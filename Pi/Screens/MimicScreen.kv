@@ -12,136 +12,128 @@
             markup: True
             color: 1,0,1
             font_size: 30
-        Label:
-            id: EVA_value
-            pos_hint: {"center_x": 0.2, "center_y": 0.17}
-            text: ''
-            markup: True
-            color: 0,0,0
-            font_size: 30
         Button:
+            id: EPS_button
             size_hint: 0.2,0.1
             pos_hint: {"center_x": 0.12, "center_y": 0.9}
             text: 'EPS'
             font_size: 30
             on_release: root.manager.current = 'eps'
         Button:
+            id: Crew_button
             size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.245, "center_y": 0.78}
+            pos_hint: {"center_x": 0.12, "center_y": 0.78}
             text: 'Crew'
             font_size: 30
             on_release: root.manager.current = 'crew'
         Button:
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.85, "center_y": 0.78}
-            text: 'Orbit'
-            font_size: 30
-            on_release: root.manager.current = 'orbit'
-        Button:
-            id: EVA_button
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.85, "center_y": 0.25}
-            text: 'EVA'
-            font_size: 30
-            on_release: root.manager.current = 'eva_main'
-        Button:
+            id: CT_button
             size_hint: 0.2,0.1
             pos_hint: {"center_x": 0.37, "center_y": 0.9}
             text: 'C&T'
             font_size: 30
             on_release: root.manager.current = 'ct'
         Button:
+            id: EVA_button
+            size_hint: 0.2,0.1
+            pos_hint: {"center_x": 0.37, "center_y": 0.78}
+            text: 'EVA'
+            font_size: 30
+            on_release: root.manager.current = 'eva_main'
+        Button:
+            id: TCS_button
             size_hint: 0.2,0.1
             pos_hint: {"center_x": 0.62, "center_y": 0.9}
             text: 'TCS'
             font_size: 30
             on_release: root.manager.current = 'tcs'
         Button:
+            id: ROS_button
+            size_hint: 0.2,0.1
+            pos_hint: {"center_x": 0.62, "center_y": 0.78}
+            text: 'ROS'
+            font_size: 30
+            on_release: root.manager.current = 'rs'
+        Button:
+            id: GNC_button
             size_hint: 0.2,0.1
             pos_hint: {"center_x": 0.87, "center_y": 0.9}
             text: 'GNC'
             font_size: 30
             on_release: root.manager.current = 'tcs'
+        Button:
+            id: Orbit_button
+            size_hint: 0.2,0.1
+            pos_hint: {"center_x": 0.87, "center_y": 0.78}
+            text: 'Orbit'
+            font_size: 30
+            on_release: root.manager.current = 'orbit'
         Label:
-            pos_hint: {"center_x": 0.55, "center_y": 0.78}
+            pos_hint: {"center_x": 0.55, "center_y": 0.68}
             text: 'ISS Information'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
             id: velocity_label
-            pos_hint: {"center_x": 0.4, "center_y": 0.7}
+            pos_hint: {"center_x": 0.4, "center_y": 0.6}
             text: 'Speed'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
             id: velocity_value
-            pos_hint: {"center_x": 0.65, "center_y": 0.7}
-            text: '0.00'
-            markup: True
-            color: 1,1,1
-            font_size: 30
-        Label:
-            id: altitude_label
-            pos_hint: {"center_x": 0.4, "center_y": 0.6}
-            text: 'Altitude'
-            markup: True
-            color: 1,1,1
-            font_size: 30
-        Label:
-            id: altitude_value
             pos_hint: {"center_x": 0.65, "center_y": 0.6}
             text: '0.00'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
-            id: stationmass_label
+            id: altitude_label
             pos_hint: {"center_x": 0.4, "center_y": 0.5}
+            text: 'Altitude'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: altitude_value
+            pos_hint: {"center_x": 0.65, "center_y": 0.5}
+            text: '0.00'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: stationmass_label
+            pos_hint: {"center_x": 0.4, "center_y": 0.4}
             text: 'Total Mass'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
             id: stationmass_value
-            pos_hint: {"center_x": 0.65, "center_y": 0.5}
+            pos_hint: {"center_x": 0.65, "center_y": 0.4}
             text: '0.00 kg'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
             id: stationmode_label
-            pos_hint: {"center_x": 0.4, "center_y": 0.4}
+            pos_hint: {"center_x": 0.4, "center_y": 0.3}
             text: 'Station Mode'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
             id: stationmode_value
-            pos_hint: {"center_x": 0.65, "center_y": 0.4}
+            pos_hint: {"center_x": 0.65, "center_y": 0.3}
             text: 'Standard'
             markup: True
             color: 1,1,1
             font_size: 30
-        ##Label:
-            ##id: aoslabel
-            ##pos_hint: {"center_x": 0.2, "center_y": 0.2}
-            ##text: '[u]ISS Signal Status:[/u]'
-            ##markup: True
-            ##color: 1,1,1
-            ##font_size: 30
-        ##Label:
-            ##id: aosvalue
-            ##pos_hint: {"center_x": 0.2, "center_y": 0.1}
-            ##text: ' '
-            ##markup: True
-            ##color: 1,1,1
-            ##font_size: 30
         Button:
             id: mimicstartbutton
             size_hint: 0.2,0.1
-            pos_hint: {"x": 0.05, "y": 0.6}
+            pos_hint: {"x": 0.05, "y": 0.5}
             text: 'Transmit'
             disabled: False
             font_size: 30
@@ -152,7 +144,7 @@
         Button:
             id: mimicstopbutton
             size_hint: 0.2,0.1
-            pos_hint: {"x": 0.05, "y": 0.45}
+            pos_hint: {"x": 0.05, "y": 0.4}
             text: 'Stop'
             disabled: True
             font_size: 30

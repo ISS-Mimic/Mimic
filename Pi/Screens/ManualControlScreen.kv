@@ -106,17 +106,17 @@
             on_press: root.setActive("SSARJ")
             on_press: MCbackground.source = './imgs/1MIMICstationGlowFileStbdSARJ.png'
         Button:
-            disabled: False
             size_hint: 0.1,0.1
             pos_hint: {"center_x": 0.4, "center_y": 0.83}
             text: '+'
+            disabled: True
             font_size: 30
             on_press: root.incrementActive(1)
         Button:
-            disabled: False
             size_hint: 0.1,0.1
             pos_hint: {"center_x": 0.6, "center_y": 0.83}
             text: '-'
+            disabled: True
             font_size: 30
             on_press: root.incrementActive(-1)
         Button:

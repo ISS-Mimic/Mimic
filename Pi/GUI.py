@@ -542,6 +542,9 @@ class EVA_Pictures(Screen, EventDispatcher):
 class TCS_Screen(Screen, EventDispatcher):
     pass
 
+class RS_Screen(Screen, EventDispatcher):
+    pass
+
 class Crew_Screen(Screen, EventDispatcher):
     pass
 
@@ -580,6 +583,7 @@ class MainApp(App):
         self.settings_screen = Settings_Screen(name = 'settings')
         self.us_eva = EVA_US_Screen(name='us_eva')
         self.rs_eva = EVA_RS_Screen(name='rs_eva')
+        self.rs_screen = RS_Screen(name='rs')
         self.eva_main = EVA_Main_Screen(name='eva_main')
         self.eva_pictures = EVA_Pictures(name='eva_pictures')
 
@@ -594,6 +598,7 @@ class MainApp(App):
         root.add_widget(self.ct_screen)
         root.add_widget(self.us_eva)
         root.add_widget(self.rs_eva)
+        root.add_widget(self.rs_screen)
         root.add_widget(self.eva_main)
         root.add_widget(self.eva_pictures)
         root.add_widget(self.tcs_screen)
@@ -1213,12 +1218,14 @@ class MainApp(App):
         self.ct_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
         self.tcs_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
         self.us_eva.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+        self.rs_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
         self.orbit_screen.ids.signal.size_hint_y = 0.112
         self.mimic_screen.ids.signal.size_hint_y = 0.112
         self.eps_screen.ids.signal.size_hint_y = 0.112
         self.ct_screen.ids.signal.size_hint_y = 0.112
         self.tcs_screen.ids.signal.size_hint_y = 0.112
         self.us_eva.ids.signal.size_hint_y = 0.112
+        self.rs_screen.ids.signal.size_hint_y = 0.112
     
     def signal_lost(self):
         self.orbit_screen.ids.signal.source = './imgs/signal/signalred.zip'
@@ -1227,18 +1234,21 @@ class MainApp(App):
         self.ct_screen.ids.signal.source = './imgs/signal/signalred.zip'
         self.tcs_screen.ids.signal.source = './imgs/signal/signalred.zip'
         self.us_eva.ids.signal.source = './imgs/signal/signalred.zip'
+        self.rs_screen.ids.signal.source = './imgs/signal/signalred.zip'
         self.orbit_screen.ids.signal.anim_delay = 0.4
         self.mimic_screen.ids.signal.anim_delay = 0.4
         self.eps_screen.ids.signal.anim_delay = 0.4
         self.ct_screen.ids.signal.anim_delay = 0.4
         self.tcs_screen.ids.signal.anim_delay = 0.4
         self.us_eva.ids.signal.anim_delay = 0.4
+        self.rs_screen.ids.signal.anim_delay = 0.4
         self.orbit_screen.ids.signal.size_hint_y = 0.112
         self.mimic_screen.ids.signal.size_hint_y = 0.112
         self.eps_screen.ids.signal.size_hint_y = 0.112
         self.ct_screen.ids.signal.size_hint_y = 0.112
         self.tcs_screen.ids.signal.size_hint_y = 0.112
         self.us_eva.ids.signal.size_hint_y = 0.112
+        self.rs_screen.ids.signal.size_hint_y = 0.112
 
     def signal_acquired(self):
         self.orbit_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
@@ -1247,18 +1257,21 @@ class MainApp(App):
         self.ct_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
         self.tcs_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
         self.us_eva.ids.signal.source = './imgs/signal/pulse-transparent.zip'
+        self.rs_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
         self.orbit_screen.ids.signal.anim_delay = 0.05
         self.mimic_screen.ids.signal.anim_delay = 0.05
         self.eps_screen.ids.signal.anim_delay = 0.05
         self.ct_screen.ids.signal.anim_delay = 0.05
         self.tcs_screen.ids.signal.anim_delay = 0.05
         self.us_eva.ids.signal.anim_delay = 0.05
+        self.rs_screen.ids.signal.anim_delay = 0.05
         self.orbit_screen.ids.signal.size_hint_y = 0.15
         self.mimic_screen.ids.signal.size_hint_y = 0.15
         self.eps_screen.ids.signal.size_hint_y = 0.15
         self.ct_screen.ids.signal.size_hint_y = 0.15
         self.tcs_screen.ids.signal.size_hint_y = 0.15
         self.us_eva.ids.signal.size_hint_y = 0.15
+        self.rs_screen.ids.signal.size_hint_y = 0.15
     
     def signal_stale(self):
         self.orbit_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
@@ -1267,18 +1280,21 @@ class MainApp(App):
         self.ct_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
         self.tcs_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
         self.us_eva.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+        self.rs_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
         self.orbit_screen.ids.signal.anim_delay = 0.12
         self.mimic_screen.ids.signal.anim_delay = 0.12
         self.eps_screen.ids.signal.anim_delay = 0.12
         self.ct_screen.ids.signal.anim_delay = 0.12
         self.tcs_screen.ids.signal.anim_delay = 0.12
         self.us_eva.ids.signal.anim_delay = 0.12
+        self.rs_screen.ids.signal.anim_delay = 0.12
         self.orbit_screen.ids.signal.size_hint_y = 0.112
         self.mimic_screen.ids.signal.size_hint_y = 0.112
         self.eps_screen.ids.signal.size_hint_y = 0.112
         self.ct_screen.ids.signal.size_hint_y = 0.112
         self.tcs_screen.ids.signal.size_hint_y = 0.112
         self.us_eva.ids.signal.size_hint_y = 0.112
+        self.rs_screen.ids.signal.size_hint_y = 0.112
 
     def update_labels(self, dt):
         global mimicbutton,switchtofake,fakeorbitboolean,psarj2,ssarj2,manualcontrol,psarj,ssarj,ptrrj,strrj,beta1b,beta1a,beta2b,beta2a,beta3b,beta3a,beta4b,beta4a,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,c1a,c1b,c3a,c3b,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress,oldAirlockPump,obtained_EVA_crew,EVAstartTime,beta1a2,beta1b2,beta2a2,beta2b2,beta3a2,beta3b2,beta4a2,beta4b2
@@ -1287,9 +1303,13 @@ class MainApp(App):
         global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power, ISS_total_power
         
         if SerialConnection1 or SerialConnection2 or SerialConnection3 or SerialConnection4:
-            self.mimic_screen.ids.mimicstartbutton.disabled = False
+            if mimicbutton:
+                self.mimic_screen.ids.mimicstartbutton.disabled = True
+            else:
+                self.mimic_screen.ids.mimicstartbutton.disabled = False
         else:
             self.mimic_screen.ids.mimicstartbutton.disabled = True
+            self.mimic_screen.ids.mimicstopbutton.disabled = True
 
         c.execute('select Value from telemetry')
         values = c.fetchall()
@@ -1800,6 +1820,7 @@ Builder.load_file('./Screens/EVA_RS_Screen.kv')
 Builder.load_file('./Screens/EVA_Main_Screen.kv')
 Builder.load_file('./Screens/EVA_Pictures.kv')
 Builder.load_file('./Screens/Crew_Screen.kv')
+Builder.load_file('./Screens/RS_Screen.kv')
 Builder.load_file('./Screens/ManualControlScreen.kv')
 Builder.load_file('./Screens/MimicScreen.kv')
 Builder.load_file('./Screens/CalibrateScreen.kv')
@@ -1820,6 +1841,7 @@ ScreenManager:
     EVA_RS_Screen:
     EVA_Main_Screen:
     EVA_Pictures:
+    RS_Screen:
     Crew_Screen:
     ManualControlScreen:
     MimicScreen:
