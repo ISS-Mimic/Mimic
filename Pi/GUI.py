@@ -1276,19 +1276,18 @@ class MainApp(App):
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             self.eva_screen.ids.EVA_occuring.text = "Pre-EVA Nitrogen Purge"
         
-        ##EVA Prebreath exercise
-        if airlock_pump_voltage == 1 and (prebreath1 or prebreath2) and airlockpres > 740: 
-            prebreath1 = False
-            prebreath2 = True
-            self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/PreBreatheLights.png'
-            self.eva_screen.ids.leak_timer.text = "~160s Leak Check"
-            self.eva_screen.ids.EVA_occuring.color = 0,0,1
-            self.eva_screen.ids.EVA_occuring.text = "In-Suit Light Exercise (ISLE)"
+        ##EVA Prebreath exercise - this doesnt work not unique, overrides prebreath1
+        #if airlock_pump_voltage == 1 and (prebreath1 or prebreath2) and airlockpres > 740: 
+        #    prebreath1 = False
+        #    prebreath2 = True
+        #    self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/PreBreatheLights.png'
+        #    self.eva_screen.ids.leak_timer.text = "~160s Leak Check"
+        #    self.eva_screen.ids.EVA_occuring.color = 0,0,1
+        #    self.eva_screen.ids.EVA_occuring.text = "In-Suit Light Exercise (ISLE)"
 
-        ##EVA Depress1 - complete
+        ##EVA Depress1
         if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres < 740 and airlockpres > 740: 
             prebreath1 = False
-            prebreath2 = False
             depress1 = True
             self.eva_screen.ids.leak_timer.text = "~160s Leak Check"
             self.eva_screen.ids.EVA_occuring.text = "Crewlock Depressurizing"

@@ -43,8 +43,6 @@ sub.addListener({
     switch (update.getItemName())
     {
         case "USLAB000092":
-            active_sasa = update.getValue("Value");
-            console.log("active sasa: " + active_sasa);
             db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "active_sasa");
             db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "active_sasa");
             break;
@@ -1048,13 +1046,13 @@ timeSub.addListener({
     {
         if( difference > 0.00153680542553047 )
         {
-            console.log("Stale Signal!")
+            console.log("Signal Error!")
             AOS = "Stale Signal";
             AOSnum = 2;
         }
         else
         {
-            console.log("Signal Acquired!")
+            console.log("Connected to the ISS!")
             AOS = "Siqnal Acquired";
              AOSnum = 1;
         }
