@@ -56,9 +56,9 @@ auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_key, access_secret)
 api = tweepy.API(auth)
 
-errorlog = open('errorlog.txt','w')
-mimiclog = open('mimiclog.txt','w')
-locationlog = open('locationlog.txt','a')
+errorlog = open('./Logs/errorlog.txt','w')
+mimiclog = open('./Logs/mimiclog.txt','w')
+locationlog = open('./Logs/locationlog.txt','a')
 
 iss_crew_url = 'http://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'        
 nasaissurl = 'http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html'
@@ -1461,19 +1461,19 @@ class MainApp(App):
             self.serialWrite("Current3B=" + c3b + " ")
 
 #All GUI Screens are on separate kv files
-Builder.load_file('MainScreen.kv')
-Builder.load_file('Settings_Screen.kv')
-Builder.load_file('FakeOrbitScreen.kv')
-Builder.load_file('Orbit_Screen.kv')
-Builder.load_file('EPS_Screen.kv')
-Builder.load_file('CT_Screen.kv')
-Builder.load_file('TCS_Screen.kv')
-Builder.load_file('EVA_Screen.kv')
-Builder.load_file('EVA_Pictures.kv')
-Builder.load_file('Crew_Screen.kv')
-Builder.load_file('ManualControlScreen.kv')
-Builder.load_file('MimicScreen.kv')
-Builder.load_file('CalibrateScreen.kv')
+Builder.load_file('./Screens/MainScreen.kv')
+Builder.load_file('./Screens/Settings_Screen.kv')
+Builder.load_file('./Screens/FakeOrbitScreen.kv')
+Builder.load_file('./Screens/Orbit_Screen.kv')
+Builder.load_file('./Screens/EPS_Screen.kv')
+Builder.load_file('./Screens/CT_Screen.kv')
+Builder.load_file('./Screens/TCS_Screen.kv')
+Builder.load_file('./Screens/EVA_Screen.kv')
+Builder.load_file('./Screens/EVA_Pictures.kv')
+Builder.load_file('./Screens/Crew_Screen.kv')
+Builder.load_file('./Screens/ManualControlScreen.kv')
+Builder.load_file('./Screens/MimicScreen.kv')
+Builder.load_file('./Screens/CalibrateScreen.kv')
 
 Builder.load_string('''
 #:kivy 1.8
@@ -1493,16 +1493,6 @@ ScreenManager:
     ManualControlScreen:
     MimicScreen:
     CalibrateScreen:
-
-<RotatedImage>:
-    canvas.before:
-        PushMatrix
-        Rotate:
-            angle: root.angle
-            axis: 0,0,1
-            origin: root.center
-    canvas.after:
-        PopMatrix
 ''')
 
 if __name__ == '__main__':
