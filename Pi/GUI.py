@@ -396,6 +396,9 @@ class CT_Screen(Screen, EventDispatcher):
 class EVA_Screen(Screen, EventDispatcher):
     pass
 
+class EVA_Pictures(Screen, EventDispatcher):
+    pass
+
 class TCS_Screen(Screen, EventDispatcher):
     pass
 
@@ -435,6 +438,7 @@ class MainApp(App):
         self.crew_screen = Crew_Screen(name = 'crew')
         self.settings_screen = Settings_Screen(name = 'settings')
         self.eva_screen = EVA_Screen(name='eva')
+        self.eva_pictures = EVA_Pictures(name='eva_pictures')
 
         root = MainScreenManager(transition=WipeTransition())
         #root.add_widget(MainScreen(name = 'main'))
@@ -446,6 +450,7 @@ class MainApp(App):
         root.add_widget(self.eps_screen)
         root.add_widget(self.ct_screen)
         root.add_widget(self.eva_screen)
+        root.add_widget(self.eva_pictures)
         root.add_widget(self.tcs_screen)
         root.add_widget(self.crew_screen)
         root.add_widget(self.settings_screen)
@@ -458,7 +463,7 @@ class MainApp(App):
         Clock.schedule_interval(self.checkAOSlong, 5)
         Clock.schedule_interval(self.checkCrew, 3600)
         Clock.schedule_once(self.checkTwitter, 1)
-        Clock.schedule_interval(self.checkTwitter, 60)
+        Clock.schedule_interval(self.checkTwitter, 65)
         Clock.schedule_interval(self.changePictures, 10)
         if crewjsonsuccess == False: #check crew every 10s until success then once per hour
             Clock.schedule_once(self.checkCrew, 10)
@@ -472,29 +477,44 @@ class MainApp(App):
     def deleteURLPictures(self, dt):
         global EVA_picture_urls
         del EVA_picture_urls[:]
+        EVA_picture_urls[:] = []
 
     def changePictures(self, dt):
         global EVA_picture_urls
         global urlindex
         urlsize = len(EVA_picture_urls)
-        self.eva_screen.ids.EVAimage.source = EVA_picture_urls[urlindex]
+        
+        if urlsize > 0:
+            self.eva_screen.ids.EVAimage.source = EVA_picture_urls[urlindex]
+            self.eva_pictures.ids.EVAimage.source = EVA_picture_urls[urlindex]
+        
         urlindex = urlindex + 1
         if urlindex > urlsize-1:
             urlindex = 0
 
     def checkTwitter(self, dt):
         global latest_tweet
-        stuff = api.user_timeline(screen_name = 'iss_mimic', count = 1, include_rts = True, tweet_mode = 'extended')
-        for status in stuff:
-            latest_tweet = status.full_text
-            if u'extended_entities' in status._json:
-                if u'media' in status._json[u'extended_entities']:
-                    for pic in status._json[u'extended_entities'][u'media']:
-                        EVA_picture_urls.append(str(pic[u'media_url']))
-                        #print pic[u'media_url']
+
+        try:
+            stuff = api.user_timeline(screen_name = 'iss_mimic', count = 1, include_rts = True, tweet_mode = 'extended')
+        except:
+            errorlog.write(str(datetime.datetime.utcnow()))
+            errorlog.write(' ')
+            errorlog.write("Tweepy - Error Retrieving Tweet")
+            errorlog.write('\n')
+        try:
+            stuff
+        except NameError:
+            print "Stuff isn't defined"
+        else:
+            for status in stuff:
+                latest_tweet = status.full_text
+                if u'extended_entities' in status._json:
+                    if u'media' in status._json[u'extended_entities']:
+                        for pic in status._json[u'extended_entities'][u'media']:
+                            EVA_picture_urls.append(str(pic[u'media_url']))
 
         emoji_pattern = re.compile("["u"\U0000007F-\U0001F1FF""]+", flags=re.UNICODE)
-        #print(emoji_pattern.sub(r'', text)) # no emoji
         self.eva_screen.ids.EVAstatus.text = str(emoji_pattern.sub(r'?', latest_tweet)) #cleanse the emojis!!
 
     def animate(self, instance):
@@ -614,7 +634,6 @@ class MainApp(App):
             errorlog.write("Crew Check - URL Error")
             errorlog.write('\n')
             print "Crew Check URL Error"
-
     
     def checkCrew(self, dt):
         #crew_response = urllib2.urlopen(crew_req)
@@ -725,7 +744,6 @@ class MainApp(App):
             #locationlog.write(" long ")
             #locationlog.write(str(obj['iss_position']['longitude']))
             #locationlog.write('\n')
-
 
     def update_labels(self, dt):
         global mimicbutton
@@ -980,6 +998,7 @@ Builder.load_file('EPS_Screen.kv')
 Builder.load_file('CT_Screen.kv')
 Builder.load_file('TCS_Screen.kv')
 Builder.load_file('EVA_Screen.kv')
+Builder.load_file('EVA_Pictures.kv')
 Builder.load_file('Crew_Screen.kv')
 Builder.load_file('ManualControlScreen.kv')
 Builder.load_file('MimicScreen.kv')
@@ -998,6 +1017,7 @@ ScreenManager:
     CT_Screen:
     TCS_Screen:
     EVA_Screen:
+    EVA_Pictures:
     Crew_Screen:
     ManualControlScreen:
     MimicScreen:

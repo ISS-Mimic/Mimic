@@ -15,6 +15,13 @@
             source: "http://pbs.twimg.com/media/DJm3BvbXkAAuMzp.jpg"
             size_hint: 0.4, 0.4
             pos_hint: {"center_x": 0.8, "center_y": 0.5}
+        Button:
+            id: EVAimage_button
+            size_hint: 0.4,0.4
+            pos_hint: {"center_x": 0.8, "center_y": 0.5}
+            font_size: 30
+            opacity: 0.0
+            on_release: app.root.current = 'eva_pictures'
         Label:
             id: crewlockpressure_label
             pos_hint: {"center_x": 0.8, "center_y": 0.25}

@@ -1,0 +1,17 @@
+#:kivy 1.8
+#:import kivy kivy
+#:import win kivy.core.window
+<EVA_Pictures>:
+    name: 'eva_pictures'
+    FloatLayout:
+        AsyncImage:
+            id: EVAimage
+            source: "http://pbs.twimg.com/media/DJm3BvbXkAAuMzp.jpg"
+            keep_ratio: True
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+        Button:
+            size_hint: 0.2,0.1
+            pos_hint: {"Left": 1, "Bottom": 1}
+            text: 'Return'
+            font_size: 30
+            on_release: app.root.current = 'eva'
