@@ -1,4 +1,11 @@
+function alert(message)
+{
+
+}
+
 var ls = require("lightstreamer-client");
+var sqlite3 = require('sqlite3');
+var db = new sqlite3.Database("iss_telemetry.db");
 
 var lsClient = new ls.LightstreamerClient("http://push.lightstreamer.com","ISSLIVE");
 
@@ -12,6 +19,7 @@ lsClient.subscribe(sub);
 lsClient.subscribe(timeSub);
 
 var AOS;
+var AOSnum;
 var PSARJ;
 var SSARJ;
 var PTRRJ;
@@ -35,7 +43,6 @@ lsClient.addListener({
 
 lsClient.connect();
 
-i2c1.i2cWriteSync(0x4,10,"testbegin");
 sub.addListener({
   onSubscription: function() {
     console.log("Subscribed");
@@ -47,52 +54,51 @@ sub.addListener({
 	switch (update.getItemName()){
 	  case "S0000004":
 		PSARJ = update.getValue("Value");
-                i2c1.i2cWriteSync(0x4,20,"PSARJ " + PSARJ + " ");
-				
+		db.run("UPDATE telemetry set two = ? where one = ?", PSARJ, "psarj");
 		break;
 	  case "S0000003":
 		SSARJ = update.getValue("Value");
-                i2c1.i2cWriteSync(0x4,20,"SSARJ " + SSARJ + " ");
+		db.run("UPDATE telemetry set two = ? where one = ?", SSARJ, "ssarj");
 		break;
 	  case "S0000002":
 		PTRRJ = update.getValue("Value");
-                i2c1.i2cWriteSync(0x4,20,"PTRRJ " + PTRRJ + " ");
+		db.run("UPDATE telemetry set two = ? where one = ?", PTRRJ, "ptrrj");
 		break;
 	  case "S0000001":
 		STRRJ = update.getValue("Value");
-                i2c1.i2cWriteSync(0x4,20,"STRRJ " + STRRJ + " ");
+		db.run("UPDATE telemetry set two = ? where one = ?", STRRJ, "strrj");
 		break;
 	  case "S6000008":
 		Beta1B = update.getValue("Value");
-                i2c1.i2cWriteSync(0x4,20,"Beta1B " + Beta1B + " ");
+		db.run("UPDATE telemetry set two = ? where one = ?", Beta1B, "beta1b");
 		break;
 	  case "S6000007":
 		Beta3B = update.getValue("Value");
-                i2c1.i2cWriteSync(0x4,20,"Beta3B " + Beta3B + " ");
+		db.run("UPDATE telemetry set two = ? where one = ?", Beta3B, "beta3b");
 		break;
 	  case "S4000008":
 		Beta3A = update.getValue("Value");
-                i2c1.i2cWriteSync(0x4,20,"Beta3A " + Beta3A + " ");
+		db.run("UPDATE telemetry set two = ? where one = ?", Beta3A, "beta3a");
 		break;
 	  case "S4000007":
 		Beta1A = update.getValue("Value");
-                i2c1.i2cWriteSync(0x4,20,"Beta1A " + Beta1A + " ");
+		db.run("UPDATE telemetry set two = ? where one = ?", Beta1A, "beta1a");
 		break;
 	  case "P4000007":
 		Beta2A = update.getValue("Value");
-                i2c1.i2cWriteSync(0x4,20,"Beta2A " + Beta2A + " ");
+		db.run("UPDATE telemetry set two = ? where one = ?", Beta2A, "beta2a");
 		break;
 	  case "P4000008":
 		Beta4A = update.getValue("Value");
-                i2c1.i2cWriteSync(0x4,20,"Beta4A " + Beta4A + " ");
+		db.run("UPDATE telemetry set two = ? where one = ?", Beta4A, "beta4a");
 		break;
 	  case "P6000007":
 		Beta4B = update.getValue("Value");
-                i2c1.i2cWriteSync(0x4,20,"Beta4B " + Beta4B + " ");
+		db.run("UPDATE telemetry set two = ? where one = ?", Beta4B, "beta4b");
 		break;
 	  case "P6000008":
 		Beta2B = update.getValue("Value");
-                i2c1.i2cWriteSync(0x4,20,"Beta2B " + Beta2B + " ");
+		db.run("UPDATE telemetry set two = ? where one = ?", Beta2B, "beta2b");
 		break;
     } 
   }
@@ -109,13 +115,15 @@ timeSub.addListener({
 	{
 	  console.log("Signal Acquired!")
 	  AOS = "Siqnal Acquired";
+	  AOSnum = 1;
 	}
 	else 
 	{
 	  console.log("Signal Lost!")
 	  AOS = "Signal Lost";
-	}
-        i2c1.i2cWriteSync(0x4,20,"AOS " + AOS);
+	  AOSnum = 0;
+	}	
+	db.run("UPDATE telemetry set two = ? where one = ?", AOSnum, "aos");
   }
 });
 
