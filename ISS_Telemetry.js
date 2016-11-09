@@ -1,10 +1,4 @@
 var ls = require("lightstreamer-client");
-var i2c = require('i2c-bus'),
-  i2c1;
-
-i2c1 = i2c.open(1, function (err) {
-  if (err) throw err;
-});
 
 var lsClient = new ls.LightstreamerClient("http://push.lightstreamer.com","ISSLIVE");
 
