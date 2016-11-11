@@ -1,4 +1,6 @@
 import kivy
+import sqlite3
+import sched, time
 from kivy.uix.behaviors.button import ButtonBehavior
 from kivy.uix.button import Button
 from kivy.app import App
@@ -15,6 +17,13 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.stacklayout import StackLayout
 from kivy.core.image import Image
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, WipeTransition, SwapTransition
+
+conn = sqlite3.connect('iss_telemetry.db')
+c = conn.cursor()
+t = ('psarj',)
+
+c.execute('SELECT two FROM telemetry where one=?',t) 
+print c.fetchone()
 
 print Window.width
 print Window.height
@@ -46,7 +55,7 @@ class MainApp(App):
         root.add_widget(CalibrateScreen(name = 'calibrate'))
         root.add_widget(MimicScreen(name = 'mimic'))
         root.add_widget(ManualControlScreen(name = 'manualcontrol'))
-        root.current= 'manualcontrol'
+        root.current= 'main'
         return root
 
 def point_inside_polygon(x, y, poly):
@@ -85,6 +94,7 @@ class TriangleButton(ButtonBehavior, Widget):
         x, y = self.to_local(x, y)
         return point_inside_polygon(x, y,
                 self.p1 + self.p2 + self.p3) 
+
 
 Builder.load_string('''
 #:kivy 1.8
@@ -125,7 +135,6 @@ Builder.load_string('''
             Button:
                 text: 'Exit'
                 font_size: 30
-                disabled: True
                 width: 50
                 height: 20
                 on_release: app.stop(*args)
