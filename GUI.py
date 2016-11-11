@@ -28,7 +28,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, WipeTr
 bus = smbus.SMBus(1)
 address = 0x04
 
-p = multiprocessing.Process(target = execute_js,args=('iss_telemetry.js',))
+p = multiprocessing.Process(target = muterun_js,args=('iss_telemetry.js',))
 
 conn = sqlite3.connect('iss_telemetry.db')
 c = conn.cursor()
@@ -121,10 +121,10 @@ class MainApp(App):
         root.current= 'main'
         return root
 
-    def startTelemetry(*args):
+    def startTelemetry(*kwargs):
         p.start()
 
-    def stopTelemetry(*args):
+    def stopTelemetry(*kwargs):
         os.kill(p.pid,signal.SIGKILL)
 
 Builder.load_string('''
@@ -377,7 +377,7 @@ Builder.load_string('''
             disabled: False
             font_size: 30
             on_release: telemetrystatus.text = 'Fetching Telemetry...'
-            on_release: app.startTelemetry(*kwargs)
+            on_release: app.startTelemetry()
             on_release: mimicstopbutton.disabled = False
             on_release: mimicstartbutton.disabled = True
         Button:
@@ -388,7 +388,7 @@ Builder.load_string('''
             disabled: True
             font_size: 30
             on_release: telemetrystatus.text = 'Program Stopped'
-            on_release: app.stopTelemetry(*kwargs)
+            on_release: app.stopTelemetry()
             on_release: mimicstopbutton.disabled = True
             on_release: mimicstartbutton.disabled = False
         Button:
