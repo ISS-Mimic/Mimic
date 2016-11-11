@@ -1,12 +1,19 @@
 import kivy
 import sqlite3
 import sched, time
+import smbus
+import time
+from Naked.toolshed.shell import execute_js, muterun_js
+import os
+import signal
+import multiprocessing, signal
 from kivy.uix.behaviors.button import ButtonBehavior
 from kivy.uix.button import Button
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.widget import Widget
 from kivy.base import runTouchApp
+from kivy.clock import Clock
 from kivy.properties import ListProperty
 from kivy.vector import Vector
 from kivy.core.window import Window
@@ -18,15 +25,19 @@ from kivy.uix.stacklayout import StackLayout
 from kivy.core.image import Image
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, WipeTransition, SwapTransition
 
+bus = smbus.SMBus(1)
+address = 0x04
+
+p = multiprocessing.Process(target = execute_js,args=('iss_telemetry.js',))
+
 conn = sqlite3.connect('iss_telemetry.db')
 c = conn.cursor()
-t = ('psarj',)
 
-c.execute('SELECT two FROM telemetry where one=?',t) 
-print c.fetchone()
+def update_values(*args):
+    c.execute('SELECT two FROM telemetry where one="psarj"') 
+    print c.fetchone()
 
-print Window.width
-print Window.height
+Clock.schedule_interval(update_values, 1)
 
 class MainScreen(Screen):
     def __init__(self, **kwargs):
@@ -57,6 +68,11 @@ class MainApp(App):
         root.add_widget(ManualControlScreen(name = 'manualcontrol'))
         root.current= 'main'
         return root
+    def startTelemetry(*args):
+        p.start()
+
+    def stopTelemetry(*args):
+        os.kill(p.pid,signal.SIGKILL)    
 
 def point_inside_polygon(x, y, poly):
     n = len(poly)
@@ -95,6 +111,21 @@ class TriangleButton(ButtonBehavior, Widget):
         return point_inside_polygon(x, y,
                 self.p1 + self.p2 + self.p3) 
 
+class MainApp(App):
+    def build(self):
+        root = ScreenManager(transition=WipeTransition())
+        root.add_widget(MainScreen(name = 'main'))
+        root.add_widget(CalibrateScreen(name = 'calibrate'))
+        root.add_widget(MimicScreen(name = 'mimic'))
+        root.add_widget(ManualControlScreen(name = 'manualcontrol'))
+        root.current= 'main'
+        return root
+
+    def startTelemetry(*args):
+        p.start()
+
+    def stopTelemetry(*args):
+        os.kill(p.pid,signal.SIGKILL)
 
 Builder.load_string('''
 #:kivy 1.8
@@ -346,6 +377,7 @@ Builder.load_string('''
             disabled: False
             font_size: 30
             on_release: telemetrystatus.text = 'Fetching Telemetry...'
+            on_release: app.startTelemetry(*kwargs)
             on_release: mimicstopbutton.disabled = False
             on_release: mimicstartbutton.disabled = True
         Button:
@@ -356,6 +388,7 @@ Builder.load_string('''
             disabled: True
             font_size: 30
             on_release: telemetrystatus.text = 'Program Stopped'
+            on_release: app.stopTelemetry(*kwargs)
             on_release: mimicstopbutton.disabled = True
             on_release: mimicstartbutton.disabled = False
         Button:
@@ -365,7 +398,6 @@ Builder.load_string('''
             font_size: 30
             on_release: root.manager.current = 'main'
            
-    
 <TriangleButton>:
     
     canvas.after:
