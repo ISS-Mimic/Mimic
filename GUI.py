@@ -109,11 +109,23 @@ class MainApp(App):
         return root
 
     def update_labels(self, dt):
-        c.execute('SELECT two FROM telemetry where one="psarj"')
-        psarj = c.fetchone()
-        print psarj[0]
-        #assert type(psarj[0]) is str
-        self.mimic_screen.ids.psarjvalue.text =str(psarj[0])
+        c.execute('SELECT two FROM telemetry')
+        #c.execute('SELECT two FROM telemetry where one="psarj"')
+        values = c.fetchall()
+        psarj = values[0]
+        ssarj = values[1]
+        ptrrj = values[2]
+        strrj = values[3]
+        beta1b = values[4]
+        beta1a = values[5]
+        beta2b = values[6]
+        beta2a = values[7]
+        beta3b = values[8]
+        beta3a = values[9]
+        beta4b = values[10]
+        beta4a = values[11]
+        aos = values[12]
+        self.mimic_screen.ids.psarjvalue.text = str(psarj[0])[:-5]
 
     def startTelemetry(*kwargs):
         sp.start()
@@ -358,15 +370,22 @@ Builder.load_string('''
             allow_stretch: True
             keep_ratio: False
         Label:
+            id: psarjlabel
+            pos_hint: {"center_x": 0.6, "center_y": 0.5}
+            text: 'PSARJ:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
             id: psarjvalue
-            pos_hint: {"center_x": 0.7, "center_y": 0.5}
+            pos_hint: {"center_x": 0.8, "center_y": 0.5}
             text: '0.003'
             markup: True
             color: 1,1,1
-            font_size: 60
+            font_size: 30
         Label:
             id: telemetrystatus
-            pos_hint: {"center_x": 0.6, "center_y": 0.8}
+            pos_hint: {"center_x": 0.5, "center_y": 0.85}
             text: 'Telemetry'
             markup: True
             color: 1,0,1
