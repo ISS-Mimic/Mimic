@@ -28,16 +28,12 @@ from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, WipeTr
 bus = smbus.SMBus(1)
 address = 0x04
 
+psarj = 0.00
+
 p = multiprocessing.Process(target = muterun_js,args=('iss_telemetry.js',))
 
 conn = sqlite3.connect('iss_telemetry.db')
 c = conn.cursor()
-
-def update_values(*args):
-    c.execute('SELECT two FROM telemetry where one="psarj"') 
-    print c.fetchone()
-
-Clock.schedule_interval(update_values, 1)
 
 class MainScreen(Screen):
     def __init__(self, **kwargs):
@@ -51,28 +47,28 @@ class ManualControlScreen(Screen):
         super(ManualControlScreen, self).__init__(**kwargs)
 
 class MimicScreen(Screen):
-    pass
+    def __init__(self, **kwargs):
+        super(MimicScreen, self).__init__(**kwargs)
+
+    def updatePSARJ(self, *args, **kwargs):
+        c.execute('SELECT two FROM telemetry where one="psarj"') 
+        psarj = c.fetchone()
+        label = self.psarjvalue
+        label.text = psarj
+
+       # self.psarjvalue.text = psarj
 
 class MainScreenManager(ScreenManager):
     pass
 
+
+#def updatePSARJ(*args):
+#    c.execute('SELECT two FROM telemetry where one="psarj"') 
+#    psarj = c.fetchone()
+#    MimicScreen.psarjlabel.text = psarj
+
 class MyButton(Button):
     pass
-
-class MainApp(App):
-    def build(self):
-        root = ScreenManager(transition=WipeTransition())
-        root.add_widget(MainScreen(name = 'main'))
-        root.add_widget(CalibrateScreen(name = 'calibrate'))
-        root.add_widget(MimicScreen(name = 'mimic'))
-        root.add_widget(ManualControlScreen(name = 'manualcontrol'))
-        root.current= 'main'
-        return root
-    def startTelemetry(*args):
-        p.start()
-
-    def stopTelemetry(*args):
-        os.kill(p.pid,signal.SIGKILL)    
 
 def point_inside_polygon(x, y, poly):
     n = len(poly)
@@ -126,6 +122,13 @@ class MainApp(App):
 
     def stopTelemetry(*kwargs):
         os.kill(p.pid,signal.SIGKILL)
+
+#def update_values(*args):
+#    c.execute('SELECT two FROM telemetry where one="psarj"') 
+#    psarj = c.fetchone()
+#    MimicScreen.updatePSARJ()
+
+Clock.schedule_interval(MimicScreen.updatePSARJ, 1)
 
 Builder.load_string('''
 #:kivy 1.8
@@ -357,13 +360,20 @@ Builder.load_string('''
 <MimicScreen>:
     name: 'mimic'
     FloatLayout:
-
+        id: mimicscreenlayout
         Image:
-            source: 'iss3.png'
+            source: 'iss1.png'
             allow_stretch: True
             keep_ratio: False
         Label:
-            id:telemetrystatus
+            id: psarjvalue
+            pos_hint: {"center_x": 0.7, "center_y": 0.5}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 60
+        Label:
+            id: telemetrystatus
             pos_hint: {"center_x": 0.6, "center_y": 0.8}
             text: 'Telemetry'
             markup: True
