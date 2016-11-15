@@ -15,10 +15,12 @@ from kivy.uix.widget import Widget
 from kivy.base import runTouchApp
 from kivy.clock import Clock
 from kivy.properties import ListProperty
+from kivy.properties import ObjectProperty
 from kivy.vector import Vector
 from kivy.core.window import Window
 from kivy.lang import Builder
 from kivy.uix.floatlayout import FloatLayout
+from kivy.event import EventDispatcher
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.stacklayout import StackLayout
@@ -46,26 +48,12 @@ class ManualControlScreen(Screen):
     def __init__(self, **kwargs):
         super(ManualControlScreen, self).__init__(**kwargs)
 
-class MimicScreen(Screen):
+class MimicScreen(Screen, EventDispatcher):
     def __init__(self, **kwargs):
         super(MimicScreen, self).__init__(**kwargs)
 
-    def updatePSARJ(self, *args, **kwargs):
-        c.execute('SELECT two FROM telemetry where one="psarj"') 
-        psarj = c.fetchone()
-        label = self.psarjvalue
-        label.text = psarj
-
-       # self.psarjvalue.text = psarj
-
 class MainScreenManager(ScreenManager):
     pass
-
-
-#def updatePSARJ(*args):
-#    c.execute('SELECT two FROM telemetry where one="psarj"') 
-#    psarj = c.fetchone()
-#    MimicScreen.psarjlabel.text = psarj
 
 class MyButton(Button):
     pass
@@ -109,26 +97,29 @@ class TriangleButton(ButtonBehavior, Widget):
 
 class MainApp(App):
     def build(self):
+        self.mimic_screen = MimicScreen(name = 'mimic')
         root = ScreenManager(transition=WipeTransition())
         root.add_widget(MainScreen(name = 'main'))
         root.add_widget(CalibrateScreen(name = 'calibrate'))
-        root.add_widget(MimicScreen(name = 'mimic'))
+        root.add_widget(self.mimic_screen)
         root.add_widget(ManualControlScreen(name = 'manualcontrol'))
         root.current= 'main'
+    
+        Clock.schedule_interval(self.update_labels, 1)
         return root
 
+    def update_labels(self, dt):
+        c.execute('SELECT two FROM telemetry where one="psarj"')
+        psarj = c.fetchone()
+        print psarj[0]
+        #assert type(psarj[0]) is str
+        self.mimic_screen.ids.psarjvalue.text =str(psarj[0])
+
     def startTelemetry(*kwargs):
-        p.start()
+        sp.start()
 
     def stopTelemetry(*kwargs):
         os.kill(p.pid,signal.SIGKILL)
-
-#def update_values(*args):
-#    c.execute('SELECT two FROM telemetry where one="psarj"') 
-#    psarj = c.fetchone()
-#    MimicScreen.updatePSARJ()
-
-Clock.schedule_interval(MimicScreen.updatePSARJ, 1)
 
 Builder.load_string('''
 #:kivy 1.8
@@ -360,6 +351,7 @@ Builder.load_string('''
 <MimicScreen>:
     name: 'mimic'
     FloatLayout:
+        psarjvalue: psarjvalue
         id: mimicscreenlayout
         Image:
             source: 'iss1.png'
