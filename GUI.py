@@ -30,12 +30,10 @@ from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, WipeTr
 bus = smbus.SMBus(1)
 address = 0x04
 
-psarj = 0.00
+p = multiprocessing.Process(target = muterun_js,args=('iss_telemetry.js',)) #might delete this
 
-p = multiprocessing.Process(target = muterun_js,args=('iss_telemetry.js',))
-
-conn = sqlite3.connect('iss_telemetry.db')
-c = conn.cursor()
+conn = sqlite3.connect('iss_telemetry.db') #sqlite database call change to include directory
+c = conn.cursor() 
 
 class MainScreen(Screen):
     def __init__(self, **kwargs):
@@ -109,8 +107,7 @@ class MainApp(App):
         return root
 
     def update_labels(self, dt):
-        c.execute('SELECT two FROM telemetry')
-        #c.execute('SELECT two FROM telemetry where one="psarj"')
+        c.execute('select two from telemetry')
         values = c.fetchall()
         psarj = values[0]
         ssarj = values[1]
