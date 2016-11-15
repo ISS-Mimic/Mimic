@@ -1,0 +1,259 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/local/bin/node',
+1 verbose cli   '/usr/local/bin/npm',
+1 verbose cli   '--verbose',
+1 verbose cli   'install',
+1 verbose cli   'sqlite3' ]
+2 info using npm@2.11.2
+3 info using node@v0.12.6
+4 verbose config Skipping project config: /home/pi/.npmrc. (matches userconfig)
+5 verbose install initial load of /home/pi/package.json
+6 verbose installManyTop reading scoped package data from /home/pi/node_modules/faye-websocket/package.json
+7 verbose installManyTop reading scoped package data from /home/pi/node_modules/file-save/package.json
+8 verbose installManyTop reading scoped package data from /home/pi/node_modules/i2c-bus/package.json
+9 verbose installManyTop reading scoped package data from /home/pi/node_modules/ini-builder/package.json
+10 verbose installManyTop reading scoped package data from /home/pi/node_modules/lightstreamer-client/package.json
+11 verbose installManyTop reading scoped package data from /home/pi/node_modules/minimist/package.json
+12 verbose installManyTop reading scoped package data from /home/pi/node_modules/mkdirp/package.json
+13 verbose installManyTop reading scoped package data from /home/pi/node_modules/nan/package.json
+14 verbose installManyTop reading scoped package data from /home/pi/node_modules/node-pre-gyp/package.json
+15 verbose installManyTop reading scoped package data from /home/pi/node_modules/rasp2c/package.json
+16 verbose installManyTop reading scoped package data from /home/pi/node_modules/raspi-board/package.json
+17 verbose installManyTop reading scoped package data from /home/pi/node_modules/raspi-i2c/package.json
+18 verbose installManyTop reading scoped package data from /home/pi/node_modules/raspi-peripheral/package.json
+19 verbose installManyTop reading scoped package data from /home/pi/node_modules/sqlite3/package.json
+20 verbose installManyTop reading scoped package data from /home/pi/node_modules/xmlhttprequest-cookie/package.json
+21 info package.json lightstreamer-client@7.0.3 No repository field.
+22 info package.json lightstreamer-client@7.0.3 No license field.
+23 info package.json rasp2c@0.0.3 No license field.
+24 verbose readDependencies loading dependencies from /home/pi/package.json
+25 verbose install sqlite3 is installed as 3.1.8
+26 silly cache add args [ 'sqlite3', null ]
+27 verbose cache add spec sqlite3
+28 silly cache add parsed spec { raw: 'sqlite3',
+28 silly cache add   scope: null,
+28 silly cache add   name: 'sqlite3',
+28 silly cache add   rawSpec: '',
+28 silly cache add   spec: '*',
+28 silly cache add   type: 'range' }
+29 silly addNamed sqlite3@*
+30 verbose addNamed "*" is a valid semver range for sqlite3
+31 silly addNameRange { name: 'sqlite3', range: '*', hasData: false }
+32 silly mapToRegistry name sqlite3
+33 silly mapToRegistry using default registry
+34 silly mapToRegistry registry https://registry.npmjs.org/
+35 silly mapToRegistry uri https://registry.npmjs.org/sqlite3
+36 verbose addNameRange registry:https://registry.npmjs.org/sqlite3 not in flight; fetching
+37 verbose request uri https://registry.npmjs.org/sqlite3
+38 verbose request no auth needed
+39 info attempt registry request try #1 at 15:40:51
+40 verbose request id 803c844b269b61dc
+41 verbose etag "9XXTRN0ADA0HRRW1DROLAN6U"
+42 http request GET https://registry.npmjs.org/sqlite3
+43 http 200 https://registry.npmjs.org/sqlite3
+44 silly get cb [ 200,
+44 silly get   { server: 'CouchDB/1.6.1 (Erlang OTP/R16B03)',
+44 silly get     etag: '"AXA36RJ7E6PS23SP24RWG0QIE"',
+44 silly get     'content-type': 'application/json',
+44 silly get     'content-encoding': 'gzip',
+44 silly get     'cache-control': 'max-age=300',
+44 silly get     'content-length': '15612',
+44 silly get     'accept-ranges': 'bytes',
+44 silly get     date: 'Wed, 09 Nov 2016 15:40:53 GMT',
+44 silly get     via: '1.1 varnish',
+44 silly get     age: '48',
+44 silly get     connection: 'keep-alive',
+44 silly get     'x-served-by': 'cache-dfw1847-DFW',
+44 silly get     'x-cache': 'HIT',
+44 silly get     'x-cache-hits': '1',
+44 silly get     'x-timer': 'S1478706053.887905,VS0,VE0',
+44 silly get     vary: 'Accept-Encoding' } ]
+45 verbose get saving sqlite3 to /home/pi/.npm/registry.npmjs.org/sqlite3/.cache.json
+46 silly addNameRange number 2 { name: 'sqlite3', range: '*', hasData: true }
+47 silly addNameRange versions [ 'sqlite3',
+47 silly addNameRange   [ '2.0.0',
+47 silly addNameRange     '2.0.1',
+47 silly addNameRange     '2.0.2',
+47 silly addNameRange     '2.0.3',
+47 silly addNameRange     '2.0.4',
+47 silly addNameRange     '2.0.5',
+47 silly addNameRange     '2.0.6',
+47 silly addNameRange     '2.0.7',
+47 silly addNameRange     '2.0.8',
+47 silly addNameRange     '2.0.9',
+47 silly addNameRange     '2.0.10',
+47 silly addNameRange     '2.0.11',
+47 silly addNameRange     '2.0.12',
+47 silly addNameRange     '2.0.13',
+47 silly addNameRange     '2.0.14',
+47 silly addNameRange     '2.0.15',
+47 silly addNameRange     '2.0.16',
+47 silly addNameRange     '2.0.17',
+47 silly addNameRange     '2.0.18',
+47 silly addNameRange     '2.1.0',
+47 silly addNameRange     '2.1.1',
+47 silly addNameRange     '2.1.2',
+47 silly addNameRange     '2.1.3',
+47 silly addNameRange     '2.1.4',
+47 silly addNameRange     '2.1.5',
+47 silly addNameRange     '2.1.7',
+47 silly addNameRange     '2.1.8',
+47 silly addNameRange     '2.1.9',
+47 silly addNameRange     '2.1.10',
+47 silly addNameRange     '2.1.11',
+47 silly addNameRange     '2.1.12',
+47 silly addNameRange     '2.1.13',
+47 silly addNameRange     '2.1.14',
+47 silly addNameRange     '2.1.15',
+47 silly addNameRange     '2.1.16',
+47 silly addNameRange     '2.1.17',
+47 silly addNameRange     '2.1.18',
+47 silly addNameRange     '2.1.19',
+47 silly addNameRange     '2.2.0',
+47 silly addNameRange     '2.2.1',
+47 silly addNameRange     '2.2.2',
+47 silly addNameRange     '2.2.3',
+47 silly addNameRange     '2.2.4',
+47 silly addNameRange     '2.2.6',
+47 silly addNameRange     '2.2.7',
+47 silly addNameRange     '3.0.0',
+47 silly addNameRange     '3.0.1',
+47 silly addNameRange     '3.0.2',
+47 silly addNameRange     '3.0.4',
+47 silly addNameRange     '3.0.5',
+47 silly addNameRange     '3.0.6',
+47 silly addNameRange     '3.0.7',
+47 silly addNameRange     '3.0.8',
+47 silly addNameRange     '3.0.9',
+47 silly addNameRange     '3.0.10',
+47 silly addNameRange     '3.1.0',
+47 silly addNameRange     '3.1.1',
+47 silly addNameRange     '3.1.2',
+47 silly addNameRange     '3.1.3',
+47 silly addNameRange     '3.1.4',
+47 silly addNameRange     '3.1.5',
+47 silly addNameRange     '3.1.6',
+47 silly addNameRange     '3.1.7',
+47 silly addNameRange     '3.1.8' ] ]
+48 silly addNamed sqlite3@3.1.8
+49 verbose addNamed "3.1.8" is a plain semver version for sqlite3
+50 silly mapToRegistry name sqlite3
+51 silly mapToRegistry using default registry
+52 silly mapToRegistry registry https://registry.npmjs.org/
+53 silly mapToRegistry uri https://registry.npmjs.org/sqlite3
+54 verbose addRemoteTarball https://registry.npmjs.org/sqlite3/-/sqlite3-3.1.8.tgz not in flight; adding
+55 verbose addRemoteTarball [ 'https://registry.npmjs.org/sqlite3/-/sqlite3-3.1.8.tgz',
+55 verbose addRemoteTarball   '4cbcf965d8b901d1b1015cbc7fc415aae157dfaa' ]
+56 info retry fetch attempt 1 at 15:40:55
+57 info attempt registry request try #1 at 15:40:55
+58 http fetch GET https://registry.npmjs.org/sqlite3/-/sqlite3-3.1.8.tgz
+59 http fetch 200 https://registry.npmjs.org/sqlite3/-/sqlite3-3.1.8.tgz
+60 silly fetchAndShaCheck shasum 4cbcf965d8b901d1b1015cbc7fc415aae157dfaa
+61 verbose addTmpTarball /tmp/npm-2839-4dd9bac5/registry.npmjs.org/sqlite3/-/sqlite3-3.1.8.tgz not in flight; adding
+62 verbose addTmpTarball already have metadata; skipping unpack for sqlite3@3.1.8
+63 silly cache afterAdd sqlite3@3.1.8
+64 verbose afterAdd /home/pi/.npm/sqlite3/3.1.8/package/package.json not in flight; writing
+65 verbose afterAdd /home/pi/.npm/sqlite3/3.1.8/package/package.json written
+66 silly install resolved [ { name: 'sqlite3',
+66 silly install resolved     description: 'Asynchronous, non-blocking SQLite3 bindings',
+66 silly install resolved     version: '3.1.8',
+66 silly install resolved     homepage: 'http://github.com/mapbox/node-sqlite3',
+66 silly install resolved     author: { name: 'MapBox', url: 'https://mapbox.com/' },
+66 silly install resolved     binary:
+66 silly install resolved      { module_name: 'node_sqlite3',
+66 silly install resolved        module_path: './lib/binding/{node_abi}-{platform}-{arch}',
+66 silly install resolved        host: 'https://mapbox-node-binary.s3.amazonaws.com',
+66 silly install resolved        remote_path: './{name}/v{version}/{toolset}/',
+66 silly install resolved        package_name: '{node_abi}-{platform}-{arch}.tar.gz' },
+66 silly install resolved     contributors:
+66 silly install resolved      [ [Object],
+66 silly install resolved        [Object],
+66 silly install resolved        [Object],
+66 silly install resolved        [Object],
+66 silly install resolved        [Object],
+66 silly install resolved        [Object],
+66 silly install resolved        [Object],
+66 silly install resolved        [Object],
+66 silly install resolved        [Object],
+66 silly install resolved        [Object],
+66 silly install resolved        [Object],
+66 silly install resolved        [Object],
+66 silly install resolved        [Object],
+66 silly install resolved        [Object],
+66 silly install resolved        [Object],
+66 silly install resolved        [Object] ],
+66 silly install resolved     repository: { type: 'git', url: 'git://github.com/mapbox/node-sqlite3.git' },
+66 silly install resolved     dependencies: { nan: '~2.4.0', 'node-pre-gyp': '~0.6.31' },
+66 silly install resolved     devDependencies: { 'aws-sdk': '2.x', eslint: '3.5.0', mocha: '3.x' },
+66 silly install resolved     scripts:
+66 silly install resolved      { prepublish: 'npm ls',
+66 silly install resolved        install: 'node-pre-gyp install --fallback-to-build',
+66 silly install resolved        pretest: 'node test/support/createdb.js',
+66 silly install resolved        test: 'mocha -R spec --timeout 480000' },
+66 silly install resolved     license: 'BSD-3-Clause',
+66 silly install resolved     keywords: [ 'sql', 'sqlite', 'sqlite3', 'database' ],
+66 silly install resolved     main: './lib/sqlite3',
+66 silly install resolved     gitHead: '4800c6377ef15f467290d77776302b486e71ada3',
+66 silly install resolved     bugs: { url: 'https://github.com/mapbox/node-sqlite3/issues' },
+66 silly install resolved     bundleDependencies: [ 'node-pre-gyp' ],
+66 silly install resolved     _id: 'sqlite3@3.1.8',
+66 silly install resolved     _shasum: '4cbcf965d8b901d1b1015cbc7fc415aae157dfaa',
+66 silly install resolved     _from: 'sqlite3@*',
+66 silly install resolved     _npmVersion: '2.15.9',
+66 silly install resolved     _nodeVersion: '4.6.1',
+66 silly install resolved     _npmUser: { name: 'springmeyer', email: 'dane@mapbox.com' },
+66 silly install resolved     dist:
+66 silly install resolved      { shasum: '4cbcf965d8b901d1b1015cbc7fc415aae157dfaa',
+66 silly install resolved        tarball: 'https://registry.npmjs.org/sqlite3/-/sqlite3-3.1.8.tgz' },
+66 silly install resolved     maintainers: [ [Object], [Object], [Object], [Object] ],
+66 silly install resolved     _npmOperationalInternal:
+66 silly install resolved      { host: 'packages-12-west.internal.npmjs.com',
+66 silly install resolved        tmp: 'tmp/sqlite3-3.1.8.tgz_1477593575470_0.9775171719957143' },
+66 silly install resolved     directories: {},
+66 silly install resolved     _resolved: 'https://registry.npmjs.org/sqlite3/-/sqlite3-3.1.8.tgz' } ]
+67 info install sqlite3@3.1.8 into /home/pi
+68 info installOne sqlite3@3.1.8
+69 verbose installOne of sqlite3 to /home/pi not in flight; installing
+70 verbose lock using /home/pi/.npm/_locks/sqlite3-47121c89ca36e8cc.lock for /home/pi/node_modules/sqlite3
+71 silly install write writing sqlite3 3.1.8 to /home/pi/node_modules/sqlite3
+72 verbose unbuild node_modules/sqlite3
+73 info preuninstall sqlite3@3.1.8
+74 info uninstall sqlite3@3.1.8
+75 verbose unbuild rmStuff sqlite3@3.1.8 from /home/pi/node_modules
+76 info postuninstall sqlite3@3.1.8
+77 silly gentlyRm /home/pi/node_modules/sqlite3 is being purged from base /home/pi
+78 verbose gentlyRm don't care about contents; nuking /home/pi/node_modules/sqlite3
+79 silly vacuum-fs purging /home/pi/node_modules/sqlite3
+80 verbose unlock done using /home/pi/.npm/_locks/sqlite3-47121c89ca36e8cc.lock for /home/pi/node_modules/sqlite3
+81 verbose stack Error: EACCES, unlink '/home/pi/node_modules/sqlite3/.eslintrc.js'
+81 verbose stack     at Error (native)
+82 verbose cwd /home/pi/Mimic
+83 error Linux 4.1.19+
+84 error argv "/usr/local/bin/node" "/usr/local/bin/npm" "--verbose" "install" "sqlite3"
+85 error node v0.12.6
+86 error npm  v2.11.2
+87 error path /home/pi/node_modules/sqlite3/.eslintrc.js
+88 error code EACCES
+89 error errno -13
+90 error Error: EACCES, unlink '/home/pi/node_modules/sqlite3/.eslintrc.js'
+90 error     at Error (native)
+90 error  { [Error: EACCES, unlink '/home/pi/node_modules/sqlite3/.eslintrc.js']
+90 error   errno: -13,
+90 error   code: 'EACCES',
+90 error   path: '/home/pi/node_modules/sqlite3/.eslintrc.js' }
+91 error Please try running this command again as root/Administrator.
+92 verbose exit [ -13, true ]
+93 verbose unbuild node_modules/sqlite3
+94 info preuninstall sqlite3@3.1.8
+95 info uninstall sqlite3@3.1.8
+96 verbose unbuild rmStuff sqlite3@3.1.8 from /home/pi/node_modules
+97 info postuninstall sqlite3@3.1.8
+98 silly gentlyRm /home/pi/node_modules/sqlite3 is being purged from base /home/pi
+99 verbose gentlyRm don't care about contents; nuking /home/pi/node_modules/sqlite3
+100 silly vacuum-fs purging /home/pi/node_modules/sqlite3
+101 error error rolling back Error: EACCES, unlink '/home/pi/node_modules/sqlite3/.eslintrc.js'
+101 error error rolling back     at Error (native)
+101 error error rolling back  { [Error: EACCES, unlink '/home/pi/node_modules/sqlite3/.eslintrc.js']
+101 error error rolling back   errno: -13,
+101 error error rolling back   code: 'EACCES',
+101 error error rolling back   path: '/home/pi/node_modules/sqlite3/.eslintrc.js' }
