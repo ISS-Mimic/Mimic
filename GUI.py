@@ -123,6 +123,28 @@ class MainApp(App):
         beta4a = values[11]
         aos = values[12]
         self.mimic_screen.ids.psarjvalue.text = str(psarj[0])[:-5]
+        self.mimic_screen.ids.ssarjvalue.text = str(ssarj[0])[:-5]
+        self.mimic_screen.ids.ptrrjvalue.text = str(ptrrj[0])[:-5]
+        self.mimic_screen.ids.strrjvalue.text = str(strrj[0])[:-5]
+        self.mimic_screen.ids.beta1bvalue.text = str(beta1b[0])[:-5]
+        self.mimic_screen.ids.beta1avalue.text = str(beta1a[0])[:-5]
+        self.mimic_screen.ids.beta2bvalue.text = str(beta2b[0])[:-5]
+        self.mimic_screen.ids.beta2avalue.text = str(beta2a[0])[:-5]
+        self.mimic_screen.ids.beta3bvalue.text = str(beta3b[0])[:-5]
+        self.mimic_screen.ids.beta3avalue.text = str(beta3a[0])[:-5]
+        self.mimic_screen.ids.beta4bvalue.text = str(beta4b[0])[:-5]
+        self.mimic_screen.ids.beta4avalue.text = str(beta4a[0])[:-5]
+        print str(aos[0])[:1]
+
+        if str(aos[0])[:1] == "1":
+            self.mimic_screen.ids.aoslabel.color = 0,1,0
+            self.mimic_screen.ids.aosvalue.color = 0,1,0
+            self.mimic_screen.ids.aosvalue.text = "Signal Acquired!"
+        else:
+            self.mimic_screen.ids.aosvalue.text = "Signal Lost"
+            self.mimic_screen.ids.aoslabel.color = 1,0,0
+            self.mimic_screen.ids.aosvalue.color = 1,0,0
+            
 
     def startTelemetry(*kwargs):
         sp.start()
@@ -367,30 +389,198 @@ Builder.load_string('''
             allow_stretch: True
             keep_ratio: False
         Label:
+            id: telemetrystatus
+            pos_hint: {"center_x": 0.25, "center_y": 0.85}
+            text: 'Telemetry'
+            markup: True
+            color: 1,0,1
+            font_size: 60
+        Label:
             id: psarjlabel
-            pos_hint: {"center_x": 0.6, "center_y": 0.5}
+            pos_hint: {"center_x": 0.6, "center_y": 0.92}
             text: 'PSARJ:'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
             id: psarjvalue
-            pos_hint: {"center_x": 0.8, "center_y": 0.5}
+            pos_hint: {"center_x": 0.8, "center_y": 0.92}
             text: '0.003'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
-            id: telemetrystatus
-            pos_hint: {"center_x": 0.5, "center_y": 0.85}
-            text: 'Telemetry'
+            id: ssarjlabel
+            pos_hint: {"center_x": 0.6, "center_y": 0.85}
+            text: 'SSARJ:'
             markup: True
-            color: 1,0,1
-            font_size: 60
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: ssarjvalue
+            pos_hint: {"center_x": 0.8, "center_y": 0.85}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: ptrrjlabel
+            pos_hint: {"center_x": 0.6, "center_y": 0.78}
+            text: 'PTRRJ:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: ptrrjvalue
+            pos_hint: {"center_x": 0.8, "center_y": 0.78}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: strrjlabel
+            pos_hint: {"center_x": 0.6, "center_y": 0.71}
+            text: 'STRRJ:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: strrjvalue
+            pos_hint: {"center_x": 0.8, "center_y": 0.71}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: beta1blabel
+            pos_hint: {"center_x": 0.6, "center_y": 0.64}
+            text: 'Beta 1B:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: beta1bvalue
+            pos_hint: {"center_x": 0.8, "center_y": 0.64}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: beta1alabel
+            pos_hint: {"center_x": 0.6, "center_y": 0.57}
+            text: 'Beta 1A:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: beta1avalue
+            pos_hint: {"center_x": 0.8, "center_y": 0.57}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: beta2blabel
+            pos_hint: {"center_x": 0.6, "center_y": 0.50}
+            text: 'Beta 2B:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: beta2bvalue
+            pos_hint: {"center_x": 0.8, "center_y": 0.50}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: beta2alabel
+            pos_hint: {"center_x": 0.6, "center_y": 0.43}
+            text: 'Beta 2A:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: beta2avalue
+            pos_hint: {"center_x": 0.8, "center_y": 0.43}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: beta3blabel
+            pos_hint: {"center_x": 0.6, "center_y": 0.36}
+            text: 'Beta 3B:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: beta3bvalue
+            pos_hint: {"center_x": 0.8, "center_y": 0.36}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: beta3alabel
+            pos_hint: {"center_x": 0.6, "center_y": 0.29}
+            text: 'Beta 3A:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: beta3avalue
+            pos_hint: {"center_x": 0.8, "center_y": 0.29}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: beta4blabel
+            pos_hint: {"center_x": 0.6, "center_y": 0.22}
+            text: 'Beta 4B:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: beta4bvalue
+            pos_hint: {"center_x": 0.8, "center_y": 0.22}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: beta4alabel
+            pos_hint: {"center_x": 0.6, "center_y": 0.15}
+            text: 'Beta 4A:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: beta4avalue
+            pos_hint: {"center_x": 0.8, "center_y": 0.15}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: aoslabel
+            pos_hint: {"center_x": 0.53, "center_y": 0.05}
+            text: 'Signal Status:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: aosvalue
+            pos_hint: {"center_x": 0.8, "center_y": 0.05}
+            text: ' '
+            markup: True
+            color: 1,1,1
+            font_size: 30
         Button:
             id: mimicstartbutton
-            size_hint: 0.3,0.1
-            pos_hint: {"x": 0.1, "y": 0.6}
+            size_hint: 0.25,0.1
+            pos_hint: {"x": 0.07, "y": 0.6}
             text: 'MIMIC'
             disabled: False
             font_size: 30
@@ -400,8 +590,8 @@ Builder.load_string('''
             on_release: mimicstartbutton.disabled = True
         Button:
             id: mimicstopbutton
-            size_hint: 0.3,0.1
-            pos_hint: {"x": 0.1, "y": 0.4}
+            size_hint: 0.25,0.1
+            pos_hint: {"x": 0.07, "y": 0.4}
             text: 'Stop'
             disabled: True
             font_size: 30
