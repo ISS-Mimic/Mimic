@@ -134,7 +134,6 @@ class MainApp(App):
         self.mimic_screen.ids.beta3avalue.text = str(beta3a[0])[:-5]
         self.mimic_screen.ids.beta4bvalue.text = str(beta4b[0])[:-5]
         self.mimic_screen.ids.beta4avalue.text = str(beta4a[0])[:-5]
-        print str(aos[0])[:1]
 
         if str(aos[0])[:1] == "1":
             self.mimic_screen.ids.aoslabel.color = 0,1,0
