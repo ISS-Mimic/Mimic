@@ -212,7 +212,7 @@ Builder.load_string('''
         Label:
             size_hint: None,None
             text: '1B'
-            pos: root.width*.5, root.width*.5
+			pos_hint: {'center_x': 0.035, 'center_y': 0.73}
             font_size: 30
             halign: 'center'
             valign: 'middle'
@@ -233,27 +233,27 @@ Builder.load_string('''
         Label:
             size_hint: None,None
             text: '3B'
-            pos: root.width*.035, root.width*.18
+            pos_hint: {'center_x': 0.035, 'center_y': 0.18}
             font_size: 30
             halign: 'center'
         TriangleButton:
             id: t3Bup
-            p1: root.width*0.060, root.height*0.36
-            p2: root.width*0.095, root.height*0.46
-            p3: root.width*0.130, root.height*0.36
+            p1: root.width*0.060, root.height*0.38
+            p2: root.width*0.095, root.height*0.48
+            p3: root.width*0.130, root.height*0.38
             on_press: self.changecolordown()
             on_release: self.changecolorup()
         TriangleButton:
             id: t3Bdown
-            p1: root.width*0.060, root.height*0.3
-            p2: root.width*0.095, root.height*0.2
-            p3: root.width*0.130, root.height*0.3
+            p1: root.width*0.060, root.height*0.32
+            p2: root.width*0.095, root.height*0.22
+            p3: root.width*0.130, root.height*0.32
             on_press: self.changecolordown()
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
             text: '3A'
-            pos_hint: {'x': .155, 'y': .75}
+            pos_hint: {'center_x': .155, 'center_y': .73}
             font_size: 30
             halign: 'center'
         TriangleButton:
@@ -273,21 +273,21 @@ Builder.load_string('''
         Label:
             size_hint: None,None
             text: '1A'
-            pos_hint: {'x': .155, 'y': .25}
+            pos_hint: {'center_x': .155, 'center_y': .23}
             font_size: 30
             halign: 'center'
         TriangleButton:
             id: t1Aup
-            p1: root.width*0.180, root.height*0.36
-            p2: root.width*0.215, root.height*0.46
-            p3: root.width*0.250, root.height*0.36
+            p1: root.width*0.180, root.height*0.38
+            p2: root.width*0.215, root.height*0.48
+            p3: root.width*0.250, root.height*0.38
             on_press: self.changecolordown()
             on_release: self.changecolorup()
         TriangleButton:
             id: t1Adown
-            p1: root.width*0.180, root.height*0.3
-            p2: root.width*0.215, root.height*0.2
-            p3: root.width*0.250, root.height*0.3
+            p1: root.width*0.180, root.height*0.32
+            p2: root.width*0.215, root.height*0.22
+            p3: root.width*0.250, root.height*0.32
             on_press: self.changecolordown()
             on_release: self.changecolorup()
         Label:
@@ -321,24 +321,80 @@ Builder.load_string('''
             pos_hint: {'x': .715, 'y': .75}
             font_size: 30
             halign: 'center'
+		TriangleButton:
+            id: t2Aup
+            p1: root.width*0.820, root.height*0.86
+            p2: root.width*0.785, root.height*0.96
+            p3: root.width*0.750, root.height*0.86
+            on_press: self.changecolordown()
+            on_release: self.changecolorup()
+        TriangleButton:
+            id: t2Adown
+            p1: root.width*0.820, root.height*0.8
+            p2: root.width*0.785, root.height*0.7
+            p3: root.width*0.750, root.height*0.8
+            on_press: self.changecolordown()
+            on_release: self.changecolorup()
         Label:
             size_hint: None,None
             text: '4A'
             pos_hint: {'x': .715, 'y': .25}
             font_size: 30
             halign: 'center'
+		TriangleButton:
+            id: t4Aup
+            p1: root.width*0.820, root.height*0.38
+            p2: root.width*0.785, root.height*0.48
+            p3: root.width*0.750, root.height*0.38
+            on_press: self.changecolordown()
+            on_release: self.changecolorup()
+        TriangleButton:
+            id: t4Adown
+            p1: root.width*0.820, root.height*0.32
+            p2: root.width*0.785, root.height*0.22
+            p3: root.width*0.750, root.height*0.32
+            on_press: self.changecolordown()
+            on_release: self.changecolorup()
         Label:
             size_hint: None,None
             text: '4B'
             pos_hint: {'x': .84, 'y': .75}
             font_size: 30
             halign: 'center'
+		TriangleButton:
+            id: t4Bup
+            p1: root.width*0.940, root.height*0.86
+            p2: root.width*0.905, root.height*0.96
+            p3: root.width*0.870, root.height*0.86
+            on_press: self.changecolordown()
+            on_release: self.changecolorup()
+        TriangleButton:
+            id: t4Bdown
+            p1: root.width*0.940, root.height*0.8
+            p2: root.width*0.905, root.height*0.7
+            p3: root.width*0.870, root.height*0.8
+            on_press: self.changecolordown()
+            on_release: self.changecolorup()
         Label:
             size_hint: None,None
             text: '2B'
             pos_hint: {'x': .84, 'y': .25}
             font_size: 30
             halign: 'center'
+		TriangleButton:
+            id: t2Bup
+            p1: root.width*0.940, root.height*0.38
+            p2: root.width*0.905, root.height*0.48
+            p3: root.width*0.870, root.height*0.38
+            on_press: self.changecolordown()
+            on_release: self.changecolorup()
+        TriangleButton:
+            id: t2Bdown
+            p1: root.width*0.940, root.height*0.32
+            p2: root.width*0.905, root.height*0.22
+            p3: root.width*0.870, root.height*0.32
+            on_press: self.changecolordown()
+            on_release: self.changecolorup()
         Button:
             size_hint_y: None
             text: 'Return'
