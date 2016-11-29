@@ -212,7 +212,7 @@ Builder.load_string('''
         Label:
             size_hint: None,None
             text: '1B'
-			pos_hint: {'center_x': 0.035, 'center_y': 0.73}
+			pos_hint: {'x': 0.035, 'y': 0.73}
             font_size: 30
             halign: 'center'
             valign: 'middle'
@@ -233,7 +233,7 @@ Builder.load_string('''
         Label:
             size_hint: None,None
             text: '3B'
-            pos_hint: {'center_x': 0.035, 'center_y': 0.18}
+            pos_hint: {'x': 0.035, 'y': 0.25}
             font_size: 30
             halign: 'center'
         TriangleButton:
@@ -253,7 +253,7 @@ Builder.load_string('''
         Label:
             size_hint: None,None
             text: '3A'
-            pos_hint: {'center_x': .155, 'center_y': .73}
+            pos_hint: {'x': .155, 'y': .73}
             font_size: 30
             halign: 'center'
         TriangleButton:
@@ -273,7 +273,7 @@ Builder.load_string('''
         Label:
             size_hint: None,None
             text: '1A'
-            pos_hint: {'center_x': .155, 'center_y': .23}
+            pos_hint: {'x': .155, 'y': .25}
             font_size: 30
             halign: 'center'
         TriangleButton:
@@ -296,6 +296,20 @@ Builder.load_string('''
             pos_hint: {'x': .275, 'y': .5}
             font_size: 30
             halign: 'center'
+		TriangleButton:
+            id: SSARJup
+            p1: root.width*0.300, root.height*0.55
+            p2: root.width*0.335, root.height*0.65
+            p3: root.width*0.370, root.height*0.55
+            on_press: self.changecolordown()
+            on_release: self.changecolorup()
+        TriangleButton:
+            id: SSARJdown
+            p1: root.width*0.300, root.height*0.35
+            p2: root.width*0.335, root.height*0.45
+            p3: root.width*0.370, root.height*0.35
+            on_press: self.changecolordown()
+            on_release: self.changecolorup()
         Label:
             size_hint: None,None
             text: 'STTRJ'
@@ -303,22 +317,64 @@ Builder.load_string('''
             font_size: 30
             halign: 'center'
             valign: 'middle'
+		TriangleButton:
+            id: STTRJup
+            p1: root.width*0.480, root.height*0.650
+            p2: root.width*0.380, root.height*0.575
+            p3: root.width*0.480, root.height*0.550
+            on_press: self.changecolordown()
+            on_release: self.changecolorup()
+        TriangleButton:
+            id: STTRJdown
+            p1: root.width*0.520, root.height*0.650
+            p2: root.width*0.620, root.height*0.575
+            p3: root.width*0.520, root.height*0.550
+            on_press: self.changecolordown()
+            on_release: self.changecolorup()
         Label:
             size_hint: None,None
             text: 'PTTRJ'
             pos_hint: {'x': .445, 'y': .45}
             font_size: 30
             halign: 'center'
+		TriangleButton:
+            id: PTTRJup
+            p1: root.width*0.480, root.height*0.350
+            p2: root.width*0.380, root.height*0.425
+            p3: root.width*0.480, root.height*0.450
+            on_press: self.changecolordown()
+            on_release: self.changecolorup()
+        TriangleButton:
+            id: PTTRJdown
+            p1: root.width*0.520, root.height*0.350
+            p2: root.width*0.620, root.height*0.425
+            p3: root.width*0.520, root.height*0.450
+            on_press: self.changecolordown()
+            on_release: self.changecolorup()
         Label:
             size_hint: None,None
             text: 'PSARJ'
             pos_hint: {'x': .6, 'y': .5}
             font_size: 30
             halign: 'center'
+		TriangleButton:
+            id: PSARJup
+            p1: root.width*0.700, root.height*0.55
+            p2: root.width*0.665, root.height*0.65
+            p3: root.width*0.630, root.height*0.55
+            on_press: self.changecolordown()
+            on_release: self.changecolorup()
+        TriangleButton:
+            id: PSARJdown
+            p1: root.width*0.700, root.height*0.35
+            p2: root.width*0.665, root.height*0.45
+            p3: root.width*0.630, root.height*0.35
+            on_press: self.changecolordown()
+            on_release: self.changecolorup()
         Label:
             size_hint: None,None
             text: '2A'
-            pos_hint: {'x': .715, 'y': .75}
+            pos_hint: {'x': .725, 'y': .73}
             font_size: 30
             halign: 'center'
 		TriangleButton:
@@ -338,7 +394,7 @@ Builder.load_string('''
         Label:
             size_hint: None,None
             text: '4A'
-            pos_hint: {'x': .715, 'y': .25}
+            pos_hint: {'x': .725, 'y': .25}
             font_size: 30
             halign: 'center'
 		TriangleButton:
@@ -358,7 +414,7 @@ Builder.load_string('''
         Label:
             size_hint: None,None
             text: '4B'
-            pos_hint: {'x': .84, 'y': .75}
+            pos_hint: {'x': .85, 'y': .73}
             font_size: 30
             halign: 'center'
 		TriangleButton:
@@ -378,7 +434,7 @@ Builder.load_string('''
         Label:
             size_hint: None,None
             text: '2B'
-            pos_hint: {'x': .84, 'y': .25}
+            pos_hint: {'x': .85, 'y': .25}
             font_size: 30
             halign: 'center'
 		TriangleButton:
