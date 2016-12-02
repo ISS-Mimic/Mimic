@@ -102,10 +102,6 @@ class TriangleButton(ButtonBehavior, Widget):
                 self.p1 + self.p2 + self.p3) 
 
 class MainApp(App):
-   
-    event = Clock.schedule_interval(self.update_labels, 1)
-    event()
-    event.cancel()
 
     def build(self):
         self.mimic_screen = MimicScreen(name = 'mimic')
@@ -116,14 +112,18 @@ class MainApp(App):
         root.add_widget(ManualControlScreen(name = 'manualcontrol'))
         root.current= 'main'
     
+        root.event = Clock.schedule_interval(self.update_labels, 1)
+        root.event()
+        root.event.cancel()
+
        # Clock.schedule_interval(self.update_labels, 1)
         return root
 
-    def clockStart(self):
-        event()
+    def clockStart(root):
+        root.event()
 
-    def clockEnd(self):
-        event.cancel()   
+    def clockEnd(root):
+        root.event.cancel()   
  
     def i2cWrite(self, *args):
         bus.write_i2c_block_data(address, 0, StringToBytes(*args))
@@ -735,7 +735,7 @@ Builder.load_string('''
             disabled: False
             font_size: 30
             on_release: telemetrystatus.text = 'Sending Telemetry...'
-            on_release: self.clockStart()
+            on_release: app.clockStart()
             on_release: mimicstopbutton.disabled = False
             on_release: mimicstartbutton.disabled = True
         Button:
@@ -746,7 +746,7 @@ Builder.load_string('''
             disabled: True
             font_size: 30
             on_release: telemetrystatus.text = 'I2C Stopped'
-            on_release: self.clockStop()
+            on_release: app.clockStop()
             on_release: mimicstopbutton.disabled = True
             on_release: mimicstartbutton.disabled = False
         Button:
@@ -754,7 +754,7 @@ Builder.load_string('''
             pos_hint: {"Left": 1, "Bottom": 1}
             text: 'Return'
             font_size: 30
-            on_release: self.clockStop()
+            on_release: app.clockStop()
             on_release: root.manager.current = 'main'
            
 <TriangleButton>:
