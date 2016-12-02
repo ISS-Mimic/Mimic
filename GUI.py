@@ -34,6 +34,13 @@ p = multiprocessing.Process(target = muterun_js,args=('iss_telemetry.js',)) #mig
 
 conn = sqlite3.connect('iss_telemetry.db') #sqlite database call change to include directory
 c = conn.cursor() 
+val = ""
+
+def StringToBytes(val):
+    retVal = []
+    for c in val:
+            retVal.append(ord(c))
+    return retVal
 
 class MainScreen(Screen):
     def __init__(self, **kwargs):
@@ -46,6 +53,9 @@ class ManualControlScreen(Screen):
     def __init__(self, **kwargs):
         super(ManualControlScreen, self).__init__(**kwargs)
 
+    def i2cWrite(self, *args):
+        bus.write_i2c_block_data(address, 0, StringToBytes(*args))
+   
 class MimicScreen(Screen, EventDispatcher):
     def __init__(self, **kwargs):
         super(MimicScreen, self).__init__(**kwargs)
@@ -81,11 +91,9 @@ class TriangleButton(ButtonBehavior, Widget):
     p3 = ListProperty([0, 0])
 
     def changecolordown(self, *args):
-        print "colordown1"
         self.triangle_color = (1,0,1,1)
 
     def changecolorup(self, *args):
-        print "colorup1"
         self.triangle_color = (1,0,0,1)
 
     def collide_point(self, x, y):
@@ -94,6 +102,11 @@ class TriangleButton(ButtonBehavior, Widget):
                 self.p1 + self.p2 + self.p3) 
 
 class MainApp(App):
+   
+    event = Clock.schedule_interval(self.update_labels, 1)
+    event()
+    event.cancel()
+
     def build(self):
         self.mimic_screen = MimicScreen(name = 'mimic')
         root = ScreenManager(transition=WipeTransition())
@@ -103,8 +116,17 @@ class MainApp(App):
         root.add_widget(ManualControlScreen(name = 'manualcontrol'))
         root.current= 'main'
     
-        Clock.schedule_interval(self.update_labels, 1)
+       # Clock.schedule_interval(self.update_labels, 1)
         return root
+
+    def clockStart(self):
+        event()
+
+    def clockEnd(self):
+        event.cancel()   
+ 
+    def i2cWrite(self, *args):
+        bus.write_i2c_block_data(address, 0, StringToBytes(*args))
 
     def update_labels(self, dt):
         c.execute('select two from telemetry')
@@ -144,13 +166,6 @@ class MainApp(App):
             self.mimic_screen.ids.aoslabel.color = 1,0,0
             self.mimic_screen.ids.aosvalue.color = 1,0,0
             
-
-    def startTelemetry(*kwargs):
-        sp.start()
-
-    def stopTelemetry(*kwargs):
-        os.kill(p.pid,signal.SIGKILL)
-
 Builder.load_string('''
 #:kivy 1.8
 #:import kivy kivy
@@ -212,7 +227,7 @@ Builder.load_string('''
         Label:
             size_hint: None,None
             text: '1B'
-			pos_hint: {'x': 0.035, 'y': 0.73}
+            pos_hint: {'x': 0.035, 'y': 0.73}
             font_size: 30
             halign: 'center'
             valign: 'middle'
@@ -222,6 +237,7 @@ Builder.load_string('''
             p2: root.width*0.095, root.height*0.96
             p3: root.width*0.130, root.height*0.86
             on_press: self.changecolordown()
+            on_release: root.i2cWrite("1B 1.00")
             on_release: self.changecolorup()
         TriangleButton:
             id: t1Bdown
@@ -229,6 +245,7 @@ Builder.load_string('''
             p2: root.width*0.095, root.height*0.7
             p3: root.width*0.130, root.height*0.8
             on_press: self.changecolordown()
+            on_release: root.i2cWrite("1B -1.00")
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -242,6 +259,7 @@ Builder.load_string('''
             p2: root.width*0.095, root.height*0.48
             p3: root.width*0.130, root.height*0.38
             on_press: self.changecolordown()
+            on_release: root.i2cWrite("3B 1.00")
             on_release: self.changecolorup()
         TriangleButton:
             id: t3Bdown
@@ -249,6 +267,7 @@ Builder.load_string('''
             p2: root.width*0.095, root.height*0.22
             p3: root.width*0.130, root.height*0.32
             on_press: self.changecolordown()
+            on_release: root.i2cWrite("3B -1.00")
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -262,6 +281,7 @@ Builder.load_string('''
             p2: root.width*0.215, root.height*0.96
             p3: root.width*0.250, root.height*0.86
             on_press: self.changecolordown()
+            on_release: root.i2cWrite("3A 1.00")
             on_release: self.changecolorup()
         TriangleButton:
             id: t3Adown
@@ -269,6 +289,7 @@ Builder.load_string('''
             p2: root.width*0.215, root.height*0.7
             p3: root.width*0.250, root.height*0.8
             on_press: self.changecolordown()
+            on_release: root.i2cWrite("3A -1.00")
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -282,6 +303,7 @@ Builder.load_string('''
             p2: root.width*0.215, root.height*0.48
             p3: root.width*0.250, root.height*0.38
             on_press: self.changecolordown()
+            on_release: root.i2cWrite("1A 1.00")
             on_release: self.changecolorup()
         TriangleButton:
             id: t1Adown
@@ -289,6 +311,7 @@ Builder.load_string('''
             p2: root.width*0.215, root.height*0.22
             p3: root.width*0.250, root.height*0.32
             on_press: self.changecolordown()
+            on_release: root.i2cWrite("1A -1.00")
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -296,19 +319,21 @@ Builder.load_string('''
             pos_hint: {'x': .275, 'y': .5}
             font_size: 30
             halign: 'center'
-		TriangleButton:
+        TriangleButton:
             id: SSARJup
-            p1: root.width*0.300, root.height*0.55
-            p2: root.width*0.335, root.height*0.65
-            p3: root.width*0.370, root.height*0.55
+            p1: root.width*0.300, root.height*0.65
+            p2: root.width*0.335, root.height*0.75
+            p3: root.width*0.370, root.height*0.65
             on_press: self.changecolordown()
+            on_release: root.i2cWrite("SSARJ 1.00")
             on_release: self.changecolorup()
         TriangleButton:
             id: SSARJdown
-            p1: root.width*0.300, root.height*0.35
+            p1: root.width*0.300, root.height*0.55
             p2: root.width*0.335, root.height*0.45
-            p3: root.width*0.370, root.height*0.35
+            p3: root.width*0.370, root.height*0.55
             on_press: self.changecolordown()
+            on_release: root.i2cWrite("SSARJ -1.00")
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -317,19 +342,21 @@ Builder.load_string('''
             font_size: 30
             halign: 'center'
             valign: 'middle'
-		TriangleButton:
+        TriangleButton:
             id: STTRJup
-            p1: root.width*0.480, root.height*0.650
-            p2: root.width*0.380, root.height*0.575
-            p3: root.width*0.480, root.height*0.550
+            p1: root.width*0.480, root.height*0.800
+            p2: root.width*0.420, root.height*0.750
+            p3: root.width*0.480, root.height*0.700
             on_press: self.changecolordown()
+            on_release: root.i2cWrite("STRRJ 1.00")
             on_release: self.changecolorup()
         TriangleButton:
             id: STTRJdown
-            p1: root.width*0.520, root.height*0.650
-            p2: root.width*0.620, root.height*0.575
-            p3: root.width*0.520, root.height*0.550
+            p1: root.width*0.520, root.height*0.800
+            p2: root.width*0.580, root.height*0.750
+            p3: root.width*0.520, root.height*0.700
             on_press: self.changecolordown()
+            on_release: root.i2cWrite("STRRJ -1.00")
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -337,19 +364,21 @@ Builder.load_string('''
             pos_hint: {'x': .445, 'y': .45}
             font_size: 30
             halign: 'center'
-		TriangleButton:
+        TriangleButton:
             id: PTTRJup
-            p1: root.width*0.480, root.height*0.350
-            p2: root.width*0.380, root.height*0.425
-            p3: root.width*0.480, root.height*0.450
+            p1: root.width*0.480, root.height*0.400
+            p2: root.width*0.420, root.height*0.450
+            p3: root.width*0.480, root.height*0.500
             on_press: self.changecolordown()
+            on_release: root.i2cWrite("PTRRJ 1.00")
             on_release: self.changecolorup()
         TriangleButton:
             id: PTTRJdown
-            p1: root.width*0.520, root.height*0.350
-            p2: root.width*0.620, root.height*0.425
-            p3: root.width*0.520, root.height*0.450
+            p1: root.width*0.520, root.height*0.400
+            p2: root.width*0.580, root.height*0.450
+            p3: root.width*0.520, root.height*0.500
             on_press: self.changecolordown()
+            on_release: root.i2cWrite("PTRRJ -1.00")
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -357,19 +386,21 @@ Builder.load_string('''
             pos_hint: {'x': .6, 'y': .5}
             font_size: 30
             halign: 'center'
-		TriangleButton:
+        TriangleButton:
             id: PSARJup
-            p1: root.width*0.700, root.height*0.55
-            p2: root.width*0.665, root.height*0.65
-            p3: root.width*0.630, root.height*0.55
+            p1: root.width*0.700, root.height*0.65
+            p2: root.width*0.665, root.height*0.75
+            p3: root.width*0.630, root.height*0.65
             on_press: self.changecolordown()
+            on_release: root.i2cWrite("PSARJ 1.00")
             on_release: self.changecolorup()
         TriangleButton:
             id: PSARJdown
-            p1: root.width*0.700, root.height*0.35
+            p1: root.width*0.700, root.height*0.55
             p2: root.width*0.665, root.height*0.45
-            p3: root.width*0.630, root.height*0.35
+            p3: root.width*0.630, root.height*0.55
             on_press: self.changecolordown()
+            on_release: root.i2cWrite("PSARJ -1.00")
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -377,12 +408,13 @@ Builder.load_string('''
             pos_hint: {'x': .725, 'y': .73}
             font_size: 30
             halign: 'center'
-		TriangleButton:
+        TriangleButton:
             id: t2Aup
             p1: root.width*0.820, root.height*0.86
             p2: root.width*0.785, root.height*0.96
             p3: root.width*0.750, root.height*0.86
             on_press: self.changecolordown()
+            on_release: root.i2cWrite("2A 1.00")
             on_release: self.changecolorup()
         TriangleButton:
             id: t2Adown
@@ -390,6 +422,7 @@ Builder.load_string('''
             p2: root.width*0.785, root.height*0.7
             p3: root.width*0.750, root.height*0.8
             on_press: self.changecolordown()
+            on_release: root.i2cWrite("2A -1.00")
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -397,12 +430,13 @@ Builder.load_string('''
             pos_hint: {'x': .725, 'y': .25}
             font_size: 30
             halign: 'center'
-		TriangleButton:
+        TriangleButton:
             id: t4Aup
             p1: root.width*0.820, root.height*0.38
             p2: root.width*0.785, root.height*0.48
             p3: root.width*0.750, root.height*0.38
             on_press: self.changecolordown()
+            on_release: root.i2cWrite("4A 1.00")
             on_release: self.changecolorup()
         TriangleButton:
             id: t4Adown
@@ -410,19 +444,21 @@ Builder.load_string('''
             p2: root.width*0.785, root.height*0.22
             p3: root.width*0.750, root.height*0.32
             on_press: self.changecolordown()
+            on_release: root.i2cWrite("4A -1.00")
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
             text: '4B'
-            pos_hint: {'x': .85, 'y': .73}
+            pos_hint: {'x': .84, 'y': .73}
             font_size: 30
             halign: 'center'
-		TriangleButton:
+        TriangleButton:
             id: t4Bup
             p1: root.width*0.940, root.height*0.86
             p2: root.width*0.905, root.height*0.96
             p3: root.width*0.870, root.height*0.86
             on_press: self.changecolordown()
+            on_release: root.i2cWrite("4B 1.00")
             on_release: self.changecolorup()
         TriangleButton:
             id: t4Bdown
@@ -430,19 +466,21 @@ Builder.load_string('''
             p2: root.width*0.905, root.height*0.7
             p3: root.width*0.870, root.height*0.8
             on_press: self.changecolordown()
+            on_release: root.i2cWrite("4B -1.00")
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
             text: '2B'
-            pos_hint: {'x': .85, 'y': .25}
+            pos_hint: {'x': .84, 'y': .25}
             font_size: 30
             halign: 'center'
-		TriangleButton:
+        TriangleButton:
             id: t2Bup
             p1: root.width*0.940, root.height*0.38
             p2: root.width*0.905, root.height*0.48
             p3: root.width*0.870, root.height*0.38
             on_press: self.changecolordown()
+            on_release: root.i2cWrite("2B 1.00")
             on_release: self.changecolorup()
         TriangleButton:
             id: t2Bdown
@@ -450,6 +488,7 @@ Builder.load_string('''
             p2: root.width*0.905, root.height*0.22
             p3: root.width*0.870, root.height*0.32
             on_press: self.changecolordown()
+            on_release: root.i2cWrite("2B -1.00")
             on_release: self.changecolorup()
         Button:
             size_hint_y: None
@@ -695,8 +734,8 @@ Builder.load_string('''
             text: 'MIMIC'
             disabled: False
             font_size: 30
-            on_release: telemetrystatus.text = 'Fetching Telemetry...'
-            on_release: app.startTelemetry()
+            on_release: telemetrystatus.text = 'Sending Telemetry...'
+            on_release: self.clockStart()
             on_release: mimicstopbutton.disabled = False
             on_release: mimicstartbutton.disabled = True
         Button:
@@ -706,8 +745,8 @@ Builder.load_string('''
             text: 'Stop'
             disabled: True
             font_size: 30
-            on_release: telemetrystatus.text = 'Program Stopped'
-            on_release: app.stopTelemetry()
+            on_release: telemetrystatus.text = 'I2C Stopped'
+            on_release: self.clockStop()
             on_release: mimicstopbutton.disabled = True
             on_release: mimicstartbutton.disabled = False
         Button:
@@ -715,10 +754,10 @@ Builder.load_string('''
             pos_hint: {"Left": 1, "Bottom": 1}
             text: 'Return'
             font_size: 30
+            on_release: self.clockStop()
             on_release: root.manager.current = 'main'
            
 <TriangleButton>:
-    
     canvas.after:
         Color:
             rgba: self.triangle_color
