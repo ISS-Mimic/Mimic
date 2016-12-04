@@ -30,6 +30,8 @@ from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, WipeTr
 bus = smbus.SMBus(1)
 address = 0x04
 
+thatoneboolean = False
+
 p = multiprocessing.Process(target = muterun_js,args=('iss_telemetry.js',)) #might delete this
 
 conn = sqlite3.connect('iss_telemetry.db') #sqlite database call change to include directory
@@ -59,6 +61,10 @@ class ManualControlScreen(Screen):
 class MimicScreen(Screen, EventDispatcher):
     def __init__(self, **kwargs):
         super(MimicScreen, self).__init__(**kwargs)
+   
+    def changeBoolean(self, *args):
+        global thatoneboolean
+        thatoneboolean = args[0]
 
 class MainScreenManager(ScreenManager):
     pass
@@ -112,52 +118,45 @@ class MainApp(App):
         root.add_widget(ManualControlScreen(name = 'manualcontrol'))
         root.current= 'main'
     
-        root.event = Clock.schedule_interval(self.update_labels, 1)
-        root.event()
-        root.event.cancel()
-
-       # Clock.schedule_interval(self.update_labels, 1)
+        Clock.schedule_interval(self.update_labels, 1)
         return root
 
-    def clockStart(root):
-        root.event()
-
-    def clockEnd(root):
-        root.event.cancel()   
- 
     def i2cWrite(self, *args):
         bus.write_i2c_block_data(address, 0, StringToBytes(*args))
 
     def update_labels(self, dt):
+        global thatoneboolean
         c.execute('select two from telemetry')
         values = c.fetchall()
-        psarj = values[0]
-        ssarj = values[1]
-        ptrrj = values[2]
-        strrj = values[3]
-        beta1b = values[4]
-        beta1a = values[5]
-        beta2b = values[6]
-        beta2a = values[7]
-        beta3b = values[8]
-        beta3a = values[9]
-        beta4b = values[10]
-        beta4a = values[11]
-        aos = values[12]
-        self.mimic_screen.ids.psarjvalue.text = str(psarj[0])[:-5]
-        self.mimic_screen.ids.ssarjvalue.text = str(ssarj[0])[:-5]
-        self.mimic_screen.ids.ptrrjvalue.text = str(ptrrj[0])[:-5]
-        self.mimic_screen.ids.strrjvalue.text = str(strrj[0])[:-5]
-        self.mimic_screen.ids.beta1bvalue.text = str(beta1b[0])[:-5]
-        self.mimic_screen.ids.beta1avalue.text = str(beta1a[0])[:-5]
-        self.mimic_screen.ids.beta2bvalue.text = str(beta2b[0])[:-5]
-        self.mimic_screen.ids.beta2avalue.text = str(beta2a[0])[:-5]
-        self.mimic_screen.ids.beta3bvalue.text = str(beta3b[0])[:-5]
-        self.mimic_screen.ids.beta3avalue.text = str(beta3a[0])[:-5]
-        self.mimic_screen.ids.beta4bvalue.text = str(beta4b[0])[:-5]
-        self.mimic_screen.ids.beta4avalue.text = str(beta4a[0])[:-5]
 
-        if str(aos[0])[:1] == "1":
+        psarj = str((values[0])[0])[:-5]
+        ssarj = str((values[1])[0])[:-5]
+        ptrrj = str((values[2])[0])[:-5]
+        strrj = str((values[3])[0])[:-5]
+        beta1b = str((values[4])[0])[:-5]
+        beta1a = str((values[5])[0])[:-5]
+        beta2b = str((values[6])[0])[:-5]
+        beta2a = str((values[7])[0])[:-5]
+        beta3b = str((values[8])[0])[:-5]
+        beta3a = str((values[9])[0])[:-5]
+        beta4b = str((values[10])[0])[:-5]
+        beta4a = str((values[11])[0])[:-5]
+        aos = str((values[12])[0])[:1]
+        
+        self.mimic_screen.ids.psarjvalue.text = psarj
+        self.mimic_screen.ids.ssarjvalue.text = ssarj
+        self.mimic_screen.ids.ptrrjvalue.text = ptrrj
+        self.mimic_screen.ids.strrjvalue.text = strrj
+        self.mimic_screen.ids.beta1bvalue.text = beta1b
+        self.mimic_screen.ids.beta1avalue.text = beta1a
+        self.mimic_screen.ids.beta2bvalue.text = beta2b
+        self.mimic_screen.ids.beta2avalue.text = beta2a
+        self.mimic_screen.ids.beta3bvalue.text = beta3b
+        self.mimic_screen.ids.beta3avalue.text = beta3a
+        self.mimic_screen.ids.beta4bvalue.text = beta4b
+        self.mimic_screen.ids.beta4avalue.text = beta4a
+
+        if aos == "1":
             self.mimic_screen.ids.aoslabel.color = 0,1,0
             self.mimic_screen.ids.aosvalue.color = 0,1,0
             self.mimic_screen.ids.aosvalue.text = "Signal Acquired!"
@@ -165,7 +164,27 @@ class MainApp(App):
             self.mimic_screen.ids.aosvalue.text = "Signal Lost"
             self.mimic_screen.ids.aoslabel.color = 1,0,0
             self.mimic_screen.ids.aosvalue.color = 1,0,0
-            
+                    
+        if thatoneboolean == True:
+            print "true"
+            self.i2cWrite("PSARJ " + psarj)
+            self.i2cWrite("SSARJ " + ssarj)
+            self.i2cWrite("PTRRJ " + ptrrj)
+            self.i2cWrite("STRRJ " + strrj)
+            self.i2cWrite("Beta1B " + beta1b)
+            self.i2cWrite("Beta1A " + beta1a)
+            self.i2cWrite("Beta2B " + beta2b)
+            self.i2cWrite("Beta2A " + beta2a)
+            self.i2cWrite("Beta3B " + beta3b)
+            self.i2cWrite("Beta3A " + beta3a)
+            self.i2cWrite("Beta4B " + beta4b)
+            self.i2cWrite("Beta4A " + beta4a)
+            self.i2cWrite("AOS " + aos)
+        else:
+            print "false"
+
+
+
 Builder.load_string('''
 #:kivy 1.8
 #:import kivy kivy
@@ -735,7 +754,7 @@ Builder.load_string('''
             disabled: False
             font_size: 30
             on_release: telemetrystatus.text = 'Sending Telemetry...'
-            on_release: app.clockStart()
+            on_release: root.changeBoolean(True)
             on_release: mimicstopbutton.disabled = False
             on_release: mimicstartbutton.disabled = True
         Button:
@@ -746,7 +765,7 @@ Builder.load_string('''
             disabled: True
             font_size: 30
             on_release: telemetrystatus.text = 'I2C Stopped'
-            on_release: app.clockStop()
+            on_release: root.changeBoolean(False)
             on_release: mimicstopbutton.disabled = True
             on_release: mimicstartbutton.disabled = False
         Button:
@@ -754,7 +773,7 @@ Builder.load_string('''
             pos_hint: {"Left": 1, "Bottom": 1}
             text: 'Return'
             font_size: 30
-            on_release: app.clockStop()
+            on_release: root.changeBoolean(False)
             on_release: root.manager.current = 'main'
            
 <TriangleButton>:
