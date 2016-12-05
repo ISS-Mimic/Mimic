@@ -56,7 +56,7 @@ class ManualControlScreen(Screen):
         super(ManualControlScreen, self).__init__(**kwargs)
 
     def i2cWrite(self, *args):
-        bus.write_i2c_block_data(address, 0, StringToBytes(*args))
+        bus.write_i2c_block_data(0x04, 0, StringToBytes(*args))
    
 class MimicScreen(Screen, EventDispatcher):
     def __init__(self, **kwargs):
@@ -109,6 +109,33 @@ class TriangleButton(ButtonBehavior, Widget):
 
 class MainApp(App):
 
+    oldpsarj = "0.003"
+    oldssarj = "0.003"
+    oldptrrj = "0.003"
+    oldstrrj = "0.003"
+    oldbeta1b = "0.003"
+    oldbeta1a = "0.003"
+    oldbeta2b = "0.003"
+    oldbeta2a = "0.003"
+    oldbeta3b = "0.003"
+    oldbeta3a = "0.003"
+    oldbeta4b = "0.003"
+    oldbeta4a = "0.003"
+    oldaos = "0"
+    psarj_dif = False
+    ssarj_dif = False
+    ptrrj_dif = False
+    strrj_dif = False
+    beta1b_dif = False    
+    beta1a_dif = False    
+    beta2b_dif = False    
+    beta2a_dif = False    
+    beta3b_dif = False    
+    beta3a_dif = False    
+    beta4b_dif = False    
+    beta4a_dif = False    
+    aos_dif = False    
+
     def build(self):
         self.mimic_screen = MimicScreen(name = 'mimic')
         root = ScreenManager(transition=WipeTransition())
@@ -122,7 +149,7 @@ class MainApp(App):
         return root
 
     def i2cWrite(self, *args):
-        bus.write_i2c_block_data(address, 0, StringToBytes(*args))
+        bus.write_i2c_block_data(0x04, 0, StringToBytes(*args))
 
     def update_labels(self, dt):
         global thatoneboolean
@@ -143,6 +170,46 @@ class MainApp(App):
         beta4a = str((values[11])[0])[:-5]
         aos = str((values[12])[0])[:1]
         
+        if psarj != self.oldpsarj:
+            psarj_dif = True
+            self.oldpsarj = psarj
+        if ssarj != self.oldssarj:
+            ssarj_dif = True
+            self.oldssarj = ssarj
+        if ptrrj != self.oldptrrj:
+            ptrrj_dif = True
+            self.oldptrrj = ptrrj
+        if strrj != self.oldstrrj:
+            strrj_dif = True
+            self.oldstrrj = strrj
+        if beta1b != self.oldbeta1b:
+            beta1b_dif = True
+            self.oldbeta1b = beta1b
+        if beta1a != self.oldbeta1a:
+            beta1a_dif = True
+            self.oldbeta1a = beta1a
+        if beta2b != self.oldbeta2b:
+            beta2b_dif = True
+            self.oldbeta2b = beta2b
+        if beta2a != self.oldbeta2a:
+            beta2a_dif = True
+            self.oldbeta2a = beta2a
+        if beta3b != self.oldbeta3b:
+            beta3b_dif = True
+            self.oldbeta3b = beta3b
+        if beta3a != self.oldbeta3a:
+            beta3a_dif = True
+            self.oldbeta3a = beta3a
+        if beta4b != self.oldbeta4b:
+            beta4b_dif = True
+            self.oldbeta4b = beta4b
+        if beta4a != self.oldbeta4a:
+            beta4a_dif = True
+            self.oldbeta4a = beta4a
+        if aos != self.oldaos:
+            aos_dif = True
+            self.oldaos = aos
+
         self.mimic_screen.ids.psarjvalue.text = psarj
         self.mimic_screen.ids.ssarjvalue.text = ssarj
         self.mimic_screen.ids.ptrrjvalue.text = ptrrj
@@ -165,21 +232,48 @@ class MainApp(App):
             self.mimic_screen.ids.aoslabel.color = 1,0,0
             self.mimic_screen.ids.aosvalue.color = 1,0,0
                     
-        if thatoneboolean == True:
+        if (thatoneboolean == True and aos == "1"):
             print "true"
-            self.i2cWrite("PSARJ " + psarj)
-            self.i2cWrite("SSARJ " + ssarj)
-            self.i2cWrite("PTRRJ " + ptrrj)
-            self.i2cWrite("STRRJ " + strrj)
-            self.i2cWrite("Beta1B " + beta1b)
-            self.i2cWrite("Beta1A " + beta1a)
-            self.i2cWrite("Beta2B " + beta2b)
-            self.i2cWrite("Beta2A " + beta2a)
-            self.i2cWrite("Beta3B " + beta3b)
-            self.i2cWrite("Beta3A " + beta3a)
-            self.i2cWrite("Beta4B " + beta4b)
-            self.i2cWrite("Beta4A " + beta4a)
-            self.i2cWrite("AOS " + aos)
+
+            if self.psarj_dif == True:
+                self.i2cWrite("PSARJ " + psarj)
+                self.psarj_dif = False
+            if self.ssarj_dif == True:
+                self.i2cWrite("SSARJ " + ssarj)
+                self.ssarj_dif = False
+            if self.ptrrj_dif == True:
+                self.i2cWrite("PTRRJ " + ptrrj)
+                self.ptrrj_dif = False
+            if self.strrj_dif == True:
+                self.i2cWrite("STRRJ " + strrj)
+                self.strrj_dif = False
+            if self.beta1b_dif == True:
+                self.i2cWrite("Beta1B " + beta1b)
+                self.beta1b_dif = False
+            if self.beta1a_dif == True:
+                self.i2cWrite("Beta1A " + beta1a)
+                self.beta1a_dif = False
+            if self.beta2b_dif == True:
+                self.i2cWrite("Beta2B " + beta2b)
+                self.beta2b_dif = False
+            if self.beta2a_dif == True:
+                self.i2cWrite("Beta2A " + beta2a)
+                self.beta2a_dif = False
+            if self.beta3b_dif == True:
+                self.i2cWrite("Beta3B " + beta3b)
+                self.beta3b_dif = False
+            if self.beta3a_dif == True:
+                self.i2cWrite("Beta3A " + beta3a)
+                self.beta3a_dif = False
+            if self.beta4b_dif == True:
+                self.i2cWrite("Beta4B " + beta4b)
+                self.beta4b_dif = False
+            if self.beta4a_dif == True:
+                self.i2cWrite("Beta4A " + beta4a)
+                self.beta4a_dif = False
+            if self.aos_dif == True:
+                self.i2cWrite("AOS " + aos)
+                self.aos_dif = False
         else:
             print "false"
 
