@@ -169,9 +169,10 @@ class MainApp(App):
         beta4b = str((values[10])[0])[:-5]
         beta4a = str((values[11])[0])[:-5]
         aos = str((values[12])[0])[:1]
-        
+    
         if psarj != self.oldpsarj:
             psarj_dif = True
+            print "change"
             self.oldpsarj = psarj
         if ssarj != self.oldssarj:
             ssarj_dif = True
@@ -233,47 +234,61 @@ class MainApp(App):
             self.mimic_screen.ids.aosvalue.color = 1,0,0
                     
         if (thatoneboolean == True and aos == "1"):
-            print "true"
+ 
+            self.i2cWrite("PSARJ " + psarj)
 
-            if self.psarj_dif == True:
-                self.i2cWrite("PSARJ " + psarj)
-                self.psarj_dif = False
-            if self.ssarj_dif == True:
-                self.i2cWrite("SSARJ " + ssarj)
-                self.ssarj_dif = False
-            if self.ptrrj_dif == True:
-                self.i2cWrite("PTRRJ " + ptrrj)
-                self.ptrrj_dif = False
-            if self.strrj_dif == True:
-                self.i2cWrite("STRRJ " + strrj)
-                self.strrj_dif = False
-            if self.beta1b_dif == True:
-                self.i2cWrite("Beta1B " + beta1b)
-                self.beta1b_dif = False
-            if self.beta1a_dif == True:
-                self.i2cWrite("Beta1A " + beta1a)
-                self.beta1a_dif = False
-            if self.beta2b_dif == True:
-                self.i2cWrite("Beta2B " + beta2b)
-                self.beta2b_dif = False
-            if self.beta2a_dif == True:
-                self.i2cWrite("Beta2A " + beta2a)
-                self.beta2a_dif = False
-            if self.beta3b_dif == True:
-                self.i2cWrite("Beta3B " + beta3b)
-                self.beta3b_dif = False
-            if self.beta3a_dif == True:
-                self.i2cWrite("Beta3A " + beta3a)
-                self.beta3a_dif = False
-            if self.beta4b_dif == True:
-                self.i2cWrite("Beta4B " + beta4b)
-                self.beta4b_dif = False
-            if self.beta4a_dif == True:
-                self.i2cWrite("Beta4A " + beta4a)
-                self.beta4a_dif = False
-            if self.aos_dif == True:
-                self.i2cWrite("AOS " + aos)
-                self.aos_dif = False
+     #       if self.psarj_dif == True: 
+     #           print "writei psarj"
+     #           self.i2cWrite("PSARJ " + psarj)
+     #           self.psarj_dif = False
+     #       if self.ssarj_dif == True:
+     #           print "write"
+     #           self.i2cWrite("SSARJ " + ssarj)
+     #           self.ssarj_dif = False
+     #       if self.ptrrj_dif == True:
+     #           print "write"
+     #           self.i2cWrite("PTRRJ " + ptrrj)
+     #           self.ptrrj_dif = False
+     #       if self.strrj_dif == True:
+     #           print "write"
+     #           self.i2cWrite("STRRJ " + strrj)
+     #           self.strrj_dif = False
+     #       if self.beta1b_dif == True:
+     #           print "write"
+     #           self.i2cWrite("Beta1B " + beta1b)
+     #           self.beta1b_dif = False
+     #       if self.beta1a_dif == True:
+     #           print "write"
+     #           self.i2cWrite("Beta1A " + beta1a)
+     #           self.beta1a_dif = False
+     #       if self.beta2b_dif == True:
+     #           print "write"
+     #           self.i2cWrite("Beta2B " + beta2b)
+     #           self.beta2b_dif = False
+     #       if self.beta2a_dif == True:
+     #           print "write"
+     #           self.i2cWrite("Beta2A " + beta2a)
+     #           self.beta2a_dif = False
+     #       if self.beta3b_dif == True:
+     #           print "write"
+     #           self.i2cWrite("Beta3B " + beta3b)
+     #           self.beta3b_dif = False
+     #       if self.beta3a_dif == True:
+     #           print "write"
+     #           self.i2cWrite("Beta3A " + beta3a)
+     #           self.beta3a_dif = False
+     #       if self.beta4b_dif == True:
+     #           print "write"
+     #           self.i2cWrite("Beta4B " + beta4b)
+     #           self.beta4b_dif = False
+     #       if self.beta4a_dif == True:
+     #           print "write"
+     #           self.i2cWrite("Beta4A " + beta4a)
+     #           self.beta4a_dif = False
+     #       if self.aos_dif == True:
+     #           print "write"
+     #           self.i2cWrite("AOS " + aos)
+     #           self.aos_dif = False
         else:
             print "false"
 
