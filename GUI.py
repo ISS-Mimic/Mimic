@@ -31,6 +31,7 @@ bus = smbus.SMBus(1)
 address = 0x04
 
 thatoneboolean = False
+fakeorbitboolean = False
 zerocomplete = False
 
 p = multiprocessing.Process(target = muterun_js,args=('iss_telemetry.js',)) #might delete this
@@ -38,6 +39,19 @@ p = multiprocessing.Process(target = muterun_js,args=('iss_telemetry.js',)) #mig
 conn = sqlite3.connect('iss_telemetry.db') #sqlite database call change to include directory
 c = conn.cursor() 
 val = ""
+    
+psarj2 = 1.0
+ssarj2 = 1.0
+ptrrj2 = 1.0
+strrj2 = 1.0
+beta1b2 = 1.0
+beta1a2 = 1.0
+beta2b2 = 1.0
+beta2a2 = 1.0
+beta3b2 = 1.0
+beta3a2 = 1.0
+beta4b2 = 1.0
+beta4a2 = 1.0
 
 def StringToBytes(val):
     retVal = []
@@ -71,6 +85,17 @@ class ManualControlScreen(Screen):
     def i2cWrite(self, *args):
         bus.write_i2c_block_data(address, 0, StringToBytes(*args))
    
+class FakeOrbitScreen(Screen):
+    def __init__(self, **kwargs):
+        super(FakeOrbitScreen, self).__init__(**kwargs)
+
+    def i2cWrite(self, *args):
+        bus.write_i2c_block_data(address, 0, StringToBytes(*args))
+    
+    def changeBoolean(self, *args):
+        global fakeorbitboolean
+        fakeorbitboolean = args[0]
+
 class MimicScreen(Screen, EventDispatcher):
     def __init__(self, **kwargs):
         super(MimicScreen, self).__init__(**kwargs)
@@ -151,10 +176,13 @@ class MainApp(App):
 
     def build(self):
         self.mimic_screen = MimicScreen(name = 'mimic')
+        self.fakeorbit_screen = FakeOrbitScreen(name = 'fakeorbit')
+
         root = ScreenManager(transition=WipeTransition())
         root.add_widget(MainScreen(name = 'main'))
         root.add_widget(CalibrateScreen(name = 'calibrate'))
         root.add_widget(self.mimic_screen)
+        root.add_widget(self.fakeorbit_screen)
         root.add_widget(ManualControlScreen(name = 'manualcontrol'))
         root.current= 'main'
     
@@ -166,6 +194,20 @@ class MainApp(App):
 
     def update_labels(self, dt):
         global thatoneboolean
+        global fakeorbitboolean        
+        global psarj2
+        global ssarj2
+        global ptrrj2
+        global strrj2
+        global beta1b2
+        global beta1a2
+        global beta2b2
+        global beta2a2
+        global beta3b2
+        global beta3a2
+        global beta4b2
+        global beta4a2
+       
         c.execute('select two from telemetry')
         values = c.fetchall()
 
@@ -182,7 +224,25 @@ class MainApp(App):
         beta4b = str((values[10])[0])[:-5]
         beta4a = str((values[11])[0])[:-5]
         aos = str((values[12])[0])[:1]
-    
+     
+        if fakeorbitboolean == True:
+            psarj2 += 1.0
+            if psarj2 == 360:
+                psarj2 = 0.0
+            self.i2cWrite(str(psarj2))
+            self.fakeorbit_screen.ids.fakepsarjvalue.text = str(psarj2)
+            ssarj2 += 1.0
+            ptrrj2 += 1.0
+            strrj2 += 1.0
+            beta1b2 += 1.0
+            beta1a2 += 1.0
+            beta2b2 += 1.0
+            beta2a2 += 1.0
+            beta3b2 += 1.0
+            beta3a2 += 1.0
+            beta4b2 += 1.0
+            beta4a2 += 1.0
+
         if psarj != self.oldpsarj:
             psarj_dif = True
             self.oldpsarj = psarj
@@ -322,6 +382,14 @@ Builder.load_string('''
             height: "20dp"
             color: 1,0,1
             width: "100dp"
+        Button:
+            size_hint: 0.3,0.1
+            pos_hint: {"center_x": 0.2, "center_y": 0.9}
+            text: 'Fake Orbit'
+            font_size: 30
+            width: 50
+            height: 20
+            on_release: root.manager.current = 'fakeorbit'
         BoxLayout:
             size_hint_y: None
             Button:
@@ -337,12 +405,6 @@ Builder.load_string('''
                 height: 20
                 on_release: root.manager.current = 'calibrate'
                 on_release: my_button.disabled = False
-            Button:
-                text: 'Exit'
-                font_size: 30
-                width: 50
-                height: 20
-                on_release: app.stop(*args)
             MyButton:
                 id: my_button
                 text: 'Mimic'
@@ -351,7 +413,71 @@ Builder.load_string('''
                 width: 50
                 height: 20
                 on_release: root.manager.current = 'mimic'
-
+            Button:
+                text: 'Exit'
+                font_size: 30
+                width: 50
+                height: 20
+                on_release: app.stop(*args)
+<FakeOrbitScreen>:
+    name: 'fakeorbit'
+    FloatLayout:
+        orientation: 'vertical'
+        Image:
+            source: 'iss2.png'
+            allow_stretch: True
+            keep_ratio: True
+        Label:
+            id: fakeorbitstatus
+            pos_hint: {"center_x": 0.25, "center_y": 0.85}
+            text: 'Status'
+            markup: True
+            color: 1,0,1
+            font_size: 60
+        Label:
+            id: fakepsarjlabel
+            pos_hint: {"center_x": 0.6, "center_y": 0.5}
+            text: 'PSARJ:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: fakepsarjvalue
+            pos_hint: {"center_x": 0.8, "center_y": 0.5}
+            text: '0.000'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Button:
+            id: orbitstartbutton
+            size_hint: 0.25,0.1
+            pos_hint: {"x": 0.07, "y": 0.6}
+            text: 'Start'
+            disabled: False
+            font_size: 30
+            on_release: fakeorbitstatus.text = 'Sending...'
+            on_release: root.changeBoolean(True)
+            on_release: orbitstopbutton.disabled = False
+            on_release: orbitstartbutton.disabled = True
+        Button:
+            id: orbitstopbutton
+            size_hint: 0.25,0.1
+            pos_hint: {"x": 0.07, "y": 0.4}
+            text: 'Stop'
+            disabled: True
+            font_size: 30
+            on_release: fakeorbitstatus.text = 'I2C Stopped'
+            on_release: root.changeBoolean(False)
+            on_release: orbitstopbutton.disabled = True
+            on_release: orbitstartbutton.disabled = False
+        Button:
+            size_hint: 0.3,0.1
+            pos_hint: {"Left": 1, "Bottom": 1}
+            text: 'Return'
+            font_size: 30
+            on_release: root.changeBoolean(False)
+            on_release: root.manager.current = 'main'
+           
 <ManualControlScreen>:
     name: 'manualcontrol'
     FloatLayout:
@@ -388,6 +514,8 @@ Builder.load_string('''
             size_hint: None,None
             text: '3B'
             pos_hint: {'x': 0.035, 'y': 0.25}
+            markup: True
+            color: 0,0,0,1
             font_size: 30
             halign: 'center'
         TriangleButton:
@@ -410,6 +538,8 @@ Builder.load_string('''
             size_hint: None,None
             text: '3A'
             pos_hint: {'x': .155, 'y': .73}
+            markup: True
+            color: 0,0,0,1
             font_size: 30
             halign: 'center'
         TriangleButton:
@@ -432,6 +562,8 @@ Builder.load_string('''
             size_hint: None,None
             text: '1A'
             pos_hint: {'x': .155, 'y': .25}
+            markup: True
+            color: 0,0,0,1
             font_size: 30
             halign: 'center'
         TriangleButton:
@@ -454,6 +586,8 @@ Builder.load_string('''
             size_hint: None,None
             text: 'SSARJ'
             pos_hint: {'x': .275, 'y': .5}
+            markup: True
+            color: 0,0,0,1
             font_size: 30
             halign: 'center'
         TriangleButton:
@@ -476,6 +610,8 @@ Builder.load_string('''
             size_hint: None,None
             text: 'STTRJ'
             pos_hint: {'x': .445, 'y': .55}
+            markup: True
+            color: 0,0,0,1
             font_size: 30
             halign: 'center'
             valign: 'middle'
@@ -499,6 +635,8 @@ Builder.load_string('''
             size_hint: None,None
             text: 'PTTRJ'
             pos_hint: {'x': .445, 'y': .45}
+            markup: True
+            color: 0,0,0,1
             font_size: 30
             halign: 'center'
         TriangleButton:
@@ -521,6 +659,8 @@ Builder.load_string('''
             size_hint: None,None
             text: 'PSARJ'
             pos_hint: {'x': .6, 'y': .5}
+            markup: True
+            color: 0,0,0,1
             font_size: 30
             halign: 'center'
         TriangleButton:
@@ -543,6 +683,8 @@ Builder.load_string('''
             size_hint: None,None
             text: '2A'
             pos_hint: {'x': .725, 'y': .73}
+            markup: True
+            color: 0,0,0,1
             font_size: 30
             halign: 'center'
         TriangleButton:
@@ -565,6 +707,8 @@ Builder.load_string('''
             size_hint: None,None
             text: '4A'
             pos_hint: {'x': .725, 'y': .25}
+            markup: True
+            color: 0,0,0,1
             font_size: 30
             halign: 'center'
         TriangleButton:
@@ -587,6 +731,8 @@ Builder.load_string('''
             size_hint: None,None
             text: '4B'
             pos_hint: {'x': .84, 'y': .73}
+            markup: True
+            color: 0,0,0,1
             font_size: 30
             halign: 'center'
         TriangleButton:
@@ -609,6 +755,8 @@ Builder.load_string('''
             size_hint: None,None
             text: '2B'
             pos_hint: {'x': .84, 'y': .25}
+            markup: True
+            color: 0,0,0,1
             font_size: 30
             halign: 'center'
         TriangleButton:
@@ -867,7 +1015,7 @@ Builder.load_string('''
             text: 'MIMIC'
             disabled: False
             font_size: 30
-            on_release: telemetrystatus.text = 'Sending Telemetry...'
+            on_release: telemetrystatus.text = 'Sending...'
             on_release: root.changeBoolean(True)
             on_release: mimicstopbutton.disabled = False
             on_release: mimicstartbutton.disabled = True
