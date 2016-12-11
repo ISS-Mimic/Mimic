@@ -307,9 +307,23 @@ class MainApp(App):
                     
         if (thatoneboolean == True and aos == "1"):
  
-            self.i2cWrite("PSARJ " + psarj)
+        #    self.i2cWrite(psarj)
 
-     #       if self.psarj_dif == True: 
+             self.i2cWrite("PSARJ " + psarj)
+             self.i2cWrite("PSARJ " + ssarj)
+             self.i2cWrite("PSARJ " + ptrrj)
+             self.i2cWrite("PSARJ " + strrj)
+             self.i2cWrite("PSARJ " + beta1b)
+             self.i2cWrite("PSARJ " + beta1a)
+             self.i2cWrite("PSARJ " + beta2b)
+             self.i2cWrite("PSARJ " + beta2a)
+             self.i2cWrite("PSARJ " + beta3b)
+             self.i2cWrite("PSARJ " + beta3a)
+             self.i2cWrite("PSARJ " + beta4b)
+             self.i2cWrite("PSARJ " + beta4a)
+             self.i2cWrite("PSARJ " + aos)
+ 
+    #       if self.psarj_dif == True: 
      #           print "writei psarj"
      #           self.i2cWrite("PSARJ " + psarj)
      #           self.psarj_dif = False
