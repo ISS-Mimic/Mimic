@@ -1,2 +1,7 @@
 From Clean Raspbian Install:
   1.) Expand Filesize / Update / Upgrade / Reboot
+  2.) Install Vim
+  3.) Enable I2C
+  4.) Install Node JS
+  5.) NPM install lighstreamer-client and dependencies 
+  6.) Install python smbus
