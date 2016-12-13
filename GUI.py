@@ -385,7 +385,7 @@ Builder.load_string('''
     FloatLayout:
         orientation: 'vertical'
         Image:
-            source: 'iss.png'
+            source: './imgs/iss.png'
             allow_stretch: True
             keep_ratio: True
         Label:
@@ -438,7 +438,7 @@ Builder.load_string('''
     FloatLayout:
         orientation: 'vertical'
         Image:
-            source: 'iss2.png'
+            source: './imgs/iss2.png'
             allow_stretch: True
             keep_ratio: True
         Label:
@@ -496,7 +496,7 @@ Builder.load_string('''
     name: 'manualcontrol'
     FloatLayout:
         Image:
-            source: 'iss_calibrate.png'
+            source: './imgs/iss_calibrate.png'
             allow_stretch: True
             keep_ratio: False
         Label:
@@ -801,7 +801,7 @@ Builder.load_string('''
     FloatLayout:
         orientation: 'vertical'
         Image:
-            source: 'iss_calibrate.png'
+            source: './imgs/iss_calibrate.png'
             allow_stretch: True
             keep_ratio: False
         Label:
@@ -830,7 +830,7 @@ Builder.load_string('''
         psarjvalue: psarjvalue
         id: mimicscreenlayout
         Image:
-            source: 'iss2.png'
+            source: './imgs/iss2.png'
             allow_stretch: True
             keep_ratio: False
         Label:
