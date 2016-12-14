@@ -1,5 +1,6 @@
 import kivy
 import sqlite3
+import serial
 import sched, time
 import smbus
 import time
@@ -27,6 +28,7 @@ from kivy.uix.stacklayout import StackLayout
 from kivy.core.image import Image
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, WipeTransition, SwapTransition
 
+ser = serial.Serial('/dev/ttyUSB0', 115200)
 bus = smbus.SMBus(1)
 address = 0x04
 
@@ -68,11 +70,13 @@ class CalibrateScreen(Screen):
         super(CalibrateScreen, self).__init__(**kwargs)
    
     def i2cWrite(self, *args):
-        bus.write_i2c_block_data(address, 0, StringToBytes(*args))
-    
+        #bus.write_i2c_block_data(address, 0, StringToBytes(*args))
+        ser.write(*args)
+
     def zeroJoints(self):
-        self.i2cWrite("ZERO")
+        #self.i2cWrite("ZERO")
         self.changeBoolean(True)
+        ser.write('Zero')
 
     def changeBoolean(self, *args):
         global zerocomplete
@@ -83,14 +87,16 @@ class ManualControlScreen(Screen):
         super(ManualControlScreen, self).__init__(**kwargs)
 
     def i2cWrite(self, *args):
-        bus.write_i2c_block_data(address, 0, StringToBytes(*args))
+        #bus.write_i2c_block_data(address, 0, StringToBytes(*args))
+        ser.write(*args)
    
 class FakeOrbitScreen(Screen):
     def __init__(self, **kwargs):
         super(FakeOrbitScreen, self).__init__(**kwargs)
 
     def i2cWrite(self, *args):
-        bus.write_i2c_block_data(address, 0, StringToBytes(*args))
+        #bus.write_i2c_block_data(address, 0, StringToBytes(*args))
+        ser.write(*args)
     
     def changeBoolean(self, *args):
         global fakeorbitboolean
@@ -190,7 +196,8 @@ class MainApp(App):
         return root
 
     def i2cWrite(self, *args):
-        bus.write_i2c_block_data(address, 0, StringToBytes(*args))
+        #bus.write_i2c_block_data(address, 0, StringToBytes(*args))
+        ser.write(*args)
 
     def update_labels(self, dt):
         global thatoneboolean
