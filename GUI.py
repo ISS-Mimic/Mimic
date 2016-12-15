@@ -35,8 +35,8 @@ address = 0x04
 thatoneboolean = False
 fakeorbitboolean = False
 zerocomplete = False
-
-p = multiprocessing.Process(target = muterun_js,args=('iss_telemetry.js',)) #might delete this
+livedata = False
+thatotherboolean = False
 
 conn = sqlite3.connect('iss_telemetry.db') #sqlite database call change to include directory
 c = conn.cursor() 
@@ -69,12 +69,12 @@ class CalibrateScreen(Screen):
     def __init__(self, **kwargs):
         super(CalibrateScreen, self).__init__(**kwargs)
    
-    def i2cWrite(self, *args):
+    def serialWrite(self, *args):
         #bus.write_i2c_block_data(address, 0, StringToBytes(*args))
         ser.write(*args)
 
     def zeroJoints(self):
-        #self.i2cWrite("ZERO")
+        #self.serialWrite("ZERO")
         self.changeBoolean(True)
         ser.write('Zero')
 
@@ -86,7 +86,7 @@ class ManualControlScreen(Screen):
     def __init__(self, **kwargs):
         super(ManualControlScreen, self).__init__(**kwargs)
 
-    def i2cWrite(self, *args):
+    def serialWrite(self, *args):
         #bus.write_i2c_block_data(address, 0, StringToBytes(*args))
         ser.write(*args)
    
@@ -94,12 +94,14 @@ class FakeOrbitScreen(Screen):
     def __init__(self, **kwargs):
         super(FakeOrbitScreen, self).__init__(**kwargs)
 
-    def i2cWrite(self, *args):
+    def serialWrite(self, *args):
         #bus.write_i2c_block_data(address, 0, StringToBytes(*args))
         ser.write(*args)
     
     def changeBoolean(self, *args):
         global fakeorbitboolean
+        global thatotherboolean
+        thatotherboolean = args[0]
         fakeorbitboolean = args[0]
 
 class MimicScreen(Screen, EventDispatcher):
@@ -153,33 +155,6 @@ class TriangleButton(ButtonBehavior, Widget):
 
 class MainApp(App):
 
-    oldpsarj = "0.003"
-    oldssarj = "0.003"
-    oldptrrj = "0.003"
-    oldstrrj = "0.003"
-    oldbeta1b = "0.003"
-    oldbeta1a = "0.003"
-    oldbeta2b = "0.003"
-    oldbeta2a = "0.003"
-    oldbeta3b = "0.003"
-    oldbeta3a = "0.003"
-    oldbeta4b = "0.003"
-    oldbeta4a = "0.003"
-    oldaos = "0"
-    psarj_dif = False
-    ssarj_dif = False
-    ptrrj_dif = False
-    strrj_dif = False
-    beta1b_dif = False    
-    beta1a_dif = False    
-    beta2b_dif = False    
-    beta2a_dif = False    
-    beta3b_dif = False    
-    beta3a_dif = False    
-    beta4b_dif = False    
-    beta4a_dif = False    
-    aos_dif = False    
-
     def build(self):
         self.mimic_screen = MimicScreen(name = 'mimic')
         self.fakeorbit_screen = FakeOrbitScreen(name = 'fakeorbit')
@@ -195,13 +170,15 @@ class MainApp(App):
         Clock.schedule_interval(self.update_labels, 1)
         return root
 
-    def i2cWrite(self, *args):
+    def serialWrite(self, *args):
         #bus.write_i2c_block_data(address, 0, StringToBytes(*args))
         ser.write(*args)
 
     def update_labels(self, dt):
         global thatoneboolean
-        global fakeorbitboolean        
+        global thatotherboolean
+        global fakeorbitboolean
+        global livedata  
         global psarj2
         global ssarj2
         global ptrrj2
@@ -219,7 +196,11 @@ class MainApp(App):
         values = c.fetchall()
 
         psarj = str((values[0])[0])[:-5]
+        if thatotherboolean == False:
+            psarj2 = float(psarj)
         ssarj = str((values[1])[0])[:-5]
+        if thatotherboolean == False:
+            ssarj2 = float(ssarj)
         ptrrj = str((values[2])[0])[:-5]
         strrj = str((values[3])[0])[:-5]
         beta1b = str((values[4])[0])[:-5]
@@ -232,63 +213,30 @@ class MainApp(App):
         beta4a = str((values[11])[0])[:-5]
         aos = str((values[12])[0])[:1]
      
-        if fakeorbitboolean == True:
-            psarj2 += 1.0
-            if psarj2 == 360:
-                psarj2 = 0.0
-            self.i2cWrite(str(psarj2))
+        if (fakeorbitboolean == True and (thatoneboolean == True or thatotherboolean == True)):
+            if psarj2 <= 0.00:
+                psarj2 = 360.0
+            self.serialWrite("PSARJ=" + str(psarj2) + " ")
             self.fakeorbit_screen.ids.fakepsarjvalue.text = str(psarj2)
-            ssarj2 += 1.0
-            ptrrj2 += 1.0
-            strrj2 += 1.0
-            beta1b2 += 1.0
-            beta1a2 += 1.0
-            beta2b2 += 1.0
-            beta2a2 += 1.0
-            beta3b2 += 1.0
-            beta3a2 += 1.0
-            beta4b2 += 1.0
-            beta4a2 += 1.0
-
-        if psarj != self.oldpsarj:
-            psarj_dif = True
-            self.oldpsarj = psarj
-        if ssarj != self.oldssarj:
-            ssarj_dif = True
-            self.oldssarj = ssarj
-        if ptrrj != self.oldptrrj:
-            ptrrj_dif = True
-            self.oldptrrj = ptrrj
-        if strrj != self.oldstrrj:
-            strrj_dif = True
-            self.oldstrrj = strrj
-        if beta1b != self.oldbeta1b:
-            beta1b_dif = True
-            self.oldbeta1b = beta1b
-        if beta1a != self.oldbeta1a:
-            beta1a_dif = True
-            self.oldbeta1a = beta1a
-        if beta2b != self.oldbeta2b:
-            beta2b_dif = True
-            self.oldbeta2b = beta2b
-        if beta2a != self.oldbeta2a:
-            beta2a_dif = True
-            self.oldbeta2a = beta2a
-        if beta3b != self.oldbeta3b:
-            beta3b_dif = True
-            self.oldbeta3b = beta3b
-        if beta3a != self.oldbeta3a:
-            beta3a_dif = True
-            self.oldbeta3a = beta3a
-        if beta4b != self.oldbeta4b:
-            beta4b_dif = True
-            self.oldbeta4b = beta4b
-        if beta4a != self.oldbeta4a:
-            beta4a_dif = True
-            self.oldbeta4a = beta4a
-        if aos != self.oldaos:
-            aos_dif = True
-            self.oldaos = aos
+            if ssarj2 >= 360.00:                
+                ssarj2 = 0.0
+            self.serialWrite("SSARJ=" + str(ssarj2) + " ")
+            self.fakeorbit_screen.ids.fakepsarjvalue.text = str(ssarj2)
+            psarj2 -= 0.0666
+            ssarj2 += 0.0666
+            ptrrj2 = -40.00
+            self.serialWrite("PTRRJ=" + str(ptrrj2) + " ")
+            strrj2 = 25.00
+            self.serialWrite("STRRJ=" + str(strrj2) + " ")
+            self.serialWrite("Beta1B=" + str(beta1b) + " ")
+            self.serialWrite("Beta1A=" + str(beta1a) + " ")
+            self.serialWrite("Beta2B=" + str(beta2b) + " ")
+            self.serialWrite("Beta2A=" + str(beta2a) + " ")
+            self.serialWrite("Beta3B=" + str(beta3b) + " ")
+            self.serialWrite("Beta3A=" + str(beta3a) + " ")
+            self.serialWrite("Beta4B=" + str(beta4b) + " ")
+            self.serialWrite("Beta4A=" + str(beta4a) + " ")
+            self.serialWrite("AOS=" + str(aos) + " ")
 
         self.mimic_screen.ids.psarjvalue.text = psarj
         self.mimic_screen.ids.ssarjvalue.text = ssarj
@@ -304,85 +252,38 @@ class MainApp(App):
         self.mimic_screen.ids.beta4avalue.text = beta4a
 
         if aos == "1":
+            livedata = True
+            if self.root.current == 'mimic':
+               fakeorbitboolean = False
+            if thatoneboolean == True:
+                thatotherboolean = False
             self.mimic_screen.ids.aoslabel.color = 0,1,0
             self.mimic_screen.ids.aosvalue.color = 0,1,0
             self.mimic_screen.ids.aosvalue.text = "Signal Acquired!"
         else:
+            livedata = False
+            if self.root.current == 'mimic':
+               fakeorbitboolean = True
             self.mimic_screen.ids.aosvalue.text = "Signal Lost"
             self.mimic_screen.ids.aoslabel.color = 1,0,0
             self.mimic_screen.ids.aosvalue.color = 1,0,0
-                    
+ 
         if (thatoneboolean == True and aos == "1"):
  
-        #    self.i2cWrite(psarj)
-
-             self.i2cWrite("PSARJ " + psarj)
-             self.i2cWrite("PSARJ " + ssarj)
-             self.i2cWrite("PSARJ " + ptrrj)
-             self.i2cWrite("PSARJ " + strrj)
-             self.i2cWrite("PSARJ " + beta1b)
-             self.i2cWrite("PSARJ " + beta1a)
-             self.i2cWrite("PSARJ " + beta2b)
-             self.i2cWrite("PSARJ " + beta2a)
-             self.i2cWrite("PSARJ " + beta3b)
-             self.i2cWrite("PSARJ " + beta3a)
-             self.i2cWrite("PSARJ " + beta4b)
-             self.i2cWrite("PSARJ " + beta4a)
-             self.i2cWrite("PSARJ " + aos)
+             self.serialWrite("PSARJ=" + psarj + " ")
+             self.serialWrite("SSARJ=" + ssarj + " ")
+             self.serialWrite("PTRRJ=" + ptrrj + " ")
+             self.serialWrite("STRRJ=" + strrj + " ")
+             self.serialWrite("Beta1B=" + beta1b + " ")
+             self.serialWrite("Beta1A=" + beta1a + " ")
+             self.serialWrite("Beta2B=" + beta2b + " ")
+             self.serialWrite("Beta2A=" + beta2a + " ")
+             self.serialWrite("Beta3B=" + beta3b + " ")
+             self.serialWrite("Beta3A=" + beta3a + " ")
+             self.serialWrite("Beta4B=" + beta4b + " ")
+             self.serialWrite("Beta4A=" + beta4a + " ")
+             self.serialWrite("AOS=" + aos + " ")
  
-    #       if self.psarj_dif == True: 
-     #           print "writei psarj"
-     #           self.i2cWrite("PSARJ " + psarj)
-     #           self.psarj_dif = False
-     #       if self.ssarj_dif == True:
-     #           print "write"
-     #           self.i2cWrite("SSARJ " + ssarj)
-     #           self.ssarj_dif = False
-     #       if self.ptrrj_dif == True:
-     #           print "write"
-     #           self.i2cWrite("PTRRJ " + ptrrj)
-     #           self.ptrrj_dif = False
-     #       if self.strrj_dif == True:
-     #           print "write"
-     #           self.i2cWrite("STRRJ " + strrj)
-     #           self.strrj_dif = False
-     #       if self.beta1b_dif == True:
-     #           print "write"
-     #           self.i2cWrite("Beta1B " + beta1b)
-     #           self.beta1b_dif = False
-     #       if self.beta1a_dif == True:
-     #           print "write"
-     #           self.i2cWrite("Beta1A " + beta1a)
-     #           self.beta1a_dif = False
-     #       if self.beta2b_dif == True:
-     #           print "write"
-     #           self.i2cWrite("Beta2B " + beta2b)
-     #           self.beta2b_dif = False
-     #       if self.beta2a_dif == True:
-     #           print "write"
-     #           self.i2cWrite("Beta2A " + beta2a)
-     #           self.beta2a_dif = False
-     #       if self.beta3b_dif == True:
-     #           print "write"
-     #           self.i2cWrite("Beta3B " + beta3b)
-     #           self.beta3b_dif = False
-     #       if self.beta3a_dif == True:
-     #           print "write"
-     #           self.i2cWrite("Beta3A " + beta3a)
-     #           self.beta3a_dif = False
-     #       if self.beta4b_dif == True:
-     #           print "write"
-     #           self.i2cWrite("Beta4B " + beta4b)
-     #           self.beta4b_dif = False
-     #       if self.beta4a_dif == True:
-     #           print "write"
-     #           self.i2cWrite("Beta4A " + beta4a)
-     #           self.beta4a_dif = False
-     #       if self.aos_dif == True:
-     #           print "write"
-     #           self.i2cWrite("AOS " + aos)
-     #           self.aos_dif = False
-
 Builder.load_string('''
 #:kivy 1.8
 #:import kivy kivy
@@ -521,7 +422,7 @@ Builder.load_string('''
             p2: root.width*0.095, root.height*0.96
             p3: root.width*0.130, root.height*0.86
             on_press: self.changecolordown()
-            on_release: root.i2cWrite("1B MC 1.00")
+            on_release: root.serialWrite("1B MC 1.00")
             on_release: self.changecolorup()
         TriangleButton:
             id: t1Bdown
@@ -529,7 +430,7 @@ Builder.load_string('''
             p2: root.width*0.095, root.height*0.7
             p3: root.width*0.130, root.height*0.8
             on_press: self.changecolordown()
-            on_release: root.i2cWrite("1B MC -1.00")
+            on_release: root.serialWrite("1B MC -1.00")
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -545,7 +446,7 @@ Builder.load_string('''
             p2: root.width*0.095, root.height*0.48
             p3: root.width*0.130, root.height*0.38
             on_press: self.changecolordown()
-            on_release: root.i2cWrite("3B MC 1.00")
+            on_release: root.serialWrite("3B MC 1.00")
             on_release: self.changecolorup()
         TriangleButton:
             id: t3Bdown
@@ -553,7 +454,7 @@ Builder.load_string('''
             p2: root.width*0.095, root.height*0.22
             p3: root.width*0.130, root.height*0.32
             on_press: self.changecolordown()
-            on_release: root.i2cWrite("3B MC -1.00")
+            on_release: root.serialWrite("3B MC -1.00")
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -569,7 +470,7 @@ Builder.load_string('''
             p2: root.width*0.215, root.height*0.96
             p3: root.width*0.250, root.height*0.86
             on_press: self.changecolordown()
-            on_release: root.i2cWrite("3A MC 1.00")
+            on_release: root.serialWrite("3A MC 1.00")
             on_release: self.changecolorup()
         TriangleButton:
             id: t3Adown
@@ -577,7 +478,7 @@ Builder.load_string('''
             p2: root.width*0.215, root.height*0.7
             p3: root.width*0.250, root.height*0.8
             on_press: self.changecolordown()
-            on_release: root.i2cWrite("3A MC -1.00")
+            on_release: root.serialWrite("3A MC -1.00")
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -593,7 +494,7 @@ Builder.load_string('''
             p2: root.width*0.215, root.height*0.48
             p3: root.width*0.250, root.height*0.38
             on_press: self.changecolordown()
-            on_release: root.i2cWrite("1A MC 1.00")
+            on_release: root.serialWrite("1A MC 1.00")
             on_release: self.changecolorup()
         TriangleButton:
             id: t1Adown
@@ -601,7 +502,7 @@ Builder.load_string('''
             p2: root.width*0.215, root.height*0.22
             p3: root.width*0.250, root.height*0.32
             on_press: self.changecolordown()
-            on_release: root.i2cWrite("1A MC -1.00")
+            on_release: root.serialWrite("1A MC -1.00")
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -617,7 +518,7 @@ Builder.load_string('''
             p2: root.width*0.335, root.height*0.75
             p3: root.width*0.370, root.height*0.65
             on_press: self.changecolordown()
-            on_release: root.i2cWrite("SSARJ MC 1.00")
+            on_release: root.serialWrite("SSARJ MC 1.00")
             on_release: self.changecolorup()
         TriangleButton:
             id: SSARJdown
@@ -625,7 +526,7 @@ Builder.load_string('''
             p2: root.width*0.335, root.height*0.45
             p3: root.width*0.370, root.height*0.55
             on_press: self.changecolordown()
-            on_release: root.i2cWrite("SSARJ MC -1.00")
+            on_release: root.serialWrite("SSARJ MC -1.00")
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -642,7 +543,7 @@ Builder.load_string('''
             p2: root.width*0.420, root.height*0.750
             p3: root.width*0.480, root.height*0.700
             on_press: self.changecolordown()
-            on_release: root.i2cWrite("STRRJ MC 1.00")
+            on_release: root.serialWrite("STRRJ MC 1.00")
             on_release: self.changecolorup()
         TriangleButton:
             id: STTRJdown
@@ -650,7 +551,7 @@ Builder.load_string('''
             p2: root.width*0.580, root.height*0.750
             p3: root.width*0.520, root.height*0.700
             on_press: self.changecolordown()
-            on_release: root.i2cWrite("STRRJ MC -1.00")
+            on_release: root.serialWrite("STRRJ MC -1.00")
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -666,7 +567,7 @@ Builder.load_string('''
             p2: root.width*0.420, root.height*0.450
             p3: root.width*0.480, root.height*0.500
             on_press: self.changecolordown()
-            on_release: root.i2cWrite("PTRRJ MC 1.00")
+            on_release: root.serialWrite("PTRRJ MC 1.00")
             on_release: self.changecolorup()
         TriangleButton:
             id: PTTRJdown
@@ -674,7 +575,7 @@ Builder.load_string('''
             p2: root.width*0.580, root.height*0.450
             p3: root.width*0.520, root.height*0.500
             on_press: self.changecolordown()
-            on_release: root.i2cWrite("PTRRJ MC -1.00")
+            on_release: root.serialWrite("PTRRJ MC -1.00")
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -690,7 +591,7 @@ Builder.load_string('''
             p2: root.width*0.665, root.height*0.75
             p3: root.width*0.630, root.height*0.65
             on_press: self.changecolordown()
-            on_release: root.i2cWrite("PSARJ MC 1.00")
+            on_release: root.serialWrite("PSARJ MC 1.00")
             on_release: self.changecolorup()
         TriangleButton:
             id: PSARJdown
@@ -698,7 +599,7 @@ Builder.load_string('''
             p2: root.width*0.665, root.height*0.45
             p3: root.width*0.630, root.height*0.55
             on_press: self.changecolordown()
-            on_release: root.i2cWrite("PSARJ MC -1.00")
+            on_release: root.serialWrite("PSARJ MC -1.00")
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -714,7 +615,7 @@ Builder.load_string('''
             p2: root.width*0.785, root.height*0.96
             p3: root.width*0.750, root.height*0.86
             on_press: self.changecolordown()
-            on_release: root.i2cWrite("2A MC 1.00")
+            on_release: root.serialWrite("2A MC 1.00")
             on_release: self.changecolorup()
         TriangleButton:
             id: t2Adown
@@ -722,7 +623,7 @@ Builder.load_string('''
             p2: root.width*0.785, root.height*0.7
             p3: root.width*0.750, root.height*0.8
             on_press: self.changecolordown()
-            on_release: root.i2cWrite("2A MC -1.00")
+            on_release: root.serialWrite("2A MC -1.00")
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -738,7 +639,7 @@ Builder.load_string('''
             p2: root.width*0.785, root.height*0.48
             p3: root.width*0.750, root.height*0.38
             on_press: self.changecolordown()
-            on_release: root.i2cWrite("4A MC 1.00")
+            on_release: root.serialWrite("4A MC 1.00")
             on_release: self.changecolorup()
         TriangleButton:
             id: t4Adown
@@ -746,7 +647,7 @@ Builder.load_string('''
             p2: root.width*0.785, root.height*0.22
             p3: root.width*0.750, root.height*0.32
             on_press: self.changecolordown()
-            on_release: root.i2cWrite("4A MC -1.00")
+            on_release: root.serialWrite("4A MC -1.00")
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -762,7 +663,7 @@ Builder.load_string('''
             p2: root.width*0.905, root.height*0.96
             p3: root.width*0.870, root.height*0.86
             on_press: self.changecolordown()
-            on_release: root.i2cWrite("4B MC 1.00")
+            on_release: root.serialWrite("4B MC 1.00")
             on_release: self.changecolorup()
         TriangleButton:
             id: t4Bdown
@@ -770,7 +671,7 @@ Builder.load_string('''
             p2: root.width*0.905, root.height*0.7
             p3: root.width*0.870, root.height*0.8
             on_press: self.changecolordown()
-            on_release: root.i2cWrite("4B MC -1.00")
+            on_release: root.serialWrite("4B MC -1.00")
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -786,7 +687,7 @@ Builder.load_string('''
             p2: root.width*0.905, root.height*0.48
             p3: root.width*0.870, root.height*0.38
             on_press: self.changecolordown()
-            on_release: root.i2cWrite("2B MC 1.00")
+            on_release: root.serialWrite("2B MC 1.00")
             on_release: self.changecolorup()
         TriangleButton:
             id: t2Bdown
@@ -794,7 +695,7 @@ Builder.load_string('''
             p2: root.width*0.905, root.height*0.22
             p3: root.width*0.870, root.height*0.32
             on_press: self.changecolordown()
-            on_release: root.i2cWrite("2B MC -1.00")
+            on_release: root.serialWrite("2B MC -1.00")
             on_release: self.changecolorup()
         Button:
             size_hint: 0.3,0.1
