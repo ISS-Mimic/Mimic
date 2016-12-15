@@ -28,6 +28,8 @@ from kivy.uix.stacklayout import StackLayout
 from kivy.core.image import Image
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, WipeTransition, SwapTransition
 
+fileplog = open('psarjlog.txt','w')
+
 ser = serial.Serial('/dev/ttyUSB0', 115200)
 bus = smbus.SMBus(1)
 address = 0x04
@@ -195,48 +197,58 @@ class MainApp(App):
         c.execute('select two from telemetry')
         values = c.fetchall()
 
-        psarj = str((values[0])[0])[:-5]
+        #psarj = "{:.2f}".format((values[0])[0])[:-5]
+        psarj = "{:.2f}".format((values[0])[0])
+        fileplog.write(psarj)
+        fileplog.write('\n')
         if thatotherboolean == False:
             psarj2 = float(psarj)
-        ssarj = str((values[1])[0])[:-5]
+        ssarj = "{:.2f}".format((values[1])[0])
         if thatotherboolean == False:
             ssarj2 = float(ssarj)
-        ptrrj = str((values[2])[0])[:-5]
-        strrj = str((values[3])[0])[:-5]
-        beta1b = str((values[4])[0])[:-5]
-        beta1a = str((values[5])[0])[:-5]
-        beta2b = str((values[6])[0])[:-5]
-        beta2a = str((values[7])[0])[:-5]
-        beta3b = str((values[8])[0])[:-5]
-        beta3a = str((values[9])[0])[:-5]
-        beta4b = str((values[10])[0])[:-5]
-        beta4a = str((values[11])[0])[:-5]
-        aos = str((values[12])[0])[:1]
-     
+        ptrrj = "{:.2f}".format((values[2])[0])
+        strrj = "{:.2f}".format((values[3])[0])
+        beta1b = "{:.2f}".format((values[4])[0])
+        beta1a = "{:.2f}".format((values[5])[0])
+        beta2b = "{:.2f}".format((values[6])[0])
+        beta2a = "{:.2f}".format((values[7])[0])
+        beta3b = "{:.2f}".format((values[8])[0])
+        beta3a = "{:.2f}".format((values[9])[0])
+        beta4b = "{:.2f}".format((values[10])[0])
+        beta4a = "{:.2f}".format((values[11])[0])
+        aos = "{:d}".format(int((values[12])[0]))
+       
         if (fakeorbitboolean == True and (thatoneboolean == True or thatotherboolean == True)):
             if psarj2 <= 0.00:
                 psarj2 = 360.0
-            self.serialWrite("PSARJ=" + str(psarj2) + " ")
-            self.fakeorbit_screen.ids.fakepsarjvalue.text = str(psarj2)
+            self.fakeorbit_screen.ids.fakepsarjvalue.text = "{:.2f}".format(psarj2)
             if ssarj2 >= 360.00:                
                 ssarj2 = 0.0
-            self.serialWrite("SSARJ=" + str(ssarj2) + " ")
-            self.fakeorbit_screen.ids.fakepsarjvalue.text = str(ssarj2)
+            self.fakeorbit_screen.ids.fakepsarjvalue.text = "{:.2f}".format(ssarj2)
+            
             psarj2 -= 0.0666
             ssarj2 += 0.0666
             ptrrj2 = -40.00
-            self.serialWrite("PTRRJ=" + str(ptrrj2) + " ")
             strrj2 = 25.00
-            self.serialWrite("STRRJ=" + str(strrj2) + " ")
-            self.serialWrite("Beta1B=" + str(beta1b) + " ")
-            self.serialWrite("Beta1A=" + str(beta1a) + " ")
-            self.serialWrite("Beta2B=" + str(beta2b) + " ")
-            self.serialWrite("Beta2A=" + str(beta2a) + " ")
-            self.serialWrite("Beta3B=" + str(beta3b) + " ")
-            self.serialWrite("Beta3A=" + str(beta3a) + " ")
-            self.serialWrite("Beta4B=" + str(beta4b) + " ")
-            self.serialWrite("Beta4A=" + str(beta4a) + " ")
-            self.serialWrite("AOS=" + str(aos) + " ")
+
+            psarjstr = "{:.2f}".format(psarj2)
+            ssarjstr = "{:.2f}".format(ssarj2)
+            ptrrjstr = "{:.2f}".format(ptrrj2)
+            strrjstr = "{:.2f}".format(strrj2)
+            
+            self.serialWrite("PSARJ=" + psarjstr + " ")
+            self.serialWrite("SSARJ=" + ssarjstr + " ")
+            self.serialWrite("PTRRJ=" + ptrrjstr + " ")
+            self.serialWrite("STRRJ=" + strrjstr + " ")
+            self.serialWrite("Beta1B=" + beta1b + " ")
+            self.serialWrite("Beta1A=" + beta1a + " ")
+            self.serialWrite("Beta2B=" + beta2b + " ")
+            self.serialWrite("Beta2A=" + beta2a + " ")
+            self.serialWrite("Beta3B=" + beta3b + " ")
+            self.serialWrite("Beta3A=" + beta3a + " ")
+            self.serialWrite("Beta4B=" + beta4b + " ")
+            self.serialWrite("Beta4A=" + beta4a + " ")
+            self.serialWrite("AOS=" + aos + " ")
 
         self.mimic_screen.ids.psarjvalue.text = psarj
         self.mimic_screen.ids.ssarjvalue.text = ssarj
