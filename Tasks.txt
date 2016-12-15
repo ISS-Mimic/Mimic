@@ -1,2 +1,3 @@
 Change calibrate screen so zero button triggers mimic screen undisable
 Fix problem where integer degrees (eg 90.000) aren't displayed to the screen (and make sure they still get sent)
+   This problem persists across the connection - exact integer degrees are not sent, blank is sent instead
