@@ -1,5 +1,8 @@
+<!DOCTYPE HTML>
+<html>
 <body>
 <table border="1" cellpadding="5" cellspacing="5" bordercolor="black" width="400">
+
 	<tr>
 		<th></th>
 		<th>Telemetry</th>
@@ -70,12 +73,13 @@ require(["LightstreamerClient","Subscription"],function(LightstreamerClient,Subs
 	var client = new LightstreamerClient("https://push.lightstreamer.com","ISSLIVE");
 	client.connect();
  
-	var sub = new Subscription("MERGE",["S0000004","S0000003","S0000002","S0000001","S6000008","S6000007","S4000008","S4000007","P4000007","P4000008","P6000007","P6000008"],["Value"]);
+	var sub = new Subscription("MERGE",["S0000004","S0000003","S0000002","S0000001","S6000008","S6000007","S4000008","S4000007","P4000007","P4000008","P6000007","P6000008","USLAB000102"],["Value","TimeStamp"]);
 	
-	var timeSub = new Subscription('MERGE', 'TIME_000001', ['Status.Class']);
+	var timeSub = new Subscription('MERGE', 'TIME_000001', ['TimeStamp','Status.Class']);
 	
 	client.subscribe(sub);
 	
+	var AOStimestamp = 0.00;
 	var AOS;
 	var PSARJ;
 	var SSARJ;
@@ -89,22 +93,30 @@ require(["LightstreamerClient","Subscription"],function(LightstreamerClient,Subs
 	var Beta3B;
 	var Beta4A;
 	var Beta4B;
-	var PSARJ1 = 0.00;
+	var time;
+	var difference = 0.00;
+
+    var unixtime = (new Date).getTime();
+	var date = new Date(unixtime);
+	var hours = date.getUTCHours();
+	var minutes = "0" + date.getMinutes();
+	var seconds = "0" + date.getSeconds();
 	
-	//console.log(sub.getItemName())
+	var timestmp = new Date().setFullYear(new Date().getFullYear(), 0, 1);
+	var yearFirstDay = Math.floor(timestmp / 86400000);
+	var today = Math.ceil((new Date().getTime()) / 86400000);
+	var dayOfYear = today - yearFirstDay;
+	
+	var timestampnow = dayOfYear*24 + hours + minutes/60 + seconds/3600; 
+	//console.log("timestamp now: " + timestampnow);
 	
 	sub.addListener({
 		onItemUpdate: function(update) 
 		{
-			//var index = update.getValue("Value");
 			$("#"+update.getItemName()).text(update.getValue("Value"));
-			
 			switch (update.getItemName()){
 			  case "S0000004":
 				PSARJ = update.getValue("Value");
-				PSARJ1 = PSARJ.toFixed(4);
-				console.log("PSARJ: " + PSARJ1)
-				//console.log(update)
 				break;
 			  case "S0000003":
 				SSARJ = update.getValue("Value");
@@ -150,13 +162,27 @@ require(["LightstreamerClient","Subscription"],function(LightstreamerClient,Subs
 	  onItemUpdate: function (update) {
 
 		var status = update.getValue('Status.Class');
-		//console.log(status)
+		AOStimestamp = parseFloat(update.getValue('TimeStamp'));
+		//console.log("Timestamp: " + update.getValue('TimeStamp'));
+		difference = timestampnow - AOStimestamp;
+		//console.log("Difference " + difference);
 		if (status === '24') 
 		{
-		  console.log("Signal Acquired!")
-		  AOS = "Siqnal Acquired!!";
-	      document.getElementById("AOS").innerHTML = AOS;
-		  document.getElementById("AOS").bgColor = '#008000';
+		  if(difference > 0.00153680542553047)
+		  {
+			console.log("Stale Signal")
+			AOS = "Stale Signal";
+			document.getElementById("AOS").innerHTML = AOS;
+			document.getElementById("AOS").bgColor = '#FF8000';
+		  }
+		  else
+		  {
+			console.log("Signal Acquired!")
+			AOS = "Siqnal Acquired!!";
+			document.getElementById("AOS").innerHTML = AOS;
+			document.getElementById("AOS").bgColor = '#008000';
+		  }
+		  
 		}
 
 		else 
@@ -168,13 +194,8 @@ require(["LightstreamerClient","Subscription"],function(LightstreamerClient,Subs
 		} 
 	  }
 	});
-	
-	//unix_timestamp = USLAB000084;
-	//console.log(USLAB000084);
-	
 });
-
-
 
 </script>
 </body>
+</html>
