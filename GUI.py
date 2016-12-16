@@ -217,7 +217,7 @@ class MainApp(App):
         beta4b = "{:.2f}".format((values[10])[0])
         beta4a = "{:.2f}".format((values[11])[0])
         aos = "{:d}".format(int((values[12])[0]))
-       
+        print aos
         if (fakeorbitboolean == True and (thatoneboolean == True or thatotherboolean == True)):
             if psarj2 <= 0.00:
                 psarj2 = 360.0
@@ -263,6 +263,8 @@ class MainApp(App):
         self.mimic_screen.ids.beta4bvalue.text = beta4b
         self.mimic_screen.ids.beta4avalue.text = beta4a
 
+        print aos
+
         if aos == "1":
             livedata = True
             if self.root.current == 'mimic':
@@ -272,14 +274,21 @@ class MainApp(App):
             self.mimic_screen.ids.aoslabel.color = 0,1,0
             self.mimic_screen.ids.aosvalue.color = 0,1,0
             self.mimic_screen.ids.aosvalue.text = "Signal Acquired!"
-        else:
+        elif aos == "0":
             livedata = False
             if self.root.current == 'mimic':
                fakeorbitboolean = True
             self.mimic_screen.ids.aosvalue.text = "Signal Lost"
             self.mimic_screen.ids.aoslabel.color = 1,0,0
             self.mimic_screen.ids.aosvalue.color = 1,0,0
- 
+        else: 
+            livedata = False
+            if self.root.current == 'mimic':
+               fakeorbitboolean = True
+            self.mimic_screen.ids.aoslabel.color = 1,0.5,0
+            self.mimic_screen.ids.aosvalue.color = 1,0.5,0
+            self.mimic_screen.ids.aosvalue.text = "Stale Signal!"
+
         if (thatoneboolean == True and aos == "1"):
  
              self.serialWrite("PSARJ=" + psarj + " ")

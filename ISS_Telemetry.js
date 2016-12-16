@@ -2,7 +2,6 @@ function alert(message)
 {
 
 }
-
 var ls = require("lightstreamer-client");
 var sqlite3 = require('sqlite3');
 var db = new sqlite3.Database("iss_telemetry.db");
@@ -11,13 +10,15 @@ var lsClient = new ls.LightstreamerClient("http://push.lightstreamer.com","ISSLI
 
 lsClient.connectionOptions.setSlowingEnabled(false);
 
-var sub = new ls.Subscription("MERGE",["S0000004","S0000003","S0000002","S0000001","S6000008","S6000007","S4000008","S4000007","P4000007","P4000008","P6000007","P6000008"],["Value"]);
+var sub = new ls.Subscription("MERGE",["S0000004","S0000003","S0000002","S0000001","S6000008","S6000007","S4000008","S4000007","P4000007","P4000008","P6000007","P6000008","USLAB000102"],["Value"]);
 
-var timeSub = new ls.Subscription('MERGE', 'TIME_000001', ['Status.Class']);
+var timeSub = new ls.Subscription('MERGE', 'TIME_000001', ['TimeStamp','Value','Status.Class','Status.Indicator']);
 
 lsClient.subscribe(sub);
 lsClient.subscribe(timeSub);
 
+var AOStimestamp;
+var timeadjust = 315986384995.04;
 var AOS;
 var AOSnum;
 var PSARJ;
@@ -32,14 +33,24 @@ var Beta3A;
 var Beta3B;
 var Beta4A;
 var Beta4B;
+var time = 0.0;
+var difference = 0.00;
 
-/*
-lsClient.addListener({
-	onStatusChange: function(newStatus) {         
-	  console.log(newStatus);
-	}
-});
-*/
+var unixtime = (new Date).getTime();
+var date = new Date(unixtime);
+var hours = date.getUTCHours();
+var minutes = "0" + date.getMinutes();
+var seconds = "0" + date.getSeconds();
+var timestmp = new Date().setFullYear(new Date().getFullYear(), 0, 1    );
+var yearFirstDay = Math.floor(timestmp / 86400000);
+var today = Math.ceil((new Date().getTime()) / 86400000);
+var dayOfYear = today - yearFirstDay;
+var timestampnow = dayOfYear*24 + hours + minutes/60 + seconds/3600;    
+
+//console.log(dayOfYear);
+//console.log(hours);
+//console.log(minutes);
+//console.log(timestampnow);
 
 lsClient.connect();
 
@@ -103,19 +114,29 @@ sub.addListener({
     } 
   }
 });
-
-
-
-console.log(sub.isSubscribed());
 	
 timeSub.addListener({
   onItemUpdate: function (update) {
         var status = update.getValue('Status.Class');
-	if (status === '24') 
+        AOStimestamp = parseFloat(update.getValue('TimeStamp'));
+        //console.log("Timestamp: " + update.getValue('TimeStamp'));
+        difference = timestampnow - AOStimestamp;
+        //console.log("Difference " + difference);
+
+        if (status === '24') 
 	{
-	  console.log("Signal Acquired!")
-	  AOS = "Siqnal Acquired";
-	  AOSnum = 1;
+          if(difference > 0.00153680542553047)
+          {
+	     console.log("Stale Signal!")
+	     AOS = "Stale Signal";
+	     AOSnum = 2;
+          }
+          else
+          {
+	     console.log("Signal Acquired!")
+	     AOS = "Siqnal Acquired";
+	     AOSnum = 1;
+          }
 	}
 	else 
 	{
