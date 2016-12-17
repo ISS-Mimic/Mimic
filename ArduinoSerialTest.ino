@@ -1,6 +1,8 @@
 #include <string.h>
 
-const int ledPin = 13;
+const int ledRedPin = 13;
+const int ledBluePin = 52;
+const int ledGreenPin = 53;
 String test;
 
 double Beta1B = 0.0;
@@ -19,7 +21,9 @@ double AOS = 0.00;
 
 void setup()
 {
-  pinMode(ledPin, OUTPUT);
+  pinMode(ledRedPin, OUTPUT);
+  pinMode(ledBluePin, OUTPUT);
+  pinMode(ledGreenPin, OUTPUT);
   Serial.begin(9600);
   Serial1.begin(115200);
   Serial1.setTimeout(50);
@@ -27,7 +31,9 @@ void setup()
 
 void loop()
 {
-  digitalWrite(ledPin, LOW);
+  digitalWrite(ledRedPin, LOW);
+  digitalWrite(ledGreenPin, LOW);
+  digitalWrite(ledBluePin, LOW);
   if(Serial1.available())
   {
     checkSerial();
@@ -35,14 +41,14 @@ void loop()
 }
 void checkSerial()
 {
-  digitalWrite(ledPin, HIGH);
+  digitalWrite(ledBluePin, HIGH);
   test = "";
   
   while(Serial1.available())  
   {
     test = Serial1.readString();
   }
-
+  //Serial.println(test);
   char sz[test.length() + 1];
   char copy[test.length() + 1];
   strcpy(sz, test.c_str());  
@@ -105,7 +111,33 @@ void checkSerial()
     }
     else if(test2.substring(0,delimeter)=="AOS")
     {
+      //Serial.println(test2);
       AOS = (test2.substring(delimeter+1)).toFloat();
+      //Serial.println(AOS);
+      if(AOS == 1.00)
+      {
+        digitalWrite(ledGreenPin, HIGH);
+      }
+      else
+      {
+        digitalWrite(ledRedPin, HIGH);
+      }
     }
   }
+  
+  Serial.println(PSARJ);
+  Serial.println(SSARJ);
+  Serial.println(PTRRJ);
+  Serial.println(STRRJ);
+  Serial.println(Beta1B);
+  Serial.println(Beta1A);
+  Serial.println(Beta2B);
+  Serial.println(Beta2A);
+  Serial.println(Beta3B);
+  Serial.println(Beta3A);
+  Serial.println(Beta4B);
+  Serial.println(Beta4A);
+  Serial.println(AOS);
+  
+  Serial.println();
 }
