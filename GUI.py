@@ -34,11 +34,11 @@ ser = serial.Serial('/dev/ttyUSB0', 115200)
 bus = smbus.SMBus(1)
 address = 0x04
 
-thatoneboolean = False
+mimicbutton = False
 fakeorbitboolean = False
 zerocomplete = False
-livedata = False
-thatotherboolean = False
+switchtofake = False
+manualcontrol = False
 
 conn = sqlite3.connect('iss_telemetry.db') #sqlite database call change to include directory
 c = conn.cursor() 
@@ -46,16 +46,33 @@ val = ""
     
 psarj2 = 1.0
 ssarj2 = 1.0
-ptrrj2 = 1.0
-strrj2 = 1.0
-beta1b2 = 1.0
-beta1a2 = 1.0
-beta2b2 = 1.0
-beta2a2 = 1.0
-beta3b2 = 1.0
-beta3a2 = 1.0
-beta4b2 = 1.0
-beta4a2 = 1.0
+
+psarj = 0.00
+ssarj = 0.00
+ptrrj = 0.00
+strrj = 0.00
+beta1b = 0.00
+beta1a = 0.00
+beta2b = 0.00
+beta2a = 0.00
+beta3b = 0.00
+beta3a = 0.00
+beta4b = 0.00
+beta4a = 0.00
+aos = 0.00
+
+psarjmc = 0.00
+ssarjmc = 0.00
+ptrrjmc = 0.00
+strrjmc = 0.00
+beta1bmc = 0.00
+beta1amc = 0.00
+beta2bmc = 0.00
+beta2amc = 0.00
+beta3bmc = 0.00
+beta3amc = 0.00
+beta4bmc = 0.00
+beta4amc = 0.00
 
 def StringToBytes(val):
     retVal = []
@@ -66,17 +83,19 @@ def StringToBytes(val):
 class MainScreen(Screen):
     def __init__(self, **kwargs):
         super(MainScreen, self).__init__(**kwargs)
+    
+    def changeManualControlBoolean(self, *args):
+        global manualcontrol
+        manualcontrol = args[0]
         
 class CalibrateScreen(Screen):
     def __init__(self, **kwargs):
         super(CalibrateScreen, self).__init__(**kwargs)
    
     def serialWrite(self, *args):
-        #bus.write_i2c_block_data(address, 0, StringToBytes(*args))
         ser.write(*args)
 
     def zeroJoints(self):
-        #self.serialWrite("ZERO")
         self.changeBoolean(True)
         ser.write('Zero')
 
@@ -87,9 +106,72 @@ class CalibrateScreen(Screen):
 class ManualControlScreen(Screen):
     def __init__(self, **kwargs):
         super(ManualControlScreen, self).__init__(**kwargs)
-
+    
+    def incrementPSARJ(self, *args):
+        global psarjmc
+        psarjmc += args[0]
+        self.serialWrite("PSARJ=" + str(psarjmc) + " ")   
+     
+    def incrementSSARJ(self, *args):
+        global ssarjmc
+        ssarjmc += args[0]
+        self.serialWrite("SSARJ=" + str(ssarjmc) + " ")   
+     
+    def incrementPTTRJ(self, *args):
+        global ptrrjmc
+        ptrrjmc += args[0]
+        self.serialWrite("PTRRJ=" + str(ptrrjmc) + " ")   
+     
+    def incrementSTRRJ(self, *args):
+        global strrjmc
+        strrjmc += args[0]
+        self.serialWrite("STRRJ=" + str(strrjmc) + " ")   
+     
+    def incrementBeta1B(self, *args):
+        global beta1bmc
+        beta1bmc += args[0]
+        self.serialWrite("Beta1B=" + str(beta1bmc) + " ")   
+     
+    def incrementBeta1A(self, *args):
+        global beta1amc
+        beta1amc += args[0]
+        self.serialWrite("Beta1A=" + str(beta1amc) + " ")   
+     
+    def incrementBeta2B(self, *args):
+        global beta2bmc
+        beta2bmc += args[0]
+        self.serialWrite("Beta2B=" + str(beta2bmc) + " ")   
+     
+    def incrementBeta2A(self, *args):
+        global beta2amc
+        beta2amc += args[0]
+        self.serialWrite("Beta2A=" + str(beta2amc) + " ")   
+     
+    def incrementBeta3B(self, *args):
+        global beta3bmc
+        beta3bmc += args[0]
+        self.serialWrite("Beta3B=" + str(beta3bmc) + " ")   
+     
+    def incrementBeta3A(self, *args):
+        global beta3amc
+        beta3amc += args[0]
+        self.serialWrite("Beta3A=" + str(beta3amc) + " ")   
+     
+    def incrementBeta4B(self, *args):
+        global beta4bmc
+        beta4bmc += args[0]
+        self.serialWrite("Beta4B=" + str(beta4bmc) + " ")   
+     
+    def incrementBeta4A(self, *args):
+        global beta4amc
+        beta4amc += args[0]
+        self.serialWrite("Beta4A=" + str(beta4amc) + " ")   
+     
+    def changeBoolean(self, *args):
+        global manualcontrol
+        manualcontrol = args[0]
+    
     def serialWrite(self, *args):
-        #bus.write_i2c_block_data(address, 0, StringToBytes(*args))
         ser.write(*args)
    
 class FakeOrbitScreen(Screen):
@@ -97,22 +179,25 @@ class FakeOrbitScreen(Screen):
         super(FakeOrbitScreen, self).__init__(**kwargs)
 
     def serialWrite(self, *args):
-        #bus.write_i2c_block_data(address, 0, StringToBytes(*args))
         ser.write(*args)
     
     def changeBoolean(self, *args):
         global fakeorbitboolean
-        global thatotherboolean
-        thatotherboolean = args[0]
+        global switchtofake
+        switchtofake = args[0]
         fakeorbitboolean = args[0]
 
 class MimicScreen(Screen, EventDispatcher):
     def __init__(self, **kwargs):
         super(MimicScreen, self).__init__(**kwargs)
    
-    def changeBoolean(self, *args):
-        global thatoneboolean
-        thatoneboolean = args[0]
+    def changeMimicBoolean(self, *args):
+        global mimicbutton
+        mimicbutton = args[0]
+    
+    def changeSwitchBoolean(self, *args):
+        global switchtofake
+        switchtofake = args[0]
 
 class MainScreenManager(ScreenManager):
     pass
@@ -173,73 +258,111 @@ class MainApp(App):
         return root
 
     def serialWrite(self, *args):
-        #bus.write_i2c_block_data(address, 0, StringToBytes(*args))
         ser.write(*args)
 
+    def changeManualControlBoolean(self, *args):
+        global manualcontrol
+        manualcontrol = args[0]
+    
     def update_labels(self, dt):
-        global thatoneboolean
-        global thatotherboolean
+        global mimicbutton
+        global switchtofake
         global fakeorbitboolean
-        global livedata  
         global psarj2
         global ssarj2
-        global ptrrj2
-        global strrj2
-        global beta1b2
-        global beta1a2
-        global beta2b2
-        global beta2a2
-        global beta3b2
-        global beta3a2
-        global beta4b2
-        global beta4a2
-       
+        global manualcontrol
+        global psarj
+        global ssarj
+        global ptrrj
+        global strrj
+        global beta1b
+        global beta1a
+        global beta2b
+        global beta2a
+        global beta3b
+        global beta3a
+        global beta4b
+        global beta4a
+        global aos
+        global psarjmc
+        global ssarjmc
+        global ptrrjmc
+        global strrjmc
+        global beta1bmc
+        global beta1amc
+        global beta2bmc
+        global beta2amc
+        global beta3bmc
+        global beta3amc
+        global beta4bmc
+        global beta4amc
+
         c.execute('select two from telemetry')
         values = c.fetchall()
 
-        #psarj = "{:.2f}".format((values[0])[0])[:-5]
         psarj = "{:.2f}".format((values[0])[0])
+        if switchtofake == False:
+            psarj2 = float(psarj)
+        if manualcontrol == False:
+            psarjmc = float(psarj)
+        ssarj = "{:.2f}".format((values[1])[0])
+        if switchtofake == False:
+            ssarj2 = float(ssarj)
+        if manualcontrol == False:
+            ssarjmc = float(ssarj)
+        ptrrj = "{:.2f}".format((values[2])[0])
+        if manualcontrol == False:
+            ptrrjmc = float(ptrrj)
+        strrj = "{:.2f}".format((values[3])[0])
+        if manualcontrol == False:
+            strrjmc = float(strrj)
+        beta1b = "{:.2f}".format((values[4])[0])
+        if manualcontrol == False:
+            beta1bmc = float(beta1b)
+        beta1a = "{:.2f}".format((values[5])[0])
+        if manualcontrol == False:
+            beta1amc = float(beta1a)
+        beta2b = "{:.2f}".format((values[6])[0])
+        if manualcontrol == False:
+            beta2bmc = float(beta2b)
+        beta2a = "{:.2f}".format((values[7])[0])
+        if manualcontrol == False:
+            beta2amc = float(beta2a)
+        beta3b = "{:.2f}".format((values[8])[0])
+        if manualcontrol == False:
+            beta3bmc = float(beta3b)
+        beta3a = "{:.2f}".format((values[9])[0])
+        if manualcontrol == False:
+            beta3amc = float(beta3a)
+        beta4b = "{:.2f}".format((values[10])[0])
+        if manualcontrol == False:
+            beta4bmc = float(beta4b)
+        beta4a = "{:.2f}".format((values[11])[0])
+        if manualcontrol == False:
+            beta4amc = float(beta4a)
+        aos = "{:.2f}".format(int((values[12])[0]))
+        
         fileplog.write(psarj)
         fileplog.write('\n')
-        if thatotherboolean == False:
-            psarj2 = float(psarj)
-        ssarj = "{:.2f}".format((values[1])[0])
-        if thatotherboolean == False:
-            ssarj2 = float(ssarj)
-        ptrrj = "{:.2f}".format((values[2])[0])
-        strrj = "{:.2f}".format((values[3])[0])
-        beta1b = "{:.2f}".format((values[4])[0])
-        beta1a = "{:.2f}".format((values[5])[0])
-        beta2b = "{:.2f}".format((values[6])[0])
-        beta2a = "{:.2f}".format((values[7])[0])
-        beta3b = "{:.2f}".format((values[8])[0])
-        beta3a = "{:.2f}".format((values[9])[0])
-        beta4b = "{:.2f}".format((values[10])[0])
-        beta4a = "{:.2f}".format((values[11])[0])
-        aos = "{:d}".format(int((values[12])[0]))
-        print aos
-        if (fakeorbitboolean == True and (thatoneboolean == True or thatotherboolean == True)):
+
+        if (fakeorbitboolean == True and (mimicbutton == True or switchtofake == True)):
             if psarj2 <= 0.00:
                 psarj2 = 360.0
             self.fakeorbit_screen.ids.fakepsarjvalue.text = "{:.2f}".format(psarj2)
             if ssarj2 >= 360.00:                
                 ssarj2 = 0.0
-            self.fakeorbit_screen.ids.fakepsarjvalue.text = "{:.2f}".format(ssarj2)
+            self.fakeorbit_screen.ids.fakessarjvalue.text = "{:.2f}".format(ssarj2)
             
             psarj2 -= 0.0666
             ssarj2 += 0.0666
-            ptrrj2 = -40.00
-            strrj2 = 25.00
 
             psarjstr = "{:.2f}".format(psarj2)
             ssarjstr = "{:.2f}".format(ssarj2)
-            ptrrjstr = "{:.2f}".format(ptrrj2)
-            strrjstr = "{:.2f}".format(strrj2)
             
             self.serialWrite("PSARJ=" + psarjstr + " ")
             self.serialWrite("SSARJ=" + ssarjstr + " ")
-            self.serialWrite("PTRRJ=" + ptrrjstr + " ")
-            self.serialWrite("STRRJ=" + strrjstr + " ")
+            self.serialWrite("PTRRJ=" + ptrrj + " ")
+            self.serialWrite("STRRJ=" + strrj + " ")
             self.serialWrite("Beta1B=" + beta1b + " ")
             self.serialWrite("Beta1A=" + beta1a + " ")
             self.serialWrite("Beta2B=" + beta2b + " ")
@@ -249,7 +372,7 @@ class MainApp(App):
             self.serialWrite("Beta4B=" + beta4b + " ")
             self.serialWrite("Beta4A=" + beta4a + " ")
             self.serialWrite("AOS=" + aos + " ")
-
+        
         self.mimic_screen.ids.psarjvalue.text = psarj
         self.mimic_screen.ids.ssarjvalue.text = ssarj
         self.mimic_screen.ids.ptrrjvalue.text = ptrrj
@@ -263,34 +386,30 @@ class MainApp(App):
         self.mimic_screen.ids.beta4bvalue.text = beta4b
         self.mimic_screen.ids.beta4avalue.text = beta4a
 
-        print aos
-
         if aos == "1":
-            livedata = True
             if self.root.current == 'mimic':
                fakeorbitboolean = False
-            if thatoneboolean == True:
-                thatotherboolean = False
+               if mimicbutton == True:
+                   switchtofake = False
             self.mimic_screen.ids.aoslabel.color = 0,1,0
             self.mimic_screen.ids.aosvalue.color = 0,1,0
             self.mimic_screen.ids.aosvalue.text = "Signal Acquired!"
         elif aos == "0":
-            livedata = False
             if self.root.current == 'mimic':
                fakeorbitboolean = True
+               switchtofake = True
             self.mimic_screen.ids.aosvalue.text = "Signal Lost"
             self.mimic_screen.ids.aoslabel.color = 1,0,0
             self.mimic_screen.ids.aosvalue.color = 1,0,0
         else: 
-            livedata = False
             if self.root.current == 'mimic':
                fakeorbitboolean = True
+               switchtofake = True
             self.mimic_screen.ids.aoslabel.color = 1,0.5,0
             self.mimic_screen.ids.aosvalue.color = 1,0.5,0
             self.mimic_screen.ids.aosvalue.text = "Stale Signal!"
 
-        if (thatoneboolean == True and aos == "1"):
- 
+        if (mimicbutton == True and aos == "1"): 
              self.serialWrite("PSARJ=" + psarj + " ")
              self.serialWrite("SSARJ=" + ssarj + " ")
              self.serialWrite("PTRRJ=" + ptrrj + " ")
@@ -318,7 +437,7 @@ Builder.load_string('''
             allow_stretch: True
             keep_ratio: True
         Label:
-            text: 'Main Screen'
+            text: 'Mimic'
             bold: True
             font_size: 120
             markup: True
@@ -340,6 +459,7 @@ Builder.load_string('''
                 font_size: 30
                 width: 50
                 height: 20
+                on_press: root.changeManualControlBoolean(True)
                 on_release: root.manager.current = 'manualcontrol'
             Button:
                 text: 'Calibrate'
@@ -391,6 +511,20 @@ Builder.load_string('''
             markup: True
             color: 1,1,1
             font_size: 30
+        Label:
+            id: fakessarjlabel
+            pos_hint: {"center_x": 0.6, "center_y": 0.35}
+            text: 'SSARJ:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: fakessarjvalue
+            pos_hint: {"center_x": 0.8, "center_y": 0.35}
+            text: '0.000'
+            markup: True
+            color: 1,1,1
+            font_size: 30
         Button:
             id: orbitstartbutton
             size_hint: 0.25,0.1
@@ -409,7 +543,7 @@ Builder.load_string('''
             text: 'Stop'
             disabled: True
             font_size: 30
-            on_release: fakeorbitstatus.text = 'I2C Stopped'
+            on_release: fakeorbitstatus.text = 'Stopped'
             on_release: root.changeBoolean(False)
             on_release: orbitstopbutton.disabled = True
             on_release: orbitstartbutton.disabled = False
@@ -443,7 +577,7 @@ Builder.load_string('''
             p2: root.width*0.095, root.height*0.96
             p3: root.width*0.130, root.height*0.86
             on_press: self.changecolordown()
-            on_release: root.serialWrite("1B MC 1.00")
+            on_release: root.incrementPSARJ(1)
             on_release: self.changecolorup()
         TriangleButton:
             id: t1Bdown
@@ -451,7 +585,7 @@ Builder.load_string('''
             p2: root.width*0.095, root.height*0.7
             p3: root.width*0.130, root.height*0.8
             on_press: self.changecolordown()
-            on_release: root.serialWrite("1B MC -1.00")
+            on_release: root.incrementPSARJ(-1)
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -467,7 +601,7 @@ Builder.load_string('''
             p2: root.width*0.095, root.height*0.48
             p3: root.width*0.130, root.height*0.38
             on_press: self.changecolordown()
-            on_release: root.serialWrite("3B MC 1.00")
+            on_release: root.incrementBeta3B(1)
             on_release: self.changecolorup()
         TriangleButton:
             id: t3Bdown
@@ -475,7 +609,7 @@ Builder.load_string('''
             p2: root.width*0.095, root.height*0.22
             p3: root.width*0.130, root.height*0.32
             on_press: self.changecolordown()
-            on_release: root.serialWrite("3B MC -1.00")
+            on_release: root.incrementBeta3B(-1)
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -491,7 +625,7 @@ Builder.load_string('''
             p2: root.width*0.215, root.height*0.96
             p3: root.width*0.250, root.height*0.86
             on_press: self.changecolordown()
-            on_release: root.serialWrite("3A MC 1.00")
+            on_release: root.incrementBeta3A(1)
             on_release: self.changecolorup()
         TriangleButton:
             id: t3Adown
@@ -499,7 +633,7 @@ Builder.load_string('''
             p2: root.width*0.215, root.height*0.7
             p3: root.width*0.250, root.height*0.8
             on_press: self.changecolordown()
-            on_release: root.serialWrite("3A MC -1.00")
+            on_release: root.incrementBeta3A(-1)
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -515,7 +649,7 @@ Builder.load_string('''
             p2: root.width*0.215, root.height*0.48
             p3: root.width*0.250, root.height*0.38
             on_press: self.changecolordown()
-            on_release: root.serialWrite("1A MC 1.00")
+            on_release: root.incrementBeta1A(1)
             on_release: self.changecolorup()
         TriangleButton:
             id: t1Adown
@@ -523,7 +657,7 @@ Builder.load_string('''
             p2: root.width*0.215, root.height*0.22
             p3: root.width*0.250, root.height*0.32
             on_press: self.changecolordown()
-            on_release: root.serialWrite("1A MC -1.00")
+            on_release: root.incrementBeta1A(-1)
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -539,7 +673,7 @@ Builder.load_string('''
             p2: root.width*0.335, root.height*0.75
             p3: root.width*0.370, root.height*0.65
             on_press: self.changecolordown()
-            on_release: root.serialWrite("SSARJ MC 1.00")
+            on_release: root.incrementSSARJ(1)
             on_release: self.changecolorup()
         TriangleButton:
             id: SSARJdown
@@ -547,7 +681,7 @@ Builder.load_string('''
             p2: root.width*0.335, root.height*0.45
             p3: root.width*0.370, root.height*0.55
             on_press: self.changecolordown()
-            on_release: root.serialWrite("SSARJ MC -1.00")
+            on_release: root.incrementSSARJ(-1)
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -564,7 +698,7 @@ Builder.load_string('''
             p2: root.width*0.420, root.height*0.750
             p3: root.width*0.480, root.height*0.700
             on_press: self.changecolordown()
-            on_release: root.serialWrite("STRRJ MC 1.00")
+            on_release: root.incrementSTRRJ(1)
             on_release: self.changecolorup()
         TriangleButton:
             id: STTRJdown
@@ -572,7 +706,7 @@ Builder.load_string('''
             p2: root.width*0.580, root.height*0.750
             p3: root.width*0.520, root.height*0.700
             on_press: self.changecolordown()
-            on_release: root.serialWrite("STRRJ MC -1.00")
+            on_release: root.incrementSTRRJ(-1)
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -588,7 +722,7 @@ Builder.load_string('''
             p2: root.width*0.420, root.height*0.450
             p3: root.width*0.480, root.height*0.500
             on_press: self.changecolordown()
-            on_release: root.serialWrite("PTRRJ MC 1.00")
+            on_release: root.incrementPTRRJ(1)
             on_release: self.changecolorup()
         TriangleButton:
             id: PTTRJdown
@@ -596,7 +730,7 @@ Builder.load_string('''
             p2: root.width*0.580, root.height*0.450
             p3: root.width*0.520, root.height*0.500
             on_press: self.changecolordown()
-            on_release: root.serialWrite("PTRRJ MC -1.00")
+            on_release: root.incrementPTRRJ(-1)
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -612,7 +746,7 @@ Builder.load_string('''
             p2: root.width*0.665, root.height*0.75
             p3: root.width*0.630, root.height*0.65
             on_press: self.changecolordown()
-            on_release: root.serialWrite("PSARJ MC 1.00")
+            on_release: root.incrementPSARJ(1)
             on_release: self.changecolorup()
         TriangleButton:
             id: PSARJdown
@@ -620,7 +754,7 @@ Builder.load_string('''
             p2: root.width*0.665, root.height*0.45
             p3: root.width*0.630, root.height*0.55
             on_press: self.changecolordown()
-            on_release: root.serialWrite("PSARJ MC -1.00")
+            on_release: root.incrementPSARJ(-1)
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -636,7 +770,7 @@ Builder.load_string('''
             p2: root.width*0.785, root.height*0.96
             p3: root.width*0.750, root.height*0.86
             on_press: self.changecolordown()
-            on_release: root.serialWrite("2A MC 1.00")
+            on_release: root.incrementBeta2A(1)
             on_release: self.changecolorup()
         TriangleButton:
             id: t2Adown
@@ -644,7 +778,7 @@ Builder.load_string('''
             p2: root.width*0.785, root.height*0.7
             p3: root.width*0.750, root.height*0.8
             on_press: self.changecolordown()
-            on_release: root.serialWrite("2A MC -1.00")
+            on_release: root.incrementBeta2A(-1)
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -660,7 +794,7 @@ Builder.load_string('''
             p2: root.width*0.785, root.height*0.48
             p3: root.width*0.750, root.height*0.38
             on_press: self.changecolordown()
-            on_release: root.serialWrite("4A MC 1.00")
+            on_release: root.incrementBeta4A(1)
             on_release: self.changecolorup()
         TriangleButton:
             id: t4Adown
@@ -668,7 +802,7 @@ Builder.load_string('''
             p2: root.width*0.785, root.height*0.22
             p3: root.width*0.750, root.height*0.32
             on_press: self.changecolordown()
-            on_release: root.serialWrite("4A MC -1.00")
+            on_release: root.incrementBeta4A(-1)
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -684,7 +818,7 @@ Builder.load_string('''
             p2: root.width*0.905, root.height*0.96
             p3: root.width*0.870, root.height*0.86
             on_press: self.changecolordown()
-            on_release: root.serialWrite("4B MC 1.00")
+            on_release: root.incrementBeta4B(1)
             on_release: self.changecolorup()
         TriangleButton:
             id: t4Bdown
@@ -692,7 +826,7 @@ Builder.load_string('''
             p2: root.width*0.905, root.height*0.7
             p3: root.width*0.870, root.height*0.8
             on_press: self.changecolordown()
-            on_release: root.serialWrite("4B MC -1.00")
+            on_release: root.incrementBeta4B(-1)
             on_release: self.changecolorup()
         Label:
             size_hint: None,None
@@ -708,7 +842,7 @@ Builder.load_string('''
             p2: root.width*0.905, root.height*0.48
             p3: root.width*0.870, root.height*0.38
             on_press: self.changecolordown()
-            on_release: root.serialWrite("2B MC 1.00")
+            on_release: root.incrementBeta2B(1)
             on_release: self.changecolorup()
         TriangleButton:
             id: t2Bdown
@@ -716,13 +850,14 @@ Builder.load_string('''
             p2: root.width*0.905, root.height*0.22
             p3: root.width*0.870, root.height*0.32
             on_press: self.changecolordown()
-            on_release: root.serialWrite("2B MC -1.00")
+            on_release: root.incrementBeta2B(-1)
             on_release: self.changecolorup()
         Button:
             size_hint: 0.3,0.1
             pos_hint: {"center_x": 0.5, "Bottom": 1}
             text: 'Return'
             font_size: 30
+            on_press: root.changeBoolean(False)
             on_release: root.manager.current = 'main'
             
 <CalibrateScreen>:
@@ -959,7 +1094,7 @@ Builder.load_string('''
             disabled: False
             font_size: 30
             on_release: telemetrystatus.text = 'Sending...'
-            on_release: root.changeBoolean(True)
+            on_release: root.changeMimicBoolean(True)
             on_release: mimicstopbutton.disabled = False
             on_release: mimicstartbutton.disabled = True
         Button:
@@ -969,8 +1104,9 @@ Builder.load_string('''
             text: 'Stop'
             disabled: True
             font_size: 30
-            on_release: telemetrystatus.text = 'I2C Stopped'
-            on_release: root.changeBoolean(False)
+            on_release: telemetrystatus.text = 'Stopped'
+            on_release: root.changeMimicBoolean(False)
+            on_release: root.changeSwitchBoolean(False)
             on_release: mimicstopbutton.disabled = True
             on_release: mimicstartbutton.disabled = False
         Button:
@@ -978,7 +1114,8 @@ Builder.load_string('''
             pos_hint: {"Left": 1, "Bottom": 1}
             text: 'Return'
             font_size: 30
-            on_release: root.changeBoolean(False)
+            on_release: root.changeMimicBoolean(False)
+            on_release: root.changeSwitchBoolean(False)
             on_release: root.manager.current = 'main'
            
 <TriangleButton>:
