@@ -30,9 +30,11 @@ from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, WipeTr
 
 fileplog = open('psarjlog.txt','w')
 
-ser = serial.Serial('/dev/ttyUSB0', 115200)
-bus = smbus.SMBus(1)
-address = 0x04
+
+try:
+    ser = serial.Serial('/dev/ttyUSB0', 115200)
+except:
+    print "Serial connection error"
 
 mimicbutton = False
 fakeorbitboolean = False
@@ -260,6 +262,21 @@ class MainApp(App):
     def serialWrite(self, *args):
         ser.write(*args)
 
+    def changeColors(self, *args):   #this function sets all labels on mimic screen to a certain color based on signal status
+        self.mimic_screen.ids.psarjvalue.color = args[0],args[1],args[2]
+        self.mimic_screen.ids.ssarjvalue.color = args[0],args[1],args[2]
+        self.mimic_screen.ids.ptrrjvalue.color = args[0],args[1],args[2]
+        self.mimic_screen.ids.strrjvalue.color = args[0],args[1],args[2]
+        self.mimic_screen.ids.beta1avalue.color = args[0],args[1],args[2]
+        self.mimic_screen.ids.beta1bvalue.color = args[0],args[1],args[2]
+        self.mimic_screen.ids.beta2avalue.color = args[0],args[1],args[2]
+        self.mimic_screen.ids.beta2bvalue.color = args[0],args[1],args[2]
+        self.mimic_screen.ids.beta3avalue.color = args[0],args[1],args[2]
+        self.mimic_screen.ids.beta3bvalue.color = args[0],args[1],args[2]
+        self.mimic_screen.ids.beta4avalue.color = args[0],args[1],args[2]
+        self.mimic_screen.ids.beta4bvalue.color = args[0],args[1],args[2]
+        self.mimic_screen.ids.aosvalue.color = args[0],args[1],args[2]
+    
     def changeManualControlBoolean(self, *args):
         global manualcontrol
         manualcontrol = args[0]
@@ -299,6 +316,8 @@ class MainApp(App):
 
         c.execute('select two from telemetry')
         values = c.fetchall()
+        c.execute('select timestamp from telemetry')
+        timestamps = c.fetchall()
 
         psarj = "{:.2f}".format((values[0])[0])
         if switchtofake == False:
@@ -342,7 +361,29 @@ class MainApp(App):
             beta4amc = float(beta4a)
         aos = "{:.2f}".format(int((values[12])[0]))
         
-        fileplog.write(psarj)
+        fileplog.write("PSARJ " + psarj)
+        fileplog.write('\n')
+        fileplog.write("SSARJ " + ssarj)
+        fileplog.write('\n')
+        fileplog.write("PTRRJ " + ptrrj)
+        fileplog.write('\n')
+        fileplog.write("STRRJ " + strrj)
+        fileplog.write('\n')
+        fileplog.write("Beta1A " + beta1a)
+        fileplog.write('\n')
+        fileplog.write("Beta1B " + beta1b)
+        fileplog.write('\n')
+        fileplog.write("Beta2A " + beta2a)
+        fileplog.write('\n')
+        fileplog.write("Beta2B " + beta2b)
+        fileplog.write('\n')
+        fileplog.write("Beta3A " + beta3a)
+        fileplog.write('\n')
+        fileplog.write("Beta3B " + beta3b)
+        fileplog.write('\n')
+        fileplog.write("Beta4A " + beta4a)
+        fileplog.write('\n')
+        fileplog.write("Beta4B " + beta4b)
         fileplog.write('\n')
 
         if (fakeorbitboolean == True and (mimicbutton == True or switchtofake == True)):
@@ -386,30 +427,25 @@ class MainApp(App):
         self.mimic_screen.ids.beta4bvalue.text = beta4b
         self.mimic_screen.ids.beta4avalue.text = beta4a
 
-        if aos == "1":
+        if float(aos) == 1.00:
+            self.changeColors(0,1,0)
             if self.root.current == 'mimic':
                fakeorbitboolean = False
                if mimicbutton == True:
                    switchtofake = False
-            self.mimic_screen.ids.aoslabel.color = 0,1,0
-            self.mimic_screen.ids.aosvalue.color = 0,1,0
             self.mimic_screen.ids.aosvalue.text = "Signal Acquired!"
-        elif aos == "0":
+        elif float(aos) == 0.00:
+            self.changeColors(1,0,0)
             if self.root.current == 'mimic':
                fakeorbitboolean = True
-               switchtofake = True
             self.mimic_screen.ids.aosvalue.text = "Signal Lost"
-            self.mimic_screen.ids.aoslabel.color = 1,0,0
-            self.mimic_screen.ids.aosvalue.color = 1,0,0
-        else: 
+        elif float(aos) == 2.00:
+            self.changeColors(1,0.5,0)
             if self.root.current == 'mimic':
                fakeorbitboolean = True
-               switchtofake = True
-            self.mimic_screen.ids.aoslabel.color = 1,0.5,0
-            self.mimic_screen.ids.aosvalue.color = 1,0.5,0
             self.mimic_screen.ids.aosvalue.text = "Stale Signal!"
 
-        if (mimicbutton == True and aos == "1"): 
+        if (mimicbutton == True and float(aos) == 1.00): 
              self.serialWrite("PSARJ=" + psarj + " ")
              self.serialWrite("SSARJ=" + ssarj + " ")
              self.serialWrite("PTRRJ=" + ptrrj + " ")
@@ -437,7 +473,7 @@ Builder.load_string('''
             allow_stretch: True
             keep_ratio: True
         Label:
-            text: 'Mimic'
+            text: 'ISS Mimic'
             bold: True
             font_size: 120
             markup: True
