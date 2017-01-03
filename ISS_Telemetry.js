@@ -17,7 +17,7 @@ var timeSub = new ls.Subscription('MERGE', 'TIME_000001', ['TimeStamp','Value','
 lsClient.subscribe(sub);
 lsClient.subscribe(timeSub);
 
-var avgSGANT = [0.00, 0.00, 0.00, 0.00, 0.00];
+var SGANT = [0.00, 0.00, 0.00, 0.00, 0.00];
 var avgSASA = [0.00, 0.00, 0.00, 0.00, 0.00];
 var avgTime = [0.00, 0.00, 0.00, 0.00, 0.00];
 var avgSlew = [0.00, 0.00, 0.00, 0.00, 0.00];	
@@ -136,6 +136,8 @@ sub.addListener({
 		break;
 	  case "Z1000014":
 		SGANT_elevation = update.getValue("Value");
+		db.run("UPDATE telemetry set two = ? where one = ?", update.getValue("Value"), "sgant_elevation");
+		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "sgant_elevation");
 		angleDif = (SGANT_elevation - SASA_elevation);
 		var currentAngleTime = ((new Date).getTime())/1000;
 		var difSlewRate = (oldAngleDif-angleDif)/(oldAngleTime-currentAngleTime);
@@ -158,7 +160,7 @@ sub.addListener({
 			correction = Number((70-SGANT_elevation))/Number(avgSGANT_el_slew);
 		}
 		
-		console.log("Potential LOS in: " + Number(((Math.abs(angleDif)/Math.abs(averageSlew))+correction))/60 + "m");
+		//console.log("Potential LOS in: " + Number(((Math.abs(angleDif)/Math.abs(averageSlew))+correction))/60 + "m");
 		
 		if (Math.abs(angleDif) < 10 && SGANT_elevation > 70)
 		{
@@ -168,9 +170,7 @@ sub.addListener({
 		{
 			LOS = 0;
 		}
-		db.run("UPDATE telemetry set two = ? where one = ?", update.getValue("Value"), "sgant_elevation");
-		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "sgant_elevation");
-			db.run("UPDATE telemetry set two = ? where one = ?", LOS, "los");
+		db.run("UPDATE telemetry set two = ? where one = ?", LOS, "los");
 		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "los");
 		break;
 	  case "S1000005":
