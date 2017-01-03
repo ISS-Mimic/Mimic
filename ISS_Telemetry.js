@@ -168,11 +168,15 @@ sub.addListener({
 		{
 			LOS = 0;
 		}
+		db.run("UPDATE telemetry set two = ? where one = ?", update.getValue("Value"), "sgant_elevation");
+		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "sgant_elevation");
+			db.run("UPDATE telemetry set two = ? where one = ?", LOS, "los");
+		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "los");
 		break;
 	  case "S1000005":
 		SASA_elevation = update.getValue("Value");
-		db.run("UPDATE telemetry set two = ? where one = ?", update.getValue("Value"), "SASA_Elevation");
-		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "SASA_Elevation");
+		db.run("UPDATE telemetry set two = ? where one = ?", update.getValue("Value"), "sasa_elevation");
+		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "sasa_elevation");
 		break;
     } 
   }
