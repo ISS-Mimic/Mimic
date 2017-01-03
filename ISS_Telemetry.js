@@ -10,15 +10,27 @@ var lsClient = new ls.LightstreamerClient("http://push.lightstreamer.com","ISSLI
 
 lsClient.connectionOptions.setSlowingEnabled(false);
 
-var sub = new ls.Subscription("MERGE",["S0000004","S0000003","S0000002","S0000001","S6000008","S6000007","S4000008","S4000007","P4000007","P4000008","P6000007","P6000008","USLAB000102"],["TimeStamp","Value"]);
+var sub = new ls.Subscription("MERGE",["S0000004","S0000003","S0000002","S0000001","S6000008","S6000007","S4000008","S4000007","P4000007","P4000008","P6000007","P6000008","USLAB000102","Z1000014","S1000005"],["TimeStamp","Value"]);
 
 var timeSub = new ls.Subscription('MERGE', 'TIME_000001', ['TimeStamp','Value','Status.Class','Status.Indicator']);
 
 lsClient.subscribe(sub);
 lsClient.subscribe(timeSub);
 
+var avgSGANT = [0.00, 0.00, 0.00, 0.00, 0.00];
+var avgSASA = [0.00, 0.00, 0.00, 0.00, 0.00];
+var avgTime = [0.00, 0.00, 0.00, 0.00, 0.00];
+var avgSlew = [0.00, 0.00, 0.00, 0.00, 0.00];	
+var angleDif = 0.00;
+var index = 0;
+var SGANT_elevation = 0.00;
+var SASA_elevation = 0.00
+var oldAngleDif = 0.00;
+var oldAngleTime = 0.00;
+var oldSGANT_el = 0.00;
 var AOStimestamp;
 var timeadjust = 315986384995.04;
+var LOS;
 var AOS;
 var AOSnum;
 var PSARJ;
@@ -35,7 +47,6 @@ var Beta4A;
 var Beta4B;
 var time = 0.0;
 var difference = 0.00;
-
 var unixtime = (new Date).getTime();
 var date = new Date(unixtime);
 var hours = date.getUTCHours();
@@ -123,6 +134,46 @@ sub.addListener({
 		db.run("UPDATE telemetry set two = ? where one = ?", Beta2B, "beta2b");
 		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "beta2b");
 		break;
+	  case "Z1000014":
+		SGANT_elevation = update.getValue("Value");
+		angleDif = (SGANT_elevation - SASA_elevation);
+		var currentAngleTime = ((new Date).getTime())/1000;
+		var difSlewRate = (oldAngleDif-angleDif)/(oldAngleTime-currentAngleTime);
+		avgSlew[index] = difSlewRate;
+		SGANT[index] = (oldSGANT_el-SGANT_elevation)/(oldAngleTime-currentAngleTime);
+		index++;
+		if(index > 4)
+		{
+			index = 0;
+		}
+		var averageSlew = ((Number(avgSlew[0]) + Number(avgSlew[1]) + Number(avgSlew[2]) + Number(avgSlew[3]) + Number(avgSlew[4]))/5);
+		var avgSGANT_el_slew = ((Number(SGANT[0]) + Number(SGANT[1]) + Number(SGANT[2]) + Number(SGANT[3]) + Number(SGANT[4]))/5);
+		oldAngleTime = currentAngleTime;
+		oldSGANT_el = SGANT_elevation;
+		oldAngleDif = angleDif;
+		var correction = 0;
+		
+		if (Math.abs(angleDif) < 10 && SGANT_elevation < 70)
+		{
+			correction = Number((70-SGANT_elevation))/Number(avgSGANT_el_slew);
+		}
+		
+		console.log("Potential LOS in: " + Number(((Math.abs(angleDif)/Math.abs(averageSlew))+correction))/60 + "m");
+		
+		if (Math.abs(angleDif) < 10 && SGANT_elevation > 70)
+		{
+			LOS = 1;
+		}
+		else
+		{
+			LOS = 0;
+		}
+		break;
+	  case "S1000005":
+		SASA_elevation = update.getValue("Value");
+		db.run("UPDATE telemetry set two = ? where one = ?", update.getValue("Value"), "SASA_Elevation");
+		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "SASA_Elevation");
+		break;
     } 
   }
 });
@@ -160,4 +211,3 @@ timeSub.addListener({
 	db.run("UPDATE telemetry set timestamp = ? where one = ?", AOStimestamp, "aos");
   }
 });
-
