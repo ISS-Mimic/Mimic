@@ -1,6 +1,6 @@
 // pins for the encoder inputs
 
-
+String test;
 int rightCount = 0;
 float Pos=0;
 //double targetCount = 1000;//-1000; // later overwritten by PSARJ value
