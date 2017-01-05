@@ -1,5 +1,6 @@
 #include <Adafruit_MotorShield.h>
 #include "utility/Adafruit_MS_PWMServoDriver.h"
+#include <string.h>
 
 // Create the motor shield object with the default I2C address
 Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
@@ -17,14 +18,14 @@ Adafruit_DCMotor *myMotor = AFMS.getMotor(1);
 #define RH_ENCODER_B 2  // BGA1 encoder
 
 // for software I2C
-#define SCL_PIN 4
-#define SCL_PORT PORTD
-#define SDA_PIN 5
-#define SDA_PORT PORTD
-#include <SoftI2CMaster.h>
+//#define SCL_PIN 4
+//#define SCL_PORT PORTD
+//#define SDA_PIN 5
+//#define SDA_PORT PORTD
+//#include <SoftI2CMaster.h>
 
-#include <SoftWire.h>
-SoftWire Wire2 = SoftWire();
+//#include <SoftWire.h>
+//SoftWire Wire2 = SoftWire();
 
 void setup() {
 
@@ -32,15 +33,18 @@ AFMS.begin(200);  // create with the default frequency 1.6KHz
   //AFMS.begin(1000);  // OR with a different frequency, say 1KHz
 
   
-  Wire2.begin();                // join i2c bus with address #4
-  Wire2.onReceive(receiveEvent); // register event
+  //Wire2.begin();                // join i2c bus with address #4
+  //Wire2.onReceive(receiveEvent); // register event
   pinMode(RH_ENCODER_A, INPUT);
   pinMode(RH_ENCODER_B, INPUT);
 
   // initialize hardware interrupts
   attachInterrupt(digitalPinToInterrupt(3), rightEncoderEvent, CHANGE);   // BGA1
 
-  Serial.begin(115200);           // set up Serial library at 9600 bps
+  Serial.begin(9600);
+  Serial1.begin(115200);          //Serial1 is connected to the RasPi
+  Serial1.setTimeout(50);
+  
   Serial.println("Motor test!");
 
   // turn on motor

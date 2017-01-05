@@ -1,6 +1,9 @@
 void loop() {
 
-
+  if(Serial1.available())
+  {
+    checkSerial();
+  }
   // === DELETE THIS!  JUST FOR TESTING!!! =====
   //PSARJ=millis()*.0005;
   //PSARJ = 90 * sin(0.0005 * millis() * 0.001 * 180 / 3.14159);
