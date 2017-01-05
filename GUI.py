@@ -1,4 +1,6 @@
 import kivy
+import urllib2
+import json
 import sqlite3
 import serial
 import sched, time
@@ -30,6 +32,9 @@ from kivy.core.image import Image
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, WipeTransition, SwapTransition
 
 errorlog = open('errorlog.txt','w')
+locationlog = open('locationlog.txt','w')
+
+req = urllib2.Request("http://api.open-notify.org/iss-now.json")
 
 try:
     ser = serial.Serial('/dev/ttyUSB0', 115200)
@@ -333,6 +338,7 @@ class MainApp(App):
         global popuptriggered
         global EVAinProgress
 
+
         c.execute('select two from telemetry')
         values = c.fetchall()
         c.execute('select timestamp from telemetry')
@@ -463,6 +469,14 @@ class MainApp(App):
                    switchtofake = False
             self.mimic_screen.ids.aosvalue.text = "Signal Acquired!"
         elif float(aos) == 0.00:
+            print "signal lost - writing longitude"
+            response = urllib2.urlopen(req)
+            obj = json.loads(response.read())
+            locationlog.write("time ")
+            locationlog.write(str(obj['timestamp']))
+            locationlog.write(" long ")
+            locationlog.write(str(obj['iss_position']['longitude']))
+            locationlog.write('\n')
             self.changeColors(1,0,0)
             if self.root.current == 'mimic':
                fakeorbitboolean = True
