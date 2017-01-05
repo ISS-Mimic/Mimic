@@ -9,6 +9,7 @@ import os
 import signal
 import multiprocessing, signal
 from kivy.uix.behaviors.button import ButtonBehavior
+from kivy.uix.popup import Popup 
 from kivy.uix.button import Button
 from kivy.app import App
 from kivy.uix.label import Label
@@ -28,13 +29,21 @@ from kivy.uix.stacklayout import StackLayout
 from kivy.core.image import Image
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, WipeTransition, SwapTransition
 
-fileplog = open('psarjlog.txt','w')
-
+errorlog = open('errorlog.txt','w')
 
 try:
     ser = serial.Serial('/dev/ttyUSB0', 115200)
 except:
-    print "Serial connection error"
+    print "Serial connection GPIO failure"
+    errorlog.write("serial connection GPIO failure")
+    errorlog.write('\n')
+
+try:
+    ser = serial.Serial('/dev/ttyACM0', 115200)
+except:
+    print "Serial connection USB failure"
+    errorlog.write("serial connection USB failure")
+    errorlog.write('\n')
 
 mimicbutton = False
 fakeorbitboolean = False
@@ -62,7 +71,10 @@ beta3a = 0.00
 beta4b = 0.00
 beta4a = 0.00
 aos = 0.00
-
+changed = False
+popuptriggered = False
+los = 0.00
+oldLOS = 0.00
 psarjmc = 0.00
 ssarjmc = 0.00
 ptrrjmc = 0.00
@@ -75,6 +87,8 @@ beta3bmc = 0.00
 beta3amc = 0.00
 beta4bmc = 0.00
 beta4amc = 0.00
+EVAinProgress = False
+
 
 def StringToBytes(val):
     retVal = []
@@ -301,6 +315,8 @@ class MainApp(App):
         global beta4b
         global beta4a
         global aos
+        global los
+        global oldLOS
         global psarjmc
         global ssarjmc
         global ptrrjmc
@@ -313,6 +329,9 @@ class MainApp(App):
         global beta3amc
         global beta4bmc
         global beta4amc
+        global changed     
+        global popuptriggered
+        global EVAinProgress
 
         c.execute('select two from telemetry')
         values = c.fetchall()
@@ -360,31 +379,39 @@ class MainApp(App):
         if manualcontrol == False:
             beta4amc = float(beta4a)
         aos = "{:.2f}".format(int((values[12])[0]))
+        los = "{:.2f}".format(int((values[13])[0]))      
+        sasa_el = "{:.2f}".format((values[14])[0])
+        sgant_el = "{:.2f}".format((values[15])[0])
+        difference = float(sgant_el)-float(sasa_el) 
+
+        crewlockpres = "{:.2f}".format((values[16])[0])
+        if float(crewlockpres) < 500:
+            EVAinProgress = True
+            self.mimic_screen.ids.EVAvalue.text = "EVA in Progress!!!"
+            self.mimic_screen.ids.EVAvalue.color = 0,1,0
+        else:
+            EVAinProgress = False 
+            self.mimic_screen.ids.EVAvalue.text = ""
+            self.mimic_screen.ids.EVAvalue.color = 0,0,0
+
+        if float(los) == 1.0 and changed == True:
+            popuptriggered = True
         
-        fileplog.write("PSARJ " + psarj)
-        fileplog.write('\n')
-        fileplog.write("SSARJ " + ssarj)
-        fileplog.write('\n')
-        fileplog.write("PTRRJ " + ptrrj)
-        fileplog.write('\n')
-        fileplog.write("STRRJ " + strrj)
-        fileplog.write('\n')
-        fileplog.write("Beta1A " + beta1a)
-        fileplog.write('\n')
-        fileplog.write("Beta1B " + beta1b)
-        fileplog.write('\n')
-        fileplog.write("Beta2A " + beta2a)
-        fileplog.write('\n')
-        fileplog.write("Beta2B " + beta2b)
-        fileplog.write('\n')
-        fileplog.write("Beta3A " + beta3a)
-        fileplog.write('\n')
-        fileplog.write("Beta3B " + beta3b)
-        fileplog.write('\n')
-        fileplog.write("Beta4A " + beta4a)
-        fileplog.write('\n')
-        fileplog.write("Beta4B " + beta4b)
-        fileplog.write('\n')
+        if float(los) == 0.0:
+            popuptriggered = False
+
+        if oldLOS == los:
+            changed = False
+        else:
+            changed = True
+
+        oldLOS = los
+        
+        if popuptriggered == True:
+            LOSpopup = Popup(title='Loss of Signal', content=Label(text='Possible LOS Soon'),size_hint=(0.3,0.2),auto_dismiss=True)
+            LOSpopup.open()
+            popuptriggered = False
+            print "popup"    
 
         if (fakeorbitboolean == True and (mimicbutton == True or switchtofake == True)):
             if psarj2 <= 0.00:
@@ -426,6 +453,7 @@ class MainApp(App):
         self.mimic_screen.ids.beta3avalue.text = beta3a
         self.mimic_screen.ids.beta4bvalue.text = beta4b
         self.mimic_screen.ids.beta4avalue.text = beta4a
+        self.mimic_screen.ids.difference.text = str(difference)
 
         if float(aos) == 1.00:
             self.changeColors(0,1,0)
@@ -476,6 +504,15 @@ Builder.load_string('''
             text: 'ISS Mimic'
             bold: True
             font_size: 120
+            markup: True
+            height: "20dp"
+            color: 1,0,1
+            width: "100dp"
+        Label:
+            text: 'Mimic screen disabled until calibration is performed'
+            bold: True
+            pos_hint: {"center_x": 0.5, "center_y": 0.3}
+            font_size: 20
             markup: True
             height: "20dp"
             color: 1,0,1
@@ -933,6 +970,27 @@ Builder.load_string('''
             source: './imgs/iss2.png'
             allow_stretch: True
             keep_ratio: False
+        Label:
+            id: EVAvalue
+            pos_hint: {"center_x": 0.2, "center_y": 0.17}
+            text: ''
+            markup: True
+            color: 0,0,0
+            font_size: 30
+        Label:
+            id: differencelabel
+            pos_hint: {"center_x": 0.15, "center_y": 0.27}
+            text: 'Antenna dif'
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Label:
+            id: difference
+            pos_hint: {"center_x": 0.4, "center_y": 0.27}
+            text: '0.00'
+            markup: True
+            color: 1,0,1
+            font_size: 30
         Label:
             id: telemetrystatus
             pos_hint: {"center_x": 0.25, "center_y": 0.85}

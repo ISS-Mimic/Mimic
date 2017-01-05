@@ -10,7 +10,7 @@ var lsClient = new ls.LightstreamerClient("http://push.lightstreamer.com","ISSLI
 
 lsClient.connectionOptions.setSlowingEnabled(false);
 
-var sub = new ls.Subscription("MERGE",["S0000004","S0000003","S0000002","S0000001","S6000008","S6000007","S4000008","S4000007","P4000007","P4000008","P6000007","P6000008","USLAB000102","Z1000014","S1000005"],["TimeStamp","Value"]);
+var sub = new ls.Subscription("MERGE",["S0000004","S0000003","S0000002","S0000001","S6000008","S6000007","S4000008","S4000007","P4000007","P4000008","P6000007","P6000008","USLAB000102","Z1000014","S1000005","AIRLOCK000049"],["TimeStamp","Value"]);
 
 var timeSub = new ls.Subscription('MERGE', 'TIME_000001', ['TimeStamp','Value','Status.Class','Status.Indicator']);
 
@@ -45,6 +45,7 @@ var Beta3A;
 var Beta3B;
 var Beta4A;
 var Beta4B;
+var Crewlock_Pres;
 var time = 0.0;
 var difference = 0.00;
 var unixtime = (new Date).getTime();
@@ -155,14 +156,14 @@ sub.addListener({
 		oldAngleDif = angleDif;
 		var correction = 0;
 		
-		if (Math.abs(angleDif) < 10 && SGANT_elevation < 70)
-		{
-			correction = Number((70-SGANT_elevation))/Number(avgSGANT_el_slew);
-		}
+		//if (Math.abs(angleDif) < 10 && SGANT_elevation < 70)
+		//{
+		//	correction = Number((70-SGANT_elevation))/Number(avgSGANT_el_slew);
+		//}
 		
 		//console.log("Potential LOS in: " + Number(((Math.abs(angleDif)/Math.abs(averageSlew))+correction))/60 + "m");
 		
-		if (Math.abs(angleDif) < 10 && SGANT_elevation > 70)
+		if (Math.abs(angleDif) < 10) // && SGANT_elevation > 70)
 		{
 			LOS = 1;
 		}
@@ -177,6 +178,10 @@ sub.addListener({
 		SASA_elevation = update.getValue("Value");
 		db.run("UPDATE telemetry set two = ? where one = ?", update.getValue("Value"), "sasa_elevation");
 		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "sasa_elevation");
+		break;
+	  case "AIRLOCK000049":
+		db.run("UPDATE telemetry set two = ? where one = ?", update.getValue("Value"), "crewlock_pres");
+		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "crewlock_pres");
 		break;
     } 
   }
