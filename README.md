@@ -9,3 +9,8 @@ The project consists of four parts:
 3.) The graphical user interface (GUI.py) that provides control for the user and manages what data gets sent to the Arduino and displays the status of the telemetry values (connected to live values vs not connected). The GUI retrieves the values from the SQL database and sends them to the arduino if commanded by the user.
 
 4.) The arduino code receives the telemetry values over the serial interface with the raspberry pi and parses the raw data into telemetry specific variables The arduino then commands the motors to turn to the appropriate positions.  
+
+
+add row to database with
+
+insert into telemetry(one,two,timestamp) values('new row',0.00,0.00);
