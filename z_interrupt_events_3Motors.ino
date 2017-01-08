@@ -19,15 +19,15 @@ void EncoderEvent_Beta2B() {
 void EncoderEvent_Beta4B() {
   if (digitalRead(ENCODER_Beta4B_A) == HIGH) {
     if (digitalRead(ENCODER_Beta4B_B) == LOW) {
-      Count_Beta2B++;
+      Count_Beta4B++;
     } else {
-      Count_Beta2B--;
+      Count_Beta4B--;
     }
   } else {
     if (digitalRead(ENCODER_Beta4B_B) == LOW) {
-      Count_Beta2B--;
+      Count_Beta4B--;
     } else {
-      Count_Beta2B++;
+      Count_Beta4B++;
     }
   }
 }
@@ -35,15 +35,15 @@ void EncoderEvent_Beta4B() {
 void EncoderEvent_PSARJ() {
   if (digitalRead(ENCODER_PSARJ_A) == HIGH) {
     if (digitalRead(ENCODER_PSARJ_B) == LOW) {
-      Count_Beta2B++;
+      Count_PSARJ++;
     } else {
-      Count_Beta2B--;
+      Count_PSARJ--;
     }
   } else {
     if (digitalRead(ENCODER_PSARJ_B) == LOW) {
-      Count_Beta2B--;
+      Count_PSARJ--;
     } else {
-      Count_Beta2B++;
+      Count_PSARJ++;
     }
   }
 }
