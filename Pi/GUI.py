@@ -33,6 +33,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, WipeTr
 
 errorlog = open('errorlog.txt','w')
 locationlog = open('locationlog.txt','a')
+locationlog1 = open('locationlog.txt','a')
 
 req = urllib2.Request("http://api.open-notify.org/iss-now.json")
 

@@ -1,0 +1,2 @@
+serial connection GPIO failure
+serial connection USB failure
