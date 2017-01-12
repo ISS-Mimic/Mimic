@@ -32,7 +32,7 @@ from kivy.core.image import Image
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, WipeTransition, SwapTransition
 
 errorlog = open('errorlog.txt','w')
-locationlog = open('locationlog.txt','w')
+locationlog = open('locationlog.txt','a')
 
 req = urllib2.Request("http://api.open-notify.org/iss-now.json")
 
@@ -208,6 +208,10 @@ class FakeOrbitScreen(Screen):
         switchtofake = args[0]
         fakeorbitboolean = args[0]
 
+class EPS_Screen(Screen, EventDispatcher):
+    def __init__(self, **kwargs):
+        super(EPS_Screen, self).__init__(**kwargs)
+
 class MimicScreen(Screen, EventDispatcher):
     def __init__(self, **kwargs):
         super(MimicScreen, self).__init__(**kwargs)
@@ -266,16 +270,19 @@ class MainApp(App):
     def build(self):
         self.mimic_screen = MimicScreen(name = 'mimic')
         self.fakeorbit_screen = FakeOrbitScreen(name = 'fakeorbit')
+        self.eps_screen = EPS_Screen(name = 'eps')
 
         root = ScreenManager(transition=WipeTransition())
         root.add_widget(MainScreen(name = 'main'))
         root.add_widget(CalibrateScreen(name = 'calibrate'))
         root.add_widget(self.mimic_screen)
         root.add_widget(self.fakeorbit_screen)
+        root.add_widget(self.eps_screen)
         root.add_widget(ManualControlScreen(name = 'manualcontrol'))
         root.current= 'main'
     
         Clock.schedule_interval(self.update_labels, 1)
+        Clock.schedule_interval(self.checkAOSlong, 5)
         return root
 
     def serialWrite(self, *args):
@@ -299,6 +306,18 @@ class MainApp(App):
     def changeManualControlBoolean(self, *args):
         global manualcontrol
         manualcontrol = args[0]
+
+    def checkAOSlong(self, dt):
+        global aos
+        print "signal lost - writing longitude"
+        if float(aos) == 0.00:
+            response = urllib2.urlopen(req)
+            obj = json.loads(response.read())
+            locationlog.write("time ")
+            locationlog.write(str(obj['timestamp']))
+            locationlog.write(" long ")
+            locationlog.write(str(obj['iss_position']['longitude']))
+            locationlog.write('\n')
     
     def update_labels(self, dt):
         global mimicbutton
@@ -469,14 +488,6 @@ class MainApp(App):
                    switchtofake = False
             self.mimic_screen.ids.aosvalue.text = "Signal Acquired!"
         elif float(aos) == 0.00:
-            print "signal lost - writing longitude"
-            response = urllib2.urlopen(req)
-            obj = json.loads(response.read())
-            locationlog.write("time ")
-            locationlog.write(str(obj['timestamp']))
-            locationlog.write(" long ")
-            locationlog.write(str(obj['iss_position']['longitude']))
-            locationlog.write('\n')
             self.changeColors(1,0,0)
             if self.root.current == 'mimic':
                fakeorbitboolean = True
@@ -975,10 +986,22 @@ Builder.load_string('''
             text: 'Return'
             font_size: 30
             on_release: root.manager.current = 'main'
+<EPS_Screen>:
+    name: 'eps'
+    FloatLayout:
+        Image:
+            source: './imgs/iss2.png'
+            allow_stretch: True
+            keep_ratio: False
+        Button:
+            size_hint: 0.3,0.1
+            pos_hint: {"Left": 1, "Bottom": 1}
+            text: 'Return'
+            font_size: 30
+            on_release: root.manager.current = 'mimic'
 <MimicScreen>:
     name: 'mimic'
     FloatLayout:
-        psarjvalue: psarjvalue
         id: mimicscreenlayout
         Image:
             source: './imgs/iss2.png'
@@ -991,6 +1014,12 @@ Builder.load_string('''
             markup: True
             color: 0,0,0
             font_size: 30
+        Button:
+            size_hint: 0.3,0.1
+            pos_hint: {"Right": 1, "Bottom": 1}
+            text: 'EPS'
+            font_size: 30
+            on_release: root.manager.current = 'eps'
         Label:
             id: differencelabel
             pos_hint: {"center_x": 0.15, "center_y": 0.27}
