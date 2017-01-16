@@ -200,6 +200,12 @@ class FakeOrbitScreen(Screen):
 class EPS_Screen(Screen, EventDispatcher):
     pass
 
+class CT_Screen(Screen, EventDispatcher):
+    pass
+
+class TCS_Screen(Screen, EventDispatcher):
+    pass
+
 class MimicScreen(Screen, EventDispatcher):
     def changeMimicBoolean(self, *args):
         global mimicbutton
@@ -256,6 +262,8 @@ class MainApp(App):
         self.mimic_screen = MimicScreen(name = 'mimic')
         self.fakeorbit_screen = FakeOrbitScreen(name = 'fakeorbit')
         self.eps_screen = EPS_Screen(name = 'eps')
+        self.ct_screen = CT_Screen(name = 'ct')
+        self.tcs_screen = TCS_Screen(name = 'tcs')
 
         root = MainScreenManager(transition=WipeTransition())
         root.add_widget(MainScreen(name = 'main'))
@@ -263,6 +271,8 @@ class MainApp(App):
         root.add_widget(self.mimic_screen)
         root.add_widget(self.fakeorbit_screen)
         root.add_widget(self.eps_screen)
+        root.add_widget(self.ct_screen)
+        root.add_widget(self.tcs_screen)
         root.add_widget(ManualControlScreen(name = 'manualcontrol'))
         root.current= 'main'
     
@@ -274,18 +284,18 @@ class MainApp(App):
         ser.write(*args)
 
     def changeColors(self, *args):   #this function sets all labels on mimic screen to a certain color based on signal status
-        self.mimic_screen.ids.psarjvalue.color = args[0],args[1],args[2]
-        self.mimic_screen.ids.ssarjvalue.color = args[0],args[1],args[2]
-        self.mimic_screen.ids.ptrrjvalue.color = args[0],args[1],args[2]
-        self.mimic_screen.ids.strrjvalue.color = args[0],args[1],args[2]
-        self.mimic_screen.ids.beta1avalue.color = args[0],args[1],args[2]
-        self.mimic_screen.ids.beta1bvalue.color = args[0],args[1],args[2]
-        self.mimic_screen.ids.beta2avalue.color = args[0],args[1],args[2]
-        self.mimic_screen.ids.beta2bvalue.color = args[0],args[1],args[2]
-        self.mimic_screen.ids.beta3avalue.color = args[0],args[1],args[2]
-        self.mimic_screen.ids.beta3bvalue.color = args[0],args[1],args[2]
-        self.mimic_screen.ids.beta4avalue.color = args[0],args[1],args[2]
-        self.mimic_screen.ids.beta4bvalue.color = args[0],args[1],args[2]
+        self.eps_screen.ids.psarjvalue.color = args[0],args[1],args[2]
+        self.eps_screen.ids.ssarjvalue.color = args[0],args[1],args[2]
+        self.eps_screen.ids.ptrrjvalue.color = args[0],args[1],args[2]
+        self.eps_screen.ids.strrjvalue.color = args[0],args[1],args[2]
+        self.eps_screen.ids.beta1avalue.color = args[0],args[1],args[2]
+        self.eps_screen.ids.beta1bvalue.color = args[0],args[1],args[2]
+        self.eps_screen.ids.beta2avalue.color = args[0],args[1],args[2]
+        self.eps_screen.ids.beta2bvalue.color = args[0],args[1],args[2]
+        self.eps_screen.ids.beta3avalue.color = args[0],args[1],args[2]
+        self.eps_screen.ids.beta3bvalue.color = args[0],args[1],args[2]
+        self.eps_screen.ids.beta4avalue.color = args[0],args[1],args[2]
+        self.eps_screen.ids.beta4bvalue.color = args[0],args[1],args[2]
         self.mimic_screen.ids.aosvalue.color = args[0],args[1],args[2]
     
     def changeManualControlBoolean(self, *args):
@@ -294,8 +304,8 @@ class MainApp(App):
 
     def checkAOSlong(self, dt):
         global aos
-        print "signal lost - writing longitude"
         if float(aos) == 0.00:
+            print "signal lost - writing longitude"
             response = urllib2.urlopen(req)
             obj = json.loads(response.read())
             locationlog.write("time ")
@@ -451,18 +461,18 @@ class MainApp(App):
             self.serialWrite("Beta4A=" + beta4a + " ")
             self.serialWrite("AOS=" + aos + " ")
         
-        self.mimic_screen.ids.psarjvalue.text = psarj
-        self.mimic_screen.ids.ssarjvalue.text = ssarj
-        self.mimic_screen.ids.ptrrjvalue.text = ptrrj
-        self.mimic_screen.ids.strrjvalue.text = strrj
-        self.mimic_screen.ids.beta1bvalue.text = beta1b
-        self.mimic_screen.ids.beta1avalue.text = beta1a
-        self.mimic_screen.ids.beta2bvalue.text = beta2b
-        self.mimic_screen.ids.beta2avalue.text = beta2a
-        self.mimic_screen.ids.beta3bvalue.text = beta3b
-        self.mimic_screen.ids.beta3avalue.text = beta3a
-        self.mimic_screen.ids.beta4bvalue.text = beta4b
-        self.mimic_screen.ids.beta4avalue.text = beta4a
+        self.eps_screen.ids.psarjvalue.text = psarj
+        self.eps_screen.ids.ssarjvalue.text = ssarj
+        self.eps_screen.ids.ptrrjvalue.text = ptrrj
+        self.eps_screen.ids.strrjvalue.text = strrj
+        self.eps_screen.ids.beta1bvalue.text = beta1b
+        self.eps_screen.ids.beta1avalue.text = beta1a
+        self.eps_screen.ids.beta2bvalue.text = beta2b
+        self.eps_screen.ids.beta2avalue.text = beta2a
+        self.eps_screen.ids.beta3bvalue.text = beta3b
+        self.eps_screen.ids.beta3avalue.text = beta3a
+        self.eps_screen.ids.beta4bvalue.text = beta4b
+        self.eps_screen.ids.beta4avalue.text = beta4a
         self.mimic_screen.ids.difference.text = str(difference)
 
         if float(aos) == 1.00:
@@ -506,6 +516,8 @@ ScreenManager:
     MainScreen:
     FakeOrbitScreen:
     EPS_Screen:
+    CT_Screen:
+    TCS_Screen:
     ManualControlScreen:
     MimicScreen:
     CalibrateScreen:
@@ -979,6 +991,44 @@ ScreenManager:
             text: 'Return'
             font_size: 30
             on_release: root.manager.current = 'main'
+<CT_Screen>:
+    name: 'ct'
+    FloatLayout:
+        Image:
+            source: './imgs/iss2.png'
+            allow_stretch: True
+            keep_ratio: False
+        Label:
+            pos_hint: {"center_x": 0.15, "center_y": 0.8}
+            text: 'C&T Stuff'
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Button:
+            size_hint: 0.3,0.1
+            pos_hint: {"Left": 1, "Bottom": 1}
+            text: 'Return'
+            font_size: 30
+            on_release: app.root.current = 'mimic'
+<TCS_Screen>:
+    name: 'tcs'
+    FloatLayout:
+        Image:
+            source: './imgs/iss2.png'
+            allow_stretch: True
+            keep_ratio: False
+        Label:
+            pos_hint: {"center_x": 0.15, "center_y": 0.8}
+            text: 'TCS Stuff'
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Button:
+            size_hint: 0.3,0.1
+            pos_hint: {"Left": 1, "Bottom": 1}
+            text: 'Return'
+            font_size: 30
+            on_release: app.root.current = 'mimic'
 <EPS_Screen>:
     name: 'eps'
     FloatLayout:
@@ -987,7 +1037,7 @@ ScreenManager:
             allow_stretch: True
             keep_ratio: False
         Label:
-            pos_hint: {"center_x": 0.15, "center_y": 0.27}
+            pos_hint: {"center_x": 0.15, "center_y": 0.8}
             text: 'EPS Stuff'
             markup: True
             color: 1,0,1
@@ -997,49 +1047,7 @@ ScreenManager:
             pos_hint: {"Left": 1, "Bottom": 1}
             text: 'Return'
             font_size: 30
-            on_release: app.root.current = 'main'
-<MimicScreen>:
-    name: 'mimic'
-    FloatLayout:
-        id: mimicscreenlayout
-        Image:
-            source: './imgs/iss2.png'
-            allow_stretch: True
-            keep_ratio: False
-        Label:
-            id: EVAvalue
-            pos_hint: {"center_x": 0.2, "center_y": 0.17}
-            text: ''
-            markup: True
-            color: 0,0,0
-            font_size: 30
-        Button:
-            size_hint: 0.3,0.1
-            pos_hint: {"center_x": 0.15, "center_y": 0.4}
-            text: 'EPS'
-            font_size: 30
-            on_release: root.manager.current = 'eps'
-        Label:
-            id: differencelabel
-            pos_hint: {"center_x": 0.15, "center_y": 0.27}
-            text: 'Antenna dif'
-            markup: True
-            color: 1,0,1
-            font_size: 30
-        Label:
-            id: difference
-            pos_hint: {"center_x": 0.4, "center_y": 0.27}
-            text: '0.00'
-            markup: True
-            color: 1,0,1
-            font_size: 30
-        Label:
-            id: telemetrystatus
-            pos_hint: {"center_x": 0.25, "center_y": 0.85}
-            text: 'Telemetry'
-            markup: True
-            color: 1,0,1
-            font_size: 60
+            on_release: app.root.current = 'mimic'
         Label:
             id: psarjlabel
             pos_hint: {"center_x": 0.6, "center_y": 0.92}
@@ -1208,6 +1216,60 @@ ScreenManager:
             markup: True
             color: 1,1,1
             font_size: 30
+<MimicScreen>:
+    name: 'mimic'
+    FloatLayout:
+        id: mimicscreenlayout
+        Image:
+            source: './imgs/iss2.png'
+            allow_stretch: True
+            keep_ratio: False
+        Label:
+            id: EVAvalue
+            pos_hint: {"center_x": 0.2, "center_y": 0.17}
+            text: ''
+            markup: True
+            color: 0,0,0
+            font_size: 30
+        Button:
+            size_hint: 0.3,0.1
+            pos_hint: {"center_x": 0.65, "center_y": 0.65}
+            text: 'EPS'
+            font_size: 30
+            on_release: root.manager.current = 'eps'
+        Button:
+            size_hint: 0.3,0.1
+            pos_hint: {"center_x": 0.65, "center_y": 0.5}
+            text: 'CT'
+            font_size: 30
+            on_release: root.manager.current = 'ct'
+        Button:
+            size_hint: 0.3,0.1
+            pos_hint: {"center_x": 0.65, "center_y": 0.35}
+            text: 'TCS'
+            font_size: 30
+            on_release: root.manager.current = 'tcs'
+        Label:
+            id: differencelabel
+            pos_hint: {"center_x": 0.15, "center_y": 0.27}
+            text: 'Antenna dif'
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Label:
+            id: difference
+            pos_hint: {"center_x": 0.4, "center_y": 0.27}
+            text: '0.00'
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Label:
+            id: telemetrystatus
+            pos_hint: {"center_x": 0.25, "center_y": 0.85}
+            text: 'Telemetry'
+            markup: True
+            color: 1,0,1
+            font_size: 60
         Label:
             id: aoslabel
             pos_hint: {"center_x": 0.53, "center_y": 0.05}
