@@ -103,17 +103,11 @@ def StringToBytes(val):
     return retVal
 
 class MainScreen(Screen):
-    def __init__(self, **kwargs):
-        super(MainScreen, self).__init__(**kwargs)
-    
     def changeManualControlBoolean(self, *args):
         global manualcontrol
         manualcontrol = args[0]
         
 class CalibrateScreen(Screen):
-    def __init__(self, **kwargs):
-        super(CalibrateScreen, self).__init__(**kwargs)
-   
     def serialWrite(self, *args):
         ser.write(*args)
 
@@ -126,9 +120,6 @@ class CalibrateScreen(Screen):
         zerocomplete = args[0]
 
 class ManualControlScreen(Screen):
-    def __init__(self, **kwargs):
-        super(ManualControlScreen, self).__init__(**kwargs)
-    
     def incrementPSARJ(self, *args):
         global psarjmc
         psarjmc += args[0]
@@ -197,9 +188,6 @@ class ManualControlScreen(Screen):
         ser.write(*args)
    
 class FakeOrbitScreen(Screen):
-    def __init__(self, **kwargs):
-        super(FakeOrbitScreen, self).__init__(**kwargs)
-
     def serialWrite(self, *args):
         ser.write(*args)
     
@@ -210,13 +198,9 @@ class FakeOrbitScreen(Screen):
         fakeorbitboolean = args[0]
 
 class EPS_Screen(Screen, EventDispatcher):
-    def __init__(self, **kwargs):
-        super(EPS_Screen, self).__init__(**kwargs)
+    pass
 
 class MimicScreen(Screen, EventDispatcher):
-    def __init__(self, **kwargs):
-        super(MimicScreen, self).__init__(**kwargs)
-   
     def changeMimicBoolean(self, *args):
         global mimicbutton
         mimicbutton = args[0]
@@ -273,7 +257,7 @@ class MainApp(App):
         self.fakeorbit_screen = FakeOrbitScreen(name = 'fakeorbit')
         self.eps_screen = EPS_Screen(name = 'eps')
 
-        root = ScreenManager(transition=WipeTransition())
+        root = MainScreenManager(transition=WipeTransition())
         root.add_widget(MainScreen(name = 'main'))
         root.add_widget(CalibrateScreen(name = 'calibrate'))
         root.add_widget(self.mimic_screen)
@@ -518,6 +502,14 @@ Builder.load_string('''
 #:kivy 1.8
 #:import kivy kivy
 #:import win kivy.core.window
+ScreenManager:
+    MainScreen:
+    FakeOrbitScreen:
+    EPS_Screen:
+    ManualControlScreen:
+    MimicScreen:
+    CalibrateScreen:
+
 <MainScreen>:
     name: 'main'
     FloatLayout:
@@ -574,7 +566,7 @@ Builder.load_string('''
                 font_size: 30
                 width: 50
                 height: 20
-                on_release: root.manager.current = 'mimic'
+                on_release: app.root.current = 'mimic'
             Button:
                 text: 'Exit'
                 font_size: 30
@@ -994,12 +986,18 @@ Builder.load_string('''
             source: './imgs/iss2.png'
             allow_stretch: True
             keep_ratio: False
+        Label:
+            pos_hint: {"center_x": 0.15, "center_y": 0.27}
+            text: 'EPS Stuff'
+            markup: True
+            color: 1,0,1
+            font_size: 30
         Button:
             size_hint: 0.3,0.1
             pos_hint: {"Left": 1, "Bottom": 1}
             text: 'Return'
             font_size: 30
-            on_release: root.manager.current = 'mimic'
+            on_release: app.root.current = 'main'
 <MimicScreen>:
     name: 'mimic'
     FloatLayout:
@@ -1017,7 +1015,7 @@ Builder.load_string('''
             font_size: 30
         Button:
             size_hint: 0.3,0.1
-            pos_hint: {"Right": 1, "Bottom": 1}
+            pos_hint: {"center_x": 0.15, "center_y": 0.4}
             text: 'EPS'
             font_size: 30
             on_release: root.manager.current = 'eps'
@@ -1238,7 +1236,7 @@ Builder.load_string('''
         Button:
             id: mimicstopbutton
             size_hint: 0.25,0.1
-            pos_hint: {"x": 0.07, "y": 0.4}
+            pos_hint: {"x": 0.07, "y": 0.5}
             text: 'Stop'
             disabled: True
             font_size: 30
@@ -1254,7 +1252,7 @@ Builder.load_string('''
             font_size: 30
             on_release: root.changeMimicBoolean(False)
             on_release: root.changeSwitchBoolean(False)
-            on_release: root.manager.current = 'main'
+            on_release: app.root.current = 'main'
            
 <TriangleButton>:
     canvas.after:
