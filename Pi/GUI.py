@@ -1033,7 +1033,7 @@ ScreenManager:
     name: 'eps'
     FloatLayout:
         Image:
-            source: './imgs/iss2.png'
+            source: './imgs/iss1.png'
             allow_stretch: True
             keep_ratio: False
         Label:
