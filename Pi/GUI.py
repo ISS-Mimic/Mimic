@@ -37,18 +37,32 @@ locationlog = open('locationlog.txt','a')
 req = urllib2.Request("http://api.open-notify.org/iss-now.json")
 
 try:
-    ser = serial.Serial('/dev/ttyUSB0', 115200)
+    ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=0)
 except:
     print "Serial connection GPIO failure"
     errorlog.write("serial connection GPIO failure")
     errorlog.write('\n')
 
+#try:
+#    ser = serial.Serial('/dev/ttyUSB1', 115200)#, write_timeout=0.5)
+#except:
+#    print "Serial connection GPIO2 failure"
+#    errorlog.write("serial connection GPIO failure")
+#    errorlog.write('\n')
+
 try:
-    ser = serial.Serial('/dev/ttyACM0', 115200)
+    ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
 except:
     print "Serial connection USB failure"
     errorlog.write("serial connection USB failure")
     errorlog.write('\n')
+
+#try:
+#    ser = serial.Serial('/dev/ttyAMA0', 115200)#, write_timeout=0.5)
+#except:
+#    print "Serial connection USB2 failure"
+#    errorlog.write("serial connection USB failure")
+#    errorlog.write('\n')
 
 mimicbutton = False
 fakeorbitboolean = False
@@ -76,8 +90,6 @@ beta3a = 0.00
 beta4b = 0.00
 beta4a = 0.00
 aos = 0.00
-changed = False
-popuptriggered = False
 los = 0.00
 oldLOS = 0.00
 psarjmc = 0.00
@@ -347,8 +359,6 @@ class MainApp(App):
         global beta3amc
         global beta4bmc
         global beta4amc
-        global changed     
-        global popuptriggered
         global EVAinProgress
 
 
@@ -413,24 +423,10 @@ class MainApp(App):
             self.mimic_screen.ids.EVAvalue.text = ""
             self.mimic_screen.ids.EVAvalue.color = 0,0,0
 
-        if float(los) == 1.0 and changed == True:
-            popuptriggered = True
-        
-        if float(los) == 0.0:
-            popuptriggered = False
-
-        if oldLOS == los:
-            changed = False
-        else:
-            changed = True
-
-        oldLOS = los
-        
-        if popuptriggered == True:
-            LOSpopup = Popup(title='Loss of Signal', content=Label(text='Possible LOS Soon'),size_hint=(0.3,0.2),auto_dismiss=True)
-            LOSpopup.open()
-            popuptriggered = False
-            print "popup"    
+#        if (difference > -10) && (isinstance(App.get_running_app().root_window.children[0], Popup)==False):
+#            LOSpopup = Popup(title='Loss of Signal', content=Label(text='Possible LOS Soon'),size_hint=(0.3,0.2),auto_dismiss=True)
+#            LOSpopup.open()
+#            print "popup"    
 
         if (fakeorbitboolean == True and (mimicbutton == True or switchtofake == True)):
             if psarj2 <= 0.00:
