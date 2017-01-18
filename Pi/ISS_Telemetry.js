@@ -5,12 +5,15 @@ function alert(message)
 var ls = require("lightstreamer-client");
 var sqlite3 = require('sqlite3');
 var db = new sqlite3.Database("iss_telemetry.db");
+var telemetry = require('./identifiers.js');
+var classes = ['TimeStamp','Value'];
 
 var lsClient = new ls.LightstreamerClient("http://push.lightstreamer.com","ISSLIVE");
 
 lsClient.connectionOptions.setSlowingEnabled(false);
 
-var sub = new ls.Subscription("MERGE",["S0000004","S0000003","S0000002","S0000001","S6000008","S6000007","S4000008","S4000007","P4000007","P4000008","P6000007","P6000008","USLAB000102","Z1000014","S1000005","AIRLOCK000049"],["TimeStamp","Value"]);
+var sub = new ls.Subscription("MERGE",telemetry.identifiers,classes);
+//var sub = new ls.Subscription("MERGE",["S0000004","S0000003","S0000002","S0000001","S6000008","S6000007","S4000008","S4000007","P4000007","P4000008","P6000007","P6000008","USLAB000102","Z1000014","S1000005","AIRLOCK000049"],["TimeStamp","Value"]);
 
 var timeSub = new ls.Subscription('MERGE', 'TIME_000001', ['TimeStamp','Value','Status.Class','Status.Indicator']);
 
