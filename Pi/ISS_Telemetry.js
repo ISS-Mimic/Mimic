@@ -40,7 +40,7 @@ var PTRRJ;
 var STRRJ;
 var Beta1A;
 var Beta1B;
-var Beta2A;
+var Beta2A [≈ High power LED current, peak 2.7 A];
 var Beta2B;
 var Beta3A;
 var Beta3B;
@@ -117,8 +117,8 @@ sub.addListener({
 		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "beta1a");
 		break;
 	  case "P4000007":
-		Beta2A = update.getValue("Value");
-		db.run("UPDATE telemetry set Value = ? where Label = ?", Beta2A, "beta2a");
+		Beta2A [≈ High power LED current, peak 2.7 A] = update.getValue("Value");
+		db.run("UPDATE telemetry set Value = ? where Label = ?", Beta2A [≈ High power LED current, peak 2.7 A], "beta2a");
 		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "beta2a");
 		break;
 	  case "P4000008":
@@ -164,7 +164,7 @@ sub.addListener({
 		
 		//console.log("Potential LOS in: " + Number(((Math.abs(angleDif)/Math.abs(averageSlew))+correction))/60 + "m");
 		
-		if (Math.abs(angleDif) < 10) // && SGANT_elevation > 70)
+		if (angleDif > -10) // && SGANT_elevation > 70)
 		{
 			LOS = 1;
 		}
@@ -184,6 +184,136 @@ sub.addListener({
 		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "crewlock_pres");
 		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "crewlock_pres");
 		break;
+		
+		
+		
+	  case "S4000001":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "voltage_1a");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "voltage_1a");
+		break;
+	  case "S4000002":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "current_1a");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "current_1a");
+		break;
+	  case "S6000004":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "voltage_1b");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "voltage_1b");
+		break;
+	  case "S6000005":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "current_1b");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "current_1b");
+		break;
+	  case "P4000001":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "voltage_2a");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "voltage_2a");
+		break;
+	  case "P4000002":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "current_2a");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "current_2a");
+		break;
+	  case "P6000004":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "voltage_2b");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "voltage_2b");
+		break;
+	  case "P6000005":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "current_2b");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "current_2b");
+		break;
+	  case "S4000004":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "voltage_3a");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "voltage_3a");
+		break;
+	  case "S4000005":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "current_3a");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "current_3a");
+		break;
+	  case "S6000001":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "voltage_3b");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "voltage_3b");
+		break;
+	  case "S6000002":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "current_3b");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "current_3b");
+		break;
+	  case "P4000004":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "voltage_4a");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "voltage_4a");
+		break;
+	  case "P4000005":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "current_4a");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "current_4a");
+		break;
+	  case "P6000001":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "voltage_4b");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "voltage_4b");
+		break;
+	  case "P6000002":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "current_4b");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "current_4b");
+		break;
+		
+		
+		
+	  case "S0000006":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "ptrrj_mode");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "ptrrj_mode");
+		break;
+	  case "S0000007":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "strrj_mode");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "strrj_mode");
+		break;
+	  case "S0000008":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "psarj_mode");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "psarj_mode");
+		break;
+	  case "S0000009":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "ssarj_mode");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "ssarj_mode");
+		break;
+	  case "Z1000013":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "kuband_transmit");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "kuband_transmit");
+		break;
+	  case "RUSSEG000001":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "russian_mode");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "russian_mode");
+		break;
+	  case "USLAB000039":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "iss_mass");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "iss_mass");
+		break;
+	  case "USLAB000012":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "us_gnc_mode");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "us_gnc_mode");
+		break;
+	  case "USLAB000086":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "iss_mode");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "iss_mode");
+		break;
+	  case "S1000001":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "loopa_flowrate");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "loopa_flowrate");
+		break;
+	  case "S1000002":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "loopa_pressure");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "loopa_pressure");
+		break;
+	  case "S1000003":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "loopa_temp");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "loopa_temp");
+		break;
+	  case "P1000001":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "loopb_flowrate");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "loopb_flowrate");
+		break;
+	  case "P1000002":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "loopb_pressure");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "loopb_pressure");
+		break;		
+	  case "P1000003":
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "loopb_temp");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "loopb_temp");
+		break;	
     } 
   }
 });
