@@ -78,68 +78,68 @@ sub.addListener({
 	switch (update.getItemName()){
 	  case "S0000004":
 		PSARJ = update.getValue("Value");
-		db.run("UPDATE telemetry set two = ? where one = ?", PSARJ, "psarj");
-		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "psarj");
+		db.run("UPDATE telemetry set Value = ? where Label = ?", PSARJ, "psarj");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "psarj");
 		break;
 	  case "S0000003":
 		SSARJ = update.getValue("Value");
-		db.run("UPDATE telemetry set two = ? where one = ?", SSARJ, "ssarj");
-		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "ssarj");
+		db.run("UPDATE telemetry set Value = ? where Label = ?", SSARJ, "ssarj");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "ssarj");
 		break;
 	  case "S0000002":
 		PTRRJ = update.getValue("Value");
-		db.run("UPDATE telemetry set two = ? where one = ?", PTRRJ, "ptrrj");
-		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "ptrrj");
+		db.run("UPDATE telemetry set Value = ? where Label = ?", PTRRJ, "ptrrj");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "ptrrj");
 		break;
 	  case "S0000001":
 		STRRJ = update.getValue("Value");
-		db.run("UPDATE telemetry set two = ? where one = ?", STRRJ, "strrj");
-		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "strrj");
+		db.run("UPDATE telemetry set Value = ? where Label = ?", STRRJ, "strrj");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "strrj");
 		break;
 	  case "S6000008":
 		Beta1B = update.getValue("Value");
-		db.run("UPDATE telemetry set two = ? where one = ?", Beta1B, "beta1b");
-		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "beta1b");
+		db.run("UPDATE telemetry set Value = ? where Label = ?", Beta1B, "beta1b");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "beta1b");
 		break;
 	  case "S6000007":
 		Beta3B = update.getValue("Value");
-		db.run("UPDATE telemetry set two = ? where one = ?", Beta3B, "beta3b");
-		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "beta3b");
+		db.run("UPDATE telemetry set Value = ? where Label = ?", Beta3B, "beta3b");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "beta3b");
 		break;
 	  case "S4000008":
 		Beta3A = update.getValue("Value");
-		db.run("UPDATE telemetry set two = ? where one = ?", Beta3A, "beta3a");
-		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "beta3a");
+		db.run("UPDATE telemetry set Value = ? where Label = ?", Beta3A, "beta3a");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "beta3a");
 		break;
 	  case "S4000007":
 		Beta1A = update.getValue("Value");
-		db.run("UPDATE telemetry set two = ? where one = ?", Beta1A, "beta1a");
-		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "beta1a");
+		db.run("UPDATE telemetry set Value = ? where Label = ?", Beta1A, "beta1a");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "beta1a");
 		break;
 	  case "P4000007":
 		Beta2A = update.getValue("Value");
-		db.run("UPDATE telemetry set two = ? where one = ?", Beta2A, "beta2a");
-		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "beta2a");
+		db.run("UPDATE telemetry set Value = ? where Label = ?", Beta2A, "beta2a");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "beta2a");
 		break;
 	  case "P4000008":
 		Beta4A = update.getValue("Value");
-		db.run("UPDATE telemetry set two = ? where one = ?", Beta4A, "beta4a");
-		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "beta4a");
+		db.run("UPDATE telemetry set Value = ? where Label = ?", Beta4A, "beta4a");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "beta4a");
 		break;
 	  case "P6000007":
 		Beta4B = update.getValue("Value");
-		db.run("UPDATE telemetry set two = ? where one = ?", Beta4B, "beta4b");
-		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "beta4b");
+		db.run("UPDATE telemetry set Value = ? where Label = ?", Beta4B, "beta4b");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "beta4b");
 		break;
 	  case "P6000008":
 		Beta2B = update.getValue("Value");
-		db.run("UPDATE telemetry set two = ? where one = ?", Beta2B, "beta2b");
-		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "beta2b");
+		db.run("UPDATE telemetry set Value = ? where Label = ?", Beta2B, "beta2b");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "beta2b");
 		break;
 	  case "Z1000014":
 		SGANT_elevation = update.getValue("Value");
-		db.run("UPDATE telemetry set two = ? where one = ?", update.getValue("Value"), "sgant_elevation");
-		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "sgant_elevation");
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "sgant_elevation");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "sgant_elevation");
 		angleDif = (SGANT_elevation - SASA_elevation);
 		var currentAngleTime = ((new Date).getTime())/1000;
 		var difSlewRate = (oldAngleDif-angleDif)/(oldAngleTime-currentAngleTime);
@@ -172,17 +172,17 @@ sub.addListener({
 		{
 			LOS = 0;
 		}
-		db.run("UPDATE telemetry set two = ? where one = ?", LOS, "los");
-		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "los");
+		db.run("UPDATE telemetry set Value = ? where Label = ?", LOS, "los");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "los");
 		break;
 	  case "S1000005":
 		SASA_elevation = update.getValue("Value");
-		db.run("UPDATE telemetry set two = ? where one = ?", update.getValue("Value"), "sasa_elevation");
-		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "sasa_elevation");
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "sasa_elevation");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "sasa_elevation");
 		break;
 	  case "AIRLOCK000049":
-		db.run("UPDATE telemetry set two = ? where one = ?", update.getValue("Value"), "crewlock_pres");
-		db.run("UPDATE telemetry set timestamp = ? where one = ?", update.getValue("TimeStamp"), "crewlock_pres");
+		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "crewlock_pres");
+		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "crewlock_pres");
 		break;
     } 
   }
@@ -217,7 +217,7 @@ timeSub.addListener({
 	  AOS = "Signal Lost";
 	  AOSnum = 0;
 	}	
-	db.run("UPDATE telemetry set two = ? where one = ?", AOSnum, "aos");
-	db.run("UPDATE telemetry set timestamp = ? where one = ?", AOStimestamp, "aos");
+	db.run("UPDATE telemetry set Value = ? where Label = ?", AOSnum, "aos");
+	db.run("UPDATE telemetry set Timestamp = ? where Label = ?", AOStimestamp, "aos");
   }
 });
