@@ -25,7 +25,10 @@ var avgSlew = [0.00, 0.00, 0.00, 0.00, 0.00];
 var angleDif = 0.00;
 var index = 0;
 var SGANT_elevation = 0.00;
+var SASA1_elevation = 0.00;
+var SASA2_elevation = 0.00;
 var SASA_elevation = 0.00;
+var active_sasa = -1.00;
 var oldAngleDif = 0.00;
 var oldAngleTime = 0.00;
 var oldSGANT_el = 0.00;
@@ -64,6 +67,12 @@ sub.addListener({
   },
   onItemUpdate: function(update) {
     switch (update.getItemName()){
+      case "USLAB000092":
+        active_sasa = update.getValue("Value");
+        console.log("active sasa: " + active_sasa);
+        db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "active_sasa");
+        db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "active_sasa");
+        break;
       case "S0000004":
         db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "psarj");
         db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "psarj");
@@ -113,6 +122,14 @@ sub.addListener({
         db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "beta2b");
         break;
       case "Z1000014":
+        if( active_sasa == 1 )
+        {
+            SASA_elevation = SASA1_elevation
+        }
+        else
+        {
+            SASA_elevation = SASA2_elevation
+        }
         SGANT_elevation = update.getValue("Value");
         db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "sgant_elevation");
         db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "sgant_elevation");
@@ -122,15 +139,15 @@ sub.addListener({
         avgSlew[index] = difSlewRate;
         SGANT[index] = (oldSGANT_el - SGANT_elevation) / (oldAngleTime - currentAngleTime);
         index++;
-        if(index > 4)
+        if( index > 4 )
         {
             index = 0;
         }
         oldAngleTime = currentAngleTime;
         oldSGANT_el = SGANT_elevation;
         oldAngleDif = angleDif;
-       
-        if (angleDif > -10) // && SGANT_elevation > 70)
+
+        if ( angleDif > -10 ) // && SGANT_elevation > 70)
         {
             LOS = 1;
         }
@@ -142,9 +159,9 @@ sub.addListener({
         db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "los");
         break;
       case "S1000005":
-        SASA_elevation = update.getValue("Value");
-        db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "sasa_elevation");
-        db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "sasa_elevation");
+        SASA1_elevation = update.getValue("Value");
+        db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "sasa1_elevation");
+        db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "sasa1_elevation");
         break;
       case "AIRLOCK000049":
         db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "crewlock_pres");
@@ -273,6 +290,31 @@ sub.addListener({
       case "P1000003":
         db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "loopb_temp");
         db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "loopb_temp");
+        break;
+      case "Z1000015":
+        db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "sgant_xel");
+        db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "sgant_xe;");
+        break;
+      case "P1000004":
+        db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "sasa2_azimuth");
+        db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "sasa2_azimuth");
+        break;
+      case "P1000005":
+        SASA2_elevation = update.getValue("Value");
+        db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "sasa2_elevation");
+        db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "sasa2_elevation");
+        break;
+      case "P1000007":
+        db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "sasa2_status");
+        db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "sasa2_status");
+        break;
+      case "S1000004":
+        db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "sasa1_azimuth");
+        db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "sasa1_azimuth");
+        break;
+      case "S1000009":
+        db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "sasa1_status");
+        db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "sasa1_status");
         break;
     }
   }
