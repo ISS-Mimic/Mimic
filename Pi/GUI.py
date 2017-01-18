@@ -362,58 +362,58 @@ class MainApp(App):
         global EVAinProgress
 
 
-        c.execute('select two from telemetry')
+        c.execute('select Value from telemetry')
         values = c.fetchall()
-        c.execute('select timestamp from telemetry')
+        c.execute('select Timestamp from telemetry')
         timestamps = c.fetchall()
 
-        psarj = "{:.2f}".format((values[0])[0])
+        psarj = "{:.2f}".format(float((values[0])[0]))
         if switchtofake == False:
             psarj2 = float(psarj)
         if manualcontrol == False:
             psarjmc = float(psarj)
-        ssarj = "{:.2f}".format((values[1])[0])
+        ssarj = "{:.2f}".format(float((values[1])[0]))
         if switchtofake == False:
             ssarj2 = float(ssarj)
         if manualcontrol == False:
             ssarjmc = float(ssarj)
-        ptrrj = "{:.2f}".format((values[2])[0])
+        ptrrj = "{:.2f}".format(float((values[2])[0]))
         if manualcontrol == False:
             ptrrjmc = float(ptrrj)
-        strrj = "{:.2f}".format((values[3])[0])
+        strrj = "{:.2f}".format(float((values[3])[0]))
         if manualcontrol == False:
             strrjmc = float(strrj)
-        beta1b = "{:.2f}".format((values[4])[0])
+        beta1b = "{:.2f}".format(float((values[4])[0]))
         if manualcontrol == False:
             beta1bmc = float(beta1b)
-        beta1a = "{:.2f}".format((values[5])[0])
+        beta1a = "{:.2f}".format(float((values[5])[0]))
         if manualcontrol == False:
             beta1amc = float(beta1a)
-        beta2b = "{:.2f}".format((values[6])[0])
+        beta2b = "{:.2f}".format(float((values[6])[0]))
         if manualcontrol == False:
             beta2bmc = float(beta2b)
-        beta2a = "{:.2f}".format((values[7])[0])
+        beta2a = "{:.2f}".format(float((values[7])[0]))
         if manualcontrol == False:
             beta2amc = float(beta2a)
-        beta3b = "{:.2f}".format((values[8])[0])
+        beta3b = "{:.2f}".format(float((values[8])[0]))
         if manualcontrol == False:
             beta3bmc = float(beta3b)
-        beta3a = "{:.2f}".format((values[9])[0])
+        beta3a = "{:.2f}".format(float((values[9])[0]))
         if manualcontrol == False:
             beta3amc = float(beta3a)
-        beta4b = "{:.2f}".format((values[10])[0])
+        beta4b = "{:.2f}".format(float((values[10])[0]))
         if manualcontrol == False:
             beta4bmc = float(beta4b)
-        beta4a = "{:.2f}".format((values[11])[0])
+        beta4a = "{:.2f}".format(float((values[11])[0]))
         if manualcontrol == False:
             beta4amc = float(beta4a)
         aos = "{:.2f}".format(int((values[12])[0]))
         los = "{:.2f}".format(int((values[13])[0]))      
-        sasa_el = "{:.2f}".format((values[14])[0])
-        sgant_el = "{:.2f}".format((values[15])[0])
+        sasa_el = "{:.2f}".format(float((values[14])[0]))
+        sgant_el = "{:.2f}".format(float((values[15])[0]))
         difference = float(sgant_el)-float(sasa_el) 
-
-        crewlockpres = "{:.2f}".format((values[16])[0])
+        crewlockpres = "{:.2f}".format(float((values[16])[0]))
+        
         if float(crewlockpres) < 500:
             EVAinProgress = True
             self.mimic_screen.ids.EVAvalue.text = "EVA in Progress!!!"
