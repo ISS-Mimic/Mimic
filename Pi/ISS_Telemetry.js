@@ -40,7 +40,7 @@ var PTRRJ;
 var STRRJ;
 var Beta1A;
 var Beta1B;
-var Beta2A [≈ High power LED current, peak 2.7 A];
+var Beta2A;
 var Beta2B;
 var Beta3A;
 var Beta3B;
@@ -184,9 +184,6 @@ sub.addListener({
 		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "crewlock_pres");
 		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "crewlock_pres");
 		break;
-		
-		
-		
 	  case "S4000001":
 		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "voltage_1a");
 		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "voltage_1a");
@@ -250,10 +247,7 @@ sub.addListener({
 	  case "P6000002":
 		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "current_4b");
 		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "current_4b");
-		break;
-		
-		
-		
+		break;	
 	  case "S0000006":
 		db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "ptrrj_mode");
 		db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "ptrrj_mode");
