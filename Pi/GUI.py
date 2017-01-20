@@ -5,6 +5,7 @@ import sqlite3
 import serial
 import sched, time
 import smbus
+import math
 import time
 from Naked.toolshed.shell import execute_js, muterun_js
 import os
@@ -105,7 +106,15 @@ beta3amc = 0.00
 beta4bmc = 0.00
 beta4amc = 0.00
 EVAinProgress = False
-
+position_x = 0.00
+position_y = 0.00
+position_z = 0.00
+velocity_x = 0.00
+velocity_y = 0.00
+velocity_z = 0.00
+velocity = 0.00
+altitude = 0.00
+mass = 0.00
 
 def StringToBytes(val):
     retVal = []
@@ -360,13 +369,21 @@ class MainApp(App):
         global beta4bmc
         global beta4amc
         global EVAinProgress
-
-
+        global position_x
+        global position_y
+        global position_z
+        global velocity_x
+        global velocity_y
+        global velocity_z
+        global altitude
+        global velocity
+        global iss_mass     
+ 
         c.execute('select Value from telemetry')
         values = c.fetchall()
         c.execute('select Timestamp from telemetry')
         timestamps = c.fetchall()
-
+        
         psarj = "{:.2f}".format(float((values[0])[0]))
         if switchtofake == False:
             psarj2 = float(psarj)
@@ -413,7 +430,7 @@ class MainApp(App):
         sgant_el = "{:.2f}".format(float((values[15])[0]))
         difference = float(sgant_el)-float(sasa_el) 
         crewlockpres = "{:.2f}".format(float((values[16])[0]))
-        
+
         if float(crewlockpres) < 500:
             EVAinProgress = True
             self.mimic_screen.ids.EVAvalue.text = "EVA in Progress!!!"
@@ -427,6 +444,17 @@ class MainApp(App):
 #            LOSpopup = Popup(title='Loss of Signal', content=Label(text='Possible LOS Soon'),size_hint=(0.3,0.2),auto_dismiss=True)
 #            LOSpopup.open()
 #            print "popup"    
+
+        iss_mass = "{:.2f}".format(float((values[48])[0]))
+        position_x = "{:.2f}".format(float((values[55])[0]))
+        position_y = "{:.2f}".format(float((values[56])[0]))
+        position_z = "{:.2f}".format(float((values[57])[0]))
+        velocity_x = "{:.2f}".format(float((values[58])[0]))
+        velocity_y = "{:.2f}".format(float((values[59])[0]))
+        velocity_z = "{:.2f}".format(float((values[60])[0]))
+        
+        altitude = "{:.2f}".format((math.sqrt( math.pow(float(position_x), 2) + math.pow(float(position_y), 2) + math.pow(float(position_z), 2) )-6371.00))
+        velocity = "{:.2f}".format(((math.sqrt( math.pow(float(velocity_x), 2) + math.pow(float(velocity_y), 2) + math.pow(float(velocity_z), 2) ))/1.00))
 
         if (fakeorbitboolean == True and (mimicbutton == True or switchtofake == True)):
             if psarj2 <= 0.00:
@@ -469,6 +497,9 @@ class MainApp(App):
         self.eps_screen.ids.beta4bvalue.text = beta4b
         self.eps_screen.ids.beta4avalue.text = beta4a
         self.mimic_screen.ids.difference.text = str(difference)
+        self.mimic_screen.ids.altitude_value.text = str(altitude) + " km"
+        self.mimic_screen.ids.velocity_value.text = str(velocity) + " m/s"
+        self.mimic_screen.ids.stationmass_value.text = str(iss_mass) + " kg"
 
         if float(aos) == 1.00:
             self.changeColors(0,1,0)
@@ -1268,63 +1299,63 @@ ScreenManager:
             pos_hint: {"center_x": 0.6, "center_y": 0.78}
             text: 'ISS Information'
             markup: True
-            color: 0,0,1
+            color: 1,1,1
             font_size: 30
         Label:
             id: velocity_label
             pos_hint: {"center_x": 0.45, "center_y": 0.7}
             text: 'Speed'
             markup: True
-            color: 0,0,1
+            color: 1,1,1
             font_size: 30
         Label:
             id: velocity_value
             pos_hint: {"center_x": 0.75, "center_y": 0.7}
             text: '0.00'
             markup: True
-            color: 0,0,1
+            color: 1,1,1
             font_size: 30
         Label:
             id: altitude_label
             pos_hint: {"center_x": 0.45, "center_y": 0.6}
             text: 'Altitude'
             markup: True
-            color: 0,0,1
+            color: 1,1,1
             font_size: 30
         Label:
             id: altitude_value
             pos_hint: {"center_x": 0.75, "center_y": 0.6}
             text: '0.00'
             markup: True
-            color: 0,0,1
+            color: 1,1,1
             font_size: 30
         Label:
             id: stationmass_label
             pos_hint: {"center_x": 0.45, "center_y": 0.5}
             text: 'Total Mass'
             markup: True
-            color: 0,0,1
+            color: 1,1,1
             font_size: 30
         Label:
             id: stationmass_value
             pos_hint: {"center_x": 0.75, "center_y": 0.5}
             text: '0.00 kg'
             markup: True
-            color: 0,0,1
+            color: 1,1,1
             font_size: 30
         Label:
             id: stationmode_label
             pos_hint: {"center_x": 0.45, "center_y": 0.4}
             text: 'Station Mode'
             markup: True
-            color: 0,0,1
+            color: 1,1,1
             font_size: 30
         Label:
             id: stationmode_value
             pos_hint: {"center_x": 0.75, "center_y": 0.4}
             text: 'Standard'
             markup: True
-            color: 0,0,1
+            color: 1,1,1
             font_size: 30
         Label:
             id: aoslabel
