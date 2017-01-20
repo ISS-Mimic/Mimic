@@ -1216,7 +1216,7 @@ ScreenManager:
     FloatLayout:
         id: mimicscreenlayout
         Image:
-            source: './imgs/iss2.png'
+            source: './imgs/iss_photo1.jpg'
             allow_stretch: True
             keep_ratio: False
         Label:
@@ -1227,44 +1227,105 @@ ScreenManager:
             color: 0,0,0
             font_size: 30
         Button:
-            size_hint: 0.3,0.1
-            pos_hint: {"center_x": 0.65, "center_y": 0.65}
+            size_hint: 0.2,0.1
+            pos_hint: {"center_x": 0.12, "center_y": 0.9}
             text: 'EPS'
             font_size: 30
             on_release: root.manager.current = 'eps'
         Button:
-            size_hint: 0.3,0.1
-            pos_hint: {"center_x": 0.65, "center_y": 0.5}
-            text: 'CT'
+            size_hint: 0.2,0.1
+            pos_hint: {"center_x": 0.37, "center_y": 0.9}
+            text: 'C&T'
             font_size: 30
             on_release: root.manager.current = 'ct'
         Button:
-            size_hint: 0.3,0.1
-            pos_hint: {"center_x": 0.65, "center_y": 0.35}
+            size_hint: 0.2,0.1
+            pos_hint: {"center_x": 0.62, "center_y": 0.9}
             text: 'TCS'
+            font_size: 30
+            on_release: root.manager.current = 'tcs'
+        Button:
+            size_hint: 0.2,0.1
+            pos_hint: {"center_x": 0.87, "center_y": 0.9}
+            text: 'GNC'
             font_size: 30
             on_release: root.manager.current = 'tcs'
         Label:
             id: differencelabel
-            pos_hint: {"center_x": 0.15, "center_y": 0.27}
+            pos_hint: {"center_x": 0.15, "center_y": 0.22}
             text: 'Antenna dif'
             markup: True
             color: 1,0,1
             font_size: 30
         Label:
             id: difference
-            pos_hint: {"center_x": 0.4, "center_y": 0.27}
+            pos_hint: {"center_x": 0.4, "center_y": 0.22}
             text: '0.00'
             markup: True
             color: 1,0,1
             font_size: 30
         Label:
-            id: telemetrystatus
-            pos_hint: {"center_x": 0.25, "center_y": 0.85}
-            text: 'Telemetry'
+            pos_hint: {"center_x": 0.6, "center_y": 0.78}
+            text: 'ISS Information'
             markup: True
-            color: 1,0,1
-            font_size: 60
+            color: 0,0,1
+            font_size: 30
+        Label:
+            id: velocity_label
+            pos_hint: {"center_x": 0.45, "center_y": 0.7}
+            text: 'Speed'
+            markup: True
+            color: 0,0,1
+            font_size: 30
+        Label:
+            id: velocity_value
+            pos_hint: {"center_x": 0.75, "center_y": 0.7}
+            text: '0.00'
+            markup: True
+            color: 0,0,1
+            font_size: 30
+        Label:
+            id: altitude_label
+            pos_hint: {"center_x": 0.45, "center_y": 0.6}
+            text: 'Altitude'
+            markup: True
+            color: 0,0,1
+            font_size: 30
+        Label:
+            id: altitude_value
+            pos_hint: {"center_x": 0.75, "center_y": 0.6}
+            text: '0.00'
+            markup: True
+            color: 0,0,1
+            font_size: 30
+        Label:
+            id: stationmass_label
+            pos_hint: {"center_x": 0.45, "center_y": 0.5}
+            text: 'Total Mass'
+            markup: True
+            color: 0,0,1
+            font_size: 30
+        Label:
+            id: stationmass_value
+            pos_hint: {"center_x": 0.75, "center_y": 0.5}
+            text: '0.00 kg'
+            markup: True
+            color: 0,0,1
+            font_size: 30
+        Label:
+            id: stationmode_label
+            pos_hint: {"center_x": 0.45, "center_y": 0.4}
+            text: 'Station Mode'
+            markup: True
+            color: 0,0,1
+            font_size: 30
+        Label:
+            id: stationmode_value
+            pos_hint: {"center_x": 0.75, "center_y": 0.4}
+            text: 'Standard'
+            markup: True
+            color: 0,0,1
+            font_size: 30
         Label:
             id: aoslabel
             pos_hint: {"center_x": 0.53, "center_y": 0.05}
@@ -1281,29 +1342,29 @@ ScreenManager:
             font_size: 30
         Button:
             id: mimicstartbutton
-            size_hint: 0.25,0.1
-            pos_hint: {"x": 0.07, "y": 0.6}
-            text: 'MIMIC'
+            size_hint: 0.2,0.1
+            pos_hint: {"x": 0.05, "y": 0.6}
+            text: 'Transmit'
             disabled: False
             font_size: 30
-            on_release: telemetrystatus.text = 'Sending...'
+            on_release: mimicstartbutton.text = 'Sending...'
             on_release: root.changeMimicBoolean(True)
             on_release: mimicstopbutton.disabled = False
             on_release: mimicstartbutton.disabled = True
         Button:
             id: mimicstopbutton
-            size_hint: 0.25,0.1
-            pos_hint: {"x": 0.07, "y": 0.5}
+            size_hint: 0.2,0.1
+            pos_hint: {"x": 0.05, "y": 0.45}
             text: 'Stop'
             disabled: True
             font_size: 30
-            on_release: telemetrystatus.text = 'Stopped'
+            on_release: mimicstartbutton.text = 'Transmit'
             on_release: root.changeMimicBoolean(False)
             on_release: root.changeSwitchBoolean(False)
             on_release: mimicstopbutton.disabled = True
             on_release: mimicstartbutton.disabled = False
         Button:
-            size_hint: 0.3,0.1
+            size_hint: 0.2,0.1
             pos_hint: {"Left": 1, "Bottom": 1}
             text: 'Return'
             font_size: 30

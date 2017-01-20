@@ -316,6 +316,30 @@ sub.addListener({
         db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "sasa1_status");
         db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "sasa1_status");
         break;
+      case "USLAB000032":
+        db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "position_x");
+        db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "position_x");
+        break;
+      case "USLAB000033":
+        db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "position_y");
+        db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "position_y");
+        break;
+      case "USLAB000034":
+        db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "position_z");
+        db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "position_z");
+        break;
+      case "USLAB000035":
+        db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "velocity_x");
+        db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "velocity_x");
+        break;
+      case "USLAB000036":
+        db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "velocity_y");
+        db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "velocity_y");
+        break;
+      case "USLAB000037":
+        db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "velocity_z");
+        db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "velocity_z");
+        break;
     }
   }
 });
