@@ -1,5 +1,8 @@
 import kivy
 import urllib2
+import datetime
+import os
+import sys
 import json
 import sqlite3
 import serial
@@ -212,6 +215,9 @@ class FakeOrbitScreen(Screen):
         switchtofake = args[0]
         fakeorbitboolean = args[0]
 
+class Settings_Screen(Screen, EventDispatcher):
+    pass
+
 class EPS_Screen(Screen, EventDispatcher):
     pass
 
@@ -283,6 +289,7 @@ class MainApp(App):
         self.ct_screen = CT_Screen(name = 'ct')
         self.tcs_screen = TCS_Screen(name = 'tcs')
         self.crew_screen = Crew_Screen(name = 'crew')
+        self.settings_screen = Settings_Screen(name = 'settings')
 
         root = MainScreenManager(transition=WipeTransition())
         root.add_widget(MainScreen(name = 'main'))
@@ -293,13 +300,14 @@ class MainApp(App):
         root.add_widget(self.ct_screen)
         root.add_widget(self.tcs_screen)
         root.add_widget(self.crew_screen)
+        root.add_widget(self.settings_screen)
         root.add_widget(ManualControlScreen(name = 'manualcontrol'))
         root.current= 'main'
     
         Clock.schedule_interval(self.update_labels, 1)
         Clock.schedule_interval(self.checkAOSlong, 5)
         Clock.schedule_interval(self.checkCrew, 60)
-        Clock.schedule_interval(self.fetchTLE, 60)
+        #Clock.schedule_interval(self.fetchTLE, 60)
         return root
 
     def serialWrite(self, *args):
@@ -327,15 +335,16 @@ class MainApp(App):
     #this code based on code from natronics open-notify.org
     def fetchTLE(self, *args):
         TLE_response = urllib2.urlopen(TLE_req)
-        TLE_response = TLE_response.split("<PRE>")[1]
-        TLE_response = TLE_response.split("</PRE>")[0]
-        TLE_response = TLE_response.split("Vector Time (GMT): ")[1:]
+        TLE_read = TLE_response.read()
+        TLE_read = TLE_read.split("<PRE>")[1]
+        TLE_read = TLE_read.split("</PRE>")[0]
+        TLE_read = TLE_read.split("Vector Time (GMT): ")[1:]
         
-        for group in TLE_response:
+        for group in TLE_read:
             tle = group.split("TWO LINE MEAN ELEMENT SET")[1]
             tle = tle[8:160]
             lines = tle.split('\n')[0:3]
-            print lines
+            #print lines
         
     def checkCrew(self, dt):
         crew_response = urllib2.urlopen(crew_req)
@@ -565,6 +574,7 @@ Builder.load_string('''
 #:import win kivy.core.window
 ScreenManager:
     MainScreen:
+    Settings_Screen:
     FakeOrbitScreen:
     EPS_Screen:
     CT_Screen:
@@ -607,6 +617,12 @@ ScreenManager:
             width: 50
             height: 20
             on_release: root.manager.current = 'fakeorbit'
+        Button:
+            size_hint: 0.1,0.15
+            pos_hint: {"center_x": 0.9, "center_y": 0.9}
+            background_normal: './imgs/Settings_Icon.png'
+            text: ''
+            on_release: root.manager.current = 'settings'
         BoxLayout:
             size_hint_y: None
             Button:
@@ -637,6 +653,28 @@ ScreenManager:
                 width: 50
                 height: 20
                 on_release: app.stop(*args)
+<Settings_Screen>:
+    name: 'settings'
+    FloatLayout:
+        orientation: 'vertical'
+        Image:
+            source: './imgs/iss.png'
+            allow_stretch: True
+            keep_ratio: True
+        Label:
+            text: 'Settings'
+            bold: True
+            font_size: 120
+            markup: True
+            height: "20dp"
+            color: 1,0,1
+            width: "100dp"
+        Button:
+            size_hint: 0.3,0.1
+            pos_hint: {"Left": 1, "Bottom": 1}
+            text: 'Return'
+            font_size: 30
+            on_release: root.manager.current = 'main'
 <FakeOrbitScreen>:
     name: 'fakeorbit'
     FloatLayout:
