@@ -36,6 +36,7 @@ errorlog = open('errorlog.txt','w')
 locationlog = open('locationlog.txt','a')
 
 req = urllib2.Request("http://api.open-notify.org/iss-now.json")
+crew_req = urllib2.Request("http://api.open-notify.org/astros.json")
 
 try:
     ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=0)
@@ -226,6 +227,9 @@ class CT_Screen(Screen, EventDispatcher):
 class TCS_Screen(Screen, EventDispatcher):
     pass
 
+class Crew_Screen(Screen, EventDispatcher):
+    pass
+
 class MimicScreen(Screen, EventDispatcher):
     def changeMimicBoolean(self, *args):
         global mimicbutton
@@ -284,6 +288,7 @@ class MainApp(App):
         self.eps_screen = EPS_Screen(name = 'eps')
         self.ct_screen = CT_Screen(name = 'ct')
         self.tcs_screen = TCS_Screen(name = 'tcs')
+        self.crew_screen = Crew_Screen(name = 'crew')
 
         root = MainScreenManager(transition=WipeTransition())
         root.add_widget(MainScreen(name = 'main'))
@@ -293,11 +298,13 @@ class MainApp(App):
         root.add_widget(self.eps_screen)
         root.add_widget(self.ct_screen)
         root.add_widget(self.tcs_screen)
+        root.add_widget(self.crew_screen)
         root.add_widget(ManualControlScreen(name = 'manualcontrol'))
         root.current= 'main'
     
         Clock.schedule_interval(self.update_labels, 1)
         Clock.schedule_interval(self.checkAOSlong, 5)
+        Clock.schedule_interval(self.checkCrew, 60)
         return root
 
     def serialWrite(self, *args):
@@ -322,6 +329,16 @@ class MainApp(App):
         global manualcontrol
         manualcontrol = args[0]
 
+    def checkCrew(self, dt):
+        crew_response = urllib2.urlopen(crew_req)
+        crew_obj = json.loads(crew_response.read())
+        self.crew_screen.ids.crew1.text = str(crew_obj['people'][0]['name'])    
+        self.crew_screen.ids.crew2.text = str(crew_obj['people'][1]['name'])    
+        self.crew_screen.ids.crew3.text = str(crew_obj['people'][2]['name'])    
+        self.crew_screen.ids.crew4.text = str(crew_obj['people'][3]['name'])    
+        self.crew_screen.ids.crew5.text = str(crew_obj['people'][4]['name'])    
+        self.crew_screen.ids.crew6.text = str(crew_obj['people'][5]['name'])    
+    
     def checkAOSlong(self, dt):
         global aos
         if float(aos) == 0.00:
@@ -544,6 +561,7 @@ ScreenManager:
     EPS_Screen:
     CT_Screen:
     TCS_Screen:
+    Crew_Screen:
     ManualControlScreen:
     MimicScreen:
     CalibrateScreen:
@@ -1055,6 +1073,61 @@ ScreenManager:
             text: 'Return'
             font_size: 30
             on_release: app.root.current = 'mimic'
+<Crew_Screen>:
+    name: 'crew'
+    FloatLayout:
+        Image:
+            source: './imgs/iss1.png'
+            allow_stretch: True
+            keep_ratio: False
+        Button:
+            size_hint: 0.3,0.1
+            pos_hint: {"Left": 1, "Bottom": 1}
+            text: 'Return'
+            font_size: 30
+            on_release: app.root.current = 'mimic'
+        Label:
+            id: crew1
+            pos_hint: {"center_x": 0.6, "center_y": 0.90}
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Label:
+            id: crew2
+            pos_hint: {"center_x": 0.6, "center_y": 0.75}
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Label:
+            id: crew3
+            pos_hint: {"center_x": 0.6, "center_y": 0.60}
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Label:
+            id: crew4
+            pos_hint: {"center_x": 0.6, "center_y": 0.45}
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Label:
+            id: crew5
+            pos_hint: {"center_x": 0.6, "center_y": 0.30}
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Label:
+            id: crew6
+            pos_hint: {"center_x": 0.6, "center_y": 0.15}
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 30
 <EPS_Screen>:
     name: 'eps'
     FloatLayout:
@@ -1263,6 +1336,12 @@ ScreenManager:
             text: 'EPS'
             font_size: 30
             on_release: root.manager.current = 'eps'
+        Button:
+            size_hint: 0.2,0.1
+            pos_hint: {"center_x": 0.245, "center_y": 0.78}
+            text: 'Crew'
+            font_size: 30
+            on_release: root.manager.current = 'crew'
         Button:
             size_hint: 0.2,0.1
             pos_hint: {"center_x": 0.37, "center_y": 0.9}
