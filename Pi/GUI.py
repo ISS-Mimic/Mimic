@@ -37,26 +37,20 @@ locationlog = open('locationlog.txt','a')
 
 req = urllib2.Request("http://api.open-notify.org/iss-now.json")
 crew_req = urllib2.Request("http://api.open-notify.org/astros.json")
+TLE_req = urllib2.Request("http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html")
 
 try:
     ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=0)
 except:
-    print "Serial connection GPIO failure"
-    errorlog.write("serial connection GPIO failure")
+    print "No serial connection detected - GPIO"
+    errorlog.write("serial connection GPIO not found")
     errorlog.write('\n')
-
-#try:
-#    ser = serial.Serial('/dev/ttyUSB1', 115200)#, write_timeout=0.5)
-#except:
-#    print "Serial connection GPIO2 failure"
-#    errorlog.write("serial connection GPIO failure")
-#    errorlog.write('\n')
 
 try:
     ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
 except:
-    print "Serial connection USB failure"
-    errorlog.write("serial connection USB failure")
+    print "No serial connection detected - USB"
+    errorlog.write("serial connection USB not found")
     errorlog.write('\n')
 
 #try:
@@ -305,6 +299,7 @@ class MainApp(App):
         Clock.schedule_interval(self.update_labels, 1)
         Clock.schedule_interval(self.checkAOSlong, 5)
         Clock.schedule_interval(self.checkCrew, 60)
+        Clock.schedule_interval(self.fetchTLE, 60)
         return root
 
     def serialWrite(self, *args):
@@ -328,7 +323,20 @@ class MainApp(App):
     def changeManualControlBoolean(self, *args):
         global manualcontrol
         manualcontrol = args[0]
-
+        
+    #this code based on code from natronics open-notify.org
+    def fetchTLE(self, *args):
+        TLE_response = urllib2.urlopen(TLE_req)
+        TLE_response = TLE_response.split("<PRE>")[1]
+        TLE_response = TLE_response.split("</PRE>")[0]
+        TLE_response = TLE_response.split("Vector Time (GMT): ")[1:]
+        
+        for group in TLE_response:
+            tle = group.split("TWO LINE MEAN ELEMENT SET")[1]
+            tle = tle[8:160]
+            lines = tle.split('\n')[0:3]
+            print lines
+        
     def checkCrew(self, dt):
         crew_response = urllib2.urlopen(crew_req)
         crew_obj = json.loads(crew_response.read())
