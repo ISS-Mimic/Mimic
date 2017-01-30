@@ -1,5 +1,6 @@
 import kivy
 import urllib2
+from bs4 import BeautifulSoup
 import datetime
 import os
 import sys
@@ -38,6 +39,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, WipeTr
 errorlog = open('errorlog.txt','w')
 locationlog = open('locationlog.txt','a')
 
+nasaissurl = 'http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html'
 req = urllib2.Request("http://api.open-notify.org/iss-now.json")
 crew_req = urllib2.Request("http://api.open-notify.org/astros.json")
 TLE_req = urllib2.Request("http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html")
@@ -218,6 +220,9 @@ class FakeOrbitScreen(Screen):
 class Settings_Screen(Screen, EventDispatcher):
     pass
 
+class Orbit_Screen(Screen, EventDispatcher):
+    pass
+
 class EPS_Screen(Screen, EventDispatcher):
     pass
 
@@ -285,6 +290,7 @@ class MainApp(App):
     def build(self):
         self.mimic_screen = MimicScreen(name = 'mimic')
         self.fakeorbit_screen = FakeOrbitScreen(name = 'fakeorbit')
+        self.orbit_screen = Orbit_Screen(name = 'orbit')
         self.eps_screen = EPS_Screen(name = 'eps')
         self.ct_screen = CT_Screen(name = 'ct')
         self.tcs_screen = TCS_Screen(name = 'tcs')
@@ -296,6 +302,7 @@ class MainApp(App):
         root.add_widget(CalibrateScreen(name = 'calibrate'))
         root.add_widget(self.mimic_screen)
         root.add_widget(self.fakeorbit_screen)
+        root.add_widget(self.orbit_screen)
         root.add_widget(self.eps_screen)
         root.add_widget(self.ct_screen)
         root.add_widget(self.tcs_screen)
@@ -307,7 +314,7 @@ class MainApp(App):
         Clock.schedule_interval(self.update_labels, 1)
         Clock.schedule_interval(self.checkAOSlong, 5)
         Clock.schedule_interval(self.checkCrew, 60)
-        #Clock.schedule_interval(self.fetchTLE, 60)
+        Clock.schedule_interval(self.getTLE, 10)
         return root
 
     def serialWrite(self, *args):
@@ -333,18 +340,31 @@ class MainApp(App):
         manualcontrol = args[0]
         
     #this code based on code from natronics open-notify.org
+    def getTLE(self, *args):
+        try:
+            self.fetchTLE(self, *args)
+        except:
+            print "URL error"
+
     def fetchTLE(self, *args):
-        TLE_response = urllib2.urlopen(TLE_req)
-        TLE_read = TLE_response.read()
-        TLE_read = TLE_read.split("<PRE>")[1]
-        TLE_read = TLE_read.split("</PRE>")[0]
-        TLE_read = TLE_read.split("Vector Time (GMT): ")[1:]
+        TLE = BeautifulSoup(urllib2.urlopen(nasaissurl), 'html.parser')
+        WebpageStuff = TLE.find('pre') 
+        TLE_reduced = WebpageStuff.split('TWO LINE MEAN ELEMENT SET')
+        print TLE_reduced
+        #TLE_response = urllib2.urlopen(TLE_req)
+        #TLE_read = TLE_response.read()
+        #TLE_read = TLE_read.split("<PRE>")[1]
+        #TLE_read = TLE_read.split("</PRE>")[0]
+        #TLE_read = TLE_read.split("Vector Time (GMT): ")[1:]
         
-        for group in TLE_read:
-            tle = group.split("TWO LINE MEAN ELEMENT SET")[1]
-            tle = tle[8:160]
-            lines = tle.split('\n')[0:3]
-            #print lines
+         #print TLE_read
+         #print group
+        
+         #for group in TLE_read:
+         #   tle = group.split("TWO LINE MEAN ELEMENT SET")[1]
+         #   tle = tle[8:160]
+         #   lines = tle.split('\n')[0:3]
+         #   print lines
         
     def checkCrew(self, dt):
         crew_response = urllib2.urlopen(crew_req)
@@ -576,6 +596,7 @@ ScreenManager:
     MainScreen:
     Settings_Screen:
     FakeOrbitScreen:
+    Orbit_Screen:
     EPS_Screen:
     CT_Screen:
     TCS_Screen:
@@ -1059,7 +1080,7 @@ ScreenManager:
         orientation: 'vertical'
         Image:
             source: './imgs/iss_calibrate.png'
-            allow_stretch: True
+            allow_stretch: False
             keep_ratio: False
         Label:
             pos_hint: {"center_x": 0.5, "center_y": 0.95}
@@ -1091,6 +1112,25 @@ ScreenManager:
         Label:
             pos_hint: {"center_x": 0.15, "center_y": 0.8}
             text: 'C&T Stuff'
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Button:
+            size_hint: 0.3,0.1
+            pos_hint: {"Left": 1, "Bottom": 1}
+            text: 'Return'
+            font_size: 30
+            on_release: app.root.current = 'mimic'
+<Orbit_Screen>:
+    name: 'orbit'
+    FloatLayout:
+        Image:
+            source: './imgs/iss2.png'
+            allow_stretch: True
+            keep_ratio: False
+        Label:
+            pos_hint: {"center_x": 0.15, "center_y": 0.8}
+            text: 'Orbit Stuff'
             markup: True
             color: 1,0,1
             font_size: 30
@@ -1388,6 +1428,12 @@ ScreenManager:
             text: 'Crew'
             font_size: 30
             on_release: root.manager.current = 'crew'
+        Button:
+            size_hint: 0.2,0.1
+            pos_hint: {"center_x": 0.85, "center_y": 0.78}
+            text: 'Orbit'
+            font_size: 30
+            on_release: root.manager.current = 'orbit'
         Button:
             size_hint: 0.2,0.1
             pos_hint: {"center_x": 0.37, "center_y": 0.9}
