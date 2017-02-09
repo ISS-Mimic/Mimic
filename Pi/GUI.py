@@ -1,6 +1,7 @@
 import kivy
 import urllib2
 from bs4 import BeautifulSoup
+from calendar import timegm
 import datetime
 import os
 import sys
@@ -48,6 +49,8 @@ try:
     ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=0)
 except:
     print "No serial connection detected - GPIO"
+    errorlog.write(str(datetime.datetime.utcnow()))
+    errorlog.write(' ')
     errorlog.write("serial connection GPIO not found")
     errorlog.write('\n')
 
@@ -55,21 +58,17 @@ try:
     ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
 except:
     print "No serial connection detected - USB"
+    errorlog.write(str(datetime.datetime.utcnow()))
+    errorlog.write(' ')
     errorlog.write("serial connection USB not found")
     errorlog.write('\n')
-
-#try:
-#    ser = serial.Serial('/dev/ttyAMA0', 115200)#, write_timeout=0.5)
-#except:
-#    print "Serial connection USB2 failure"
-#    errorlog.write("serial connection USB failure")
-#    errorlog.write('\n')
 
 mimicbutton = False
 fakeorbitboolean = False
 zerocomplete = False
 switchtofake = False
 manualcontrol = False
+startup = True
 
 conn = sqlite3.connect('iss_telemetry.db') #sqlite database call change to include directory
 c = conn.cursor() 
@@ -129,6 +128,15 @@ class MainScreen(Screen):
         
 class CalibrateScreen(Screen):
     def serialWrite(self, *args):
+        try:
+            self.serialActualWrite(self, *args)
+        except:
+            errorlog.write(str(datetime.datetime.utcnow()))
+            errorlog.write(' ')
+            errorlog.write("Attempted write - no serial device connected")
+            errorlog.write('\n')
+
+    def serialActualWrite(self, *args):
         ser.write(*args)
 
     def zeroJoints(self):
@@ -205,12 +213,30 @@ class ManualControlScreen(Screen):
         manualcontrol = args[0]
     
     def serialWrite(self, *args):
+        try:
+            self.serialActualWrite(self, *args)
+        except:
+            errorlog.write(str(datetime.datetime.utcnow()))
+            errorlog.write(' ')
+            errorlog.write("Attempted write - no serial device connected")
+            errorlog.write('\n')
+
+    def serialActualWrite(self, *args):
         ser.write(*args)
-   
+
 class FakeOrbitScreen(Screen):
     def serialWrite(self, *args):
+        try:
+            self.serialActualWrite(self, *args)
+        except:
+            errorlog.write(str(datetime.datetime.utcnow()))
+            errorlog.write(' ')
+            errorlog.write("Attempted write - no serial device connected")
+            errorlog.write('\n')
+
+    def serialActualWrite(self, *args):
         ser.write(*args)
-    
+
     def changeBoolean(self, *args):
         global fakeorbitboolean
         global switchtofake
@@ -288,6 +314,7 @@ class TriangleButton(ButtonBehavior, Widget):
 class MainApp(App):
 
     def build(self):
+        global startup
         self.mimic_screen = MimicScreen(name = 'mimic')
         self.fakeorbit_screen = FakeOrbitScreen(name = 'fakeorbit')
         self.orbit_screen = Orbit_Screen(name = 'orbit')
@@ -313,11 +340,24 @@ class MainApp(App):
     
         Clock.schedule_interval(self.update_labels, 1)
         Clock.schedule_interval(self.checkAOSlong, 5)
-        Clock.schedule_interval(self.checkCrew, 60)
-        Clock.schedule_interval(self.getTLE, 10)
+        Clock.schedule_interval(self.updateCrew, 3600)
+        if startup == True:
+            startup = False
+            self.checkCrew(60)
+
+        Clock.schedule_interval(self.getTLE, 3600)
         return root
 
     def serialWrite(self, *args):
+        try:
+            self.serialActualWrite(self, *args)
+        except:
+            errorlog.write(str(datetime.datetime.utcnow()))
+            errorlog.write(' ')
+            errorlog.write("Attempted write - no serial device connected")
+            errorlog.write('\n')
+
+    def serialActualWrite(self, *args):
         ser.write(*args)
 
     def changeColors(self, *args):   #this function sets all labels on mimic screen to a certain color based on signal status
@@ -344,7 +384,11 @@ class MainApp(App):
         try:
             self.fetchTLE(self, *args)
         except:
-            print "URL error"
+            errorlog.write(str(datetime.datetime.utcnow()))
+            errorlog.write(' ')
+            errorlog.write("TLE Fetch - URL Error")
+            errorlog.write('\n')
+            print "TLE Fetch - URL Error"
 
     def fetchTLE(self, *args):
         TLE = BeautifulSoup(urllib2.urlopen(nasaissurl), 'html.parser')
@@ -366,6 +410,17 @@ class MainApp(App):
          #   lines = tle.split('\n')[0:3]
          #   print lines
         
+    def updateCrew(self, dt):
+        try:
+            self.checkCrew(self, *args)
+        except:
+            errorlog.write(str(datetime.datetime.utcnow()))
+            errorlog.write(' ')
+            errorlog.write("Crew Check - URL Error")
+            errorlog.write('\n')
+            print "Crew Check URL Error"
+
+    
     def checkCrew(self, dt):
         crew_response = urllib2.urlopen(crew_req)
         crew_obj = json.loads(crew_response.read())

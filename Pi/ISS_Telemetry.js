@@ -54,7 +54,7 @@ var timestampnow = dayOfYear * 24 + hours + minutes / 60 + seconds / 3600;
 //console.log(dayOfYear);
 //console.log(hours);
 //console.log(minutes);
-//console.log(timestampnow);
+console.log(timestampnow);
 
 lsClient.connect();
 
@@ -348,9 +348,9 @@ timeSub.addListener({
   onItemUpdate: function (update) {
         var status = update.getValue("Status.Class");
         AOStimestamp = parseFloat(update.getValue("TimeStamp"));
-        //console.log("Timestamp: " + update.getValue("TimeStamp"));
+        console.log("Timestamp: " + update.getValue("TimeStamp"));
         difference = timestampnow - AOStimestamp;
-        //console.log("Difference " + difference);
+        console.log("Difference " + difference);
 
     if ( status === "24")
     {
