@@ -361,18 +361,18 @@ class MainApp(App):
         ser.write(*args)
 
     def changeColors(self, *args):   #this function sets all labels on mimic screen to a certain color based on signal status
-        self.eps_screen.ids.psarjvalue.color = args[0],args[1],args[2]
-        self.eps_screen.ids.ssarjvalue.color = args[0],args[1],args[2]
-        self.eps_screen.ids.ptrrjvalue.color = args[0],args[1],args[2]
-        self.eps_screen.ids.strrjvalue.color = args[0],args[1],args[2]
-        self.eps_screen.ids.beta1avalue.color = args[0],args[1],args[2]
-        self.eps_screen.ids.beta1bvalue.color = args[0],args[1],args[2]
-        self.eps_screen.ids.beta2avalue.color = args[0],args[1],args[2]
-        self.eps_screen.ids.beta2bvalue.color = args[0],args[1],args[2]
-        self.eps_screen.ids.beta3avalue.color = args[0],args[1],args[2]
-        self.eps_screen.ids.beta3bvalue.color = args[0],args[1],args[2]
-        self.eps_screen.ids.beta4avalue.color = args[0],args[1],args[2]
-        self.eps_screen.ids.beta4bvalue.color = args[0],args[1],args[2]
+        self.eps_screen.ids.psarj_value.color = args[0],args[1],args[2]
+        self.eps_screen.ids.ssarj_value.color = args[0],args[1],args[2]
+        self.tcs_screen.ids.ptrrj_value.color = args[0],args[1],args[2]
+        self.tcs_screen.ids.strrj_value.color = args[0],args[1],args[2]
+        self.eps_screen.ids.beta1a_value.color = args[0],args[1],args[2]
+        self.eps_screen.ids.beta1b_value.color = args[0],args[1],args[2]
+        self.eps_screen.ids.beta2a_value.color = args[0],args[1],args[2]
+        self.eps_screen.ids.beta2b_value.color = args[0],args[1],args[2]
+        self.eps_screen.ids.beta3a_value.color = args[0],args[1],args[2]
+        self.eps_screen.ids.beta3b_value.color = args[0],args[1],args[2]
+        self.eps_screen.ids.beta4a_value.color = args[0],args[1],args[2]
+        self.eps_screen.ids.beta4b_value.color = args[0],args[1],args[2]
         self.mimic_screen.ids.aosvalue.color = args[0],args[1],args[2]
     
     def changeManualControlBoolean(self, *args):
@@ -539,15 +539,31 @@ class MainApp(App):
         sgant_el = "{:.2f}".format(float((values[15])[0]))
         difference = float(sgant_el)-float(sasa_el) 
         crewlockpres = "{:.2f}".format(float((values[16])[0]))
-
+        v1a = "{:.2f}".format(float((values[25])[0]))
+        v1b = "{:.2f}".format(float((values[26])[0]))
+        v2a = "{:.2f}".format(float((values[27])[0]))
+        v2b = "{:.2f}".format(float((values[28])[0]))
+        v3a = "{:.2f}".format(float((values[29])[0]))
+        v3b = "{:.2f}".format(float((values[30])[0]))
+        v4a = "{:.2f}".format(float((values[31])[0]))
+        v4b = "{:.2f}".format(float((values[32])[0]))
+        c1a = "{:.2f}".format(float((values[33])[0]))
+        c1b = "{:.2f}".format(float((values[34])[0]))
+        c2a = "{:.2f}".format(float((values[35])[0]))
+        c2b = "{:.2f}".format(float((values[36])[0]))
+        c3a = "{:.2f}".format(float((values[37])[0]))
+        c3b = "{:.2f}".format(float((values[38])[0]))
+        c4a = "{:.2f}".format(float((values[39])[0]))
+        c4b = "{:.2f}".format(float((values[40])[0]))
+        
         if float(crewlockpres) < 500:
             EVAinProgress = True
-            self.mimic_screen.ids.EVAvalue.text = "EVA in Progress!!!"
-            self.mimic_screen.ids.EVAvalue.color = 0,1,0
+            self.mimic_screen.ids.EVa_value.text = "EVA in Progress!!!"
+            self.mimic_screen.ids.EVa_value.color = 0,1,0
         else:
             EVAinProgress = False 
-            self.mimic_screen.ids.EVAvalue.text = ""
-            self.mimic_screen.ids.EVAvalue.color = 0,0,0
+            self.mimic_screen.ids.EVa_value.text = ""
+            self.mimic_screen.ids.EVa_value.color = 0,0,0
 
 #        if (difference > -10) && (isinstance(App.get_running_app().root_window.children[0], Popup)==False):
 #            LOSpopup = Popup(title='Loss of Signal', content=Label(text='Possible LOS Soon'),size_hint=(0.3,0.2),auto_dismiss=True)
@@ -568,10 +584,10 @@ class MainApp(App):
         if (fakeorbitboolean == True and (mimicbutton == True or switchtofake == True)):
             if psarj2 <= 0.00:
                 psarj2 = 360.0
-            self.fakeorbit_screen.ids.fakepsarjvalue.text = "{:.2f}".format(psarj2)
+            self.fakeorbit_screen.ids.fakepsarj_value.text = "{:.2f}".format(psarj2)
             if ssarj2 >= 360.00:                
                 ssarj2 = 0.0
-            self.fakeorbit_screen.ids.fakessarjvalue.text = "{:.2f}".format(ssarj2)
+            self.fakeorbit_screen.ids.fakessarj_value.text = "{:.2f}".format(ssarj2)
             
             psarj2 -= 0.0666
             ssarj2 += 0.0666
@@ -593,18 +609,34 @@ class MainApp(App):
             self.serialWrite("Beta4A=" + beta4a + " ")
             self.serialWrite("AOS=" + aos + " ")
         
-        self.eps_screen.ids.psarjvalue.text = psarj
-        self.eps_screen.ids.ssarjvalue.text = ssarj
-        self.eps_screen.ids.ptrrjvalue.text = ptrrj
-        self.eps_screen.ids.strrjvalue.text = strrj
-        self.eps_screen.ids.beta1bvalue.text = beta1b
-        self.eps_screen.ids.beta1avalue.text = beta1a
-        self.eps_screen.ids.beta2bvalue.text = beta2b
-        self.eps_screen.ids.beta2avalue.text = beta2a
-        self.eps_screen.ids.beta3bvalue.text = beta3b
-        self.eps_screen.ids.beta3avalue.text = beta3a
-        self.eps_screen.ids.beta4bvalue.text = beta4b
-        self.eps_screen.ids.beta4avalue.text = beta4a
+        self.eps_screen.ids.psarj_value.text = psarj
+        self.eps_screen.ids.ssarj_value.text = ssarj
+        self.tcs_screen.ids.ptrrj_value.text = ptrrj
+        self.tcs_screen.ids.strrj_value.text = strrj
+        self.eps_screen.ids.beta1b_value.text = beta1b
+        self.eps_screen.ids.beta1a_value.text = beta1a
+        self.eps_screen.ids.beta2b_value.text = beta2b
+        self.eps_screen.ids.beta2a_value.text = beta2a
+        self.eps_screen.ids.beta3b_value.text = beta3b
+        self.eps_screen.ids.beta3a_value.text = beta3a
+        self.eps_screen.ids.beta4b_value.text = beta4b
+        self.eps_screen.ids.beta4a_value.text = beta4a
+        self.eps_screen.ids.c1a_value.text = c1a
+        self.eps_screen.ids.v1a_value.text = v1a
+        self.eps_screen.ids.c1b_value.text = c1b
+        self.eps_screen.ids.v1b_value.text = v1b
+        self.eps_screen.ids.c2a_value.text = c2a
+        self.eps_screen.ids.v2a_value.text = v2a
+        self.eps_screen.ids.c2b_value.text = c2b
+        self.eps_screen.ids.v2b_value.text = v2b
+        self.eps_screen.ids.c3a_value.text = c3a
+        self.eps_screen.ids.v3a_value.text = v3a
+        self.eps_screen.ids.c3b_value.text = c3b
+        self.eps_screen.ids.v3b_value.text = v3b
+        self.eps_screen.ids.c4a_value.text = c4a
+        self.eps_screen.ids.v4a_value.text = v4a
+        self.eps_screen.ids.c4b_value.text = c4b
+        self.eps_screen.ids.v4b_value.text = v4b
         self.mimic_screen.ids.difference.text = str(difference)
         self.mimic_screen.ids.altitude_value.text = str(altitude) + " km"
         self.mimic_screen.ids.velocity_value.text = str(velocity) + " m/s"
@@ -767,28 +799,28 @@ ScreenManager:
             color: 1,0,1
             font_size: 60
         Label:
-            id: fakepsarjlabel
+            id: fakepsarj_label
             pos_hint: {"center_x": 0.6, "center_y": 0.5}
             text: 'PSARJ:'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
-            id: fakepsarjvalue
+            id: fakepsarj_value
             pos_hint: {"center_x": 0.8, "center_y": 0.5}
             text: '0.000'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
-            id: fakessarjlabel
+            id: fakessarj_label
             pos_hint: {"center_x": 0.6, "center_y": 0.35}
             text: 'SSARJ:'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
-            id: fakessarjvalue
+            id: fakessarj_value
             pos_hint: {"center_x": 0.8, "center_y": 0.35}
             text: '0.000'
             markup: True
@@ -1208,6 +1240,34 @@ ScreenManager:
             markup: True
             color: 1,0,1
             font_size: 30
+        Label:
+            id: ptrrj_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.78}
+            text: 'PTRRJ:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: ptrrj_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.78}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: strrj_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.71}
+            text: 'STRRJ:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: strrj_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.71}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
         Button:
             size_hint: 0.3,0.1
             pos_hint: {"Left": 1, "Bottom": 1}
@@ -1276,12 +1336,6 @@ ScreenManager:
             source: './imgs/iss1.png'
             allow_stretch: True
             keep_ratio: False
-        Label:
-            pos_hint: {"center_x": 0.15, "center_y": 0.8}
-            text: 'EPS Stuff'
-            markup: True
-            color: 1,0,1
-            font_size: 30
         Button:
             size_hint: 0.3,0.1
             pos_hint: {"Left": 1, "Bottom": 1}
@@ -1289,173 +1343,426 @@ ScreenManager:
             font_size: 30
             on_release: app.root.current = 'mimic'
         Label:
-            id: psarjlabel
+            id: psarj_label
             pos_hint: {"center_x": 0.6, "center_y": 0.92}
             text: 'PSARJ:'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
-            id: psarjvalue
+            id: psarj_value
             pos_hint: {"center_x": 0.8, "center_y": 0.92}
             text: '0.003'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
-            id: ssarjlabel
+            id: ssarj_label
             pos_hint: {"center_x": 0.6, "center_y": 0.85}
             text: 'SSARJ:'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
-            id: ssarjvalue
+            id: ssarj_value
             pos_hint: {"center_x": 0.8, "center_y": 0.85}
             text: '0.003'
             markup: True
             color: 1,1,1
             font_size: 30
+            
         Label:
-            id: ptrrjlabel
+            pos_hint: {"center_x": 0.55, "center_y": 0.85}
+            text: 'Channel 1A'
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Label:
+            id: beta1a_label
+            pos_hint: {"center_x": 0.4, "center_y": 0.78}
+            text: 'Angle:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: beta1a_value
             pos_hint: {"center_x": 0.6, "center_y": 0.78}
-            text: 'PTRRJ:'
-            markup: True
-            color: 1,1,1
-            font_size: 30
-        Label:
-            id: ptrrjvalue
-            pos_hint: {"center_x": 0.8, "center_y": 0.78}
             text: '0.003'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
-            id: strrjlabel
+            id: c1a_label
+            pos_hint: {"center_x": 0.4, "center_y": 0.71}
+            text: 'Current:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: c1a_value
             pos_hint: {"center_x": 0.6, "center_y": 0.71}
-            text: 'STRRJ:'
-            markup: True
-            color: 1,1,1
-            font_size: 30
-        Label:
-            id: strrjvalue
-            pos_hint: {"center_x": 0.8, "center_y": 0.71}
             text: '0.003'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
-            id: beta1blabel
+            id: v1a_label
+            pos_hint: {"center_x": 0.4, "center_y": 0.64}
+            text: 'Voltage:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: v1a_value
             pos_hint: {"center_x": 0.6, "center_y": 0.64}
-            text: 'Beta 1B:'
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+            
+        Label:
+            pos_hint: {"center_x": 0.85, "center_y": 0.5}
+            text: 'Channel 1B'
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Label:
+            id: beta1b_label
+            pos_hint: {"center_x": 0.7, "center_y": 0.43}
+            text: 'Angle:'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
-            id: beta1bvalue
-            pos_hint: {"center_x": 0.8, "center_y": 0.64}
+            id: beta1b_value
+            pos_hint: {"center_x": 0.9, "center_y": 0.43}
             text: '0.003'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
-            id: beta1alabel
-            pos_hint: {"center_x": 0.6, "center_y": 0.57}
-            text: 'Beta 1A:'
+            id: c1b_label
+            pos_hint: {"center_x": 0.7, "center_y": 0.36}
+            text: 'Current:'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
-            id: beta1avalue
-            pos_hint: {"center_x": 0.8, "center_y": 0.57}
+            id: c1b_value
+            pos_hint: {"center_x": 0.9, "center_y": 0.36}
             text: '0.003'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
-            id: beta2blabel
-            pos_hint: {"center_x": 0.6, "center_y": 0.50}
-            text: 'Beta 2B:'
+            id: v1b_label
+            pos_hint: {"center_x": 0.7, "center_y": 0.29}
+            text: 'Voltage:'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
-            id: beta2bvalue
-            pos_hint: {"center_x": 0.8, "center_y": 0.50}
+            id: v1b_value
+            pos_hint: {"center_x": 0.9, "center_y": 0.29}
             text: '0.003'
             markup: True
             color: 1,1,1
             font_size: 30
+
         Label:
-            id: beta2alabel
+            pos_hint: {"center_x": 0.1, "center_y": 0.85}
+            text: 'Channel 2A'
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Label:
+            id: beta2a_label
             pos_hint: {"center_x": 0.6, "center_y": 0.43}
-            text: 'Beta 2A:'
+            text: 'Angle:'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
-            id: beta2avalue
+            id: beta2a_value
             pos_hint: {"center_x": 0.8, "center_y": 0.43}
             text: '0.003'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
-            id: beta3blabel
-            pos_hint: {"center_x": 0.6, "center_y": 0.36}
-            text: 'Beta 3B:'
+            id: c2a_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.64}
+            text: 'Current:'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
-            id: beta3bvalue
+            id: c2a_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.64}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: v2a_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.64}
+            text: 'Voltage:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: v2a_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.64}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30   
+            
+        Label:
+            pos_hint: {"center_x": 0.1, "center_y": 0.85}
+            text: 'Channel 2B'
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Label:
+            id: beta2b_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.50}
+            text: 'Angle:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: beta2b_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.50}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: c2b_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.64}
+            text: 'Current:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: c2b_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.64}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: v2b_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.64}
+            text: 'Voltage:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: v2b_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.64}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30    
+            
+        Label:
+            pos_hint: {"center_x": 0.1, "center_y": 0.85}
+            text: 'Channel 3A'
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Label:
+            id: beta3a_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.29}
+            text: 'Angle:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: beta3a_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.29}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30   
+        Label:
+            id: c3a_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.64}
+            text: 'Current:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: c3a_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.64}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: v3a_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.64}
+            text: 'Voltage:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: v3a_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.64}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30   
+            
+        Label:
+            pos_hint: {"center_x": 0.1, "center_y": 0.85}
+            text: 'Channel 3B'
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Label:
+            id: beta3b_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.36}
+            text: 'Angle:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: beta3b_value
             pos_hint: {"center_x": 0.8, "center_y": 0.36}
             text: '0.003'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
-            id: beta3alabel
-            pos_hint: {"center_x": 0.6, "center_y": 0.29}
-            text: 'Beta 3A:'
+            id: c3b_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.64}
+            text: 'Current:'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
-            id: beta3avalue
-            pos_hint: {"center_x": 0.8, "center_y": 0.29}
+            id: c3b_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.64}
             text: '0.003'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
-            id: beta4blabel
-            pos_hint: {"center_x": 0.6, "center_y": 0.22}
-            text: 'Beta 4B:'
+            id: v3b_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.64}
+            text: 'Voltage:'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
-            id: beta4bvalue
+            id: v3b_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.64}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+            
+        Label:
+            pos_hint: {"center_x": 0.1, "center_y": 0.85}
+            text: 'Channel 4A'
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Label:
+            id: beta4a_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.15}
+            text: 'Angle:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: beta4a_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.15}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: c4a_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.64}
+            text: 'Current:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: c4a_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.64}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: v4a_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.64}
+            text: 'Voltage:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: v4a_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.64}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+            
+        Label:
+            pos_hint: {"center_x": 0.1, "center_y": 0.85}
+            text: 'Channel 4B'
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Label:
+            id: beta4b_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.22}
+            text: 'Angle:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: beta4b_value
             pos_hint: {"center_x": 0.8, "center_y": 0.22}
             text: '0.003'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
-            id: beta4alabel
-            pos_hint: {"center_x": 0.6, "center_y": 0.15}
-            text: 'Beta 4A:'
+            id: c4b_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.64}
+            text: 'Current:'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
-            id: beta4avalue
-            pos_hint: {"center_x": 0.8, "center_y": 0.15}
+            id: c4b_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.64}
             text: '0.003'
             markup: True
             color: 1,1,1
             font_size: 30
+        Label:
+            id: v4b_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.64}
+            text: 'Voltage:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: v4b_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.64}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        
 <MimicScreen>:
     name: 'mimic'
     FloatLayout:
@@ -1465,7 +1772,7 @@ ScreenManager:
             allow_stretch: True
             keep_ratio: False
         Label:
-            id: EVAvalue
+            id: EVa_value
             pos_hint: {"center_x": 0.2, "center_y": 0.17}
             text: ''
             markup: True
