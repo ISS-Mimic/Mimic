@@ -41,12 +41,11 @@ from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, WipeTr
 errorlog = open('errorlog.txt','w')
 locationlog = open('locationlog.txt','a')
 
+iss_crew_url = 'http://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'        
 nasaissurl = 'http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html'
 req = urllib2.Request("http://api.open-notify.org/iss-now.json")
 #crew_req = urllib2.Request("http://api.open-notify.org/astros.json")
-crew_url = "http://www.howmanypeopleareinspacerightnow.com/peopleinspace.json"
 TLE_req = urllib2.Request("http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html")
-
 
 LED_COUNT      = 7       # Number of LED pixels.
 LED_PIN        = 18      # GPIO pin connected to the pixels (must support PWM!).
@@ -88,10 +87,13 @@ zerocomplete = False
 switchtofake = False
 manualcontrol = False
 startup = True
+isscrew = 0
 
 conn = sqlite3.connect('iss_telemetry.db') #sqlite database call change to include directory
 c = conn.cursor() 
 val = ""
+    
+    
     
 psarj2 = 1.0
 ssarj2 = 1.0
@@ -460,16 +462,36 @@ class MainApp(App):
     
     def checkCrew(self, dt):
         #crew_response = urllib2.urlopen(crew_req)
-        crew_obj = json.loads(urllib2.urlopen(crew_url))
-        numberofcrew = str(crew_obj['number'][0])
-        print numberofcrew
-        self.crew_screen.ids.crew1.text = str(crew_obj['people'][0]['name'])    
-        self.crew_screen.ids.crew2.text = str(crew_obj['people'][1]['name'])    
-        self.crew_screen.ids.crew3.text = str(crew_obj['people'][2]['name'])    
-        self.crew_screen.ids.crew4.text = str(crew_obj['people'][3]['name'])    
-        self.crew_screen.ids.crew5.text = str(crew_obj['people'][4]['name'])    
-        self.crew_screen.ids.crew6.text = str(crew_obj['people'][5]['name'])    
-    
+        crewmember = ['','','','','','','','','','','','']
+        crewmemberbio = ['','','','','','','','','','','','']
+        crewmembertitle = ['','','','','','','','','','','','']
+        crewmemberlaunchdate = ['','','','','','','','','','','','']
+        crewmemberpicture = ['','','','','','','','','','','','']
+        crewmembercountry = ['','','','','','','','','','','','']
+
+        for num in range(1,number_of_space+1):
+            if(str(data['people'][num-1]['location']) == str("International Space Station")):
+                crewmember[isscrew] = str(data['people'][num-1]['name'])
+                crewmemberbio[isscrew] = (data['people'][num-1]['bio'])
+                crewmembertitle[isscrew] = str(data['people'][num-1]['title'])
+                crewmemberlaunchdate[isscrew] = str(data['people'][num-1]['launchdate'])
+                crewmemberpicture[isscrew] = str(data['people'][num-1]['biophoto'])
+                crewmembercountry[isscrew] = str(data['people'][num-1]['country'])
+                isscrew = isscrew+1  
+        
+        self.crew_screen.ids.crew1.text = crewmember[0]  
+        self.crew_screen.ids.crew2.text = crewmember[1]  
+        self.crew_screen.ids.crew3.text = crewmember[2]  
+        self.crew_screen.ids.crew4.text = crewmember[3]  
+        self.crew_screen.ids.crew5.text = crewmember[4]  
+        self.crew_screen.ids.crew6.text = crewmember[5]  
+        self.crew_screen.ids.crew7.text = crewmember[6]  
+        self.crew_screen.ids.crew8.text = crewmember[7]  
+        self.crew_screen.ids.crew9.text = crewmember[8]  
+        self.crew_screen.ids.crew10.text = crewmember[9]  
+        self.crew_screen.ids.crew11.text = crewmember[10]  
+        self.crew_screen.ids.crew12.text = crewmember[11]  
+        
     def checkAOSlong(self, dt):
         global aos
         if float(aos) == 0.00:
@@ -1328,46 +1350,94 @@ ScreenManager:
             on_release: app.root.current = 'mimic'
         Label:
             id: crew1
-            pos_hint: {"center_x": 0.6, "center_y": 0.90}
+            pos_hint: {"center_x": 0.1, "center_y": 0.90}
             text: ''
             markup: True
             color: 1,0,1
-            font_size: 30
+            font_size: 25
         Label:
             id: crew2
-            pos_hint: {"center_x": 0.6, "center_y": 0.75}
+            pos_hint: {"center_x": 0.1, "center_y": 0.75}
             text: ''
             markup: True
             color: 1,0,1
-            font_size: 30
+            font_size: 25
         Label:
             id: crew3
-            pos_hint: {"center_x": 0.6, "center_y": 0.60}
+            pos_hint: {"center_x": 0.1, "center_y": 0.60}
             text: ''
             markup: True
             color: 1,0,1
-            font_size: 30
+            font_size: 25
         Label:
             id: crew4
-            pos_hint: {"center_x": 0.6, "center_y": 0.45}
+            pos_hint: {"center_x": 0.1, "center_y": 0.45}
             text: ''
             markup: True
             color: 1,0,1
-            font_size: 30
+            font_size: 25
         Label:
             id: crew5
-            pos_hint: {"center_x": 0.6, "center_y": 0.30}
+            pos_hint: {"center_x": 0.1, "center_y": 0.30}
             text: ''
             markup: True
             color: 1,0,1
-            font_size: 30
+            font_size: 25
         Label:
             id: crew6
-            pos_hint: {"center_x": 0.6, "center_y": 0.15}
+            pos_hint: {"center_x": 0.1, "center_y": 0.15}
             text: ''
             markup: True
             color: 1,0,1
-            font_size: 30
+            font_size: 25
+            
+        Label:
+            id: crew7
+            pos_hint: {"center_x": 0.1, "center_y": 0.15}
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 25
+            
+        Label:
+            id: crew8
+            pos_hint: {"center_x": 0.1, "center_y": 0.15}
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 25
+            
+        Label:
+            id: crew9
+            pos_hint: {"center_x": 0.1, "center_y": 0.15}
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 25
+            
+        Label:
+            id: crew10
+            pos_hint: {"center_x": 0.1, "center_y": 0.15}
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 25
+            
+        Label:
+            id: crew11
+            pos_hint: {"center_x": 0.1, "center_y": 0.15}
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 25
+            
+        Label:
+            id: crew12
+            pos_hint: {"center_x": 0.1, "center_y": 0.15}
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 25
 <EPS_Screen>:
     name: 'eps'
     FloatLayout:
