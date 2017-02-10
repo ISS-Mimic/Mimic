@@ -47,21 +47,21 @@ req = urllib2.Request("http://api.open-notify.org/iss-now.json")
 #crew_req = urllib2.Request("http://api.open-notify.org/astros.json")
 TLE_req = urllib2.Request("http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html")
 
-LED_COUNT      = 7       # Number of LED pixels.
-LED_PIN        = 18      # GPIO pin connected to the pixels (must support PWM!).
-LED_FREQ_HZ    = 800000  # LED signal frequency in hertz (usually 800khz)
-LED_DMA        = 5       # DMA channel to use for generating signal (try 5)
-LED_BRIGHTNESS = 255     # Set to 0 for darkest and 255 for brightest
-LED_INVERT     = False   # True to invert the signal (when using NPN transistor level shift
+#LED_COUNT      = 7       # Number of LED pixels.
+#LED_PIN        = 18      # GPIO pin connected to the pixels (must support PWM!).
+#LED_FREQ_HZ    = 800000  # LED signal frequency in hertz (usually 800khz)
+#LED_DMA        = 5       # DMA channel to use for generating signal (try 5)
+#LED_BRIGHTNESS = 255     # Set to 0 for darkest and 255 for brightest
+#LED_INVERT     = False   # True to invert the signal (when using NPN transistor level shift
 
-strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS)
+#strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS)
 # Intialize the library (must be called once before other functions).
-strip.begin()
+#strip.begin()
 
-for i in range(strip.numPixels()):
-    strip.setPixelColor(i, Color(255,255,255))
-    strip.show()
-    time.sleep(1.0)
+#for i in range(strip.numPixels()):
+#    strip.setPixelColor(i, Color(255,255,255))
+#    strip.show()
+#    time.sleep(0.1)
 
 try:
     ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=0)
@@ -81,6 +81,7 @@ except:
     errorlog.write("serial connection USB not found")
     errorlog.write('\n')
 
+crewjsonsuccess = False
 mimicbutton = False
 fakeorbitboolean = False
 zerocomplete = False
@@ -92,9 +93,7 @@ isscrew = 0
 conn = sqlite3.connect('iss_telemetry.db') #sqlite database call change to include directory
 c = conn.cursor() 
 val = ""
-    
-    
-    
+       
 psarj2 = 1.0
 ssarj2 = 1.0
 
@@ -336,6 +335,7 @@ class MainApp(App):
 
     def build(self):
         global startup
+        global crewjsonsuccess
         self.mimic_screen = MimicScreen(name = 'mimic')
         self.fakeorbit_screen = FakeOrbitScreen(name = 'fakeorbit')
         self.orbit_screen = Orbit_Screen(name = 'orbit')
@@ -361,10 +361,12 @@ class MainApp(App):
     
         Clock.schedule_interval(self.update_labels, 1)
         Clock.schedule_interval(self.checkAOSlong, 5)
-        Clock.schedule_interval(self.updateCrew, 3600)
+        Clock.schedule_interval(self.checkCrew, 3600)
+        if crewjsonsuccess == False:
+            Clock.schedule_once(self.checkCrew, 10)
         if startup == True:
             startup = False
-            self.checkCrew(60)
+            #self.checkCrew(60)
 
         Clock.schedule_interval(self.getTLE, 3600)
         return root
@@ -462,6 +464,9 @@ class MainApp(App):
     
     def checkCrew(self, dt):
         #crew_response = urllib2.urlopen(crew_req)
+        global isscrew    
+        req = urllib2.Request(iss_crew_url, headers={'User-Agent' : "Magic Browser"})
+        stuff = urllib2.urlopen(req)
         crewmember = ['','','','','','','','','','','','']
         crewmemberbio = ['','','','','','','','','','','','']
         crewmembertitle = ['','','','','','','','','','','','']
@@ -469,17 +474,31 @@ class MainApp(App):
         crewmemberpicture = ['','','','','','','','','','','','']
         crewmembercountry = ['','','','','','','','','','','','']
 
-        for num in range(1,number_of_space+1):
-            if(str(data['people'][num-1]['location']) == str("International Space Station")):
-                crewmember[isscrew] = str(data['people'][num-1]['name'])
-                crewmemberbio[isscrew] = (data['people'][num-1]['bio'])
-                crewmembertitle[isscrew] = str(data['people'][num-1]['title'])
-                crewmemberlaunchdate[isscrew] = str(data['people'][num-1]['launchdate'])
-                crewmemberpicture[isscrew] = str(data['people'][num-1]['biophoto'])
-                crewmembercountry[isscrew] = str(data['people'][num-1]['country'])
-                isscrew = isscrew+1  
-        
+        if (stuff.info().getsubtype()=='json'):
+            print "JSON true"
+            crewjsonsuccess = True
+            data = json.load(stuff)
+            number_of_space = int(data['number'])
+            for num in range(1,number_of_space+1):
+                if(str(data['people'][num-1]['location']) == str("International Space Station")):
+                    crewmember[isscrew] = str(data['people'][num-1]['name'])
+                    crewmemberbio[isscrew] = (data['people'][num-1]['bio'])
+                    crewmembertitle[isscrew] = str(data['people'][num-1]['title'])
+                    crewmemberlaunchdate[isscrew] = str(data['people'][num-1]['launchdate'])
+                    crewmemberpicture[isscrew] = str(data['people'][num-1]['biophoto'])
+                    crewmembercountry[isscrew] = str(data['people'][num-1]['country']).title()
+                    if(str(data['people'][num-1]['country'])==str('usa')):
+                        crewmembercountry[isscrew] = str('USA')
+                    isscrew = isscrew+1  
+        else:
+            print "JSON false"
+            crewjsonsuccess = False
+
         self.crew_screen.ids.crew1.text = crewmember[0]  
+        self.crew_screen.ids.crew1title.text = crewmembertitle[0]  
+        self.crew_screen.ids.crew1bio.text = crewmemberbio[0]  
+        self.crew_screen.ids.crew1country.text = crewmembercountry[0]  
+        #self.crew_screen.ids.crew1image.source = str(crewmemberpicture[0])
         self.crew_screen.ids.crew2.text = crewmember[1]  
         self.crew_screen.ids.crew3.text = crewmember[2]  
         self.crew_screen.ids.crew4.text = crewmember[3]  
@@ -1350,35 +1369,72 @@ ScreenManager:
             on_release: app.root.current = 'mimic'
         Label:
             id: crew1
-            pos_hint: {"center_x": 0.1, "center_y": 0.90}
+            pos_hint: {"center_x": 0.15, "center_y": 0.90}
+            halign: 'center'
+            valign: 'middle'
             text: ''
             markup: True
             color: 1,0,1
             font_size: 25
         Label:
+            id: crew1title
+            pos_hint: {"center_x": 0.15, "center_y": 0.83}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Label:
+            id: crew1country
+            pos_hint: {"center_x": 0.15, "center_y": 0.76}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+        Label:
+            id: crew1bio
+            pos_hint: {"center_x": 0.2, "center_y": 0.5}
+            text_size: cm(8), cm(5)
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+        Image:
+            id: crew1image
+            source: 'http://www.howmanypeopleareinspacerightnow.com/app/flags/flag-usa.jpg'
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            keep_ratio: True
+            size_hint: 0.3, 0.4
+
+        Label:
             id: crew2
-            pos_hint: {"center_x": 0.1, "center_y": 0.75}
+            pos_hint: {"center_x": 0.1, "center_y": 0.2}
             text: ''
             markup: True
             color: 1,0,1
             font_size: 25
         Label:
             id: crew3
-            pos_hint: {"center_x": 0.1, "center_y": 0.60}
+            pos_hint: {"center_x": 0.1, "center_y": 0.2}
             text: ''
             markup: True
             color: 1,0,1
             font_size: 25
         Label:
             id: crew4
-            pos_hint: {"center_x": 0.1, "center_y": 0.45}
+            pos_hint: {"center_x": 0.1, "center_y": 0.2}
             text: ''
             markup: True
             color: 1,0,1
             font_size: 25
         Label:
             id: crew5
-            pos_hint: {"center_x": 0.1, "center_y": 0.30}
+            pos_hint: {"center_x": 0.1, "center_y": 0.2}
             text: ''
             markup: True
             color: 1,0,1
