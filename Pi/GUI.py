@@ -1,5 +1,6 @@
 import kivy
 import urllib2
+from neopixel import *
 from bs4 import BeautifulSoup
 from calendar import timegm
 import datetime
@@ -42,8 +43,26 @@ locationlog = open('locationlog.txt','a')
 
 nasaissurl = 'http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html'
 req = urllib2.Request("http://api.open-notify.org/iss-now.json")
-crew_req = urllib2.Request("http://api.open-notify.org/astros.json")
+#crew_req = urllib2.Request("http://api.open-notify.org/astros.json")
+crew_url = "http://www.howmanypeopleareinspacerightnow.com/peopleinspace.json"
 TLE_req = urllib2.Request("http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html")
+
+
+LED_COUNT      = 7       # Number of LED pixels.
+LED_PIN        = 18      # GPIO pin connected to the pixels (must support PWM!).
+LED_FREQ_HZ    = 800000  # LED signal frequency in hertz (usually 800khz)
+LED_DMA        = 5       # DMA channel to use for generating signal (try 5)
+LED_BRIGHTNESS = 255     # Set to 0 for darkest and 255 for brightest
+LED_INVERT     = False   # True to invert the signal (when using NPN transistor level shift
+
+strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS)
+# Intialize the library (must be called once before other functions).
+strip.begin()
+
+for i in range(strip.numPixels()):
+    strip.setPixelColor(i, Color(255,255,255))
+    strip.show()
+    time.sleep(1.0)
 
 try:
     ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=0)
@@ -440,8 +459,10 @@ class MainApp(App):
 
     
     def checkCrew(self, dt):
-        crew_response = urllib2.urlopen(crew_req)
-        crew_obj = json.loads(crew_response.read())
+        #crew_response = urllib2.urlopen(crew_req)
+        crew_obj = json.loads(urllib2.urlopen(crew_url))
+        numberofcrew = str(crew_obj['number'][0])
+        print numberofcrew
         self.crew_screen.ids.crew1.text = str(crew_obj['people'][0]['name'])    
         self.crew_screen.ids.crew2.text = str(crew_obj['people'][1]['name'])    
         self.crew_screen.ids.crew3.text = str(crew_obj['people'][2]['name'])    
