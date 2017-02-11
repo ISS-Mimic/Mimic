@@ -1,0 +1,2 @@
+2017-02-10 05:45:06.944750 serial connection GPIO not found
+2017-02-10 05:45:06.945041 serial connection USB not found
