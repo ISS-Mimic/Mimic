@@ -135,6 +135,13 @@ velocity = 0.00
 altitude = 0.00
 mass = 0.00
 
+crewmember = ['','','','','','','','','','','','']
+crewmemberbio = ['','','','','','','','','','','','']
+crewmembertitle = ['','','','','','','','','','','','']
+crewmemberdays = ['','','','','','','','','','','','']
+crewmemberpicture = ['','','','','','','','','','','','']
+crewmembercountry = ['','','','','','','','','','','','']
+
 def StringToBytes(val):
     retVal = []
     for c in val:
@@ -465,14 +472,17 @@ class MainApp(App):
     def checkCrew(self, dt):
         #crew_response = urllib2.urlopen(crew_req)
         global isscrew    
+        global crewmember 
+        global crewmemberbio
+        global crewmembertitle
+        global crewmemberdays
+        global crewmemberpicture
+        global crewmembercountry
         req = urllib2.Request(iss_crew_url, headers={'User-Agent' : "Magic Browser"})
         stuff = urllib2.urlopen(req)
-        crewmember = ['','','','','','','','','','','','']
-        crewmemberbio = ['','','','','','','','','','','','']
-        crewmembertitle = ['','','','','','','','','','','','']
-        crewmemberlaunchdate = ['','','','','','','','','','','','']
-        crewmemberpicture = ['','','','','','','','','','','','']
-        crewmembercountry = ['','','','','','','','','','','','']
+
+        now = datetime.datetime.now()
+        print now
 
         if (stuff.info().getsubtype()=='json'):
             print "JSON true"
@@ -484,7 +494,11 @@ class MainApp(App):
                     crewmember[isscrew] = str(data['people'][num-1]['name'])
                     crewmemberbio[isscrew] = (data['people'][num-1]['bio'])
                     crewmembertitle[isscrew] = str(data['people'][num-1]['title'])
-                    crewmemberlaunchdate[isscrew] = str(data['people'][num-1]['launchdate'])
+                    datetime_object = datetime.datetime.strptime(str(data['people'][num-1]['launchdate']),'%Y-%m-%d')
+                    previousdays = int(data['people'][num-1]['careerdays'])
+                    totaldaysinspace = str(now-datetime_object)
+                    d_index = totaldaysinspace.index('d')
+                    crewmemberdays[isscrew] = str(int(totaldaysinspace[:d_index])+previousdays)
                     crewmemberpicture[isscrew] = str(data['people'][num-1]['biophoto'])
                     crewmembercountry[isscrew] = str(data['people'][num-1]['country']).title()
                     if(str(data['people'][num-1]['country'])==str('usa')):
@@ -493,23 +507,67 @@ class MainApp(App):
         else:
             print "JSON false"
             crewjsonsuccess = False
-
+        isscrew = 0
         self.crew_screen.ids.crew1.text = crewmember[0]  
         self.crew_screen.ids.crew1title.text = crewmembertitle[0]  
-        self.crew_screen.ids.crew1bio.text = crewmemberbio[0]  
         self.crew_screen.ids.crew1country.text = crewmembercountry[0]  
+        self.crew_screen.ids.crew1daysonISS.text = crewmemberdays[0] + ' total days in space'
         #self.crew_screen.ids.crew1image.source = str(crewmemberpicture[0])
         self.crew_screen.ids.crew2.text = crewmember[1]  
+        self.crew_screen.ids.crew2title.text = crewmembertitle[1]  
+        self.crew_screen.ids.crew2country.text = crewmembercountry[1]  
+        self.crew_screen.ids.crew2daysonISS.text = crewmemberdays[1] + ' total days in space'
+        #self.crew_screen.ids.crew2image.source = str(crewmemberpicture[1])
         self.crew_screen.ids.crew3.text = crewmember[2]  
+        self.crew_screen.ids.crew3title.text = crewmembertitle[2]  
+        self.crew_screen.ids.crew3country.text = crewmembercountry[2]  
+        self.crew_screen.ids.crew3daysonISS.text = crewmemberdays[2] + ' total days in space'
+        #self.crew_screen.ids.crew3image.source = str(crewmemberpicture[2])
         self.crew_screen.ids.crew4.text = crewmember[3]  
+        self.crew_screen.ids.crew4title.text = crewmembertitle[3]  
+        self.crew_screen.ids.crew4country.text = crewmembercountry[3]  
+        self.crew_screen.ids.crew4daysonISS.text = crewmemberdays[3] + ' total days in space'
+        #self.crew_screen.ids.crew4image.source = str(crewmemberpicture[3])
         self.crew_screen.ids.crew5.text = crewmember[4]  
+        self.crew_screen.ids.crew5title.text = crewmembertitle[4]  
+        self.crew_screen.ids.crew5country.text = crewmembercountry[4]  
+        self.crew_screen.ids.crew5daysonISS.text = crewmemberdays[4] + ' total days in space'
+        #self.crew_screen.ids.crew5image.source = str(crewmemberpicture[4])
         self.crew_screen.ids.crew6.text = crewmember[5]  
+        self.crew_screen.ids.crew6title.text = crewmembertitle[5]  
+        self.crew_screen.ids.crew6country.text = crewmembercountry[5]  
+        self.crew_screen.ids.crew6daysonISS.text = crewmemberdays[5] + ' total days in space'
+        #self.crew_screen.ids.crew6image.source = str(crewmemberpicture[5])
         self.crew_screen.ids.crew7.text = crewmember[6]  
+        self.crew_screen.ids.crew7title.text = crewmembertitle[6]  
+        self.crew_screen.ids.crew7country.text = crewmembercountry[6]  
+        self.crew_screen.ids.crew7daysonISS.text = crewmemberdays[6] + ' total days in space'
+        #self.crew_screen.ids.crew7image.source = str(crewmemberpicture[6])
         self.crew_screen.ids.crew8.text = crewmember[7]  
+        self.crew_screen.ids.crew8title.text = crewmembertitle[7]  
+        self.crew_screen.ids.crew8country.text = crewmembercountry[7]  
+        self.crew_screen.ids.crew8daysonISS.text = crewmemberdays[7] + ' total days in space'
+        #self.crew_screen.ids.crew8image.source = str(crewmemberpicture[7])
         self.crew_screen.ids.crew9.text = crewmember[8]  
+        self.crew_screen.ids.crew9title.text = crewmembertitle[8]  
+        self.crew_screen.ids.crew9country.text = crewmembercountry[8]  
+        self.crew_screen.ids.crew9daysonISS.text = crewmemberdays[8] + ' total days in space'
+        #self.crew_screen.ids.crew9image.source = str(crewmemberpicture[8])
         self.crew_screen.ids.crew10.text = crewmember[9]  
+        self.crew_screen.ids.crew10title.text = crewmembertitle[9]  
+        self.crew_screen.ids.crew10country.text = crewmembercountry[9]  
+        self.crew_screen.ids.crew10daysonISS.text = crewmemberdays[9] + ' total days in space'
+        #self.crew_screen.ids.crew10image.source = str(crewmemberpicture[9])
         self.crew_screen.ids.crew11.text = crewmember[10]  
+        self.crew_screen.ids.crew11title.text = crewmembertitle[10]  
+        self.crew_screen.ids.crew11country.text = crewmembercountry[10]  
+        self.crew_screen.ids.crew11daysonISS.text = crewmemberdays[10] + ' total days in space'
+        #self.crew_screen.ids.crew11image.source = str(crewmemberpicture[10])
         self.crew_screen.ids.crew12.text = crewmember[11]  
+        self.crew_screen.ids.crew12title.text = crewmembertitle[11]  
+        self.crew_screen.ids.crew12country.text = crewmembercountry[11]  
+        self.crew_screen.ids.crew12daysonISS.text = crewmemberdays[11] + ' total days in space'
+        #self.crew_screen.ids.crew12image.source = str(crewmemberpicture[11])
         
     def checkAOSlong(self, dt):
         global aos
@@ -1394,106 +1452,18 @@ ScreenManager:
             text: ''
             color: 1,1,1
             font_size: 18
+            #text_size: cm(8), cm(5)
         Label:
-            id: crew1bio
-            pos_hint: {"center_x": 0.2, "center_y": 0.5}
-            text_size: cm(8), cm(5)
+            id: crew1daysonISS
+            pos_hint: {"center_x": 0.15, "center_y": 0.69}
             markup: True
             halign: 'center'
             valign: 'middle'
             text: ''
             color: 1,1,1
             font_size: 18
-        Image:
-            id: crew1image
-            source: 'http://www.howmanypeopleareinspacerightnow.com/app/flags/flag-usa.jpg'
-            pos_hint: {"center_x": 0.5, "center_y": 0.5}
-            keep_ratio: True
-            size_hint: 0.3, 0.4
+            #text_size: cm(8), cm(5)
 
-        Label:
-            id: crew2
-            pos_hint: {"center_x": 0.1, "center_y": 0.2}
-            text: ''
-            markup: True
-            color: 1,0,1
-            font_size: 25
-        Label:
-            id: crew3
-            pos_hint: {"center_x": 0.1, "center_y": 0.2}
-            text: ''
-            markup: True
-            color: 1,0,1
-            font_size: 25
-        Label:
-            id: crew4
-            pos_hint: {"center_x": 0.1, "center_y": 0.2}
-            text: ''
-            markup: True
-            color: 1,0,1
-            font_size: 25
-        Label:
-            id: crew5
-            pos_hint: {"center_x": 0.1, "center_y": 0.2}
-            text: ''
-            markup: True
-            color: 1,0,1
-            font_size: 25
-        Label:
-            id: crew6
-            pos_hint: {"center_x": 0.1, "center_y": 0.15}
-            text: ''
-            markup: True
-            color: 1,0,1
-            font_size: 25
-            
-        Label:
-            id: crew7
-            pos_hint: {"center_x": 0.1, "center_y": 0.15}
-            text: ''
-            markup: True
-            color: 1,0,1
-            font_size: 25
-            
-        Label:
-            id: crew8
-            pos_hint: {"center_x": 0.1, "center_y": 0.15}
-            text: ''
-            markup: True
-            color: 1,0,1
-            font_size: 25
-            
-        Label:
-            id: crew9
-            pos_hint: {"center_x": 0.1, "center_y": 0.15}
-            text: ''
-            markup: True
-            color: 1,0,1
-            font_size: 25
-            
-        Label:
-            id: crew10
-            pos_hint: {"center_x": 0.1, "center_y": 0.15}
-            text: ''
-            markup: True
-            color: 1,0,1
-            font_size: 25
-            
-        Label:
-            id: crew11
-            pos_hint: {"center_x": 0.1, "center_y": 0.15}
-            text: ''
-            markup: True
-            color: 1,0,1
-            font_size: 25
-            
-        Label:
-            id: crew12
-            pos_hint: {"center_x": 0.1, "center_y": 0.15}
-            text: ''
-            markup: True
-            color: 1,0,1
-            font_size: 25
 <EPS_Screen>:
     name: 'eps'
     FloatLayout:
