@@ -1428,7 +1428,7 @@ ScreenManager:
 ##-----------------------------------------------------------CREW1-------------------------------------------------------------
         Label:
             id: crew1
-            pos_hint: {"center_x": 0.15, "center_y": 0.90}
+            pos_hint: {"center_x": 0.11, "center_y": 0.95}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1437,7 +1437,7 @@ ScreenManager:
             font_size: 25
         Label:
             id: crew1title
-            pos_hint: {"center_x": 0.15, "center_y": 0.83}
+            pos_hint: {"center_x": 0.11, "center_y": 0.88}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1446,7 +1446,7 @@ ScreenManager:
             font_size: 20
         Label:
             id: crew1country
-            pos_hint: {"center_x": 0.15, "center_y": 0.76}
+            pos_hint: {"center_x": 0.11, "center_y": 0.81}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1456,7 +1456,7 @@ ScreenManager:
             #text_size: cm(8), cm(5)
         Label:
             id: crew1daysonISS
-            pos_hint: {"center_x": 0.15, "center_y": 0.69}
+            pos_hint: {"center_x": 0.11, "center_y": 0.74}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1467,7 +1467,7 @@ ScreenManager:
 ##-----------------------------------------------------------CREW2-------------------------------------------------------------
         Label:
             id: crew2
-            pos_hint: {"center_x": 0.15, "center_y": 0.62}
+            pos_hint: {"center_x": 0.11, "center_y": 0.67}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1476,7 +1476,7 @@ ScreenManager:
             font_size: 25
         Label:
             id: crew2title
-            pos_hint: {"center_x": 0.15, "center_y": 0.55}
+            pos_hint: {"center_x": 0.11, "center_y": 0.60}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1485,7 +1485,7 @@ ScreenManager:
             font_size: 20
         Label:
             id: crew2country
-            pos_hint: {"center_x": 0.15, "center_y": 0.48}
+            pos_hint: {"center_x": 0.11, "center_y": 0.53}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1495,7 +1495,7 @@ ScreenManager:
             #text_size: cm(8), cm(5)
         Label:
             id: crew2daysonISS
-            pos_hint: {"center_x": 0.15, "center_y": 0.41}
+            pos_hint: {"center_x": 0.11, "center_y": 0.46}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1506,7 +1506,7 @@ ScreenManager:
 ##-----------------------------------------------------------CREW3-------------------------------------------------------------
         Label:
             id: crew3
-            pos_hint: {"center_x": 0.15, "center_y": 0.34}
+            pos_hint: {"center_x": 0.11, "center_y": 0.39}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1515,7 +1515,7 @@ ScreenManager:
             font_size: 25
         Label:
             id: crew3title
-            pos_hint: {"center_x": 0.15, "center_y": 0.27}
+            pos_hint: {"center_x": 0.11, "center_y": 0.32}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1524,7 +1524,7 @@ ScreenManager:
             font_size: 20
         Label:
             id: crew3country
-            pos_hint: {"center_x": 0.15, "center_y": 0.20}
+            pos_hint: {"center_x": 0.11, "center_y": 0.25}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1534,7 +1534,7 @@ ScreenManager:
             #text_size: cm(8), cm(5)
         Label:
             id: crew3daysonISS
-            pos_hint: {"center_x": 0.15, "center_y": 0.13}
+            pos_hint: {"center_x": 0.11, "center_y": 0.18}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1545,7 +1545,7 @@ ScreenManager:
 ##-----------------------------------------------------------CREW4-------------------------------------------------------------
         Label:
             id: crew4
-            pos_hint: {"center_x": 0.5, "center_y": 0.90}
+            pos_hint: {"center_x": 0.4, "center_y": 0.95}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1554,7 +1554,7 @@ ScreenManager:
             font_size: 25
         Label:
             id: crew4title
-            pos_hint: {"center_x": 0.5, "center_y": 0.83}
+            pos_hint: {"center_x": 0.4, "center_y": 0.88}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1563,7 +1563,7 @@ ScreenManager:
             font_size: 20
         Label:
             id: crew4country
-            pos_hint: {"center_x": 0.5, "center_y": 0.76}
+            pos_hint: {"center_x": 0.4, "center_y": 0.81}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1573,7 +1573,7 @@ ScreenManager:
             #text_size: cm(8), cm(5)
         Label:
             id: crew4daysonISS
-            pos_hint: {"center_x": 0.5, "center_y": 0.69}
+            pos_hint: {"center_x": 0.4, "center_y": 0.74}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1584,7 +1584,7 @@ ScreenManager:
 ##-----------------------------------------------------------CREW5-------------------------------------------------------------
         Label:
             id: crew5
-            pos_hint: {"center_x": 0.5, "center_y": 0.62}
+            pos_hint: {"center_x": 0.5, "center_y": 0.67}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1593,7 +1593,7 @@ ScreenManager:
             font_size: 25
         Label:
             id: crew5title
-            pos_hint: {"center_x": 0.5, "center_y": 0.55}
+            pos_hint: {"center_x": 0.5, "center_y": 0.60}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1602,7 +1602,7 @@ ScreenManager:
             font_size: 20
         Label:
             id: crew5country
-            pos_hint: {"center_x": 0.5, "center_y": 0.48}
+            pos_hint: {"center_x": 0.5, "center_y": 0.53}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1612,7 +1612,7 @@ ScreenManager:
             #text_size: cm(8), cm(5)
         Label:
             id: crew5daysonISS
-            pos_hint: {"center_x": 0.5, "center_y": 0.41}
+            pos_hint: {"center_x": 0.5, "center_y": 0.46}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1623,7 +1623,7 @@ ScreenManager:
 ##-----------------------------------------------------------CREW6-------------------------------------------------------------
         Label:
             id: crew6
-            pos_hint: {"center_x": 0.5, "center_y": 0.34}
+            pos_hint: {"center_x": 0.5, "center_y": 0.39}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1632,7 +1632,7 @@ ScreenManager:
             font_size: 25
         Label:
             id: crew6title
-            pos_hint: {"center_x": 0.5, "center_y": 0.27}
+            pos_hint: {"center_x": 0.5, "center_y": 0.32}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1641,7 +1641,7 @@ ScreenManager:
             font_size: 20
         Label:
             id: crew6country
-            pos_hint: {"center_x": 0.5, "center_y": 0.20}
+            pos_hint: {"center_x": 0.5, "center_y": 0.25}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1651,7 +1651,7 @@ ScreenManager:
             #text_size: cm(8), cm(5)
         Label:
             id: crew6daysonISS
-            pos_hint: {"center_x": 0.5, "center_y": 0.13}
+            pos_hint: {"center_x": 0.5, "center_y": 0.18}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1662,7 +1662,7 @@ ScreenManager:
 ##-----------------------------------------------------------CREW7-------------------------------------------------------------
         Label:
             id: crew7
-            pos_hint: {"center_x": 0.5, "center_y": 0.90}
+            pos_hint: {"center_x": 0.5, "center_y": 0.95}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1671,7 +1671,7 @@ ScreenManager:
             font_size: 25
         Label:
             id: crew7title
-            pos_hint: {"center_x": 0.5, "center_y": 0.83}
+            pos_hint: {"center_x": 0.5, "center_y": 0.88}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1680,7 +1680,7 @@ ScreenManager:
             font_size: 20
         Label:
             id: crew7country
-            pos_hint: {"center_x": 0.5, "center_y": 0.76}
+            pos_hint: {"center_x": 0.5, "center_y": 0.81}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1690,7 +1690,7 @@ ScreenManager:
             #text_size: cm(8), cm(5)
         Label:
             id: crew7daysonISS
-            pos_hint: {"center_x": 0.5, "center_y": 0.69}
+            pos_hint: {"center_x": 0.5, "center_y": 0.74}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1701,7 +1701,7 @@ ScreenManager:
 ##-----------------------------------------------------------CREW8-------------------------------------------------------------
         Label:
             id: crew8
-            pos_hint: {"center_x": 0.5, "center_y": 0.62}
+            pos_hint: {"center_x": 0.5, "center_y": 0.67}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1710,7 +1710,7 @@ ScreenManager:
             font_size: 25
         Label:
             id: crew8title
-            pos_hint: {"center_x": 0.5, "center_y": 0.55}
+            pos_hint: {"center_x": 0.5, "center_y": 0.60}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1719,7 +1719,7 @@ ScreenManager:
             font_size: 20
         Label:
             id: crew8country
-            pos_hint: {"center_x": 0.5, "center_y": 0.48}
+            pos_hint: {"center_x": 0.5, "center_y": 0.53}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1729,7 +1729,7 @@ ScreenManager:
             #text_size: cm(8), cm(5)
         Label:
             id: crew8daysonISS
-            pos_hint: {"center_x": 0.5, "center_y": 0.41}
+            pos_hint: {"center_x": 0.5, "center_y": 0.46}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1740,7 +1740,7 @@ ScreenManager:
 ##-----------------------------------------------------------CREW9-------------------------------------------------------------
         Label:
             id: crew9
-            pos_hint: {"center_x": 0.5, "center_y": 0.34}
+            pos_hint: {"center_x": 0.5, "center_y": 0.39}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1749,7 +1749,7 @@ ScreenManager:
             font_size: 25
         Label:
             id: crew9title
-            pos_hint: {"center_x": 0.5, "center_y": 0.27}
+            pos_hint: {"center_x": 0.5, "center_y": 0.31}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1758,7 +1758,7 @@ ScreenManager:
             font_size: 20
         Label:
             id: crew9country
-            pos_hint: {"center_x": 0.5, "center_y": 0.20}
+            pos_hint: {"center_x": 0.5, "center_y": 0.25}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1768,7 +1768,7 @@ ScreenManager:
             #text_size: cm(8), cm(5)
         Label:
             id: crew9daysonISS
-            pos_hint: {"center_x": 0.5, "center_y": 0.13}
+            pos_hint: {"center_x": 0.5, "center_y": 0.18}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1779,7 +1779,7 @@ ScreenManager:
 ##-----------------------------------------------------------CREW10-------------------------------------------------------------
         Label:
             id: crew10
-            pos_hint: {"center_x": 0.5, "center_y": 0.90}
+            pos_hint: {"center_x": 0.5, "center_y": 0.95}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1788,7 +1788,7 @@ ScreenManager:
             font_size: 25
         Label:
             id: crew10title
-            pos_hint: {"center_x": 0.5, "center_y": 0.83}
+            pos_hint: {"center_x": 0.5, "center_y": 0.88}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1797,7 +1797,7 @@ ScreenManager:
             font_size: 20
         Label:
             id: crew10country
-            pos_hint: {"center_x": 0.5, "center_y": 0.76}
+            pos_hint: {"center_x": 0.5, "center_y": 0.81}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1807,7 +1807,7 @@ ScreenManager:
             #text_size: cm(8), cm(5)
         Label:
             id: crew10daysonISS
-            pos_hint: {"center_x": 0.5, "center_y": 0.69}
+            pos_hint: {"center_x": 0.5, "center_y": 0.74}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1818,7 +1818,7 @@ ScreenManager:
 ##-----------------------------------------------------------CREW11-------------------------------------------------------------
         Label:
             id: crew11
-            pos_hint: {"center_x": 0.5, "center_y": 0.62}
+            pos_hint: {"center_x": 0.5, "center_y": 0.67}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1827,7 +1827,7 @@ ScreenManager:
             font_size: 25
         Label:
             id: crew11title
-            pos_hint: {"center_x": 0.5, "center_y": 0.55}
+            pos_hint: {"center_x": 0.5, "center_y": 0.60}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1836,7 +1836,7 @@ ScreenManager:
             font_size: 20
         Label:
             id: crew11country
-            pos_hint: {"center_x": 0.5, "center_y": 0.48}
+            pos_hint: {"center_x": 0.5, "center_y": 0.53}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1846,7 +1846,7 @@ ScreenManager:
             #text_size: cm(8), cm(5)
         Label:
             id: crew11daysonISS
-            pos_hint: {"center_x": 0.5, "center_y": 0.41}
+            pos_hint: {"center_x": 0.5, "center_y": 0.46}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1857,7 +1857,7 @@ ScreenManager:
 ##-----------------------------------------------------------CREW12-------------------------------------------------------------
         Label:
             id: crew12
-            pos_hint: {"center_x": 0.5, "center_y": 0.34}
+            pos_hint: {"center_x": 0.5, "center_y": 0.39}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1866,7 +1866,7 @@ ScreenManager:
             font_size: 25
         Label:
             id: crew12title
-            pos_hint: {"center_x": 0.5, "center_y": 0.27}
+            pos_hint: {"center_x": 0.5, "center_y": 0.32}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1875,7 +1875,7 @@ ScreenManager:
             font_size: 20
         Label:
             id: crew12country
-            pos_hint: {"center_x": 0.5, "center_y": 0.20}
+            pos_hint: {"center_x": 0.5, "center_y": 0.25}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1885,7 +1885,7 @@ ScreenManager:
             #text_size: cm(8), cm(5)
         Label:
             id: crew12daysonISS
-            pos_hint: {"center_x": 0.5, "center_y": 0.13}
+            pos_hint: {"center_x": 0.5, "center_y": 0.18}
             markup: True
             halign: 'center'
             valign: 'middle'
