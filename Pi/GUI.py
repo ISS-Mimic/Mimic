@@ -63,23 +63,30 @@ TLE_req = urllib2.Request("http://spaceflight.nasa.gov/realdata/sightings/SSappl
 #    strip.show()
 #    time.sleep(0.1)
 
-try:
-    ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=0)
-except:
-    print "No serial connection detected - GPIO"
-    errorlog.write(str(datetime.datetime.utcnow()))
-    errorlog.write(' ')
-    errorlog.write("serial connection GPIO not found")
-    errorlog.write('\n')
+#try:
+#    ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1)
+#    ser.open()
+#except:
+#    print "No serial connection detected - GPIO"
+#    errorlog.write(str(datetime.datetime.utcnow()))
+#    errorlog.write(' ')
+#    errorlog.write("serial connection GPIO not found")
+#    errorlog.write('\n')
 
-try:
-    ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
-except:
-    print "No serial connection detected - USB"
-    errorlog.write(str(datetime.datetime.utcnow()))
-    errorlog.write(' ')
-    errorlog.write("serial connection USB not found")
-    errorlog.write('\n')
+ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
+ser.write("test")
+#ser.open()
+
+
+#try:
+    #ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
+    #ser.open()
+#except:
+#    print "No serial connection detected - USB"
+#    errorlog.write(str(datetime.datetime.utcnow()))
+#    errorlog.write(' ')
+#    errorlog.write("serial connection USB not found")
+#    errorlog.write('\n')
 
 crewjsonsuccess = False
 mimicbutton = False
@@ -142,6 +149,7 @@ crewmemberdays = ['','','','','','','','','','','','']
 crewmemberpicture = ['','','','','','','','','','','','']
 crewmembercountry = ['','','','','','','','','','','','']
 
+
 def StringToBytes(val):
     retVal = []
     for c in val:
@@ -151,8 +159,11 @@ def StringToBytes(val):
 class MainScreen(Screen):
     def changeManualControlBoolean(self, *args):
         global manualcontrol
-        manualcontrol = args[0]
-        
+        manualcontrol = args[0]        
+    def closeSerial(self):
+        global ser
+        ser.close()
+
 class CalibrateScreen(Screen):
     def serialWrite(self, *args):
         try:
@@ -164,9 +175,11 @@ class CalibrateScreen(Screen):
             errorlog.write('\n')
 
     def serialActualWrite(self, *args):
+        global ser
         ser.write(*args)
 
     def zeroJoints(self):
+        global ser
         self.changeBoolean(True)
         ser.write('Zero')
 
@@ -249,6 +262,7 @@ class ManualControlScreen(Screen):
             errorlog.write('\n')
 
     def serialActualWrite(self, *args):
+        global ser
         ser.write(*args)
 
 class FakeOrbitScreen(Screen):
@@ -262,6 +276,7 @@ class FakeOrbitScreen(Screen):
             errorlog.write('\n')
 
     def serialActualWrite(self, *args):
+        global ser
         ser.write(*args)
 
     def changeBoolean(self, *args):
@@ -369,26 +384,23 @@ class MainApp(App):
         Clock.schedule_interval(self.update_labels, 1)
         Clock.schedule_interval(self.checkAOSlong, 5)
         Clock.schedule_interval(self.checkCrew, 3600)
-        if crewjsonsuccess == False:
+        if crewjsonsuccess == False: #check crew every 10s until success then once per hour
             Clock.schedule_once(self.checkCrew, 10)
         if startup == True:
             startup = False
             #self.checkCrew(60)
 
-        Clock.schedule_interval(self.getTLE, 3600)
+        #Clock.schedule_interval(self.getTLE, 3600)
         return root
 
     def serialWrite(self, *args):
         try:
-            self.serialActualWrite(self, *args)
+            ser.write(*args)
         except:
             errorlog.write(str(datetime.datetime.utcnow()))
             errorlog.write(' ')
             errorlog.write("Attempted write - no serial device connected")
             errorlog.write('\n')
-
-    def serialActualWrite(self, *args):
-        ser.write(*args)
 
     def changeColors(self, *args):   #this function sets all labels on mimic screen to a certain color based on signal status
         self.eps_screen.ids.psarj_value.color = args[0],args[1],args[2]
@@ -479,11 +491,9 @@ class MainApp(App):
         global crewmemberpicture
         global crewmembercountry
         req = urllib2.Request(iss_crew_url, headers={'User-Agent' : "Magic Browser"})
+        global ser
         stuff = urllib2.urlopen(req)
-
         now = datetime.datetime.now()
-        print now
-
         if (stuff.info().getsubtype()=='json'):
             print "JSON true"
             crewjsonsuccess = True
@@ -498,7 +508,7 @@ class MainApp(App):
                     previousdays = int(data['people'][num-1]['careerdays'])
                     totaldaysinspace = str(now-datetime_object)
                     d_index = totaldaysinspace.index('d')
-                    crewmemberdays[isscrew] = str(int(totaldaysinspace[:d_index])+previousdays)
+                    crewmemberdays[isscrew] = str(int(totaldaysinspace[:d_index])+previousdays)+" days in space"
                     crewmemberpicture[isscrew] = str(data['people'][num-1]['biophoto'])
                     crewmembercountry[isscrew] = str(data['people'][num-1]['country']).title()
                     if(str(data['people'][num-1]['country'])==str('usa')):
@@ -511,62 +521,62 @@ class MainApp(App):
         self.crew_screen.ids.crew1.text = crewmember[0]  
         self.crew_screen.ids.crew1title.text = crewmembertitle[0]  
         self.crew_screen.ids.crew1country.text = crewmembercountry[0]  
-        self.crew_screen.ids.crew1daysonISS.text = crewmemberdays[0] + ' total days in space'
+        self.crew_screen.ids.crew1daysonISS.text = crewmemberdays[0]
         #self.crew_screen.ids.crew1image.source = str(crewmemberpicture[0])
         self.crew_screen.ids.crew2.text = crewmember[1]  
         self.crew_screen.ids.crew2title.text = crewmembertitle[1]  
         self.crew_screen.ids.crew2country.text = crewmembercountry[1]  
-        self.crew_screen.ids.crew2daysonISS.text = crewmemberdays[1] + ' total days in space'
+        self.crew_screen.ids.crew2daysonISS.text = crewmemberdays[1]
         #self.crew_screen.ids.crew2image.source = str(crewmemberpicture[1])
         self.crew_screen.ids.crew3.text = crewmember[2]  
         self.crew_screen.ids.crew3title.text = crewmembertitle[2]  
         self.crew_screen.ids.crew3country.text = crewmembercountry[2]  
-        self.crew_screen.ids.crew3daysonISS.text = crewmemberdays[2] + ' total days in space'
+        self.crew_screen.ids.crew3daysonISS.text = crewmemberdays[2]
         #self.crew_screen.ids.crew3image.source = str(crewmemberpicture[2])
         self.crew_screen.ids.crew4.text = crewmember[3]  
         self.crew_screen.ids.crew4title.text = crewmembertitle[3]  
         self.crew_screen.ids.crew4country.text = crewmembercountry[3]  
-        self.crew_screen.ids.crew4daysonISS.text = crewmemberdays[3] + ' total days in space'
+        self.crew_screen.ids.crew4daysonISS.text = crewmemberdays[3]
         #self.crew_screen.ids.crew4image.source = str(crewmemberpicture[3])
         self.crew_screen.ids.crew5.text = crewmember[4]  
         self.crew_screen.ids.crew5title.text = crewmembertitle[4]  
         self.crew_screen.ids.crew5country.text = crewmembercountry[4]  
-        self.crew_screen.ids.crew5daysonISS.text = crewmemberdays[4] + ' total days in space'
+        self.crew_screen.ids.crew5daysonISS.text = crewmemberdays[4]
         #self.crew_screen.ids.crew5image.source = str(crewmemberpicture[4])
         self.crew_screen.ids.crew6.text = crewmember[5]  
         self.crew_screen.ids.crew6title.text = crewmembertitle[5]  
         self.crew_screen.ids.crew6country.text = crewmembercountry[5]  
-        self.crew_screen.ids.crew6daysonISS.text = crewmemberdays[5] + ' total days in space'
+        self.crew_screen.ids.crew6daysonISS.text = crewmemberdays[5]
         #self.crew_screen.ids.crew6image.source = str(crewmemberpicture[5])
         self.crew_screen.ids.crew7.text = crewmember[6]  
         self.crew_screen.ids.crew7title.text = crewmembertitle[6]  
         self.crew_screen.ids.crew7country.text = crewmembercountry[6]  
-        self.crew_screen.ids.crew7daysonISS.text = crewmemberdays[6] + ' total days in space'
+        self.crew_screen.ids.crew7daysonISS.text = crewmemberdays[6]
         #self.crew_screen.ids.crew7image.source = str(crewmemberpicture[6])
         self.crew_screen.ids.crew8.text = crewmember[7]  
         self.crew_screen.ids.crew8title.text = crewmembertitle[7]  
         self.crew_screen.ids.crew8country.text = crewmembercountry[7]  
-        self.crew_screen.ids.crew8daysonISS.text = crewmemberdays[7] + ' total days in space'
+        self.crew_screen.ids.crew8daysonISS.text = crewmemberdays[7]
         #self.crew_screen.ids.crew8image.source = str(crewmemberpicture[7])
         self.crew_screen.ids.crew9.text = crewmember[8]  
         self.crew_screen.ids.crew9title.text = crewmembertitle[8]  
         self.crew_screen.ids.crew9country.text = crewmembercountry[8]  
-        self.crew_screen.ids.crew9daysonISS.text = crewmemberdays[8] + ' total days in space'
+        self.crew_screen.ids.crew9daysonISS.text = crewmemberdays[8]
         #self.crew_screen.ids.crew9image.source = str(crewmemberpicture[8])
         self.crew_screen.ids.crew10.text = crewmember[9]  
         self.crew_screen.ids.crew10title.text = crewmembertitle[9]  
         self.crew_screen.ids.crew10country.text = crewmembercountry[9]  
-        self.crew_screen.ids.crew10daysonISS.text = crewmemberdays[9] + ' total days in space'
+        self.crew_screen.ids.crew10daysonISS.text = crewmemberdays[9]
         #self.crew_screen.ids.crew10image.source = str(crewmemberpicture[9])
         self.crew_screen.ids.crew11.text = crewmember[10]  
         self.crew_screen.ids.crew11title.text = crewmembertitle[10]  
         self.crew_screen.ids.crew11country.text = crewmembercountry[10]  
-        self.crew_screen.ids.crew11daysonISS.text = crewmemberdays[10] + ' total days in space'
+        self.crew_screen.ids.crew11daysonISS.text = crewmemberdays[10]
         #self.crew_screen.ids.crew11image.source = str(crewmemberpicture[10])
         self.crew_screen.ids.crew12.text = crewmember[11]  
         self.crew_screen.ids.crew12title.text = crewmembertitle[11]  
         self.crew_screen.ids.crew12country.text = crewmembercountry[11]  
-        self.crew_screen.ids.crew12daysonISS.text = crewmemberdays[11] + ' total days in space'
+        self.crew_screen.ids.crew12daysonISS.text = crewmemberdays[11]
         #self.crew_screen.ids.crew12image.source = str(crewmemberpicture[11])
         
     def checkAOSlong(self, dt):
@@ -696,12 +706,12 @@ class MainApp(App):
         
         if float(crewlockpres) < 500:
             EVAinProgress = True
-            self.mimic_screen.ids.EVa_value.text = "EVA in Progress!!!"
-            self.mimic_screen.ids.EVa_value.color = 0,1,0
+            self.mimic_screen.ids.EVA_value.text = "EVA in Progress!!!"
+            self.mimic_screen.ids.EVA_value.color = 0,1,0
         else:
             EVAinProgress = False 
-            self.mimic_screen.ids.EVa_value.text = ""
-            self.mimic_screen.ids.EVa_value.color = 0,0,0
+            self.mimic_screen.ids.EVA_value.text = ""
+            self.mimic_screen.ids.EVA_value.color = 0,0,0
 
 #        if (difference > -10) && (isinstance(App.get_running_app().root_window.children[0], Popup)==False):
 #            LOSpopup = Popup(title='Loss of Signal', content=Label(text='Possible LOS Soon'),size_hint=(0.3,0.2),auto_dismiss=True)
@@ -898,6 +908,7 @@ ScreenManager:
                 font_size: 30
                 width: 50
                 height: 20
+                on_press: root.closeSerial()
                 on_release: app.stop(*args)
 <Settings_Screen>:
     name: 'settings'
@@ -1427,8 +1438,15 @@ ScreenManager:
             on_release: app.root.current = 'mimic'
 ##-----------------------------------------------------------CREW1-------------------------------------------------------------
         Label:
+            canvas.before:
+                Color:
+                    rgb: 0,0,0,0.1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
             id: crew1
-            pos_hint: {"center_x": 0.11, "center_y": 0.95}
+            size: self.texture_size
+            pos_hint: {"center_x": 0.13, "center_y": 0.95}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1437,7 +1455,7 @@ ScreenManager:
             font_size: 25
         Label:
             id: crew1title
-            pos_hint: {"center_x": 0.11, "center_y": 0.88}
+            pos_hint: {"center_x": 0.13, "center_y": 0.88}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1446,7 +1464,7 @@ ScreenManager:
             font_size: 20
         Label:
             id: crew1country
-            pos_hint: {"center_x": 0.11, "center_y": 0.81}
+            pos_hint: {"center_x": 0.13, "center_y": 0.81}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1456,7 +1474,7 @@ ScreenManager:
             #text_size: cm(8), cm(5)
         Label:
             id: crew1daysonISS
-            pos_hint: {"center_x": 0.11, "center_y": 0.74}
+            pos_hint: {"center_x": 0.13, "center_y": 0.74}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1467,7 +1485,7 @@ ScreenManager:
 ##-----------------------------------------------------------CREW2-------------------------------------------------------------
         Label:
             id: crew2
-            pos_hint: {"center_x": 0.11, "center_y": 0.67}
+            pos_hint: {"center_x": 0.13, "center_y": 0.67}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1476,7 +1494,7 @@ ScreenManager:
             font_size: 25
         Label:
             id: crew2title
-            pos_hint: {"center_x": 0.11, "center_y": 0.60}
+            pos_hint: {"center_x": 0.13, "center_y": 0.60}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1485,7 +1503,7 @@ ScreenManager:
             font_size: 20
         Label:
             id: crew2country
-            pos_hint: {"center_x": 0.11, "center_y": 0.53}
+            pos_hint: {"center_x": 0.13, "center_y": 0.53}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1495,7 +1513,7 @@ ScreenManager:
             #text_size: cm(8), cm(5)
         Label:
             id: crew2daysonISS
-            pos_hint: {"center_x": 0.11, "center_y": 0.46}
+            pos_hint: {"center_x": 0.13, "center_y": 0.46}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1506,7 +1524,7 @@ ScreenManager:
 ##-----------------------------------------------------------CREW3-------------------------------------------------------------
         Label:
             id: crew3
-            pos_hint: {"center_x": 0.11, "center_y": 0.39}
+            pos_hint: {"center_x": 0.13, "center_y": 0.39}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1515,7 +1533,7 @@ ScreenManager:
             font_size: 25
         Label:
             id: crew3title
-            pos_hint: {"center_x": 0.11, "center_y": 0.32}
+            pos_hint: {"center_x": 0.13, "center_y": 0.32}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1524,7 +1542,7 @@ ScreenManager:
             font_size: 20
         Label:
             id: crew3country
-            pos_hint: {"center_x": 0.11, "center_y": 0.25}
+            pos_hint: {"center_x": 0.13, "center_y": 0.25}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1534,7 +1552,7 @@ ScreenManager:
             #text_size: cm(8), cm(5)
         Label:
             id: crew3daysonISS
-            pos_hint: {"center_x": 0.11, "center_y": 0.18}
+            pos_hint: {"center_x": 0.13, "center_y": 0.18}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1584,7 +1602,7 @@ ScreenManager:
 ##-----------------------------------------------------------CREW5-------------------------------------------------------------
         Label:
             id: crew5
-            pos_hint: {"center_x": 0.5, "center_y": 0.67}
+            pos_hint: {"center_x": 0.4, "center_y": 0.67}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1593,7 +1611,7 @@ ScreenManager:
             font_size: 25
         Label:
             id: crew5title
-            pos_hint: {"center_x": 0.5, "center_y": 0.60}
+            pos_hint: {"center_x": 0.4, "center_y": 0.60}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1602,7 +1620,7 @@ ScreenManager:
             font_size: 20
         Label:
             id: crew5country
-            pos_hint: {"center_x": 0.5, "center_y": 0.53}
+            pos_hint: {"center_x": 0.4, "center_y": 0.53}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1612,7 +1630,7 @@ ScreenManager:
             #text_size: cm(8), cm(5)
         Label:
             id: crew5daysonISS
-            pos_hint: {"center_x": 0.5, "center_y": 0.46}
+            pos_hint: {"center_x": 0.4, "center_y": 0.46}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1623,7 +1641,7 @@ ScreenManager:
 ##-----------------------------------------------------------CREW6-------------------------------------------------------------
         Label:
             id: crew6
-            pos_hint: {"center_x": 0.5, "center_y": 0.39}
+            pos_hint: {"center_x": 0.4, "center_y": 0.39}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1632,7 +1650,7 @@ ScreenManager:
             font_size: 25
         Label:
             id: crew6title
-            pos_hint: {"center_x": 0.5, "center_y": 0.32}
+            pos_hint: {"center_x": 0.4, "center_y": 0.32}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1641,7 +1659,7 @@ ScreenManager:
             font_size: 20
         Label:
             id: crew6country
-            pos_hint: {"center_x": 0.5, "center_y": 0.25}
+            pos_hint: {"center_x": 0.4, "center_y": 0.25}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1651,7 +1669,7 @@ ScreenManager:
             #text_size: cm(8), cm(5)
         Label:
             id: crew6daysonISS
-            pos_hint: {"center_x": 0.5, "center_y": 0.18}
+            pos_hint: {"center_x": 0.4, "center_y": 0.18}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1662,7 +1680,7 @@ ScreenManager:
 ##-----------------------------------------------------------CREW7-------------------------------------------------------------
         Label:
             id: crew7
-            pos_hint: {"center_x": 0.5, "center_y": 0.95}
+            pos_hint: {"center_x": 0.7, "center_y": 0.95}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1671,7 +1689,7 @@ ScreenManager:
             font_size: 25
         Label:
             id: crew7title
-            pos_hint: {"center_x": 0.5, "center_y": 0.88}
+            pos_hint: {"center_x": 0.7, "center_y": 0.88}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1680,7 +1698,7 @@ ScreenManager:
             font_size: 20
         Label:
             id: crew7country
-            pos_hint: {"center_x": 0.5, "center_y": 0.81}
+            pos_hint: {"center_x": 0.7, "center_y": 0.81}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1690,7 +1708,7 @@ ScreenManager:
             #text_size: cm(8), cm(5)
         Label:
             id: crew7daysonISS
-            pos_hint: {"center_x": 0.5, "center_y": 0.74}
+            pos_hint: {"center_x": 0.7, "center_y": 0.74}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1701,7 +1719,7 @@ ScreenManager:
 ##-----------------------------------------------------------CREW8-------------------------------------------------------------
         Label:
             id: crew8
-            pos_hint: {"center_x": 0.5, "center_y": 0.67}
+            pos_hint: {"center_x": 0.7, "center_y": 0.67}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1710,7 +1728,7 @@ ScreenManager:
             font_size: 25
         Label:
             id: crew8title
-            pos_hint: {"center_x": 0.5, "center_y": 0.60}
+            pos_hint: {"center_x": 0.7, "center_y": 0.60}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1719,7 +1737,7 @@ ScreenManager:
             font_size: 20
         Label:
             id: crew8country
-            pos_hint: {"center_x": 0.5, "center_y": 0.53}
+            pos_hint: {"center_x": 0.7, "center_y": 0.53}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1729,7 +1747,7 @@ ScreenManager:
             #text_size: cm(8), cm(5)
         Label:
             id: crew8daysonISS
-            pos_hint: {"center_x": 0.5, "center_y": 0.46}
+            pos_hint: {"center_x": 0.7, "center_y": 0.46}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1740,7 +1758,7 @@ ScreenManager:
 ##-----------------------------------------------------------CREW9-------------------------------------------------------------
         Label:
             id: crew9
-            pos_hint: {"center_x": 0.5, "center_y": 0.39}
+            pos_hint: {"center_x": 0.7, "center_y": 0.39}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1749,7 +1767,7 @@ ScreenManager:
             font_size: 25
         Label:
             id: crew9title
-            pos_hint: {"center_x": 0.5, "center_y": 0.31}
+            pos_hint: {"center_x": 0.7, "center_y": 0.31}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1758,7 +1776,7 @@ ScreenManager:
             font_size: 20
         Label:
             id: crew9country
-            pos_hint: {"center_x": 0.5, "center_y": 0.25}
+            pos_hint: {"center_x": 0.7, "center_y": 0.25}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1768,7 +1786,7 @@ ScreenManager:
             #text_size: cm(8), cm(5)
         Label:
             id: crew9daysonISS
-            pos_hint: {"center_x": 0.5, "center_y": 0.18}
+            pos_hint: {"center_x": 0.7, "center_y": 0.18}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1779,7 +1797,7 @@ ScreenManager:
 ##-----------------------------------------------------------CREW10-------------------------------------------------------------
         Label:
             id: crew10
-            pos_hint: {"center_x": 0.5, "center_y": 0.95}
+            pos_hint: {"center_x": 0.85, "center_y": 0.95}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1788,7 +1806,7 @@ ScreenManager:
             font_size: 25
         Label:
             id: crew10title
-            pos_hint: {"center_x": 0.5, "center_y": 0.88}
+            pos_hint: {"center_x": 0.85, "center_y": 0.88}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1797,7 +1815,7 @@ ScreenManager:
             font_size: 20
         Label:
             id: crew10country
-            pos_hint: {"center_x": 0.5, "center_y": 0.81}
+            pos_hint: {"center_x": 0.85, "center_y": 0.81}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1807,7 +1825,7 @@ ScreenManager:
             #text_size: cm(8), cm(5)
         Label:
             id: crew10daysonISS
-            pos_hint: {"center_x": 0.5, "center_y": 0.74}
+            pos_hint: {"center_x": 0.85, "center_y": 0.74}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1818,7 +1836,7 @@ ScreenManager:
 ##-----------------------------------------------------------CREW11-------------------------------------------------------------
         Label:
             id: crew11
-            pos_hint: {"center_x": 0.5, "center_y": 0.67}
+            pos_hint: {"center_x": 0.85, "center_y": 0.67}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1827,7 +1845,7 @@ ScreenManager:
             font_size: 25
         Label:
             id: crew11title
-            pos_hint: {"center_x": 0.5, "center_y": 0.60}
+            pos_hint: {"center_x": 0.85, "center_y": 0.60}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1836,7 +1854,7 @@ ScreenManager:
             font_size: 20
         Label:
             id: crew11country
-            pos_hint: {"center_x": 0.5, "center_y": 0.53}
+            pos_hint: {"center_x": 0.85, "center_y": 0.53}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1846,7 +1864,7 @@ ScreenManager:
             #text_size: cm(8), cm(5)
         Label:
             id: crew11daysonISS
-            pos_hint: {"center_x": 0.5, "center_y": 0.46}
+            pos_hint: {"center_x": 0.85, "center_y": 0.46}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1857,7 +1875,7 @@ ScreenManager:
 ##-----------------------------------------------------------CREW12-------------------------------------------------------------
         Label:
             id: crew12
-            pos_hint: {"center_x": 0.5, "center_y": 0.39}
+            pos_hint: {"center_x": 0.85, "center_y": 0.39}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1866,7 +1884,7 @@ ScreenManager:
             font_size: 25
         Label:
             id: crew12title
-            pos_hint: {"center_x": 0.5, "center_y": 0.32}
+            pos_hint: {"center_x": 0.85, "center_y": 0.32}
             halign: 'center'
             valign: 'middle'
             text: ''
@@ -1875,7 +1893,7 @@ ScreenManager:
             font_size: 20
         Label:
             id: crew12country
-            pos_hint: {"center_x": 0.5, "center_y": 0.25}
+            pos_hint: {"center_x": 0.85, "center_y": 0.25}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -1885,7 +1903,7 @@ ScreenManager:
             #text_size: cm(8), cm(5)
         Label:
             id: crew12daysonISS
-            pos_hint: {"center_x": 0.5, "center_y": 0.18}
+            pos_hint: {"center_x": 0.85, "center_y": 0.18}
             markup: True
             halign: 'center'
             valign: 'middle'
@@ -2330,6 +2348,12 @@ ScreenManager:
         
 <MimicScreen>:
     name: 'mimic'
+    canvas:
+        Color:
+            rgba: 0,0,0,0.7
+        Rectangle:
+            pos: 0,0
+            size: 1000,1000
     FloatLayout:
         id: mimicscreenlayout
         Image:
@@ -2337,7 +2361,7 @@ ScreenManager:
             allow_stretch: True
             keep_ratio: False
         Label:
-            id: EVa_value
+            id: EVA_value
             pos_hint: {"center_x": 0.2, "center_y": 0.17}
             text: ''
             markup: True
@@ -2394,63 +2418,63 @@ ScreenManager:
             color: 1,0,1
             font_size: 30
         Label:
-            pos_hint: {"center_x": 0.6, "center_y": 0.78}
+            pos_hint: {"center_x": 0.55, "center_y": 0.78}
             text: 'ISS Information'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
             id: velocity_label
-            pos_hint: {"center_x": 0.45, "center_y": 0.7}
+            pos_hint: {"center_x": 0.4, "center_y": 0.7}
             text: 'Speed'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
             id: velocity_value
-            pos_hint: {"center_x": 0.75, "center_y": 0.7}
+            pos_hint: {"center_x": 0.65, "center_y": 0.7}
             text: '0.00'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
             id: altitude_label
-            pos_hint: {"center_x": 0.45, "center_y": 0.6}
+            pos_hint: {"center_x": 0.4, "center_y": 0.6}
             text: 'Altitude'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
             id: altitude_value
-            pos_hint: {"center_x": 0.75, "center_y": 0.6}
+            pos_hint: {"center_x": 0.65, "center_y": 0.6}
             text: '0.00'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
             id: stationmass_label
-            pos_hint: {"center_x": 0.45, "center_y": 0.5}
+            pos_hint: {"center_x": 0.4, "center_y": 0.5}
             text: 'Total Mass'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
             id: stationmass_value
-            pos_hint: {"center_x": 0.75, "center_y": 0.5}
+            pos_hint: {"center_x": 0.65, "center_y": 0.5}
             text: '0.00 kg'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
             id: stationmode_label
-            pos_hint: {"center_x": 0.45, "center_y": 0.4}
+            pos_hint: {"center_x": 0.4, "center_y": 0.4}
             text: 'Station Mode'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
             id: stationmode_value
-            pos_hint: {"center_x": 0.75, "center_y": 0.4}
+            pos_hint: {"center_x": 0.65, "center_y": 0.4}
             text: 'Standard'
             markup: True
             color: 1,1,1
