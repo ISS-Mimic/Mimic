@@ -1,0 +1,156 @@
+// pins for the encoder inputs
+
+String test;
+unsigned long previousMillis = 0;
+unsigned long LoopStartMillis = 0;
+unsigned long  delta_t_millis = 1;
+float inverse_delta_t_millis = 1;
+uint8_t i;
+unsigned long time;
+
+// ======== B2B PID Vals=====================
+//  PID Constants
+float Kp_B2B = 20; // Proportional Gain of PID
+float Ki_B2B = 0; // Integral Gain of PID
+float Kd_B2B = 0; // Derivative Gain of PID
+
+// B2B vars that change every iteration
+int Count_B2B = 0;
+float Pos_B2B=0;
+float PosErr_B2B = 0;
+float PosErr_B2B_old = 0;
+float tmpSpeed_B2B = 0;
+float dErrDt_B2B = 0;
+float dPosErr_B2B=0;
+float IntOld_B2B=0;
+float IntNow_B2B=0;
+int CmdSpeed_B2B=0;
+// =============================================
+
+// ======== B4B PID Vals=====================
+//  PID Constants
+float Kp_B4B = 20; // Proportional Gain of PID
+float Ki_B4B = 0; // Integral Gain of PID
+float Kd_B4B = 0; // Derivative Gain of PID
+
+// B4B vars that change every iteration
+int Count_B4B = 0;
+float Pos_B4B=0;
+float PosErr_B4B = 0;
+float PosErr_B4B_old = 0;
+float tmpSpeed_B4B = 0;
+float dErrDt_B4B = 0;
+float dPosErr_B4B=0;
+float IntOld_B4B=0;
+float IntNow_B4B=0;
+int CmdSpeed_B4B=0;
+// =============================================
+
+// ======== B2A PID Vals=====================
+//  PID Constants
+float Kp_B2A = 20; // Proportional Gain of PID
+float Ki_B2A = 0; // Integral Gain of PID
+float Kd_B2A = 0; // Derivative Gain of PID
+
+// B2A vars that change every iteration
+int Count_B2A = 0;
+float Pos_B2A=0;
+float PosErr_B2A = 0;
+float PosErr_B2A_old = 0;
+float tmpSpeed_B2A = 0;
+float dErrDt_B2A = 0;
+float dPosErr_B2A=0;
+float IntOld_B2A=0;
+float IntNow_B2A=0;
+int CmdSpeed_B2A=0;
+// =============================================
+
+// ======== B4A PID Vals=====================
+//  PID Constants
+float Kp_B4A = 20; // Proportional Gain of PID
+float Ki_B4A = 0; // Integral Gain of PID
+float Kd_B4A = 0; // Derivative Gain of PID
+
+// B4A vars that change every iteration
+int Count_B4A = 0;
+float Pos_B4A=0;
+float PosErr_B4A = 0;
+float PosErr_B4A_old = 0;
+float tmpSpeed_B4A = 0;
+float dErrDt_B4A = 0;
+float dPosErr_B4A=0;
+float IntOld_B4A=0;
+float IntNow_B4A=0;
+int CmdSpeed_B4A=0;
+// =============================================
+
+//// ======== PSARJ PID Vals=====================
+////  PID Constants
+//float Kp_PSARJ = 50; // Proportional Gain of PID
+//float Ki_PSARJ = 0; // Integral Gain of PID
+//float Kd_PSARJ = 0; // Derivative Gain of PID
+//
+//// PSARJ vars that change every iteration
+//int Count_PSARJ = 0;
+//float Pos_PSARJ=0;
+//float PosErr_PSARJ = 0;
+//float PosErr_PSARJ_old = 0;
+//float tmpSpeed_PSARJ = 0;
+//float dErrDt_PSARJ = 0;
+//float dPosErr_PSARJ=0;
+//float IntOld_PSARJ=0;
+//float IntNow_PSARJ=0;
+//int CmdSpeed_PSARJ=0;
+//// =============================================
+
+
+
+// For debugging
+int MyFlag;
+String response="";
+unsigned long millisChPt1 = 0;
+unsigned long millisChPt2 = 0;
+unsigned long millisChPt3 = 0;
+unsigned long millisChPt4 = 0;
+unsigned long millisChPt5 = 0;
+unsigned long millisChPt6 = 0;
+int LEDstatus=0; 
+
+
+// ===== Initializations ==========
+//PSARJ
+
+boolean PSARJstartup = true;
+double PSARJdiff = 0.00;
+double oldPSARJstep = 0.00;
+double oldPSARJangle = 0.00;
+double oldPSARJ = 0.00;
+double PSARJcheck = 0.00;
+double PSARJstep = 0.00;
+
+
+//SSARJ
+
+boolean SSARJstartup = true;
+double SSARJdiff = 0.00;
+double oldSSARJstep = 0.00;
+double oldSSARJangle = 0.00;
+double oldSSARJ = 0.00;
+double SSARJcheck = 0.00;
+double SSARJstep = 0.00;
+
+double B1B = 0.0;
+double B2B = 0.0;
+double B3B = 0.0;
+double B4B = 0.0;
+double B1A = 0.0;
+double B2A = 0.0;
+double B3A = 0.0;
+double B4A = 0.0;
+double PSARJ = -1.0;
+double SSARJ = 0.0;
+double PTRRJ = 0.0;
+double STRRJ = 0.0;
+boolean AOS = false;
+
+
