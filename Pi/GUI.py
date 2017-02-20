@@ -44,42 +44,41 @@ locationlog = open('locationlog.txt','a')
 iss_crew_url = 'http://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'        
 nasaissurl = 'http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html'
 req = urllib2.Request("http://api.open-notify.org/iss-now.json")
-#crew_req = urllib2.Request("http://api.open-notify.org/astros.json")
 TLE_req = urllib2.Request("http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html")
 
-#LED_COUNT      = 7       # Number of LED pixels.
-#LED_PIN        = 18      # GPIO pin connected to the pixels (must support PWM!).
-#LED_FREQ_HZ    = 800000  # LED signal frequency in hertz (usually 800khz)
-#LED_DMA        = 5       # DMA channel to use for generating signal (try 5)
-#LED_BRIGHTNESS = 255     # Set to 0 for darkest and 255 for brightest
-#LED_INVERT     = False   # True to invert the signal (when using NPN transistor level shift
+try:
+    ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=0)
+    print str(ser)
+except:
+    errorlog.write(str(datetime.datetime.utcnow()))
+    errorlog.write(' ')
+    errorlog.write("serial connection GPIO not found")
+    errorlog.write('\n')
 
-#strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS)
-# Intialize the library (must be called once before other functions).
-#strip.begin()
-
-#for i in range(strip.numPixels()):
-#    strip.setPixelColor(i, Color(255,255,255))
-#    strip.show()
-#    time.sleep(0.1)
+try:
+    ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
+    print str(ser)
+except:
+    errorlog.write(str(datetime.datetime.utcnow()))
+    errorlog.write(' ')
+    errorlog.write("serial connection GPIO not found")
+    errorlog.write('\n')
 
 #try:
-#    ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1)
-#    ser.open()
+#    ser = serial.Serial('/dev/ttyAMA00', 115200, timeout=0)
 #except:
-#    print "No serial connection detected - GPIO"
+#    print "No serial connection detected - AMA0"
 #    errorlog.write(str(datetime.datetime.utcnow()))
 #    errorlog.write(' ')
 #    errorlog.write("serial connection GPIO not found")
 #    errorlog.write('\n')
 
-ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
-ser.write("test")
-#ser.open()
-
+#ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
+#ser.write("test")
 
 #try:
-    #ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
+#    ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
+#    ser.write("test")
     #ser.open()
 #except:
 #    print "No serial connection detected - USB"
@@ -160,26 +159,19 @@ class MainScreen(Screen):
     def changeManualControlBoolean(self, *args):
         global manualcontrol
         manualcontrol = args[0]        
-    def closeSerial(self):
-        global ser
-        ser.close()
 
 class CalibrateScreen(Screen):
     def serialWrite(self, *args):
-        try:
-            self.serialActualWrite(self, *args)
-        except:
-            errorlog.write(str(datetime.datetime.utcnow()))
-            errorlog.write(' ')
-            errorlog.write("Attempted write - no serial device connected")
-            errorlog.write('\n')
-
-    def serialActualWrite(self, *args):
-        global ser
         ser.write(*args)
+        #try:
+        #    self.serialActualWrite(self, *args)
+        #except:
+        #    errorlog.write(str(datetime.datetime.utcnow()))
+        #    errorlog.write(' ')
+        #    errorlog.write("Attempted write - no serial device connected")
+        #    errorlog.write('\n')
 
     def zeroJoints(self):
-        global ser
         self.changeBoolean(True)
         ser.write('Zero')
 
@@ -253,30 +245,10 @@ class ManualControlScreen(Screen):
         manualcontrol = args[0]
     
     def serialWrite(self, *args):
-        try:
-            self.serialActualWrite(self, *args)
-        except:
-            errorlog.write(str(datetime.datetime.utcnow()))
-            errorlog.write(' ')
-            errorlog.write("Attempted write - no serial device connected")
-            errorlog.write('\n')
-
-    def serialActualWrite(self, *args):
-        global ser
         ser.write(*args)
 
 class FakeOrbitScreen(Screen):
     def serialWrite(self, *args):
-        try:
-            self.serialActualWrite(self, *args)
-        except:
-            errorlog.write(str(datetime.datetime.utcnow()))
-            errorlog.write(' ')
-            errorlog.write("Attempted write - no serial device connected")
-            errorlog.write('\n')
-
-    def serialActualWrite(self, *args):
-        global ser
         ser.write(*args)
 
     def changeBoolean(self, *args):
@@ -394,13 +366,14 @@ class MainApp(App):
         return root
 
     def serialWrite(self, *args):
-        try:
-            ser.write(*args)
-        except:
-            errorlog.write(str(datetime.datetime.utcnow()))
-            errorlog.write(' ')
-            errorlog.write("Attempted write - no serial device connected")
-            errorlog.write('\n')
+        ser.write(*args)
+        #try:
+            #ser.write(*args)
+        #except:
+        #    errorlog.write(str(datetime.datetime.utcnow()))
+        #    errorlog.write(' ')
+        #    errorlog.write("Attempted write - no serial device connected")
+        #    errorlog.write('\n')
 
     def changeColors(self, *args):   #this function sets all labels on mimic screen to a certain color based on signal status
         self.eps_screen.ids.psarj_value.color = args[0],args[1],args[2]
@@ -908,7 +881,6 @@ ScreenManager:
                 font_size: 30
                 width: 50
                 height: 20
-                on_press: root.closeSerial()
                 on_release: app.stop(*args)
 <Settings_Screen>:
     name: 'settings'

@@ -1,0 +1,1 @@
+2017-02-20 20:42:27.275323 serial connection GPIO not found
