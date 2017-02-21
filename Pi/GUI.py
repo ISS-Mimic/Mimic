@@ -729,6 +729,10 @@ class MainApp(App):
             self.serialWrite("Beta4B=" + beta4b + " ")
             self.serialWrite("Beta4A=" + beta4a + " ")
             self.serialWrite("AOS=" + aos + " ")
+	    self.serialWrite("Current1A=" + c1a + " ")
+	    self.serialWrite("Current1B=" + c1b + " ")
+	    self.serialWrite("Current3A=" + c3a + " ")
+	    self.serialWrite("Current3B=" + c3b + " ")
         
         self.eps_screen.ids.psarj_value.text = psarj
         self.eps_screen.ids.ssarj_value.text = ssarj
