@@ -18,6 +18,8 @@ double current1B = 0.0;
 double current3A = 0.0;
 double current3B = 0.0;
 String test;
+boolean sparkle = false;
+unsigned long sparkletime = 0.0;
 
 void setup() 
 {
@@ -40,17 +42,26 @@ void setup()
 
 void loop() 
 {
- if(Serial.available())
+  if(Serial.available())
   {
     checkSerial();
   }
-  mapRGB(current1A,1);
-  mapRGB(current1B,2);
-  mapRGB(current3A,3);
-  mapRGB(current3B,4);
+  if(millis()-sparkletime > 5000)
+  {
+    sparkle = true;
+    sparkletime = millis();
+  }
+  else
+  {
+    sparkle = false;
+  }
+  mapRGB(current1A,1,sparkle);
+  mapRGB(current1B,2,sparkle);
+  mapRGB(current3A,3,sparkle);
+  mapRGB(current3B,4,sparkle);
 }
 
-void mapRGB(float value, int strip)
+void mapRGB(float value, int strip, boolean sparkle)
 {
   int b = 0;
   int r = 0;
@@ -61,19 +72,47 @@ void mapRGB(float value, int strip)
   g = (255-b-r);
   if(strip==1)
   {
-    set1A(channel_1A.Color(r,g,b),10);
+    if(sparkle)
+    {
+      set1A(channel_1A.Color(r/10,g/10,b/10),10);  
+    }
+    else
+    {
+      set1A(channel_1A.Color(r,g,b),10);
+    }
   }
   else if(strip==2)
   {
-    set1B(channel_1B.Color(r,g,b),10);
+    if(sparkle)
+    {
+      set1B(channel_1B.Color(r/10,g/10,b/10),10);  
+    }
+    else
+    {
+      set1B(channel_1B.Color(r,g,b),10);
+    }
   }
   else if(strip==3)
   {
-    set3A(channel_3A.Color(r,g,b),10);
+    if(sparkle)
+    {
+      set3A(channel_3A.Color(r/10,g/10,b/10),10);  
+    }
+    else
+    {
+      set3A(channel_3A.Color(r,g,b),10);
+    }
   }
   else if(strip==4)
   {
-    set3B(channel_3B.Color(r,g,b),10);
+    if(sparkle)
+    {
+      set3B(channel_3B.Color(r/10,g/10,b/10),10);  
+    }
+    else
+    {
+      set3B(channel_3B.Color(r,g,b),10);
+    }
   }
 }
 
