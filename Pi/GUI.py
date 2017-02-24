@@ -17,6 +17,7 @@ from Naked.toolshed.shell import execute_js, muterun_js
 import os
 import signal
 import multiprocessing, signal
+from kivy.animation import Animation
 from kivy.uix.behaviors.button import ButtonBehavior
 from kivy.uix.popup import Popup 
 from kivy.uix.button import Button
@@ -102,7 +103,8 @@ val = ""
        
 psarj2 = 1.0
 ssarj2 = 1.0
-
+new_x = 0
+new_y = 0
 psarj = 0.00
 ssarj = 0.00
 ptrrj = 0.00
@@ -335,9 +337,12 @@ class MainApp(App):
     def build(self):
         global startup
         global crewjsonsuccess
-        self.mimic_screen = MimicScreen(name = 'mimic')
-        self.fakeorbit_screen = FakeOrbitScreen(name = 'fakeorbit')
+
+        self.main_screen = MainScreen(name = 'main')
+        #root.add_widget(MainScreen(name = 'main'))
         self.orbit_screen = Orbit_Screen(name = 'orbit')
+        self.fakeorbit_screen = FakeOrbitScreen(name = 'fakeorbit')
+        self.mimic_screen = MimicScreen(name = 'mimic')
         self.eps_screen = EPS_Screen(name = 'eps')
         self.ct_screen = CT_Screen(name = 'ct')
         self.tcs_screen = TCS_Screen(name = 'tcs')
@@ -345,9 +350,10 @@ class MainApp(App):
         self.settings_screen = Settings_Screen(name = 'settings')
 
         root = MainScreenManager(transition=WipeTransition())
-        root.add_widget(MainScreen(name = 'main'))
+        #root.add_widget(MainScreen(name = 'main'))
         root.add_widget(CalibrateScreen(name = 'calibrate'))
         root.add_widget(self.mimic_screen)
+        root.add_widget(self.main_screen)
         root.add_widget(self.fakeorbit_screen)
         root.add_widget(self.orbit_screen)
         root.add_widget(self.eps_screen)
@@ -356,9 +362,10 @@ class MainApp(App):
         root.add_widget(self.crew_screen)
         root.add_widget(self.settings_screen)
         root.add_widget(ManualControlScreen(name = 'manualcontrol'))
-        root.current= 'main'
+        root.current = 'main'
     
         Clock.schedule_interval(self.update_labels, 1)
+        Clock.schedule_interval(self.animate,0.1)
         Clock.schedule_interval(self.checkAOSlong, 5)
         Clock.schedule_interval(self.checkCrew, 3600)
         if crewjsonsuccess == False: #check crew every 10s until success then once per hour
@@ -369,6 +376,16 @@ class MainApp(App):
 
         #Clock.schedule_interval(self.getTLE, 3600)
         return root
+
+    def animate(self, instance):
+        global new_x
+        global new_y
+        new_x = new_x+0.005
+        new_y = (math.sin(new_x*30)/5)+0.4
+        if new_x > 1:
+            new_x = new_x-1.0
+            
+        self.main_screen.ids.ISStiny.pos_hint = {"center_x": new_x, "center_y": new_y}
 
     def serialWrite(self, *args):
         ser.write(*args)
@@ -838,26 +855,20 @@ ScreenManager:
     FloatLayout:
         orientation: 'vertical'
         Image:
-            source: './imgs/iss.png'
+            source: './imgs/ISSmimicLogoPartsGroundtrack.png'
             allow_stretch: True
-            keep_ratio: True
-        Label:
-            text: 'ISS Mimic'
-            bold: True
-            font_size: 120
-            markup: True
-            height: "20dp"
-            color: 1,0,1
-            width: "100dp"
-        Label:
-            text: 'Mimic screen disabled until calibration is performed'
-            bold: True
-            pos_hint: {"center_x": 0.5, "center_y": 0.3}
-            font_size: 20
-            markup: True
-            height: "20dp"
-            color: 1,0,1
-            width: "100dp"
+            keep_ratio: False
+            size: root.width,200
+            pos_hint: {"center_x": 0.5, "center_y": 0.67}
+        Image:
+            #canvas.after:
+            id: ISStiny
+            source: './imgs/ISSmimicLogoPartsGlowingISS.png'
+            keep_ratio: False
+            allow_stretch: True
+            size_hint: 0.1,0.1
+            #pos: 5000,500
+            pos_hint: {"center_x": 0.25, "center_y": 0.25}
         Button:
             size_hint: 0.3,0.1
             pos_hint: {"center_x": 0.2, "center_y": 0.9}
