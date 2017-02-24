@@ -140,6 +140,11 @@ velocity_z = 0.00
 velocity = 0.00
 altitude = 0.00
 mass = 0.00
+c1b = 0.00
+c1a = 0.00
+c3b = 0.00
+c3a = 0.00
+
 
 crewmember = ['','','','','','','','','','','','']
 crewmemberbio = ['','','','','','','','','','','','']
@@ -563,7 +568,8 @@ class MainApp(App):
             locationlog.write(" long ")
             locationlog.write(str(obj['iss_position']['longitude']))
             locationlog.write('\n')
-    
+
+
     def update_labels(self, dt):
         global mimicbutton
         global switchtofake
@@ -608,7 +614,11 @@ class MainApp(App):
         global altitude
         global velocity
         global iss_mass     
- 
+        global c1a
+        global c1b
+        global c3a
+        global c3b
+
         c.execute('select Value from telemetry')
         values = c.fetchall()
         c.execute('select Timestamp from telemetry')
@@ -733,7 +743,7 @@ class MainApp(App):
 	    self.serialWrite("Current1B=" + c1b + " ")
 	    self.serialWrite("Current3A=" + c3a + " ")
 	    self.serialWrite("Current3B=" + c3b + " ")
-        
+       
         self.eps_screen.ids.psarj_value.text = psarj
         self.eps_screen.ids.ssarj_value.text = ssarj
         self.tcs_screen.ids.ptrrj_value.text = ptrrj
@@ -785,6 +795,8 @@ class MainApp(App):
                fakeorbitboolean = True
             self.mimic_screen.ids.aosvalue.text = "Stale Signal!"
 
+        
+
         if (mimicbutton == True and float(aos) == 1.00): 
              self.serialWrite("PSARJ=" + psarj + " ")
              self.serialWrite("SSARJ=" + ssarj + " ")
@@ -799,6 +811,10 @@ class MainApp(App):
              self.serialWrite("Beta4B=" + beta4b + " ")
              self.serialWrite("Beta4A=" + beta4a + " ")
              self.serialWrite("AOS=" + aos + " ")
+	     self.serialWrite("Current1A=" + c1a + " ")
+	     self.serialWrite("Current1B=" + c1b + " ")
+	     self.serialWrite("Current3A=" + c3a + " ")
+	     self.serialWrite("Current3B=" + c3b + " ")
  
 Builder.load_string('''
 #:kivy 1.8

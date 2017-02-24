@@ -1,83 +1,4 @@
-// encoder event for the interrupt call
 
-void EncoderEvent_Beta2B() {
-  if (digitalRead(ENCODER_Beta2B_A) == HIGH) {
-    if (digitalRead(ENCODER_Beta2B_B) == LOW) {
-      Count_Beta2B++;
-    } else {
-      Count_Beta2B--;
-    }
-  } else {
-    if (digitalRead(ENCODER_Beta2B_B) == LOW) {
-      Count_Beta2B--;
-    } else {
-      Count_Beta2B++;
-    }
-  }
-}
-
-void EncoderEvent_Beta4B() {
-  if (digitalRead(ENCODER_Beta4B_A) == HIGH) {
-    if (digitalRead(ENCODER_Beta4B_B) == LOW) {
-      Count_Beta4B++;
-    } else {
-      Count_Beta4B--;
-    }
-  } else {
-    if (digitalRead(ENCODER_Beta4B_B) == LOW) {
-      Count_Beta4B--;
-    } else {
-      Count_Beta4B++;
-    }
-  }
-}
-
-void EncoderEvent_PSARJ() {
-  if (digitalRead(ENCODER_PSARJ_A) == HIGH) {
-    if (digitalRead(ENCODER_PSARJ_B) == LOW) {
-      Count_PSARJ++;
-    } else {
-      Count_PSARJ--;
-    }
-  } else {
-    if (digitalRead(ENCODER_PSARJ_B) == LOW) {
-      Count_PSARJ--;
-    } else {
-      Count_PSARJ++;
-    }
-  }
-}
-
-
-
-
-/*void receiveEvent(int howMany)
-{
-  String test = "";
-  while (1 < Wire2.available()) // loop through all but the last
-  {
-    Serial.println("");
-    Serial.println("Start:Received from Pi");
-    char c = Wire2.read(); // receive byte as a character
-    Serial.print("This is what c looks like:");
-    Serial.println(c);
-    test += c;
-    Serial.print("Test contents:");
-    Serial.println(test);
-    
-  }
-    Serial.println("received from pi");
-  Serial.println(test);
-  String test2=test.substring(1);
-  PSARJ = test2.toFloat();
-  Serial.println(PSARJ);
-
-  int x = Wire2.read();    // receive byte as an integer
-  //Serial.println(x);         // print the integer
-  //Serial.println();
-  Serial.println("Inside the Wire Read loop");
-  Serial.flush();
-}*/
 void checkSerial()
 {
   //digitalWrite(ledBluePin, HIGH);
@@ -87,7 +8,7 @@ void checkSerial()
   {
     test = Serial1.readString();
   }
-  //Serial.println(test);
+  Serial.println(test);
   char sz[test.length() + 1];
   char copy[test.length() + 1];
   strcpy(sz, test.c_str());  
@@ -116,37 +37,37 @@ void checkSerial()
     {
       STRRJ = (test2.substring(delimeter+1)).toFloat();
     } 
-    else if(test2.substring(0,delimeter)=="Beta1B")
+    else if(test2.substring(0,delimeter)=="B1B")
     {
-      Beta1B = (test2.substring(delimeter+1)).toFloat();
+      B1B = (test2.substring(delimeter+1)).toFloat();
     }
-    else if(test2.substring(0,delimeter)=="Beta1A")
+    else if(test2.substring(0,delimeter)=="B1A")
     {
-      Beta1A = (test2.substring(delimeter+1)).toFloat();
+      B1A = (test2.substring(delimeter+1)).toFloat();
     }
-    else if(test2.substring(0,delimeter)=="Beta2B")
+    else if(test2.substring(0,delimeter)=="B2B")
     {
-      Beta2B = (test2.substring(delimeter+1)).toFloat();
+      B2B = (test2.substring(delimeter+1)).toFloat();
     }
-    else if(test2.substring(0,delimeter)=="Beta2A")
+    else if(test2.substring(0,delimeter)=="B2A")
     {
-      Beta2A = (test2.substring(delimeter+1)).toFloat();
+      B2A = (test2.substring(delimeter+1)).toFloat();
     }
-    else if(test2.substring(0,delimeter)=="Beta3B")
+    else if(test2.substring(0,delimeter)=="B3B")
     {
-      Beta3B = (test2.substring(delimeter+1)).toFloat();
+      B3B = (test2.substring(delimeter+1)).toFloat();
     }
-    else if(test2.substring(0,delimeter)=="Beta3A")
+    else if(test2.substring(0,delimeter)=="B3A")
     {
-      Beta3A = (test2.substring(delimeter+1)).toFloat();
+      B3A = (test2.substring(delimeter+1)).toFloat();
     }
-    else if(test2.substring(0,delimeter)=="Beta4B")
+    else if(test2.substring(0,delimeter)=="B4B")
     {
-      Beta4B = (test2.substring(delimeter+1)).toFloat();
+      B4B = (test2.substring(delimeter+1)).toFloat();
     }
-    else if(test2.substring(0,delimeter)=="Beta4A")
+    else if(test2.substring(0,delimeter)=="B4A")
     {
-      Beta4A = (test2.substring(delimeter+1)).toFloat();
+      B4A = (test2.substring(delimeter+1)).toFloat();
     }
     else if(test2.substring(0,delimeter)=="AOS")
     {

@@ -1,1 +1,2 @@
-2017-02-20 20:42:27.275323 serial connection GPIO not found
+2017-02-23 20:28:51.154184 serial connection GPIO not found
+2017-02-23 20:28:51.154422 serial connection GPIO not found

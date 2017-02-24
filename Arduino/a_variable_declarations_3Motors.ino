@@ -8,62 +8,100 @@ float inverse_delta_t_millis = 1;
 uint8_t i;
 unsigned long time;
 
-// ======== Beta2B PID Vals=====================
+// ======== B2B PID Vals=====================
 //  PID Constants
-int Kp_Beta2B = 50; // Proportional Gain of PID
-int Ki_Beta2B = 4; // Integral Gain of PID
-int Kd_Beta2B = 0; // Derivative Gain of PID
+float Kp_B2B = 20; // Proportional Gain of PID
+float Ki_B2B = 0; // Integral Gain of PID
+float Kd_B2B = 0; // Derivative Gain of PID
 
-// Beta2B vars that change every iteration
-int Count_Beta2B = 0;
-float Pos_Beta2B=0;
-float PosErr_Beta2B = 0;
-float PosErr_Beta2B_old = 0;
-float tmpSpeed_Beta2B = 0;
-float dErrDt_Beta2B = 0;
-float dPosErr_Beta2B=0;
-float IntOld_Beta2B=0;
-float IntNow_Beta2B=0;
-int CmdSpeed_Beta2B=0;
+// B2B vars that change every iteration
+int Count_B2B = 0;
+float Pos_B2B=0;
+float PosErr_B2B = 0;
+float PosErr_B2B_old = 0;
+float tmpSpeed_B2B = 0;
+float dErrDt_B2B = 0;
+float dPosErr_B2B=0;
+float IntOld_B2B=0;
+float IntNow_B2B=0;
+int CmdSpeed_B2B=0;
 // =============================================
 
-// ======== Beta4B PID Vals=====================
+// ======== B4B PID Vals=====================
 //  PID Constants
-int Kp_Beta4B = 50; // Proportional Gain of PID
-int Ki_Beta4B = 4; // Integral Gain of PID
-int Kd_Beta4B = 0; // Derivative Gain of PID
+float Kp_B4B = 20; // Proportional Gain of PID
+float Ki_B4B = 0; // Integral Gain of PID
+float Kd_B4B = 0; // Derivative Gain of PID
 
-// Beta4B vars that change every iteration
-int Count_Beta4B = 0;
-float Pos_Beta4B=0;
-float PosErr_Beta4B = 0;
-float PosErr_Beta4B_old = 0;
-float tmpSpeed_Beta4B = 0;
-float dErrDt_Beta4B = 0;
-float dPosErr_Beta4B=0;
-float IntOld_Beta4B=0;
-float IntNow_Beta4B=0;
-int CmdSpeed_Beta4B=0;
+// B4B vars that change every iteration
+int Count_B4B = 0;
+float Pos_B4B=0;
+float PosErr_B4B = 0;
+float PosErr_B4B_old = 0;
+float tmpSpeed_B4B = 0;
+float dErrDt_B4B = 0;
+float dPosErr_B4B=0;
+float IntOld_B4B=0;
+float IntNow_B4B=0;
+int CmdSpeed_B4B=0;
 // =============================================
 
-// ======== PSARJ PID Vals=====================
+// ======== B2A PID Vals=====================
 //  PID Constants
-int Kp_PSARJ = 50; // Proportional Gain of PID
-int Ki_PSARJ = 4; // Integral Gain of PID
-int Kd_PSARJ = 0; // Derivative Gain of PID
+float Kp_B2A = 20; // Proportional Gain of PID
+float Ki_B2A = 0; // Integral Gain of PID
+float Kd_B2A = 0; // Derivative Gain of PID
 
-// PSARJ vars that change every iteration
-int Count_PSARJ = 0;
-float Pos_PSARJ=0;
-float PosErr_PSARJ = 0;
-float PosErr_PSARJ_old = 0;
-float tmpSpeed_PSARJ = 0;
-float dErrDt_PSARJ = 0;
-float dPosErr_PSARJ=0;
-float IntOld_PSARJ=0;
-float IntNow_PSARJ=0;
-int CmdSpeed_PSARJ=0;
+// B2A vars that change every iteration
+int Count_B2A = 0;
+float Pos_B2A=0;
+float PosErr_B2A = 0;
+float PosErr_B2A_old = 0;
+float tmpSpeed_B2A = 0;
+float dErrDt_B2A = 0;
+float dPosErr_B2A=0;
+float IntOld_B2A=0;
+float IntNow_B2A=0;
+int CmdSpeed_B2A=0;
 // =============================================
+
+// ======== B4A PID Vals=====================
+//  PID Constants
+float Kp_B4A = 20; // Proportional Gain of PID
+float Ki_B4A = 0; // Integral Gain of PID
+float Kd_B4A = 0; // Derivative Gain of PID
+
+// B4A vars that change every iteration
+int Count_B4A = 0;
+float Pos_B4A=0;
+float PosErr_B4A = 0;
+float PosErr_B4A_old = 0;
+float tmpSpeed_B4A = 0;
+float dErrDt_B4A = 0;
+float dPosErr_B4A=0;
+float IntOld_B4A=0;
+float IntNow_B4A=0;
+int CmdSpeed_B4A=0;
+// =============================================
+
+//// ======== PSARJ PID Vals=====================
+////  PID Constants
+//float Kp_PSARJ = 50; // Proportional Gain of PID
+//float Ki_PSARJ = 0; // Integral Gain of PID
+//float Kd_PSARJ = 0; // Derivative Gain of PID
+//
+//// PSARJ vars that change every iteration
+//int Count_PSARJ = 0;
+//float Pos_PSARJ=0;
+//float PosErr_PSARJ = 0;
+//float PosErr_PSARJ_old = 0;
+//float tmpSpeed_PSARJ = 0;
+//float dErrDt_PSARJ = 0;
+//float dPosErr_PSARJ=0;
+//float IntOld_PSARJ=0;
+//float IntNow_PSARJ=0;
+//int CmdSpeed_PSARJ=0;
+//// =============================================
 
 
 
@@ -101,19 +139,18 @@ double oldSSARJ = 0.00;
 double SSARJcheck = 0.00;
 double SSARJstep = 0.00;
 
-double Beta1B = 0.0;
-double Beta2B = 0.0;
-double Beta3B = 0.0;
-double Beta4B = 0.0;
-double Beta1A = 0.0;
-double Beta2A = 0.0;
-double Beta3A = 0.0;
-double Beta4A = 0.0;
+double B1B = 0.0;
+double B2B = 0.0;
+double B3B = 0.0;
+double B4B = 0.0;
+double B1A = 0.0;
+double B2A = 0.0;
+double B3A = 0.0;
+double B4A = 0.0;
 double PSARJ = -1.0;
 double SSARJ = 0.0;
 double PTRRJ = 0.0;
 double STRRJ = 0.0;
 boolean AOS = false;
-
 
 
