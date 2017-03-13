@@ -315,23 +315,6 @@ def point_inside_polygon(x, y, poly):
         p1x, p1y = p2x, p2y
     return inside
 
-class TriangleButton(ButtonBehavior, Widget):
-    triangle_color = ListProperty([1,0,0,1])
-    p1 = ListProperty([0, 0])
-    p2 = ListProperty([0, 0])
-    p3 = ListProperty([0, 0])
-
-    def changecolordown(self, *args):
-        self.triangle_color = (1,0,1,1)
-
-    def changecolorup(self, *args):
-        self.triangle_color = (1,0,0,1)
-
-    def collide_point(self, x, y):
-        x, y = self.to_local(x, y)
-        return point_inside_polygon(x, y,
-                self.p1 + self.p2 + self.p3) 
-
 class MainApp(App):
 
     def build(self):
@@ -381,7 +364,7 @@ class MainApp(App):
         global new_x
         global new_y
         new_x = new_x+0.005
-        new_y = (math.sin(new_x*30)/5)+0.4
+        new_y = (math.sin(new_x*30)/5)+0.42
         if new_x > 1:
             new_x = new_x-1.0
             
@@ -576,15 +559,15 @@ class MainApp(App):
         
     def checkAOSlong(self, dt):
         global aos
-        if float(aos) == 0.00:
-            print "signal lost - writing longitude"
-            response = urllib2.urlopen(req)
-            obj = json.loads(response.read())
-            locationlog.write("time ")
-            locationlog.write(str(obj['timestamp']))
-            locationlog.write(" long ")
-            locationlog.write(str(obj['iss_position']['longitude']))
-            locationlog.write('\n')
+        #if float(aos) == 0.00: #getting url errors, killing for now
+            #print "signal lost - writing longitude"
+            #response = urllib2.urlopen(req)
+            #obj = json.loads(response.read())
+            #locationlog.write("time ")
+            #locationlog.write(str(obj['timestamp']))
+            #locationlog.write(" long ")
+            #locationlog.write(str(obj['iss_position']['longitude']))
+            #locationlog.write('\n')
 
 
     def update_labels(self, dt):
@@ -856,9 +839,9 @@ ScreenManager:
         orientation: 'vertical'
         Image:
             source: './imgs/ISSmimicLogoPartsGroundtrack.png'
-            allow_stretch: True
-            keep_ratio: False
-            size: root.width,200
+            allow_stretch: False
+            keep_ratio: True
+            #size: root.width,200
             pos_hint: {"center_x": 0.5, "center_y": 0.67}
         Image:
             #canvas.after:
@@ -1015,296 +998,6 @@ ScreenManager:
             source: './imgs/iss_calibrate.png'
             allow_stretch: True
             keep_ratio: False
-        Label:
-            size_hint: None,None
-            text: '1B'
-            pos_hint: {'x': 0.035, 'y': 0.73}
-            font_size: 30
-            markup: True
-            color: 0,0,0,1
-            halign: 'center'
-            valign: 'middle'
-        TriangleButton:
-            id: t1Bup
-            p1: root.width*0.060, root.height*0.86
-            p2: root.width*0.095, root.height*0.96
-            p3: root.width*0.130, root.height*0.86
-            on_press: self.changecolordown()
-            on_release: root.incrementPSARJ(1)
-            on_release: self.changecolorup()
-        TriangleButton:
-            id: t1Bdown
-            p1: root.width*0.060, root.height*0.8
-            p2: root.width*0.095, root.height*0.7
-            p3: root.width*0.130, root.height*0.8
-            on_press: self.changecolordown()
-            on_release: root.incrementPSARJ(-1)
-            on_release: self.changecolorup()
-        Label:
-            size_hint: None,None
-            text: '3B'
-            pos_hint: {'x': 0.035, 'y': 0.25}
-            markup: True
-            color: 0,0,0,1
-            font_size: 30
-            halign: 'center'
-        TriangleButton:
-            id: t3Bup
-            p1: root.width*0.060, root.height*0.38
-            p2: root.width*0.095, root.height*0.48
-            p3: root.width*0.130, root.height*0.38
-            on_press: self.changecolordown()
-            on_release: root.incrementBeta3B(1)
-            on_release: self.changecolorup()
-        TriangleButton:
-            id: t3Bdown
-            p1: root.width*0.060, root.height*0.32
-            p2: root.width*0.095, root.height*0.22
-            p3: root.width*0.130, root.height*0.32
-            on_press: self.changecolordown()
-            on_release: root.incrementBeta3B(-1)
-            on_release: self.changecolorup()
-        Label:
-            size_hint: None,None
-            text: '3A'
-            pos_hint: {'x': .155, 'y': .73}
-            markup: True
-            color: 0,0,0,1
-            font_size: 30
-            halign: 'center'
-        TriangleButton:
-            id: t3Aup
-            p1: root.width*0.180, root.height*0.86
-            p2: root.width*0.215, root.height*0.96
-            p3: root.width*0.250, root.height*0.86
-            on_press: self.changecolordown()
-            on_release: root.incrementBeta3A(1)
-            on_release: self.changecolorup()
-        TriangleButton:
-            id: t3Adown
-            p1: root.width*0.180, root.height*0.8
-            p2: root.width*0.215, root.height*0.7
-            p3: root.width*0.250, root.height*0.8
-            on_press: self.changecolordown()
-            on_release: root.incrementBeta3A(-1)
-            on_release: self.changecolorup()
-        Label:
-            size_hint: None,None
-            text: '1A'
-            pos_hint: {'x': .155, 'y': .25}
-            markup: True
-            color: 0,0,0,1
-            font_size: 30
-            halign: 'center'
-        TriangleButton:
-            id: t1Aup
-            p1: root.width*0.180, root.height*0.38
-            p2: root.width*0.215, root.height*0.48
-            p3: root.width*0.250, root.height*0.38
-            on_press: self.changecolordown()
-            on_release: root.incrementBeta1A(1)
-            on_release: self.changecolorup()
-        TriangleButton:
-            id: t1Adown
-            p1: root.width*0.180, root.height*0.32
-            p2: root.width*0.215, root.height*0.22
-            p3: root.width*0.250, root.height*0.32
-            on_press: self.changecolordown()
-            on_release: root.incrementBeta1A(-1)
-            on_release: self.changecolorup()
-        Label:
-            size_hint: None,None
-            text: 'SSARJ'
-            pos_hint: {'x': .275, 'y': .5}
-            markup: True
-            color: 0,0,0,1
-            font_size: 30
-            halign: 'center'
-        TriangleButton:
-            id: SSARJup
-            p1: root.width*0.300, root.height*0.65
-            p2: root.width*0.335, root.height*0.75
-            p3: root.width*0.370, root.height*0.65
-            on_press: self.changecolordown()
-            on_release: root.incrementSSARJ(1)
-            on_release: self.changecolorup()
-        TriangleButton:
-            id: SSARJdown
-            p1: root.width*0.300, root.height*0.55
-            p2: root.width*0.335, root.height*0.45
-            p3: root.width*0.370, root.height*0.55
-            on_press: self.changecolordown()
-            on_release: root.incrementSSARJ(-1)
-            on_release: self.changecolorup()
-        Label:
-            size_hint: None,None
-            text: 'STTRJ'
-            pos_hint: {'x': .445, 'y': .55}
-            markup: True
-            color: 0,0,0,1
-            font_size: 30
-            halign: 'center'
-            valign: 'middle'
-        TriangleButton:
-            id: STTRJup
-            p1: root.width*0.480, root.height*0.800
-            p2: root.width*0.420, root.height*0.750
-            p3: root.width*0.480, root.height*0.700
-            on_press: self.changecolordown()
-            on_release: root.incrementSTRRJ(1)
-            on_release: self.changecolorup()
-        TriangleButton:
-            id: STTRJdown
-            p1: root.width*0.520, root.height*0.800
-            p2: root.width*0.580, root.height*0.750
-            p3: root.width*0.520, root.height*0.700
-            on_press: self.changecolordown()
-            on_release: root.incrementSTRRJ(-1)
-            on_release: self.changecolorup()
-        Label:
-            size_hint: None,None
-            text: 'PTTRJ'
-            pos_hint: {'x': .445, 'y': .45}
-            markup: True
-            color: 0,0,0,1
-            font_size: 30
-            halign: 'center'
-        TriangleButton:
-            id: PTTRJup
-            p1: root.width*0.480, root.height*0.400
-            p2: root.width*0.420, root.height*0.450
-            p3: root.width*0.480, root.height*0.500
-            on_press: self.changecolordown()
-            on_release: root.incrementPTRRJ(1)
-            on_release: self.changecolorup()
-        TriangleButton:
-            id: PTTRJdown
-            p1: root.width*0.520, root.height*0.400
-            p2: root.width*0.580, root.height*0.450
-            p3: root.width*0.520, root.height*0.500
-            on_press: self.changecolordown()
-            on_release: root.incrementPTRRJ(-1)
-            on_release: self.changecolorup()
-        Label:
-            size_hint: None,None
-            text: 'PSARJ'
-            pos_hint: {'x': .6, 'y': .5}
-            markup: True
-            color: 0,0,0,1
-            font_size: 30
-            halign: 'center'
-        TriangleButton:
-            id: PSARJup
-            p1: root.width*0.700, root.height*0.65
-            p2: root.width*0.665, root.height*0.75
-            p3: root.width*0.630, root.height*0.65
-            on_press: self.changecolordown()
-            on_release: root.incrementPSARJ(1)
-            on_release: self.changecolorup()
-        TriangleButton:
-            id: PSARJdown
-            p1: root.width*0.700, root.height*0.55
-            p2: root.width*0.665, root.height*0.45
-            p3: root.width*0.630, root.height*0.55
-            on_press: self.changecolordown()
-            on_release: root.incrementPSARJ(-1)
-            on_release: self.changecolorup()
-        Label:
-            size_hint: None,None
-            text: '2A'
-            pos_hint: {'x': .725, 'y': .73}
-            markup: True
-            color: 0,0,0,1
-            font_size: 30
-            halign: 'center'
-        TriangleButton:
-            id: t2Aup
-            p1: root.width*0.820, root.height*0.86
-            p2: root.width*0.785, root.height*0.96
-            p3: root.width*0.750, root.height*0.86
-            on_press: self.changecolordown()
-            on_release: root.incrementBeta2A(1)
-            on_release: self.changecolorup()
-        TriangleButton:
-            id: t2Adown
-            p1: root.width*0.820, root.height*0.8
-            p2: root.width*0.785, root.height*0.7
-            p3: root.width*0.750, root.height*0.8
-            on_press: self.changecolordown()
-            on_release: root.incrementBeta2A(-1)
-            on_release: self.changecolorup()
-        Label:
-            size_hint: None,None
-            text: '4A'
-            pos_hint: {'x': .725, 'y': .25}
-            markup: True
-            color: 0,0,0,1
-            font_size: 30
-            halign: 'center'
-        TriangleButton:
-            id: t4Aup
-            p1: root.width*0.820, root.height*0.38
-            p2: root.width*0.785, root.height*0.48
-            p3: root.width*0.750, root.height*0.38
-            on_press: self.changecolordown()
-            on_release: root.incrementBeta4A(1)
-            on_release: self.changecolorup()
-        TriangleButton:
-            id: t4Adown
-            p1: root.width*0.820, root.height*0.32
-            p2: root.width*0.785, root.height*0.22
-            p3: root.width*0.750, root.height*0.32
-            on_press: self.changecolordown()
-            on_release: root.incrementBeta4A(-1)
-            on_release: self.changecolorup()
-        Label:
-            size_hint: None,None
-            text: '4B'
-            pos_hint: {'x': .84, 'y': .73}
-            markup: True
-            color: 0,0,0,1
-            font_size: 30
-            halign: 'center'
-        TriangleButton:
-            id: t4Bup
-            p1: root.width*0.940, root.height*0.86
-            p2: root.width*0.905, root.height*0.96
-            p3: root.width*0.870, root.height*0.86
-            on_press: self.changecolordown()
-            on_release: root.incrementBeta4B(1)
-            on_release: self.changecolorup()
-        TriangleButton:
-            id: t4Bdown
-            p1: root.width*0.940, root.height*0.8
-            p2: root.width*0.905, root.height*0.7
-            p3: root.width*0.870, root.height*0.8
-            on_press: self.changecolordown()
-            on_release: root.incrementBeta4B(-1)
-            on_release: self.changecolorup()
-        Label:
-            size_hint: None,None
-            text: '2B'
-            pos_hint: {'x': .84, 'y': .25}
-            markup: True
-            color: 0,0,0,1
-            font_size: 30
-            halign: 'center'
-        TriangleButton:
-            id: t2Bup
-            p1: root.width*0.940, root.height*0.38
-            p2: root.width*0.905, root.height*0.48
-            p3: root.width*0.870, root.height*0.38
-            on_press: self.changecolordown()
-            on_release: root.incrementBeta2B(1)
-            on_release: self.changecolorup()
-        TriangleButton:
-            id: t2Bdown
-            p1: root.width*0.940, root.height*0.32
-            p2: root.width*0.905, root.height*0.22
-            p3: root.width*0.870, root.height*0.32
-            on_press: self.changecolordown()
-            on_release: root.incrementBeta2B(-1)
-            on_release: self.changecolorup()
         Button:
             size_hint: 0.3,0.1
             pos_hint: {"center_x": 0.5, "Bottom": 1}
@@ -2527,17 +2220,7 @@ ScreenManager:
             on_release: root.changeMimicBoolean(False)
             on_release: root.changeSwitchBoolean(False)
             on_release: app.root.current = 'main'
-           
-<TriangleButton>:
-    canvas.after:
-        Color:
-            rgba: self.triangle_color
-        Triangle:
-            points: self.p1 + self.p2 + self.p3
-            
 ''')
 
 if __name__ == '__main__':
     MainApp().run()
-
-#runTouchApp(root_widget)
