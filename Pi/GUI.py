@@ -102,9 +102,21 @@ conn = sqlite3.connect('iss_telemetry.db') #sqlite database call change to inclu
 c = conn.cursor() 
 val = ""
        
+Beta4Bcontrol = False
+Beta3Bcontrol = False
+Beta2Bcontrol = False
+Beta1Bcontrol = False
+Beta4Acontrol = False
+Beta3Acontrol = False
+Beta2Acontrol = False
+Beta1Acontrol = False
+PSARJcontrol = False
+SSARJcontrol = False
+PTRRJcontrol = False
+STRRJcontrol = False
+stopAnimation = True
 sizeX = 0.00
 sizeY = 0.00
-stopAnimation = True
 psarj2 = 1.0
 ssarj2 = 1.0
 new_x = 0
@@ -191,92 +203,141 @@ class CalibrateScreen(Screen):
         zerocomplete = args[0]
 
 class ManualControlScreen(Screen):
-    def setActive(*args)
-        print str(args[1])
+    def setActive(*args):
+        global Beta4Bcontrol
+        global Beta3Bcontrol
+        global Beta2Bcontrol
+        global Beta1Bcontrol
+        global Beta4Acontrol
+        global Beta3Acontrol
+        global Beta2Acontrol
+        global Beta1Acontrol
+        global PSARJcontrol
+        global SSARJcontrol
+        global PTRRJcontrol
+        global STRRJcontrol
 	if str(args[1])=="Beta4B":
-	    Beta4Bcontrol = true
-	    print "True"
+	    Beta4Bcontrol = True
 	if str(args[1])=="Beta3B":
-	    Beta3Bcontrol = true
+	    Beta3Bcontrol = True
 	if str(args[1])=="Beta2B":
-	    Beta2Bcontrol = true
+	    Beta2Bcontrol = True
 	if str(args[1])=="Beta1B":
-	    Beta1Bcontrol = true
+	    Beta1Bcontrol = True
 	if str(args[1])=="Beta4A":
-	    Beta4Acontrol = true
+	    Beta4Acontrol = True
 	if str(args[1])=="Beta3A":
-	    Beta3Acontrol = true
+	    Beta3Acontrol = True
 	if str(args[1])=="Beta2A":
-	    Beta2Acontrol = true
+	    Beta2Acontrol = True
 	if str(args[1])=="Beta1A":
-	    Beta1Acontrol = true
+	    Beta1Acontrol = True
 	if str(args[1])=="PTRRJ":
-	    PTRRJcontrol = true
+	    PTRRJcontrol = True
 	if str(args[1])=="STRRJ":
-	    STRRJcontrol = true
+	    STRRJcontrol = True
 	if str(args[1])=="PSARJ":
-	    PSARJcontrol = true
+	    PSARJcontrol = True
 	if str(args[1])=="SSARJ":
-	    SSARJcontrol = true
-	
+	    SSARJcontrol = True
+
+    def incrementActive(self, *args):
+        global Beta4Bcontrol
+        global Beta3Bcontrol
+        global Beta2Bcontrol
+        global Beta1Bcontrol
+        global Beta4Acontrol
+        global Beta3Acontrol
+        global Beta2Acontrol
+        global Beta1Acontrol
+        global PSARJcontrol
+        global SSARJcontrol
+        global PTRRJcontrol
+        global STRRJcontrol
+
+        if Beta4Bcontrol == True:
+            self.incrementBeta4B(args[0])
+        if Beta3Bcontrol == True:
+            self.incrementBeta3B(args[0])
+        if Beta2Bcontrol == True:
+            self.incrementBeta2B(args[0])
+        if Beta1Bcontrol == True:
+            self.incrementBeta1B(args[0])
+        if Beta4Acontrol == True:
+            self.incrementBeta4A(args[0])
+        if Beta3Acontrol == True:
+            self.incrementBeta3A(args[0])
+        if Beta2Acontrol == True:
+            self.incrementBeta2A(args[0])
+        if Beta1Acontrol == True:
+            self.incrementBeta1A(args[0])
+        if PTRRJcontrol == True:
+            self.incrementPTRRJ(args[0])
+        if STRRJcontrol == True:
+            self.incrementSTRRJ(args[0])
+        if PSARJcontrol == True:
+            self.incrementPSARJ(args[0])
+        if SSARJcontrol == True:
+            self.incrementSSARJ(args[0])
+
     def incrementPSARJ(self, *args):
         global psarjmc
-        psarjmc += args[0]
+        psarjmc += args[1]
         self.serialWrite("PSARJ=" + str(psarjmc) + " ")   
      
     def incrementSSARJ(self, *args):
         global ssarjmc
-        ssarjmc += args[0]
+        ssarjmc += args[1]
         self.serialWrite("SSARJ=" + str(ssarjmc) + " ")   
      
     def incrementPTTRJ(self, *args):
         global ptrrjmc
-        ptrrjmc += args[0]
+        ptrrjmc += args[1]
         self.serialWrite("PTRRJ=" + str(ptrrjmc) + " ")   
      
     def incrementSTRRJ(self, *args):
         global strrjmc
-        strrjmc += args[0]
+        strrjmc += args[1]
         self.serialWrite("STRRJ=" + str(strrjmc) + " ")   
      
     def incrementBeta1B(self, *args):
         global beta1bmc
-        beta1bmc += args[0]
+        beta1bmc += args[1]
         self.serialWrite("Beta1B=" + str(beta1bmc) + " ")   
      
     def incrementBeta1A(self, *args):
         global beta1amc
-        beta1amc += args[0]
+        beta1amc += args[1]
         self.serialWrite("Beta1A=" + str(beta1amc) + " ")   
      
     def incrementBeta2B(self, *args):
         global beta2bmc
-        beta2bmc += args[0]
+        beta2bmc += args[1]
         self.serialWrite("Beta2B=" + str(beta2bmc) + " ")   
      
     def incrementBeta2A(self, *args):
         global beta2amc
-        beta2amc += args[0]
+        beta2amc += args[1]
         self.serialWrite("Beta2A=" + str(beta2amc) + " ")   
      
     def incrementBeta3B(self, *args):
         global beta3bmc
-        beta3bmc += args[0]
+        beta3bmc += args[1]
         self.serialWrite("Beta3B=" + str(beta3bmc) + " ")   
      
     def incrementBeta3A(self, *args):
         global beta3amc
-        beta3amc += args[0]
+        beta3amc += args[1]
         self.serialWrite("Beta3A=" + str(beta3amc) + " ")   
      
     def incrementBeta4B(self, *args):
         global beta4bmc
-        beta4bmc += args[0]
+        beta4bmc += args[1]
         self.serialWrite("Beta4B=" + str(beta4bmc) + " ")   
      
     def incrementBeta4A(self, *args):
         global beta4amc
-        beta4amc += args[0]
+        beta4amc += args[1]
         self.serialWrite("Beta4A=" + str(beta4amc) + " ")   
      
     def changeBoolean(self, *args):
@@ -284,7 +345,8 @@ class ManualControlScreen(Screen):
         manualcontrol = args[0]
     
     def serialWrite(self, *args):
-        ser.write(*args)
+        print args
+        #ser.write(*args)
 
 class FakeOrbitScreen(Screen):
     def serialWrite(self, *args):
@@ -500,7 +562,7 @@ class MainApp(App):
         stuff = urllib2.urlopen(req)
         now = datetime.datetime.now()
         if (stuff.info().getsubtype()=='json'):
-            print "JSON true"
+            print "JSON True"
             crewjsonsuccess = True
             data = json.load(stuff)
             number_of_space = int(data['number'])
@@ -1025,8 +1087,8 @@ ScreenManager:
     name: 'manualcontrol'
     FloatLayout:
         Image:
-	    id: MCbackground
-            source: './imgs/iss_diagram.png'
+            id: MCbackground
+            source: './imgs/iss_calibrate.png'
             allow_stretch: True
             keep_ratio: False
         Button:
@@ -1035,86 +1097,108 @@ ScreenManager:
             pos_hint: {"center_x": 0.0875, "center_y": 0.26}
             font_size: 30
             opacity: 0.2
-	    on_press: root.setActive("Beta4B")
-	    on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
+            on_press: root.setActive("Beta4B")
+            on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
         Button:
             id: Beta2A_Button
             size_hint: 0.12,0.4
             pos_hint: {"center_x": 0.217, "center_y": 0.26}
             font_size: 30
             opacity: 0.2
-	    on_press: root.setActive("Beta2A")
+            on_press: root.setActive("Beta2A")
+            on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
         Button:
             id: Beta3A_Button
             size_hint: 0.12,0.4
             pos_hint: {"center_x": 0.7925, "center_y": 0.26}
             font_size: 30
             opacity: 0.2
-	    on_press: root.setActive("Beta3A")
+            on_press: root.setActive("Beta3A")
+            on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
         Button:
             id: Beta1B_Button
             size_hint: 0.12,0.4
             pos_hint: {"center_x": 0.922, "center_y": 0.26}
             font_size: 30
             opacity: 0.2
-	    on_press: root.setActive("Beta1B")
+            on_press: root.setActive("Beta1B")
+            on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
         Button:
             id: Beta2B_Button
             size_hint: 0.12,0.4
             pos_hint: {"center_x": 0.0975, "center_y": 0.742}
             font_size: 30
             opacity: 0.2
-	    on_press: root.setActive("Beta2B")
+            on_press: root.setActive("Beta2B")
+            on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
         Button:
             id: Beta4A_Button
             size_hint: 0.12,0.4
             pos_hint: {"center_x": 0.227, "center_y": 0.742}
             font_size: 30
             opacity: 0.2
-	    on_press: root.setActive("Beta4A")
+            on_press: root.setActive("Beta4A")
+            on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
         Button:
             id: Beta1A_Button
             size_hint: 0.12,0.4
             pos_hint: {"center_x": 0.7825, "center_y": 0.742}
             font_size: 30
             opacity: 0.2
-	    on_press: root.setActive("Beta1A")
+            on_press: root.setActive("Beta1A")
+            on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
         Button:
             id: Beta3B_Button
             size_hint: 0.12,0.4
             pos_hint: {"center_x": 0.912, "center_y": 0.742}
             font_size: 30
             opacity: 0.2
-	    on_press: root.setActive("Beta3B")
+            on_press: root.setActive("Beta3B")
+            on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
         Button:
             id: PTRRJ_Button
             size_hint: 0.12,0.3
             pos_hint: {"center_x": 0.36, "center_y": 0.33}
             font_size: 30
             opacity: 0.2
-	    on_press: root.setActive("PTRRJ")
+            on_press: root.setActive("PTRRJ")
+            on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
         Button:
             id: STRRJ_Button
             size_hint: 0.12,0.3
             pos_hint: {"center_x": 0.65, "center_y": 0.33}
             font_size: 30
             opacity: 0.2
-	    on_press: root.setActive("STRRJ")
+            on_press: root.setActive("STRRJ")
+            on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
         Button:
             id: PSARJ_Button
             size_hint: 0.25,0.08
             pos_hint: {"center_x": 0.18, "center_y": 0.5}
             font_size: 30
             opacity: 0.2
-	    on_press: root.setActive("PSARJ")
+            on_press: root.setActive("PSARJ")
+            on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
         Button:
             id: SSARJ_Button
             size_hint: 0.25,0.08
             pos_hint: {"center_x": 0.83, "center_y": 0.5}
             font_size: 30
             opacity: 0.2
-	    on_press: root.setActive("SSARJ")
-	    on_release: root.set
+            on_press: root.setActive("SSARJ")
+            on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
+        Button:
+            size_hint: 0.15,0.15
+            pos_hint: {"center_x": 0.4, "center_y": 0.8}
+            text: '+'
+            font_size: 30
+            on_press: root.incrementActive(1)
+        Button:
+            size_hint: 0.15,0.15
+            pos_hint: {"center_x": 0.6, "center_y": 0.8}
+            text: '-'
+            font_size: 30
+            on_press: root.incrementActive(-1)
         Button:
             size_hint: 0.3,0.1
             pos_hint: {"center_x": 0.5, "Bottom": 1}
