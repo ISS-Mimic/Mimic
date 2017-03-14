@@ -1,3 +1,8 @@
+DISCLAIMER - We are not professional programmers. All the code maintained here was created to work toward our specific goal, and much of it was using languages that none of us had used before. You may find the structure, style, and lack of comments to be completely novice and infuriating. You may scream out in frustration, laugh in disgust, or even weep at the obfuscated nonsense appearing before your eyes. 
+
+That said, feel free to improve upon our caffeine-induced, late-night, insanity-plagued programming madness or even just scrap it all and make something better using our ideas.  
+
+
 The project consists of four parts:
 
 1-3 are on the raspberry pi, 4 is on the arduino mega
