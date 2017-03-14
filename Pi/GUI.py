@@ -191,7 +191,34 @@ class CalibrateScreen(Screen):
         zerocomplete = args[0]
 
 class ManualControlScreen(Screen):
-
+    def setActive(*args)
+        print str(args[1])
+	if str(args[1])=="Beta4B":
+	    Beta4Bcontrol = true
+	    print "True"
+	if str(args[1])=="Beta3B":
+	    Beta3Bcontrol = true
+	if str(args[1])=="Beta2B":
+	    Beta2Bcontrol = true
+	if str(args[1])=="Beta1B":
+	    Beta1Bcontrol = true
+	if str(args[1])=="Beta4A":
+	    Beta4Acontrol = true
+	if str(args[1])=="Beta3A":
+	    Beta3Acontrol = true
+	if str(args[1])=="Beta2A":
+	    Beta2Acontrol = true
+	if str(args[1])=="Beta1A":
+	    Beta1Acontrol = true
+	if str(args[1])=="PTRRJ":
+	    PTRRJcontrol = true
+	if str(args[1])=="STRRJ":
+	    STRRJcontrol = true
+	if str(args[1])=="PSARJ":
+	    PSARJcontrol = true
+	if str(args[1])=="SSARJ":
+	    SSARJcontrol = true
+	
     def incrementPSARJ(self, *args):
         global psarjmc
         psarjmc += args[0]
@@ -998,7 +1025,8 @@ ScreenManager:
     name: 'manualcontrol'
     FloatLayout:
         Image:
-            source: './imgs/MIMICstationGlowFileGreenTRRJ.png'
+	    id: MCbackground
+            source: './imgs/iss_diagram.png'
             allow_stretch: True
             keep_ratio: False
         Button:
@@ -1007,72 +1035,86 @@ ScreenManager:
             pos_hint: {"center_x": 0.0875, "center_y": 0.26}
             font_size: 30
             opacity: 0.2
+	    on_press: root.setActive("Beta4B")
+	    on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
         Button:
             id: Beta2A_Button
             size_hint: 0.12,0.4
             pos_hint: {"center_x": 0.217, "center_y": 0.26}
             font_size: 30
             opacity: 0.2
+	    on_press: root.setActive("Beta2A")
         Button:
             id: Beta3A_Button
             size_hint: 0.12,0.4
             pos_hint: {"center_x": 0.7925, "center_y": 0.26}
             font_size: 30
             opacity: 0.2
+	    on_press: root.setActive("Beta3A")
         Button:
             id: Beta1B_Button
             size_hint: 0.12,0.4
             pos_hint: {"center_x": 0.922, "center_y": 0.26}
             font_size: 30
             opacity: 0.2
+	    on_press: root.setActive("Beta1B")
         Button:
             id: Beta2B_Button
             size_hint: 0.12,0.4
             pos_hint: {"center_x": 0.0975, "center_y": 0.742}
             font_size: 30
             opacity: 0.2
+	    on_press: root.setActive("Beta2B")
         Button:
             id: Beta4A_Button
             size_hint: 0.12,0.4
             pos_hint: {"center_x": 0.227, "center_y": 0.742}
             font_size: 30
             opacity: 0.2
+	    on_press: root.setActive("Beta4A")
         Button:
             id: Beta1A_Button
             size_hint: 0.12,0.4
             pos_hint: {"center_x": 0.7825, "center_y": 0.742}
             font_size: 30
             opacity: 0.2
+	    on_press: root.setActive("Beta1A")
         Button:
             id: Beta3B_Button
             size_hint: 0.12,0.4
             pos_hint: {"center_x": 0.912, "center_y": 0.742}
             font_size: 30
             opacity: 0.2
+	    on_press: root.setActive("Beta3B")
         Button:
             id: PTRRJ_Button
             size_hint: 0.12,0.3
             pos_hint: {"center_x": 0.36, "center_y": 0.33}
             font_size: 30
             opacity: 0.2
+	    on_press: root.setActive("PTRRJ")
         Button:
             id: STRRJ_Button
             size_hint: 0.12,0.3
             pos_hint: {"center_x": 0.65, "center_y": 0.33}
             font_size: 30
             opacity: 0.2
+	    on_press: root.setActive("STRRJ")
         Button:
             id: PSARJ_Button
             size_hint: 0.25,0.08
             pos_hint: {"center_x": 0.18, "center_y": 0.5}
             font_size: 30
             opacity: 0.2
+	    on_press: root.setActive("PSARJ")
         Button:
             id: SSARJ_Button
             size_hint: 0.25,0.08
             pos_hint: {"center_x": 0.83, "center_y": 0.5}
             font_size: 30
             opacity: 0.2
+	    on_press: root.setActive("SSARJ")
+	    on_release: root.set
         Button:
             size_hint: 0.3,0.1
             pos_hint: {"center_x": 0.5, "Bottom": 1}
