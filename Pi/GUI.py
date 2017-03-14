@@ -28,6 +28,7 @@ from kivy.base import runTouchApp
 from kivy.clock import Clock
 from kivy.properties import ListProperty
 from kivy.properties import ObjectProperty
+from kivy.properties import NumericProperty
 from kivy.vector import Vector
 from kivy.core.window import Window
 from kivy.lang import Builder
@@ -101,6 +102,9 @@ conn = sqlite3.connect('iss_telemetry.db') #sqlite database call change to inclu
 c = conn.cursor() 
 val = ""
        
+sizeX = 0.00
+sizeY = 0.00
+stopAnimation = True
 psarj2 = 1.0
 ssarj2 = 1.0
 new_x = 0
@@ -187,6 +191,7 @@ class CalibrateScreen(Screen):
         zerocomplete = args[0]
 
 class ManualControlScreen(Screen):
+
     def incrementPSARJ(self, *args):
         global psarjmc
         psarjmc += args[0]
@@ -297,30 +302,13 @@ class MainScreenManager(ScreenManager):
 class MyButton(Button):
     pass
 
-def point_inside_polygon(x, y, poly):
-    n = len(poly)
-    inside = False
-    p1x = poly[0]
-    p1y = poly[1]
-    for i in range(0, n + 2, 2):
-        p2x = poly[i % n]
-        p2y = poly[(i + 1) % n]
-        if y > min(p1y, p2y):
-            if y <= max(p1y, p2y):
-                if x <= max(p1x, p2x):
-                    if p1y != p2y:
-                        xinters = (y - p1y) * (p2x - p1x) / (p2y - p1y) + p1x
-                    if p1x == p2x or x <= xinters:
-                        inside = not inside
-        p1x, p1y = p2x, p2y
-    return inside
-
 class MainApp(App):
 
     def build(self):
         global startup
         global crewjsonsuccess
-
+        global stopAnimation
+        global event_fadeISS
         self.main_screen = MainScreen(name = 'main')
         #root.add_widget(MainScreen(name = 'main'))
         self.orbit_screen = Orbit_Screen(name = 'orbit')
@@ -347,6 +335,7 @@ class MainApp(App):
         root.add_widget(ManualControlScreen(name = 'manualcontrol'))
         root.current = 'main'
     
+
         Clock.schedule_interval(self.update_labels, 1)
         Clock.schedule_interval(self.animate,0.1)
         Clock.schedule_interval(self.checkAOSlong, 5)
@@ -363,12 +352,23 @@ class MainApp(App):
     def animate(self, instance):
         global new_x
         global new_y
-        new_x = new_x+0.005
-        new_y = (math.sin(new_x*30)/5)+0.42
+        global stopAnimation
+        new_x = new_x+0.007
+        new_y = (math.sin(new_x*30)/18)+0.75
         if new_x > 1:
             new_x = new_x-1.0
-            
+        if new_x > 0.6:
+            if stopAnimation == True:
+                Clock.schedule_interval(self.animate2,0.05)
+            stopAnimation = False
         self.main_screen.ids.ISStiny.pos_hint = {"center_x": new_x, "center_y": new_y}
+
+    def animate2(self, instance):
+        global sizeX
+        global sizeY
+        sizeX = sizeX + 0.01
+        sizeY = sizeY + 0.01
+        self.main_screen.ids.ISStinyStatic.size_hint = sizeX,sizeY
 
     def serialWrite(self, *args):
         ser.write(*args)
@@ -795,8 +795,6 @@ class MainApp(App):
                fakeorbitboolean = True
             self.mimic_screen.ids.aosvalue.text = "Stale Signal!"
 
-        
-
         if (mimicbutton == True and float(aos) == 1.00): 
              self.serialWrite("PSARJ=" + psarj + " ")
              self.serialWrite("SSARJ=" + ssarj + " ")
@@ -815,7 +813,7 @@ class MainApp(App):
 	     self.serialWrite("Current1B=" + c1b + " ")
 	     self.serialWrite("Current3A=" + c3a + " ")
 	     self.serialWrite("Current3B=" + c3b + " ")
- 
+
 Builder.load_string('''
 #:kivy 1.8
 #:import kivy kivy
@@ -838,23 +836,28 @@ ScreenManager:
     FloatLayout:
         orientation: 'vertical'
         Image:
-            source: './imgs/ISSmimicLogoPartsGroundtrack.png'
+            source: './imgs/ISSmimicLogoPartsGroundtrackLightBlue.png'
             allow_stretch: False
             keep_ratio: True
-            #size: root.width,200
-            pos_hint: {"center_x": 0.5, "center_y": 0.67}
+            pos_hint: {"center_x": 0.5, "center_y": 0.82}
         Image:
-            #canvas.after:
             id: ISStiny
-            source: './imgs/ISSmimicLogoPartsGlowingISS.png'
+            source: './imgs/ISSmimicLogoPartsGlowingISSblue.png'
             keep_ratio: False
             allow_stretch: True
-            size_hint: 0.1,0.1
-            #pos: 5000,500
+            #size_hint: 0.1,0.1
+            size_hint: 0.07,0.07
             pos_hint: {"center_x": 0.25, "center_y": 0.25}
+        Image:
+            id: ISStinyStatic
+            source: './imgs/ISSmimicLogoPartsGlowingISSblue.png'
+            keep_ratio: True
+            allow_stretch: False
+            size_hint: 0.0,0.0
+            pos_hint: {"center_x": 0.88, "center_y": 0.83}
         Button:
             size_hint: 0.3,0.1
-            pos_hint: {"center_x": 0.2, "center_y": 0.9}
+            pos_hint: {"center_x": 0.2, "center_y": 0.3}
             text: 'Fake Orbit'
             font_size: 30
             width: 50
@@ -862,7 +865,7 @@ ScreenManager:
             on_release: root.manager.current = 'fakeorbit'
         Button:
             size_hint: 0.1,0.15
-            pos_hint: {"center_x": 0.9, "center_y": 0.9}
+            pos_hint: {"center_x": 0.9, "center_y": 0.3}
             background_normal: './imgs/Settings_Icon.png'
             text: ''
             on_release: root.manager.current = 'settings'
@@ -995,9 +998,16 @@ ScreenManager:
     name: 'manualcontrol'
     FloatLayout:
         Image:
-            source: './imgs/iss_calibrate.png'
+            source: './imgs/MIMICstationGlowFileGreenTRRJ.png'
             allow_stretch: True
             keep_ratio: False
+        Button:
+            id: Beta4B_Button
+            size_hint: 0.25,0.4
+            pos_hint: {"center_x": 0.2, "center_y": 0.25}
+            text: ''
+            font_size: 30
+            opacity: 0.1
         Button:
             size_hint: 0.3,0.1
             pos_hint: {"center_x": 0.5, "Bottom": 1}
