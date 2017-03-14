@@ -115,12 +115,15 @@ SSARJcontrol = False
 PTRRJcontrol = False
 STRRJcontrol = False
 stopAnimation = True
+startingAnim = True
 sizeX = 0.00
 sizeY = 0.00
 psarj2 = 1.0
 ssarj2 = 1.0
 new_x = 0
 new_y = 0
+new_x2 = 0
+new_y2 = 0
 psarj = 0.00
 ssarj = 0.00
 ptrrj = 0.00
@@ -423,10 +426,9 @@ class MainApp(App):
         root.add_widget(self.settings_screen)
         root.add_widget(ManualControlScreen(name = 'manualcontrol'))
         root.current = 'main'
-    
 
         Clock.schedule_interval(self.update_labels, 1)
-        Clock.schedule_interval(self.animate,0.1)
+        Clock.schedule_interval(self.animate3,0.1)
         Clock.schedule_interval(self.checkAOSlong, 5)
         Clock.schedule_interval(self.checkCrew, 3600)
         if crewjsonsuccess == False: #check crew every 10s until success then once per hour
@@ -439,25 +441,34 @@ class MainApp(App):
         return root
 
     def animate(self, instance):
+        global new_x2
+        global new_y2
+        self.main_screen.ids.ISStiny2.size_hint = 0.07,0.07
+        new_x2 = new_x2+0.007
+        new_y2 = (math.sin(new_x2*30)/18)+0.75
+        if new_x2 > 1:
+            new_x2 = new_x2-1.0
+        self.main_screen.ids.ISStiny2.pos_hint = {"center_x": new_x2, "center_y": new_y2}
+
+    def animate3(self, instance):
         global new_x
         global new_y
-        global stopAnimation
-        new_x = new_x+0.007
-        new_y = (math.sin(new_x*30)/18)+0.75
-        if new_x > 1:
-            new_x = new_x-1.0
-        if new_x > 0.6:
-            if stopAnimation == True:
-                Clock.schedule_interval(self.animate2,0.05)
-            stopAnimation = False
-        self.main_screen.ids.ISStiny.pos_hint = {"center_x": new_x, "center_y": new_y}
-
-    def animate2(self, instance):
         global sizeX
         global sizeY
-        sizeX = sizeX + 0.01
-        sizeY = sizeY + 0.01
-        self.main_screen.ids.ISStinyStatic.size_hint = sizeX,sizeY
+        global startingAnim
+        if new_x<0.886:
+            new_x = new_x+0.007
+            new_y = (math.sin(new_x*30)/18)+0.75
+            self.main_screen.ids.ISStiny.pos_hint = {"center_x": new_x, "center_y": new_y}
+        else:
+            if sizeX <= 0.15:
+                sizeX = sizeX + 0.01
+                sizeY = sizeY + 0.01
+                self.main_screen.ids.ISStiny.size_hint = sizeX,sizeY
+            else:
+                if startingAnim:
+                    Clock.schedule_interval(self.animate,0.1)
+                    startingAnim = False
 
     def serialWrite(self, *args):
         ser.write(*args)
@@ -934,16 +945,15 @@ ScreenManager:
             source: './imgs/ISSmimicLogoPartsGlowingISSblue.png'
             keep_ratio: False
             allow_stretch: True
-            #size_hint: 0.1,0.1
             size_hint: 0.07,0.07
             pos_hint: {"center_x": 0.25, "center_y": 0.25}
         Image:
-            id: ISStinyStatic
+            id: ISStiny2
             source: './imgs/ISSmimicLogoPartsGlowingISSblue.png'
-            keep_ratio: True
-            allow_stretch: False
+            keep_ratio: False
+            allow_stretch: True
             size_hint: 0.0,0.0
-            pos_hint: {"center_x": 0.88, "center_y": 0.83}
+            pos_hint: {"center_x": 0.25, "center_y": 0.25}
         Button:
             size_hint: 0.3,0.1
             pos_hint: {"center_x": 0.2, "center_y": 0.3}
@@ -1096,106 +1106,106 @@ ScreenManager:
             size_hint: 0.12,0.4
             pos_hint: {"center_x": 0.0875, "center_y": 0.26}
             font_size: 30
-            opacity: 0.2
+            opacity: 0.0
             on_press: root.setActive("Beta4B")
-            on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
+            on_press: MCbackground.source = './imgs/MIMICstationGlowFile4B.png'
         Button:
             id: Beta2A_Button
             size_hint: 0.12,0.4
             pos_hint: {"center_x": 0.217, "center_y": 0.26}
             font_size: 30
-            opacity: 0.2
+            opacity: 0.0
             on_press: root.setActive("Beta2A")
-            on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
+            on_press: MCbackground.source = './imgs/MIMICstationGlowFile2A.png'
         Button:
             id: Beta3A_Button
             size_hint: 0.12,0.4
             pos_hint: {"center_x": 0.7925, "center_y": 0.26}
             font_size: 30
-            opacity: 0.2
+            opacity: 0.0
             on_press: root.setActive("Beta3A")
-            on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
+            on_press: MCbackground.source = './imgs/MIMICstationGlowFile3A.png'
         Button:
             id: Beta1B_Button
             size_hint: 0.12,0.4
             pos_hint: {"center_x": 0.922, "center_y": 0.26}
             font_size: 30
-            opacity: 0.2
+            opacity: 0.0
             on_press: root.setActive("Beta1B")
-            on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
+            on_press: MCbackground.source = './imgs/MIMICstationGlowFile1B.png'
         Button:
             id: Beta2B_Button
             size_hint: 0.12,0.4
             pos_hint: {"center_x": 0.0975, "center_y": 0.742}
             font_size: 30
-            opacity: 0.2
+            opacity: 0.0
             on_press: root.setActive("Beta2B")
-            on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
+            on_press: MCbackground.source = './imgs/MIMICstationGlowFile2B.png'
         Button:
             id: Beta4A_Button
             size_hint: 0.12,0.4
             pos_hint: {"center_x": 0.227, "center_y": 0.742}
             font_size: 30
-            opacity: 0.2
+            opacity: 0.0
             on_press: root.setActive("Beta4A")
-            on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
+            on_press: MCbackground.source = './imgs/MIMICstationGlowFile4A.png'
         Button:
             id: Beta1A_Button
             size_hint: 0.12,0.4
             pos_hint: {"center_x": 0.7825, "center_y": 0.742}
             font_size: 30
-            opacity: 0.2
+            opacity: 0.0
             on_press: root.setActive("Beta1A")
-            on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
+            on_press: MCbackground.source = './imgs/MIMICstationGlowFile1A.png'
         Button:
             id: Beta3B_Button
             size_hint: 0.12,0.4
             pos_hint: {"center_x": 0.912, "center_y": 0.742}
             font_size: 30
-            opacity: 0.2
+            opacity: 0.0
             on_press: root.setActive("Beta3B")
-            on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
+            on_press: MCbackground.source = './imgs/MIMICstationGlowFile3B.png'
         Button:
             id: PTRRJ_Button
             size_hint: 0.12,0.3
             pos_hint: {"center_x": 0.36, "center_y": 0.33}
             font_size: 30
-            opacity: 0.2
+            opacity: 0.0
             on_press: root.setActive("PTRRJ")
-            on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
+            on_press: MCbackground.source = './imgs/MIMICstationGlowFilePortTRRJ.png'
         Button:
             id: STRRJ_Button
             size_hint: 0.12,0.3
             pos_hint: {"center_x": 0.65, "center_y": 0.33}
             font_size: 30
-            opacity: 0.2
+            opacity: 0.0
             on_press: root.setActive("STRRJ")
-            on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
+            on_press: MCbackground.source = './imgs/MIMICstationGlowFileStbdTRRJ.png'
         Button:
             id: PSARJ_Button
             size_hint: 0.25,0.08
             pos_hint: {"center_x": 0.18, "center_y": 0.5}
             font_size: 30
-            opacity: 0.2
+            opacity: 0.0
             on_press: root.setActive("PSARJ")
-            on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
+            on_press: MCbackground.source = './imgs/MIMICstationGlowFilePortSARJ.png'
         Button:
             id: SSARJ_Button
             size_hint: 0.25,0.08
             pos_hint: {"center_x": 0.83, "center_y": 0.5}
             font_size: 30
-            opacity: 0.2
+            opacity: 0.0
             on_press: root.setActive("SSARJ")
-            on_press: MCbackground.source = './imgs/MIMICstationGlowFileGreenTRRJ.png'
+            on_press: MCbackground.source = './imgs/MIMICstationGlowFileStbdSARJ.png'
         Button:
-            size_hint: 0.15,0.15
-            pos_hint: {"center_x": 0.4, "center_y": 0.8}
+            size_hint: 0.1,0.1
+            pos_hint: {"center_x": 0.4, "center_y": 0.83}
             text: '+'
             font_size: 30
             on_press: root.incrementActive(1)
         Button:
-            size_hint: 0.15,0.15
-            pos_hint: {"center_x": 0.6, "center_y": 0.8}
+            size_hint: 0.1,0.1
+            pos_hint: {"center_x": 0.6, "center_y": 0.83}
             text: '-'
             font_size: 30
             on_press: root.incrementActive(-1)
