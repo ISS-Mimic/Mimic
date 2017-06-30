@@ -373,6 +373,9 @@ class EPS_Screen(Screen, EventDispatcher):
 class CT_Screen(Screen, EventDispatcher):
     pass
 
+class EVA_Screen(Screen, EventDispatcher):
+    pass
+    
 class TCS_Screen(Screen, EventDispatcher):
     pass
 
@@ -411,6 +414,7 @@ class MainApp(App):
         self.tcs_screen = TCS_Screen(name = 'tcs')
         self.crew_screen = Crew_Screen(name = 'crew')
         self.settings_screen = Settings_Screen(name = 'settings')
+        self.eva_screen = EVA_Screen(name='eva')
 
         root = MainScreenManager(transition=WipeTransition())
         #root.add_widget(MainScreen(name = 'main'))
@@ -421,6 +425,7 @@ class MainApp(App):
         root.add_widget(self.orbit_screen)
         root.add_widget(self.eps_screen)
         root.add_widget(self.ct_screen)
+        root.add_widget(self.eva_screen)
         root.add_widget(self.tcs_screen)
         root.add_widget(self.crew_screen)
         root.add_widget(self.settings_screen)
@@ -926,6 +931,7 @@ ScreenManager:
     EPS_Screen:
     CT_Screen:
     TCS_Screen:
+    EVA_Screen:
     Crew_Screen:
     ManualControlScreen:
     MimicScreen:
@@ -1258,6 +1264,39 @@ ScreenManager:
             markup: True
             color: 1,0,1
             font_size: 30
+        Button:
+            size_hint: 0.3,0.1
+            pos_hint: {"Left": 1, "Bottom": 1}
+            text: 'Return'
+            font_size: 30
+            on_release: app.root.current = 'mimic'
+<EVA_Screen>:
+    name: 'eva'
+    FloatLayout:
+        Image:
+            source: './imgs/iss2.png'
+            allow_stretch: True
+            keep_ratio: False
+        Label:
+            pos_hint: {"center_x": 0.15, "center_y": 0.8}
+            text: 'EVA Stuff'
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Label:
+            id: beta1b_label
+            pos_hint: {"center_x": 0.82, "center_y": 0.31}
+            text: 'Angle:'
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Label:
+            id: beta1b_value
+            pos_hint: {"center_x": 0.92, "center_y": 0.31}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 20
         Button:
             size_hint: 0.3,0.1
             pos_hint: {"Left": 1, "Bottom": 1}
@@ -1909,7 +1948,6 @@ ScreenManager:
             markup: True
             color: 1,1,1
             font_size: 20
-            
         Label:
             pos_hint: {"center_x": 0.87, "center_y": 0.38}
             text: 'Channel 1B'
@@ -2104,8 +2142,7 @@ ScreenManager:
             text: '0.003'
             markup: True
             color: 1,1,1
-            font_size: 20   
-            
+            font_size: 20     
         Label:
             pos_hint: {"center_x": 0.87, "center_y": 0.85}
             text: 'Channel 3B'
@@ -2154,7 +2191,6 @@ ScreenManager:
             markup: True
             color: 1,1,1
             font_size: 20
-            
         Label:
             pos_hint: {"center_x": 0.37, "center_y": 0.85}
             text: 'Channel 4A'
@@ -2292,6 +2328,12 @@ ScreenManager:
             text: 'Orbit'
             font_size: 30
             on_release: root.manager.current = 'orbit'
+        Button:
+            size_hint: 0.2,0.1
+            pos_hint: {"center_x": 0.75, "center_y": 0.5}
+            text: 'EVA'
+            font_size: 30
+            on_release: root.manager.current = 'eva'
         Button:
             size_hint: 0.2,0.1
             pos_hint: {"center_x": 0.37, "center_y": 0.9}
