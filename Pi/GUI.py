@@ -1,6 +1,5 @@
 import kivy
 import urllib2
-from neopixel import *
 from bs4 import BeautifulSoup
 from calendar import timegm
 import datetime
@@ -1098,7 +1097,7 @@ ScreenManager:
     FloatLayout:
         Image:
             id: MCbackground
-            source: './imgs/iss_calibrate.png'
+            source: './imgs/MIMICstation_stretched.png'
             allow_stretch: True
             keep_ratio: False
         Button:
@@ -1108,7 +1107,7 @@ ScreenManager:
             font_size: 30
             opacity: 0.0
             on_press: root.setActive("Beta4B")
-            on_press: MCbackground.source = './imgs/MIMICstationGlowFile4B.png'
+            on_press: MCbackground.source = './imgs/1MIMICstationGlowFile4B.png'
         Button:
             id: Beta2A_Button
             size_hint: 0.12,0.4
@@ -1116,7 +1115,7 @@ ScreenManager:
             font_size: 30
             opacity: 0.0
             on_press: root.setActive("Beta2A")
-            on_press: MCbackground.source = './imgs/MIMICstationGlowFile2A.png'
+            on_press: MCbackground.source = './imgs/1MIMICstationGlowFile2A.png'
         Button:
             id: Beta3A_Button
             size_hint: 0.12,0.4
@@ -1124,7 +1123,7 @@ ScreenManager:
             font_size: 30
             opacity: 0.0
             on_press: root.setActive("Beta3A")
-            on_press: MCbackground.source = './imgs/MIMICstationGlowFile3A.png'
+            on_press: MCbackground.source = './imgs/1MIMICstationGlowFile3A.png'
         Button:
             id: Beta1B_Button
             size_hint: 0.12,0.4
@@ -1132,7 +1131,7 @@ ScreenManager:
             font_size: 30
             opacity: 0.0
             on_press: root.setActive("Beta1B")
-            on_press: MCbackground.source = './imgs/MIMICstationGlowFile1B.png'
+            on_press: MCbackground.source = './imgs/1MIMICstationGlowFile1B.png'
         Button:
             id: Beta2B_Button
             size_hint: 0.12,0.4
@@ -1140,7 +1139,7 @@ ScreenManager:
             font_size: 30
             opacity: 0.0
             on_press: root.setActive("Beta2B")
-            on_press: MCbackground.source = './imgs/MIMICstationGlowFile2B.png'
+            on_press: MCbackground.source = './imgs/1MIMICstationGlowFile2B.png'
         Button:
             id: Beta4A_Button
             size_hint: 0.12,0.4
@@ -1148,7 +1147,7 @@ ScreenManager:
             font_size: 30
             opacity: 0.0
             on_press: root.setActive("Beta4A")
-            on_press: MCbackground.source = './imgs/MIMICstationGlowFile4A.png'
+            on_press: MCbackground.source = './imgs/1MIMICstationGlowFile4A.png'
         Button:
             id: Beta1A_Button
             size_hint: 0.12,0.4
@@ -1156,7 +1155,7 @@ ScreenManager:
             font_size: 30
             opacity: 0.0
             on_press: root.setActive("Beta1A")
-            on_press: MCbackground.source = './imgs/MIMICstationGlowFile1A.png'
+            on_press: MCbackground.source = './imgs/1MIMICstationGlowFile1A.png'
         Button:
             id: Beta3B_Button
             size_hint: 0.12,0.4
@@ -1164,7 +1163,7 @@ ScreenManager:
             font_size: 30
             opacity: 0.0
             on_press: root.setActive("Beta3B")
-            on_press: MCbackground.source = './imgs/MIMICstationGlowFile3B.png'
+            on_press: MCbackground.source = './imgs/1MIMICstationGlowFile3B.png'
         Button:
             id: PTRRJ_Button
             size_hint: 0.12,0.3
@@ -1172,7 +1171,7 @@ ScreenManager:
             font_size: 30
             opacity: 0.0
             on_press: root.setActive("PTRRJ")
-            on_press: MCbackground.source = './imgs/MIMICstationGlowFilePortTRRJ.png'
+            on_press: MCbackground.source = './imgs/1MIMICstationGlowFilePortTRRJ.png'
         Button:
             id: STRRJ_Button
             size_hint: 0.12,0.3
@@ -1180,7 +1179,7 @@ ScreenManager:
             font_size: 30
             opacity: 0.0
             on_press: root.setActive("STRRJ")
-            on_press: MCbackground.source = './imgs/MIMICstationGlowFileStbdTRRJ.png'
+            on_press: MCbackground.source = './imgs/1MIMICstationGlowFileStbdTRRJ.png'
         Button:
             id: PSARJ_Button
             size_hint: 0.25,0.08
@@ -1188,7 +1187,7 @@ ScreenManager:
             font_size: 30
             opacity: 0.0
             on_press: root.setActive("PSARJ")
-            on_press: MCbackground.source = './imgs/MIMICstationGlowFilePortSARJ.png'
+            on_press: MCbackground.source = './imgs/1MIMICstationGlowFilePortSARJ.png'
         Button:
             id: SSARJ_Button
             size_hint: 0.25,0.08
@@ -1196,7 +1195,7 @@ ScreenManager:
             font_size: 30
             opacity: 0.0
             on_press: root.setActive("SSARJ")
-            on_press: MCbackground.source = './imgs/MIMICstationGlowFileStbdSARJ.png'
+            on_press: MCbackground.source = './imgs/1MIMICstationGlowFileStbdSARJ.png'
         Button:
             size_hint: 0.1,0.1
             pos_hint: {"center_x": 0.4, "center_y": 0.83}
