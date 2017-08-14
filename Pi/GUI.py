@@ -348,7 +348,7 @@ class ManualControlScreen(Screen):
     
     def serialWrite(self, *args):
         print args
-        #ser.write(*args)
+        ser.write(*args)
 
 class FakeOrbitScreen(Screen):
     def serialWrite(self, *args):
@@ -477,12 +477,12 @@ class MainApp(App):
     def serialWrite(self, *args):
         ser.write(*args)
         #try:
-            #ser.write(*args)
+        #   ser.write(*args)
         #except:
-        #    errorlog.write(str(datetime.datetime.utcnow()))
-        #    errorlog.write(' ')
-        #    errorlog.write("Attempted write - no serial device connected")
-        #    errorlog.write('\n')
+        #   errorlog.write(str(datetime.datetime.utcnow()))
+        #   errorlog.write(' ')
+        #   errorlog.write("Attempted write - no serial device connected")
+        #   errorlog.write('\n')
 
     def changeColors(self, *args):   #this function sets all labels on mimic screen to a certain color based on signal status
         self.eps_screen.ids.psarj_value.color = args[0],args[1],args[2]
@@ -876,6 +876,7 @@ class MainApp(App):
         self.eps_screen.ids.v4a_value.text = v4a
         self.eps_screen.ids.c4b_value.text = c4b
         self.eps_screen.ids.v4b_value.text = v4b
+        self.eva_screen.ids.crewlockpressure_value.text = crewlockpres
         self.mimic_screen.ids.difference.text = str(difference)
         self.mimic_screen.ids.altitude_value.text = str(altitude) + " km"
         self.mimic_screen.ids.velocity_value.text = str(velocity) + " m/s"
@@ -1203,12 +1204,14 @@ ScreenManager:
             on_press: root.setActive("SSARJ")
             on_press: MCbackground.source = './imgs/1MIMICstationGlowFileStbdSARJ.png'
         Button:
+            disabled: False
             size_hint: 0.1,0.1
             pos_hint: {"center_x": 0.4, "center_y": 0.83}
             text: '+'
             font_size: 30
             on_press: root.incrementActive(1)
         Button:
+            disabled: False
             size_hint: 0.1,0.1
             pos_hint: {"center_x": 0.6, "center_y": 0.83}
             text: '-'
@@ -1254,7 +1257,7 @@ ScreenManager:
     name: 'ct'
     FloatLayout:
         Image:
-            source: './imgs/iss2.png'
+            ##source: './imgs/iss2.png'
             allow_stretch: True
             keep_ratio: False
         Label:
@@ -1273,7 +1276,7 @@ ScreenManager:
     name: 'eva'
     FloatLayout:
         Image:
-            source: './imgs/iss2.png'
+            ##source: './imgs/iss2.png'
             allow_stretch: True
             keep_ratio: False
         Label:
@@ -1283,16 +1286,16 @@ ScreenManager:
             color: 1,0,1
             font_size: 30
         Label:
-            id: beta1b_label
-            pos_hint: {"center_x": 0.82, "center_y": 0.31}
-            text: 'Angle:'
+            id: crewlockpressure_label
+            pos_hint: {"center_x": 0.92, "center_y": 0.45}
+            text: 'Crewlock Pressure:'
             markup: True
             color: 1,1,1
             font_size: 20
         Label:
-            id: beta1b_value
+            id: crewlockpressure_value
             pos_hint: {"center_x": 0.92, "center_y": 0.31}
-            text: '0.003'
+            text: '0.00'
             markup: True
             color: 1,1,1
             font_size: 20
@@ -1306,7 +1309,7 @@ ScreenManager:
     name: 'orbit'
     FloatLayout:
         Image:
-            source: './imgs/iss2.png'
+            ##source: './imgs/iss2.png'
             allow_stretch: True
             keep_ratio: False
         Label:
@@ -1325,7 +1328,7 @@ ScreenManager:
     name: 'tcs'
     FloatLayout:
         Image:
-            source: './imgs/iss2.png'
+            ##source: './imgs/iss2.png'
             allow_stretch: True
             keep_ratio: False
         Label:
@@ -1372,7 +1375,7 @@ ScreenManager:
     name: 'crew'
     FloatLayout:
         Image:
-            source: './imgs/iss1.png'
+            ##source: './imgs/iss1.png'
             allow_stretch: True
             keep_ratio: False
         Button:
@@ -1861,7 +1864,7 @@ ScreenManager:
     name: 'eps'
     FloatLayout:
         Image:
-            source: './imgs/iss1.png'
+            #source: './imgs/iss1.png'
             allow_stretch: True
             keep_ratio: False
         Button:
@@ -2299,7 +2302,7 @@ ScreenManager:
     FloatLayout:
         id: mimicscreenlayout
         Image:
-            source: './imgs/iss_photo1.jpg'
+            #source: './imgs/iss_photo1.jpg'
             allow_stretch: True
             keep_ratio: False
         Label:
@@ -2329,7 +2332,7 @@ ScreenManager:
             on_release: root.manager.current = 'orbit'
         Button:
             size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.75, "center_y": 0.5}
+            pos_hint: {"center_x": 0.85, "center_y": 0.25}
             text: 'EVA'
             font_size: 30
             on_release: root.manager.current = 'eva'
