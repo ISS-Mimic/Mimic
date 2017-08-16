@@ -1,0 +1,31 @@
+#:kivy 1.8
+#:import kivy kivy
+#:import win kivy.core.window
+<CalibrateScreen>:
+    name: 'calibrate'
+    FloatLayout:
+        orientation: 'vertical'
+        Image:
+            source: './imgs/iss_calibrate.png'
+            allow_stretch: False
+            keep_ratio: False
+        Label:
+            pos_hint: {"center_x": 0.5, "center_y": 0.95}
+            id: calibratestatus
+            text: 'Calibrate ISS Angles'
+            color: 0,0,0,1
+            font_size: 40
+        Button:
+            id: zerobutton
+            size_hint: 0.4,0.1
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            text: 'Zero All Angles'
+            font_size: 30
+            on_press: root.zeroJoints()
+            on_release: calibratestatus.text = 'Angles Zero-ing!'
+        Button:
+            size_hint: 0.3,0.1
+            pos_hint: {"center_x": 0.5, "Bottom": 1}
+            text: 'Return'
+            font_size: 30
+            on_release: root.manager.current = 'main'

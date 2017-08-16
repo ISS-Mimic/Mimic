@@ -1,0 +1,491 @@
+#:kivy 1.8
+#:import kivy kivy
+#:import win kivy.core.window
+<Crew_Screen>:
+    name: 'crew'
+    FloatLayout:
+        Image:
+            ##source: './imgs/iss1.png'
+            allow_stretch: True
+            keep_ratio: False
+        Button:
+            size_hint: 0.3,0.1
+            pos_hint: {"Left": 1, "Bottom": 1}
+            text: 'Return'
+            font_size: 30
+            on_release: app.root.current = 'mimic'
+##-----------------------------------------------------------CREW1-------------------------------------------------------------
+        Label:
+            canvas.before:
+                Color:
+                    rgb: 0,0,0,0.1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            id: crew1
+            size: self.texture_size
+            pos_hint: {"center_x": 0.13, "center_y": 0.95}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 25
+        Label:
+            id: crew1title
+            pos_hint: {"center_x": 0.13, "center_y": 0.88}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Label:
+            id: crew1country
+            pos_hint: {"center_x": 0.13, "center_y": 0.81}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+            #text_size: cm(8), cm(5)
+        Label:
+            id: crew1daysonISS
+            pos_hint: {"center_x": 0.13, "center_y": 0.74}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+            #text_size: cm(8), cm(5)
+##-----------------------------------------------------------CREW2-------------------------------------------------------------
+        Label:
+            id: crew2
+            pos_hint: {"center_x": 0.13, "center_y": 0.67}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 25
+        Label:
+            id: crew2title
+            pos_hint: {"center_x": 0.13, "center_y": 0.60}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Label:
+            id: crew2country
+            pos_hint: {"center_x": 0.13, "center_y": 0.53}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+            #text_size: cm(8), cm(5)
+        Label:
+            id: crew2daysonISS
+            pos_hint: {"center_x": 0.13, "center_y": 0.46}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+            #text_size: cm(8), cm(5)
+##-----------------------------------------------------------CREW3-------------------------------------------------------------
+        Label:
+            id: crew3
+            pos_hint: {"center_x": 0.13, "center_y": 0.39}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 25
+        Label:
+            id: crew3title
+            pos_hint: {"center_x": 0.13, "center_y": 0.32}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Label:
+            id: crew3country
+            pos_hint: {"center_x": 0.13, "center_y": 0.25}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+            #text_size: cm(8), cm(5)
+        Label:
+            id: crew3daysonISS
+            pos_hint: {"center_x": 0.13, "center_y": 0.18}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+            #text_size: cm(8), cm(5)
+##-----------------------------------------------------------CREW4-------------------------------------------------------------
+        Label:
+            id: crew4
+            pos_hint: {"center_x": 0.4, "center_y": 0.95}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 25
+        Label:
+            id: crew4title
+            pos_hint: {"center_x": 0.4, "center_y": 0.88}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Label:
+            id: crew4country
+            pos_hint: {"center_x": 0.4, "center_y": 0.81}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+            #text_size: cm(8), cm(5)
+        Label:
+            id: crew4daysonISS
+            pos_hint: {"center_x": 0.4, "center_y": 0.74}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+            #text_size: cm(8), cm(5)
+##-----------------------------------------------------------CREW5-------------------------------------------------------------
+        Label:
+            id: crew5
+            pos_hint: {"center_x": 0.4, "center_y": 0.67}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 25
+        Label:
+            id: crew5title
+            pos_hint: {"center_x": 0.4, "center_y": 0.60}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Label:
+            id: crew5country
+            pos_hint: {"center_x": 0.4, "center_y": 0.53}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+            #text_size: cm(8), cm(5)
+        Label:
+            id: crew5daysonISS
+            pos_hint: {"center_x": 0.4, "center_y": 0.46}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+            #text_size: cm(8), cm(5)
+##-----------------------------------------------------------CREW6-------------------------------------------------------------
+        Label:
+            id: crew6
+            pos_hint: {"center_x": 0.4, "center_y": 0.39}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 25
+        Label:
+            id: crew6title
+            pos_hint: {"center_x": 0.4, "center_y": 0.32}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Label:
+            id: crew6country
+            pos_hint: {"center_x": 0.4, "center_y": 0.25}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+            #text_size: cm(8), cm(5)
+        Label:
+            id: crew6daysonISS
+            pos_hint: {"center_x": 0.4, "center_y": 0.18}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+            #text_size: cm(8), cm(5)
+##-----------------------------------------------------------CREW7-------------------------------------------------------------
+        Label:
+            id: crew7
+            pos_hint: {"center_x": 0.7, "center_y": 0.95}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 25
+        Label:
+            id: crew7title
+            pos_hint: {"center_x": 0.7, "center_y": 0.88}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Label:
+            id: crew7country
+            pos_hint: {"center_x": 0.7, "center_y": 0.81}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+            #text_size: cm(8), cm(5)
+        Label:
+            id: crew7daysonISS
+            pos_hint: {"center_x": 0.7, "center_y": 0.74}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+            #text_size: cm(8), cm(5)
+##-----------------------------------------------------------CREW8-------------------------------------------------------------
+        Label:
+            id: crew8
+            pos_hint: {"center_x": 0.7, "center_y": 0.67}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 25
+        Label:
+            id: crew8title
+            pos_hint: {"center_x": 0.7, "center_y": 0.60}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Label:
+            id: crew8country
+            pos_hint: {"center_x": 0.7, "center_y": 0.53}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+            #text_size: cm(8), cm(5)
+        Label:
+            id: crew8daysonISS
+            pos_hint: {"center_x": 0.7, "center_y": 0.46}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+            #text_size: cm(8), cm(5)
+##-----------------------------------------------------------CREW9-------------------------------------------------------------
+        Label:
+            id: crew9
+            pos_hint: {"center_x": 0.7, "center_y": 0.39}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 25
+        Label:
+            id: crew9title
+            pos_hint: {"center_x": 0.7, "center_y": 0.31}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Label:
+            id: crew9country
+            pos_hint: {"center_x": 0.7, "center_y": 0.25}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+            #text_size: cm(8), cm(5)
+        Label:
+            id: crew9daysonISS
+            pos_hint: {"center_x": 0.7, "center_y": 0.18}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+            #text_size: cm(8), cm(5)
+##-----------------------------------------------------------CREW10-------------------------------------------------------------
+        Label:
+            id: crew10
+            pos_hint: {"center_x": 0.85, "center_y": 0.95}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 25
+        Label:
+            id: crew10title
+            pos_hint: {"center_x": 0.85, "center_y": 0.88}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Label:
+            id: crew10country
+            pos_hint: {"center_x": 0.85, "center_y": 0.81}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+            #text_size: cm(8), cm(5)
+        Label:
+            id: crew10daysonISS
+            pos_hint: {"center_x": 0.85, "center_y": 0.74}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+            #text_size: cm(8), cm(5)
+##-----------------------------------------------------------CREW11-------------------------------------------------------------
+        Label:
+            id: crew11
+            pos_hint: {"center_x": 0.85, "center_y": 0.67}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 25
+        Label:
+            id: crew11title
+            pos_hint: {"center_x": 0.85, "center_y": 0.60}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Label:
+            id: crew11country
+            pos_hint: {"center_x": 0.85, "center_y": 0.53}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+            #text_size: cm(8), cm(5)
+        Label:
+            id: crew11daysonISS
+            pos_hint: {"center_x": 0.85, "center_y": 0.46}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+            #text_size: cm(8), cm(5)
+##-----------------------------------------------------------CREW12-------------------------------------------------------------
+        Label:
+            id: crew12
+            pos_hint: {"center_x": 0.85, "center_y": 0.39}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 25
+        Label:
+            id: crew12title
+            pos_hint: {"center_x": 0.85, "center_y": 0.32}
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Label:
+            id: crew12country
+            pos_hint: {"center_x": 0.85, "center_y": 0.25}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+            #text_size: cm(8), cm(5)
+        Label:
+            id: crew12daysonISS
+            pos_hint: {"center_x": 0.85, "center_y": 0.18}
+            markup: True
+            halign: 'center'
+            valign: 'middle'
+            text: ''
+            color: 1,1,1
+            font_size: 18
+            #text_size: cm(8), cm(5)

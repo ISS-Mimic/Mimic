@@ -1,0 +1,26 @@
+#:kivy 1.8
+#:import kivy kivy
+#:import win kivy.core.window
+
+<Settings_Screen>:
+    name: 'settings'
+    FloatLayout:
+        orientation: 'vertical'
+        Image:
+            source: './imgs/iss.png'
+            allow_stretch: True
+            keep_ratio: True
+        Label:
+            text: 'Settings'
+            bold: True
+            font_size: 120
+            markup: True
+            height: "20dp"
+            color: 1,0,1
+            width: "100dp"
+        Button:
+            size_hint: 0.3,0.1
+            pos_hint: {"Left": 1, "Bottom": 1}
+            text: 'Return'
+            font_size: 30
+            on_release: root.manager.current = 'main'

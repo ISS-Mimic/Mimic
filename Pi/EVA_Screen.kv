@@ -1,0 +1,45 @@
+#:kivy 1.8
+#:import kivy kivy
+#:import win kivy.core.window
+<EVA_Screen>:
+    name: 'eva'
+    FloatLayout:
+        Image:
+            ##source: './imgs/iss2.png'
+            allow_stretch: True
+            keep_ratio: False
+        Label:
+            pos_hint: {"center_x": 0.15, "center_y": 0.8}
+            text: 'EVA Stuff'
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Label:
+            id: crewlockpressure_label
+            pos_hint: {"center_x": 0.5, "center_y": 0.45}
+            text: 'Crewlock Pressure:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: crewlockpressure_value
+            pos_hint: {"center_x": 0.5, "center_y": 0.31}
+            text: '0.00'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: EVAstatus
+            pos_hint: {"center_x": 0.5, "center_y": 0.8}
+            size_hint: 0.4,0.4
+            text: ''
+            text_size: self.width, None
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Button:
+            size_hint: 0.3,0.1
+            pos_hint: {"Left": 1, "Bottom": 1}
+            text: 'Return'
+            font_size: 30
+            on_release: app.root.current = 'mimic'

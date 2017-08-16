@@ -1,0 +1,50 @@
+#:kivy 1.8
+#:import kivy kivy
+#:import win kivy.core.window
+<TCS_Screen>:
+    name: 'tcs'
+    FloatLayout:
+        Image:
+            ##source: './imgs/iss2.png'
+            allow_stretch: True
+            keep_ratio: False
+        Label:
+            pos_hint: {"center_x": 0.15, "center_y": 0.8}
+            text: 'TCS Stuff'
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Label:
+            id: ptrrj_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.78}
+            text: 'PTRRJ:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: ptrrj_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.78}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: strrj_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.71}
+            text: 'STRRJ:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: strrj_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.71}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Button:
+            size_hint: 0.3,0.1
+            pos_hint: {"Left": 1, "Bottom": 1}
+            text: 'Return'
+            font_size: 30
+            on_release: app.root.current = 'mimic'

@@ -1,0 +1,128 @@
+#:kivy 1.8
+#:import kivy kivy
+#:import win kivy.core.window
+<ManualControlScreen>:
+    name: 'manualcontrol'
+    FloatLayout:
+        Image:
+            id: MCbackground
+            source: './imgs/MIMICstation_stretched.png'
+            allow_stretch: True
+            keep_ratio: False
+        Button:
+            id: Beta4B_Button
+            size_hint: 0.12,0.4
+            pos_hint: {"center_x": 0.0875, "center_y": 0.26}
+            font_size: 30
+            opacity: 0.0
+            on_press: root.setActive("Beta4B")
+            on_press: MCbackground.source = './imgs/1MIMICstationGlowFile4B.png'
+        Button:
+            id: Beta2A_Button
+            size_hint: 0.12,0.4
+            pos_hint: {"center_x": 0.217, "center_y": 0.26}
+            font_size: 30
+            opacity: 0.0
+            on_press: root.setActive("Beta2A")
+            on_press: MCbackground.source = './imgs/1MIMICstationGlowFile2A.png'
+        Button:
+            id: Beta3A_Button
+            size_hint: 0.12,0.4
+            pos_hint: {"center_x": 0.7925, "center_y": 0.26}
+            font_size: 30
+            opacity: 0.0
+            on_press: root.setActive("Beta3A")
+            on_press: MCbackground.source = './imgs/1MIMICstationGlowFile3A.png'
+        Button:
+            id: Beta1B_Button
+            size_hint: 0.12,0.4
+            pos_hint: {"center_x": 0.922, "center_y": 0.26}
+            font_size: 30
+            opacity: 0.0
+            on_press: root.setActive("Beta1B")
+            on_press: MCbackground.source = './imgs/1MIMICstationGlowFile1B.png'
+        Button:
+            id: Beta2B_Button
+            size_hint: 0.12,0.4
+            pos_hint: {"center_x": 0.0975, "center_y": 0.742}
+            font_size: 30
+            opacity: 0.0
+            on_press: root.setActive("Beta2B")
+            on_press: MCbackground.source = './imgs/1MIMICstationGlowFile2B.png'
+        Button:
+            id: Beta4A_Button
+            size_hint: 0.12,0.4
+            pos_hint: {"center_x": 0.227, "center_y": 0.742}
+            font_size: 30
+            opacity: 0.0
+            on_press: root.setActive("Beta4A")
+            on_press: MCbackground.source = './imgs/1MIMICstationGlowFile4A.png'
+        Button:
+            id: Beta1A_Button
+            size_hint: 0.12,0.4
+            pos_hint: {"center_x": 0.7825, "center_y": 0.742}
+            font_size: 30
+            opacity: 0.0
+            on_press: root.setActive("Beta1A")
+            on_press: MCbackground.source = './imgs/1MIMICstationGlowFile1A.png'
+        Button:
+            id: Beta3B_Button
+            size_hint: 0.12,0.4
+            pos_hint: {"center_x": 0.912, "center_y": 0.742}
+            font_size: 30
+            opacity: 0.0
+            on_press: root.setActive("Beta3B")
+            on_press: MCbackground.source = './imgs/1MIMICstationGlowFile3B.png'
+        Button:
+            id: PTRRJ_Button
+            size_hint: 0.12,0.3
+            pos_hint: {"center_x": 0.36, "center_y": 0.33}
+            font_size: 30
+            opacity: 0.0
+            on_press: root.setActive("PTRRJ")
+            on_press: MCbackground.source = './imgs/1MIMICstationGlowFilePortTRRJ.png'
+        Button:
+            id: STRRJ_Button
+            size_hint: 0.12,0.3
+            pos_hint: {"center_x": 0.65, "center_y": 0.33}
+            font_size: 30
+            opacity: 0.0
+            on_press: root.setActive("STRRJ")
+            on_press: MCbackground.source = './imgs/1MIMICstationGlowFileStbdTRRJ.png'
+        Button:
+            id: PSARJ_Button
+            size_hint: 0.25,0.08
+            pos_hint: {"center_x": 0.18, "center_y": 0.5}
+            font_size: 30
+            opacity: 0.0
+            on_press: root.setActive("PSARJ")
+            on_press: MCbackground.source = './imgs/1MIMICstationGlowFilePortSARJ.png'
+        Button:
+            id: SSARJ_Button
+            size_hint: 0.25,0.08
+            pos_hint: {"center_x": 0.83, "center_y": 0.5}
+            font_size: 30
+            opacity: 0.0
+            on_press: root.setActive("SSARJ")
+            on_press: MCbackground.source = './imgs/1MIMICstationGlowFileStbdSARJ.png'
+        Button:
+            disabled: False
+            size_hint: 0.1,0.1
+            pos_hint: {"center_x": 0.4, "center_y": 0.83}
+            text: '+'
+            font_size: 30
+            on_press: root.incrementActive(1)
+        Button:
+            disabled: False
+            size_hint: 0.1,0.1
+            pos_hint: {"center_x": 0.6, "center_y": 0.83}
+            text: '-'
+            font_size: 30
+            on_press: root.incrementActive(-1)
+        Button:
+            size_hint: 0.3,0.1
+            pos_hint: {"center_x": 0.5, "Bottom": 1}
+            text: 'Return'
+            font_size: 30
+            on_press: root.changeBoolean(False)
+            on_release: root.manager.current = 'main'

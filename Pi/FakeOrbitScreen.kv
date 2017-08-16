@@ -1,0 +1,75 @@
+#:kivy 1.8
+#:import kivy kivy
+#:import win kivy.core.window
+<FakeOrbitScreen>:
+    name: 'fakeorbit'
+    FloatLayout:
+        orientation: 'vertical'
+        Image:
+            source: './imgs/iss2.png'
+            allow_stretch: True
+            keep_ratio: True
+        Label:
+            id: fakeorbitstatus
+            pos_hint: {"center_x": 0.25, "center_y": 0.85}
+            text: 'Status'
+            markup: True
+            color: 1,0,1
+            font_size: 60
+        Label:
+            id: fakepsarj_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.5}
+            text: 'PSARJ:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: fakepsarj_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.5}
+            text: '0.000'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: fakessarj_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.35}
+            text: 'SSARJ:'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Label:
+            id: fakessarj_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.35}
+            text: '0.000'
+            markup: True
+            color: 1,1,1
+            font_size: 30
+        Button:
+            id: orbitstartbutton
+            size_hint: 0.25,0.1
+            pos_hint: {"x": 0.07, "y": 0.6}
+            text: 'Start'
+            disabled: False
+            font_size: 30
+            on_release: fakeorbitstatus.text = 'Sending...'
+            on_release: root.changeBoolean(True)
+            on_release: orbitstopbutton.disabled = False
+            on_release: orbitstartbutton.disabled = True
+        Button:
+            id: orbitstopbutton
+            size_hint: 0.25,0.1
+            pos_hint: {"x": 0.07, "y": 0.4}
+            text: 'Stop'
+            disabled: True
+            font_size: 30
+            on_release: fakeorbitstatus.text = 'Stopped'
+            on_release: root.changeBoolean(False)
+            on_release: orbitstopbutton.disabled = True
+            on_release: orbitstartbutton.disabled = False
+        Button:
+            size_hint: 0.3,0.1
+            pos_hint: {"Left": 1, "Bottom": 1}
+            text: 'Return'
+            font_size: 30
+            on_release: root.changeBoolean(False)
+            on_release: root.manager.current = 'main'
