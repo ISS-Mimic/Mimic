@@ -466,17 +466,14 @@ class MainApp(App):
 
     def checkTwitter(self, dt):
         global latest_tweet
-        stuff = api.user_timeline(screen_name = 'iss101', count = 1, include_rts = True)
+        stuff = api.user_timeline(screen_name = 'iss101', count = 1, include_rts = True, tweet_mode = 'extended')
         for status in stuff:
-             latest_tweet = status.text
+             latest_tweet = status.full_text
         emoji_pattern = re.compile("["
-                 u"\U0001F600-\U0001F64F"  # emoticons
-                 u"\U0001F300-\U0001F5FF"  # symbols & pictographs
-                 u"\U0001F680-\U0001F6FF"  # transport & map symbols
-                 u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
+                 u"\U0000007F-\U0001F1FF"  # emoticons
                                 "]+", flags=re.UNICODE)
         #print(emoji_pattern.sub(r'', text)) # no emoji
-        self.eva_screen.ids.EVAstatus.text = emoji_pattern.sub(r'', latest_tweet) #cleanse the emojis!!
+        self.eva_screen.ids.EVAstatus.text = str(emoji_pattern.sub(r'?', latest_tweet)) #cleanse the emojis!!
 
     def animate(self, instance):
         global new_x2
@@ -911,7 +908,6 @@ class MainApp(App):
         self.eps_screen.ids.c4b_value.text = c4b
         self.eps_screen.ids.v4b_value.text = v4b
         self.eva_screen.ids.crewlockpressure_value.text = crewlockpres
-        self.mimic_screen.ids.difference.text = str(difference)
         self.mimic_screen.ids.altitude_value.text = str(altitude) + " km"
         self.mimic_screen.ids.velocity_value.text = str(velocity) + " m/s"
         self.mimic_screen.ids.stationmass_value.text = str(iss_mass) + " kg"
@@ -983,7 +979,17 @@ ScreenManager:
     Crew_Screen:
     ManualControlScreen:
     MimicScreen:
-    CalibrateScreen:     
+    CalibrateScreen:
+
+<RotatedImage>:
+    canvas.before:
+        PushMatrix
+        Rotate:
+            angle: root.angle
+            axis: 0,0,1
+            origin: root.center
+    canvas.after:
+        PopMatrix
 ''')
 
 if __name__ == '__main__':

@@ -37,6 +37,14 @@
             size_hint: 0.1,0.15
             pos_hint: {"center_x": 0.9, "center_y": 0.3}
             background_normal: './imgs/Settings_Icon.png'
+            canvas.before:
+                PushMatrix
+                Rotate:
+                    angle: 0
+                    axis: 0,0,1
+                    origin: self.center
+            canvas.after:
+                PopMatrix
             text: ''
             on_release: root.manager.current = 'settings'
         BoxLayout:

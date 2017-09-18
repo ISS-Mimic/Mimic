@@ -3,18 +3,8 @@
 #:import win kivy.core.window
 <MimicScreen>:
     name: 'mimic'
-    canvas:
-        Color:
-            rgba: 0,0,0,0.7
-        Rectangle:
-            pos: 0,0
-            size: 1000,1000
     FloatLayout:
         id: mimicscreenlayout
-        Image:
-            #source: './imgs/iss_photo1.jpg'
-            allow_stretch: True
-            keep_ratio: False
         Label:
             id: EVA_value
             pos_hint: {"center_x": 0.2, "center_y": 0.17}
@@ -64,20 +54,6 @@
             text: 'GNC'
             font_size: 30
             on_release: root.manager.current = 'tcs'
-        Label:
-            id: differencelabel
-            pos_hint: {"center_x": 0.15, "center_y": 0.22}
-            text: 'Antenna dif'
-            markup: True
-            color: 1,0,1
-            font_size: 30
-        Label:
-            id: difference
-            pos_hint: {"center_x": 0.4, "center_y": 0.22}
-            text: '0.00'
-            markup: True
-            color: 1,0,1
-            font_size: 30
         Label:
             pos_hint: {"center_x": 0.55, "center_y": 0.78}
             text: 'ISS Information'
@@ -142,14 +118,14 @@
             font_size: 30
         Label:
             id: aoslabel
-            pos_hint: {"center_x": 0.53, "center_y": 0.05}
-            text: 'Signal Status:'
+            pos_hint: {"center_x": 0.2, "center_y": 0.2}
+            text: '[u]ISS Signal Status:[/u]'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
             id: aosvalue
-            pos_hint: {"center_x": 0.8, "center_y": 0.05}
+            pos_hint: {"center_x": 0.2, "center_y": 0.1}
             text: ' '
             markup: True
             color: 1,1,1
@@ -179,7 +155,7 @@
             on_release: mimicstartbutton.disabled = False
         Button:
             size_hint: 0.2,0.1
-            pos_hint: {"Left": 1, "Bottom": 1}
+            pos_hint: {"right":1, "bottom":1}
             text: 'Return'
             font_size: 30
             on_release: root.changeMimicBoolean(False)
