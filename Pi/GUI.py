@@ -14,6 +14,7 @@ import math
 import time
 import re
 from Naked.toolshed.shell import execute_js, muterun_js
+from kivy.garden.gauge import Gauge
 import os
 import signal
 import multiprocessing, signal
@@ -188,6 +189,8 @@ crewmemberdays = ['','','','','','','','','','','','']
 crewmemberpicture = ['','','','','','','','','','','','']
 crewmembercountry = ['','','','','','','','','','','','']
 
+EVA_picture_urls = []
+urlindex = 0
 
 def StringToBytes(val):
     retVal = []
@@ -392,7 +395,7 @@ class CT_Screen(Screen, EventDispatcher):
 
 class EVA_Screen(Screen, EventDispatcher):
     pass
-    
+
 class TCS_Screen(Screen, EventDispatcher):
     pass
 
@@ -450,11 +453,13 @@ class MainApp(App):
         root.current = 'main'
 
         Clock.schedule_interval(self.update_labels, 1)
+        Clock.schedule_interval(self.deleteURLPictures, 86400)
         Clock.schedule_interval(self.animate3,0.1)
         Clock.schedule_interval(self.checkAOSlong, 5)
         Clock.schedule_interval(self.checkCrew, 3600)
         Clock.schedule_once(self.checkTwitter, 1)
         Clock.schedule_interval(self.checkTwitter, 60)
+        Clock.schedule_interval(self.changePictures, 10)
         if crewjsonsuccess == False: #check crew every 10s until success then once per hour
             Clock.schedule_once(self.checkCrew, 10)
         if startup == True:
@@ -464,14 +469,31 @@ class MainApp(App):
         #Clock.schedule_interval(self.getTLE, 3600)
         return root
 
+    def deleteURLPictures(self, dt):
+        global EVA_picture_urls
+        del EVA_picture_urls[:]
+
+    def changePictures(self, dt):
+        global EVA_picture_urls
+        global urlindex
+        urlsize = len(EVA_picture_urls)
+        self.eva_screen.ids.EVAimage.source = EVA_picture_urls[urlindex]
+        urlindex = urlindex + 1
+        if urlindex > urlsize-1:
+            urlindex = 0
+
     def checkTwitter(self, dt):
         global latest_tweet
-        stuff = api.user_timeline(screen_name = 'iss101', count = 1, include_rts = True, tweet_mode = 'extended')
+        stuff = api.user_timeline(screen_name = 'iss_mimic', count = 1, include_rts = True, tweet_mode = 'extended')
         for status in stuff:
-             latest_tweet = status.full_text
-        emoji_pattern = re.compile("["
-                 u"\U0000007F-\U0001F1FF"  # emoticons
-                                "]+", flags=re.UNICODE)
+            latest_tweet = status.full_text
+            if u'extended_entities' in status._json:
+                if u'media' in status._json[u'extended_entities']:
+                    for pic in status._json[u'extended_entities'][u'media']:
+                        EVA_picture_urls.append(str(pic[u'media_url']))
+                        #print pic[u'media_url']
+
+        emoji_pattern = re.compile("["u"\U0000007F-\U0001F1FF""]+", flags=re.UNICODE)
         #print(emoji_pattern.sub(r'', text)) # no emoji
         self.eva_screen.ids.EVAstatus.text = str(emoji_pattern.sub(r'?', latest_tweet)) #cleanse the emojis!!
 

@@ -15,10 +15,12 @@ access_secret = "Lu47Nu4eQrtQI1vmKUIMWTQ419CmEXSZPVAyHb8vFJbTu"
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_key, access_secret)
 api = tweepy.API(auth)
-stuff = api.user_timeline(screen_name = 'iss101', count = 10, include_rts = True, tweet_mode = 'extended')
+stuff = api.user_timeline(screen_name = 'iss_mimic', count = 1, include_rts = True, tweet_mode = 'extended')
+#stuff = api.get_status(909345339391561729)
 
 for status in stuff:
     print "----------"
+    print status.id
     #print status
     #print json.dumps(status._json, sort_keys=True, indent=4, separators=(',', ': '))
     if u'extended_entities' in status._json:
