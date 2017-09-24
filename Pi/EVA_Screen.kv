@@ -4,12 +4,12 @@
 <EVA_Screen>:
     name: 'eva'
     FloatLayout:
-        Gauge
-            id: EVAgauge
-            value: 50
-            size_gauge: 100
-            size_text: 20
-            pos_hint: {"x": 0.1, "y": 0.2}
+        ##Gauge
+            ##id: EVAgauge
+            ##value: 50
+            ##size_gauge: 100
+            ##size_text: 20
+            ##pos_hint: {"x": 0.1, "y": 0.2}
         AsyncImage:
             id: EVAimage
             source: "http://pbs.twimg.com/media/DJm3BvbXkAAuMzp.jpg"
@@ -17,36 +17,36 @@
             pos_hint: {"center_x": 0.8, "center_y": 0.5}
         Button:
             id: EVAimage_button
-            size_hint: 0.4,0.4
-            pos_hint: {"center_x": 0.8, "center_y": 0.5}
+            size_hint: 0.35,0.35
+            pos_hint: {"center_x": 0.8, "center_y": 0.25}
             font_size: 30
             opacity: 0.0
             on_release: app.root.current = 'eva_pictures'
         Label:
             id: crewlockpressure_label
-            pos_hint: {"center_x": 0.8, "center_y": 0.25}
+            pos_hint: {"center_x": 0.65, "center_y": 0.8}
             text: 'Crewlock Pressure:'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
             id: crewlockpressure_value
-            pos_hint: {"center_x": 0.8, "center_y": 0.1}
+            pos_hint: {"center_x": 0.65, "center_y": 0.75}
             text: '0.00'
             markup: True
             color: 1,1,1
             font_size: 30
         Label:
             id: EVAstatus
-            pos_hint: {"center_x": 0.7, "center_y": 0.8}
+            pos_hint: {"center_x": 0.65, "center_y": 0.9}
             size_hint: 0.4,0.4
-            text: ''
+            text: 'Currently No Spacewalk'
             text_size: self.width, None
             markup: True
             color: 1,1,1
             font_size: 20
         Button:
-            size_hint: 0.3,0.1
+            size_hint: 0.2,0.1
             pos_hint: {"Left": 1, "Bottom": 1}
             text: 'Return'
             font_size: 30
