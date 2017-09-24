@@ -13,8 +13,8 @@
         AsyncImage:
             id: EVAimage
             source: "http://pbs.twimg.com/media/DJm3BvbXkAAuMzp.jpg"
-            size_hint: 0.4, 0.4
-            pos_hint: {"center_x": 0.8, "center_y": 0.5}
+            size_hint: 0.35, 0.35
+            pos_hint: {"center_x": 0.8, "center_y": 0.25}
         Button:
             id: EVAimage_button
             size_hint: 0.35,0.35
@@ -37,10 +37,19 @@
             color: 1,1,1
             font_size: 30
         Label:
+            id: EVA_occuring
+            pos_hint: {"center_x": 0.25, "center_y": 0.5}
+            size_hint: 0.35,0.35
+            text: ''
+            text_size: self.width, None
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Label:
             id: EVAstatus
-            pos_hint: {"center_x": 0.65, "center_y": 0.9}
-            size_hint: 0.4,0.4
-            text: 'Currently No Spacewalk'
+            pos_hint: {"center_x": 0.55, "center_y": 0.25}
+            size_hint: 0.35,0.35
+            text: ''
             text_size: self.width, None
             markup: True
             color: 1,1,1

@@ -515,7 +515,8 @@ class MainApp(App):
                             EVA_picture_urls.append(str(pic[u'media_url']))
 
         emoji_pattern = re.compile("["u"\U0000007F-\U0001F1FF""]+", flags=re.UNICODE)
-        self.eva_screen.ids.EVAstatus.text = str(emoji_pattern.sub(r'?', latest_tweet)) #cleanse the emojis!!
+        tweet_string_no_emojis = str(emoji_pattern.sub(r'?', latest_tweet)) #cleanse the emojis!!
+        self.eva_screen.ids.EVAstatus.text = str(tweet_string_no_emojis.split("http",1)[0])
 
     def animate(self, instance):
         global new_x2
@@ -864,12 +865,12 @@ class MainApp(App):
         
         if float(crewlockpres) < 500:
             EVAinProgress = True
-            self.mimic_screen.ids.EVA_value.text = "EVA in Progress!!!"
-            self.mimic_screen.ids.EVA_value.color = 0,1,0
+            self.eva_screen.ids.EVA_occuring.text = "EVA In Progress!!!"
+            self.eva_screen.ids.EVA_occuring.color = 0,1,0
         else:
             EVAinProgress = False 
-            self.mimic_screen.ids.EVA_value.text = ""
-            self.mimic_screen.ids.EVA_value.color = 0,0,0
+            self.eva_screen.ids.EVA_occuring.text = "Currently No EVA"
+            self.eva_screen.ids.EVA_occuring.color = 1,0,0
 
 #        if (difference > -10) && (isinstance(App.get_running_app().root_window.children[0], Popup)==False):
 #            LOSpopup = Popup(title='Loss of Signal', content=Label(text='Possible LOS Soon'),size_hint=(0.3,0.2),auto_dismiss=True)
