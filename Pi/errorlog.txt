@@ -1,2 +1,4 @@
-2017-09-26 18:16:25.319979 serial connection GPIO not found
-2017-09-26 18:16:25.320230 serial connection GPIO not found
+2017-09-27 19:54:34.617867 serial connection GPIO not found
+2017-09-27 19:54:34.618123 serial connection GPIO not found
+2017-09-27 20:32:33.255308 Tweepy - Error Retrieving Tweet, make sure clock is correct
+2017-09-27 20:33:38.294504 Tweepy - Error Retrieving Tweet, make sure clock is correct

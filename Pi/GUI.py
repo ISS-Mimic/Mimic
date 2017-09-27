@@ -116,7 +116,7 @@ isscrew = 0
 conn = sqlite3.connect('iss_telemetry.db') #sqlite database call change to include directory
 c = conn.cursor() 
 val = ""
-       
+alternate = True       
 Beta4Bcontrol = False
 Beta3Bcontrol = False
 Beta2Bcontrol = False
@@ -181,7 +181,7 @@ c1a = 0.00
 c3b = 0.00
 c3a = 0.00
 
-
+latest_tweet = "test"
 crewmember = ['','','','','','','','','','','','']
 crewmemberbio = ['','','','','','','','','','','','']
 crewmembertitle = ['','','','','','','','','','','','']
@@ -465,6 +465,7 @@ class MainApp(App):
         Clock.schedule_once(self.checkTwitter, 1)
         Clock.schedule_interval(self.checkTwitter, 65)
         Clock.schedule_interval(self.changePictures, 10)
+        Clock.schedule_interval(self.flashButton, 1)
         if crewjsonsuccess == False: #check crew every 10s until success then once per hour
             Clock.schedule_once(self.checkCrew, 10)
         if startup == True:
@@ -500,7 +501,7 @@ class MainApp(App):
         except:
             errorlog.write(str(datetime.datetime.utcnow()))
             errorlog.write(' ')
-            errorlog.write("Tweepy - Error Retrieving Tweet")
+            errorlog.write("Tweepy - Error Retrieving Tweet, make sure clock is correct")
             errorlog.write('\n')
         try:
             stuff
@@ -517,6 +518,19 @@ class MainApp(App):
         emoji_pattern = re.compile("["u"\U0000007F-\U0001F1FF""]+", flags=re.UNICODE)
         tweet_string_no_emojis = str(emoji_pattern.sub(r'?', latest_tweet)) #cleanse the emojis!!
         self.eva_screen.ids.EVAstatus.text = str(tweet_string_no_emojis.split("http",1)[0])
+
+    def flashButton(self, instace): #not sure if I want to use this function not finished
+        global EVAinProgress 
+        global alternate
+        #if EVAinProgress:
+        
+        self.mimic_screen.ids.EVA_button.background_color = (0,0,1,1)
+        def reset_color(*args):
+            self.mimic_screen.ids.EVA_button.background_color = (1,1,1,1)
+        Clock.schedule_once(reset_color, 0.5) 
+        #else:
+        #    self.mimic_screen.ids.EVA_button.background_color = (1,1,1,1)
+
 
     def animate(self, instance):
         global new_x2
@@ -865,10 +879,12 @@ class MainApp(App):
         
         if float(crewlockpres) < 500:
             EVAinProgress = True
+            #self.mimic_screen.ids.EVA_button.background_color = (0,1,0,1)
             self.eva_screen.ids.EVA_occuring.text = "EVA In Progress!!!"
             self.eva_screen.ids.EVA_occuring.color = 0,1,0
         else:
             EVAinProgress = False 
+            #self.mimic_screen.ids.EVA_button.background_color = (1,1,1,1)
             self.eva_screen.ids.EVA_occuring.text = "Currently No EVA"
             self.eva_screen.ids.EVA_occuring.color = 1,0,0
 
