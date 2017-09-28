@@ -295,7 +295,7 @@ sub.addListener({
             break;
         case "Z1000015":
             db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "sgant_xel");
-            db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "sgant_xe;");
+            db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "sgant_xel");
             break;
         case "P1000004":
             db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "sasa2_azimuth");

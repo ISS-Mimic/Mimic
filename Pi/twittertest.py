@@ -18,11 +18,13 @@ api = tweepy.API(auth)
 stuff = api.user_timeline(screen_name = 'iss_mimic', count = 1, include_rts = True, tweet_mode = 'extended')
 #stuff = api.get_status(909345339391561729)
 
+test = api.get_user('SupaTreadz')
+print test.name
+
 for status in stuff:
     print "----------"
-    print status.id
-    #print status
-    #print json.dumps(status._json, sort_keys=True, indent=4, separators=(',', ': '))
+    parsingtext = status.full_text
+    print parsingtext.split("@",1)[1]
     if u'extended_entities' in status._json:
         if u'media' in status._json[u'extended_entities']:
             for pic in status._json[u'extended_entities'][u'media']:
@@ -31,6 +33,36 @@ for status in stuff:
             print "No media."
     else:
         print "No extended entities."
+
+storage = []
+index = 0
+while index < len(parsingtext):
+    index = parsingtext.find('@',index)
+    if index == -1:
+        break
+    storage.append(str(parsingtext[index:]))
+    index += 1
+
+count = 0
+while count < len(storage):
+    storage[count] = (storage[count].split('@')[1]).split(' ')[0]
+    count += 1
+
+#print storage
+
+test = api.get_user('SupaTreadz')
+#print test.name
+count = 0
+while count < len(storage):
+    storage[count] = str(api.get_user(storage[count]).name)
+    count += 1
+
+print storage
+
+for friend in tweepy.Cursor(api.friends, screen_name="NASA_Astronauts").items():
+#    print friend.screen_name
+    print friend.name
+#    print friend.user.name
 
 emoji_pattern = re.compile("["
         u"\U0001F600-\U0001F64F"  # emoticons

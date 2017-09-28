@@ -13,15 +13,24 @@
         AsyncImage:
             id: EVAimage
             source: "http://pbs.twimg.com/media/DJm3BvbXkAAuMzp.jpg"
-            size_hint: 0.35, 0.35
-            pos_hint: {"center_x": 0.8, "center_y": 0.25}
+            size_hint: 0.5, 0.44
+            pos_hint: {"center_x": 0.17, "center_y": 0.48}
         Button:
             id: EVAimage_button
-            size_hint: 0.35,0.35
-            pos_hint: {"center_x": 0.8, "center_y": 0.25}
+            size_hint: 0.5, 0.44
+            pos_hint: {"center_x": 0.17, "center_y": 0.48}
             font_size: 30
             opacity: 0.0
             on_release: app.root.current = 'eva_pictures'
+        Label:
+            id: EVAstatus
+            pos_hint: {"center_x": 0.17, "center_y": 0.13}
+            size_hint: 0.33,0.35
+            text: ''
+            text_size: self.width, None
+            markup: True
+            color: 1,1,1
+            font_size: 20
         Label:
             id: crewlockpressure_label
             pos_hint: {"center_x": 0.65, "center_y": 0.8}
@@ -45,18 +54,10 @@
             markup: True
             color: 1,1,1
             font_size: 20
-        Label:
-            id: EVAstatus
-            pos_hint: {"center_x": 0.55, "center_y": 0.25}
-            size_hint: 0.35,0.35
-            text: ''
-            text_size: self.width, None
-            markup: True
-            color: 1,1,1
-            font_size: 20
         Button:
             size_hint: 0.2,0.1
-            pos_hint: {"Left": 1, "Bottom": 1}
+            #pos_hint: {"Left": 1, "Bottom": 1}
+            pos_hint: {"center_x": 0.9, "center_y": 0.05}
             text: 'Return'
             font_size: 30
             on_release: app.root.current = 'mimic'

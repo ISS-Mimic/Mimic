@@ -519,18 +519,14 @@ class MainApp(App):
         tweet_string_no_emojis = str(emoji_pattern.sub(r'?', latest_tweet)) #cleanse the emojis!!
         self.eva_screen.ids.EVAstatus.text = str(tweet_string_no_emojis.split("http",1)[0])
 
-    def flashButton(self, instace): #not sure if I want to use this function not finished
-        global EVAinProgress 
-        global alternate
-        #if EVAinProgress:
-        
-        self.mimic_screen.ids.EVA_button.background_color = (0,0,1,1)
-        def reset_color(*args):
-            self.mimic_screen.ids.EVA_button.background_color = (1,1,1,1)
-        Clock.schedule_once(reset_color, 0.5) 
-        #else:
-        #    self.mimic_screen.ids.EVA_button.background_color = (1,1,1,1)
+    def flashButton(self, instace):
+        global EVAinProgress
 
+        if EVAinProgress:
+            self.mimic_screen.ids.EVA_button.background_color = (0,0,1,1)
+            def reset_color(*args):
+                self.mimic_screen.ids.EVA_button.background_color = (1,1,1,1)
+            Clock.schedule_once(reset_color, 0.5) 
 
     def animate(self, instance):
         global new_x2
