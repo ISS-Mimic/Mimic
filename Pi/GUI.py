@@ -519,6 +519,26 @@ class MainApp(App):
         tweet_string_no_emojis = str(emoji_pattern.sub(r'?', latest_tweet)) #cleanse the emojis!!
         self.eva_screen.ids.EVAstatus.text = str(tweet_string_no_emojis.split("http",1)[0])
 
+        storage = []
+        index = 0
+        while index < len(parsingtext):
+            index = parsingtext.find('@',index)
+            if index == -1:
+                break
+            storage.append(str(parsingtext[index:]))
+            index += 1
+        count = 0
+        while count < len(storage):
+            storage[count] = (storage[count].split('@')[1]).split(' ')[0]
+            count += 1
+        count = 0
+        while count < len(storage):
+            storage[count] = str(api.get_user(storage[count]).name)
+            count += 1
+
+    def check_EVA_stats(self, *args):        
+        
+
     def flashButton(self, instace):
         global EVAinProgress
 
