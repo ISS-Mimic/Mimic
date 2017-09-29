@@ -15,30 +15,34 @@ access_secret = "Lu47Nu4eQrtQI1vmKUIMWTQ419CmEXSZPVAyHb8vFJbTu"
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_key, access_secret)
 api = tweepy.API(auth)
-stuff = api.user_timeline(screen_name = 'iss_mimic', count = 1, include_rts = True, tweet_mode = 'extended')
+stuff = api.user_timeline(screen_name = 'SupaTreadz', count = 1, include_rts = False, tweet_mode = 'extended')
 #stuff = api.get_status(909345339391561729)
 
 for status in stuff:
     parsingtext = status.full_text
 
+print parsingtext.find('@')
 storage = []
 index = 0
-while index < len(parsingtext):
-    index = parsingtext.find('@',index)
-    if index == -1:
-        break
-    storage.append(str(parsingtext[index:]))
-    index += 1
+if parsingtext.find('@')>0:
+    while index < len(parsingtext):
+        index = parsingtext.find('@',index)
+        if index == -1:
+            break
+        storage.append(str(parsingtext[index:]))
+        index += 1
 
-count = 0
-while count < len(storage):
-    storage[count] = (storage[count].split('@')[1]).split(' ')[0]
-    count += 1
+    count = 0
+    while count < len(storage):
+        storage[count] = (storage[count].split('@')[1]).split(' ')[0]
+        count += 1
 
-count = 0
-while count < len(storage):
-    storage[count] = str(api.get_user(storage[count]).name)
-    count += 1
+    count = 0
+    while count < len(storage):
+        print storage[count]
+        storage[count] = str(api.get_user(storage[count]).name)
+        storage[count] = storage[count].split()[-1]
+        count += 1
 
 print storage
 

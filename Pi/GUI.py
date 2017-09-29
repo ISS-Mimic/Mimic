@@ -103,7 +103,7 @@ except:
 #    errorlog.write(' ')
 #    errorlog.write("serial connection USB not found")
 #    errorlog.write('\n')
-
+crew_mention= False
 crewjsonsuccess = False
 mimicbutton = False
 fakeorbitboolean = False
@@ -112,7 +112,7 @@ switchtofake = False
 manualcontrol = False
 startup = True
 isscrew = 0
-
+different_tweet = False
 conn = sqlite3.connect('iss_telemetry.db') #sqlite database call change to include directory
 c = conn.cursor() 
 val = ""
@@ -493,11 +493,30 @@ class MainApp(App):
         if urlindex > urlsize-1:
             urlindex = 0
 
-    def checkTwitter(self, dt):
-        global latest_tweet
+    def check_EVA_stats(self, args):                
+        eva_url = 'http://spacefacts.de/eva/e_eva_az.htm'
+        soup = BeautifulSoup(urllib2.urlopen(eva_url), 'html.parser')
+        name = str(args)
 
+        #print soup.find("td", text=name)
+        if str(soup.find("td", text=name)) == "None":
+            numEVAs = 0
+            EVAtime_hours = 0
+            EVAtime_minutes = 0
+        else:
+            numEVAs = int(soup.find("td", text=name).find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
+            EVAtime_hours = int(soup.find("td", text=name).find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
+            EVAtime_minutes = int(soup.find("td", text=name).find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
+            EVAtime_minutes += (EVAtime_hours * 60)
+        return numEVAs,EVAtime_minutes
+
+    def checkTwitter(self, dt):
+        print "in check twitter routine"
+        global latest_tweet
+        global crew_mention
+        global different_tweet
         try:
-            stuff = api.user_timeline(screen_name = 'iss_mimic', count = 1, include_rts = True, tweet_mode = 'extended')
+            stuff = api.user_timeline(screen_name = 'iss_mimic', count = 1, include_rts = False, tweet_mode = 'extended')
         except:
             errorlog.write(str(datetime.datetime.utcnow()))
             errorlog.write(' ')
@@ -509,6 +528,13 @@ class MainApp(App):
             print "Stuff isn't defined"
         else:
             for status in stuff:
+                if status.full_text == latest_tweet:
+                    different_tweet = False
+                    print "same tweet"
+                else:
+                    different_tweet = True
+                    print "diff tweet"
+
                 latest_tweet = status.full_text
                 if u'extended_entities' in status._json:
                     if u'media' in status._json[u'extended_entities']:
@@ -519,25 +545,45 @@ class MainApp(App):
         tweet_string_no_emojis = str(emoji_pattern.sub(r'?', latest_tweet)) #cleanse the emojis!!
         self.eva_screen.ids.EVAstatus.text = str(tweet_string_no_emojis.split("http",1)[0])
 
-        storage = []
+        EVnames = []
         index = 0
-        while index < len(parsingtext):
-            index = parsingtext.find('@',index)
-            if index == -1:
-                break
-            storage.append(str(parsingtext[index:]))
-            index += 1
-        count = 0
-        while count < len(storage):
-            storage[count] = (storage[count].split('@')[1]).split(' ')[0]
-            count += 1
-        count = 0
-        while count < len(storage):
-            storage[count] = str(api.get_user(storage[count]).name)
-            count += 1
 
-    def check_EVA_stats(self, *args):        
-        
+        if ("EVA BEGINS" in latest_tweet) and latest_tweet.count('@') == 2 and different_tweet:
+            print "fetching crew twitter accounts"
+            crew_mention = True
+            while index < len(latest_tweet):
+                index = latest_tweet.find('@',index)
+                if index == -1:
+                    break
+                EVnames.append(str(latest_tweet[index:]))
+                index += 1
+            count = 0
+            while count < len(EVnames):
+                EVnames[count] = (EVnames[count].split('@')[1]).split(' ')[0]
+                count += 1
+            count = 0
+            while count < len(EVnames):
+                EVnames[count] = str(api.get_user(EVnames[count]).name)
+                count += 1
+
+        if crew_mention:
+            #EV1_surname = EVnames[0].split()[-1]
+            EV1_surname = 'Bresnik'
+            #EV2_surname = EVnames[1].split()[-1]
+            EV2_surname = 'Hei'
+            EV1 = EVnames[0]
+            EV2 = EVnames[1]
+
+            EV1_EVA_number,EV1_EVA_time = self.check_EVA_stats(EV1_surname)
+            EV2_EVA_number,EV2_EVA_time = self.check_EVA_stats(EV2_surname)
+
+            self.eva_screen.ids.EV1.text = str(EV1)
+            self.eva_screen.ids.EV2.text = str(EV2)
+            self.eva_screen.ids.EV1_EVAnum.text = str(EV1_EVA_number)
+            self.eva_screen.ids.EV2_EVAnum.text = str(EV2_EVA_number)
+            self.eva_screen.ids.EV1_EVAtime.text = str(EV1_EVA_time)
+            self.eva_screen.ids.EV2_EVAtime.text = str(EV2_EVA_time)
+            crew_mention = False
 
     def flashButton(self, instace):
         global EVAinProgress

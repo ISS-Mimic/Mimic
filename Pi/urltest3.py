@@ -1,16 +1,22 @@
 import urllib2
 from bs4 import BeautifulSoup
 
-nasaissurl = 'http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html'
-#TLE = BeautifulSoup(urllib2.urlopen(nasaissurl), 'html.parser')
-soup = BeautifulSoup(open('./EVA.html'), 'html.parser')
+eva_url = 'http://spacefacts.de/eva/e_eva_az.htm'
+soup = BeautifulSoup(urllib2.urlopen(eva_url), 'html.parser')
 
-name = "Acaba"
+name = "Hei"
 
-numEVAs = soup.find("td", text=name).find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text
-EVAtime_hours = soup.find("td", text=name).find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text
-EVAtime_minutes = soup.find("td", text=name).find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text
+print soup.find("td", text=name)
+
+if str(soup.find("td", text=name)) == "None":
+    numEVAs = 0
+    EVAtime_hours = 0
+    EVAtime_minutes = 0
+else:
+    numEVAs = soup.find("td", text=name).find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text
+    EVAtime_hours = int(soup.find("td", text=name).find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
+    EVAtime_minutes = int(soup.find("td", text=name).find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
 
 print numEVAs
-print EVAtime_hours
+EVAtime_minutes += (EVAtime_hours * 60)
 print EVAtime_minutes
