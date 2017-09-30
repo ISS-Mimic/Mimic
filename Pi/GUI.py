@@ -8,9 +8,11 @@ import sys
 import json
 import sqlite3
 import serial
+import time
 import sched, time
 import smbus
 import math
+import random
 import time
 import re
 from Naked.toolshed.shell import execute_js, muterun_js
@@ -56,6 +58,7 @@ api = tweepy.API(auth)
 
 
 errorlog = open('errorlog.txt','w')
+mimiclog = open('mimiclog.txt','w')
 locationlog = open('locationlog.txt','a')
 
 iss_crew_url = 'http://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'        
@@ -116,6 +119,7 @@ different_tweet = False
 conn = sqlite3.connect('iss_telemetry.db') #sqlite database call change to include directory
 c = conn.cursor() 
 val = ""
+testvalue = 0
 alternate = True       
 Beta4Bcontrol = False
 Beta3Bcontrol = False
@@ -153,6 +157,8 @@ beta4b = 0.00
 beta4a = 0.00
 aos = 0.00
 los = 0.00
+timenew = float(time.time())
+timeold = 0.00
 oldLOS = 0.00
 psarjmc = 0.00
 ssarjmc = 0.00
@@ -180,6 +186,10 @@ c1b = 0.00
 c1a = 0.00
 c3b = 0.00
 c3a = 0.00
+
+seconds = 0
+minutes = 0
+hours = 0
 
 latest_tweet = "test"
 crewmember = ['','','','','','','','','','','','']
@@ -455,17 +465,16 @@ class MainApp(App):
         root.add_widget(self.crew_screen)
         root.add_widget(self.settings_screen)
         root.add_widget(ManualControlScreen(name = 'manualcontrol'))
-        root.current = 'main'
+        root.current = 'eva' #change this back to main when done with eva setup
 
         Clock.schedule_interval(self.update_labels, 1)
         Clock.schedule_interval(self.deleteURLPictures, 86400)
         Clock.schedule_interval(self.animate3,0.1)
         Clock.schedule_interval(self.checkAOSlong, 5)
         Clock.schedule_interval(self.checkCrew, 3600)
-        Clock.schedule_once(self.checkTwitter, 1)
         Clock.schedule_interval(self.checkTwitter, 65)
         Clock.schedule_interval(self.changePictures, 10)
-        Clock.schedule_interval(self.flashButton, 1)
+        Clock.schedule_interval(self.flashEVAbutton, 1)
         if crewjsonsuccess == False: #check crew every 10s until success then once per hour
             Clock.schedule_once(self.checkCrew, 10)
         if startup == True:
@@ -476,11 +485,19 @@ class MainApp(App):
         return root
 
     def deleteURLPictures(self, dt):
+        mimiclog.write(str(datetime.datetime.utcnow()))
+        mimiclog.write(' ')
+        mimiclog.write(str("deleteURLpictures"))
+        mimiclog.write('\n')
         global EVA_picture_urls
         del EVA_picture_urls[:]
         EVA_picture_urls[:] = []
 
     def changePictures(self, dt):
+        mimiclog.write(str(datetime.datetime.utcnow()))
+        mimiclog.write(' ')
+        mimiclog.write(str("changeURLpictures"))
+        mimiclog.write('\n')
         global EVA_picture_urls
         global urlindex
         urlsize = len(EVA_picture_urls)
@@ -494,6 +511,10 @@ class MainApp(App):
             urlindex = 0
 
     def check_EVA_stats(self, args):                
+        mimiclog.write(str(datetime.datetime.utcnow()))
+        mimiclog.write(' ')
+        mimiclog.write(str("check EVA stats"))
+        mimiclog.write('\n')
         eva_url = 'http://spacefacts.de/eva/e_eva_az.htm'
         soup = BeautifulSoup(urllib2.urlopen(eva_url), 'html.parser')
         name = str(args)
@@ -511,10 +532,18 @@ class MainApp(App):
         return numEVAs,EVAtime_minutes
 
     def checkTwitter(self, dt):
+        mimiclog.write(str(datetime.datetime.utcnow()))
+        mimiclog.write(' ')
+        mimiclog.write(str("check twitter"))
+        mimiclog.write('\n')
         print "in check twitter routine"
+        
         global latest_tweet
         global crew_mention
         global different_tweet
+        global crewmember
+        global crewmemberpicture
+
         try:
             stuff = api.user_timeline(screen_name = 'iss_mimic', count = 1, include_rts = False, tweet_mode = 'extended')
         except:
@@ -567,25 +596,53 @@ class MainApp(App):
                 count += 1
 
         if crew_mention:
-            #EV1_surname = EVnames[0].split()[-1]
-            EV1_surname = 'Bresnik'
-            #EV2_surname = EVnames[1].split()[-1]
-            EV2_surname = 'Hei'
+            EV1_surname = EVnames[0].split()[-1]
+            #EV1_surname = 'Bresnik'
+            EV2_surname = EVnames[1].split()[-1]
+            #EV2_surname = 'Hei'
             EV1 = EVnames[0]
             EV2 = EVnames[1]
+
+            ###########images from api not working maybe no hotlinking allowed########
+            ##EV1index = 0
+            #EV2index = 0
+
+            #count2 = 0
+            #while count2 < len(crewmember):
+            #    if str(EV1_surname) in crewmember[count2]:
+            #        EV1index = count2
+            #        count2 += 1
+
+            #count2 = 0
+            #while count2 < len(crewmember):
+            #    if str(EV2_surname) in crewmember[count2]:
+            #        EV2index = count2
+            #        count2 += 1
+            
+            #self.eva_screen.ids.EV1_Pic.source = str(crewmemberpicture[EV1index])
+            #self.eva_screen.ids.EV2_Pic.source = str(crewmemberpicture[EV2index])
 
             EV1_EVA_number,EV1_EVA_time = self.check_EVA_stats(EV1_surname)
             EV2_EVA_number,EV2_EVA_time = self.check_EVA_stats(EV2_surname)
 
-            self.eva_screen.ids.EV1.text = str(EV1)
-            self.eva_screen.ids.EV2.text = str(EV2)
-            self.eva_screen.ids.EV1_EVAnum.text = str(EV1_EVA_number)
-            self.eva_screen.ids.EV2_EVAnum.text = str(EV2_EVA_number)
-            self.eva_screen.ids.EV1_EVAtime.text = str(EV1_EVA_time)
-            self.eva_screen.ids.EV2_EVAtime.text = str(EV2_EVA_time)
+            EV1_minutes = str(EV1_EVA_time%60).zfill(2)
+            EV2_minutes = str(EV2_EVA_time%60).zfill(2)
+            EV1_hours = int(EV1_EVA_time/60)
+            EV2_hours = int(EV2_EVA_time/60)
+
+            self.eva_screen.ids.EV1.text = str(EV1) + " (EV1):"
+            self.eva_screen.ids.EV2.text = str(EV2) + " (EV2):"
+            self.eva_screen.ids.EV1_EVAnum.text = "Number of EVAs = " + str(EV1_EVA_number) 
+            self.eva_screen.ids.EV2_EVAnum.text = "Number of EVAs = " + str(EV2_EVA_number)
+            self.eva_screen.ids.EV1_EVAtime.text = "Total EVA Time = " + str(EV1_hours) + ":" + str(EV1_minutes)
+            self.eva_screen.ids.EV2_EVAtime.text = "Total EVA Time = " + str(EV2_hours) + ":" + str(EV2_minutes)
             crew_mention = False
 
-    def flashButton(self, instace):
+    def flashEVAbutton(self, instace):
+        mimiclog.write(str(datetime.datetime.utcnow()))
+        mimiclog.write(' ')
+        mimiclog.write(str("flash eva button"))
+        mimiclog.write('\n')
         global EVAinProgress
 
         if EVAinProgress:
@@ -593,8 +650,39 @@ class MainApp(App):
             def reset_color(*args):
                 self.mimic_screen.ids.EVA_button.background_color = (1,1,1,1)
             Clock.schedule_once(reset_color, 0.5) 
+    
+    def EVA_clock(self, dt):
+        mimiclog.write(str(datetime.datetime.utcnow()))
+        mimiclog.write(' ')
+        mimiclog.write(str("eva timer"))
+        mimiclog.write('\n')
+        global seconds
+        global minutes
+        global hours
+        global timenew
+        global timeold
+                          
+        timenew = float(time.time())
+        difference = timenew - timeold
+        if difference > 1000: #first call to this function will have large time difference
+            difference = 0
+        timeold = timenew
+
+        seconds += difference
+        if seconds >= 60:
+            seconds = 0
+            minutes += 1
+            if minutes >= 60:
+                minutes = 0
+                hours += 1
+        self.eva_screen.ids.EVA_clock.text =(str(hours) + ":" + str(minutes).zfill(2) + ":" + str(int(seconds)).zfill(2))
+        self.eva_screen.ids.EVA_clock.color = (0,1,0)
 
     def animate(self, instance):
+        mimiclog.write(str(datetime.datetime.utcnow()))
+        mimiclog.write(' ')
+        mimiclog.write(str("animate"))
+        mimiclog.write('\n')
         global new_x2
         global new_y2
         self.main_screen.ids.ISStiny2.size_hint = 0.07,0.07
@@ -605,6 +693,10 @@ class MainApp(App):
         self.main_screen.ids.ISStiny2.pos_hint = {"center_x": new_x2, "center_y": new_y2}
 
     def animate3(self, instance):
+        mimiclog.write(str(datetime.datetime.utcnow()))
+        mimiclog.write(' ')
+        mimiclog.write(str("animate3"))
+        mimiclog.write('\n')
         global new_x
         global new_y
         global sizeX
@@ -748,6 +840,8 @@ class MainApp(App):
         else:
             print "JSON false"
             crewjsonsuccess = False
+
+        #print crewmemberpicture[0]
         isscrew = 0
         self.crew_screen.ids.crew1.text = crewmember[0]  
         self.crew_screen.ids.crew1title.text = crewmembertitle[0]  
@@ -808,7 +902,7 @@ class MainApp(App):
         self.crew_screen.ids.crew12title.text = crewmembertitle[11]  
         self.crew_screen.ids.crew12country.text = crewmembercountry[11]  
         self.crew_screen.ids.crew12daysonISS.text = crewmemberdays[11]
-        #self.crew_screen.ids.crew12image.source = str(crewmemberpicture[11])
+        #self.crew_screen.ids.crew12image.source = str(crewmemberpicture[11]) 
         
     def checkAOSlong(self, dt):
         global aos
@@ -821,7 +915,16 @@ class MainApp(App):
             #locationlog.write(" long ")
             #locationlog.write(str(obj['iss_position']['longitude']))
             #locationlog.write('\n')
+    def map_rotation(self, args):
+        scalefactor = 0.083333
+        scaledValue = float(args)/scalefactor
+        return scaledValue
 
+    def map_psi_bar(self, args):
+        scalefactor = 0.014666666667
+        scaledValue = (float(args)*scalefactor)+0.71
+        return scaledValue
+    
     def update_labels(self, dt):
         global mimicbutton
         global switchtofake
@@ -870,6 +973,7 @@ class MainApp(App):
         global c1b
         global c3a
         global c3b
+        global testvalue
 
         c.execute('select Value from telemetry')
         values = c.fetchall()
@@ -922,6 +1026,7 @@ class MainApp(App):
         sgant_el = "{:.2f}".format(float((values[15])[0]))
         difference = float(sgant_el)-float(sasa_el) 
         crewlockpres = "{:.2f}".format(float((values[16])[0]))
+        crewlockpres_needle = 0.0193368*float(crewlockpres)
         v1a = "{:.2f}".format(float((values[25])[0]))
         v1b = "{:.2f}".format(float((values[26])[0]))
         v2a = "{:.2f}".format(float((values[27])[0]))
@@ -939,16 +1044,16 @@ class MainApp(App):
         c4a = "{:.2f}".format(float((values[39])[0]))
         c4b = "{:.2f}".format(float((values[40])[0]))
         
-        if float(crewlockpres) < 500:
+        if float(crewlockpres_needle) < 0.0386735: #PSI
             EVAinProgress = True
-            #self.mimic_screen.ids.EVA_button.background_color = (0,1,0,1)
             self.eva_screen.ids.EVA_occuring.text = "EVA In Progress!!!"
             self.eva_screen.ids.EVA_occuring.color = 0,1,0
+            Clock.schedule_interval(self.EVA_clock, 1)
         else:
             EVAinProgress = False 
-            #self.mimic_screen.ids.EVA_button.background_color = (1,1,1,1)
             self.eva_screen.ids.EVA_occuring.text = "Currently No EVA"
             self.eva_screen.ids.EVA_occuring.color = 1,0,0
+            Clock.unschedule(self.EVA_clock)
 
 #        if (difference > -10) && (isinstance(App.get_running_app().root_window.children[0], Popup)==False):
 #            LOSpopup = Popup(title='Loss of Signal', content=Label(text='Possible LOS Soon'),size_hint=(0.3,0.2),auto_dismiss=True)
@@ -1026,11 +1131,17 @@ class MainApp(App):
         self.eps_screen.ids.v4a_value.text = v4a
         self.eps_screen.ids.c4b_value.text = c4b
         self.eps_screen.ids.v4b_value.text = v4b
-        self.eva_screen.ids.crewlockpressure_value.text = crewlockpres
         self.mimic_screen.ids.altitude_value.text = str(altitude) + " km"
         self.mimic_screen.ids.velocity_value.text = str(velocity) + " m/s"
         self.mimic_screen.ids.stationmass_value.text = str(iss_mass) + " kg"
 
+        self.eva_screen.ids.EVA_needle.angle = float(self.map_rotation(crewlockpres_needle))
+        self.eva_screen.ids.crewlockpressure_value.text = "{:.2f}".format(crewlockpres_needle)
+       
+        psi_bar_x = self.map_psi_bar(crewlockpres_needle)
+        
+        self.eva_screen.ids.EVA_psi_bar.pos_hint = {"center_x": psi_bar_x, "center_y": 0.552} 
+        
         if float(aos) == 1.00:
             self.changeColors(0,1,0)
             if self.root.current == 'mimic':
