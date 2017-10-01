@@ -46,13 +46,13 @@
             id: Hold_bar
             source: './imgs/eva/GuageBar.png'
             size_hint_x: 0.25
-            pos_hint: {"center_x": 0.94, "center_y": 0.484}
+            pos_hint: {"center_x": 0.7, "center_y": 0.484}
             allow_stretch: False
             keep_ratio: True
         Label:
             id: leak_timer
             pos_hint: {"center_x": 0.82, "center_y": 0.484}
-            text: '0s'
+            text: '~260s Leak Check'
             markup: True
             color: 0,0,0
             font_size: 20
@@ -91,7 +91,7 @@
             opacity: 0.0
             on_release: app.root.current = 'eva_pictures'
         Label:
-            id: EVAstatus ##twitter box 
+            id: EVAstatus  
             pos_hint: {"center_x": 0.199, "center_y": 0.17}
             size_hint: 0.35,0.35
             text: ''
@@ -99,6 +99,15 @@
             markup: True
             color: 1,1,1
             font_size: 20
+        Label:
+            id: EVAstatus_credit 
+            pos_hint: {"center_x": 0.3, "center_y": 0.05}
+            size_hint: 0.3,0.03
+            text: 'from @iss101'
+            text_size: self.width, None
+            markup: True
+            color: 1,1,1
+            font_size: 14
         Label:
             id: EVA_clock
             pos_hint: {"center_x": 0.53, "center_y": 0.82}

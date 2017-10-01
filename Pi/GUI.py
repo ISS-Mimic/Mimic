@@ -106,6 +106,7 @@ except:
 #    errorlog.write(' ')
 #    errorlog.write("serial connection USB not found")
 #    errorlog.write('\n')
+testfactor = -1
 crew_mention= False
 crewjsonsuccess = False
 mimicbutton = False
@@ -157,8 +158,11 @@ beta4b = 0.00
 beta4a = 0.00
 aos = 0.00
 los = 0.00
+seconds2 = 260
 timenew = float(time.time())
 timeold = 0.00
+timenew2 = float(time.time())
+timeold2 = 0.00
 oldLOS = 0.00
 psarjmc = 0.00
 ssarjmc = 0.00
@@ -173,6 +177,8 @@ beta3amc = 0.00
 beta4bmc = 0.00
 beta4amc = 0.00
 EVAinProgress = False
+leak_hold = False
+firstcrossing = True
 position_x = 0.00
 position_y = 0.00
 position_z = 0.00
@@ -186,12 +192,14 @@ c1b = 0.00
 c1a = 0.00
 c3b = 0.00
 c3a = 0.00
+airlock_pump = 0
+crewlockpres = 758
 
 seconds = 0
 minutes = 0
 hours = 0
-
-latest_tweet = "test"
+leak_hold = False
+latest_tweet = "No Tweet"
 crewmember = ['','','','','','','','','','','','']
 crewmemberbio = ['','','','','','','','','','','','']
 crewmembertitle = ['','','','','','','','','','','','']
@@ -465,7 +473,7 @@ class MainApp(App):
         root.add_widget(self.crew_screen)
         root.add_widget(self.settings_screen)
         root.add_widget(ManualControlScreen(name = 'manualcontrol'))
-        root.current = 'eva' #change this back to main when done with eva setup
+        root.current = 'main' #change this back to main when done with eva setup
 
         Clock.schedule_interval(self.update_labels, 1)
         Clock.schedule_interval(self.deleteURLPictures, 86400)
@@ -536,7 +544,6 @@ class MainApp(App):
         mimiclog.write(' ')
         mimiclog.write(str("check twitter"))
         mimiclog.write('\n')
-        print "in check twitter routine"
         
         global latest_tweet
         global crew_mention
@@ -545,7 +552,7 @@ class MainApp(App):
         global crewmemberpicture
 
         try:
-            stuff = api.user_timeline(screen_name = 'iss_mimic', count = 1, include_rts = False, tweet_mode = 'extended')
+            stuff = api.user_timeline(screen_name = 'iss101', count = 1, include_rts = False, tweet_mode = 'extended')
         except:
             errorlog.write(str(datetime.datetime.utcnow()))
             errorlog.write(' ')
@@ -559,10 +566,8 @@ class MainApp(App):
             for status in stuff:
                 if status.full_text == latest_tweet:
                     different_tweet = False
-                    print "same tweet"
                 else:
                     different_tweet = True
-                    print "diff tweet"
 
                 latest_tweet = status.full_text
                 if u'extended_entities' in status._json:
@@ -578,7 +583,6 @@ class MainApp(App):
         index = 0
 
         if ("EVA BEGINS" in latest_tweet) and latest_tweet.count('@') == 2 and different_tweet:
-            print "fetching crew twitter accounts"
             crew_mention = True
             while index < len(latest_tweet):
                 index = latest_tweet.find('@',index)
@@ -818,7 +822,10 @@ class MainApp(App):
         stuff = urllib2.urlopen(req)
         now = datetime.datetime.now()
         if (stuff.info().getsubtype()=='json'):
-            print "JSON True"
+            mimiclog.write(str(datetime.datetime.utcnow()))
+            mimiclog.write(' ')
+            mimiclog.write("Crew Check - JSON Success")
+            mimiclog.write('\n')
             crewjsonsuccess = True
             data = json.load(stuff)
             number_of_space = int(data['number'])
@@ -838,7 +845,10 @@ class MainApp(App):
                         crewmembercountry[isscrew] = str('USA')
                     isscrew = isscrew+1  
         else:
-            print "JSON false"
+            mimiclog.write(str(datetime.datetime.utcnow()))
+            mimiclog.write(' ')
+            mimiclog.write("Crew Check - JSON Error")
+            mimiclog.write('\n')
             crewjsonsuccess = False
 
         #print crewmemberpicture[0]
@@ -925,6 +935,37 @@ class MainApp(App):
         scaledValue = (float(args)*scalefactor)+0.71
         return scaledValue
     
+    def map_hold_bar(self, args):
+        scalefactor = 0.000923
+        scaledValue = (float(args)*scalefactor)+0.7
+        return scaledValue
+    
+    def hold_timer(self, dt):
+        mimiclog.write(str(datetime.datetime.utcnow()))
+        mimiclog.write(' ')
+        mimiclog.write(str("hold timer"))
+        mimiclog.write('\n')
+        global seconds2
+        global timenew2
+        global timeold2
+                          
+        timenew2 = float(time.time())
+        difference2 = timenew2 - timeold2
+        if difference2 > 1000: #first call to this function will have large time difference
+            difference2 = 0
+        timeold2 = timenew2
+        seconds2 -= difference2
+        new_bar_x = self.map_hold_bar(260-seconds2)
+        self.eva_screen.ids.leak_timer.text = "~"+ str(int(seconds2)) + "s"
+        self.eva_screen.ids.Hold_bar.pos_hint = {"center_x": new_bar_x, "center_y": 0.484}
+        self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/LeakCheckLights.png'
+        
+        if seconds2 <= 0:
+            Clock.unschedule(self.hold_timer)
+            self.eva_screen.ids.leak_timer.text = "Complete"
+            seconds2 = 0
+            self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/DepressLights.png'
+
     def update_labels(self, dt):
         global mimicbutton
         global switchtofake
@@ -974,7 +1015,11 @@ class MainApp(App):
         global c3a
         global c3b
         global testvalue
-
+        global testfactor
+        global airlock_pump
+        global crewlockpres
+        global leak_hold
+        global firstcrossing
         c.execute('select Value from telemetry')
         values = c.fetchall()
         c.execute('select Timestamp from telemetry')
@@ -1025,8 +1070,6 @@ class MainApp(App):
         sasa_el = "{:.2f}".format(float((values[14])[0]))
         sgant_el = "{:.2f}".format(float((values[15])[0]))
         difference = float(sgant_el)-float(sasa_el) 
-        crewlockpres = "{:.2f}".format(float((values[16])[0]))
-        crewlockpres_needle = 0.0193368*float(crewlockpres)
         v1a = "{:.2f}".format(float((values[25])[0]))
         v1b = "{:.2f}".format(float((values[26])[0]))
         v2a = "{:.2f}".format(float((values[27])[0]))
@@ -1044,16 +1087,52 @@ class MainApp(App):
         c4a = "{:.2f}".format(float((values[39])[0]))
         c4b = "{:.2f}".format(float((values[40])[0]))
         
-        if float(crewlockpres_needle) < 0.0386735: #PSI
+        airlock_pump = int((values[72])[0])
+        crewlockpres = "{:.2f}".format(float((values[16])[0]))
+        #reverse = False 
+        #airlock_pump = 1
+        #if(crewlockpres <= 2):
+            #airlock_pump = 0
+            #reverse = True
+        #if reverse:
+        #    testfactor = 1
+        #if(crewlockpres >= 758):
+        #    airlock_pump = 1
+        #    reverse = False
+        #crewlockpres = crewlockpres - (-5*testfactor)
+
+        if float(0.0193368*float(crewlockpres)) < 0.0386735: #PSI
             EVAinProgress = True
             self.eva_screen.ids.EVA_occuring.text = "EVA In Progress!!!"
             self.eva_screen.ids.EVA_occuring.color = 0,1,0
+            self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/InProgressLights.png'
             Clock.schedule_interval(self.EVA_clock, 1)
         else:
             EVAinProgress = False 
             self.eva_screen.ids.EVA_occuring.text = "Currently No EVA"
+            self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/BlankLights.png'
             self.eva_screen.ids.EVA_occuring.color = 1,0,0
             Clock.unschedule(self.EVA_clock)
+
+        if float(crewlockpres) >= 744: #torr
+            EVAinProgress = False
+            self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/BlankLights.png'
+        
+        if float(crewlockpres) <= 258.5 and firstcrossing: #Torr
+            leak_hold = True
+            firstcrossing = False
+            Clock.schedule_interval(self.hold_timer, 1)
+            if float(crewlockpres) >= 700: #Torr
+                leak_hold = False
+                firstcrossing = True
+
+        if airlock_pump == 1 and ~leak_hold:
+            depress = True
+            self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/DepressLights.png'
+        if airlock_pump == 0 and float(crewlockpres) > 5 and float(crewlockpres) < 744:
+            repress = True
+            self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/RepressLights.png'
+
 
 #        if (difference > -10) && (isinstance(App.get_running_app().root_window.children[0], Popup)==False):
 #            LOSpopup = Popup(title='Loss of Signal', content=Label(text='Possible LOS Soon'),size_hint=(0.3,0.2),auto_dismiss=True)
@@ -1135,10 +1214,10 @@ class MainApp(App):
         self.mimic_screen.ids.velocity_value.text = str(velocity) + " m/s"
         self.mimic_screen.ids.stationmass_value.text = str(iss_mass) + " kg"
 
-        self.eva_screen.ids.EVA_needle.angle = float(self.map_rotation(crewlockpres_needle))
-        self.eva_screen.ids.crewlockpressure_value.text = "{:.2f}".format(crewlockpres_needle)
+        self.eva_screen.ids.EVA_needle.angle = float(self.map_rotation(0.0193368*float(crewlockpres)))
+        self.eva_screen.ids.crewlockpressure_value.text = "{:.2f}".format(0.0193368*float(crewlockpres))
        
-        psi_bar_x = self.map_psi_bar(crewlockpres_needle)
+        psi_bar_x = self.map_psi_bar(0.0193368*float(crewlockpres)) #convert to torr
         
         self.eva_screen.ids.EVA_psi_bar.pos_hint = {"center_x": psi_bar_x, "center_y": 0.552} 
         
