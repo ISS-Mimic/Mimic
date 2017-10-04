@@ -1088,75 +1088,74 @@ class MainApp(App):
         c4a = "{:.2f}".format(float((values[39])[0]))
         c4b = "{:.2f}".format(float((values[40])[0]))
         
-        #airlock_pump = int((values[72])[0])
-        #crewlockpres = "{:.2f}".format(float((values[16])[0]))
-        reverse = False 
-        if(crewlockpres <= 2):
-            airlock_pump = 0
-            reverse = True
+        airlock_pump = int((values[72])[0])
+        crewlockpres = float((values[16])[0])
 
-        if reverse:
-            airlock_pump = 0
-            testfactor = 1
-        else:
-            airlock_pump
+        #reverse = False 
+        #if(crewlockpres <= 2):
+        #    airlock_pump = 0
+        #    reverse = True
 
-        if(float(crewlockpres) >= 758):
-            airlock_pump = 1
-            reverse = False
+        #if reverse:
+        #    airlock_pump = 0
+        #    testfactor = 1
+        #else:
+        #    airlock_pump
 
-        if testfactor == 1:
-            airlock_pump = 0
-        else:
-            airlock_pump = 1
+        #if(float(crewlockpres) >= 758):
+        #    airlock_pump = 1
+        #    reverse = False
 
-        crewlockpres = crewlockpres - (-10*testfactor)
+        #if testfactor == 1:
+        #    airlock_pump = 0
+        #else:
+        #    airlock_pump = 1
 
-        if airlock_pump == 1 or float(crewlockpres) < 744:
-            print "eva active"
+        #crewlockpres = crewlockpres - (-10*testfactor)
+
+        if airlock_pump or crewlockpres < 744:
             EVA_activities = True
             Clock.schedule_interval(self.flashEVAbutton, 1)
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             self.eva_screen.ids.EVA_occuring.text = "EVA Standby"
 
-        if airlock_pump == 0 and float(crewlockpres) > 744:
-            print "eva notactive"
+        if ~airlock_pump and crewlockpres > 744:
             EVA_activities = False
             self.eva_screen.ids.EVA_occuring.text = "Currently No EVA"
             self.eva_screen.ids.EVA_occuring.color = 1,0,0
             Clock.unschedule(self.flashEVAbutton)
 
-        if float(0.0193368*float(crewlockpres)) < 0.0386735: #PSI
-            print "eva in progress"
+        if 0.0193368*crewlockpres < 0.0386735: #PSI
             EVAinProgress = True
             self.eva_screen.ids.EVA_occuring.text = "EVA In Progress!!!"
             self.eva_screen.ids.EVA_occuring.color = 0,1,0
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/InProgressLights.png'
             Clock.schedule_interval(self.EVA_clock, 1)
 
-        if float(0.0193368*float(crewlockpres)) > 0.0386735 and EVAinProgress: #PSI
-            print "EVA complete"
+        if crewlockpres > 744 and ~airlock_pump:
+            self.eva_screen.ids.leak_timer.text = ""
+
+
+        if 0.0193368*crewlockpres > 0.0386735 and EVAinProgress: #PSI
             EVAinProgress = False
             Clock.unschedule(self.EVA_clock)
         
-        if float(crewlockpres) >= 744: #torr
+        if crewlockpres >= 744: #torr
             EVAinProgress = False
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/BlankLights.png'
             
-        if float(crewlockpres) >= 700: #Torr
+        if crewlockpres >= 700: #Torr
             leak_hold = False
             firstcrossing = True
         
-        if float(crewlockpres) <= 258.5 and firstcrossing: #Torr
-            print "leak hold"
+        if crewlockpres <= 258.5 and firstcrossing and airlock_pump: #Torr
             leak_hold = True
             firstcrossing = False
             self.eva_screen.ids.EVA_occuring.text = "Leak Check in Progress!"
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             Clock.schedule_interval(self.hold_timer, 1)
 
-        if leak_hold and float(crewlockpres) < 256 and ~repress:
-            print "leak complete depress again"
+        if leak_hold and crewlockpres < 256 and ~repress and airlock_pump:
             self.eva_screen.ids.EVA_occuring.text = "Crewlock Depressurizing"
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             leak_hold = False
@@ -1165,22 +1164,20 @@ class MainApp(App):
             self.eva_screen.ids.leak_timer.text = "Complete"
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/DepressLights.png'
 
-        if airlock_pump == 1 and ~leak_hold and float(crewlockpres) < 744:
-            print "depress"
+        if airlock_pump == 1 and ~leak_hold and crewlockpres < 744:
             self.eva_screen.ids.EVA_occuring.text = "Crewlock Depressurizing"
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
+            self.eva_screen.ids.leak_timer.text = "Leak Check Timer"
             depress = True
             repress = False
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/DepressLights.png'
         
-        if airlock_pump == 0 and float(crewlockpres) > 5 and float(crewlockpres) < 744:
-            print "repress"
+        if airlock_pump == 0 and crewlockpres > 5 and crewlockpres < 744:
             self.eva_screen.ids.EVA_occuring.text = "Crewlock Repressurizing"
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             repress = True
             depress = False
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/RepressLights.png'
-
 
 #        if (difference > -10) && (isinstance(App.get_running_app().root_window.children[0], Popup)==False):
 #            LOSpopup = Popup(title='Loss of Signal', content=Label(text='Possible LOS Soon'),size_hint=(0.3,0.2),auto_dismiss=True)
