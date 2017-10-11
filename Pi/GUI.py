@@ -482,14 +482,14 @@ class MainApp(App):
         root.add_widget(self.crew_screen)
         root.add_widget(self.settings_screen)
         root.add_widget(ManualControlScreen(name = 'manualcontrol'))
-        root.current = 'eva' #change this back to main when done with eva setup
+        root.current = 'main' #change this back to main when done with eva setup
 
         Clock.schedule_interval(self.update_labels, 1)
         Clock.schedule_interval(self.deleteURLPictures, 86400)
         Clock.schedule_interval(self.animate3,0.1)
         Clock.schedule_interval(self.checkAOSlong, 5)
         Clock.schedule_interval(self.checkCrew, 3600)
-        Clock.schedule_interval(self.checkTwitter, 20) #change back to 65 after testing
+        Clock.schedule_interval(self.checkTwitter, 65) #change back to 65 after testing
         Clock.schedule_interval(self.changePictures, 10)
         if crewjsonsuccess == False: #check crew every 10s until success then once per hour
             Clock.schedule_once(self.checkCrew, 10)
@@ -583,8 +583,8 @@ class MainApp(App):
         self.eva_screen.ids.EV2.text = str(EV2) + " (EV2):"
         self.eva_screen.ids.EV1_EVAnum.text = "Number of EVAs = " + str(EV1_EVA_number) 
         self.eva_screen.ids.EV2_EVAnum.text = "Number of EVAs = " + str(EV2_EVA_number)
-        self.eva_screen.ids.EV1_EVAtime.text = "Total EVA Time = " + str(EV1_hours) + ":" + str(EV1_minutes)
-        self.eva_screen.ids.EV2_EVAtime.text = "Total EVA Time = " + str(EV2_hours) + ":" + str(EV2_minutes)
+        self.eva_screen.ids.EV1_EVAtime.text = "Total EVA Time = " + str(EV1_hours) + "h " + str(EV1_minutes) + "m"
+        self.eva_screen.ids.EV2_EVAtime.text = "Total EVA Time = " + str(EV2_hours) + "h " + str(EV2_minutes) + "m"
 
     def checkTwitter(self, dt):
         background_thread = Thread(target=self.checkTwitter2)
@@ -613,7 +613,7 @@ class MainApp(App):
         global EV2
 
         try:
-            stuff = api.user_timeline(screen_name = 'iss_mimic', count = 1, include_rts = False, tweet_mode = 'extended')
+            stuff = api.user_timeline(screen_name = 'iss101', count = 1, include_rts = False, tweet_mode = 'extended')
         except:
             errorlog.write(str(datetime.datetime.utcnow()))
             errorlog.write(' ')
@@ -701,11 +701,10 @@ class MainApp(App):
         mimiclog.write('\n')
         global EVAinProgress
 
-        if EVAinProgress:
-            self.mimic_screen.ids.EVA_button.background_color = (0,0,1,1)
-            def reset_color(*args):
-                self.mimic_screen.ids.EVA_button.background_color = (1,1,1,1)
-            Clock.schedule_once(reset_color, 0.5) 
+        self.mimic_screen.ids.EVA_button.background_color = (0,0,1,1)
+        def reset_color(*args):
+            self.mimic_screen.ids.EVA_button.background_color = (1,1,1,1)
+        Clock.schedule_once(reset_color, 0.5) 
     
     def EVA_clock(self, dt):
         mimiclog.write(str(datetime.datetime.utcnow()))
@@ -732,7 +731,7 @@ class MainApp(App):
                 minutes = 0
                 hours += 1
         self.eva_screen.ids.EVA_clock.text =(str(hours) + ":" + str(minutes).zfill(2) + ":" + str(int(seconds)).zfill(2))
-        self.eva_screen.ids.EVA_clock.color = (0,1,0)
+        self.eva_screen.ids.EVA_clock.color = 0.33,0.7,0.18
 
     def animate(self, instance):
         mimiclog.write(str(datetime.datetime.utcnow()))
@@ -1088,7 +1087,7 @@ class MainApp(App):
         c4a = "{:.2f}".format(float((values[39])[0]))
         c4b = "{:.2f}".format(float((values[40])[0]))
         
-        airlock_pump = int((values[72])[0])
+        airlock_pump = int((values[71])[0])
         crewlockpres = float((values[16])[0])
 
         #reverse = False 
@@ -1100,7 +1099,7 @@ class MainApp(App):
         #    airlock_pump = 0
         #    testfactor = 1
         #else:
-        #    airlock_pump
+        #    airlock_pump = 1
 
         #if(float(crewlockpres) >= 758):
         #    airlock_pump = 1
@@ -1113,13 +1112,13 @@ class MainApp(App):
 
         #crewlockpres = crewlockpres - (-10*testfactor)
 
-        if airlock_pump or crewlockpres < 744:
+        if airlock_pump==1 or crewlockpres < 744:
             EVA_activities = True
             Clock.schedule_interval(self.flashEVAbutton, 1)
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             self.eva_screen.ids.EVA_occuring.text = "EVA Standby"
 
-        if ~airlock_pump and crewlockpres > 744:
+        if airlock_pump==0 and crewlockpres > 744:
             EVA_activities = False
             self.eva_screen.ids.EVA_occuring.text = "Currently No EVA"
             self.eva_screen.ids.EVA_occuring.color = 1,0,0
@@ -1128,7 +1127,8 @@ class MainApp(App):
         if 0.0193368*crewlockpres < 0.0386735: #PSI
             EVAinProgress = True
             self.eva_screen.ids.EVA_occuring.text = "EVA In Progress!!!"
-            self.eva_screen.ids.EVA_occuring.color = 0,1,0
+            self.eva_screen.ids.EVA_occuring.color = 0.33,0.7,0.18
+            self.eva_screen.ids.leak_timer.text = "Complete"
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/InProgressLights.png'
             Clock.schedule_interval(self.EVA_clock, 1)
 
@@ -1167,7 +1167,7 @@ class MainApp(App):
         if airlock_pump == 1 and ~leak_hold and crewlockpres < 744:
             self.eva_screen.ids.EVA_occuring.text = "Crewlock Depressurizing"
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
-            self.eva_screen.ids.leak_timer.text = "Leak Check Timer"
+            #iself.eva_screen.ids.leak_timer.text = "Leak Check Timer"
             depress = True
             repress = False
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/DepressLights.png'

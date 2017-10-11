@@ -6,7 +6,7 @@
     FloatLayout:
         Image:
             id: US_EVA_background
-            source: './imgs/eva/USpageEVAbase44.png'
+            source: './imgs/eva/USpageEVAbase.png'
             allow_stretch: False
             ##size_hint_y: 1
             ##keep_ratio: False
@@ -64,23 +64,22 @@
             font_size: 14
         AsyncImage:
             id: EV1_Pic
-            ##source: "http://howmanypeopleareinspacerightnow.com/app/biophotos/randy-bresnik.jpg"
-            source: "http://pbs.twimg.com/media/DJm3BvbXkAAuMzp.jpg"
+            source: './imgs/eva/GuageBar.png'
             size_hint_y: 0.2
             allow_stretch: False
             keep_ratio: True
             pos_hint: {"center_x": 0.756, "center_y": 0.293}
         AsyncImage:
             id: EV2_Pic
-            ##source: "https://upload.wikimedia.org/wikipedia/commons/8/83/Mark_Vande_Hei%2C_official_portrait.jpg"
-            source: "http://pbs.twimg.com/media/DJm3BvbXkAAuMzp.jpg"
+            source: './imgs/eva/GuageBar.png'
             size_hint_y: 0.2
             allow_stretch: False
             keep_ratio: True
             pos_hint: {"center_x": 0.886, "center_y": 0.293}
         AsyncImage:
             id: EVAimage
-            source: "http://pbs.twimg.com/media/DJm3BvbXkAAuMzp.jpg"
+            ##source: "http://pbs.twimg.com/media/DJm3BvbXkAAuMzp.jpg"
+            source: './imgs/eva/GuageBar.png'
             size_hint_y: 0.38
             allow_stretch: False
             keep_ratio: True
@@ -100,7 +99,7 @@
             text_size: self.width, None
             markup: True
             color: 1,1,1
-            font_size: 20
+            font_size: 12
         Label:
             id: EVAstatus_credit 
             pos_hint: {"center_x": 0.3, "center_y": 0.05}
