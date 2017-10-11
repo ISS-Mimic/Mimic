@@ -482,7 +482,7 @@ class MainApp(App):
         root.add_widget(self.crew_screen)
         root.add_widget(self.settings_screen)
         root.add_widget(ManualControlScreen(name = 'manualcontrol'))
-        root.current = 'main' #change this back to main when done with eva setup
+        root.current = 'eva' #change this back to main when done with eva setup
 
         Clock.schedule_interval(self.update_labels, 1)
         Clock.schedule_interval(self.deleteURLPictures, 86400)
@@ -542,13 +542,10 @@ class MainApp(App):
         global EV2
 
         eva_url = 'http://spacefacts.de/eva/e_eva_az.htm'
-        #self.eva_screen.ids.EV1.text = "Loading url thingy"
         urlthingy = urllib2.urlopen(eva_url)
-        #self.eva_screen.ids.EV1.text = "Loaded url thingy"
         soup = BeautifulSoup(urlthingy, 'html.parser')
-        #self.eva_screen.ids.EV1.text = "soupify loaded"
-
-        #print soup.find("td", text=name)
+        print name1
+        print soup.find("td", text=name1)
         if str(soup.find("td", text=name1)) == "None":
             numEVAs1 = 0
             EVAtime_hours1 = 0
@@ -559,6 +556,8 @@ class MainApp(App):
             EVAtime_minutes1 = int(soup.find("td", text=name1).find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
             EVAtime_minutes1 += (EVAtime_hours1 * 60)
         
+        print name2
+        print soup.find("td", text=name2)
         if str(soup.find("td", text=name2)) == "None":
             numEVAs2 = 0
             EVAtime_hours2 = 0
@@ -613,7 +612,7 @@ class MainApp(App):
         global EV2
 
         try:
-            stuff = api.user_timeline(screen_name = 'iss101', count = 1, include_rts = False, tweet_mode = 'extended')
+            stuff = api.user_timeline(screen_name = 'iss_mimic', count = 1, include_rts = True, tweet_mode = 'extended')
         except:
             errorlog.write(str(datetime.datetime.utcnow()))
             errorlog.write(' ')
@@ -622,7 +621,7 @@ class MainApp(App):
         try:
             stuff
         except NameError:
-            print "Stuff isn't defined"
+            print "No tweet - ensure correct time is set"
         else:
             for status in stuff:
                 if status.full_text == latest_tweet:
@@ -641,6 +640,7 @@ class MainApp(App):
         self.eva_screen.ids.EVAstatus.text = str(tweet_string_no_emojis.split("http",1)[0])
 
         EVnames = []
+        EVpics = []
         index = 0
 
         if ("EVA BEGINS" in latest_tweet) and latest_tweet.count('@') == 2 and different_tweet:
@@ -650,6 +650,7 @@ class MainApp(App):
                 if index == -1:
                     break
                 EVnames.append(str(latest_tweet[index:]))
+                EVpics.append("")
                 index += 1
             count = 0
             while count < len(EVnames):
@@ -657,7 +658,9 @@ class MainApp(App):
                 count += 1
             count = 0
             while count < len(EVnames):
+                EVpics[count] = str(api.get_user(EVnames[count]).profile_image_url)
                 EVnames[count] = str(api.get_user(EVnames[count]).name)
+                EVpics[count] = EVpics[count].replace("_normal","_bigger")
                 count += 1
 
         if crew_mention:
@@ -667,25 +670,9 @@ class MainApp(App):
             #EV2_surname = 'Hei'
             EV1 = EVnames[0]
             EV2 = EVnames[1]
-
-            ###########images from api not working maybe no hotlinking allowed########
-            ##EV1index = 0
-            #EV2index = 0
-
-            #count2 = 0
-            #while count2 < len(crewmember):
-            #    if str(EV1_surname) in crewmember[count2]:
-            #        EV1index = count2
-            #        count2 += 1
-
-            #count2 = 0
-            #while count2 < len(crewmember):
-            #    if str(EV2_surname) in crewmember[count2]:
-            #        EV2index = count2
-            #        count2 += 1
-            
-            #self.eva_screen.ids.EV1_Pic.source = str(crewmemberpicture[EV1index])
-            #self.eva_screen.ids.EV2_Pic.source = str(crewmemberpicture[EV2index])
+            print EV2
+            self.eva_screen.ids.EV1_Pic.source = str(EVpics[0])
+            self.eva_screen.ids.EV2_Pic.source = str(EVpics[1])
 
             background_thread = Thread(target=self.check_EVA_stats, args=(EV1_surname,EV2_surname))
             background_thread.daemon = True
