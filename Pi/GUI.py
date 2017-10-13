@@ -526,7 +526,7 @@ class MainApp(App):
         if urlindex > urlsize-1:
             urlindex = 0
 
-    def check_EVA_stats(self, name1,name2):                
+    def check_EVA_stats(self,lastname1,firstname1,lastname2,firstname2):                
         mimiclog.write(str(datetime.datetime.utcnow()))
         mimiclog.write(' ')
         mimiclog.write(str("check EVA stats"))
@@ -544,29 +544,30 @@ class MainApp(App):
         eva_url = 'http://spacefacts.de/eva/e_eva_az.htm'
         urlthingy = urllib2.urlopen(eva_url)
         soup = BeautifulSoup(urlthingy, 'html.parser')
-        print name1
-        print soup.find("td", text=name1)
-        if str(soup.find("td", text=name1)) == "None":
-            numEVAs1 = 0
-            EVAtime_hours1 = 0
-            EVAtime_minutes1 = 0
-        else:
-            numEVAs1 = int(soup.find("td", text=name1).find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
-            EVAtime_hours1 = int(soup.find("td", text=name1).find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
-            EVAtime_minutes1 = int(soup.find("td", text=name1).find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
-            EVAtime_minutes1 += (EVAtime_hours1 * 60)
         
-        print name2
-        print soup.find("td", text=name2)
-        if str(soup.find("td", text=name2)) == "None":
-            numEVAs2 = 0
-            EVAtime_hours2 = 0
-            EVAtime_minutes2 = 0
-        else:
-            numEVAs2 = int(soup.find("td", text=name2).find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
-            EVAtime_hours2 = int(soup.find("td", text=name2).find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
-            EVAtime_minutes2 = int(soup.find("td", text=name2).find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
-            EVAtime_minutes2 += (EVAtime_hours2 * 60)
+        numEVAs1 = 0
+        EVAtime_hours1 = 0
+        EVAtime_minutes1 = 0
+        numEVAs2 = 0
+        EVAtime_hours2 = 0
+        EVAtime_minutes2 = 0
+
+        tabletags = soup.find_all("td")
+        for tag in tabletags:
+            if lastname1 in tag.text:
+                if firstname1 in tag.find_next_sibling("td").text:
+                    numEVAs1 = tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text
+                    EVAtime_hours1 = int(tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
+                    EVAtime_minutes1 = int(tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
+                    EVAtime_minutes1 += (EVAtime_hours1 * 60)
+
+        for tag in tabletags:
+            if lastname2 in tag.text:
+                if firstname2 in tag.find_next_sibling("td").text:
+                    numEVAs2 = tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text
+                    EVAtime_hours2 = int(tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
+                    EVAtime_minutes2 = int(tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
+                    EVAtime_minutes2 += (EVAtime_hours2 * 60)
         
         EV1_EVA_number = numEVAs1 
         EV1_EVA_time  = EVAtime_minutes1
@@ -612,6 +613,7 @@ class MainApp(App):
         global EV2
 
         try:
+            #stuff = api.user_timeline(screen_name = 'iss101', count = 1, include_rts = True, tweet_mode = 'extended')
             stuff = api.user_timeline(screen_name = 'iss_mimic', count = 1, include_rts = True, tweet_mode = 'extended')
         except:
             errorlog.write(str(datetime.datetime.utcnow()))
@@ -665,16 +667,17 @@ class MainApp(App):
 
         if crew_mention:
             EV1_surname = EVnames[0].split()[-1]
+            EV1_firstname = EVnames[0].split()[0]
             #EV1_surname = 'Bresnik'
             EV2_surname = EVnames[1].split()[-1]
+            EV2_firstname = EVnames[1].split()[0]
             #EV2_surname = 'Hei'
             EV1 = EVnames[0]
             EV2 = EVnames[1]
-            print EV2
             self.eva_screen.ids.EV1_Pic.source = str(EVpics[0])
             self.eva_screen.ids.EV2_Pic.source = str(EVpics[1])
 
-            background_thread = Thread(target=self.check_EVA_stats, args=(EV1_surname,EV2_surname))
+            background_thread = Thread(target=self.check_EVA_stats, args=(EV1_surname,EV1_firstname,EV2_surname,EV2_firstname))
             background_thread.daemon = True
             background_thread.start()
             #self.check_EVA_stats(EV1_surname,EV2surname)
@@ -1076,7 +1079,6 @@ class MainApp(App):
         
         airlock_pump = int((values[71])[0])
         crewlockpres = float((values[16])[0])
-
         #reverse = False 
         #if(crewlockpres <= 2):
         #    airlock_pump = 0
