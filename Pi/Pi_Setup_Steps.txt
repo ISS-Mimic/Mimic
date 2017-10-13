@@ -3,9 +3,9 @@ From Clean Raspbian Install:
   2.) Install Vim
   3.) Enable I2C (sudo raspi-config)
   4.) Install Node JS
-  5.) git clone https://github.com/ISS-Mimic/Mimic.git
-  6.) npm install lighstreamer-client and dependencies 
-  7.) npm install sqlite3
+  5.) "git clone https://github.com/ISS-Mimic/Mimic.git"
+  6.) "npm install lighstreamer-client" (and dependencies to that package) 
+  7.) "sudo apt-get install sqlite3"
   8.) Install kivy (best tutorial http://mattrichardson.com/kivy-gpio-raspberry-pi-touch/index.html)
   9.) Install python naked.toolshed.shell
     9a.) downloaded Naked source zip from github, unzipped, sudo python setup.py install (http://sweetme.at/2014/02/17/a-simple-approach-to-execute-a-node.js-script-from-python/)
