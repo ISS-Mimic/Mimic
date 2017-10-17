@@ -29,8 +29,9 @@
         Image:
             id: Crewlock_Status_image
             source: './imgs/eva/BlankLights.png'
-            size_hint_x: 0.25
-            pos_hint: {"center_x": 0.82, "center_y": 0.8}
+            ##size_hint_x: 0.28
+            size_hint_y: 0.14
+            pos_hint: {"center_x": 0.83, "center_y": 0.8}
             allow_stretch: False
             keep_ratio: True
         Image:
@@ -64,18 +65,32 @@
             font_size: 14
         AsyncImage:
             id: EV1_Pic
-            source: './imgs/eva/GuageBar.png'
-            size_hint_y: 0.2
-            allow_stretch: False
+            source: "http://pbs.twimg.com/media/DJm3BvbXkAAuMzp.jpg"
+            size_hint_y: 0.17
+            allow_stretch: True
             keep_ratio: True
-            pos_hint: {"center_x": 0.756, "center_y": 0.293}
+            pos_hint: {"center_x": 0.763, "center_y": 0.293}
+        Label:
+            id: EV1_name
+            pos_hint: {"center_x": 0.763, "center_y": 0.12}
+            text: 'EV1'
+            markup: True
+            color: 0,0,0
+            font_size: 18
         AsyncImage:
             id: EV2_Pic
-            source: './imgs/eva/GuageBar.png'
-            size_hint_y: 0.2
-            allow_stretch: False
+            source: "http://pbs.twimg.com/media/DJm3BvbXkAAuMzp.jpg"
+            size_hint_y: 0.17
+            allow_stretch: True
             keep_ratio: True
-            pos_hint: {"center_x": 0.886, "center_y": 0.293}
+            pos_hint: {"center_x": 0.894, "center_y": 0.293}
+        Label:
+            id: EV2_name
+            pos_hint: {"center_x": 0.894, "center_y": 0.12}
+            text: 'EV2'
+            markup: True
+            color: 0,0,0
+            font_size: 18
         AsyncImage:
             id: EVAimage
             ##source: "http://pbs.twimg.com/media/DJm3BvbXkAAuMzp.jpg"
@@ -93,17 +108,17 @@
             on_release: app.root.current = 'eva_pictures'
         Label:
             id: EVAstatus  
-            pos_hint: {"center_x": 0.199, "center_y": 0.17}
+            pos_hint: {"center_x": 0.199, "center_y": 0.35}
             size_hint: 0.35,0.35
             text: ''
             text_size: self.width, None
             markup: True
             color: 1,1,1
-            font_size: 12
+            font_size: 18
         Label:
             id: EVAstatus_credit 
-            pos_hint: {"center_x": 0.3, "center_y": 0.05}
-            size_hint: 0.3,0.03
+            pos_hint: {"center_x": 0.22, "center_y": 0.07}
+            size_hint: 0.27,0.04
             text: 'from @iss101'
             text_size: self.width, None
             markup: True
@@ -120,7 +135,7 @@
             font_size: 70
         Label:
             id: EV1
-            pos_hint: {"center_x": 0.55, "center_y": 0.55}
+            pos_hint: {"center_x": 0.55, "center_y": 0.5}
             size_hint: 0.3,0.15
             text: 'EV1 Crewmember:'
             text_size: self.width, None
@@ -129,7 +144,7 @@
             font_size: 18
         Label:
             id: EV1_EVAnum
-            pos_hint: {"center_x": 0.55, "center_y": 0.5}
+            pos_hint: {"center_x": 0.55, "center_y": 0.45}
             size_hint: 0.3,0.15
             text: 'Number of EVAs = 0'
             text_size: self.width, None
@@ -138,7 +153,7 @@
             font_size: 18
         Label:
             id: EV1_EVAtime
-            pos_hint: {"center_x": 0.55, "center_y": 0.45}
+            pos_hint: {"center_x": 0.55, "center_y": 0.4}
             size_hint: 0.3,0.15
             text: 'Total EVA Time = 0:00'
             text_size: self.width, None
@@ -147,7 +162,7 @@
             font_size: 18
         Label:
             id: EV2
-            pos_hint: {"center_x": 0.55, "center_y": 0.385}
+            pos_hint: {"center_x": 0.55, "center_y": 0.335}
             size_hint: 0.3,0.15
             text: 'EV2 Crewmember:'
             text_size: self.width, None
@@ -156,7 +171,7 @@
             font_size: 18
         Label:
             id: EV2_EVAnum
-            pos_hint: {"center_x": 0.55, "center_y": 0.335}
+            pos_hint: {"center_x": 0.55, "center_y": 0.285}
             size_hint: 0.3,0.15
             text: 'Number of EVAs = 0'
             text_size: self.width, None
@@ -165,7 +180,7 @@
             font_size: 18
         Label:
             id: EV2_EVAtime
-            pos_hint: {"center_x": 0.55, "center_y": 0.285}
+            pos_hint: {"center_x": 0.55, "center_y": 0.235}
             size_hint: 0.3,0.15
             text: 'Total EVA Time = 0:00'
             text_size: self.width, None
@@ -196,9 +211,9 @@
             color: 1,1,1
             font_size: 20
         Button:
-            size_hint: 0.08,0.1
-            #pos_hint: {"Left": 1, "Bottom": 1}
-            pos_hint: {"center_x": 0.4365, "center_y": 0.2}
+            size_hint: 0.1,0.1
+            ##pos_hint: {"Left": 1, "Bottom": 1}
+            pos_hint: {"center_x": 0.32, "center_y": 0.085}
             background_normal: './imgs/eva/BackButton.png'
             text: ''
             font_size: 30

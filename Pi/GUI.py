@@ -616,6 +616,7 @@ class MainApp(App):
             #stuff = api.user_timeline(screen_name = 'iss101', count = 1, include_rts = True, tweet_mode = 'extended')
             stuff = api.user_timeline(screen_name = 'iss_mimic', count = 1, include_rts = True, tweet_mode = 'extended')
         except:
+            self.eva_screen.ids.EVAstatus.text = str("Twitter Error")
             errorlog.write(str(datetime.datetime.utcnow()))
             errorlog.write(' ')
             errorlog.write("Tweepy - Error Retrieving Tweet, make sure clock is correct")
@@ -624,6 +625,7 @@ class MainApp(App):
             stuff
         except NameError:
             print "No tweet - ensure correct time is set"
+            self.eva_screen.ids.EVAstatus.text = str("Twitter Error")
         else:
             for status in stuff:
                 if status.full_text == latest_tweet:
@@ -675,7 +677,9 @@ class MainApp(App):
             EV1 = EVnames[0]
             EV2 = EVnames[1]
             self.eva_screen.ids.EV1_Pic.source = str(EVpics[0])
+            self.eva_screen.ids.EV1_name.text = str(EV1_firstname)
             self.eva_screen.ids.EV2_Pic.source = str(EVpics[1])
+            self.eva_screen.ids.EV2_name.text = str(EV2_firstname)
 
             background_thread = Thread(target=self.check_EVA_stats, args=(EV1_surname,EV1_firstname,EV2_surname,EV2_firstname))
             background_thread.daemon = True
@@ -1079,6 +1083,7 @@ class MainApp(App):
         
         airlock_pump = int((values[71])[0])
         crewlockpres = float((values[16])[0])
+        airlockpres = float((values[77])[0])
         #reverse = False 
         #if(crewlockpres <= 2):
         #    airlock_pump = 0
@@ -1100,10 +1105,22 @@ class MainApp(App):
         #    airlock_pump = 1
 
         #crewlockpres = crewlockpres - (-10*testfactor)
+        if airlock_pump==1 and airlockpres < 744:
+            prebreath = True
+            self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/InProgressLights.png'
+            ##change that image to the prebreath image when uploaded
+            self.eva_screen.ids.EVA_occuring.color = 0,0,1
+            self.eva_screen.ids.EVA_occuring.text = "Pre-EVA Nitrogen Purge in Progress"
+        else:
+            prebreath = False
 
         if airlock_pump==1 or crewlockpres < 744:
-            EVA_activities = True
             Clock.schedule_interval(self.flashEVAbutton, 1)
+            EVA_activities = True
+
+        if EVA_activities and ~prebreath :
+            self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/InProgressLights.png'
+            ##change that image to the standby image when uploaded
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             self.eva_screen.ids.EVA_occuring.text = "EVA Standby"
 
@@ -1211,10 +1228,10 @@ class MainApp(App):
             self.serialWrite("Beta4B=" + beta4b + " ")
             self.serialWrite("Beta4A=" + beta4a + " ")
             self.serialWrite("AOS=" + aos + " ")
-	    self.serialWrite("Current1A=" + c1a + " ")
-	    self.serialWrite("Current1B=" + c1b + " ")
-	    self.serialWrite("Current3A=" + c3a + " ")
-	    self.serialWrite("Current3B=" + c3b + " ")
+            self.serialWrite("Current1A=" + c1a + " ")
+            self.serialWrite("Current1B=" + c1b + " ")
+            self.serialWrite("Current3A=" + c3a + " ")
+            self.serialWrite("Current3B=" + c3b + " ")
        
         self.eps_screen.ids.psarj_value.text = psarj
         self.eps_screen.ids.ssarj_value.text = ssarj
@@ -1274,23 +1291,23 @@ class MainApp(App):
             self.mimic_screen.ids.aosvalue.text = "Stale Signal!"
 
         if (mimicbutton == True and float(aos) == 1.00): 
-             self.serialWrite("PSARJ=" + psarj + " ")
-             self.serialWrite("SSARJ=" + ssarj + " ")
-             self.serialWrite("PTRRJ=" + ptrrj + " ")
-             self.serialWrite("STRRJ=" + strrj + " ")
-             self.serialWrite("Beta1B=" + beta1b + " ")
-             self.serialWrite("Beta1A=" + beta1a + " ")
-             self.serialWrite("Beta2B=" + beta2b + " ")
-             self.serialWrite("Beta2A=" + beta2a + " ")
-             self.serialWrite("Beta3B=" + beta3b + " ")
-             self.serialWrite("Beta3A=" + beta3a + " ")
-             self.serialWrite("Beta4B=" + beta4b + " ")
-             self.serialWrite("Beta4A=" + beta4a + " ")
-             self.serialWrite("AOS=" + aos + " ")
-	     self.serialWrite("Current1A=" + c1a + " ")
-	     self.serialWrite("Current1B=" + c1b + " ")
-	     self.serialWrite("Current3A=" + c3a + " ")
-	     self.serialWrite("Current3B=" + c3b + " ")
+            self.serialWrite("PSARJ=" + psarj + " ")
+            self.serialWrite("SSARJ=" + ssarj + " ")
+            self.serialWrite("PTRRJ=" + ptrrj + " ")
+            self.serialWrite("STRRJ=" + strrj + " ")
+            self.serialWrite("Beta1B=" + beta1b + " ")
+            self.serialWrite("Beta1A=" + beta1a + " ")
+            self.serialWrite("Beta2B=" + beta2b + " ")
+            self.serialWrite("Beta2A=" + beta2a + " ")
+            self.serialWrite("Beta3B=" + beta3b + " ")
+            self.serialWrite("Beta3A=" + beta3a + " ")
+            self.serialWrite("Beta4B=" + beta4b + " ")
+            self.serialWrite("Beta4A=" + beta4a + " ")
+            self.serialWrite("AOS=" + aos + " ")
+            self.serialWrite("Current1A=" + c1a + " ")
+            self.serialWrite("Current1B=" + c1b + " ")
+            self.serialWrite("Current3A=" + c3a + " ")
+            self.serialWrite("Current3B=" + c3b + " ")
 
 #All GUI Screens are on separate kv files
 Builder.load_file('MainScreen.kv')

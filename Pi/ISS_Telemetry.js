@@ -5,7 +5,7 @@ function alert(message)
 var ls = require("lightstreamer-client");
 var sqlite3 = require("sqlite3");
 var db = new sqlite3.Database("iss_telemetry.db");
-var telemetry = require("./identifiers.js");
+var telemetry = require("./Telemetry_identifiers.js");
 var classes = ["TimeStamp", "Value"];
 
 var lsClient = new ls.LightstreamerClient("http://push.lightstreamer.com", "ISSLIVE");
