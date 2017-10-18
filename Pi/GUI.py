@@ -1011,6 +1011,36 @@ class MainApp(App):
             self.eva_screen.ids.leak_timer.text = "Complete"
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/DepressLights.png'
 
+    def signal_lost(self):
+        #self.orbit_screen.ids.signal.source = './imgs/SignalLost.png'
+        #self.fakeorbit_screen.ids.signal.source = './imgs/SignalLost.png'
+        #self.mimic_screen.ids.signal.source = './imgs/SignalLost.png'
+        #self.eps_screen.ids.signal.source = './imgs/SignalLost.png'
+        #self.ct_screen.ids.signal.source = './imgs/SignalLost.png'
+        #self.tcs_screen.ids.signal.source = './imgs/SignalLost.png'
+        #self.crew_screen.ids.signal.source = './imgs/SignalLost.png'
+        self.eva_screen.ids.signal.source = './imgs/SignalLost.png'
+
+    def signal_acquired(self):
+        #self.orbit_screen.ids.signal.source = './imgs/SignalAcquired.png'
+        #self.fakeorbit_screen.ids.signal.source = './imgs/SignalAcquired.png'
+        #self.mimic_screen.ids.signal.source = './imgs/SignalAcquired.png'
+        #self.eps_screen.ids.signal.source = './imgs/SignalAcquired.png'
+        #self.ct_screen.ids.signal.source = './imgs/SignalAcquired.png'
+        #self.tcs_screen.ids.signal.source = './imgs/SignalAcquired.png'
+        #self.crew_screen.ids.signal.source = './imgs/SignalAcquired.png'
+        self.eva_screen.ids.signal.source = './imgs/SignalAcquired.png'
+
+    def signal_stale(self):
+        #self.orbit_screen.ids.signal.source = './imgs/SignalAcquired.png'
+        #self.fakeorbit_screen.ids.signal.source = './imgs/SignalAcquired.png'
+        #self.mimic_screen.ids.signal.source = './imgs/SignalAcquired.png'
+        #self.eps_screen.ids.signal.source = './imgs/SignalAcquired.png'
+        #self.ct_screen.ids.signal.source = './imgs/SignalAcquired.png'
+        #self.tcs_screen.ids.signal.source = './imgs/SignalAcquired.png'
+        #self.crew_screen.ids.signal.source = './imgs/SignalAcquired.png'
+        self.eva_screen.ids.signal.source = './imgs/SignalAcquired.png'
+
     def update_labels(self, dt):
         global mimicbutton,switchtofake,fakeorbitboolean,psarj2,ssarj2,manualcontrol,psarj,ssarj,ptrrj,strrj,beta1b,beta1a,beta2b,beta2a,beta3b,beta3a,beta4b,beta4a,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,c1a,c1b,c3a,c3b,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress
         
@@ -1107,7 +1137,7 @@ class MainApp(App):
         #crewlockpres = crewlockpres - (-10*testfactor)
         if airlock_pump==1 and airlockpres < 744:
             prebreath = True
-            self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/InProgressLights.png'
+            self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/PreBreatheLights.png'
             ##change that image to the prebreath image when uploaded
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             self.eva_screen.ids.EVA_occuring.text = "Pre-EVA Nitrogen Purge in Progress"
@@ -1119,7 +1149,7 @@ class MainApp(App):
             EVA_activities = True
 
         if EVA_activities and ~prebreath :
-            self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/InProgressLights.png'
+            self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/StandbyLights.png'
             ##change that image to the standby image when uploaded
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             self.eva_screen.ids.EVA_occuring.text = "EVA Standby"
@@ -1279,16 +1309,19 @@ class MainApp(App):
                if mimicbutton == True:
                    switchtofake = False
             self.mimic_screen.ids.aosvalue.text = "Signal Acquired!"
+            self.signal_acquired()
         elif float(aos) == 0.00:
             self.changeColors(1,0,0)
             if self.root.current == 'mimic':
                fakeorbitboolean = True
             self.mimic_screen.ids.aosvalue.text = "Signal Lost"
+            self.signal_lost()
         elif float(aos) == 2.00:
             self.changeColors(1,0.5,0)
             if self.root.current == 'mimic':
                fakeorbitboolean = True
             self.mimic_screen.ids.aosvalue.text = "Stale Signal!"
+            self.signal_stale()
 
         if (mimicbutton == True and float(aos) == 1.00): 
             self.serialWrite("PSARJ=" + psarj + " ")
