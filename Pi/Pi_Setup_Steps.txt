@@ -31,4 +31,6 @@ From Clean Raspbian Install:
         - Command: sudo apt-get install python-bs4
     11.) Install tweepy
         - Command: sudo apt-get install python-tweepy
-
+    12.) Update the video memory split split
+        - Command: sudo vim /boot/config.txt
+        - Add to end of file: gpu_mem=256
