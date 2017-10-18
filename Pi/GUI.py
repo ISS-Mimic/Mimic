@@ -119,6 +119,7 @@ different_tweet = False
 conn = sqlite3.connect('iss_telemetry.db') #sqlite database call change to include directory
 c = conn.cursor() 
 val = ""
+lastsignal = 0
 testvalue = 0
 alternate = True       
 Beta4Bcontrol = False
@@ -266,30 +267,30 @@ class ManualControlScreen(Screen):
         global SSARJcontrol
         global PTRRJcontrol
         global STRRJcontrol
-	if str(args[1])=="Beta4B":
-	    Beta4Bcontrol = True
-	if str(args[1])=="Beta3B":
-	    Beta3Bcontrol = True
-	if str(args[1])=="Beta2B":
-	    Beta2Bcontrol = True
-	if str(args[1])=="Beta1B":
-	    Beta1Bcontrol = True
-	if str(args[1])=="Beta4A":
-	    Beta4Acontrol = True
-	if str(args[1])=="Beta3A":
-	    Beta3Acontrol = True
-	if str(args[1])=="Beta2A":
-	    Beta2Acontrol = True
-	if str(args[1])=="Beta1A":
-	    Beta1Acontrol = True
-	if str(args[1])=="PTRRJ":
-	    PTRRJcontrol = True
-	if str(args[1])=="STRRJ":
-	    STRRJcontrol = True
-	if str(args[1])=="PSARJ":
-	    PSARJcontrol = True
-	if str(args[1])=="SSARJ":
-	    SSARJcontrol = True
+        if str(args[1])=="Beta4B":
+            Beta4Bcontrol = True
+        if str(args[1])=="Beta3B":
+            Beta3Bcontrol = True
+        if str(args[1])=="Beta2B":
+            Beta2Bcontrol = True
+        if str(args[1])=="Beta1B":
+            Beta1Bcontrol = True
+        if str(args[1])=="Beta4A":
+            Beta4Acontrol = True
+        if str(args[1])=="Beta3A":
+            Beta3Acontrol = True
+        if str(args[1])=="Beta2A":
+            Beta2Acontrol = True
+        if str(args[1])=="Beta1A":
+            Beta1Acontrol = True
+        if str(args[1])=="PTRRJ":
+            PTRRJcontrol = True
+        if str(args[1])=="STRRJ":
+            STRRJcontrol = True
+        if str(args[1])=="PSARJ":
+            PSARJcontrol = True
+        if str(args[1])=="SSARJ":
+            SSARJcontrol = True
 
     def incrementActive(self, *args):
         global Beta4Bcontrol
@@ -1012,34 +1013,56 @@ class MainApp(App):
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/DepressLights.png'
 
     def signal_lost(self):
-        #self.orbit_screen.ids.signal.source = './imgs/SignalLost.png'
-        #self.fakeorbit_screen.ids.signal.source = './imgs/SignalLost.png'
-        #self.mimic_screen.ids.signal.source = './imgs/SignalLost.png'
-        #self.eps_screen.ids.signal.source = './imgs/SignalLost.png'
-        #self.ct_screen.ids.signal.source = './imgs/SignalLost.png'
-        #self.tcs_screen.ids.signal.source = './imgs/SignalLost.png'
-        #self.crew_screen.ids.signal.source = './imgs/SignalLost.png'
-        self.eva_screen.ids.signal.source = './imgs/SignalLost.png'
+        self.orbit_screen.ids.signal.source = './imgs/SignalRedGray.png'
+        self.mimic_screen.ids.signal.source = './imgs/SignalRedGray.png'
+        self.eps_screen.ids.signal.source = './imgs/SignalRedGray.png'
+        self.ct_screen.ids.signal.source = './imgs/SignalRedGray.png'
+        self.tcs_screen.ids.signal.source = './imgs/SignalRedGray.png'
+        self.eva_screen.ids.signal.source = './imgs/SignalRedGray.png'
 
-    def signal_acquired(self):
-        #self.orbit_screen.ids.signal.source = './imgs/SignalAcquired.png'
-        #self.fakeorbit_screen.ids.signal.source = './imgs/SignalAcquired.png'
-        #self.mimic_screen.ids.signal.source = './imgs/SignalAcquired.png'
-        #self.eps_screen.ids.signal.source = './imgs/SignalAcquired.png'
-        #self.ct_screen.ids.signal.source = './imgs/SignalAcquired.png'
-        #self.tcs_screen.ids.signal.source = './imgs/SignalAcquired.png'
-        #self.crew_screen.ids.signal.source = './imgs/SignalAcquired.png'
-        self.eva_screen.ids.signal.source = './imgs/SignalAcquired.png'
+    def signal_acquired(self, dt):
+        global lastsignal
+
+        if lastsignal == 0:
+            self.orbit_screen.ids.signal.source = './imgs/SignalGreen1Gray.png'
+            self.mimic_screen.ids.signal.source = './imgs/SignalGreen1Gray.png'
+            self.eps_screen.ids.signal.source = './imgs/SignalGreen1Gray.png'
+            self.ct_screen.ids.signal.source = './imgs/SignalGreen1Gray.png'
+            self.tcs_screen.ids.signal.source = './imgs/SignalGreen1Gray.png'
+            self.eva_screen.ids.signal.source = './imgs/SignalGreen1Gray.png'
+            lastsignal = 1
+        elif lastsignal == 1:
+            self.orbit_screen.ids.signal.source = './imgs/SignalGreen2Gray.png'
+            self.mimic_screen.ids.signal.source = './imgs/SignalGreen2Gray.png'
+            self.eps_screen.ids.signal.source = './imgs/SignalGreen2Gray.png'
+            self.ct_screen.ids.signal.source = './imgs/SignalGreen2Gray.png'
+            self.tcs_screen.ids.signal.source = './imgs/SignalGreen2Gray.png'
+            self.eva_screen.ids.signal.source = './imgs/SignalGreen2Gray.png'
+            lastsignal = 2
+        elif lastsignal == 2:
+            self.orbit_screen.ids.signal.source = './imgs/SignalGreen3Gray.png'
+            self.mimic_screen.ids.signal.source = './imgs/SignalGreen3Gray.png'
+            self.eps_screen.ids.signal.source = './imgs/SignalGreen3Gray.png'
+            self.ct_screen.ids.signal.source = './imgs/SignalGreen3Gray.png'
+            self.tcs_screen.ids.signal.source = './imgs/SignalGreen3Gray.png'
+            self.eva_screen.ids.signal.source = './imgs/SignalGreen3Gray.png'
+            lastsignal = 3
+        else:
+            self.orbit_screen.ids.signal.source = './imgs/SignalGreen0Gray.png'
+            self.mimic_screen.ids.signal.source = './imgs/SignalGreen0Gray.png'
+            self.eps_screen.ids.signal.source = './imgs/SignalGreen0Gray.png'
+            self.ct_screen.ids.signal.source = './imgs/SignalGreen0Gray.png'
+            self.tcs_screen.ids.signal.source = './imgs/SignalGreen0Gray.png'
+            self.eva_screen.ids.signal.source = './imgs/SignalGreen0Gray.png'
+            lastsignal = 0
 
     def signal_stale(self):
-        #self.orbit_screen.ids.signal.source = './imgs/SignalAcquired.png'
-        #self.fakeorbit_screen.ids.signal.source = './imgs/SignalAcquired.png'
-        #self.mimic_screen.ids.signal.source = './imgs/SignalAcquired.png'
-        #self.eps_screen.ids.signal.source = './imgs/SignalAcquired.png'
-        #self.ct_screen.ids.signal.source = './imgs/SignalAcquired.png'
-        #self.tcs_screen.ids.signal.source = './imgs/SignalAcquired.png'
-        #self.crew_screen.ids.signal.source = './imgs/SignalAcquired.png'
-        self.eva_screen.ids.signal.source = './imgs/SignalAcquired.png'
+        self.orbit_screen.ids.signal.source = './imgs/SignalOrangeGray.png'
+        self.mimic_screen.ids.signal.source = './imgs/SignalOrangeGray.png'
+        self.eps_screen.ids.signal.source = './imgs/SignalOrangeGray.png'
+        self.ct_screen.ids.signal.source = './imgs/SignalOrangeGray.png'
+        self.tcs_screen.ids.signal.source = './imgs/SignalOrangeGray.png'
+        self.eva_screen.ids.signal.source = './imgs/SignalOrangeGray.png'
 
     def update_labels(self, dt):
         global mimicbutton,switchtofake,fakeorbitboolean,psarj2,ssarj2,manualcontrol,psarj,ssarj,ptrrj,strrj,beta1b,beta1a,beta2b,beta2a,beta3b,beta3a,beta4b,beta4a,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,c1a,c1b,c3a,c3b,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress
@@ -1145,7 +1168,7 @@ class MainApp(App):
             prebreath = False
 
         if airlock_pump==1 or crewlockpres < 744:
-            Clock.schedule_interval(self.flashEVAbutton, 1)
+            evaflashevent = Clock.schedule_interval(self.flashEVAbutton, 1)
             EVA_activities = True
 
         if EVA_activities and ~prebreath :
@@ -1158,7 +1181,13 @@ class MainApp(App):
             EVA_activities = False
             self.eva_screen.ids.EVA_occuring.text = "Currently No EVA"
             self.eva_screen.ids.EVA_occuring.color = 1,0,0
-            Clock.unschedule(self.flashEVAbutton)
+            #Clock.unschedule(self.flashEVAbutton)
+            try:
+                evaflashevent
+            except NameError:
+                pass
+            else:
+                evaflashevent.cancel()
 
         if 0.0193368*crewlockpres < 0.0386735: #PSI
             EVAinProgress = True
@@ -1166,7 +1195,7 @@ class MainApp(App):
             self.eva_screen.ids.EVA_occuring.color = 0.33,0.7,0.18
             self.eva_screen.ids.leak_timer.text = "Complete"
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/InProgressLights.png'
-            Clock.schedule_interval(self.EVA_clock, 1)
+            evatimerevent = Clock.schedule_interval(self.EVA_clock, 1)
 
         if crewlockpres > 744 and ~airlock_pump:
             self.eva_screen.ids.leak_timer.text = ""
@@ -1174,7 +1203,13 @@ class MainApp(App):
 
         if 0.0193368*crewlockpres > 0.0386735 and EVAinProgress: #PSI
             EVAinProgress = False
-            Clock.unschedule(self.EVA_clock)
+            #Clock.unschedule(self.EVA_clock)
+            try:
+                evatimerevent
+            except NameError:
+                pass
+            else:
+                evatimerevent.cancel()
         
         if crewlockpres >= 744: #torr
             EVAinProgress = False
@@ -1189,13 +1224,19 @@ class MainApp(App):
             firstcrossing = False
             self.eva_screen.ids.EVA_occuring.text = "Leak Check in Progress!"
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
-            Clock.schedule_interval(self.hold_timer, 1)
+            holdtimerevent = Clock.schedule_interval(self.hold_timer, 1)
 
         if leak_hold and crewlockpres < 256 and ~repress and airlock_pump:
             self.eva_screen.ids.EVA_occuring.text = "Crewlock Depressurizing"
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             leak_hold = False
-            Clock.unschedule(self.hold_timer)
+            #Clock.unschedule(self.hold_timer)
+            try:
+                holdtimerevent
+            except NameError:
+                pass
+            else:
+                holdtimerevent.cancel()
             self.eva_screen.ids.Hold_bar.pos_hint = {"center_x": 0.94, "center_y": 0.484}
             self.eva_screen.ids.leak_timer.text = "Complete"
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/DepressLights.png'
@@ -1309,18 +1350,38 @@ class MainApp(App):
                if mimicbutton == True:
                    switchtofake = False
             self.mimic_screen.ids.aosvalue.text = "Signal Acquired!"
-            self.signal_acquired()
+            #self.signal_acquired()
+            print Clock
+            try:
+                signalevent
+            except NameError:
+                signalevent = Clock.schedule_once(self.signal_acquired,2)
+                print "scheduling signal"
+            else:
+                pass
         elif float(aos) == 0.00:
             self.changeColors(1,0,0)
             if self.root.current == 'mimic':
                fakeorbitboolean = True
             self.mimic_screen.ids.aosvalue.text = "Signal Lost"
+            try:
+                signalevent
+            except NameError:
+                pass
+            else:
+                signalevent.cancel()
             self.signal_lost()
         elif float(aos) == 2.00:
             self.changeColors(1,0.5,0)
             if self.root.current == 'mimic':
                fakeorbitboolean = True
             self.mimic_screen.ids.aosvalue.text = "Stale Signal!"
+            try:
+                signalevent
+            except NameError:
+                pass
+            else:
+                signalevent.cancel()
             self.signal_stale()
 
         if (mimicbutton == True and float(aos) == 1.00): 
