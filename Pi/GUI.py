@@ -807,7 +807,7 @@ class MainApp(App):
         self.eps_screen.ids.c4b_value.color = args[0],args[1],args[2]
         self.eps_screen.ids.v4b_value.color = args[0],args[1],args[2]
         
-        self.mimic_screen.ids.aosvalue.color = args[0],args[1],args[2]
+        ##self.mimic_screen.ids.aosvalue.color = args[0],args[1],args[2]
     
     def changeManualControlBoolean(self, *args):
         global manualcontrol
@@ -1349,21 +1349,13 @@ class MainApp(App):
                fakeorbitboolean = False
                if mimicbutton == True:
                    switchtofake = False
-            self.mimic_screen.ids.aosvalue.text = "Signal Acquired!"
-            #self.signal_acquired()
-            print Clock
-            try:
-                signalevent
-            except NameError:
-                signalevent = Clock.schedule_once(self.signal_acquired,2)
-                print "scheduling signal"
-            else:
-                pass
+            ##self.mimic_screen.ids.aosvalue.text = "Signal Acquired!"
+            signalevent = Clock.schedule_once(self.signal_acquired,2)
         elif float(aos) == 0.00:
             self.changeColors(1,0,0)
             if self.root.current == 'mimic':
                fakeorbitboolean = True
-            self.mimic_screen.ids.aosvalue.text = "Signal Lost"
+            ##self.mimic_screen.ids.aosvalue.text = "Signal Lost"
             try:
                 signalevent
             except NameError:
@@ -1375,7 +1367,7 @@ class MainApp(App):
             self.changeColors(1,0.5,0)
             if self.root.current == 'mimic':
                fakeorbitboolean = True
-            self.mimic_screen.ids.aosvalue.text = "Stale Signal!"
+            ##self.mimic_screen.ids.aosvalue.text = "Stale Signal!"
             try:
                 signalevent
             except NameError:
