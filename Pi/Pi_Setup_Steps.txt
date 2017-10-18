@@ -1,11 +1,34 @@
 From Clean Raspbian Install:
-  1.) Expand Filesize / Update / Upgrade / Reboot
-  2.) Install Vim
-  3.) Enable I2C (sudo raspi-config)
-  4.) Install Node JS
-  5.) "git clone https://github.com/ISS-Mimic/Mimic.git"
-  6.) "npm install lighstreamer-client" (and dependencies to that package) 
-  7.) "sudo apt-get install sqlite3"
-  8.) Install kivy (best tutorial http://mattrichardson.com/kivy-gpio-raspberry-pi-touch/index.html)
-  9.) Install python naked.toolshed.shell
-    9a.) downloaded Naked source zip from github, unzipped, sudo python setup.py install (http://sweetme.at/2014/02/17/a-simple-approach-to-execute-a-node.js-script-from-python/)
+    1.) Expand Filesize (Note this may not be an option on some.)
+        - Command: sudo raspi-config
+        - After expanding Update & Upgrade then Reboot:
+            - Command: sudo apt-get update && sudo apt-get -y upgrade
+            - Command: sudo reboot
+    2.) Enable I2C
+        - Command: sudo raspi-config
+        - Under "Interfacing Options" set I2C to "Enable"
+    3.) Install Vim
+        - Command: sudo apt-get install vim
+    4.) Install Node JS
+        - Command: curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+        - Command: sudo apt-get install -y nodejs
+    5.) Install git and clone repo.
+        - If not install then command: sudo apt-get install git-all
+        - Clone repository: git clone https://github.com/ISS-Mimic/Mimic.git
+    6.) Install Lightstreamer and dependencies in home directory.
+        - Command: cd $HOME
+        - Command: sudo npm install lightstreamer-client
+    7.) Install sqlite3
+        - Command (if it doesn't work try next command instead): sudo npm install sqlite3
+        - Command sudo npm install --unsafe-perm sqlite3
+    8.) Install kivy
+        - Follow instructions for your Pi from https://kivy.org/docs/installation/installation-rpi.html
+        - If using the 'Rasberry Pi 7" Touchscreen Display' and touch doesn't work? 
+            Then perform #16 from http://mattrichardson.com/kivy-gpio-raspberry-pi-touch/index.html (Note: this installation process is outdated. Don't follow rest of guide).
+    9.) Install python naked.toolshed.shell
+        - Command: sudo pip install Naked
+    10.) Install BeautifulSoup
+        - Command: sudo apt-get install python-bs4
+    11.) Install tweepy
+        - Command: sudo apt-get install python-tweepy
+
