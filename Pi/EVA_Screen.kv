@@ -29,7 +29,6 @@
         Image:
             id: Crewlock_Status_image
             source: './imgs/eva/BlankLights.png'
-            ##size_hint_x: 0.28
             size_hint_y: 0.14
             pos_hint: {"center_x": 0.83, "center_y": 0.8}
             allow_stretch: False
@@ -43,6 +42,13 @@
             ##pos_hint_y: 0.552
             allow_stretch: False
             keep_ratio: True
+        Label:
+            id: crewlockpressure_value
+            pos_hint: {"center_x": 0.83, "center_y": 0.558}
+            text: '0.00'
+            markup: True
+            color: 1,1,1
+            font_size: 20
         Image:
             id: Hold_bar
             source: './imgs/eva/GuageBar.png'
@@ -69,7 +75,7 @@
             size_hint_y: 0.17
             allow_stretch: True
             keep_ratio: True
-            pos_hint: {"center_x": 0.763, "center_y": 0.293}
+            pos_hint: {"center_x": 0.764, "center_y": 0.241}
         Label:
             id: EV1_name
             pos_hint: {"center_x": 0.763, "center_y": 0.12}
@@ -83,7 +89,7 @@
             size_hint_y: 0.17
             allow_stretch: True
             keep_ratio: True
-            pos_hint: {"center_x": 0.894, "center_y": 0.293}
+            pos_hint: {"center_x": 0.895, "center_y": 0.241}
         Label:
             id: EV2_name
             pos_hint: {"center_x": 0.894, "center_y": 0.12}
@@ -110,14 +116,14 @@
             id: EVAstatus  
             pos_hint: {"center_x": 0.199, "center_y": 0.35}
             size_hint: 0.35,0.35
-            text: ''
+            text: 'Fetching latest tweet...'
             text_size: self.width, None
             markup: True
             color: 1,1,1
             font_size: 18
         Label:
             id: EVAstatus_credit 
-            pos_hint: {"center_x": 0.22, "center_y": 0.07}
+            pos_hint: {"center_x": 0.24, "center_y": 0.1}
             size_hint: 0.27,0.04
             text: 'from @iss101'
             text_size: self.width, None
@@ -162,7 +168,7 @@
             font_size: 18
         Label:
             id: EV2
-            pos_hint: {"center_x": 0.55, "center_y": 0.335}
+            pos_hint: {"center_x": 0.55, "center_y": 0.3}
             size_hint: 0.3,0.15
             text: 'EV2 Crewmember:'
             text_size: self.width, None
@@ -171,7 +177,7 @@
             font_size: 18
         Label:
             id: EV2_EVAnum
-            pos_hint: {"center_x": 0.55, "center_y": 0.285}
+            pos_hint: {"center_x": 0.55, "center_y": 0.25}
             size_hint: 0.3,0.15
             text: 'Number of EVAs = 0'
             text_size: self.width, None
@@ -180,27 +186,13 @@
             font_size: 18
         Label:
             id: EV2_EVAtime
-            pos_hint: {"center_x": 0.55, "center_y": 0.235}
+            pos_hint: {"center_x": 0.55, "center_y": 0.2}
             size_hint: 0.3,0.15
             text: 'Total EVA Time = 0:00'
             text_size: self.width, None
             markup: True
             color: 0,0,0
             font_size: 18
-        ##Label:
-            ##id: crewlockpressure_label
-            ##pos_hint: {"center_x": 0.65, "center_y": 0.8}
-            ##text: 'Crewlock Pressure:'
-            ##markup: True
-            ##color: 1,1,1
-            ##font_size: 30
-        Label:
-            id: crewlockpressure_value
-            pos_hint: {"center_x": 0.82, "center_y": 0.554}
-            text: '0.00'
-            markup: True
-            color: 1,1,1
-            font_size: 20
         Label:
             id: EVA_occuring
             pos_hint: {"center_x": 0.57, "center_y": 0.76}
@@ -218,3 +210,10 @@
             text: ''
             font_size: 30
             on_release: app.root.current = 'mimic'
+        Image:
+            id: signal
+            pos_hint: {"center_x": 0.04, "center_y": 0.06}
+            source: './imgs/SignalLost.png'
+            size_hint_y: 0.12
+            allow_stretch: False
+            keep_ratio: True
