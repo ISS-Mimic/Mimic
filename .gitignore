@@ -1,0 +1,9 @@
+# Wild Cards
+*.swp
+*.db-shm
+*.db-wal
+
+Pi/errorlog.txt
+Pi/locationlog.txt
+Pi/mimiclog.txt
+
