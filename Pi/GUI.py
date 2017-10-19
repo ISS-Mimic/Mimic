@@ -121,6 +121,7 @@ c = conn.cursor()
 val = ""
 lastsignal = 0
 testvalue = 0
+obtained_EVA_crew = False
 alternate = True       
 Beta4Bcontrol = False
 Beta3Bcontrol = False
@@ -179,6 +180,7 @@ beta4amc = 0.00
 EVAinProgress = False
 leak_hold = False
 firstcrossing = True
+oldAirlockPump = 0.00
 position_x = 0.00
 position_y = 0.00
 position_z = 0.00
@@ -192,7 +194,7 @@ c1b = 0.00
 c1a = 0.00
 c3b = 0.00
 c3a = 0.00
-airlock_pump = 0
+airlock_pump_voltage = 0
 crewlockpres = 758
 EVA_activities = False
 repress = False
@@ -599,23 +601,11 @@ class MainApp(App):
         mimiclog.write(str("check twitter"))
         mimiclog.write('\n')
         
-        global latest_tweet
-        global crew_mention
-        global different_tweet
-        global crewmember
-        global crewmemberpicture
-        global numEVAs1
-        global EVAtime_hours1
-        global EVAtime_minutes1
-        global numEVAs2
-        global EVAtime_hours2
-        global EVAtime_minutes2
-        global EV1
-        global EV2
+        global latest_tweet, obtained_EVA_crew, crew_mention, different_tweet, crewmember, crewmemberpicture, numEVAs1, EVAtime_hours1, EVAtime_minutes1, numEVAs2, EVAtime_hours2, EVAtime_minutes2, EV1, EV2
 
         try:
-            #stuff = api.user_timeline(screen_name = 'iss101', count = 1, include_rts = True, tweet_mode = 'extended')
-            stuff = api.user_timeline(screen_name = 'iss_mimic', count = 1, include_rts = True, tweet_mode = 'extended')
+            stuff = api.user_timeline(screen_name = 'iss101', count = 1, include_rts = True, tweet_mode = 'extended')
+            #stuff = api.user_timeline(screen_name = 'iss_mimic', count = 1, include_rts = True, tweet_mode = 'extended')
         except:
             self.eva_screen.ids.EVAstatus.text = str("Twitter Error")
             errorlog.write(str(datetime.datetime.utcnow()))
@@ -686,7 +676,83 @@ class MainApp(App):
             background_thread.daemon = True
             background_thread.start()
             #self.check_EVA_stats(EV1_surname,EV2surname)
+            obtained_EVA_crew = True 
+            crew_mention = False
             
+    def checkpasttweets(self):
+        mimiclog.write(str(datetime.datetime.utcnow()))
+        mimiclog.write(' ')
+        mimiclog.write(str("check twitter past"))
+        mimiclog.write('\n')
+        
+        global obtained_EVA_crew, crew_mention, different_tweet, crewmember, crewmemberpicture, numEVAs1, EVAtime_hours1, EVAtime_minutes1, numEVAs2, EVAtime_hours2, EVAtime_minutes2, EV1, EV2
+
+        try:
+            #stuff = api.user_timeline(screen_name = 'iss101', count = 1, include_rts = True, tweet_mode = 'extended')
+            stuff = api.user_timeline(screen_name = 'iss101', count = 50, include_rts = False, tweet_mode = 'extended')
+        except:
+            errorlog.write(str(datetime.datetime.utcnow()))
+            errorlog.write(' ')
+            errorlog.write("Tweepy - Error Retrieving Tweet, make sure clock is correct")
+            errorlog.write('\n')
+        try:
+            stuff
+        except NameError:
+            print "No tweet - ensure correct time is set"
+        else:
+            for status in stuff:
+                if status.full_text == latest_tweet:
+                    different_tweet = False
+                else:
+                    different_tweet = True
+                past_tweet = status.full_text
+
+        emoji_pattern = re.compile("["u"\U0000007F-\U0001F1FF""]+", flags=re.UNICODE)
+        tweet_string_no_emojis = str(emoji_pattern.sub(r'?', past_tweet)) #cleanse the emojis!!
+
+        EVnames = []
+        EVpics = []
+        index = 0
+
+        if ("EVA BEGINS" in past_tweet) and past_tweet.count('@') == 2:
+            crew_mention = True
+            while index < len(past_tweet):
+                index = past_tweet.find('@',index)
+                if index == -1:
+                    break
+                EVnames.append(str(past_tweet[index:]))
+                EVpics.append("")
+                index += 1
+            count = 0
+            while count < len(EVnames):
+                EVnames[count] = (EVnames[count].split('@')[1]).split(' ')[0]
+                count += 1
+            count = 0
+            while count < len(EVnames):
+                EVpics[count] = str(api.get_user(EVnames[count]).profile_image_url)
+                EVnames[count] = str(api.get_user(EVnames[count]).name)
+                EVpics[count] = EVpics[count].replace("_normal","_bigger")
+                count += 1
+
+        if crew_mention:
+            EV1_surname = EVnames[0].split()[-1]
+            EV1_firstname = EVnames[0].split()[0]
+            #EV1_surname = 'Bresnik'
+            EV2_surname = EVnames[1].split()[-1]
+            EV2_firstname = EVnames[1].split()[0]
+            #EV2_surname = 'Hei'
+            EV1 = EVnames[0]
+            EV2 = EVnames[1]
+            self.eva_screen.ids.EV1_Pic.source = str(EVpics[0])
+            self.eva_screen.ids.EV1_name.text = str(EV1_firstname)
+            self.eva_screen.ids.EV2_Pic.source = str(EVpics[1])
+            self.eva_screen.ids.EV2_name.text = str(EV2_firstname)
+
+            background_thread = Thread(target=self.check_EVA_stats, args=(EV1_surname,EV1_firstname,EV2_surname,EV2_firstname))
+            background_thread.daemon = True
+            background_thread.start()
+            #self.check_EVA_stats(EV1_surname,EV2surname)
+            obtained_EVA_crew = True 
             crew_mention = False
             
     def flashEVAbutton(self, instace):
@@ -806,8 +872,6 @@ class MainApp(App):
         self.eps_screen.ids.v4a_value.color = args[0],args[1],args[2]
         self.eps_screen.ids.c4b_value.color = args[0],args[1],args[2]
         self.eps_screen.ids.v4b_value.color = args[0],args[1],args[2]
-        
-        ##self.mimic_screen.ids.aosvalue.color = args[0],args[1],args[2]
     
     def changeManualControlBoolean(self, *args):
         global manualcontrol
@@ -1065,7 +1129,7 @@ class MainApp(App):
         self.eva_screen.ids.signal.source = './imgs/SignalOrangeGray.png'
 
     def update_labels(self, dt):
-        global mimicbutton,switchtofake,fakeorbitboolean,psarj2,ssarj2,manualcontrol,psarj,ssarj,ptrrj,strrj,beta1b,beta1a,beta2b,beta2a,beta3b,beta3a,beta4b,beta4a,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,c1a,c1b,c3a,c3b,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress
+        global mimicbutton,switchtofake,fakeorbitboolean,psarj2,ssarj2,manualcontrol,psarj,ssarj,ptrrj,strrj,beta1b,beta1a,beta2b,beta2a,beta3b,beta3a,beta4b,beta4a,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,c1a,c1b,c3a,c3b,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress,oldAirlockPump,obtained_EVA_crew
         
         c.execute('select Value from telemetry')
         values = c.fetchall()
@@ -1134,50 +1198,56 @@ class MainApp(App):
         c4a = "{:.2f}".format(float((values[39])[0]))
         c4b = "{:.2f}".format(float((values[40])[0]))
         
-        airlock_pump = int((values[71])[0])
+        airlock_pump_voltage = int((values[71])[0])
+        airlock_pump_voltage_timestamp = float((timestamps[71])[0])
+        airlock_pump_switch = int((values[72])[0])
         crewlockpres = float((values[16])[0])
         airlockpres = float((values[77])[0])
+
         #reverse = False 
         #if(crewlockpres <= 2):
-        #    airlock_pump = 0
+        #    airlock_pump_voltage = 0
         #    reverse = True
 
         #if reverse:
-        #    airlock_pump = 0
+        #    airlock_pump_voltage = 0
         #    testfactor = 1
         #else:
-        #    airlock_pump = 1
+        #    airlock_pump_voltage = 1
 
         #if(float(crewlockpres) >= 758):
-        #    airlock_pump = 1
+        #    airlock_pump_voltage = 1
         #    reverse = False
 
         #if testfactor == 1:
-        #    airlock_pump = 0
+        #    airlock_pump_voltage = 0
         #else:
-        #    airlock_pump = 1
+        #    airlock_pump_voltage = 1
 
         #crewlockpres = crewlockpres - (-10*testfactor)
-        if airlock_pump==1 and airlockpres < 744:
+        if airlock_pump_voltage == 1 and airlockpres < 744:
             prebreath = True
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/PreBreatheLights.png'
-            ##change that image to the prebreath image when uploaded
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             self.eva_screen.ids.EVA_occuring.text = "Pre-EVA Nitrogen Purge in Progress"
         else:
             prebreath = False
 
-        if airlock_pump==1 or crewlockpres < 744:
+        if crewlockpres < 500 and airlock_pump_voltage == 0:
+            EVAstartTime = airlock_pump_voltage_timestamp
+            if obtained_EVA_crew:
+                self.checkpasttweets()
+
+        if airlock_pump_voltage == 1 or crewlockpres < 744:
             evaflashevent = Clock.schedule_interval(self.flashEVAbutton, 1)
             EVA_activities = True
 
         if EVA_activities and ~prebreath :
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/StandbyLights.png'
-            ##change that image to the standby image when uploaded
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             self.eva_screen.ids.EVA_occuring.text = "EVA Standby"
 
-        if airlock_pump==0 and crewlockpres > 744:
+        if airlock_pump_voltage == 0 and crewlockpres > 744:
             EVA_activities = False
             self.eva_screen.ids.EVA_occuring.text = "Currently No EVA"
             self.eva_screen.ids.EVA_occuring.color = 1,0,0
@@ -1195,9 +1265,9 @@ class MainApp(App):
             self.eva_screen.ids.EVA_occuring.color = 0.33,0.7,0.18
             self.eva_screen.ids.leak_timer.text = "Complete"
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/InProgressLights.png'
-            evatimerevent = Clock.schedule_interval(self.EVA_clock, 1)
+            evatimerevent = Clock.schedule_once(self.EVA_clock, 0.1)
 
-        if crewlockpres > 744 and ~airlock_pump:
+        if crewlockpres > 744 and ~airlock_pump_voltage:
             self.eva_screen.ids.leak_timer.text = ""
 
 
@@ -1219,14 +1289,14 @@ class MainApp(App):
             leak_hold = False
             firstcrossing = True
         
-        if crewlockpres <= 258.5 and firstcrossing and airlock_pump: #Torr
+        if crewlockpres <= 258.5 and firstcrossing and airlock_pump_voltage: #Torr
             leak_hold = True
             firstcrossing = False
             self.eva_screen.ids.EVA_occuring.text = "Leak Check in Progress!"
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             holdtimerevent = Clock.schedule_interval(self.hold_timer, 1)
 
-        if leak_hold and crewlockpres < 256 and ~repress and airlock_pump:
+        if leak_hold and crewlockpres < 256 and ~repress and airlock_pump_voltage:
             self.eva_screen.ids.EVA_occuring.text = "Crewlock Depressurizing"
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             leak_hold = False
@@ -1241,7 +1311,7 @@ class MainApp(App):
             self.eva_screen.ids.leak_timer.text = "Complete"
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/DepressLights.png'
 
-        if airlock_pump == 1 and ~leak_hold and crewlockpres < 744:
+        if airlock_pump_voltage == 1 and ~leak_hold and crewlockpres < 744:
             self.eva_screen.ids.EVA_occuring.text = "Crewlock Depressurizing"
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             #iself.eva_screen.ids.leak_timer.text = "Leak Check Timer"
@@ -1249,7 +1319,7 @@ class MainApp(App):
             repress = False
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/DepressLights.png'
         
-        if airlock_pump == 0 and crewlockpres > 5 and crewlockpres < 744:
+        if airlock_pump_voltage == 0 and crewlockpres > 5 and crewlockpres < 744:
             self.eva_screen.ids.EVA_occuring.text = "Crewlock Repressurizing"
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             repress = True

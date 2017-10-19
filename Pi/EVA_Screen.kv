@@ -99,16 +99,18 @@
             font_size: 18
         AsyncImage:
             id: EVAimage
-            ##source: "http://pbs.twimg.com/media/DJm3BvbXkAAuMzp.jpg"
-            source: './imgs/eva/GuageBar.png'
-            size_hint_y: 0.38
+            source: "http://pbs.twimg.com/media/DJm3BvbXkAAuMzp.jpg"
+            ##source: './imgs/eva/GuageBar.png'
+            size_hint: 0.42, 0.38
+            size_hint_max: 300, 200
+            ##width: 700
             allow_stretch: False
             keep_ratio: True
-            pos_hint: {"center_x": 0.185, "center_y": 0.505}
+            pos_hint: {"center_x": 0.185, "center_y": 0.655}
         Button:
             id: EVAimage_button
             size_hint_y: 0.38
-            pos_hint: {"center_x": 0.185, "center_y": 0.505}
+            pos_hint: {"center_x": 0.185, "center_y": 0.655}
             font_size: 30
             opacity: 0.0
             on_release: app.root.current = 'eva_pictures'
