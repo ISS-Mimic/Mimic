@@ -1077,49 +1077,45 @@ class MainApp(App):
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/DepressLights.png'
 
     def signal_lost(self):
-        self.orbit_screen.ids.signal.source = './imgs/SignalRedGray.png'
-        self.mimic_screen.ids.signal.source = './imgs/SignalRedGray.png'
-        self.eps_screen.ids.signal.source = './imgs/SignalRedGray.png'
-        self.ct_screen.ids.signal.source = './imgs/SignalRedGray.png'
-        self.tcs_screen.ids.signal.source = './imgs/SignalRedGray.png'
-        self.eva_screen.ids.signal.source = './imgs/SignalRedGray.png'
+        self.orbit_screen.ids.signal.source = './imgs/signalred.zip'
+        self.mimic_screen.ids.signal.source = './imgs/signalred.zip'
+        self.eps_screen.ids.signal.source = './imgs/signalred.zip'
+        self.ct_screen.ids.signal.source = './imgs/signalred.zip'
+        self.tcs_screen.ids.signal.source = './imgs/signalred.zip'
+        self.eva_screen.ids.signal.source = './imgs/signalred.zip'
+        self.orbit_screen.ids.signal.anim_delay = 0.4
+        self.mimic_screen.ids.signal.anim_delay = 0.4
+        self.eps_screen.ids.signal.anim_delay = 0.4
+        self.ct_screen.ids.signal.anim_delay = 0.4
+        self.tcs_screen.ids.signal.anim_delay = 0.4
+        self.eva_screen.ids.signal.anim_delay = 0.4
+        self.orbit_screen.ids.signal.size_hint_y = 0.112
+        self.mimic_screen.ids.signal.size_hint_y = 0.112
+        self.eps_screen.ids.signal.size_hint_y = 0.112
+        self.ct_screen.ids.signal.size_hint_y = 0.112
+        self.tcs_screen.ids.signal.size_hint_y = 0.112
+        self.eva_screen.ids.signal.size_hint_y = 0.112
 
-    def signal_acquired(self, dt):
-        global lastsignal
-
-        if lastsignal == 0:
-            self.orbit_screen.ids.signal.source = './imgs/SignalGreen1Gray.png'
-            self.mimic_screen.ids.signal.source = './imgs/SignalGreen1Gray.png'
-            self.eps_screen.ids.signal.source = './imgs/SignalGreen1Gray.png'
-            self.ct_screen.ids.signal.source = './imgs/SignalGreen1Gray.png'
-            self.tcs_screen.ids.signal.source = './imgs/SignalGreen1Gray.png'
-            self.eva_screen.ids.signal.source = './imgs/SignalGreen1Gray.png'
-            lastsignal = 1
-        elif lastsignal == 1:
-            self.orbit_screen.ids.signal.source = './imgs/SignalGreen2Gray.png'
-            self.mimic_screen.ids.signal.source = './imgs/SignalGreen2Gray.png'
-            self.eps_screen.ids.signal.source = './imgs/SignalGreen2Gray.png'
-            self.ct_screen.ids.signal.source = './imgs/SignalGreen2Gray.png'
-            self.tcs_screen.ids.signal.source = './imgs/SignalGreen2Gray.png'
-            self.eva_screen.ids.signal.source = './imgs/SignalGreen2Gray.png'
-            lastsignal = 2
-        elif lastsignal == 2:
-            self.orbit_screen.ids.signal.source = './imgs/SignalGreen3Gray.png'
-            self.mimic_screen.ids.signal.source = './imgs/SignalGreen3Gray.png'
-            self.eps_screen.ids.signal.source = './imgs/SignalGreen3Gray.png'
-            self.ct_screen.ids.signal.source = './imgs/SignalGreen3Gray.png'
-            self.tcs_screen.ids.signal.source = './imgs/SignalGreen3Gray.png'
-            self.eva_screen.ids.signal.source = './imgs/SignalGreen3Gray.png'
-            lastsignal = 3
-        else:
-            self.orbit_screen.ids.signal.source = './imgs/SignalGreen0Gray.png'
-            self.mimic_screen.ids.signal.source = './imgs/SignalGreen0Gray.png'
-            self.eps_screen.ids.signal.source = './imgs/SignalGreen0Gray.png'
-            self.ct_screen.ids.signal.source = './imgs/SignalGreen0Gray.png'
-            self.tcs_screen.ids.signal.source = './imgs/SignalGreen0Gray.png'
-            self.eva_screen.ids.signal.source = './imgs/SignalGreen0Gray.png'
-            lastsignal = 0
-
+    def signal_acquired(self):
+        self.orbit_screen.ids.signal.source = './imgs/pulse-transparent.zip'
+        self.mimic_screen.ids.signal.source = './imgs/pulse-transparent.zip'
+        self.eps_screen.ids.signal.source = './imgs/pulse-transparent.zip'
+        self.ct_screen.ids.signal.source = './imgs/pulse-transparent.zip'
+        self.tcs_screen.ids.signal.source = './imgs/pulse-transparent.zip'
+        self.eva_screen.ids.signal.source = './imgs/pulse-transparent.zip'
+        self.orbit_screen.ids.signal.anim_delay = 0.05
+        self.mimic_screen.ids.signal.anim_delay = 0.05
+        self.eps_screen.ids.signal.anim_delay = 0.05
+        self.ct_screen.ids.signal.anim_delay = 0.05
+        self.tcs_screen.ids.signal.anim_delay = 0.05
+        self.eva_screen.ids.signal.anim_delay = 0.05
+        self.orbit_screen.ids.signal.size_hint_y = 0.15
+        self.mimic_screen.ids.signal.size_hint_y = 0.15
+        self.eps_screen.ids.signal.size_hint_y = 0.15
+        self.ct_screen.ids.signal.size_hint_y = 0.15
+        self.tcs_screen.ids.signal.size_hint_y = 0.15
+        self.eva_screen.ids.signal.size_hint_y = 0.15
+    
     def signal_stale(self):
         self.orbit_screen.ids.signal.source = './imgs/SignalOrangeGray.png'
         self.mimic_screen.ids.signal.source = './imgs/SignalOrangeGray.png'
@@ -1127,6 +1123,18 @@ class MainApp(App):
         self.ct_screen.ids.signal.source = './imgs/SignalOrangeGray.png'
         self.tcs_screen.ids.signal.source = './imgs/SignalOrangeGray.png'
         self.eva_screen.ids.signal.source = './imgs/SignalOrangeGray.png'
+        self.orbit_screen.ids.signal.anim_delay = 0.12
+        self.mimic_screen.ids.signal.anim_delay = 0.12
+        self.eps_screen.ids.signal.anim_delay = 0.12
+        self.ct_screen.ids.signal.anim_delay = 0.12
+        self.tcs_screen.ids.signal.anim_delay = 0.12
+        self.eva_screen.ids.signal.anim_delay = 0.12
+        self.orbit_screen.ids.signal.size_hint_y = 0.112
+        self.mimic_screen.ids.signal.size_hint_y = 0.112
+        self.eps_screen.ids.signal.size_hint_y = 0.112
+        self.ct_screen.ids.signal.size_hint_y = 0.112
+        self.tcs_screen.ids.signal.size_hint_y = 0.112
+        self.eva_screen.ids.signal.size_hint_y = 0.112
 
     def update_labels(self, dt):
         global mimicbutton,switchtofake,fakeorbitboolean,psarj2,ssarj2,manualcontrol,psarj,ssarj,ptrrj,strrj,beta1b,beta1a,beta2b,beta2a,beta3b,beta3a,beta4b,beta4a,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,c1a,c1b,c3a,c3b,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress,oldAirlockPump,obtained_EVA_crew
@@ -1204,6 +1212,20 @@ class MainApp(App):
         crewlockpres = float((values[16])[0])
         airlockpres = float((values[77])[0])
 
+        if airlock_pump_voltage == 1:
+            self.eva_screen.ids.pumpvoltage.text = "Airlock Pump Power On!"
+            self.eva_screen.ids.EVA_occuring.color = 0.33,0.7,0.18
+        else:
+            self.eva_screen.ids.pumpvoltage.text = "Airlock Pump Power Off"
+            self.eva_screen.ids.pumpvoltage.color = 0,0,0
+
+        if airlock_pump_switch == 1:
+            self.eva_screen.ids.pumpswitch.text = "Airlock Pump Active!"
+            self.eva_screen.ids.EVA_occuring.color = 0.33,0.7,0.18
+        else:
+            self.eva_screen.ids.pumpswitch.text = "Airlock Pump Inactive"
+            self.eva_screen.ids.pumpswitch.color = 0,0,0
+        
         #reverse = False 
         #if(crewlockpres <= 2):
         #    airlock_pump_voltage = 0
@@ -1419,31 +1441,16 @@ class MainApp(App):
                fakeorbitboolean = False
                if mimicbutton == True:
                    switchtofake = False
-            ##self.mimic_screen.ids.aosvalue.text = "Signal Acquired!"
-            signalevent = Clock.schedule_once(self.signal_acquired,2)
+            self.signal_acquired()
         elif float(aos) == 0.00:
             self.changeColors(1,0,0)
             if self.root.current == 'mimic':
                fakeorbitboolean = True
-            ##self.mimic_screen.ids.aosvalue.text = "Signal Lost"
-            try:
-                signalevent
-            except NameError:
-                pass
-            else:
-                signalevent.cancel()
             self.signal_lost()
         elif float(aos) == 2.00:
             self.changeColors(1,0.5,0)
             if self.root.current == 'mimic':
                fakeorbitboolean = True
-            ##self.mimic_screen.ids.aosvalue.text = "Stale Signal!"
-            try:
-                signalevent
-            except NameError:
-                pass
-            else:
-                signalevent.cancel()
             self.signal_stale()
 
         if (mimicbutton == True and float(aos) == 1.00): 
