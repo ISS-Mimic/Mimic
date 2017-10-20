@@ -13,8 +13,8 @@
         Image:
             id: EVA_needle
             source: './imgs/eva/GuageNeedle.png'
-            pos_hint: {"center_x": 0.82, "center_y": 0.583}
-            size_hint_x: 0.25 
+            pos_hint: {"center_x": 0.83, "center_y": 0.583}
+            size_hint_x: 0.24 
             allow_stretch: False
             keep_ratio: True
             angle: 180
@@ -36,15 +36,15 @@
         Image:
             id: EVA_psi_bar
             source: './imgs/eva/GuageBar.png'
-            size_hint_x: 0.25
-            pos_hint: {"center_x": 0.71, "center_y": 0.552}
+            size_hint_y: 0.15
+            pos_hint: {"center_x": 0.945, "center_y": 0.56}
             ##pos_hint_x: 0.71
             ##pos_hint_y: 0.552
             allow_stretch: False
             keep_ratio: True
         Label:
             id: crewlockpressure_value
-            pos_hint: {"center_x": 0.83, "center_y": 0.558}
+            pos_hint: {"center_x": 0.83, "center_y": 0.56}
             text: '0.00'
             markup: True
             color: 1,1,1
@@ -52,19 +52,19 @@
         Image:
             id: Hold_bar
             source: './imgs/eva/GuageBar.png'
-            size_hint_x: 0.25
-            pos_hint: {"center_x": 0.7, "center_y": 0.484}
+            size_hint_y: 0.15
+            pos_hint: {"center_x": 0.95, "center_y": 0.49}
             allow_stretch: False
             keep_ratio: True
         Label:
             id: leak_timer
-            pos_hint: {"center_x": 0.82, "center_y": 0.484}
+            pos_hint: {"center_x": 0.83, "center_y": 0.49}
             text: '~260s Leak Check'
             markup: True
             color: 0,0,0
             font_size: 20
         Label:
-            pos_hint: {"center_x": 0.82, "center_y": 0.65}
+            pos_hint: {"center_x": 0.83, "center_y": 0.65}
             text: '(psi)'
             markup: True
             color: 0,0,0
@@ -143,7 +143,7 @@
             font_size: 18
         Label:
             id: EVAstatus_credit 
-            pos_hint: {"center_x": 0.24, "center_y": 0.1}
+            pos_hint: {"center_x": 0.27, "center_y": 0.085}
             size_hint: 0.27,0.04
             text: 'from @iss101'
             text_size: self.width, None

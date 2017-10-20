@@ -122,6 +122,7 @@ val = ""
 lastsignal = 0
 testvalue = 0
 obtained_EVA_crew = False
+EVAstartTime = float(time.time())
 alternate = True       
 Beta4Bcontrol = False
 Beta3Bcontrol = False
@@ -775,22 +776,17 @@ class MainApp(App):
         global seconds
         global minutes
         global hours
-        global timenew
-        global timeold
-                          
-        timenew = float(time.time())
-        difference = timenew - timeold
-        if difference > 1000: #first call to this function will have large time difference
-            difference = 0
-        timeold = timenew
+        global EVAstartTime
+        unixconvert = time.gmtime(time.time())
+        currenthours = float(unixconvert[7])*24+unixconvert[3]+float(unixconvert[4])/60+float(unixconvert[5])/3600
+        difference = (currenthours-EVAstartTime)*3600
+        minutes, seconds = divmod(difference, 60)
+        hours, minutes = divmod(minutes, 60)
 
-        seconds += difference
-        if seconds >= 60:
-            seconds = 0
-            minutes += 1
-            if minutes >= 60:
-                minutes = 0
-                hours += 1
+        hours = int(hours)
+        minutes = int(minutes)
+        seconds = int(seconds)
+
         self.eva_screen.ids.EVA_clock.text =(str(hours) + ":" + str(minutes).zfill(2) + ":" + str(int(seconds)).zfill(2))
         self.eva_screen.ids.EVA_clock.color = 0.33,0.7,0.18
 
@@ -1041,13 +1037,13 @@ class MainApp(App):
         return scaledValue
 
     def map_psi_bar(self, args):
-        scalefactor = 0.014666666667
-        scaledValue = (float(args)*scalefactor)+0.71
+        scalefactor = 0.015
+        scaledValue = (float(args)*scalefactor)+0.72
         return scaledValue
     
     def map_hold_bar(self, args):
-        scalefactor = 0.000923
-        scaledValue = (float(args)*scalefactor)+0.7
+        scalefactor = 0.0015
+        scaledValue = (float(args)*scalefactor)+0.71
         return scaledValue
     
     def hold_timer(self, dt):
@@ -1067,7 +1063,7 @@ class MainApp(App):
         seconds2 -= difference2
         new_bar_x = self.map_hold_bar(260-seconds2)
         self.eva_screen.ids.leak_timer.text = "~"+ str(int(seconds2)) + "s"
-        self.eva_screen.ids.Hold_bar.pos_hint = {"center_x": new_bar_x, "center_y": 0.484}
+        self.eva_screen.ids.Hold_bar.pos_hint = {"center_x": new_bar_x, "center_y": 0.49}
         self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/LeakCheckLights.png'
         
         if seconds2 <= 0:
@@ -1137,7 +1133,7 @@ class MainApp(App):
         self.eva_screen.ids.signal.size_hint_y = 0.112
 
     def update_labels(self, dt):
-        global mimicbutton,switchtofake,fakeorbitboolean,psarj2,ssarj2,manualcontrol,psarj,ssarj,ptrrj,strrj,beta1b,beta1a,beta2b,beta2a,beta3b,beta3a,beta4b,beta4a,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,c1a,c1b,c3a,c3b,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress,oldAirlockPump,obtained_EVA_crew
+        global mimicbutton,switchtofake,fakeorbitboolean,psarj2,ssarj2,manualcontrol,psarj,ssarj,ptrrj,strrj,beta1b,beta1a,beta2b,beta2a,beta3b,beta3a,beta4b,beta4a,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,c1a,c1b,c3a,c3b,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress,oldAirlockPump,obtained_EVA_crew,EVAstartTime
         
         c.execute('select Value from telemetry')
         values = c.fetchall()
@@ -1212,6 +1208,11 @@ class MainApp(App):
         crewlockpres = float((values[16])[0])
         airlockpres = float((values[77])[0])
 
+        #airlock_pump_voltage = 0
+        #airlock_pump_voltage_timestamp = 7034.8
+        #airlock_pump_switch = 0
+        #crewlockpres = 0
+        
         if airlock_pump_voltage == 1:
             self.eva_screen.ids.pumpvoltage.text = "Airlock Pump Power On!"
             self.eva_screen.ids.EVA_occuring.color = 0.33,0.7,0.18
@@ -1291,7 +1292,8 @@ class MainApp(App):
 
         if crewlockpres > 744 and ~airlock_pump_voltage:
             self.eva_screen.ids.leak_timer.text = ""
-
+        else:
+            self.eva_screen.ids.leak_timer.text = "~160s Leak Check"
 
         if 0.0193368*crewlockpres > 0.0386735 and EVAinProgress: #PSI
             EVAinProgress = False
@@ -1329,7 +1331,7 @@ class MainApp(App):
                 pass
             else:
                 holdtimerevent.cancel()
-            self.eva_screen.ids.Hold_bar.pos_hint = {"center_x": 0.94, "center_y": 0.484}
+            self.eva_screen.ids.Hold_bar.pos_hint = {"center_x": 0.945, "center_y": 0.49}
             self.eva_screen.ids.leak_timer.text = "Complete"
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/DepressLights.png'
 
@@ -1433,7 +1435,7 @@ class MainApp(App):
        
         psi_bar_x = self.map_psi_bar(0.0193368*float(crewlockpres)) #convert to torr
         
-        self.eva_screen.ids.EVA_psi_bar.pos_hint = {"center_x": psi_bar_x, "center_y": 0.552} 
+        self.eva_screen.ids.EVA_psi_bar.pos_hint = {"center_x": psi_bar_x, "center_y": 0.56} 
         
         if float(aos) == 1.00:
             self.changeColors(0,1,0)
