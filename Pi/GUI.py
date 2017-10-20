@@ -1271,7 +1271,6 @@ class MainApp(App):
             EVA_activities = True
 
         if EVA_activities and prebreath == False:
-            print "standby"
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/StandbyLights.png'
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             self.eva_screen.ids.EVA_occuring.text = "EVA Standby"

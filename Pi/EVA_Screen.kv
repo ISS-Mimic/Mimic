@@ -120,11 +120,11 @@
             source: "http://pbs.twimg.com/media/DJm3BvbXkAAuMzp.jpg"
             ##source: './imgs/eva/GuageBar.png'
             size_hint: 0.42, 0.38
-            size_hint_max: 300, 200
+            size_hint_max: 270, 220
             ##width: 700
             allow_stretch: False
             keep_ratio: True
-            pos_hint: {"center_x": 0.185, "center_y": 0.655}
+            pos_hint: {"center_x": 0.187, "center_y": 0.655}
         Button:
             id: EVAimage_button
             size_hint_y: 0.38
@@ -134,13 +134,13 @@
             on_release: app.root.current = 'eva_pictures'
         Label:
             id: EVAstatus  
-            pos_hint: {"center_x": 0.199, "center_y": 0.35}
-            size_hint: 0.35,0.35
+            pos_hint: {"center_x": 0.19, "center_y": 0.34}
+            size_hint: 0.365,0.36
             text: 'Fetching latest tweet...'
             text_size: self.width, None
             markup: True
             color: 1,1,1
-            font_size: 18
+            font_size: 16
         Label:
             id: EVAstatus_credit 
             pos_hint: {"center_x": 0.27, "center_y": 0.085}
