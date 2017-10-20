@@ -1208,6 +1208,11 @@ class MainApp(App):
         crewlockpres = float((values[16])[0])
         airlockpres = float((values[77])[0])
 
+        if airlockpres < 744:
+            crewlockonly = False
+        else:
+            crewlockonly = True
+
         #airlock_pump_voltage = 0
         #airlock_pump_voltage_timestamp = 7034.8
         #airlock_pump_switch = 0
@@ -1215,14 +1220,14 @@ class MainApp(App):
         
         if airlock_pump_voltage == 1:
             self.eva_screen.ids.pumpvoltage.text = "Airlock Pump Power On!"
-            self.eva_screen.ids.EVA_occuring.color = 0.33,0.7,0.18
+            self.eva_screen.ids.pumpvoltage.color = 0.33,0.7,0.18
         else:
             self.eva_screen.ids.pumpvoltage.text = "Airlock Pump Power Off"
             self.eva_screen.ids.pumpvoltage.color = 0,0,0
 
         if airlock_pump_switch == 1:
             self.eva_screen.ids.pumpswitch.text = "Airlock Pump Active!"
-            self.eva_screen.ids.EVA_occuring.color = 0.33,0.7,0.18
+            self.eva_screen.ids.pumpswitch.color = 0.33,0.7,0.18
         else:
             self.eva_screen.ids.pumpswitch.text = "Airlock Pump Inactive"
             self.eva_screen.ids.pumpswitch.color = 0,0,0
@@ -1256,16 +1261,17 @@ class MainApp(App):
         else:
             prebreath = False
 
-        if crewlockpres < 500 and airlock_pump_voltage == 0:
+        if crewlockpres < 500 and airlock_pump_voltage == 0 and crewlockonly:
             EVAstartTime = airlock_pump_voltage_timestamp
             if obtained_EVA_crew:
                 self.checkpasttweets()
 
         if airlock_pump_voltage == 1 or crewlockpres < 744:
-            evaflashevent = Clock.schedule_interval(self.flashEVAbutton, 1)
+            #evaflashevent = Clock.schedule_interval(self.flashEVAbutton, 1)
             EVA_activities = True
 
-        if EVA_activities and ~prebreath :
+        if EVA_activities and prebreath == False:
+            print "standby"
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/StandbyLights.png'
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             self.eva_screen.ids.EVA_occuring.text = "EVA Standby"
@@ -1305,7 +1311,7 @@ class MainApp(App):
             else:
                 evatimerevent.cancel()
         
-        if crewlockpres >= 744: #torr
+        if crewlockpres >= 744 and airlock_pump_voltage == 0: #torr
             EVAinProgress = False
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/BlankLights.png'
             
@@ -1320,7 +1326,7 @@ class MainApp(App):
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             holdtimerevent = Clock.schedule_interval(self.hold_timer, 1)
 
-        if leak_hold and crewlockpres < 256 and ~repress and airlock_pump_voltage:
+        if leak_hold and crewlockpres < 256 and ~repress and airlock_pump_voltage and crewlockonly:
             self.eva_screen.ids.EVA_occuring.text = "Crewlock Depressurizing"
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             leak_hold = False
@@ -1335,7 +1341,7 @@ class MainApp(App):
             self.eva_screen.ids.leak_timer.text = "Complete"
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/DepressLights.png'
 
-        if airlock_pump_voltage == 1 and ~leak_hold and crewlockpres < 744:
+        if airlock_pump_voltage == 1 and crewlockonly and ~leak_hold and crewlockpres < 744:
             self.eva_screen.ids.EVA_occuring.text = "Crewlock Depressurizing"
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             #iself.eva_screen.ids.leak_timer.text = "Leak Check Timer"
