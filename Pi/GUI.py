@@ -458,7 +458,6 @@ class MainApp(App):
         global startup
         global crewjsonsuccess
         global stopAnimation
-        global event_fadeISS
         self.main_screen = MainScreen(name = 'main')
         #root.add_widget(MainScreen(name = 'main'))
         self.orbit_screen = Orbit_Screen(name = 'orbit')
@@ -472,7 +471,7 @@ class MainApp(App):
         self.eva_screen = EVA_Screen(name='eva')
         self.eva_pictures = EVA_Pictures(name='eva_pictures')
 
-        root = MainScreenManager(transition=WipeTransition())
+        root = MainScreenManager(transition=SwapTransition())
         #root.add_widget(MainScreen(name = 'main'))
         root.add_widget(CalibrateScreen(name = 'calibrate'))
         root.add_widget(self.mimic_screen)
@@ -1198,6 +1197,7 @@ class MainApp(App):
         c4a = "{:.2f}".format(float((values[39])[0]))
         c4b = "{:.2f}".format(float((values[40])[0]))
         
+        ##-------------------EVA Functionality-------------------##
         airlock_pump_voltage = int((values[71])[0])
         airlock_pump_voltage_timestamp = float((timestamps[71])[0])
         airlock_pump_switch = int((values[72])[0])
@@ -1209,7 +1209,12 @@ class MainApp(App):
         else:
             crewlockonly = True
 
-        #airlock_pump_voltage = 0
+        if crewlockpres < 500 and airlock_pump_voltage == 0 and crewlockonly:
+            EVAstartTime = airlock_pump_voltage_timestamp
+            if obtained_EVA_crew == False:
+                self.checkpasttweets()
+        
+        #airlock_pump_voltage = 1
         #airlock_pump_voltage_timestamp = 7034.8
         #airlock_pump_switch = 0
         #crewlockpres = 0
@@ -1257,16 +1262,11 @@ class MainApp(App):
         else:
             prebreath = False
 
-        if crewlockpres < 500 and airlock_pump_voltage == 0 and crewlockonly:
-            EVAstartTime = airlock_pump_voltage_timestamp
-            if obtained_EVA_crew == False:
-                self.checkpasttweets()
-
         if airlock_pump_voltage == 1 or crewlockpres < 744:
-            #evaflashevent = Clock.schedule_interval(self.flashEVAbutton, 1)
+            evaflashevent = Clock.schedule_once(self.flashEVAbutton, 1)
             EVA_activities = True
 
-        if EVA_activities and prebreath == False:
+        if EVA_activities and prebreath == False and ~Repress:
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/StandbyLights.png'
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             self.eva_screen.ids.EVA_occuring.text = "EVA Standby"
@@ -1275,13 +1275,6 @@ class MainApp(App):
             EVA_activities = False
             self.eva_screen.ids.EVA_occuring.text = "Currently No EVA"
             self.eva_screen.ids.EVA_occuring.color = 1,0,0
-            #Clock.unschedule(self.flashEVAbutton)
-            try:
-                evaflashevent
-            except NameError:
-                pass
-            else:
-                evaflashevent.cancel()
 
         if 0.0193368*crewlockpres < 0.0386735: #PSI
             EVAinProgress = True
@@ -1296,10 +1289,6 @@ class MainApp(App):
         else:
             self.eva_screen.ids.leak_timer.text = "~160s Leak Check"
 
-        if 0.0193368*crewlockpres > 0.0386735 and EVAinProgress: #PSI
-            EVAinProgress = False
-            #Clock.unschedule(self.EVA_clock)
-        
         if crewlockpres >= 744 and airlock_pump_voltage == 0: #torr
             EVAinProgress = False
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/BlankLights.png'
@@ -1319,7 +1308,6 @@ class MainApp(App):
             self.eva_screen.ids.EVA_occuring.text = "Crewlock Depressurizing"
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             leak_hold = False
-            #Clock.unschedule(self.hold_timer)
             try:
                 holdtimerevent
             except NameError:
@@ -1338,12 +1326,15 @@ class MainApp(App):
             repress = False
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/DepressLights.png'
         
-        if airlock_pump_voltage == 0 and crewlockpres > 5 and crewlockpres < 744:
+        if airlock_pump_voltage == 0 and (EVAinProgress or repress) and crewlockpres < 744:
+            EVAinProgress = False
             self.eva_screen.ids.EVA_occuring.text = "Crewlock Repressurizing"
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             repress = True
             depress = False
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/RepressLights.png'
+        
+        ##-------------------EVA Functionality End-------------------##
 
 #        if (difference > -10) && (isinstance(App.get_running_app().root_window.children[0], Popup)==False):
 #            LOSpopup = Popup(title='Loss of Signal', content=Label(text='Possible LOS Soon'),size_hint=(0.3,0.2),auto_dismiss=True)
