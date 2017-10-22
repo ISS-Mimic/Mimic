@@ -18,43 +18,16 @@ var timeSub = new ls.Subscription("MERGE", "TIME_000001", ["TimeStamp", "Value",
 lsClient.subscribe(sub);
 lsClient.subscribe(timeSub);
 
-var SGANT = [0.00, 0.00, 0.00, 0.00, 0.00];
-var avgSASA = [0.00, 0.00, 0.00, 0.00, 0.00];
-var avgTime = [0.00, 0.00, 0.00, 0.00, 0.00];
-var avgSlew = [0.00, 0.00, 0.00, 0.00, 0.00];
-var angleDif = 0.00;
-var index = 0;
-var SGANT_elevation = 0.00;
-var SASA1_elevation = 0.00;
-var SASA2_elevation = 0.00;
-var SASA_elevation = 0.00;
-var active_sasa = -1.00;
-var oldAngleDif = 0.00;
-var oldAngleTime = 0.00;
-var oldSGANT_el = 0.00;
-var AOStimestamp;
-var timeadjust = 315986384995.04;
-var LOS;
 var AOS;
 var AOSnum;
-var Crewlock_Pres;
-var time = 0.0;
-var difference = 0.00;
-var unixtime = (new Date).getTime();
-var date = new Date(unixtime);
-var hours = date.getUTCHours();
-var minutes = "0" + date.getMinutes();
-var seconds = "0" + date.getSeconds();
-var timestmp = new Date().setFullYear(new Date().getFullYear(), 0, 1    );
-var yearFirstDay = Math.floor(timestmp / 86400000);
-var today = Math.ceil((new Date().getTime()) / 86400000);
-var dayOfYear = today - yearFirstDay;
-var timestampnow = dayOfYear * 24 + hours + minutes / 60 + seconds / 3600;
 
-//console.log(dayOfYear);
-//console.log(hours);
-//console.log(minutes);
-console.log(timestampnow);
+var now = new Date();
+var gmtoff = (now.getTimezoneOffset())/60;
+var start = new Date(now.getFullYear(), 0, 0);
+var diff = (now - start) + ((start.getTimezoneOffset() - now.getTimezoneOffset()) * 60 * 1000);
+var oneDay = 1000 * 60 * 60 * 24;
+var timestampnow = (diff / oneDay) * 24 + gmtoff;
+console.log('Current timestamp: ' + timestampnow);
 
 lsClient.connect();
 
@@ -124,44 +97,10 @@ sub.addListener({
             db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "beta2b");
             break;
         case "Z1000014":
-            if( active_sasa == 1 )
-            {
-                SASA_elevation = SASA1_elevation
-            }
-            else
-            {
-                SASA_elevation = SASA2_elevation
-            }
-            SGANT_elevation = update.getValue("Value");
             db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "sgant_elevation");
             db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "sgant_elevation");
-            angleDif = (SGANT_elevation - SASA_elevation);
-            var currentAngleTime = ((new Date).getTime()) / 1000;
-            var difSlewRate = (oldAngleDif - angleDif) / (oldAngleTime - currentAngleTime);
-            avgSlew[index] = difSlewRate;
-            SGANT[index] = (oldSGANT_el - SGANT_elevation) / (oldAngleTime - currentAngleTime);
-            index++;
-            if( index > 4 )
-            {
-                index = 0;
-            }
-            oldAngleTime = currentAngleTime;
-            oldSGANT_el = SGANT_elevation;
-            oldAngleDif = angleDif;
-
-            if ( angleDif > -10 ) // && SGANT_elevation > 70)
-            {
-                LOS = 1;
-            }
-            else
-            {
-                LOS = 0;
-            }
-            db.run("UPDATE telemetry set Value = ? where Label = ?", LOS, "los");
-            db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "los");
             break;
         case "S1000005":
-            SASA1_elevation = update.getValue("Value");
             db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "sasa1_elevation");
             db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "sasa1_elevation");
             break;
@@ -302,7 +241,6 @@ sub.addListener({
             db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "sasa2_azimuth");
             break;
         case "P1000005":
-            SASA2_elevation = update.getValue("Value");
             db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), "sasa2_elevation");
             db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), "sasa2_elevation");
             break;
