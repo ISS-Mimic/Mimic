@@ -62,10 +62,10 @@ for child in root:
     elif child.tag == 'ConsumerSecret' and child.text is not None:
         consumerSecret = child.text
         print("Consumer Secret: " + consumerSecret)
-    elif child.tag == 'AccessToken':
+    elif child.tag == 'AccessToken' and child.text is not None:
         accessToken = child.text
         print("Access Token: " + accessToken)
-    elif child.tag == 'AccessTokenSecret':
+    elif child.tag == 'AccessTokenSecret' and child.text is not None:
         accessTokenSecret = child.text
         print("Access Token Secret: " + accessTokenSecret)
     else:
