@@ -17,7 +17,6 @@ import time
 from threading import Thread
 import re
 from Naked.toolshed.shell import execute_js, muterun_js
-from kivy.garden.gauge import Gauge
 import os
 import signal
 import multiprocessing, signal
@@ -45,15 +44,39 @@ from kivy.core.image import Image
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, WipeTransition, SwapTransition
 import tweepy
-   
-#Twitter API credentials
-consumer_key = "qsaZuBudT7HRaXf4JU0x0KtML"
-consumer_secret = "C6hpOGEtzTc9xoCeABgEnWxwWXjp3qOIpxrNiYerCoSGXZRqEd"
-access_key = "896619221475614720-MBUhORGyemI4ueSPdW8cAHJIaNzgdr9"
-access_secret = "Lu47Nu4eQrtQI1vmKUIMWTQ419CmEXSZPVAyHb8vFJbTu"   
-#authorize twitter, initialize tweepy
-auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-auth.set_access_token(access_key, access_secret)
+import xml.etree.ElementTree as etree
+
+# Twitter API credentials
+consumerKey = ''
+consumerSecret = ''
+accessToken = ''
+accessTokenSecret = ''
+
+# Retrieving key and tokens used for 0Auth
+tree = etree.parse('TwitterKeys.xml')
+root = tree.getroot()
+for child in root:
+    if child.tag == 'ConsumerKey' and child.text is not None:
+        consumerKey = child.text
+        print("Consumer Key: " + consumerKey)
+    elif child.tag == 'ConsumerSecret' and child.text is not None:
+        consumerSecret = child.text
+        print("Consumer Secret: " + consumerSecret)
+    elif child.tag == 'AccessToken' and child.text is not None:
+        accessToken = child.text
+        print("Access Token: " + accessToken)
+    elif child.tag == 'AccessTokenSecret' and child.text is not None:
+        accessTokenSecret = child.text
+        print("Access Token Secret: " + accessTokenSecret)
+    else:
+        print("Warning: Unknown or Empty element: " + child.tag)
+        print(" Twitter fetching may not work.")
+
+#OAuth process, using the keys and tokens
+auth = tweepy.OAuthHandler(consumerKey, consumerSecret)
+auth.set_access_token(accessToken, accessTokenSecret)
+
+# Creation of the actual interface, using authentication
 api = tweepy.API(auth)
 
 errorlog = open('./Logs/errorlog.txt','w')
