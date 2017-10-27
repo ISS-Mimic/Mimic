@@ -1,11 +1,12 @@
 #!/bin/bash
 
 echo "running"
-sleep 30
+sleep 10
 
-while read time crew voltage switch
+while read time crew voltage switch air
 do
     echo $crew
+    echo $air
     sqlite3 iss_telemetry.db "update telemetry set value = '$crew' where ID = 'AIRLOCK000049'"
     sqlite3 iss_telemetry.db "update telemetry set timestamp = '$time' where ID = 'AIRLOCK000049'"
     
@@ -25,7 +26,11 @@ do
         sqlite3 iss_telemetry.db "update telemetry set value = '$switch' where ID = 'AIRLOCK000048'"
         sqlite3 iss_telemetry.db "update telemetry set timestamp = '$time' where ID = 'AIRLOCK000048'"
     fi
+    if [ "$air" != "-" ]; then
+        sqlite3 iss_telemetry.db "update telemetry set value = '$air' where ID = 'AIRLOCK000054'"
+        sqlite3 iss_telemetry.db "update telemetry set timestamp = '$time' where ID = 'AIRLOCK000048'"
+    fi
 
     sleep 0.1
 
-done < "TestData2.txt"
+done < "TestData.txt"
