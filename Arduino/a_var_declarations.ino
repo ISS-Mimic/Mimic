@@ -11,14 +11,14 @@ unsigned long mytime;
 // ======== B2B PID Vals=====================
 //  PID Constants
 float Kp_B2B = 40; // Proportional Gain of PID
-float Ki_B2B = 0; // Integral Gain of PID
-float Kd_B2B = 0; // Derivative Gain of PID
+float Ki_B2B = 5; // Integral Gain of PID
+float Kd_B2B = 10*0; // Derivative Gain of PID
 
 // B2B vars that change every iteration
 int Count_B2B = 0;
 float Pos_B2B=0;
 float PosErr_B2B = 0;
-float PosErr_B2B_old = 0;
+float PosErr_old_B2B = 0;
 float tmpSpeed_B2B = 0;
 float dErrDt_B2B = 0;
 float dPosErr_B2B=0;
@@ -30,14 +30,14 @@ int CmdSpeed_B2B=0;
 // ======== B4B PID Vals=====================
 //  PID Constants
 float Kp_B4B = 20; // Proportional Gain of PID
-float Ki_B4B = 0; // Integral Gain of PID
+float Ki_B4B = 5; // Integral Gain of PID
 float Kd_B4B = 0; // Derivative Gain of PID
 
 // B4B vars that change every iteration
 int Count_B4B = 0;
 float Pos_B4B=0;
 float PosErr_B4B = 0;
-float PosErr_B4B_old = 0;
+float PosErr_old_B4B = 0;
 float tmpSpeed_B4B = 0;
 float dErrDt_B4B = 0;
 float dPosErr_B4B=0;
@@ -56,7 +56,7 @@ float Kd_B2A = 0; // Derivative Gain of PID
 int Count_B2A = 0;
 float Pos_B2A=0;
 float PosErr_B2A = 0;
-float PosErr_B2A_old = 0;
+float PosErr_old_B2A = 0;
 float tmpSpeed_B2A = 0;
 float dErrDt_B2A = 0;
 float dPosErr_B2A=0;
@@ -75,7 +75,7 @@ float Kd_B4A = 0; // Derivative Gain of PID
 int Count_B4A = 0;
 float Pos_B4A=0;
 float PosErr_B4A = 0;
-float PosErr_B4A_old = 0;
+float PosErr_old_B4A = 0;
 float tmpSpeed_B4A = 0;
 float dErrDt_B4A = 0;
 float dPosErr_B4A=0;
@@ -94,7 +94,7 @@ int CmdSpeed_B4A=0;
 //int Count_PSARJ = 0;
 //float Pos_PSARJ=0;
 //float PosErr_PSARJ = 0;
-//float PosErr_PSARJ_old = 0;
+//float PosErr_old_PSARJ = 0;
 //float tmpSpeed_PSARJ = 0;
 //float dErrDt_PSARJ = 0;
 //float dPosErr_PSARJ=0;

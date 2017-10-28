@@ -1,13 +1,33 @@
 void loop() {
-   B4B = 100+90.0 * sin(2.0 * 3.14159 * 0.001 * millis() / 1000.0);
-   B2B = 100+90.0 * sin(2.0 * 3.14159 * 0.001 * millis() / 1000.0);
+
+int  debug_mode=2;
+  B4B = 100 + 90.0 ;//* sin(2.0 * 3.14159 * 0.001 * millis() / 1000.0);
+  B2B = 100 + 90.0 ;//* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
   // commentedAug23  B2B=184.5+55.2*sin((1/60.)*2*3.14159*float(millis())/1000.0);
   //B4B=180;
   if (Serial3.available())
   {
     checkSerial();
   }
+  /*
 
+  // ========= Servo Stuff =============================
+  for (i = 0; i < 255; i++) {
+    servo1.write(map(i, 0, 255, 0, 180));
+    // myMotor->setSpeed(i);
+    // myStepper->step(1, FORWARD, DOUBLE);
+    delay(3);
+  }
+  //delay(10);
+  for (i = 255; i != 0; i--) {
+    servo1.write(map(i, 0, 255, 0, 180));
+    // myMotor->setSpeed(i);
+    //myStepper->step(1, BACKWARD, DOUBLE);
+    delay(3);
+  }
+  //delay(10);
+  // ==================================================
+*/
   // ============== Time measures ===================================================
   LoopStartMillis = millis();
   delta_t_millis = max(LoopStartMillis - previousMillis, 1); // ensure always equal to at least one, for later inversion
@@ -30,12 +50,12 @@ void loop() {
   Pos_B2A = float(Count_B2A) / 5;
 
   PosErr_B2A = B2A - Pos_B2A; // Compute Pos_B2Aition Error
-  dPosErr_B2A = PosErr_B2A - PosErr_B2A_old;
+  dPosErr_B2A = PosErr_B2A - PosErr_old_B2A;
 
   if (abs(PosErr_B2A) < 0.1) {
     PosErr_B2A = 0;
     dPosErr_B2A = 0;
-    PosErr_B2A_old = 0;
+    PosErr_old_B2A = 0;
     IntOld_B2A = 0;
     //Serial.println("Small2A Err");
   }
@@ -45,11 +65,11 @@ void loop() {
   IntOld_B2A = IntNow_B2A;
 
   // Integrator reset when error sign changes
-  if (PosErr_B2A_old * PosErr_B2A <= 0) { // sign on error has changed or is zero
+  if (PosErr_old_B2A * PosErr_B2A <= 0) { // sign on error has changed or is zero
     IntNow_B2A = 0;
     IntOld_B2A = 0;
   }
-  PosErr_B2A_old = PosErr_B2A; // For use on the next iteration
+  PosErr_old_B2A = PosErr_B2A; // For use on the next iteration
 
   // Calculate motor speed setpoint based on PID constants and computed params for this iteration.
   tmpSpeed_B2A = Kp_B2A * PosErr_B2A + Kd_B2A * (dErrDt_B2A) + Ki_B2A * IntNow_B2A;
@@ -59,15 +79,15 @@ void loop() {
     CmdSpeed_B2A = 40;
   }
 
- // CmdSpeed_B2A = ManualSpeed + 10; max(min(CmdSpeed_B2A, 250), 0); // At least 10, at most 250.  Update as needed per motor.
+ CmdSpeed_B2A = max(min(CmdSpeed_B2A, 250), 0); // At least 10, at most 250.  Update as needed per motor.
 
   // Set motor speed
-   if (tmpSpeed_B2A > 0) {
-  myMotorB2A->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
-   }
-   else {
-     myMotorB2A->run(BACKWARD);
-    }
+  if (tmpSpeed_B2A > 0) {
+    myMotorB2A->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
+  }
+  else {
+    myMotorB2A->run(BACKWARD);
+  }
   myMotorB2A->setSpeed(CmdSpeed_B2A);// + 20);
   //=====================================================================================
 
@@ -77,12 +97,12 @@ void loop() {
   Pos_B2B = float(Count_B2B) / 5;
 
   PosErr_B2B = B2B - Pos_B2B; // Compute Pos_B2Bition Error
-  dPosErr_B2B = PosErr_B2B - PosErr_B2B_old;
+  dPosErr_B2B = PosErr_B2B - PosErr_old_B2B;
 
   if (abs(PosErr_B2B) < 0.1) {
     PosErr_B2B = 0;
     dPosErr_B2B = 0;
-    PosErr_B2B_old = 0;
+    PosErr_old_B2B = 0;
     IntOld_B2B = 0;
     //Serial.println("Small2B Err");
   }
@@ -92,11 +112,11 @@ void loop() {
   IntOld_B2B = IntNow_B2B;
 
   // Integrator reset when error sign changes
-  if (PosErr_B2B_old * PosErr_B2B <= 0) { // sign on error has changed or is zero
+  if (PosErr_old_B2B * PosErr_B2B <= 0) { // sign on error has changed or is zero
     IntNow_B2B = 0;
     IntOld_B2B = 0;
   }
-  PosErr_B2B_old = PosErr_B2B; // For use on the next iteration
+  PosErr_old_B2B = PosErr_B2B; // For use on the next iteration
 
   // Calculate motor speed setpoint based on PID constants and computed params for this iteration.
   tmpSpeed_B2B = Kp_B2B * PosErr_B2B + Kd_B2B * (dErrDt_B2B) + Ki_B2B * IntNow_B2B;
@@ -124,12 +144,12 @@ void loop() {
   Pos_B4A = float(Count_B4A) / 5;
 
   PosErr_B4A = B4A - Pos_B4A; // Compute Pos_B4Aition Error
-  dPosErr_B4A = PosErr_B4A - PosErr_B4A_old;
+  dPosErr_B4A = PosErr_B4A - PosErr_old_B4A;
 
   if (abs(PosErr_B4A) < 0.1) {
     PosErr_B4A = 0;
     dPosErr_B4A = 0;
-    PosErr_B4A_old = 0;
+    PosErr_old_B4A = 0;
     IntOld_B4A = 0;
     //Serial.println("Small4A Err");
   }
@@ -139,11 +159,11 @@ void loop() {
   IntOld_B4A = IntNow_B4A;
 
   // Integrator reset when error sign changes
-  if (PosErr_B4A_old * PosErr_B4A <= 0) { // sign on error has changed or is zero
+  if (PosErr_old_B4A * PosErr_B4A <= 0) { // sign on error has changed or is zero
     IntNow_B4A = 0;
     IntOld_B4A = 0;
   }
-  PosErr_B4A_old = PosErr_B4A; // For use on the next iteration
+  PosErr_old_B4A = PosErr_B4A; // For use on the next iteration
 
   // Calculate motor speed setpoint based on PID constants and computed params for this iteration.
   tmpSpeed_B4A = Kp_B4A * PosErr_B4A + Kd_B4A * (dErrDt_B4A) + Ki_B4A * IntNow_B4A;
@@ -153,15 +173,15 @@ void loop() {
     CmdSpeed_B4A = 40;
   }
 
-  CmdSpeed_B4A = ManualSpeed;  max(min(CmdSpeed_B4A, 250), 0); // At least 10, at most 250.  Update as needed per motor.
+  CmdSpeed_B4A = max(min(CmdSpeed_B4A, 250), 0); // At least 10, at most 250.  Update as needed per motor.
 
   // Set motor speed
-    if (tmpSpeed_B4A > 0) {
-  myMotorB4A->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
-    }
-    else {
-      myMotorB4A->run(BACKWARD);
-    }
+  if (tmpSpeed_B4A > 0) {
+    myMotorB4A->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
+  }
+  else {
+    myMotorB4A->run(BACKWARD);
+  }
   myMotorB4A->setSpeed(CmdSpeed_B4A);// + 20);
   //=====================================================================================
 
@@ -172,12 +192,12 @@ void loop() {
   Pos_B4B = float(Count_B4B) / 5;
 
   PosErr_B4B = B4B - Pos_B4B; // Compute Pos_B4Bition Error
-  dPosErr_B4B = PosErr_B4B - PosErr_B4B_old;
+  dPosErr_B4B = PosErr_B4B - PosErr_old_B4B;
 
   if (abs(PosErr_B4B) < 0.1) {
     PosErr_B4B = 0;
     dPosErr_B4B = 0;
-    PosErr_B4B_old = 0;
+    PosErr_old_B4B = 0;
     IntOld_B4B = 0;
     //Serial.println("Small4B Err");
   }
@@ -187,11 +207,11 @@ void loop() {
   IntOld_B4B = IntNow_B4B;
 
   // Integrator reset when error sign changes
-  if (PosErr_B4B_old * PosErr_B4B <= 0) { // sign on error has changed or is zero
+  if (PosErr_old_B4B * PosErr_B4B <= 0) { // sign on error has changed or is zero
     IntNow_B4B = 0;
     IntOld_B4B = 0;
   }
-  PosErr_B4B_old = PosErr_B4B; // For use on the next iteration
+  PosErr_old_B4B = PosErr_B4B; // For use on the next iteration
 
   // Calculate motor speed setpoint based on PID constants and computed params for this iteration.
   tmpSpeed_B4B = Kp_B4B * PosErr_B4B + Kd_B4B * (dErrDt_B4B) + Ki_B4B * IntNow_B4B;
@@ -201,15 +221,15 @@ void loop() {
     CmdSpeed_B4B = 40;
   }
 
- //Aug23 CmdSpeed_B4B = ManualSpeed; max(min(CmdSpeed_B4B, 250), 0); // At least 10, at most 250.  Update as needed per motor.
+  CmdSpeed_B4B = max(min(CmdSpeed_B4B, 250), 0); // At least 0, at most 250.  Update as needed per motor.
 
   // Set motor speed
-   if (tmpSpeed_B4B > 0) {
-  myMotorB4B->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
-   }
-   else {
-     myMotorB4B->run(BACKWARD);
-   }
+  if (tmpSpeed_B4B > 0) {
+    myMotorB4B->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
+  }
+  else {
+    myMotorB4B->run(BACKWARD);
+  }
   myMotorB4B->setSpeed(CmdSpeed_B4B);// + 20);
   //=====================================================================================
 
@@ -217,13 +237,13 @@ void loop() {
   //  Pos_PSARJ = float(Count_PSARJ) / 2.5; // / 25; // 150:1 gear ratio, 6 encoder counts per motor shaft rotation 150/6=25;
   //
   //  PosErr_PSARJ = PSARJ - Pos_PSARJ; // Compute Pos_PSARJition Error
-  //  dPosErr_PSARJ = PosErr_PSARJ - PosErr_PSARJ_old;
+  //  dPosErr_PSARJ = PosErr_PSARJ - PosErr_old_PSARJ;
   //  dErrDt_PSARJ = dPosErr_PSARJ * inverse_delta_t_millis * 0.001; // For Derivative
   //  IntNow_PSARJ = IntOld_PSARJ + PosErr_PSARJ * inverse_delta_t_millis * 0.001; // For Integrator
   //  IntOld_PSARJ = IntNow_PSARJ;
-  //  PosErr_PSARJ_old = PosErr_PSARJ; // For use on the next iteration
+  //  PosErr_old_PSARJ = PosErr_PSARJ; // For use on the next iteration
   //  // Integrator reset when error sign changes
-  //  if (PosErr_PSARJ_old * PosErr_PSARJ < 0) { // sign on error has changed
+  //  if (PosErr_old_PSARJ * PosErr_PSARJ < 0) { // sign on error has changed
   //    IntNow_PSARJ = 0;
   //    IntOld_PSARJ = 0;
   //  }
@@ -245,7 +265,11 @@ void loop() {
 
   millisChPt2 = millis() - LoopStartMillis;
 
-  if (1) {
+
+
+  
+
+  if (debug_mode==1) {
     response = "";
     response += "Ct2B:";
     response += Count_B2B;
@@ -322,9 +346,47 @@ void loop() {
   //  response = "";
   //  response += Pos_B4B;
   //  Serial.println(response);
+
+
+if (debug_mode==2){
+Serial.print(B2B);
+Serial.print(",");
+Serial.print(Pos_B2B);
+Serial.print(",");
+Serial.print(CmdSpeed_B2B);
+Serial.print(",");
+Serial.print(tmpSpeed_B2B);
+Serial.print("|,");
+Serial.print(B4B);
+Serial.print(",");
+Serial.print(Pos_B4B);
+Serial.print(",");
+Serial.print(CmdSpeed_B4B);
+Serial.print(",");
+Serial.print(tmpSpeed_B4B);
+millisChPt5 = millis() - LoopStartMillis;
+Serial.print(", deltaT:");
+Serial.println(millisChPt5);
+}
+
+if (debug_mode==3){
+Serial.print(B2B);
+Serial.print(",");
+Serial.print(Pos_B2B);
+Serial.print(",");
+Serial.print(B4B);
+Serial.print(",");
+Serial.println(Pos_B4B);
+
+}
+
+
+
+
+  
   previousMillis = LoopStartMillis;
 
   millisChPt6 = millis() - LoopStartMillis;
 
-  delay(10);
+  delay(3);
 }
