@@ -1,9 +1,13 @@
+#!/usr/bin/python
+
 import kivy
 import urllib2
 from bs4 import BeautifulSoup
 from calendar import timegm
 import datetime
 import os
+import sys
+import subprocess
 import sys
 import json
 import sqlite3
@@ -46,6 +50,9 @@ from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, WipeTr
 import tweepy
 import xml.etree.ElementTree as etree
 
+p = subprocess.Popen(["node", "ISS_Telemetry.js"]) 
+#call(["node", "ISS_Telemetry.js"]) 
+#call('node ISS_Telemetry.js')
 # Twitter API credentials
 consumerKey = ''
 consumerSecret = ''
@@ -269,6 +276,10 @@ class MainScreen(Screen):
     def changeManualControlBoolean(self, *args):
         global manualcontrol
         manualcontrol = args[0]        
+
+    def killproc(*args):
+        global p
+        p.kill()
 
 class CalibrateScreen(Screen):
     def serialWrite(self, *args):
@@ -535,6 +546,10 @@ class MainApp(App):
 
         #Clock.schedule_interval(self.getTLE, 3600)
         return root
+
+    def kill():
+        global p
+        p.kill()
 
     def deleteURLPictures(self, dt):
         mimiclog.write(str(datetime.datetime.utcnow()))
@@ -1229,9 +1244,6 @@ class MainApp(App):
         crewlockpres = float((values[16])[0])
         airlockpres = float((values[77])[0])
 
-        print crewlockpres
-        print airlockpres
-
         if airlock_pump_voltage == 1:
             self.eva_screen.ids.pumpvoltage.text = "Airlock Pump Power On!"
             self.eva_screen.ids.pumpvoltage.color = 0.33,0.7,0.18
@@ -1252,11 +1264,7 @@ class MainApp(App):
 
         ##No EVA Currently
         if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and crewlockpres > 740 and airlockpres > 740: 
-            print "No EVA"
             eva = False   
-            repress = False
-            depress1 = False
-            depress2 = False
             self.eva_screen.ids.leak_timer.text = ""
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/BlankLights.png'
             self.eva_screen.ids.EVA_occuring.color = 1,0,0
@@ -1264,7 +1272,6 @@ class MainApp(App):
 
         ##EVA Standby - NOT UNIQUE
         if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres > 740 and airlockpres > 740: 
-            print "Standby"
             standby = True
             self.eva_screen.ids.leak_timer.text = "~160s Leak Check"
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/StandbyLights.png'
@@ -1275,25 +1282,14 @@ class MainApp(App):
 
         ##EVA Prebreath Pressure
         if airlock_pump_voltage == 1 and crewlockpres > 740 and airlockpres > 740: 
-            print "Prebreath"
             prebreath1 = True
             self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/PreBreatheLights.png'
             self.eva_screen.ids.leak_timer.text = "~160s Leak Check"
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             self.eva_screen.ids.EVA_occuring.text = "Pre-EVA Nitrogen Purge"
         
-        ##EVA Prebreath exercise - this doesnt work not unique, overrides prebreath1
-        #if airlock_pump_voltage == 1 and (prebreath1 or prebreath2) and airlockpres > 740: 
-        #    prebreath1 = False
-        #    prebreath2 = True
-        #    self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/PreBreatheLights.png'
-        #    self.eva_screen.ids.leak_timer.text = "~160s Leak Check"
-        #    self.eva_screen.ids.EVA_occuring.color = 0,0,1
-        #    self.eva_screen.ids.EVA_occuring.text = "In-Suit Light Exercise (ISLE)"
-
         ##EVA Depress1
         if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres < 740 and airlockpres > 740: 
-            print "Depress1"
             depress1 = True
             self.eva_screen.ids.leak_timer.text = "~160s Leak Check"
             self.eva_screen.ids.EVA_occuring.text = "Crewlock Depressurizing"
@@ -1302,7 +1298,6 @@ class MainApp(App):
 
         ##EVA Leakcheck
         if airlock_pump_voltage == 1 and crewlockpres < 260 and crewlockpres > 250 and (depress1 or leakhold): 
-            print "Leak Hold"
             if depress1:
                 holdstartTime = float(unixconvert[7])*24+unixconvert[3]+float(unixconvert[4])/60+float(unixconvert[5])/3600
             leakhold = True
@@ -1316,7 +1311,6 @@ class MainApp(App):
 
         ##EVA Depress2
         if airlock_pump_voltage == 1 and crewlockpres <= 250 and crewlockpres > 3 : 
-            print "Depress2"
             leakhold = False
             self.eva_screen.ids.leak_timer.text = "Complete"
             self.eva_screen.ids.EVA_occuring.text = "Crewlock Depressurizing"
@@ -1325,7 +1319,6 @@ class MainApp(App):
         
         ##EVA in progress
         if crewlockpres < 2.5: 
-            print "EVA in progress!"
             eva = True
             if obtained_EVA_crew == False:
                 self.checkpasttweets()
@@ -1337,7 +1330,6 @@ class MainApp(App):
 
         ##Repress
         if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and crewlockpres >= 3 and crewlockpres < 740:
-            print "Repress1"
             eva = False
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             self.eva_screen.ids.EVA_occuring.text = "Crewlock Repressurizing"
