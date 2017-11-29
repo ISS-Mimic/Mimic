@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <TwitterKeys>
-    <ConsumerKey></ConsumerKey>
-    <ConsumerSecret></ConsumerSecret>
-    <AccessToken></AccessToken>
-    <AccessTokenSecret></AccessTokenSecret>
+    <ConsumerKey>replacewithyourconsumerkey</ConsumerKey>
+    <ConsumerSecret>replacewithyourconsumersecret</ConsumerSecret>
+    <AccessToken>replacewithyouraccesstoken</AccessToken>
+    <AccessTokenSecret>replacewithyouraccesssecret</AccessTokenSecret>
 </TwitterKeys>
