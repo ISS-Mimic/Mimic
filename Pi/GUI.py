@@ -281,6 +281,9 @@ class MainScreen(Screen):
         global p
         p.kill()
 
+    def resetLOS(*args):
+        p.kill()
+
 class CalibrateScreen(Screen):
     def serialWrite(self, *args):
         ser.write(*args)
@@ -1259,7 +1262,7 @@ class MainApp(App):
             self.eva_screen.ids.pumpswitch.color = 0,0,0
        
         ##activate EVA button flash
-        if airlock_pump_voltage == 1 or crewlockpres < 740:
+        if airlock_pump_voltage == 1 or crewlockpres < 734:
             evaflashevent = Clock.schedule_once(self.flashEVAbutton, 1)
 
         ##No EVA Currently
@@ -1329,7 +1332,7 @@ class MainApp(App):
             evatimerevent = Clock.schedule_once(self.EVA_clock, 1)
 
         ##Repress
-        if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and crewlockpres >= 3 and crewlockpres < 740:
+        if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and crewlockpres >= 3 and crewlockpres < 734:
             eva = False
             self.eva_screen.ids.EVA_occuring.color = 0,0,1
             self.eva_screen.ids.EVA_occuring.text = "Crewlock Repressurizing"
