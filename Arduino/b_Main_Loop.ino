@@ -1,21 +1,24 @@
 void loop() {
-
-int  debug_mode=3;
+delay(1);
+int  debug_mode=1;
   B4B = 100 + 90.0* sin(2.0 * 3.14159 * 0.001 * millis() / 1000.0);
   B2B = 100 + 90.0*sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
-  PTRRJ=-100*sin(1*3.14159*0.01*millis()/1000.0); 
+  PTRRJ=104*sin(1*3.14159*0.01*millis()/1000.0); 
   // commentedAug23  B2B=184.5+55.2*sin((1/60.)*2*3.14159*float(millis())/1000.0);
   //B4B=180;
-  if (Serial3.available())
-  {
-    checkSerial();
-  }
+//  if (Serial3.available())
+//  {
+//    checkSerial();
+//  }
   
 
   // ========= Servo Stuff =============================
   //map(value, fromLow, fromHigh, toLow, toHigh)
-//     servo1.write(map(PTRRJ, -115,115, 0, 255)); // from +/- 115deg to servo command min and max.
-  servo1.write(PTRRJ+180);
+     servo1.write(map(PTRRJ, -115,115, 0, 255)); // from +/- 115deg to servo command min and max.
+     servo2.write(map(PTRRJ, -115,115, 0, 255)); // from +/- 115deg to servo command min and max.
+  //servo1.write(PTRRJ+180);
+  //servo2.write(PTRRJ+180);
+
   delay(1);
   //delay(10);
 //  for (i = 255; i != 0; i--) {
