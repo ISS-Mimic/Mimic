@@ -1,8 +1,10 @@
 void loop() {
 delay(1);
-int  debug_mode=1;
-  B4B = 100 + 90.0* sin(2.0 * 3.14159 * 0.001 * millis() / 1000.0);
-  B2B = 100 + 90.0*sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
+int  debug_mode=5;
+  B2A = 100 + 90.0* sin(2.0 * 3.14159 * 0.001 * millis() / 1000.0);
+  B4A = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
+  B2B = 100 + 90.0* sin(2.0 * 3.14159 * 0.001 * millis() / 1000.0);
+  B4B = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
   PTRRJ=104*sin(1*3.14159*0.01*millis()/1000.0); 
   // commentedAug23  B2B=184.5+55.2*sin((1/60.)*2*3.14159*float(millis())/1000.0);
   //B4B=180;
@@ -386,6 +388,52 @@ Serial.println(millisChPt5);
 }
 
 
+if (debug_mode==5){
+Serial.print("[Joint]:Cmd,Act,Err|  ");
+Serial.print("2A:c");
+Serial.print(B2A);
+Serial.print(",a");
+Serial.print(Pos_B2A);
+Serial.print(",e");
+Serial.print(PosErr_B2A);
+
+Serial.print("|,  ");
+Serial.print("4A:c");
+Serial.print(B4A);
+Serial.print(",a");
+Serial.print(Pos_B4A);
+Serial.print(",e");
+Serial.print(PosErr_B4A);
+
+Serial.print("|,  ");
+Serial.print("2B:c");
+Serial.print(B2B);
+Serial.print(",a");
+Serial.print(Pos_B2B);
+Serial.print(",e");
+Serial.print(PosErr_B2B);
+
+Serial.print("|,  ");
+Serial.print("4B:c");
+Serial.print(B4B);
+Serial.print(",a");
+Serial.print(Pos_B4B);
+Serial.print(",e");
+Serial.print(PosErr_B4B);
+Serial.print("|,");
+Serial.println("");
+}
+
+
+
+    response += "|Ct4A:";
+    response += Count_B4A;
+    response += "|p4A:";
+    response += Pos_B4A;
+    response += "|4Acmd:";
+    response += B4A;
+    response += "|e4A:";
+    response += PosErr_B4A;
 
 
   

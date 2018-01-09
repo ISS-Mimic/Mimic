@@ -30,14 +30,14 @@ Servo servo1;
 Servo servo2;
 
 // Temporarily setting some pins to ground and high (3.3v) for convenient connections.  Will mod when using more motors.
-int MyHighPin13 = 13; // This is just to have a convenient 3.3volt source near the other utilized pins
-int MyHighPin11 = 1;
-int MyHighPin12 = 12;
-
-int MyLowPin0 = 0;
-int MyLowPin14 = 14; //AKA Analog A0
-int MyLowPin15 = 15; //AKA Analog A1
-int MyLowPin16 = 16; //AKA Analog A2
+//int MyHighPin13 = 13; // This is just to have a convenient 3.3volt source near the other utilized pins
+//int MyHighPin11 = 1;
+//int MyHighPin12 = 12;
+//
+//int MyLowPin0 = 0;
+//int MyLowPin14 = 14; //AKA Analog A0
+//int MyLowPin15 = 15; //AKA Analog A1
+//int MyLowPin16 = 16; //AKA Analog A2
 
 // Create the motor shield object with the default I2C address
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
@@ -54,26 +54,26 @@ Adafruit_DCMotor *myMotorB4B = AFMS.getMotor(4);
 Encoder myEnc2A(2, 3);
 Encoder myEnc4A(4, 5);
 Encoder myEnc2B(6, 7);
-Encoder myEnc4B(8, 11);
+Encoder myEnc4B(11, 12);
 
 void setup() {
-  pinMode(MyHighPin13, OUTPUT);
-  digitalWrite(MyHighPin13, HIGH); // This is just a convenient pin for 3.3 volts
-  pinMode(MyHighPin11, OUTPUT);
-  digitalWrite(MyHighPin11, HIGH); // This is just a convenient pin for 3.3 volts
-  pinMode(MyHighPin12, OUTPUT);
-  digitalWrite(MyHighPin12, HIGH); // This is just a convenient pin for 3.3 volts
-
-
-  pinMode(MyLowPin0, OUTPUT);
-  digitalWrite(MyLowPin0, LOW); // This is just a convenient pin for Gnd
-
-  pinMode(MyLowPin14, OUTPUT);
-  digitalWrite(MyLowPin14, LOW); // This is just a convenient pin for Gnd
-  pinMode(MyLowPin15, OUTPUT);
-  digitalWrite(MyLowPin15, LOW); // This is just a convenient pin for Gnd
-    pinMode(MyLowPin16, OUTPUT);
-  digitalWrite(MyLowPin16, LOW); // This is just a convenient pin for Gnd
+//  pinMode(MyHighPin13, OUTPUT);
+//  digitalWrite(MyHighPin13, HIGH); // This is just a convenient pin for 3.3 volts
+//  pinMode(MyHighPin11, OUTPUT);
+//  digitalWrite(MyHighPin11, HIGH); // This is just a convenient pin for 3.3 volts
+//  pinMode(MyHighPin12, OUTPUT);
+//  digitalWrite(MyHighPin12, HIGH); // This is just a convenient pin for 3.3 volts
+//
+//
+//  pinMode(MyLowPin0, OUTPUT);
+//  digitalWrite(MyLowPin0, LOW); // This is just a convenient pin for Gnd
+//
+//  pinMode(MyLowPin14, OUTPUT);
+//  digitalWrite(MyLowPin14, LOW); // This is just a convenient pin for Gnd
+//  pinMode(MyLowPin15, OUTPUT);
+//  digitalWrite(MyLowPin15, LOW); // This is just a convenient pin for Gnd
+//    pinMode(MyLowPin16, OUTPUT);
+//  digitalWrite(MyLowPin16, LOW); // This is just a convenient pin for Gnd
 
   
 
