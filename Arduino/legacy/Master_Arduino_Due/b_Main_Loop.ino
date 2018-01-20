@@ -1,33 +1,35 @@
 void loop() {
-
-int  debug_mode=2;
-  B4B = 100 + 90.0 ;//* sin(2.0 * 3.14159 * 0.001 * millis() / 1000.0);
-  B2B = 100 + 90.0 ;//* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
+delay(1);
+int  debug_mode=5;
+  B2A = 100 + 90.0* sin(2.0 * 3.14159 * 0.001 * millis() / 1000.0);
+  B4A = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
+  B2B = 100 + 90.0* sin(2.0 * 3.14159 * 0.001 * millis() / 1000.0);
+  B4B = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
+  PTRRJ=104*sin(1*3.14159*0.01*millis()/1000.0); 
   // commentedAug23  B2B=184.5+55.2*sin((1/60.)*2*3.14159*float(millis())/1000.0);
   //B4B=180;
-  if (Serial3.available())
-  {
-    checkSerial();
-  }
-  /*
+//  if (Serial3.available())
+//  {
+//    checkSerial();
+//  }
+  
 
   // ========= Servo Stuff =============================
-  for (i = 0; i < 255; i++) {
-    servo1.write(map(i, 0, 255, 0, 180));
-    // myMotor->setSpeed(i);
-    // myStepper->step(1, FORWARD, DOUBLE);
-    delay(3);
-  }
+  //map(value, fromLow, fromHigh, toLow, toHigh)
+     servo1.write(map(PTRRJ, -115,115, 0, 255)); // from +/- 115deg to servo command min and max.
+     servo2.write(map(PTRRJ, -115,115, 0, 255)); // from +/- 115deg to servo command min and max.
+  //servo1.write(PTRRJ+180);
+  //servo2.write(PTRRJ+180);
+
+  delay(1);
   //delay(10);
-  for (i = 255; i != 0; i--) {
-    servo1.write(map(i, 0, 255, 0, 180));
-    // myMotor->setSpeed(i);
-    //myStepper->step(1, BACKWARD, DOUBLE);
-    delay(3);
-  }
+//  for (i = 255; i != 0; i--) {
+//    servo1.write(map(i, 0, 255, 0, 180));
+//    delay(1);
+//  }
   //delay(10);
   // ==================================================
-*/
+
   // ============== Time measures ===================================================
   LoopStartMillis = millis();
   delta_t_millis = max(LoopStartMillis - previousMillis, 1); // ensure always equal to at least one, for later inversion
@@ -376,11 +378,62 @@ Serial.print(Pos_B2B);
 Serial.print(",");
 Serial.print(B4B);
 Serial.print(",");
-Serial.println(Pos_B4B);
+Serial.print(Pos_B4B);
+Serial.print(",");
+Serial.print(PTRRJ);
+millisChPt5 = millis() - LoopStartMillis;
+Serial.print(", deltaT:");
+Serial.println(millisChPt5);
 
 }
 
 
+if (debug_mode==5){
+Serial.print("[Joint]:Cmd,Act,Err|  ");
+Serial.print("2A:c");
+Serial.print(B2A);
+Serial.print(",a");
+Serial.print(Pos_B2A);
+Serial.print(",e");
+Serial.print(PosErr_B2A);
+
+Serial.print("|,  ");
+Serial.print("4A:c");
+Serial.print(B4A);
+Serial.print(",a");
+Serial.print(Pos_B4A);
+Serial.print(",e");
+Serial.print(PosErr_B4A);
+
+Serial.print("|,  ");
+Serial.print("2B:c");
+Serial.print(B2B);
+Serial.print(",a");
+Serial.print(Pos_B2B);
+Serial.print(",e");
+Serial.print(PosErr_B2B);
+
+Serial.print("|,  ");
+Serial.print("4B:c");
+Serial.print(B4B);
+Serial.print(",a");
+Serial.print(Pos_B4B);
+Serial.print(",e");
+Serial.print(PosErr_B4B);
+Serial.print("|,");
+Serial.println("");
+}
+
+
+
+    response += "|Ct4A:";
+    response += Count_B4A;
+    response += "|p4A:";
+    response += Pos_B4A;
+    response += "|4Acmd:";
+    response += B4A;
+    response += "|e4A:";
+    response += PosErr_B4A;
 
 
   

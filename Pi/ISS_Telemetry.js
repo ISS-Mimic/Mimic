@@ -19,15 +19,17 @@ lsClient.subscribe(sub);
 lsClient.subscribe(timeSub);
 
 var AOS;
-var AOSnum;
-
+var AOSnum = 0;
 var now = new Date();
 var gmtoff = (now.getTimezoneOffset())/60;
 var start = new Date(now.getFullYear(), 0, 0);
 var diff = (now - start) + ((start.getTimezoneOffset() - now.getTimezoneOffset()) * 60 * 1000);
 var oneDay = 1000 * 60 * 60 * 24;
 var timestampnow = (diff / oneDay) * 24 + gmtoff;
-console.log('Current timestamp: ' + timestampnow);
+
+
+console.log('ISS Telemetry script active');
+//console.log('Current timestamp: ' + timestampnow);
 
 lsClient.connect();
 
@@ -1038,28 +1040,31 @@ timeSub.addListener({
   onItemUpdate: function (update) {
         var status = update.getValue("Status.Class");
         AOStimestamp = parseFloat(update.getValue("TimeStamp"));
-        console.log("Timestamp: " + update.getValue("TimeStamp"));
+        //console.log("Timestamp: " + update.getValue("TimeStamp"));
         difference = timestampnow - AOStimestamp;
-        console.log("Difference " + difference);
+        //console.log("Difference " + difference);
 
     if ( status === "24")
     {
         if( difference > 0.00153680542553047 )
         {
-            console.log("Signal Error!")
+            console.log("Signal Error!     @ " + update.getValue("TimeStamp"));
             AOS = "Stale Signal";
             AOSnum = 2;
         }
         else
         {
-            console.log("Connected to the ISS!")
+            if ( AOSnum !== 1 )
+            {
+               console.log("Connected to the ISS!     @ " + update.getValue("TimeStamp"));
+            }
             AOS = "Siqnal Acquired";
-             AOSnum = 1;
+            AOSnum = 1;
         }
     }
     else
     {
-        console.log("Signal Lost!")
+        console.log("Signal Lost!     @ " + update.getValue("TimeStamp"));
         AOS = "Signal Lost";
         AOSnum = 0;
     }
