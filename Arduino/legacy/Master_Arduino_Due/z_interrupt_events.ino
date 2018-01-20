@@ -4,11 +4,11 @@ void checkSerial()
   //digitalWrite(ledBluePin, HIGH);
   test = "";
   
-  while(Serial1.available())  
+  while(Serial.available())  
   {
-    test = Serial1.readString();
+    test = Serial.readString();
   }
-  Serial.println(test);
+ // Serial.println(test);
   char sz[test.length() + 1];
   char copy[test.length() + 1];
   strcpy(sz, test.c_str());  
