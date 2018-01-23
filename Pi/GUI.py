@@ -51,8 +51,7 @@ import tweepy
 import xml.etree.ElementTree as etree
 
 p = subprocess.Popen(["node", "ISS_Telemetry.js"]) 
-#call(["node", "ISS_Telemetry.js"]) 
-#call('node ISS_Telemetry.js')
+
 # Twitter API credentials
 consumerKey = ''
 consumerSecret = ''
@@ -836,10 +835,6 @@ class MainApp(App):
         self.eva_screen.ids.EVA_clock.color = 0.33,0.7,0.18
 
     def animate(self, instance):
-        mimiclog.write(str(datetime.datetime.utcnow()))
-        mimiclog.write(' ')
-        mimiclog.write(str("animate"))
-        mimiclog.write('\n')
         global new_x2
         global new_y2
         self.main_screen.ids.ISStiny2.size_hint = 0.07,0.07
@@ -850,10 +845,6 @@ class MainApp(App):
         self.main_screen.ids.ISStiny2.pos_hint = {"center_x": new_x2, "center_y": new_y2}
 
     def animate3(self, instance):
-        mimiclog.write(str(datetime.datetime.utcnow()))
-        mimiclog.write(' ')
-        mimiclog.write(str("animate3"))
-        mimiclog.write('\n')
         global new_x
         global new_y
         global sizeX
