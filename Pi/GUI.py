@@ -470,7 +470,13 @@ class EPS_Screen(Screen, EventDispatcher):
 class CT_Screen(Screen, EventDispatcher):
     pass
 
-class EVA_Screen(Screen, EventDispatcher):
+class EVA_Main_Screen(Screen, EventDispatcher):
+    pass
+
+class EVA_US_Screen(Screen, EventDispatcher):
+    pass
+
+class EVA_RS_Screen(Screen, EventDispatcher):
     pass
 
 class EVA_Pictures(Screen, EventDispatcher):
@@ -503,8 +509,8 @@ class MainApp(App):
         global startup
         global crewjsonsuccess
         global stopAnimation
+
         self.main_screen = MainScreen(name = 'main')
-        #root.add_widget(MainScreen(name = 'main'))
         self.orbit_screen = Orbit_Screen(name = 'orbit')
         self.fakeorbit_screen = FakeOrbitScreen(name = 'fakeorbit')
         self.mimic_screen = MimicScreen(name = 'mimic')
@@ -513,11 +519,12 @@ class MainApp(App):
         self.tcs_screen = TCS_Screen(name = 'tcs')
         self.crew_screen = Crew_Screen(name = 'crew')
         self.settings_screen = Settings_Screen(name = 'settings')
-        self.eva_screen = EVA_Screen(name='eva')
+        self.us_eva = EVA_US_Screen(name='us_eva')
+        self.rs_eva = EVA_RS_Screen(name='rs_eva')
+        self.eva_main = EVA_Main_Screen(name='eva_main')
         self.eva_pictures = EVA_Pictures(name='eva_pictures')
 
         root = MainScreenManager(transition=SwapTransition())
-        #root.add_widget(MainScreen(name = 'main'))
         root.add_widget(CalibrateScreen(name = 'calibrate'))
         root.add_widget(self.mimic_screen)
         root.add_widget(self.main_screen)
@@ -525,7 +532,9 @@ class MainApp(App):
         root.add_widget(self.orbit_screen)
         root.add_widget(self.eps_screen)
         root.add_widget(self.ct_screen)
-        root.add_widget(self.eva_screen)
+        root.add_widget(self.us_eva)
+        root.add_widget(self.rs_eva)
+        root.add_widget(self.eva_main)
         root.add_widget(self.eva_pictures)
         root.add_widget(self.tcs_screen)
         root.add_widget(self.crew_screen)
@@ -572,7 +581,7 @@ class MainApp(App):
         urlsize = len(EVA_picture_urls)
         
         if urlsize > 0:
-            self.eva_screen.ids.EVAimage.source = EVA_picture_urls[urlindex]
+            self.us_eva.ids.EVAimage.source = EVA_picture_urls[urlindex]
             self.eva_pictures.ids.EVAimage.source = EVA_picture_urls[urlindex]
         
         urlindex = urlindex + 1
@@ -632,12 +641,12 @@ class MainApp(App):
         EV1_hours = int(EV1_EVA_time/60)
         EV2_hours = int(EV2_EVA_time/60)
 
-        self.eva_screen.ids.EV1.text = str(EV1) + " (EV1):"
-        self.eva_screen.ids.EV2.text = str(EV2) + " (EV2):"
-        self.eva_screen.ids.EV1_EVAnum.text = "Number of EVAs = " + str(EV1_EVA_number) 
-        self.eva_screen.ids.EV2_EVAnum.text = "Number of EVAs = " + str(EV2_EVA_number)
-        self.eva_screen.ids.EV1_EVAtime.text = "Total EVA Time = " + str(EV1_hours) + "h " + str(EV1_minutes) + "m"
-        self.eva_screen.ids.EV2_EVAtime.text = "Total EVA Time = " + str(EV2_hours) + "h " + str(EV2_minutes) + "m"
+        self.us_eva.ids.EV1.text = str(EV1) + " (EV1):"
+        self.us_eva.ids.EV2.text = str(EV2) + " (EV2):"
+        self.us_eva.ids.EV1_EVAnum.text = "Number of EVAs = " + str(EV1_EVA_number) 
+        self.us_eva.ids.EV2_EVAnum.text = "Number of EVAs = " + str(EV2_EVA_number)
+        self.us_eva.ids.EV1_EVAtime.text = "Total EVA Time = " + str(EV1_hours) + "h " + str(EV1_minutes) + "m"
+        self.us_eva.ids.EV2_EVAtime.text = "Total EVA Time = " + str(EV2_hours) + "h " + str(EV2_minutes) + "m"
 
     def checkTwitter(self, dt):
         background_thread = Thread(target=self.checkTwitter2)
@@ -657,7 +666,7 @@ class MainApp(App):
             stuff = api.user_timeline(screen_name = 'iss101', count = 1, include_rts = True, tweet_mode = 'extended')
             #stuff = api.user_timeline(screen_name = 'iss_mimic', count = 1, include_rts = True, tweet_mode = 'extended')
         except:
-            self.eva_screen.ids.EVAstatus.text = str("Twitter Error")
+            self.us_eva.ids.EVAstatus.text = str("Twitter Error")
             errorlog.write(str(datetime.datetime.utcnow()))
             errorlog.write(' ')
             errorlog.write("Tweepy - Error Retrieving Tweet, make sure clock is correct")
@@ -666,7 +675,7 @@ class MainApp(App):
             stuff
         except NameError:
             print "No tweet - ensure correct time is set"
-            self.eva_screen.ids.EVAstatus.text = str("Twitter Error")
+            self.us_eva.ids.EVAstatus.text = str("Twitter Error")
         else:
             for status in stuff:
                 if status.full_text == latest_tweet:
@@ -682,7 +691,7 @@ class MainApp(App):
 
         emoji_pattern = re.compile("["u"\U0000007F-\U0001F1FF""]+", flags=re.UNICODE)
         tweet_string_no_emojis = str(emoji_pattern.sub(r'?', latest_tweet)) #cleanse the emojis!!
-        self.eva_screen.ids.EVAstatus.text = str(tweet_string_no_emojis.split("http",1)[0])
+        self.us_eva.ids.EVAstatus.text = str(tweet_string_no_emojis.split("http",1)[0])
 
         EVnames = []
         EVpics = []
@@ -717,10 +726,10 @@ class MainApp(App):
             #EV2_surname = 'Hei'
             EV1 = EVnames[0]
             EV2 = EVnames[1]
-            self.eva_screen.ids.EV1_Pic.source = str(EVpics[0])
-            self.eva_screen.ids.EV1_name.text = str(EV1_firstname)
-            self.eva_screen.ids.EV2_Pic.source = str(EVpics[1])
-            self.eva_screen.ids.EV2_name.text = str(EV2_firstname)
+            self.us_eva.ids.EV1_Pic.source = str(EVpics[0])
+            self.us_eva.ids.EV1_name.text = str(EV1_firstname)
+            self.us_eva.ids.EV2_Pic.source = str(EVpics[1])
+            self.us_eva.ids.EV2_name.text = str(EV2_firstname)
 
             background_thread = Thread(target=self.check_EVA_stats, args=(EV1_surname,EV1_firstname,EV2_surname,EV2_firstname))
             background_thread.daemon = True
@@ -788,10 +797,10 @@ class MainApp(App):
                     #EV2_surname = 'Hei'
                     EV1 = EVnames[0]
                     EV2 = EVnames[1]
-                    self.eva_screen.ids.EV1_Pic.source = str(EVpics[0])
-                    self.eva_screen.ids.EV1_name.text = str(EV1_firstname)
-                    self.eva_screen.ids.EV2_Pic.source = str(EVpics[1])
-                    self.eva_screen.ids.EV2_name.text = str(EV2_firstname)
+                    self.us_eva.ids.EV1_Pic.source = str(EVpics[0])
+                    self.us_eva.ids.EV1_name.text = str(EV1_firstname)
+                    self.us_eva.ids.EV2_Pic.source = str(EVpics[1])
+                    self.us_eva.ids.EV2_name.text = str(EV2_firstname)
 
                     background_thread = Thread(target=self.check_EVA_stats, args=(EV1_surname,EV1_firstname,EV2_surname,EV2_firstname))
                     background_thread.daemon = True
@@ -831,8 +840,8 @@ class MainApp(App):
         minutes = int(minutes)
         seconds = int(seconds)
 
-        self.eva_screen.ids.EVA_clock.text =(str(hours) + ":" + str(minutes).zfill(2) + ":" + str(int(seconds)).zfill(2))
-        self.eva_screen.ids.EVA_clock.color = 0.33,0.7,0.18
+        self.us_eva.ids.EVA_clock.text =(str(hours) + ":" + str(minutes).zfill(2) + ":" + str(int(seconds)).zfill(2))
+        self.us_eva.ids.EVA_clock.color = 0.33,0.7,0.18
 
     def animate(self, instance):
         global new_x2
@@ -1095,9 +1104,9 @@ class MainApp(App):
         seconds2 = int(seconds2)
 
         new_bar_x = self.map_hold_bar(260-seconds2)
-        self.eva_screen.ids.leak_timer.text = "~"+ str(int(seconds2)) + "s"
-        self.eva_screen.ids.Hold_bar.pos_hint = {"center_x": new_bar_x, "center_y": 0.49}
-        self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/LeakCheckLights.png'
+        self.us_eva.ids.leak_timer.text = "~"+ str(int(seconds2)) + "s"
+        self.us_eva.ids.Hold_bar.pos_hint = {"center_x": new_bar_x, "center_y": 0.49}
+        self.us_eva.ids.Crewlock_Status_image.source = './imgs/eva/LeakCheckLights.png'
 
     def signal_lost(self):
         self.orbit_screen.ids.signal.source = './imgs/signalred.zip'
@@ -1105,19 +1114,19 @@ class MainApp(App):
         self.eps_screen.ids.signal.source = './imgs/signalred.zip'
         self.ct_screen.ids.signal.source = './imgs/signalred.zip'
         self.tcs_screen.ids.signal.source = './imgs/signalred.zip'
-        self.eva_screen.ids.signal.source = './imgs/signalred.zip'
+        self.us_eva.ids.signal.source = './imgs/signalred.zip'
         self.orbit_screen.ids.signal.anim_delay = 0.4
         self.mimic_screen.ids.signal.anim_delay = 0.4
         self.eps_screen.ids.signal.anim_delay = 0.4
         self.ct_screen.ids.signal.anim_delay = 0.4
         self.tcs_screen.ids.signal.anim_delay = 0.4
-        self.eva_screen.ids.signal.anim_delay = 0.4
+        self.us_eva.ids.signal.anim_delay = 0.4
         self.orbit_screen.ids.signal.size_hint_y = 0.112
         self.mimic_screen.ids.signal.size_hint_y = 0.112
         self.eps_screen.ids.signal.size_hint_y = 0.112
         self.ct_screen.ids.signal.size_hint_y = 0.112
         self.tcs_screen.ids.signal.size_hint_y = 0.112
-        self.eva_screen.ids.signal.size_hint_y = 0.112
+        self.us_eva.ids.signal.size_hint_y = 0.112
 
     def signal_acquired(self):
         self.orbit_screen.ids.signal.source = './imgs/pulse-transparent.zip'
@@ -1125,19 +1134,19 @@ class MainApp(App):
         self.eps_screen.ids.signal.source = './imgs/pulse-transparent.zip'
         self.ct_screen.ids.signal.source = './imgs/pulse-transparent.zip'
         self.tcs_screen.ids.signal.source = './imgs/pulse-transparent.zip'
-        self.eva_screen.ids.signal.source = './imgs/pulse-transparent.zip'
+        self.us_eva.ids.signal.source = './imgs/pulse-transparent.zip'
         self.orbit_screen.ids.signal.anim_delay = 0.05
         self.mimic_screen.ids.signal.anim_delay = 0.05
         self.eps_screen.ids.signal.anim_delay = 0.05
         self.ct_screen.ids.signal.anim_delay = 0.05
         self.tcs_screen.ids.signal.anim_delay = 0.05
-        self.eva_screen.ids.signal.anim_delay = 0.05
+        self.us_eva.ids.signal.anim_delay = 0.05
         self.orbit_screen.ids.signal.size_hint_y = 0.15
         self.mimic_screen.ids.signal.size_hint_y = 0.15
         self.eps_screen.ids.signal.size_hint_y = 0.15
         self.ct_screen.ids.signal.size_hint_y = 0.15
         self.tcs_screen.ids.signal.size_hint_y = 0.15
-        self.eva_screen.ids.signal.size_hint_y = 0.15
+        self.us_eva.ids.signal.size_hint_y = 0.15
     
     def signal_stale(self):
         self.orbit_screen.ids.signal.source = './imgs/SignalOrangeGray.png'
@@ -1145,19 +1154,19 @@ class MainApp(App):
         self.eps_screen.ids.signal.source = './imgs/SignalOrangeGray.png'
         self.ct_screen.ids.signal.source = './imgs/SignalOrangeGray.png'
         self.tcs_screen.ids.signal.source = './imgs/SignalOrangeGray.png'
-        self.eva_screen.ids.signal.source = './imgs/SignalOrangeGray.png'
+        self.us_eva.ids.signal.source = './imgs/SignalOrangeGray.png'
         self.orbit_screen.ids.signal.anim_delay = 0.12
         self.mimic_screen.ids.signal.anim_delay = 0.12
         self.eps_screen.ids.signal.anim_delay = 0.12
         self.ct_screen.ids.signal.anim_delay = 0.12
         self.tcs_screen.ids.signal.anim_delay = 0.12
-        self.eva_screen.ids.signal.anim_delay = 0.12
+        self.us_eva.ids.signal.anim_delay = 0.12
         self.orbit_screen.ids.signal.size_hint_y = 0.112
         self.mimic_screen.ids.signal.size_hint_y = 0.112
         self.eps_screen.ids.signal.size_hint_y = 0.112
         self.ct_screen.ids.signal.size_hint_y = 0.112
         self.tcs_screen.ids.signal.size_hint_y = 0.112
-        self.eva_screen.ids.signal.size_hint_y = 0.112
+        self.us_eva.ids.signal.size_hint_y = 0.112
 
     def update_labels(self, dt):
         global mimicbutton,switchtofake,fakeorbitboolean,psarj2,ssarj2,manualcontrol,psarj,ssarj,ptrrj,strrj,beta1b,beta1a,beta2b,beta2a,beta3b,beta3a,beta4b,beta4a,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,c1a,c1b,c3a,c3b,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress,oldAirlockPump,obtained_EVA_crew,EVAstartTime
@@ -1239,18 +1248,18 @@ class MainApp(App):
         airlockpres = float((values[77])[0])
 
         if airlock_pump_voltage == 1:
-            self.eva_screen.ids.pumpvoltage.text = "Airlock Pump Power On!"
-            self.eva_screen.ids.pumpvoltage.color = 0.33,0.7,0.18
+            self.us_eva.ids.pumpvoltage.text = "Airlock Pump Power On!"
+            self.us_eva.ids.pumpvoltage.color = 0.33,0.7,0.18
         else:
-            self.eva_screen.ids.pumpvoltage.text = "Airlock Pump Power Off"
-            self.eva_screen.ids.pumpvoltage.color = 0,0,0
+            self.us_eva.ids.pumpvoltage.text = "Airlock Pump Power Off"
+            self.us_eva.ids.pumpvoltage.color = 0,0,0
 
         if airlock_pump_switch == 1:
-            self.eva_screen.ids.pumpswitch.text = "Airlock Pump Active!"
-            self.eva_screen.ids.pumpswitch.color = 0.33,0.7,0.18
+            self.us_eva.ids.pumpswitch.text = "Airlock Pump Active!"
+            self.us_eva.ids.pumpswitch.color = 0.33,0.7,0.18
         else:
-            self.eva_screen.ids.pumpswitch.text = "Airlock Pump Inactive"
-            self.eva_screen.ids.pumpswitch.color = 0,0,0
+            self.us_eva.ids.pumpswitch.text = "Airlock Pump Inactive"
+            self.us_eva.ids.pumpswitch.color = 0,0,0
        
         ##activate EVA button flash
         if airlock_pump_voltage == 1 or crewlockpres < 734:
@@ -1259,36 +1268,36 @@ class MainApp(App):
         ##No EVA Currently
         if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and crewlockpres > 740 and airlockpres > 740: 
             eva = False   
-            self.eva_screen.ids.leak_timer.text = ""
-            self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/BlankLights.png'
-            self.eva_screen.ids.EVA_occuring.color = 1,0,0
-            self.eva_screen.ids.EVA_occuring.text = "Currently No EVA"
+            self.us_eva.ids.leak_timer.text = ""
+            self.us_eva.ids.Crewlock_Status_image.source = './imgs/eva/BlankLights.png'
+            self.us_eva.ids.EVA_occuring.color = 1,0,0
+            self.us_eva.ids.EVA_occuring.text = "Currently No EVA"
 
         ##EVA Standby - NOT UNIQUE
         if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres > 740 and airlockpres > 740: 
             standby = True
-            self.eva_screen.ids.leak_timer.text = "~160s Leak Check"
-            self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/StandbyLights.png'
-            self.eva_screen.ids.EVA_occuring.color = 0,0,1
-            self.eva_screen.ids.EVA_occuring.text = "EVA Standby"
+            self.us_eva.ids.leak_timer.text = "~160s Leak Check"
+            self.us_eva.ids.Crewlock_Status_image.source = './imgs/eva/StandbyLights.png'
+            self.us_eva.ids.EVA_occuring.color = 0,0,1
+            self.us_eva.ids.EVA_occuring.text = "EVA Standby"
         else:
             standby = False
 
         ##EVA Prebreath Pressure
         if airlock_pump_voltage == 1 and crewlockpres > 740 and airlockpres > 740: 
             prebreath1 = True
-            self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/PreBreatheLights.png'
-            self.eva_screen.ids.leak_timer.text = "~160s Leak Check"
-            self.eva_screen.ids.EVA_occuring.color = 0,0,1
-            self.eva_screen.ids.EVA_occuring.text = "Pre-EVA Nitrogen Purge"
+            self.us_eva.ids.Crewlock_Status_image.source = './imgs/eva/PreBreatheLights.png'
+            self.us_eva.ids.leak_timer.text = "~160s Leak Check"
+            self.us_eva.ids.EVA_occuring.color = 0,0,1
+            self.us_eva.ids.EVA_occuring.text = "Pre-EVA Nitrogen Purge"
         
         ##EVA Depress1
         if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres < 740 and airlockpres > 740: 
             depress1 = True
-            self.eva_screen.ids.leak_timer.text = "~160s Leak Check"
-            self.eva_screen.ids.EVA_occuring.text = "Crewlock Depressurizing"
-            self.eva_screen.ids.EVA_occuring.color = 0,0,1
-            self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/DepressLights.png'
+            self.us_eva.ids.leak_timer.text = "~160s Leak Check"
+            self.us_eva.ids.EVA_occuring.text = "Crewlock Depressurizing"
+            self.us_eva.ids.EVA_occuring.color = 0,0,1
+            self.us_eva.ids.Crewlock_Status_image.source = './imgs/eva/DepressLights.png'
 
         ##EVA Leakcheck
         if airlock_pump_voltage == 1 and crewlockpres < 260 and crewlockpres > 250 and (depress1 or leakhold): 
@@ -1296,38 +1305,38 @@ class MainApp(App):
                 holdstartTime = float(unixconvert[7])*24+unixconvert[3]+float(unixconvert[4])/60+float(unixconvert[5])/3600
             leakhold = True
             depress1 = False
-            self.eva_screen.ids.EVA_occuring.text = "Leak Check in Progress!"
-            self.eva_screen.ids.EVA_occuring.color = 0,0,1
+            self.us_eva.ids.EVA_occuring.text = "Leak Check in Progress!"
+            self.us_eva.ids.EVA_occuring.color = 0,0,1
             Clock.schedule_once(self.hold_timer, 1)
-            self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/LeakCheckLights.png'
+            self.us_eva.ids.Crewlock_Status_image.source = './imgs/eva/LeakCheckLights.png'
         else:
             leakhold = False
 
         ##EVA Depress2
         if airlock_pump_voltage == 1 and crewlockpres <= 250 and crewlockpres > 3 : 
             leakhold = False
-            self.eva_screen.ids.leak_timer.text = "Complete"
-            self.eva_screen.ids.EVA_occuring.text = "Crewlock Depressurizing"
-            self.eva_screen.ids.EVA_occuring.color = 0,0,1
-            self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/DepressLights.png'
+            self.us_eva.ids.leak_timer.text = "Complete"
+            self.us_eva.ids.EVA_occuring.text = "Crewlock Depressurizing"
+            self.us_eva.ids.EVA_occuring.color = 0,0,1
+            self.us_eva.ids.Crewlock_Status_image.source = './imgs/eva/DepressLights.png'
         
         ##EVA in progress
         if crewlockpres < 2.5: 
             eva = True
             if obtained_EVA_crew == False:
                 self.checkpasttweets()
-            self.eva_screen.ids.EVA_occuring.text = "EVA In Progress!!!"
-            self.eva_screen.ids.EVA_occuring.color = 0.33,0.7,0.18
-            self.eva_screen.ids.leak_timer.text = "Complete"
-            self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/InProgressLights.png'
+            self.us_eva.ids.EVA_occuring.text = "EVA In Progress!!!"
+            self.us_eva.ids.EVA_occuring.color = 0.33,0.7,0.18
+            self.us_eva.ids.leak_timer.text = "Complete"
+            self.us_eva.ids.Crewlock_Status_image.source = './imgs/eva/InProgressLights.png'
             evatimerevent = Clock.schedule_once(self.EVA_clock, 1)
 
         ##Repress
         if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and crewlockpres >= 3 and crewlockpres < 734:
             eva = False
-            self.eva_screen.ids.EVA_occuring.color = 0,0,1
-            self.eva_screen.ids.EVA_occuring.text = "Crewlock Repressurizing"
-            self.eva_screen.ids.Crewlock_Status_image.source = './imgs/eva/RepressLights.png'
+            self.us_eva.ids.EVA_occuring.color = 0,0,1
+            self.us_eva.ids.EVA_occuring.text = "Crewlock Repressurizing"
+            self.us_eva.ids.Crewlock_Status_image.source = './imgs/eva/RepressLights.png'
 
         ##-------------------EVA Functionality End-------------------##
 
@@ -1411,12 +1420,12 @@ class MainApp(App):
         self.mimic_screen.ids.velocity_value.text = str(velocity) + " m/s"
         self.mimic_screen.ids.stationmass_value.text = str(iss_mass) + " kg"
 
-        self.eva_screen.ids.EVA_needle.angle = float(self.map_rotation(0.0193368*float(crewlockpres)))
-        self.eva_screen.ids.crewlockpressure_value.text = "{:.2f}".format(0.0193368*float(crewlockpres))
+        self.us_eva.ids.EVA_needle.angle = float(self.map_rotation(0.0193368*float(crewlockpres)))
+        self.us_eva.ids.crewlockpressure_value.text = "{:.2f}".format(0.0193368*float(crewlockpres))
        
         psi_bar_x = self.map_psi_bar(0.0193368*float(crewlockpres)) #convert to torr
         
-        self.eva_screen.ids.EVA_psi_bar.pos_hint = {"center_x": psi_bar_x, "center_y": 0.56} 
+        self.us_eva.ids.EVA_psi_bar.pos_hint = {"center_x": psi_bar_x, "center_y": 0.56} 
         
         if float(aos) == 1.00:
             self.changeColors(0,1,0)
@@ -1463,7 +1472,9 @@ Builder.load_file('./Screens/Orbit_Screen.kv')
 Builder.load_file('./Screens/EPS_Screen.kv')
 Builder.load_file('./Screens/CT_Screen.kv')
 Builder.load_file('./Screens/TCS_Screen.kv')
-Builder.load_file('./Screens/EVA_Screen.kv')
+Builder.load_file('./Screens/EVA_US_Screen.kv')
+Builder.load_file('./Screens/EVA_RS_Screen.kv')
+Builder.load_file('./Screens/EVA_Main_Screen.kv')
 Builder.load_file('./Screens/EVA_Pictures.kv')
 Builder.load_file('./Screens/Crew_Screen.kv')
 Builder.load_file('./Screens/ManualControlScreen.kv')
@@ -1482,7 +1493,9 @@ ScreenManager:
     EPS_Screen:
     CT_Screen:
     TCS_Screen:
-    EVA_Screen:
+    EVA_US_Screen:
+    EVA_RS_Screen:
+    EVA_Main_Screen:
     EVA_Pictures:
     Crew_Screen:
     ManualControlScreen:
