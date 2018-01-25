@@ -3,11 +3,9 @@
 #:import win kivy.core.window
 <Orbit_Screen>:
     name: 'orbit'
-    FloatLayout:
-        ##Image:
-            ##source: './imgs/iss2.png'
-            ##allow_stretch: True
-            ##keep_ratio: False
+    GridLayout:
+        rows: 3
+        cols: 1
         Label:
             pos_hint: {"center_x": 0.15, "center_y": 0.8}
             text: 'Orbit Stuff'

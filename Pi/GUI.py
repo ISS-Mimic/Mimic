@@ -24,6 +24,7 @@ from Naked.toolshed.shell import execute_js, muterun_js
 import os
 import signal
 import multiprocessing, signal
+from kivy.graphics.svg import Svg
 from kivy.animation import Animation
 from kivy.uix.behaviors.button import ButtonBehavior
 from kivy.uix.popup import Popup 
@@ -511,6 +512,8 @@ class MainApp(App):
         global stopAnimation
 
         self.main_screen = MainScreen(name = 'main')
+        self.calibrate_screen = CalibrateScreen(name = 'calibrate')
+        self.control_screen = ManualControlScreen(name = 'manualcontrol')
         self.orbit_screen = Orbit_Screen(name = 'orbit')
         self.fakeorbit_screen = FakeOrbitScreen(name = 'fakeorbit')
         self.mimic_screen = MimicScreen(name = 'mimic')
@@ -525,9 +528,10 @@ class MainApp(App):
         self.eva_pictures = EVA_Pictures(name='eva_pictures')
 
         root = MainScreenManager(transition=SwapTransition())
-        root.add_widget(CalibrateScreen(name = 'calibrate'))
-        root.add_widget(self.mimic_screen)
         root.add_widget(self.main_screen)
+        root.add_widget(self.calibrate_screen)
+        root.add_widget(self.control_screen)
+        root.add_widget(self.mimic_screen)
         root.add_widget(self.fakeorbit_screen)
         root.add_widget(self.orbit_screen)
         root.add_widget(self.eps_screen)
@@ -539,7 +543,6 @@ class MainApp(App):
         root.add_widget(self.tcs_screen)
         root.add_widget(self.crew_screen)
         root.add_widget(self.settings_screen)
-        root.add_widget(ManualControlScreen(name = 'manualcontrol'))
         root.current = 'main' #change this back to main when done with eva setup
 
         Clock.schedule_interval(self.update_labels, 1)
@@ -1034,35 +1037,35 @@ class MainApp(App):
         self.crew_screen.ids.crew6country.text = crewmembercountry[5]  
         self.crew_screen.ids.crew6daysonISS.text = crewmemberdays[5]
         #self.crew_screen.ids.crew6image.source = str(crewmemberpicture[5])
-        self.crew_screen.ids.crew7.text = crewmember[6]  
-        self.crew_screen.ids.crew7title.text = crewmembertitle[6]  
-        self.crew_screen.ids.crew7country.text = crewmembercountry[6]  
-        self.crew_screen.ids.crew7daysonISS.text = crewmemberdays[6]
+        #self.crew_screen.ids.crew7.text = crewmember[6]  
+        #self.crew_screen.ids.crew7title.text = crewmembertitle[6]  
+        #self.crew_screen.ids.crew7country.text = crewmembercountry[6]  
+        #self.crew_screen.ids.crew7daysonISS.text = crewmemberdays[6]
         #self.crew_screen.ids.crew7image.source = str(crewmemberpicture[6])
-        self.crew_screen.ids.crew8.text = crewmember[7]  
-        self.crew_screen.ids.crew8title.text = crewmembertitle[7]  
-        self.crew_screen.ids.crew8country.text = crewmembercountry[7]  
-        self.crew_screen.ids.crew8daysonISS.text = crewmemberdays[7]
+        #self.crew_screen.ids.crew8.text = crewmember[7]  
+        #self.crew_screen.ids.crew8title.text = crewmembertitle[7]  
+        #self.crew_screen.ids.crew8country.text = crewmembercountry[7]  
+        #self.crew_screen.ids.crew8daysonISS.text = crewmemberdays[7]
         #self.crew_screen.ids.crew8image.source = str(crewmemberpicture[7])
-        self.crew_screen.ids.crew9.text = crewmember[8]  
-        self.crew_screen.ids.crew9title.text = crewmembertitle[8]  
-        self.crew_screen.ids.crew9country.text = crewmembercountry[8]  
-        self.crew_screen.ids.crew9daysonISS.text = crewmemberdays[8]
+        #self.crew_screen.ids.crew9.text = crewmember[8]  
+        #self.crew_screen.ids.crew9title.text = crewmembertitle[8]  
+        #self.crew_screen.ids.crew9country.text = crewmembercountry[8]  
+        #self.crew_screen.ids.crew9daysonISS.text = crewmemberdays[8]
         #self.crew_screen.ids.crew9image.source = str(crewmemberpicture[8])
-        self.crew_screen.ids.crew10.text = crewmember[9]  
-        self.crew_screen.ids.crew10title.text = crewmembertitle[9]  
-        self.crew_screen.ids.crew10country.text = crewmembercountry[9]  
-        self.crew_screen.ids.crew10daysonISS.text = crewmemberdays[9]
+        #self.crew_screen.ids.crew10.text = crewmember[9]  
+        #self.crew_screen.ids.crew10title.text = crewmembertitle[9]  
+        #self.crew_screen.ids.crew10country.text = crewmembercountry[9]  
+        #self.crew_screen.ids.crew10daysonISS.text = crewmemberdays[9]
         #self.crew_screen.ids.crew10image.source = str(crewmemberpicture[9])
-        self.crew_screen.ids.crew11.text = crewmember[10]  
-        self.crew_screen.ids.crew11title.text = crewmembertitle[10]  
-        self.crew_screen.ids.crew11country.text = crewmembercountry[10]  
-        self.crew_screen.ids.crew11daysonISS.text = crewmemberdays[10]
+        #self.crew_screen.ids.crew11.text = crewmember[10]  
+        #self.crew_screen.ids.crew11title.text = crewmembertitle[10]  
+        #self.crew_screen.ids.crew11country.text = crewmembercountry[10]  
+        #self.crew_screen.ids.crew11daysonISS.text = crewmemberdays[10]
         #self.crew_screen.ids.crew11image.source = str(crewmemberpicture[10])
-        self.crew_screen.ids.crew12.text = crewmember[11]  
-        self.crew_screen.ids.crew12title.text = crewmembertitle[11]  
-        self.crew_screen.ids.crew12country.text = crewmembercountry[11]  
-        self.crew_screen.ids.crew12daysonISS.text = crewmemberdays[11]
+        #self.crew_screen.ids.crew12.text = crewmember[11]  
+        #self.crew_screen.ids.crew12title.text = crewmembertitle[11]  
+        #self.crew_screen.ids.crew12country.text = crewmembercountry[11]  
+        #self.crew_screen.ids.crew12daysonISS.text = crewmemberdays[11]
         #self.crew_screen.ids.crew12image.source = str(crewmemberpicture[11]) 
         
     def checkAOSlong(self, dt):
@@ -1465,7 +1468,6 @@ class MainApp(App):
             self.serialWrite("Current3B=" + c3b + " ")
 
 #All GUI Screens are on separate kv files
-Builder.load_file('./Screens/MainScreen.kv')
 Builder.load_file('./Screens/Settings_Screen.kv')
 Builder.load_file('./Screens/FakeOrbitScreen.kv')
 Builder.load_file('./Screens/Orbit_Screen.kv')
@@ -1480,13 +1482,13 @@ Builder.load_file('./Screens/Crew_Screen.kv')
 Builder.load_file('./Screens/ManualControlScreen.kv')
 Builder.load_file('./Screens/MimicScreen.kv')
 Builder.load_file('./Screens/CalibrateScreen.kv')
+Builder.load_file('./Screens/MainScreen.kv')
 
 Builder.load_string('''
 #:kivy 1.8
 #:import kivy kivy
 #:import win kivy.core.window
 ScreenManager:
-    MainScreen:
     Settings_Screen:
     FakeOrbitScreen:
     Orbit_Screen:
@@ -1501,6 +1503,7 @@ ScreenManager:
     ManualControlScreen:
     MimicScreen:
     CalibrateScreen:
+    MainScreen:
 ''')
 
 if __name__ == '__main__':
