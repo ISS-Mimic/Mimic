@@ -65,16 +65,16 @@ root = tree.getroot()
 for child in root:
     if child.tag == 'ConsumerKey' and child.text is not None:
         consumerKey = child.text
-        print("Consumer Key: " + consumerKey)
+        #print("Consumer Key: " + consumerKey)
     elif child.tag == 'ConsumerSecret' and child.text is not None:
         consumerSecret = child.text
-        print("Consumer Secret: " + consumerSecret)
+        #print("Consumer Secret: " + consumerSecret)
     elif child.tag == 'AccessToken' and child.text is not None:
         accessToken = child.text
-        print("Access Token: " + accessToken)
+        #print("Access Token: " + accessToken)
     elif child.tag == 'AccessTokenSecret' and child.text is not None:
         accessTokenSecret = child.text
-        print("Access Token Secret: " + accessTokenSecret)
+        #print("Access Token Secret: " + accessTokenSecret)
     else:
         print("Warning: Unknown or Empty element: " + child.tag)
         print(" Twitter fetching may not work.")
@@ -1112,12 +1112,12 @@ class MainApp(App):
         self.us_eva.ids.Crewlock_Status_image.source = './imgs/eva/LeakCheckLights.png'
 
     def signal_lost(self):
-        self.orbit_screen.ids.signal.source = './imgs/signalred.zip'
-        self.mimic_screen.ids.signal.source = './imgs/signalred.zip'
-        self.eps_screen.ids.signal.source = './imgs/signalred.zip'
-        self.ct_screen.ids.signal.source = './imgs/signalred.zip'
-        self.tcs_screen.ids.signal.source = './imgs/signalred.zip'
-        self.us_eva.ids.signal.source = './imgs/signalred.zip'
+        self.orbit_screen.ids.signal.source = './imgs/signal/signalred.zip'
+        self.mimic_screen.ids.signal.source = './imgs/signal/signalred.zip'
+        self.eps_screen.ids.signal.source = './imgs/signal/signalred.zip'
+        self.ct_screen.ids.signal.source = './imgs/signal/signalred.zip'
+        self.tcs_screen.ids.signal.source = './imgs/signal/signalred.zip'
+        self.us_eva.ids.signal.source = './imgs/signal/signalred.zip'
         self.orbit_screen.ids.signal.anim_delay = 0.4
         self.mimic_screen.ids.signal.anim_delay = 0.4
         self.eps_screen.ids.signal.anim_delay = 0.4
@@ -1132,12 +1132,12 @@ class MainApp(App):
         self.us_eva.ids.signal.size_hint_y = 0.112
 
     def signal_acquired(self):
-        self.orbit_screen.ids.signal.source = './imgs/pulse-transparent.zip'
-        self.mimic_screen.ids.signal.source = './imgs/pulse-transparent.zip'
-        self.eps_screen.ids.signal.source = './imgs/pulse-transparent.zip'
-        self.ct_screen.ids.signal.source = './imgs/pulse-transparent.zip'
-        self.tcs_screen.ids.signal.source = './imgs/pulse-transparent.zip'
-        self.us_eva.ids.signal.source = './imgs/pulse-transparent.zip'
+        self.orbit_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
+        self.mimic_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
+        self.eps_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
+        self.ct_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
+        self.tcs_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
+        self.us_eva.ids.signal.source = './imgs/signal/pulse-transparent.zip'
         self.orbit_screen.ids.signal.anim_delay = 0.05
         self.mimic_screen.ids.signal.anim_delay = 0.05
         self.eps_screen.ids.signal.anim_delay = 0.05
@@ -1152,12 +1152,12 @@ class MainApp(App):
         self.us_eva.ids.signal.size_hint_y = 0.15
     
     def signal_stale(self):
-        self.orbit_screen.ids.signal.source = './imgs/SignalOrangeGray.png'
-        self.mimic_screen.ids.signal.source = './imgs/SignalOrangeGray.png'
-        self.eps_screen.ids.signal.source = './imgs/SignalOrangeGray.png'
-        self.ct_screen.ids.signal.source = './imgs/SignalOrangeGray.png'
-        self.tcs_screen.ids.signal.source = './imgs/SignalOrangeGray.png'
-        self.us_eva.ids.signal.source = './imgs/SignalOrangeGray.png'
+        self.orbit_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+        self.mimic_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+        self.eps_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+        self.ct_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+        self.tcs_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+        self.us_eva.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
         self.orbit_screen.ids.signal.anim_delay = 0.12
         self.mimic_screen.ids.signal.anim_delay = 0.12
         self.eps_screen.ids.signal.anim_delay = 0.12
@@ -1242,8 +1242,90 @@ class MainApp(App):
         c3b = "{:.2f}".format(float((values[38])[0]))
         c4a = "{:.2f}".format(float((values[39])[0]))
         c4b = "{:.2f}".format(float((values[40])[0]))
+       
+        ##-------------------EPS Stuff---------------------------##
+        if float(v1a) < 155.0 and float(v1a) > 140:
+            self.eps_screen.ids.a1a_source.text = "Array"
+            self.eps_screen.ids.a1a_source.color = 1,1,0
+        elif float(v1a) >= 155.0:
+            self.eps_screen.ids.a1a_source.text = "Battery"
+            self.eps_screen.ids.a1a_source.color = 0,0,1
+        else:
+            self.eps_screen.ids.a1a_source.text = "Error"
+            self.eps_screen.ids.a1a_source.color = 1,0,0
+        
+        if float(v1b) < 155.0 and float(v1b) > 140:
+            self.eps_screen.ids.a1b_source.text = "Array"
+            self.eps_screen.ids.a1b_source.color = 1,1,0
+        elif float(v1b) >= 155.0:
+            self.eps_screen.ids.a1b_source.text = "Battery"
+            self.eps_screen.ids.a1b_source.color = 0,0,1
+        else:
+            self.eps_screen.ids.a1b_source.text = "Error"
+            self.eps_screen.ids.a1b_source.color = 1,0,0
+                
+        if float(v2a) < 155.0 and float(v2a) > 140:
+            self.eps_screen.ids.a2a_source.text = "Array"
+            self.eps_screen.ids.a2a_source.color = 1,1,0
+        elif float(v2a) >= 155.0:
+            self.eps_screen.ids.a2a_source.text = "Battery"
+            self.eps_screen.ids.a2a_source.color = 0,0,1
+        else:
+            self.eps_screen.ids.a2a_source.text = "Error"
+            self.eps_screen.ids.a2a_source.color = 1,0,0
+
+        if float(v2b) < 155.0 and float(v2b) > 140:
+            self.eps_screen.ids.a2b_source.text = "Array"
+            self.eps_screen.ids.a2b_source.color = 1,1,0
+        elif float(v2b) >= 155.0:
+            self.eps_screen.ids.a2b_source.text = "Battery"
+            self.eps_screen.ids.a2b_source.color = 0,0,1
+        else:
+            self.eps_screen.ids.a2b_source.text = "Error"
+            self.eps_screen.ids.a2b_source.color = 1,0,0
+
+        if float(v3a) < 155.0 and float(v3a) > 140:
+            self.eps_screen.ids.a3a_source.text = "Array"
+            self.eps_screen.ids.a3a_source.color = 1,1,0
+        elif float(v3a) >= 155.0:
+            self.eps_screen.ids.a3a_source.text = "Battery"
+            self.eps_screen.ids.a3a_source.color = 0,0,1
+        else:
+            self.eps_screen.ids.a3a_source.text = "Error"
+            self.eps_screen.ids.a3a_source.color = 1,0,0
+
+        if float(v3b) < 155.0 and float(v3b) > 140:
+            self.eps_screen.ids.a3b_source.text = "Array"
+            self.eps_screen.ids.a3b_source.color = 1,1,0
+        elif float(v3b) >= 155.0:
+            self.eps_screen.ids.a3b_source.text = "Battery"
+            self.eps_screen.ids.a3b_source.color = 0,0,1
+        else:
+            self.eps_screen.ids.a3b_source.text = "Error"
+            self.eps_screen.ids.a3b_source.color = 1,0,0
+        
+        if float(v4a) < 155.0 and float(v4a) > 140:
+            self.eps_screen.ids.a4a_source.text = "Array"
+            self.eps_screen.ids.a4a_source.color = 1,1,0
+        elif float(v4a) >= 155.0:
+            self.eps_screen.ids.a4a_source.text = "Battery"
+            self.eps_screen.ids.a4a_source.color = 0,0,1
+        else:
+            self.eps_screen.ids.a4a_source.text = "Error"
+            self.eps_screen.ids.a4a_source.color = 1,0,0
+
+        if float(v4b) < 155.0 and float(v4b) > 140:
+            self.eps_screen.ids.a4b_source.text = "Array"
+            self.eps_screen.ids.a4b_source.color = 1,1,0
+        elif float(v4b) >= 155.0:
+            self.eps_screen.ids.a4b_source.text = "Battery"
+            self.eps_screen.ids.a4b_source.color = 0,0,1
+        else:
+            self.eps_screen.ids.a4b_source.text = "Error"
+            self.eps_screen.ids.a4b_source.color = 1,0,0
         
         ##-------------------EVA Functionality-------------------##
+        
         airlock_pump_voltage = int((values[71])[0])
         airlock_pump_voltage_timestamp = float((timestamps[71])[0])
         airlock_pump_switch = int((values[72])[0])
@@ -1343,7 +1425,7 @@ class MainApp(App):
 
         ##-------------------EVA Functionality End-------------------##
 
-#        if (difference > -10) && (isinstance(App.get_running_app().root_window.children[0], Popup)==False):
+#        if (difference > -10) and (isinstance(App.get_running_app().root_window.children[0], Popup)==False):
 #            LOSpopup = Popup(title='Loss of Signal', content=Label(text='Possible LOS Soon'),size_hint=(0.3,0.2),auto_dismiss=True)
 #            LOSpopup.open()
 #            print "popup"    

@@ -86,6 +86,13 @@
             color: 1,1,1
             font_size: 20
         Label:
+            id: a1a_source
+            pos_hint: {"center_x": 0.67, "center_y": 0.60}
+            text: 'Battery'
+            markup: True
+            color: 1,1,1
+            font_size: 12
+        Label:
             pos_hint: {"center_x": 0.87, "center_y": 0.38}
             text: 'Channel 1B'
             markup: True
@@ -133,6 +140,13 @@
             markup: True
             color: 1,1,1
             font_size: 20
+        Label:
+            id: a1b_source
+            pos_hint: {"center_x": 0.92, "center_y": 0.13}
+            text: 'Battery'
+            markup: True
+            color: 1,1,1
+            font_size: 12
 
         Label:
             pos_hint: {"center_x": 0.37, "center_y": 0.38}
@@ -182,6 +196,13 @@
             markup: True
             color: 1,1,1
             font_size: 20   
+        Label:
+            id: a2a_source
+            pos_hint: {"center_x": 0.42, "center_y": 0.13}
+            text: 'Battery'
+            markup: True
+            color: 1,1,1
+            font_size: 12
             
         Label:
             pos_hint: {"center_x": 0.12, "center_y": 0.85}
@@ -231,6 +252,13 @@
             markup: True
             color: 1,1,1
             font_size: 20    
+        Label:
+            id: a2b_source
+            pos_hint: {"center_x": 0.17, "center_y": 0.60}
+            text: 'Battery'
+            markup: True
+            color: 1,1,1
+            font_size: 12
             
         Label:
             pos_hint: {"center_x": 0.62, "center_y": 0.38}
@@ -281,6 +309,13 @@
             color: 1,1,1
             font_size: 20     
         Label:
+            id: a3a_source
+            pos_hint: {"center_x": 0.67, "center_y": 0.13}
+            text: 'Battery'
+            markup: True
+            color: 1,1,1
+            font_size: 12
+        Label:
             pos_hint: {"center_x": 0.87, "center_y": 0.85}
             text: 'Channel 3B'
             markup: True
@@ -329,6 +364,13 @@
             color: 1,1,1
             font_size: 20
         Label:
+            id: a3b_source
+            pos_hint: {"center_x": 0.92, "center_y": 0.60}
+            text: 'Battery'
+            markup: True
+            color: 1,1,1
+            font_size: 12
+        Label:
             pos_hint: {"center_x": 0.37, "center_y": 0.85}
             text: 'Channel 4A'
             markup: True
@@ -376,6 +418,13 @@
             markup: True
             color: 1,1,1
             font_size: 20
+        Label:
+            id: a4a_source
+            pos_hint: {"center_x": 0.42, "center_y": 0.60}
+            text: 'Battery'
+            markup: True
+            color: 1,1,1
+            font_size: 12
             
         Label:
             pos_hint: {"center_x": 0.12, "center_y": 0.38}
@@ -425,6 +474,13 @@
             markup: True
             color: 1,1,1
             font_size: 20
+        Label:
+            id: a4b_source
+            pos_hint: {"center_x": 0.17, "center_y": 0.13}
+            text: 'Battery'
+            markup: True
+            color: 1,1,1
+            font_size: 12
         Button:
             size_hint: 0.2,0.1
             pos_hint: {"center_x": 0.8, "Bottom": 1}
@@ -433,7 +489,7 @@
             on_release: app.root.current = 'mimic'
         Image:
             id: signal
-            source: "./imgs/pulse-transparent.zip"
+            source: "./imgs/signal/pulse-transparent.zip"
             size_hint_y: 0.15
             anim_delay: 0.12
             anim_loop: 0
