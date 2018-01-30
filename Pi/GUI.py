@@ -169,6 +169,15 @@ PTRRJcontrol = False
 STRRJcontrol = False
 stopAnimation = True
 startingAnim = True
+EPSstorageindex = 0
+channel1A_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
+channel1B_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
+channel2A_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
+channel2B_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
+channel3A_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
+channel3B_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
+channel4A_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
+channel4B_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
 sizeX = 0.00
 sizeY = 0.00
 psarj2 = 1.0
@@ -1173,9 +1182,9 @@ class MainApp(App):
 
     def update_labels(self, dt):
         global mimicbutton,switchtofake,fakeorbitboolean,psarj2,ssarj2,manualcontrol,psarj,ssarj,ptrrj,strrj,beta1b,beta1a,beta2b,beta2a,beta3b,beta3a,beta4b,beta4a,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,c1a,c1b,c3a,c3b,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress,oldAirlockPump,obtained_EVA_crew,EVAstartTime
-        global holdstartTime
-       
+        global holdstartTime       
         global eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
+        global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage
         c.execute('select Value from telemetry')
         values = c.fetchall()
         c.execute('select Timestamp from telemetry')
@@ -1227,13 +1236,21 @@ class MainApp(App):
         sgant_el = "{:.2f}".format(float((values[15])[0]))
         difference = float(sgant_el)-float(sasa_el) 
         v1a = "{:.2f}".format(float((values[25])[0]))
+        channel1A_voltage[EPSstorageindex] = float(v1a)
         v1b = "{:.2f}".format(float((values[26])[0]))
+        channel1B_voltage[EPSstorageindex] = float(v1b)
         v2a = "{:.2f}".format(float((values[27])[0]))
+        channel2A_voltage[EPSstorageindex] = float(v2a)
         v2b = "{:.2f}".format(float((values[28])[0]))
+        channel2B_voltage[EPSstorageindex] = float(v2b)
         v3a = "{:.2f}".format(float((values[29])[0]))
+        channel3A_voltage[EPSstorageindex] = float(v3a)
         v3b = "{:.2f}".format(float((values[30])[0]))
+        channel3B_voltage[EPSstorageindex] = float(v3b)
         v4a = "{:.2f}".format(float((values[31])[0]))
+        channel4A_voltage[EPSstorageindex] = float(v4a)
         v4b = "{:.2f}".format(float((values[32])[0]))
+        channel4B_voltage[EPSstorageindex] = float(v4b)
         c1a = "{:.2f}".format(float((values[33])[0]))
         c1b = "{:.2f}".format(float((values[34])[0]))
         c2a = "{:.2f}".format(float((values[35])[0]))
@@ -1242,87 +1259,103 @@ class MainApp(App):
         c3b = "{:.2f}".format(float((values[38])[0]))
         c4a = "{:.2f}".format(float((values[39])[0]))
         c4b = "{:.2f}".format(float((values[40])[0]))
-       
+
+        avg_total_voltage = (float(v1a)+float(v1b)+float(v2a)+float(v2b)+float(v3a)+float(v3b)+float(v4a)+float(v4b))/8.0
+
+        avg_1a = (channel1A_voltage[0]+channel1A_voltage[1]+channel1A_voltage[2]+channel1A_voltage[3]+channel1A_voltage[4]+channel1A_voltage[5]+channel1A_voltage[6]+channel1A_voltage[7]+channel1A_voltage[8]+channel1A_voltage[9])/10
+        avg_1b = (channel1B_voltage[0]+channel1B_voltage[1]+channel1B_voltage[2]+channel1B_voltage[3]+channel1B_voltage[4]+channel1B_voltage[5]+channel1B_voltage[6]+channel1B_voltage[7]+channel1B_voltage[8]+channel1B_voltage[9])/10
+        avg_2a = (channel2A_voltage[0]+channel2A_voltage[1]+channel2A_voltage[2]+channel2A_voltage[3]+channel2A_voltage[4]+channel2A_voltage[5]+channel2A_voltage[6]+channel2A_voltage[7]+channel2A_voltage[8]+channel2A_voltage[9])/10
+        avg_2b = (channel2B_voltage[0]+channel2B_voltage[1]+channel2B_voltage[2]+channel2B_voltage[3]+channel2B_voltage[4]+channel2B_voltage[5]+channel2B_voltage[6]+channel2B_voltage[7]+channel2B_voltage[8]+channel2B_voltage[9])/10
+        avg_3a = (channel3A_voltage[0]+channel3A_voltage[1]+channel3A_voltage[2]+channel3A_voltage[3]+channel3A_voltage[4]+channel3A_voltage[5]+channel3A_voltage[6]+channel3A_voltage[7]+channel3A_voltage[8]+channel3A_voltage[9])/10
+        avg_3b = (channel3B_voltage[0]+channel3B_voltage[1]+channel3B_voltage[2]+channel3B_voltage[3]+channel3B_voltage[4]+channel3B_voltage[5]+channel3B_voltage[6]+channel3B_voltage[7]+channel3B_voltage[8]+channel3B_voltage[9])/10
+        avg_4a = (channel4A_voltage[0]+channel4A_voltage[1]+channel4A_voltage[2]+channel4A_voltage[3]+channel4A_voltage[4]+channel4A_voltage[5]+channel4A_voltage[6]+channel4A_voltage[7]+channel4A_voltage[8]+channel4A_voltage[9])/10
+        avg_4b = (channel4B_voltage[0]+channel4B_voltage[1]+channel4B_voltage[2]+channel4B_voltage[3]+channel4B_voltage[4]+channel4B_voltage[5]+channel4B_voltage[6]+channel4B_voltage[7]+channel4B_voltage[8]+channel4B_voltage[9])/10
+        halfavg_1a = (channel1A_voltage[0]+channel1A_voltage[1]+channel1A_voltage[2]+channel1A_voltage[3]+channel1A_voltage[4])/5
+        halfavg_1b = (channel1B_voltage[0]+channel1B_voltage[1]+channel1B_voltage[2]+channel1B_voltage[3]+channel1B_voltage[4])/5
+        halfavg_2a = (channel2A_voltage[0]+channel2A_voltage[1]+channel2A_voltage[2]+channel2A_voltage[3]+channel2A_voltage[4])/5
+        halfavg_2b = (channel2B_voltage[0]+channel2B_voltage[1]+channel2B_voltage[2]+channel2B_voltage[3]+channel2B_voltage[4])/5
+        halfavg_3a = (channel3A_voltage[0]+channel3A_voltage[1]+channel3A_voltage[2]+channel3A_voltage[3]+channel3A_voltage[4])/5
+        halfavg_3b = (channel3B_voltage[0]+channel3B_voltage[1]+channel3B_voltage[2]+channel3B_voltage[3]+channel3B_voltage[4])/5
+        halfavg_4a = (channel4A_voltage[0]+channel4A_voltage[1]+channel4A_voltage[2]+channel4A_voltage[3]+channel4A_voltage[4])/5
+        halfavg_4b = (channel4B_voltage[0]+channel4B_voltage[1]+channel4B_voltage[2]+channel4B_voltage[3]+channel4B_voltage[4])/5
+
+        EPSstorageindex += 1
+        if EPSstorageindex > 9:
+            EPSstorageindex = 0
+
         ##-------------------EPS Stuff---------------------------##
-        if float(v1a) < 155.0 and float(v1a) > 140:
-            self.eps_screen.ids.a1a_source.text = "Array"
-            self.eps_screen.ids.a1a_source.color = 1,1,0
-        elif float(v1a) >= 155.0:
-            self.eps_screen.ids.a1a_source.text = "Battery"
-            self.eps_screen.ids.a1a_source.color = 0,0,1
-        else:
-            self.eps_screen.ids.a1a_source.text = "Error"
-            self.eps_screen.ids.a1a_source.color = 1,0,0
+        if halfavg_1a < 151.5: #discharging
+            self.eps_screen.ids.array_1a.source = "./imgs/eps/array-discharging.zip"
+        elif avg_1a > 160.0: #charged
+            self.eps_screen.ids.array_1a.source = "./imgs/eps/array-charged.zip"
+        else:                                               #charging
+            self.eps_screen.ids.array_1a.source = "./imgs/eps/array-charging.zip"
+        if float(c1a) > 0:                                  #power channel offline!
+            self.eps_screen.ids.array_1a.source = "./imgs/eps/array-offline.png"
         
-        if float(v1b) < 155.0 and float(v1b) > 140:
-            self.eps_screen.ids.a1b_source.text = "Array"
-            self.eps_screen.ids.a1b_source.color = 1,1,0
-        elif float(v1b) >= 155.0:
-            self.eps_screen.ids.a1b_source.text = "Battery"
-            self.eps_screen.ids.a1b_source.color = 0,0,1
-        else:
-            self.eps_screen.ids.a1b_source.text = "Error"
-            self.eps_screen.ids.a1b_source.color = 1,0,0
-                
-        if float(v2a) < 155.0 and float(v2a) > 140:
-            self.eps_screen.ids.a2a_source.text = "Array"
-            self.eps_screen.ids.a2a_source.color = 1,1,0
-        elif float(v2a) >= 155.0:
-            self.eps_screen.ids.a2a_source.text = "Battery"
-            self.eps_screen.ids.a2a_source.color = 0,0,1
-        else:
-            self.eps_screen.ids.a2a_source.text = "Error"
-            self.eps_screen.ids.a2a_source.color = 1,0,0
-
-        if float(v2b) < 155.0 and float(v2b) > 140:
-            self.eps_screen.ids.a2b_source.text = "Array"
-            self.eps_screen.ids.a2b_source.color = 1,1,0
-        elif float(v2b) >= 155.0:
-            self.eps_screen.ids.a2b_source.text = "Battery"
-            self.eps_screen.ids.a2b_source.color = 0,0,1
-        else:
-            self.eps_screen.ids.a2b_source.text = "Error"
-            self.eps_screen.ids.a2b_source.color = 1,0,0
-
-        if float(v3a) < 155.0 and float(v3a) > 140:
-            self.eps_screen.ids.a3a_source.text = "Array"
-            self.eps_screen.ids.a3a_source.color = 1,1,0
-        elif float(v3a) >= 155.0:
-            self.eps_screen.ids.a3a_source.text = "Battery"
-            self.eps_screen.ids.a3a_source.color = 0,0,1
-        else:
-            self.eps_screen.ids.a3a_source.text = "Error"
-            self.eps_screen.ids.a3a_source.color = 1,0,0
-
-        if float(v3b) < 155.0 and float(v3b) > 140:
-            self.eps_screen.ids.a3b_source.text = "Array"
-            self.eps_screen.ids.a3b_source.color = 1,1,0
-        elif float(v3b) >= 155.0:
-            self.eps_screen.ids.a3b_source.text = "Battery"
-            self.eps_screen.ids.a3b_source.color = 0,0,1
-        else:
-            self.eps_screen.ids.a3b_source.text = "Error"
-            self.eps_screen.ids.a3b_source.color = 1,0,0
+        if halfavg_1b < 151.5: #discharging
+            self.eps_screen.ids.array_1b.source = "./imgs/eps/array-discharging.zip"
+        elif avg_1b > 160.0: #charged
+            self.eps_screen.ids.array_1b.source = "./imgs/eps/array-charged.zip"
+        else:                                               #charging
+            self.eps_screen.ids.array_1b.source = "./imgs/eps/array-charging.zip"
+        if float(c1b) > 0:                                  #power channel offline!
+            self.eps_screen.ids.array_1b.source = "./imgs/eps/array-offline.png"
         
-        if float(v4a) < 155.0 and float(v4a) > 140:
-            self.eps_screen.ids.a4a_source.text = "Array"
-            self.eps_screen.ids.a4a_source.color = 1,1,0
-        elif float(v4a) >= 155.0:
-            self.eps_screen.ids.a4a_source.text = "Battery"
-            self.eps_screen.ids.a4a_source.color = 0,0,1
-        else:
-            self.eps_screen.ids.a4a_source.text = "Error"
-            self.eps_screen.ids.a4a_source.color = 1,0,0
-
-        if float(v4b) < 155.0 and float(v4b) > 140:
-            self.eps_screen.ids.a4b_source.text = "Array"
-            self.eps_screen.ids.a4b_source.color = 1,1,0
-        elif float(v4b) >= 155.0:
-            self.eps_screen.ids.a4b_source.text = "Battery"
-            self.eps_screen.ids.a4b_source.color = 0,0,1
-        else:
-            self.eps_screen.ids.a4b_source.text = "Error"
-            self.eps_screen.ids.a4b_source.color = 1,0,0
+        if halfavg_2a < 151.5: #discharging
+            self.eps_screen.ids.array_2a.source = "./imgs/eps/array-discharging.zip"
+        elif avg_2a > 160.0: #charged
+            self.eps_screen.ids.array_2a.source = "./imgs/eps/array-charged.zip"
+        else:                                               #charging
+            self.eps_screen.ids.array_2a.source = "./imgs/eps/array-charging.zip"
+        if float(c2a) > 0:                                  #power channel offline!
+            self.eps_screen.ids.array_2a.source = "./imgs/eps/array-offline.png"
+        
+        if halfavg_2b < 151.5: #discharging
+            self.eps_screen.ids.array_2b.source = "./imgs/eps/array-discharging.zip"
+        elif avg_2b > 160.0: #charged
+            self.eps_screen.ids.array_2b.source = "./imgs/eps/array-charged.zip"
+        else:                                               #charging
+            self.eps_screen.ids.array_2b.source = "./imgs/eps/array-charging.zip"
+        if float(c2b) > 0:                                  #power channel offline!
+            self.eps_screen.ids.array_2b.source = "./imgs/eps/array-offline.png"
+        
+        if halfavg_3a < 151.5: #discharging
+            self.eps_screen.ids.array_3a.source = "./imgs/eps/array-discharging.zip"
+        elif avg_3a > 160.0: #charged
+            self.eps_screen.ids.array_3a.source = "./imgs/eps/array-charged.zip"
+        else:                                               #charging
+            self.eps_screen.ids.array_3a.source = "./imgs/eps/array-charging.zip"
+        if float(c3a) > 0:                                  #power channel offline!
+            self.eps_screen.ids.array_3a.source = "./imgs/eps/array-offline.png"
+        
+        if halfavg_3b < 151.5: #discharging
+            self.eps_screen.ids.array_3b.source = "./imgs/eps/array-discharging.zip"
+        elif avg_3b > 160.0: #charged
+            self.eps_screen.ids.array_3b.source = "./imgs/eps/array-charged.zip"
+        else:                                               #charging
+            self.eps_screen.ids.array_3b.source = "./imgs/eps/array-charging.zip"
+        if float(c3b) > 0:                                  #power channel offline!
+            self.eps_screen.ids.array_3b.source = "./imgs/eps/array-offline.png"
+        
+        if halfavg_4a < 151.5: #discharging
+            self.eps_screen.ids.array_4a.source = "./imgs/eps/array-discharging.zip"
+        elif avg_4a > 160.0: #charged
+            self.eps_screen.ids.array_4a.source = "./imgs/eps/array-charged.zip"
+        else:                                               #charging
+            self.eps_screen.ids.array_4a.source = "./imgs/eps/array-charging.zip"
+        if float(c4a) > 0:                                  #power channel offline!
+            self.eps_screen.ids.array_4a.source = "./imgs/eps/array-offline.png"
+        
+        if halfavg_4b < 151.5: #discharging
+            self.eps_screen.ids.array_4b.source = "./imgs/eps/array-discharging.zip"
+        elif avg_4b > 160.0: #charged
+            self.eps_screen.ids.array_4b.source = "./imgs/eps/array-charged.zip"
+        else:                                               #charging
+            self.eps_screen.ids.array_4b.source = "./imgs/eps/array-charging.zip"
+        if float(c4b) > 0:                                  #power channel offline!
+            self.eps_screen.ids.array_4b.source = "./imgs/eps/array-offline.png"
+        
         
         ##-------------------EVA Functionality-------------------##
         

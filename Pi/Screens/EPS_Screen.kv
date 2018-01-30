@@ -36,13 +36,22 @@
             markup: True
             color: 1,1,1
             font_size: 25
-            
+##----------------------------------------------------------------------        
         Label:
             pos_hint: {"center_x": 0.62, "center_y": 0.85}
             text: 'Channel 1A'
             markup: True
             color: 1,0,1
             font_size: 30
+        Image:
+            id: array_1a
+            source: "./imgs/eps/array-charging.zip"
+            anim_delay: 0.12
+            size_hint_y: 0.6
+            size_hint_x: 1
+            anim_loop: 0
+            keep_ratio: False
+            pos_hint: {"center_x": 0.68, "center_y": 0.8}
         Label:
             id: beta1a_label
             pos_hint: {"center_x": 0.57, "center_y": 0.78}
@@ -85,19 +94,32 @@
             markup: True
             color: 1,1,1
             font_size: 20
-        Label:
-            id: a1a_source
-            pos_hint: {"center_x": 0.67, "center_y": 0.60}
-            text: 'Battery'
-            markup: True
-            color: 1,1,1
-            font_size: 12
+##----------------------------------------------------------------------        
         Label:
             pos_hint: {"center_x": 0.87, "center_y": 0.38}
             text: 'Channel 1B'
             markup: True
             color: 1,0,1
             font_size: 30
+        Image:
+            id: array_1b
+            source: "./imgs/eps/array-charging.zip"
+            anim_delay: 0.12
+            anim_loop: 0
+            size_hint_y: 0.6
+            size_hint_x: 1
+            keep_ratio: False
+            pos_hint: {"center_x": 0.83, "center_y": 0.2}
+            angle: 0
+            canvas.before:
+                PushMatrix
+                Scale:
+                    x: 1
+                    y: -1
+                    z: 1
+                    origin: self.center
+            canvas.after:
+                PopMatrix
         Label:
             id: beta1b_label
             pos_hint: {"center_x": 0.82, "center_y": 0.31}
@@ -140,20 +162,32 @@
             markup: True
             color: 1,1,1
             font_size: 20
-        Label:
-            id: a1b_source
-            pos_hint: {"center_x": 0.92, "center_y": 0.13}
-            text: 'Battery'
-            markup: True
-            color: 1,1,1
-            font_size: 12
-
+##----------------------------------------------------------------------        
         Label:
             pos_hint: {"center_x": 0.37, "center_y": 0.38}
             text: 'Channel 2A'
             markup: True
             color: 1,0,1
             font_size: 30
+        Image:
+            id: array_2a
+            source: "./imgs/eps/array-charging.zip"
+            anim_delay: 0.12
+            anim_loop: 0
+            size_hint_y: 0.6
+            size_hint_x: 1
+            keep_ratio: False
+            pos_hint: {"center_x": 0.32, "center_y": 0.2}
+            angle: 0
+            canvas.before:
+                PushMatrix
+                Scale:
+                    x: 1
+                    y: -1
+                    z: 1
+                    origin: self.center
+            canvas.after:
+                PopMatrix
         Label:
             id: beta2a_label
             pos_hint: {"center_x": 0.32, "center_y": 0.31}
@@ -196,20 +230,22 @@
             markup: True
             color: 1,1,1
             font_size: 20   
-        Label:
-            id: a2a_source
-            pos_hint: {"center_x": 0.42, "center_y": 0.13}
-            text: 'Battery'
-            markup: True
-            color: 1,1,1
-            font_size: 12
-            
+##----------------------------------------------------------------------        
         Label:
             pos_hint: {"center_x": 0.12, "center_y": 0.85}
             text: 'Channel 2B'
             markup: True
             color: 1,0,1
             font_size: 30
+        Image:
+            id: array_2b
+            source: "./imgs/eps/array-charging.zip"
+            anim_delay: 0.12
+            size_hint_y: 0.6
+            size_hint_x: 1
+            anim_loop: 0
+            keep_ratio: False
+            pos_hint: {"center_x": 0.17, "center_y": 0.8}
         Label:
             id: beta2b_label
             pos_hint: {"center_x": 0.07, "center_y": 0.78}
@@ -252,20 +288,32 @@
             markup: True
             color: 1,1,1
             font_size: 20    
-        Label:
-            id: a2b_source
-            pos_hint: {"center_x": 0.17, "center_y": 0.60}
-            text: 'Battery'
-            markup: True
-            color: 1,1,1
-            font_size: 12
-            
+##----------------------------------------------------------------------        
         Label:
             pos_hint: {"center_x": 0.62, "center_y": 0.38}
             text: 'Channel 3A'
             markup: True
             color: 1,0,1
             font_size: 30
+        Image:
+            id: array_3a
+            source: "./imgs/eps/array-charging.zip"
+            anim_delay: 0.12
+            anim_loop: 0
+            size_hint_y: 0.6
+            size_hint_x: 1
+            keep_ratio: False
+            pos_hint: {"center_x": 0.68, "center_y": 0.2}
+            angle: 0
+            canvas.before:
+                PushMatrix
+                Scale:
+                    x: 1
+                    y: -1
+                    z: 1
+                    origin: self.center
+            canvas.after:
+                PopMatrix
         Label:
             id: beta3a_label
             pos_hint: {"center_x": 0.57, "center_y": 0.31}
@@ -308,19 +356,22 @@
             markup: True
             color: 1,1,1
             font_size: 20     
-        Label:
-            id: a3a_source
-            pos_hint: {"center_x": 0.67, "center_y": 0.13}
-            text: 'Battery'
-            markup: True
-            color: 1,1,1
-            font_size: 12
+##----------------------------------------------------------------------        
         Label:
             pos_hint: {"center_x": 0.87, "center_y": 0.85}
             text: 'Channel 3B'
             markup: True
             color: 1,0,1
             font_size: 30
+        Image:
+            id: array_3b
+            source: "./imgs/eps/array-offline.png"
+            anim_delay: 0.12
+            size_hint_y: 0.6
+            size_hint_x: 1
+            anim_loop: 0
+            keep_ratio: False
+            pos_hint: {"center_x": 0.83, "center_y": 0.8}
         Label:
             id: beta3b_label
             pos_hint: {"center_x": 0.82, "center_y": 0.78}
@@ -363,19 +414,22 @@
             markup: True
             color: 1,1,1
             font_size: 20
-        Label:
-            id: a3b_source
-            pos_hint: {"center_x": 0.92, "center_y": 0.60}
-            text: 'Battery'
-            markup: True
-            color: 1,1,1
-            font_size: 12
+##----------------------------------------------------------------------        
         Label:
             pos_hint: {"center_x": 0.37, "center_y": 0.85}
             text: 'Channel 4A'
             markup: True
             color: 1,0,1
             font_size: 30
+        Image:
+            id: array_4a
+            source: "./imgs/eps/array-discharging.zip"
+            anim_delay: 0.12
+            anim_loop: 0
+            size_hint_y: 0.6
+            size_hint_x: 1
+            keep_ratio: False
+            pos_hint: {"center_x": 0.32, "center_y": 0.8}
         Label:
             id: beta4a_label
             pos_hint: {"center_x": 0.32, "center_y": 0.78}
@@ -418,17 +472,35 @@
             markup: True
             color: 1,1,1
             font_size: 20
-        Label:
-            id: a4a_source
-            pos_hint: {"center_x": 0.42, "center_y": 0.60}
-            text: 'Battery'
-            markup: True
-            color: 1,1,1
-            font_size: 12
-            
+##----------------------------------------------------------------------        
         Label:
             pos_hint: {"center_x": 0.12, "center_y": 0.38}
             text: 'Channel 4B'
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Image:
+            id: array_4b
+            source: "./imgs/eps/array-charged.zip"
+            anim_delay: 0.12
+            anim_loop: 0
+            size_hint_y: 0.6
+            size_hint_x: 1
+            keep_ratio: False
+            pos_hint: {"center_x": 0.17, "center_y": 0.2}
+            angle: 0
+            canvas.before:
+                PushMatrix
+                Scale:
+                    x: 1
+                    y: -1
+                    z: 1
+                    origin: self.center
+            canvas.after:
+                PopMatrix
+        Label:
+            pos_hint: {"center_x": 0.12, "center_y": 0.5}
+            text: '--------------'
             markup: True
             color: 1,0,1
             font_size: 30
@@ -474,13 +546,7 @@
             markup: True
             color: 1,1,1
             font_size: 20
-        Label:
-            id: a4b_source
-            pos_hint: {"center_x": 0.17, "center_y": 0.13}
-            text: 'Battery'
-            markup: True
-            color: 1,1,1
-            font_size: 12
+##----------------------------------------------------------------------        
         Button:
             size_hint: 0.2,0.1
             pos_hint: {"center_x": 0.8, "Bottom": 1}
