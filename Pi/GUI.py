@@ -4,7 +4,7 @@ import kivy
 import urllib2
 from bs4 import BeautifulSoup
 from calendar import timegm
-import datetime
+from datetime import datetime
 import os
 import sys
 import subprocess
@@ -95,46 +95,54 @@ nasaissurl = 'http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post
 req = urllib2.Request("http://api.open-notify.org/iss-now.json")
 TLE_req = urllib2.Request("http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html")
 
+#-------------------------Look for a connected arduino-----------------------------------
+SerialConnection = False
 try:
     ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=0)
-    print str(ser)
 except:
-    errorlog.write(str(datetime.datetime.utcnow()))
+    errorlog.write(str(datetime.utcnow()))
     errorlog.write(' ')
     errorlog.write("serial connection GPIO not found")
     errorlog.write('\n')
+else:
+    SerialConnection = True
+    ser.write("test")
+    errorlog.write("Successful connection to ")
+    errorlog.write(str(ser))
+    print str(ser)
 
 try:
     ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
-    print str(ser)
 except:
-    errorlog.write(str(datetime.datetime.utcnow()))
+    errorlog.write(str(datetime.utcnow()))
     errorlog.write(' ')
     errorlog.write("serial connection GPIO not found")
     errorlog.write('\n')
+else:
+    SerialConnection = True
+    ser.write("test")
+    errorlog.write("Successful connection to ")
+    errorlog.write(str(ser))
+    print str(ser)
 
-#try:
-#    ser = serial.Serial('/dev/ttyAMA00', 115200, timeout=0)
-#except:
-#    print "No serial connection detected - AMA0"
-#    errorlog.write(str(datetime.datetime.utcnow()))
-#    errorlog.write(' ')
-#    errorlog.write("serial connection GPIO not found")
-#    errorlog.write('\n')
+try:
+    ser = serial.Serial('/dev/ttyAMA00', 115200, timeout=0)
+except:
+    errorlog.write(str(datetime.utcnow()))
+    errorlog.write(' ')
+    errorlog.write("serial connection GPIO not found")
+    errorlog.write('\n')
+else:
+    SerialConnection = True
+    ser.write("test")
+    errorlog.write("Successful connection to ")
+    errorlog.write(str(ser))
+    print str(ser)
 
-#ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
-#ser.write("test")
-
-#try:
-#    ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
-#    ser.write("test")
-    #ser.open()
-#except:
-#    print "No serial connection detected - USB"
-#    errorlog.write(str(datetime.datetime.utcnow()))
-#    errorlog.write(' ')
-#    errorlog.write("serial connection USB not found")
-#    errorlog.write('\n')
+#----------------Open SQLITE3 Database that holds the current ISS Telemetry--------------
+conn = sqlite3.connect('iss_telemetry.db')
+c = conn.cursor() 
+#----------------------------------Variables---------------------------------------------
 testfactor = -1
 crew_mention= False
 crewjsonsuccess = False
@@ -146,8 +154,6 @@ manualcontrol = False
 startup = True
 isscrew = 0
 different_tweet = False
-conn = sqlite3.connect('iss_telemetry.db') #sqlite database call change to include directory
-c = conn.cursor() 
 val = ""
 lastsignal = 0
 testvalue = 0
@@ -169,6 +175,7 @@ PTRRJcontrol = False
 STRRJcontrol = False
 stopAnimation = True
 startingAnim = True
+
 
 #-----------EPS Variables----------------------
 EPSstorageindex = 0
@@ -304,7 +311,7 @@ class CalibrateScreen(Screen):
         #try:
         #    self.serialActualWrite(self, *args)
         #except:
-        #    errorlog.write(str(datetime.datetime.utcnow()))
+        #    errorlog.write(str(datetime.utcnow()))
         #    errorlog.write(' ')
         #    errorlog.write("Attempted write - no serial device connected")
         #    errorlog.write('\n')
@@ -580,7 +587,7 @@ class MainApp(App):
         p.kill()
 
     def deleteURLPictures(self, dt):
-        mimiclog.write(str(datetime.datetime.utcnow()))
+        mimiclog.write(str(datetime.utcnow()))
         mimiclog.write(' ')
         mimiclog.write(str("deleteURLpictures"))
         mimiclog.write('\n')
@@ -589,7 +596,7 @@ class MainApp(App):
         EVA_picture_urls[:] = []
 
     def changePictures(self, dt):
-        mimiclog.write(str(datetime.datetime.utcnow()))
+        mimiclog.write(str(datetime.utcnow()))
         mimiclog.write(' ')
         mimiclog.write(str("changeURLpictures"))
         mimiclog.write('\n')
@@ -606,7 +613,7 @@ class MainApp(App):
             urlindex = 0
 
     def check_EVA_stats(self,lastname1,firstname1,lastname2,firstname2):                
-        mimiclog.write(str(datetime.datetime.utcnow()))
+        mimiclog.write(str(datetime.utcnow()))
         mimiclog.write(' ')
         mimiclog.write(str("check EVA stats"))
         mimiclog.write('\n')
@@ -672,7 +679,7 @@ class MainApp(App):
 
 
     def checkTwitter2(self):
-        mimiclog.write(str(datetime.datetime.utcnow()))
+        mimiclog.write(str(datetime.utcnow()))
         mimiclog.write(' ')
         mimiclog.write(str("check twitter"))
         mimiclog.write('\n')
@@ -684,7 +691,7 @@ class MainApp(App):
             #stuff = api.user_timeline(screen_name = 'iss_mimic', count = 1, include_rts = True, tweet_mode = 'extended')
         except:
             self.us_eva.ids.EVAstatus.text = str("Twitter Error")
-            errorlog.write(str(datetime.datetime.utcnow()))
+            errorlog.write(str(datetime.utcnow()))
             errorlog.write(' ')
             errorlog.write("Tweepy - Error Retrieving Tweet, make sure clock is correct")
             errorlog.write('\n')
@@ -756,7 +763,7 @@ class MainApp(App):
             crew_mention = False
             
     def checkpasttweets(self):
-        mimiclog.write(str(datetime.datetime.utcnow()))
+        mimiclog.write(str(datetime.utcnow()))
         mimiclog.write(' ')
         mimiclog.write(str("check twitter past"))
         mimiclog.write('\n')
@@ -766,7 +773,7 @@ class MainApp(App):
         try:
             stuff = api.user_timeline(screen_name = 'iss101', count = 50, include_rts = False, tweet_mode = 'extended')
         except:
-            errorlog.write(str(datetime.datetime.utcnow()))
+            errorlog.write(str(datetime.utcnow()))
             errorlog.write(' ')
             errorlog.write("Tweepy - Error Retrieving Tweet, make sure clock is correct")
             errorlog.write('\n')
@@ -827,7 +834,7 @@ class MainApp(App):
                     crew_mention = False
             
     def flashEVAbutton(self, instace):
-        mimiclog.write(str(datetime.datetime.utcnow()))
+        mimiclog.write(str(datetime.utcnow()))
         mimiclog.write(' ')
         mimiclog.write(str("flash eva button"))
         mimiclog.write('\n')
@@ -839,7 +846,7 @@ class MainApp(App):
         Clock.schedule_once(reset_color, 0.5) 
     
     def EVA_clock(self, dt):
-        mimiclog.write(str(datetime.datetime.utcnow()))
+        mimiclog.write(str(datetime.utcnow()))
         mimiclog.write(' ')
         mimiclog.write(str("eva timer"))
         mimiclog.write('\n')
@@ -895,7 +902,7 @@ class MainApp(App):
         #try:
         #   ser.write(*args)
         #except:
-        #   errorlog.write(str(datetime.datetime.utcnow()))
+        #   errorlog.write(str(datetime.utcnow()))
         #   errorlog.write(' ')
         #   errorlog.write("Attempted write - no serial device connected")
         #   errorlog.write('\n')
@@ -940,7 +947,7 @@ class MainApp(App):
         try:
             self.fetchTLE(self, *args)
         except:
-            errorlog.write(str(datetime.datetime.utcnow()))
+            errorlog.write(str(datetime.utcnow()))
             errorlog.write(' ')
             errorlog.write("TLE Fetch - URL Error")
             errorlog.write('\n')
@@ -970,7 +977,7 @@ class MainApp(App):
         try:
             self.checkCrew(self, *args)
         except:
-            errorlog.write(str(datetime.datetime.utcnow()))
+            errorlog.write(str(datetime.utcnow()))
             errorlog.write(' ')
             errorlog.write("Crew Check - URL Error")
             errorlog.write('\n')
@@ -988,9 +995,9 @@ class MainApp(App):
         req = urllib2.Request(iss_crew_url, headers={'User-Agent' : "Magic Browser"})
         global ser
         stuff = urllib2.urlopen(req)
-        now = datetime.datetime.now()
+        now = datetime.now()
         if (stuff.info().getsubtype()=='json'):
-            mimiclog.write(str(datetime.datetime.utcnow()))
+            mimiclog.write(str(datetime.utcnow()))
             mimiclog.write(' ')
             mimiclog.write("Crew Check - JSON Success")
             mimiclog.write('\n')
@@ -1002,7 +1009,7 @@ class MainApp(App):
                     crewmember[isscrew] = str(data['people'][num-1]['name'])
                     crewmemberbio[isscrew] = (data['people'][num-1]['bio'])
                     crewmembertitle[isscrew] = str(data['people'][num-1]['title'])
-                    datetime_object = datetime.datetime.strptime(str(data['people'][num-1]['launchdate']),'%Y-%m-%d')
+                    datetime_object = datetime.strptime(str(data['people'][num-1]['launchdate']),'%Y-%m-%d')
                     previousdays = int(data['people'][num-1]['careerdays'])
                     totaldaysinspace = str(now-datetime_object)
                     d_index = totaldaysinspace.index('d')
@@ -1013,7 +1020,7 @@ class MainApp(App):
                         crewmembercountry[isscrew] = str('USA')
                     isscrew = isscrew+1  
         else:
-            mimiclog.write(str(datetime.datetime.utcnow()))
+            mimiclog.write(str(datetime.utcnow()))
             mimiclog.write(' ')
             mimiclog.write("Crew Check - JSON Error")
             mimiclog.write('\n')
@@ -1109,7 +1116,7 @@ class MainApp(App):
         return scaledValue
     
     def hold_timer(self, dt):
-        mimiclog.write(str(datetime.datetime.utcnow()))
+        mimiclog.write(str(datetime.utcnow()))
         mimiclog.write(' ')
         mimiclog.write(str("hold timer"))
         mimiclog.write('\n')
@@ -1302,75 +1309,105 @@ class MainApp(App):
         
 
         ##-------------------EPS Stuff---------------------------##
+
+        if avg_total_voltage > 151.5:
+            #for x in range(0,1000,1):
+            #self.eps_screen.ids.eps_sun.color = 1,1,1,0.1
+            #anim = Animation(self.eps_screen.ids.eps_sun.color=(1,1,1,1.0))
+            #anim.start(self.eps_screen.ids.eps_sun.color)
+            self.eps_screen.ids.eps_sun.color = 1,1,1,1
+        else:
+            #for x in range(1000,0,-1):
+            #self.eps_screen.ids.eps_sun.color = 1,1,1,1.0
+            #anim = Animation(self.eps_screen.ids.eps_sun.color=(1,1,1,0.1))
+            #anim.start(self.eps_screen.ids.eps_sun.color)
+            self.eps_screen.ids.eps_sun.color = 1,1,1,0.1
+
         if halfavg_1a < 151.5: #discharging
             self.eps_screen.ids.array_1a.source = "./imgs/eps/array-discharging.zip"
+            self.eps_screen.ids.array_1a.color = 1,1,1,0.8
         elif avg_1a > 160.0: #charged
             self.eps_screen.ids.array_1a.source = "./imgs/eps/array-charged.zip"
         elif halfavg_1a >= 151.5:  #charging
             self.eps_screen.ids.array_1a.source = "./imgs/eps/array-charging.zip"
+            self.eps_screen.ids.array_1a.color = 1,1,1,1.0
         if float(c1a) > 0.0:    #power channel offline!
             self.eps_screen.ids.array_1a.source = "./imgs/eps/array-offline.png"
         
         if halfavg_1b < 151.5: #discharging
             self.eps_screen.ids.array_1b.source = "./imgs/eps/array-discharging.zip"
+            self.eps_screen.ids.array_1b.color = 1,1,1,0.8
         elif avg_1b > 160.0: #charged
             self.eps_screen.ids.array_1b.source = "./imgs/eps/array-charged.zip"
         elif halfavg_1b >= 151.5:  #charging
             self.eps_screen.ids.array_1b.source = "./imgs/eps/array-charging.zip"
+            self.eps_screen.ids.array_1b.color = 1,1,1,1.0
         if float(c1b) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_1b.source = "./imgs/eps/array-offline.png"
         
         if halfavg_2a < 151.5: #discharging
             self.eps_screen.ids.array_2a.source = "./imgs/eps/array-discharging.zip"
+            self.eps_screen.ids.array_2a.color = 1,1,1,0.8
         elif avg_2a > 160.0: #charged
             self.eps_screen.ids.array_2a.source = "./imgs/eps/array-charged.zip"
         elif halfavg_2a >= 151.5:  #charging
             self.eps_screen.ids.array_2a.source = "./imgs/eps/array-charging.zip"
+            self.eps_screen.ids.array_2a.color = 1,1,1,1.0
         if float(c2a) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_2a.source = "./imgs/eps/array-offline.png"
         
         if halfavg_2b < 151.5: #discharging
             self.eps_screen.ids.array_2b.source = "./imgs/eps/array-discharging.zip"
+            self.eps_screen.ids.array_2b.color = 1,1,1,0.8
         elif avg_2b > 160.0: #charged
             self.eps_screen.ids.array_2b.source = "./imgs/eps/array-charged.zip"
         elif halfavg_2b >= 151.5:  #charging
             self.eps_screen.ids.array_2b.source = "./imgs/eps/array-charging.zip"
+            self.eps_screen.ids.array_2b.color = 1,1,1,1.0
         if float(c2b) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_2b.source = "./imgs/eps/array-offline.png"
         
         if halfavg_3a < 151.5: #discharging
             self.eps_screen.ids.array_3a.source = "./imgs/eps/array-discharging.zip"
+            self.eps_screen.ids.array_3a.color = 1,1,1,0.8
         elif avg_3a > 160.0: #charged
             self.eps_screen.ids.array_3a.source = "./imgs/eps/array-charged.zip"
         elif halfavg_3a >= 151.5:  #charging
             self.eps_screen.ids.array_3a.source = "./imgs/eps/array-charging.zip"
+            self.eps_screen.ids.array_3a.color = 1,1,1,1.0
         if float(c3a) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_3a.source = "./imgs/eps/array-offline.png"
         
         if halfavg_3b < 151.5: #discharging
             self.eps_screen.ids.array_3b.source = "./imgs/eps/array-discharging.zip"
+            self.eps_screen.ids.array_3b.color = 1,1,1,0.8
         elif avg_3b > 160.0: #charged
             self.eps_screen.ids.array_3b.source = "./imgs/eps/array-charged.zip"
         elif halfavg_3b >= 151.5:  #charging
             self.eps_screen.ids.array_3b.source = "./imgs/eps/array-charging.zip"
+            self.eps_screen.ids.array_3b.color = 1,1,1,1.0
         if float(c3b) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_3b.source = "./imgs/eps/array-offline.png"
         
         if halfavg_4a < 151.5: #discharging
             self.eps_screen.ids.array_4a.source = "./imgs/eps/array-discharging.zip"
+            self.eps_screen.ids.array_4a.color = 1,1,1,0.8
         elif avg_4a > 160.0: #charged
             self.eps_screen.ids.array_4a.source = "./imgs/eps/array-charged.zip"
         elif halfavg_4a >= 151.5:  #charging
             self.eps_screen.ids.array_4a.source = "./imgs/eps/array-charging.zip"
+            self.eps_screen.ids.array_4a.color = 1,1,1,1.0
         if float(c4a) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_4a.source = "./imgs/eps/array-offline.png"
         
         if halfavg_4b < 151.5: #discharging
             self.eps_screen.ids.array_4b.source = "./imgs/eps/array-discharging.zip"
+            self.eps_screen.ids.array_4b.color = 1,1,1,0.8
         elif avg_4b > 160.0: #charged
             self.eps_screen.ids.array_4b.source = "./imgs/eps/array-charged.zip"
         elif halfavg_4b >= 151.5:  #charging
             self.eps_screen.ids.array_4b.source = "./imgs/eps/array-charging.zip"
+            self.eps_screen.ids.array_4b.color = 1,1,1,1.0
         if float(c4b) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_4b.source = "./imgs/eps/array-offline.png"
         

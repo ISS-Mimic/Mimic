@@ -4,10 +4,14 @@
 <EPS_Screen>:
     name: 'eps'
     FloatLayout:
-        #Image:
-            #source: './imgs/iss1.png'
-            #allow_stretch: True
-            #keep_ratio: False
+        Image:
+            id: eps_sun
+            source: './imgs/eps/sun.png'
+            allow_stretch: False
+            keep_ratio: True
+            pos_hint: {"center_x": 0.5, "center_y": 0.9}
+            size_hint: 0.2,0.2
+            color: 1,1,1,0.1
         Label:
             id: psarj_label
             pos_hint: {"center_x": 0.35, "center_y": 0.55}
@@ -38,15 +42,16 @@
             font_size: 25
 ##----------------------------------------------------------------------        
         Label:
-            pos_hint: {"center_x": 0.62, "center_y": 0.85}
-            text: 'Channel 1A'
+            pos_hint: {"center_x": 0.57, "center_y": 0.85}
+            text: '1A'
             markup: True
             color: 1,0,1
-            font_size: 30
+            font_size: 20
         Image:
             id: array_1a
             source: "./imgs/eps/array-charging.zip"
             anim_delay: 0.12
+            color: 1,1,1,1
             size_hint_y: 0.6
             size_hint_x: 1
             anim_loop: 0
@@ -97,15 +102,16 @@
 ##----------------------------------------------------------------------        
         Label:
             pos_hint: {"center_x": 0.87, "center_y": 0.38}
-            text: 'Channel 1B'
+            text: '1B'
             markup: True
             color: 1,0,1
-            font_size: 30
+            font_size: 20
         Image:
             id: array_1b
             source: "./imgs/eps/array-charging.zip"
             anim_delay: 0.12
             anim_loop: 0
+            color: 1,1,1,1
             size_hint_y: 0.6
             size_hint_x: 1
             keep_ratio: False
@@ -165,15 +171,16 @@
 ##----------------------------------------------------------------------        
         Label:
             pos_hint: {"center_x": 0.37, "center_y": 0.38}
-            text: 'Channel 2A'
+            text: '2A'
             markup: True
             color: 1,0,1
-            font_size: 30
+            font_size: 20
         Image:
             id: array_2a
             source: "./imgs/eps/array-charging.zip"
             anim_delay: 0.12
             anim_loop: 0
+            color: 1,1,1,1
             size_hint_y: 0.6
             size_hint_x: 1
             keep_ratio: False
@@ -233,14 +240,15 @@
 ##----------------------------------------------------------------------        
         Label:
             pos_hint: {"center_x": 0.12, "center_y": 0.85}
-            text: 'Channel 2B'
+            text: '2B'
             markup: True
             color: 1,0,1
-            font_size: 30
+            font_size: 20
         Image:
             id: array_2b
             source: "./imgs/eps/array-charging.zip"
             anim_delay: 0.12
+            color: 1,1,1,1
             size_hint_y: 0.6
             size_hint_x: 1
             anim_loop: 0
@@ -291,15 +299,16 @@
 ##----------------------------------------------------------------------        
         Label:
             pos_hint: {"center_x": 0.62, "center_y": 0.38}
-            text: 'Channel 3A'
+            text: '3A'
             markup: True
             color: 1,0,1
-            font_size: 30
+            font_size: 20
         Image:
             id: array_3a
             source: "./imgs/eps/array-charging.zip"
             anim_delay: 0.12
             anim_loop: 0
+            color: 1,1,1,1
             size_hint_y: 0.6
             size_hint_x: 1
             keep_ratio: False
@@ -359,14 +368,15 @@
 ##----------------------------------------------------------------------        
         Label:
             pos_hint: {"center_x": 0.87, "center_y": 0.85}
-            text: 'Channel 3B'
+            text: '3B'
             markup: True
             color: 1,0,1
-            font_size: 30
+            font_size: 20
         Image:
             id: array_3b
             source: "./imgs/eps/array-offline.png"
             anim_delay: 0.12
+            color: 1,1,1,1
             size_hint_y: 0.6
             size_hint_x: 1
             anim_loop: 0
@@ -417,15 +427,16 @@
 ##----------------------------------------------------------------------        
         Label:
             pos_hint: {"center_x": 0.37, "center_y": 0.85}
-            text: 'Channel 4A'
+            text: '4A'
             markup: True
             color: 1,0,1
-            font_size: 30
+            font_size: 20
         Image:
             id: array_4a
             source: "./imgs/eps/array-discharging.zip"
             anim_delay: 0.12
             anim_loop: 0
+            color: 1,1,1,1
             size_hint_y: 0.6
             size_hint_x: 1
             keep_ratio: False
@@ -475,16 +486,17 @@
 ##----------------------------------------------------------------------        
         Label:
             pos_hint: {"center_x": 0.12, "center_y": 0.38}
-            text: 'Channel 4B'
+            text: '4B'
             markup: True
             color: 1,0,1
-            font_size: 30
+            font_size: 20
         Image:
             id: array_4b
             source: "./imgs/eps/array-charged.zip"
             anim_delay: 0.12
             anim_loop: 0
             size_hint_y: 0.6
+            color: 1,1,1,1
             size_hint_x: 1
             keep_ratio: False
             pos_hint: {"center_x": 0.17, "center_y": 0.2}
@@ -503,7 +515,7 @@
             text: '--------------'
             markup: True
             color: 1,0,1
-            font_size: 30
+            font_size: 20
         Label:
             id: beta4b_label
             pos_hint: {"center_x": 0.07, "center_y": 0.31}
@@ -558,7 +570,7 @@
             size_hint: 0.2,0.1
             pos_hint: {"center_x": 0.8, "Bottom": 1}
             text: 'Return'
-            font_size: 30
+            font_size: 20
             on_release: app.root.current = 'mimic'
         Image:
             id: signal
