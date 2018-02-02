@@ -18,6 +18,7 @@ import smbus
 import math
 import random
 import time
+from geopy.geocoders import Nominatim
 from threading import Thread
 import re
 from Naked.toolshed.shell import execute_js, muterun_js
@@ -142,6 +143,8 @@ else:
 #----------------Open SQLITE3 Database that holds the current ISS Telemetry--------------
 conn = sqlite3.connect('iss_telemetry.db')
 c = conn.cursor() 
+#----------------------------------GeoPy-------------------------------------------------
+geolocator = Nominatim()
 #----------------------------------Variables---------------------------------------------
 testfactor = -1
 crew_mention= False
@@ -569,7 +572,7 @@ class MainApp(App):
         Clock.schedule_interval(self.update_labels, 1)
         Clock.schedule_interval(self.deleteURLPictures, 86400)
         Clock.schedule_interval(self.animate3,0.1)
-        Clock.schedule_interval(self.checkAOSlong, 5)
+        Clock.schedule_interval(self.checkLatLon, 5)
         Clock.schedule_interval(self.checkCrew, 3600)
         Clock.schedule_interval(self.checkTwitter, 65) #change back to 65 after testing
         Clock.schedule_interval(self.changePictures, 10)
@@ -1089,17 +1092,21 @@ class MainApp(App):
         #self.crew_screen.ids.crew12daysonISS.text = crewmemberdays[11]
         #self.crew_screen.ids.crew12image.source = str(crewmemberpicture[11]) 
         
-    def checkAOSlong(self, dt):
-        global aos
-        #if float(aos) == 0.00: #getting url errors, killing for now
-            #print "signal lost - writing longitude"
-            #response = urllib2.urlopen(req)
-            #obj = json.loads(response.read())
-            #locationlog.write("time ")
-            #locationlog.write(str(obj['timestamp']))
-            #locationlog.write(" long ")
-            #locationlog.write(str(obj['iss_position']['longitude']))
-            #locationlog.write('\n')
+    def checkLatLon(self, dt):
+        response = urllib2.urlopen(req)
+        latlonobj = json.loads(response.read())
+        lat = str(latlonobj['iss_position']['latitude'])
+        lon = str(latlonobj['iss_position']['longitude'])
+        location = geolocator.reverse([lat,lon],language='en')
+        try:
+            self.mimic_screen.ids.iss_over_country.text = "The ISS is over " + str(location.raw['address']['country'])
+        except:
+            #print "Water"
+            self.mimic_screen.ids.iss_over_country.text = "The ISS is over water"
+        else:
+            #print "ISS is over " + str(location.raw['address']['country'])    
+            self.mimic_screen.ids.iss_over_country.text = "The ISS is over " + str(location.raw['address']['country'])
+
     def map_rotation(self, args):
         scalefactor = 0.083333
         scaledValue = float(args)/scalefactor
