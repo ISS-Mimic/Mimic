@@ -25,6 +25,7 @@ from Naked.toolshed.shell import execute_js, muterun_js
 import os
 import signal
 import multiprocessing, signal
+from kivy.network.urlrequest import UrlRequest
 from kivy.graphics.svg import Svg
 from kivy.animation import Animation
 from kivy.uix.behaviors.button import ButtonBehavior
@@ -93,7 +94,8 @@ locationlog = open('./Logs/locationlog.txt','a')
 
 iss_crew_url = 'http://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'        
 nasaissurl = 'http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html'
-req = urllib2.Request("http://api.open-notify.org/iss-now.json")
+#req = urllib2.Request("http://api.open-notify.org/iss-now.json")
+ISS_Location_URL = "http://api.open-notify.org/iss-now.json"
 TLE_req = urllib2.Request("http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html")
 
 #-------------------------Look for a connected arduino-----------------------------------
@@ -146,6 +148,8 @@ c = conn.cursor()
 #----------------------------------GeoPy-------------------------------------------------
 geolocator = Nominatim()
 #----------------------------------Variables---------------------------------------------
+overcountry = "None"
+isslocationsuccess = False
 testfactor = -1
 crew_mention= False
 crewjsonsuccess = False
@@ -581,7 +585,6 @@ class MainApp(App):
         if startup == True:
             startup = False
             #self.checkCrew(60)
-
         #Clock.schedule_interval(self.getTLE, 3600)
         return root
 
@@ -1093,19 +1096,31 @@ class MainApp(App):
         #self.crew_screen.ids.crew12image.source = str(crewmemberpicture[11]) 
         
     def checkLatLon(self, dt):
-        response = urllib2.urlopen(req)
-        latlonobj = json.loads(response.read())
-        lat = str(latlonobj['iss_position']['latitude'])
-        lon = str(latlonobj['iss_position']['longitude'])
-        location = geolocator.reverse([lat,lon],language='en')
-        try:
-            self.mimic_screen.ids.iss_over_country.text = "The ISS is over " + str(location.raw['address']['country'])
-        except:
-            #print "Water"
-            self.mimic_screen.ids.iss_over_country.text = "The ISS is over water"
-        else:
-            #print "ISS is over " + str(location.raw['address']['country'])    
-            self.mimic_screen.ids.iss_over_country.text = "The ISS is over " + str(location.raw['address']['country'])
+        global overcountry
+        iss_location_url = "http://api.open-notify.org/iss-now.json"
+        self.mimic_screen.ids.iss_over_country.text = "The ISS is over " + overcountry
+        
+        def res(self,*args):
+            global overcountry
+            latitude = self.result['iss_position']['latitude']        
+            longitude = self.result['iss_position']['longitude']        
+        
+            #try:
+            #    location = geolocator.reverse([latitude,longitude],language='en')
+            #except:
+            #    print "geopy url error"
+            #else:
+            #    print "success"
+            #    try:
+            #        location.raw['address']['country']
+            #    except:
+            #        print "Water"
+            #        overcountry = "Water"
+            #    else:
+            #        overcountry = str(location.raw['address']['country'])
+            #        print overcountry
+
+        self.request = UrlRequest(iss_location_url, res)
 
     def map_rotation(self, args):
         scalefactor = 0.083333
