@@ -144,8 +144,6 @@ else:
 #----------------Open SQLITE3 Database that holds the current ISS Telemetry--------------
 conn = sqlite3.connect('iss_telemetry.db')
 c = conn.cursor() 
-#----------------------------------GeoPy-------------------------------------------------
-geolocator = Nominatim()
 #----------------------------------Variables---------------------------------------------
 overcountry = "None"
 isslocationsuccess = False
