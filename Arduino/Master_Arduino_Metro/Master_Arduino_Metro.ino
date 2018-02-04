@@ -43,7 +43,7 @@ Adafruit_DCMotor *myMotorB4B = AFMS.getMotor(4);
 
 Encoder myEnc2A(2, 3);
 //Encoder myEnc4A(4, 5); //for some reason, these do not register blips if motor moves fast, within a few deg of desired position
-Encoder myEnc4A(0, 1);
+Encoder myEnc4A(A1,A2);// was 0,1
 Encoder myEnc2B(6, 7);
 Encoder myEnc4B(11, 12);
 
