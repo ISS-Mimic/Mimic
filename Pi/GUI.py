@@ -18,7 +18,6 @@ import smbus
 import math
 import random
 import time
-from geopy.geocoders import Nominatim
 from threading import Thread
 import re
 from Naked.toolshed.shell import execute_js, muterun_js
