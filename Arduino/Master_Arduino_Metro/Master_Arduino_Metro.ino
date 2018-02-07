@@ -55,9 +55,10 @@ void setup() {
   AFMS.begin(200);  // I set this at 200 previously to reduce audible buzz.
   Serial.begin(115200);
   //Serial3.begin(115200);          //Serial1 is connected to the RasPi
-  //Serial3.setTimeout(50);
+  Serial.setTimeout(50);
+  Serial1.begin(9600);
 
-  Serial.println("Motor test!");
+  //Serial.println("Motor test!");
 
   // turn on motor   NOTE: May be able to remove all of these setSpeed and run commands here, although they are fine.
   myMotorB2A->setSpeed(150);

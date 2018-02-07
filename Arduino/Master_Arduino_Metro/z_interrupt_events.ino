@@ -8,7 +8,7 @@ void checkSerial()
   {
     test = Serial.readString();
   }
- // Serial.println(test);
+ Serial1.println(test);
   char sz[test.length() + 1];
   char copy[test.length() + 1];
   strcpy(sz, test.c_str());  
@@ -37,35 +37,35 @@ void checkSerial()
     {
       STRRJ = (test2.substring(delimeter+1)).toFloat();
     } 
-    else if(test2.substring(0,delimeter)=="B1B")
+    else if(test2.substring(0,delimeter)=="Beta1B")
     {
       B1B = (test2.substring(delimeter+1)).toFloat();
     }
-    else if(test2.substring(0,delimeter)=="B1A")
+    else if(test2.substring(0,delimeter)=="Beta1A")
     {
       B1A = (test2.substring(delimeter+1)).toFloat();
     }
-    else if(test2.substring(0,delimeter)=="B2B")
+    else if(test2.substring(0,delimeter)=="Beta2B")
     {
       B2B = (test2.substring(delimeter+1)).toFloat();
     }
-    else if(test2.substring(0,delimeter)=="B2A")
+    else if(test2.substring(0,delimeter)=="Beta2A")
     {
       B2A = (test2.substring(delimeter+1)).toFloat();
     }
-    else if(test2.substring(0,delimeter)=="B3B")
+    else if(test2.substring(0,delimeter)=="Beta3B")
     {
       B3B = (test2.substring(delimeter+1)).toFloat();
     }
-    else if(test2.substring(0,delimeter)=="B3A")
+    else if(test2.substring(0,delimeter)=="Beta3A")
     {
       B3A = (test2.substring(delimeter+1)).toFloat();
     }
-    else if(test2.substring(0,delimeter)=="B4B")
+    else if(test2.substring(0,delimeter)=="Beta4B")
     {
       B4B = (test2.substring(delimeter+1)).toFloat();
     }
-    else if(test2.substring(0,delimeter)=="B4A")
+    else if(test2.substring(0,delimeter)=="Beta4A")
     {
       B4A = (test2.substring(delimeter+1)).toFloat();
     }

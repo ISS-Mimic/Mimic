@@ -1,11 +1,16 @@
 void loop() {
 delay(1);
+if(Serial.available())
+{
+checkSerial();
+}
+
 int  debug_mode=6;
-  B2A = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
-  B4A = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
-  B2B = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
-  B4B = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
-  PTRRJ=104*sin(1*3.14159*0.01*millis()/1000.0); 
+//  B2A = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
+//  B4A = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
+//  B2B = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
+//  B4B = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
+//  PTRRJ=104*sin(1*3.14159*0.01*millis()/1000.0); 
 
 
   // ========= Servo Stuff =============================
@@ -259,55 +264,55 @@ int  debug_mode=6;
   millisChPt2 = millis() - LoopStartMillis;
 
 if (debug_mode==5){
-Serial.print("[Joint]:Cmd,Act,Err|  ");
-Serial.print("2A:c");
-Serial.print(B2A);
-Serial.print(",a");
-Serial.print(Pos_B2A);
-Serial.print(",e");
-Serial.print(PosErr_B2A);
+Serial1.print("[Joint]:Cmd,Act,Err|  ");
+Serial1.print("2A:c");
+Serial1.print(B2A);
+Serial1.print(",a");
+Serial1.print(Pos_B2A);
+Serial1.print(",e");
+Serial1.print(PosErr_B2A);
 
-Serial.print("|,  ");
-Serial.print("4A:c");
-Serial.print(B4A);
-Serial.print(",a");
-Serial.print(Pos_B4A);
-Serial.print(",e");
-Serial.print(PosErr_B4A);
+Serial1.print("|,  ");
+Serial1.print("4A:c");
+Serial1.print(B4A);
+Serial1.print(",a");
+Serial1.print(Pos_B4A);
+Serial1.print(",e");
+Serial1.print(PosErr_B4A);
 
-Serial.print("|,  ");
-Serial.print("2B:c");
-Serial.print(B2B);
-Serial.print(",a");
-Serial.print(Pos_B2B);
-Serial.print(",e");
-Serial.print(PosErr_B2B);
+Serial1.print("|,  ");
+Serial1.print("2B:c");
+Serial1.print(B2B);
+Serial1.print(",a");
+Serial1.print(Pos_B2B);
+Serial1.print(",e");
+Serial1.print(PosErr_B2B);
 
-Serial.print("|,  ");
-Serial.print("4B:c");
-Serial.print(B4B);
-Serial.print(",a");
-Serial.print(Pos_B4B);
-Serial.print(",e");
-Serial.print(PosErr_B4B);
-Serial.print("|,");
-Serial.println("");
+Serial1.print("|,  ");
+Serial1.print("4B:c");
+Serial1.print(B4B);
+Serial1.print(",a");
+Serial1.print(Pos_B4B);
+Serial1.print(",e");
+Serial1.print(PosErr_B4B);
+Serial1.print("|,");
+Serial1.println("");
 }
   
 
 
 if (debug_mode==6){
-Serial.print(PosErr_B2A);
+Serial1.print(PosErr_B2A);
 
-Serial.print(", ");
-Serial.print(PosErr_B4A);
+Serial1.print(", ");
+Serial1.print(PosErr_B4A);
 
-Serial.print(", ");
-Serial.print(PosErr_B2B);
+Serial1.print(", ");
+Serial1.print(PosErr_B2B);
 
-Serial.print(", ");
-Serial.print(PosErr_B4B);
-Serial.println("");
+Serial1.print(", ");
+Serial1.print(PosErr_B4B);
+Serial1.println("");
 }
 
 
