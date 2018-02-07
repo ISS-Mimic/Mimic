@@ -4,16 +4,29 @@
 <Orbit_Screen>:
     name: 'orbit'
     FloatLayout:
-        ##Image:
-            ##source: './imgs/iss2.png'
-            ##allow_stretch: True
-            ##keep_ratio: False
+ ## GridLAyout
+        ##rows: 3
+        ##cols: 1
         Label:
             pos_hint: {"center_x": 0.15, "center_y": 0.8}
             text: 'Orbit Stuff'
             markup: True
             color: 1,0,1
             font_size: 30
+        Label:
+            pos_hint: {"center_x": 0.45, "center_y": 0.5}
+            text: 'Bar:'
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Image:
+            id: Orbitbar
+            source: './imgs/eva/GenericEVAbuttonQuest.png'
+            size_hint_x: 0.2
+            size_hint_y: 0.15
+            pos_hint: {"x": 0.5, "center_y": 0.5}
+            allow_stretch: True
+            keep_ratio: False
         Button:
             size_hint: 0.3,0.1
             pos_hint: {"Left": 1, "Bottom": 1}
@@ -22,7 +35,7 @@
             on_release: app.root.current = 'mimic'
         Image:
             id: signal
-            source: "./imgs/pulse-transparent.zip"
+            source: "./imgs/signal/pulse-transparent.zip"
             size_hint_y: 0.15
             anim_delay: 0.12
             anim_loop: 0

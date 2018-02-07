@@ -21,6 +21,7 @@
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
             text: 'Zero All Angles'
             font_size: 30
+            disabled: True
             on_press: root.zeroJoints()
             on_release: calibratestatus.text = 'Angles Zero-ing!'
         Button:

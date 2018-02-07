@@ -6,6 +6,13 @@
     FloatLayout:
         id: mimicscreenlayout
         Label:
+            id: iss_over_country
+            pos_hint: {"center_x": 0.5, "center_y": 0.2}
+            text: ''
+            markup: True
+            color: 1,0,1
+            font_size: 30
+        Label:
             id: EVA_value
             pos_hint: {"center_x": 0.2, "center_y": 0.17}
             text: ''
@@ -36,7 +43,7 @@
             pos_hint: {"center_x": 0.85, "center_y": 0.25}
             text: 'EVA'
             font_size: 30
-            on_release: root.manager.current = 'eva'
+            on_release: root.manager.current = 'eva_main'
         Button:
             size_hint: 0.2,0.1
             pos_hint: {"center_x": 0.37, "center_y": 0.9}
@@ -164,7 +171,7 @@
             on_release: app.root.current = 'main'
         Image:
             id: signal
-            source: "./imgs/signalred.zip"
+            source: "./imgs/signal/signalred.zip"
             ##size_hint_y: 0.15
             size_hint_y: 0.112
             anim_delay: 0.05
