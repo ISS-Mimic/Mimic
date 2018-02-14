@@ -47,9 +47,6 @@ Encoder myEnc4A(6, 7); //for some reason, these do not register blips if motor m
 Encoder myEnc2B(5, 8);
 Encoder myEnc4B(11, 12);
 
-
-
-
 void setup() {
 
   // Attach a servo to pin #10
