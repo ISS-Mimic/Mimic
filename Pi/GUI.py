@@ -215,7 +215,8 @@ channel4A_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1
 channel4B_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
 USOS_Power = 0.0
 ISS_total_power = 0.0
-
+latitude = 0.00
+longitude = 0.00
 sizeX = 0.00
 sizeY = 0.00
 psarj2 = 1.0
@@ -1125,14 +1126,29 @@ class MainApp(App):
         
     def checkLatLon(self, dt):
         global overcountry
+        global latitude
+        global longitude
         iss_location_url = "http://api.open-notify.org/iss-now.json"
         self.mimic_screen.ids.iss_over_country.text = "The ISS is over " + overcountry
         
+        fromLatSpan = 180.0
+        fromLonSpan = 360.0
+        toLatSpan = 0.598
+        toLonSpan = 0.716
+        valueLatScaled = (float(latitude)+90.0)/float(fromLatSpan)
+        valueLonScaled = (float(longitude)+180.0)/float(fromLonSpan)
+        newLat = (0.29) + (valueLatScaled * toLatSpan) 
+        newLon = (0.172) + (valueLonScaled * toLonSpan) 
+        self.orbit_screen.ids.OrbitISStiny.pos_hint = {"center_x": newLon, "center_y": newLat}
+        
         def res(self,*args):
+            global latitude
+            global longitude
             global overcountry
             latitude = self.result['iss_position']['latitude']        
             longitude = self.result['iss_position']['longitude']        
             coordinates = (latitude,longitude),(latitude,longitude) #sending one pair causes errors so send duplicate cause lol
+            
             try:
                 location = reverse_geocode.search(coordinates)
             except:
@@ -1146,21 +1162,6 @@ class MainApp(App):
                 else:
                     overcountry = str(location[0]['country'])
             
-            #try:
-            #    location = geolocator.reverse([latitude,longitude],language='en')
-            #except:
-            #    print "geopy url error"
-            #else:
-            #    print "success"
-            #    try:
-            #        location.raw['address']['country']
-            #    except:
-            #        print "Water"
-            #        overcountry = "Water"
-            #    else:
-            #        overcountry = str(location.raw['address']['country'])
-            #        print overcountry
-
         self.request = UrlRequest(iss_location_url, res)
 
     def map_rotation(self, args):

@@ -4,32 +4,27 @@
 <Orbit_Screen>:
     name: 'orbit'
     FloatLayout:
- ## GridLAyout
-        ##rows: 3
-        ##cols: 1
-        Label:
-            pos_hint: {"center_x": 0.15, "center_y": 0.8}
-            text: 'Orbit Stuff'
-            markup: True
-            color: 1,0,1
-            font_size: 30
-        Label:
-            pos_hint: {"center_x": 0.45, "center_y": 0.5}
-            text: 'Bar:'
-            markup: True
-            color: 1,0,1
-            font_size: 30
         Image:
-            id: Orbitbar
-            source: './imgs/eva/GenericEVAbuttonQuest.png'
-            size_hint_x: 0.2
-            size_hint_y: 0.15
-            pos_hint: {"x": 0.5, "center_y": 0.5}
-            allow_stretch: True
+            id: Orbit_background
+            source: './imgs/unsorted/OrbitEweekBase.png'
+            allow_stretch: False
+        AsyncImage:
+            id: OrbitMap
+            source: './imgs/orbit/map.jpg'
+            pos_hint: {"center_x": 0.5, "center_y": 0.56}
+            size_hint_y: 0.598
+            allow_stretch: False
+            keep_ratio: True
+        Image:
+            id: OrbitISStiny
+            source: './imgs/orbit/ISSmimicLogoPartsGlowingISSblue.png'
             keep_ratio: False
+            allow_stretch: True
+            size_hint: 0.07,0.07
+            pos_hint: {"center_x": 0.888, "center_y": 0.888}
         Button:
-            size_hint: 0.3,0.1
-            pos_hint: {"Left": 1, "Bottom": 1}
+            size_hint: 0.2,0.1
+            pos_hint: {"center_x": 0.9, "center_y": 0.05}
             text: 'Return'
             font_size: 30
             on_release: app.root.current = 'mimic'
