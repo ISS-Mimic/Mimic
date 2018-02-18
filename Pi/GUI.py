@@ -5,6 +5,7 @@ import urllib2
 from bs4 import BeautifulSoup
 from calendar import timegm
 from datetime import datetime
+import reverse_geocode
 import os
 import sys
 import subprocess
@@ -99,52 +100,73 @@ TLE_req = urllib2.Request("http://spaceflight.nasa.gov/realdata/sightings/SSappl
 
 #-------------------------Look for a connected arduino-----------------------------------
 SerialConnection = False
-try:
-    ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=0)
-except:
-    errorlog.write(str(datetime.utcnow()))
-    errorlog.write(' ')
-    errorlog.write("serial connection GPIO not found")
-    errorlog.write('\n')
-else:
-    SerialConnection = True
-    ser.write("test")
-    errorlog.write("Successful connection to ")
-    errorlog.write(str(ser))
-    print str(ser)
+SerialConnection1 = False
+SerialConnection2 = False
+SerialConnection3 = False
+SerialConnection4 = False
 
+#setting up 2 serial connections to control neopixels and motors seperately 
 try:
     ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
 except:
     errorlog.write(str(datetime.utcnow()))
     errorlog.write(' ')
-    errorlog.write("serial connection GPIO not found")
+    errorlog.write("serial connection ACM0 not found")
     errorlog.write('\n')
 else:
-    SerialConnection = True
+    SerialConnection1 = True
     ser.write("test")
     errorlog.write("Successful connection to ")
     errorlog.write(str(ser))
     print str(ser)
 
 try:
-    ser = serial.Serial('/dev/ttyAMA00', 115200, timeout=0)
+    ser2 = serial.Serial('/dev/ttyACM1', 115200, timeout=0)
 except:
     errorlog.write(str(datetime.utcnow()))
     errorlog.write(' ')
-    errorlog.write("serial connection GPIO not found")
+    errorlog.write("serial connection ACM1 not found")
     errorlog.write('\n')
 else:
-    SerialConnection = True
+    SerialConnection2 = True
+    ser2.write("test")
+    errorlog.write("Successful connection to ")
+    errorlog.write(str(ser2))
+    print str(ser2)
+
+try:
+    ser3 = serial.Serial('/dev/ttyUSB0', 115200, timeout=0)
+except:
+    errorlog.write(str(datetime.utcnow()))
+    errorlog.write(' ')
+    errorlog.write("serial connection USB0 not found")
+    errorlog.write('\n')
+else:
+    SerialConnection3 = True
     ser.write("test")
     errorlog.write("Successful connection to ")
-    errorlog.write(str(ser))
-    print str(ser)
+    errorlog.write(str(ser3))
+    print str(ser3)
+
+try:
+    ser4 = serial.Serial('/dev/ttyAMA00', 115200, timeout=0)
+except:
+    errorlog.write(str(datetime.utcnow()))
+    errorlog.write(' ')
+    errorlog.write("serial connection AMA00 not found")
+    errorlog.write('\n')
+else:
+    SerialConnection4 = True
+    ser.write("test")
+    errorlog.write("Successful connection to ")
+    errorlog.write(str(ser4))
+    print str(ser4)
 
 #----------------Open SQLITE3 Database that holds the current ISS Telemetry--------------
 conn = sqlite3.connect('iss_telemetry.db')
 c = conn.cursor() 
 #----------------------------------Variables---------------------------------------------
+LS_Subscription = False
 overcountry = "None"
 isslocationsuccess = False
 testfactor = -1
@@ -901,7 +923,16 @@ class MainApp(App):
                     startingAnim = False
 
     def serialWrite(self, *args):
-        ser.write(*args)
+        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4
+        
+        if SerialConnection1:
+            ser.write(*args)
+        if SerialConnection2:
+            ser2.write(*args)
+        if SerialConnection3:
+            ser3.write(*args)
+        if SerialConnection4:
+            ser4.write(*args)
         #try:
         #   ser.write(*args)
         #except:
@@ -1101,7 +1132,20 @@ class MainApp(App):
             global overcountry
             latitude = self.result['iss_position']['latitude']        
             longitude = self.result['iss_position']['longitude']        
-        
+            coordinates = (latitude,longitude),(latitude,longitude) #sending one pair causes errors so send duplicate cause lol
+            try:
+                location = reverse_geocode.search(coordinates)
+            except:
+                print "geopy url error"
+            else:
+                try:
+                    location[0]['country']
+                except:
+                    print "Water"
+                    overcountry = "Water"
+                else:
+                    overcountry = str(location[0]['country'])
+            
             #try:
             #    location = geolocator.reverse([latitude,longitude],language='en')
             #except:
@@ -1151,6 +1195,20 @@ class MainApp(App):
         self.us_eva.ids.Hold_bar.pos_hint = {"center_x": new_bar_x, "center_y": 0.49}
         self.us_eva.ids.Crewlock_Status_image.source = './imgs/eva/LeakCheckLights.png'
 
+    def signal_unsubscribed(self):
+        self.orbit_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+        self.mimic_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+        self.eps_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+        self.ct_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+        self.tcs_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+        self.us_eva.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+        self.orbit_screen.ids.signal.size_hint_y = 0.112
+        self.mimic_screen.ids.signal.size_hint_y = 0.112
+        self.eps_screen.ids.signal.size_hint_y = 0.112
+        self.ct_screen.ids.signal.size_hint_y = 0.112
+        self.tcs_screen.ids.signal.size_hint_y = 0.112
+        self.us_eva.ids.signal.size_hint_y = 0.112
+    
     def signal_lost(self):
         self.orbit_screen.ids.signal.source = './imgs/signal/signalred.zip'
         self.mimic_screen.ids.signal.source = './imgs/signal/signalred.zip'
@@ -1213,13 +1271,25 @@ class MainApp(App):
 
     def update_labels(self, dt):
         global mimicbutton,switchtofake,fakeorbitboolean,psarj2,ssarj2,manualcontrol,psarj,ssarj,ptrrj,strrj,beta1b,beta1a,beta2b,beta2a,beta3b,beta3a,beta4b,beta4a,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,c1a,c1b,c3a,c3b,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress,oldAirlockPump,obtained_EVA_crew,EVAstartTime
-        global holdstartTime       
+        global holdstartTime, LS_Subscription, SerialConnection
         global eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
         global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power, ISS_total_power
+        
+        if SerialConnection1 or SerialConnection2 or SerialConnection3 or SerialConnection4:
+            self.mimic_screen.ids.mimicstartbutton.disabled = False
+        else:
+            self.mimic_screen.ids.mimicstartbutton.disabled = True
+
         c.execute('select Value from telemetry')
         values = c.fetchall()
         c.execute('select Timestamp from telemetry')
         timestamps = c.fetchall()
+         
+        sub_status = str((values[255])[0]) #lightstreamer subscript checker
+        if sub_status == "Subscribed":
+            LS_Subscription = True
+        else:
+            LS_Subscription = False
         
         psarj = "{:.2f}".format(float((values[0])[0]))
         if switchtofake == False:
@@ -1575,10 +1645,14 @@ class MainApp(App):
             self.serialWrite("Beta4B=" + beta4b + " ")
             self.serialWrite("Beta4A=" + beta4a + " ")
             self.serialWrite("AOS=" + aos + " ")
-            self.serialWrite("Current1A=" + c1a + " ")
-            self.serialWrite("Current1B=" + c1b + " ")
-            self.serialWrite("Current3A=" + c3a + " ")
-            self.serialWrite("Current3B=" + c3b + " ")
+            self.serialWrite("Voltage1A=" + v1a + " ")
+            self.serialWrite("Voltage2A=" + v2a + " ")
+            self.serialWrite("Voltage3A=" + v3a + " ")
+            self.serialWrite("Voltage4A=" + v4a + " ")
+            self.serialWrite("Voltage1B=" + v1b + " ")
+            self.serialWrite("Voltage2B=" + v2b + " ")
+            self.serialWrite("Voltage3B=" + v3b + " ")
+            self.serialWrite("Voltage4B=" + v4b + " ")
        
         self.eps_screen.ids.psarj_value.text = psarj
         self.eps_screen.ids.ssarj_value.text = ssarj
@@ -1618,14 +1692,17 @@ class MainApp(App):
         psi_bar_x = self.map_psi_bar(0.0193368*float(crewlockpres)) #convert to torr
         
         self.us_eva.ids.EVA_psi_bar.pos_hint = {"center_x": psi_bar_x, "center_y": 0.56} 
-        
+       
         if float(aos) == 1.00:
             self.changeColors(0,1,0)
             if self.root.current == 'mimic':
                fakeorbitboolean = False
                if mimicbutton == True:
                    switchtofake = False
-            self.signal_acquired()
+            if LS_Subscription == True:
+                self.signal_acquired()
+            else:
+                self.signal_unsubscribed()
         elif float(aos) == 0.00:
             self.changeColors(1,0,0)
             if self.root.current == 'mimic':
@@ -1651,10 +1728,14 @@ class MainApp(App):
             self.serialWrite("Beta4B=" + beta4b + " ")
             self.serialWrite("Beta4A=" + beta4a + " ")
             self.serialWrite("AOS=" + aos + " ")
-            self.serialWrite("Current1A=" + c1a + " ")
-            self.serialWrite("Current1B=" + c1b + " ")
-            self.serialWrite("Current3A=" + c3a + " ")
-            self.serialWrite("Current3B=" + c3b + " ")
+            self.serialWrite("Voltage1A=" + v1a + " ")
+            self.serialWrite("Voltage2A=" + v2a + " ")
+            self.serialWrite("Voltage3A=" + v3a + " ")
+            self.serialWrite("Voltage4A=" + v4a + " ")
+            self.serialWrite("Voltage1B=" + v1b + " ")
+            self.serialWrite("Voltage2B=" + v2b + " ")
+            self.serialWrite("Voltage3B=" + v3b + " ")
+            self.serialWrite("Voltage4B=" + v4b + " ")
 
 #All GUI Screens are on separate kv files
 Builder.load_file('./Screens/Settings_Screen.kv')

@@ -36,9 +36,11 @@ lsClient.connect();
 sub.addListener({
   onSubscription: function() {
     console.log("Subscribed");
+    db.run("UPDATE telemetry set Value = ? where Label = ?", "Subscribed", "Lightstreamer");
   },
   onUnsubscription: function() {
     console.log("Unsubscribed");
+    db.run("UPDATE telemetry set Value = ? where Label = ?", "Unsubscribed", "Lightstreamer");
   },
   onItemUpdate: function(update) 
   {
