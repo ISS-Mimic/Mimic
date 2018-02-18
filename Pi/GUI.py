@@ -237,6 +237,14 @@ beta3b = 0.00
 beta3a = 0.00
 beta4b = 0.00
 beta4a = 0.00
+beta1b2 = 0.00
+beta1a2 = 0.00
+beta2b2 = 0.00
+beta2a2 = 0.00
+beta3b2 = 0.00
+beta3a2 = 0.00
+beta4b2 = 0.00
+beta4a2 = 0.00
 aos = 0.00
 los = 0.00
 seconds2 = 260
@@ -1137,9 +1145,11 @@ class MainApp(App):
         toLonSpan = 0.716
         valueLatScaled = (float(latitude)+90.0)/float(fromLatSpan)
         valueLonScaled = (float(longitude)+180.0)/float(fromLonSpan)
-        newLat = (0.29) + (valueLatScaled * toLatSpan) 
-        newLon = (0.172) + (valueLonScaled * toLonSpan) 
+        newLat = (0.265) + (valueLatScaled * toLatSpan) 
+        newLon = (0.14) + (valueLonScaled * toLonSpan) 
         self.orbit_screen.ids.OrbitISStiny.pos_hint = {"center_x": newLon, "center_y": newLat}
+        self.orbit_screen.ids.latitude.text = str(latitude)
+        self.orbit_screen.ids.longitude.text = str(longitude)
         
         def res(self,*args):
             global latitude
@@ -1271,7 +1281,7 @@ class MainApp(App):
         self.us_eva.ids.signal.size_hint_y = 0.112
 
     def update_labels(self, dt):
-        global mimicbutton,switchtofake,fakeorbitboolean,psarj2,ssarj2,manualcontrol,psarj,ssarj,ptrrj,strrj,beta1b,beta1a,beta2b,beta2a,beta3b,beta3a,beta4b,beta4a,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,c1a,c1b,c3a,c3b,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress,oldAirlockPump,obtained_EVA_crew,EVAstartTime
+        global mimicbutton,switchtofake,fakeorbitboolean,psarj2,ssarj2,manualcontrol,psarj,ssarj,ptrrj,strrj,beta1b,beta1a,beta2b,beta2a,beta3b,beta3a,beta4b,beta4a,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,c1a,c1b,c3a,c3b,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress,oldAirlockPump,obtained_EVA_crew,EVAstartTime,beta1a2,beta1b2,beta2a2,beta2b2,beta3a2,beta3b2,beta4a2,beta4b2
         global holdstartTime, LS_Subscription, SerialConnection
         global eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
         global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power, ISS_total_power
@@ -1309,27 +1319,43 @@ class MainApp(App):
         if manualcontrol == False:
             strrjmc = float(strrj)
         beta1b = "{:.2f}".format(float((values[4])[0]))
+        if switchtofake == False:
+            beta1b2 = float(beta1b)
         if manualcontrol == False:
             beta1bmc = float(beta1b)
         beta1a = "{:.2f}".format(float((values[5])[0]))
+        if switchtofake == False:
+            beta1a2 = float(beta1a)
         if manualcontrol == False:
             beta1amc = float(beta1a)
         beta2b = "{:.2f}".format(float((values[6])[0]))
+        if switchtofake == False:
+            beta2b2 = float(beta2b)
         if manualcontrol == False:
             beta2bmc = float(beta2b)
         beta2a = "{:.2f}".format(float((values[7])[0]))
+        if switchtofake == False:
+            beta2a2 = float(beta2a)
         if manualcontrol == False:
             beta2amc = float(beta2a)
         beta3b = "{:.2f}".format(float((values[8])[0]))
+        if switchtofake == False:
+            beta3b2 = float(beta3b)
         if manualcontrol == False:
             beta3bmc = float(beta3b)
         beta3a = "{:.2f}".format(float((values[9])[0]))
+        if switchtofake == False:
+            beta3a2 = float(beta3a)
         if manualcontrol == False:
             beta3amc = float(beta3a)
         beta4b = "{:.2f}".format(float((values[10])[0]))
+        if switchtofake == False:
+            beta4b2 = float(beta4b)
         if manualcontrol == False:
             beta4bmc = float(beta4b)
         beta4a = "{:.2f}".format(float((values[11])[0]))
+        if switchtofake == False:
+            beta4a2 = float(beta4a)
         if manualcontrol == False:
             beta4amc = float(beta4a)
         aos = "{:.2f}".format(int((values[12])[0]))
@@ -1622,29 +1648,53 @@ class MainApp(App):
         if (fakeorbitboolean == True and (mimicbutton == True or switchtofake == True)):
             if psarj2 <= 0.00:
                 psarj2 = 360.0
-            self.fakeorbit_screen.ids.fakepsarj_value.text = "{:.2f}".format(psarj2)
             if ssarj2 >= 360.00:                
                 ssarj2 = 0.0
+            if beta1a2 >= 360.00:
+                beta1a2 = 0.0
+            if beta1b2 >= 360.00:
+                beta1b2 = 0.0
+            if beta2a2 >= 360.00:
+                beta2a2 = 0.0
+            if beta2b2 >= 360.00:
+                beta2b2 = 0.0
+            if beta3a2 >= 360.00:
+                beta3a2 = 0.0
+            if beta3b2 >= 360.00:
+                beta3b2 = 0.0
+            if beta4a2 >= 360.00:
+                beta4a2 = 0.0
+            if beta4b2 >= 360.00:
+                beta4b2 = 0.0
+            self.fakeorbit_screen.ids.fakepsarj_value.text = "{:.2f}".format(psarj2)
             self.fakeorbit_screen.ids.fakessarj_value.text = "{:.2f}".format(ssarj2)
             
-            psarj2 -= 0.0666
-            ssarj2 += 0.0666
+            #psarj2 -= 0.0666
+            psarj2 -= 10.00
+            #ssarj2 += 0.0666
+            ssarj2 += 10.00
 
-            psarjstr = "{:.2f}".format(psarj2)
-            ssarjstr = "{:.2f}".format(ssarj2)
-            
-            self.serialWrite("PSARJ=" + psarjstr + " ")
-            self.serialWrite("SSARJ=" + ssarjstr + " ")
+            beta1a2 += 3.00
+            beta1b2 += 3.00
+            beta2a2 += 3.00
+            beta2b2 += 3.00
+            beta3a2 += 3.00
+            beta3b2 += 3.00
+            beta4a2 += 3.00
+            beta4b2 += 3.00
+
+            self.serialWrite("PSARJ=" + psarj2 + " ")
+            self.serialWrite("SSARJ=" + ssarj2 + " ")
             self.serialWrite("PTRRJ=" + ptrrj + " ")
             self.serialWrite("STRRJ=" + strrj + " ")
-            self.serialWrite("Beta1B=" + beta1b + " ")
-            self.serialWrite("Beta1A=" + beta1a + " ")
-            self.serialWrite("Beta2B=" + beta2b + " ")
-            self.serialWrite("Beta2A=" + beta2a + " ")
-            self.serialWrite("Beta3B=" + beta3b + " ")
-            self.serialWrite("Beta3A=" + beta3a + " ")
-            self.serialWrite("Beta4B=" + beta4b + " ")
-            self.serialWrite("Beta4A=" + beta4a + " ")
+            self.serialWrite("Beta1B=" + beta1b2 + " ")
+            self.serialWrite("Beta1A=" + beta1a2 + " ")
+            self.serialWrite("Beta2B=" + beta2b2 + " ")
+            self.serialWrite("Beta2A=" + beta2a2 + " ")
+            self.serialWrite("Beta3B=" + beta3b2 + " ")
+            self.serialWrite("Beta3A=" + beta3a2 + " ")
+            self.serialWrite("Beta4B=" + beta4b2 + " ")
+            self.serialWrite("Beta4A=" + beta4a2 + " ")
             self.serialWrite("AOS=" + aos + " ")
             self.serialWrite("Voltage1A=" + v1a + " ")
             self.serialWrite("Voltage2A=" + v2a + " ")
