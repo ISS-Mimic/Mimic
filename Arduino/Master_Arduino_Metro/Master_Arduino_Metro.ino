@@ -30,7 +30,7 @@ Servo servo1;
 Servo servo2;
 
 // Create the motor shield object with the default I2C address
-Adafruit_MotorShield AFMS = Adafruit_MotorShield();
+Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x60);
 // Or, create it with a different I2C address (say for stacking)
 // Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x61);
 
@@ -42,10 +42,13 @@ Adafruit_DCMotor *myMotorB4B = AFMS.getMotor(4);
 
 
 Encoder myEnc2A(2, 3);
-//Encoder myEnc4A(4, 5); //for some reason, these do not register blips if motor moves fast, within a few deg of desired position
-Encoder myEnc4A(0, 1);
-Encoder myEnc2B(6, 7);
+Encoder myEnc4A(6, 7); //for some reason, these do not register blips if motor moves fast, within a few deg of desired position
+//Encoder myEnc4A(A1,A2);// was 0,1
+Encoder myEnc2B(5, 8);
 Encoder myEnc4B(11, 12);
+
+
+
 
 void setup() {
 
@@ -55,9 +58,10 @@ void setup() {
   AFMS.begin(200);  // I set this at 200 previously to reduce audible buzz.
   Serial.begin(115200);
   //Serial3.begin(115200);          //Serial1 is connected to the RasPi
-  //Serial3.setTimeout(50);
+  Serial.setTimeout(50);
+  Serial1.begin(9600);
 
-  Serial.println("Motor test!");
+  //Serial.println("Motor test!");
 
   // turn on motor   NOTE: May be able to remove all of these setSpeed and run commands here, although they are fine.
   myMotorB2A->setSpeed(150);
