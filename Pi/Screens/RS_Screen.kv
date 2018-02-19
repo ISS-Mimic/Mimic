@@ -1,0 +1,24 @@
+#:kivy 1.8
+#:import kivy kivy
+#:import win kivy.core.window
+<RS_Screen>:
+    name: 'rs'
+    FloatLayout:
+        Image:
+            source: './imgs/unsorted/RussianSegmentExample.png'
+            allow_stretch: False
+            keep_ratio: True
+        Button:
+            size_hint: 0.2,0.1
+            pos_hint: {"center_x": 0.9, "center_y": 0.05}
+            text: 'Return'
+            font_size: 30
+            on_release: app.root.current = 'mimic'
+        Image:
+            id: signal
+            source: "./imgs/signal/pulse-transparent.zip"
+            size_hint_y: 0.15
+            anim_delay: 0.12
+            anim_loop: 0
+            keep_ratio: True
+            pos_hint: {"center_x": 0.05, "center_y": 0.07}

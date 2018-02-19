@@ -1,30 +1,25 @@
 #!/usr/bin/python
-
 import kivy
 import urllib2
 from bs4 import BeautifulSoup
 from calendar import timegm
 from datetime import datetime
-import reverse_geocode
-import os
+#import reverse_geocode #test1uncomment
 import sys
 import subprocess
-import sys
 import json
 import sqlite3
 import serial
 import time
-import sched, time
+import sched
 import smbus
 import math
 import random
-import time
 from threading import Thread
 import re
 from Naked.toolshed.shell import execute_js, muterun_js
-import os
 import signal
-import multiprocessing, signal
+import multiprocessing
 from kivy.network.urlrequest import UrlRequest
 from kivy.graphics.svg import Svg
 from kivy.animation import Animation
@@ -53,7 +48,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, WipeTr
 import tweepy
 import xml.etree.ElementTree as etree
 
-p = subprocess.Popen(["node", "ISS_Telemetry.js"]) 
+p = subprocess.Popen(["node", "./ISS_Telemetry.js"]) 
 
 # Twitter API credentials
 consumerKey = ''
@@ -163,7 +158,7 @@ else:
     print str(ser4)
 
 #----------------Open SQLITE3 Database that holds the current ISS Telemetry--------------
-conn = sqlite3.connect('iss_telemetry.db')
+conn = sqlite3.connect('/dev/shm/iss_telemetry.db')
 c = conn.cursor() 
 #----------------------------------Variables---------------------------------------------
 LS_Subscription = False
@@ -336,9 +331,7 @@ class MainScreen(Screen):
     def killproc(*args):
         global p
         p.kill()
-
-    def resetLOS(*args):
-        p.kill()
+        call('rm /dev/shm/iss_telemetry.db')
 
 class CalibrateScreen(Screen):
     def serialWrite(self, *args):
@@ -1143,7 +1136,8 @@ class MainApp(App):
         global longitude
         iss_location_url = "http://api.open-notify.org/iss-now.json"
         self.mimic_screen.ids.iss_over_country.text = "The ISS is over " + overcountry
-        
+       
+        #converting lat lon to x,y for map
         fromLatSpan = 180.0
         fromLonSpan = 360.0
         toLatSpan = 0.598
@@ -1164,18 +1158,19 @@ class MainApp(App):
             longitude = self.result['iss_position']['longitude']        
             coordinates = (latitude,longitude),(latitude,longitude) #sending one pair causes errors so send duplicate cause lol
             
-            try:
-                location = reverse_geocode.search(coordinates)
-            except:
-                print "geopy url error"
-            else:
-                try:
-                    location[0]['country']
-                except:
-                    print "Water"
-                    overcountry = "Water"
-                else:
-                    overcountry = str(location[0]['country'])
+            #try:
+            #    print "skip geo"
+            #    #location = reverse_geocode.search(coordinates) #test1uncomment
+            #except:
+            #    print "geopy url error"
+            #else:
+            #    try:
+            #        location[0]['country']
+            #    except:
+            #        print "Water"
+            #        overcountry = "Water"
+            #    else:
+            #        overcountry = str(location[0]['country'])
             
         self.request = UrlRequest(iss_location_url, res)
 
