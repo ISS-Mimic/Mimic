@@ -6,6 +6,7 @@ from calendar import timegm
 from datetime import datetime
 #import reverse_geocode #test1uncomment
 import sys
+import os
 import subprocess
 import json
 import sqlite3
@@ -48,7 +49,6 @@ from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, WipeTr
 import tweepy
 import xml.etree.ElementTree as etree
 
-p = subprocess.Popen(["node", "./ISS_Telemetry.js"]) 
 
 # Twitter API credentials
 consumerKey = ''
@@ -130,11 +130,11 @@ else:
     print str(ser2)
 
 try:
-    ser3 = serial.Serial('/dev/ttyUSB0', 115200, timeout=0)
+    ser3 = serial.Serial('/dev/ttyACM2', 115200, timeout=0)
 except:
     errorlog.write(str(datetime.utcnow()))
     errorlog.write(' ')
-    errorlog.write("serial connection USB0 not found")
+    errorlog.write("serial connection ACM2 not found")
     errorlog.write('\n')
 else:
     SerialConnection3 = True
@@ -314,24 +314,35 @@ repress = False
 EVA_picture_urls = []
 urlindex = 0
 
-def StringToBytes(val):
-    retVal = []
-    for c in val:
-            retVal.append(ord(c))
-    return retVal
-
-class RotatedImage(Image):
-    angle = NumericProperty()
-
 class MainScreen(Screen):
     def changeManualControlBoolean(self, *args):
         global manualcontrol
         manualcontrol = args[0]        
 
+    def startBGA(*args):
+        global p2
+        p2 = subprocess.Popen("./fakeBGA.sh")
+    
+    def stopBGA(*args):
+        global p2
+        p2.kill()
+    
+    def startproc(*args):
+        global p
+        p = subprocess.Popen(["node", "./ISS_Telemetry.js"]) 
+    
     def killproc(*args):
         global p
-        p.kill()
-        call('rm /dev/shm/iss_telemetry.db')
+        global p2
+        #os.system('rm /dev/shm/iss_telemetry.db')
+        try:
+            p.kill()
+            p2.kill()
+        except:
+            print "no process"
+        else:
+            p.kill()
+            p2.kill()
 
 class CalibrateScreen(Screen):
     def serialWrite(self, *args):
@@ -1345,7 +1356,7 @@ class MainApp(App):
             beta1amc = float(beta1a)
         beta2b = "{:.2f}".format(float((values[6])[0]))
         if switchtofake == False:
-            beta2b2 = float(beta2b)
+            beta2b2 = float(beta2b) #+ 20.00
         if manualcontrol == False:
             beta2bmc = float(beta2b)
         beta2a = "{:.2f}".format(float((values[7])[0]))
@@ -1370,7 +1381,7 @@ class MainApp(App):
             beta4bmc = float(beta4b)
         beta4a = "{:.2f}".format(float((values[11])[0]))
         if switchtofake == False:
-            beta4a2 = float(beta4a)
+            beta4a2 = float(beta4a) #+ 20.00
         if manualcontrol == False:
             beta4amc = float(beta4a)
         aos = "{:.2f}".format(int((values[12])[0]))
@@ -1671,54 +1682,54 @@ class MainApp(App):
                 beta1b2 = 0.0
             if beta2a2 >= 360.00:
                 beta2a2 = 0.0
-            if beta2b2 >= 360.00:
-                beta2b2 = 0.0
+            if beta2b2 <= 0.00:
+                beta2b2 = 360.0
             if beta3a2 >= 360.00:
                 beta3a2 = 0.0
             if beta3b2 >= 360.00:
                 beta3b2 = 0.0
-            if beta4a2 >= 360.00:
-                beta4a2 = 0.0
+            if beta4a2 <= 0.00:
+                beta4a2 = 360.0
             if beta4b2 >= 360.00:
                 beta4b2 = 0.0
             self.fakeorbit_screen.ids.fakepsarj_value.text = "{:.2f}".format(psarj2)
             self.fakeorbit_screen.ids.fakessarj_value.text = "{:.2f}".format(ssarj2)
             
             #psarj2 -= 0.0666
-            psarj2 -= 10.00
+            psarj2 -= 6.66
             #ssarj2 += 0.0666
-            ssarj2 += 10.00
+            ssarj2 += 6.66
 
             beta1a2 += 3.00
             beta1b2 += 3.00
             beta2a2 += 3.00
-            beta2b2 += 3.00
+            beta2b2 -= 3.00
             beta3a2 += 3.00
             beta3b2 += 3.00
-            beta4a2 += 3.00
+            beta4a2 -= 3.00
             beta4b2 += 3.00
 
-            self.serialWrite("PSARJ=" + psarj2 + " ")
-            self.serialWrite("SSARJ=" + ssarj2 + " ")
-            self.serialWrite("PTRRJ=" + ptrrj + " ")
-            self.serialWrite("STRRJ=" + strrj + " ")
-            self.serialWrite("Beta1B=" + beta1b2 + " ")
-            self.serialWrite("Beta1A=" + beta1a2 + " ")
-            self.serialWrite("Beta2B=" + beta2b2 + " ")
-            self.serialWrite("Beta2A=" + beta2a2 + " ")
-            self.serialWrite("Beta3B=" + beta3b2 + " ")
-            self.serialWrite("Beta3A=" + beta3a2 + " ")
-            self.serialWrite("Beta4B=" + beta4b2 + " ")
-            self.serialWrite("Beta4A=" + beta4a2 + " ")
-            self.serialWrite("AOS=" + aos + " ")
-            self.serialWrite("Voltage1A=" + v1a + " ")
-            self.serialWrite("Voltage2A=" + v2a + " ")
-            self.serialWrite("Voltage3A=" + v3a + " ")
-            self.serialWrite("Voltage4A=" + v4a + " ")
-            self.serialWrite("Voltage1B=" + v1b + " ")
-            self.serialWrite("Voltage2B=" + v2b + " ")
-            self.serialWrite("Voltage3B=" + v3b + " ")
-            self.serialWrite("Voltage4B=" + v4b + " ")
+            self.serialWrite("PSARJ=" + str(psarj2) + " ")
+            self.serialWrite("SSARJ=" + str(ssarj2) + " ")
+            self.serialWrite("PTRRJ=" + str(ptrrj) + " ")
+            self.serialWrite("STRRJ=" + str(strrj) + " ")
+            self.serialWrite("Beta1B=" + str(beta1b2) + " ")
+            self.serialWrite("Beta1A=" + str(beta1a2) + " ")
+            self.serialWrite("Beta2B=" + str(beta2b2) + " ")
+            self.serialWrite("Beta2A=" + str(beta2a2) + " ")
+            self.serialWrite("Beta3B=" + str(beta3b2) + " ")
+            self.serialWrite("Beta3A=" + str(beta3a2) + " ")
+            self.serialWrite("Beta4B=" + str(beta4b2) + " ")
+            self.serialWrite("Beta4A=" + str(beta4a2) + " ")
+            self.serialWrite("AOS=" + str(aos) + " ")
+            self.serialWrite("Voltage1A=" + str(v1a) + " ")
+            self.serialWrite("Voltage2A=" + str(v2a) + " ")
+            self.serialWrite("Voltage3A=" + str(v3a) + " ")
+            self.serialWrite("Voltage4A=" + str(v4a) + " ")
+            self.serialWrite("Voltage1B=" + str(v1b) + " ")
+            self.serialWrite("Voltage2B=" + str(v2b) + " ")
+            self.serialWrite("Voltage3B=" + str(v3b) + " ")
+            self.serialWrite("Voltage4B=" + str(v4b) + " ")
        
         self.eps_screen.ids.psarj_value.text = psarj
         self.eps_screen.ids.ssarj_value.text = ssarj

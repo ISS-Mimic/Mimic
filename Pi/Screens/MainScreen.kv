@@ -47,6 +47,38 @@
                 PopMatrix
             text: ''
             on_release: root.manager.current = 'settings'
+        Button:
+            size_hint: 0.2,0.1
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            text: 'Start BGA'
+            font_size: 30
+            width: 50
+            height: 20
+            on_release: root.startBGA()
+        Button:
+            size_hint: 0.2,0.1
+            pos_hint: {"center_x": 0.7, "center_y": 0.5}
+            text: 'Stop BGA'
+            font_size: 30
+            width: 50
+            height: 20
+            on_release: root.stopBGA()
+        Button:
+            size_hint: 0.2,0.1
+            pos_hint: {"center_x": 0.45, "center_y": 0.3}
+            text: 'Start'
+            font_size: 30
+            width: 50
+            height: 20
+            on_release: root.startproc()
+        Button:
+            size_hint: 0.2,0.1
+            pos_hint: {"center_x": 0.65, "center_y": 0.3}
+            text: 'Stop'
+            font_size: 30
+            width: 50
+            height: 20
+            on_release: root.killproc()
         BoxLayout:
             size_hint_y: None
             Button:
@@ -63,7 +95,7 @@
                 height: 20
                 on_release: root.manager.current = 'calibrate'
                 on_release: my_button.disabled = False
-            MyButton:
+            Button:
                 id: my_button
                 text: 'Mimic'
                 disabled: False

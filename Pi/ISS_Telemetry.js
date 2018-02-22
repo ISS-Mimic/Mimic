@@ -9,6 +9,7 @@ var sqlite3 = require("sqlite3");
 //var db = new sqlite3.Database("./iss_telemetry.db", sqlite3.OPEN_READWRITE, db_err);
 var db = new sqlite3.Database("/dev/shm/iss_telemetry.db", sqlite3.OPEN_CREATE | sqlite3.OPEN_READWRITE);
 db.serialize(function() {
+db.run("pragma journal_mode=wal");
 db.run("CREATE TABLE IF NOT EXISTS telemetry (`Label` TEXT PRIMARY KEY, `Timestamp` TEXT, `Value` TEXT, `ID` TEXT, `dbID` NUMERIC )");
 db.run("INSERT OR IGNORE INTO telemetry VALUES('psarj','1216.72738833328','233.039337158203','S0000004',1)");
 db.run("INSERT OR IGNORE INTO telemetry VALUES('ssarj','1216.72738833328','126.911819458008','S0000003',2)");
