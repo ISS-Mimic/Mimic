@@ -623,6 +623,7 @@ class MainApp(App):
             startup = False
             #self.checkCrew(60)
         #Clock.schedule_interval(self.getTLE, 3600)
+        #Clock.schedule_once(self.getTLE)
         return root
 
     def kill():
@@ -996,14 +997,15 @@ class MainApp(App):
         
     #this code based on code from natronics open-notify.org
     def getTLE(self, *args):
-        try:
-            self.fetchTLE(self, *args)
-        except:
-            errorlog.write(str(datetime.utcnow()))
-            errorlog.write(' ')
-            errorlog.write("TLE Fetch - URL Error")
-            errorlog.write('\n')
-            print "TLE Fetch - URL Error"
+        self.fetchTLE(self, *args)
+        #try:
+        #    self.fetchTLE(self, *args)
+        #except:
+        #    errorlog.write(str(datetime.utcnow()))
+        #    errorlog.write(' ')
+        #    errorlog.write("TLE Fetch - URL Error")
+        #    errorlog.write('\n')
+        #    print "TLE Fetch - URL Error"
 
     def fetchTLE(self, *args):
         TLE = BeautifulSoup(urllib2.urlopen(nasaissurl), 'html.parser')
@@ -1731,34 +1733,34 @@ class MainApp(App):
             self.serialWrite("Voltage3B=" + str(v3b) + " ")
             self.serialWrite("Voltage4B=" + str(v4b) + " ")
        
-        self.eps_screen.ids.psarj_value.text = psarj
-        self.eps_screen.ids.ssarj_value.text = ssarj
-        self.tcs_screen.ids.ptrrj_value.text = ptrrj
-        self.tcs_screen.ids.strrj_value.text = strrj
-        self.eps_screen.ids.beta1b_value.text = beta1b
-        self.eps_screen.ids.beta1a_value.text = beta1a
-        self.eps_screen.ids.beta2b_value.text = beta2b
-        self.eps_screen.ids.beta2a_value.text = beta2a
-        self.eps_screen.ids.beta3b_value.text = beta3b
-        self.eps_screen.ids.beta3a_value.text = beta3a
-        self.eps_screen.ids.beta4b_value.text = beta4b
-        self.eps_screen.ids.beta4a_value.text = beta4a
-        self.eps_screen.ids.c1a_value.text = c1a
-        self.eps_screen.ids.v1a_value.text = v1a
-        self.eps_screen.ids.c1b_value.text = c1b
-        self.eps_screen.ids.v1b_value.text = v1b
-        self.eps_screen.ids.c2a_value.text = c2a
-        self.eps_screen.ids.v2a_value.text = v2a
-        self.eps_screen.ids.c2b_value.text = c2b
-        self.eps_screen.ids.v2b_value.text = v2b
-        self.eps_screen.ids.c3a_value.text = c3a
-        self.eps_screen.ids.v3a_value.text = v3a
-        self.eps_screen.ids.c3b_value.text = c3b
-        self.eps_screen.ids.v3b_value.text = v3b
-        self.eps_screen.ids.c4a_value.text = c4a
-        self.eps_screen.ids.v4a_value.text = v4a
-        self.eps_screen.ids.c4b_value.text = c4b
-        self.eps_screen.ids.v4b_value.text = v4b
+        self.eps_screen.ids.psarj_value.text = psarj + "deg" 
+        self.eps_screen.ids.ssarj_value.text = ssarj + "deg"
+        self.tcs_screen.ids.ptrrj_value.text = ptrrj + "deg"
+        self.tcs_screen.ids.strrj_value.text = strrj + "deg"
+        self.eps_screen.ids.beta1b_value.text = beta1b + "deg"
+        self.eps_screen.ids.beta1a_value.text = beta1a + "deg"
+        self.eps_screen.ids.beta2b_value.text = beta2b + "deg"
+        self.eps_screen.ids.beta2a_value.text = beta2a + "deg"
+        self.eps_screen.ids.beta3b_value.text = beta3b + "deg"
+        self.eps_screen.ids.beta3a_value.text = beta3a + "deg"
+        self.eps_screen.ids.beta4b_value.text = beta4b + "deg"
+        self.eps_screen.ids.beta4a_value.text = beta4a + "deg"
+        self.eps_screen.ids.c1a_value.text = c1a + "A"
+        self.eps_screen.ids.v1a_value.text = v1a + "V"
+        self.eps_screen.ids.c1b_value.text = c1b + "A"
+        self.eps_screen.ids.v1b_value.text = v1b + "V"
+        self.eps_screen.ids.c2a_value.text = c2a + "A"
+        self.eps_screen.ids.v2a_value.text = v2a + "V"
+        self.eps_screen.ids.c2b_value.text = c2b + "A"
+        self.eps_screen.ids.v2b_value.text = v2b + "V"
+        self.eps_screen.ids.c3a_value.text = c3a + "A"
+        self.eps_screen.ids.v3a_value.text = v3a + "V"
+        self.eps_screen.ids.c3b_value.text = c3b + "A"
+        self.eps_screen.ids.v3b_value.text = v3b + "V"
+        self.eps_screen.ids.c4a_value.text = c4a + "A"
+        self.eps_screen.ids.v4a_value.text = v4a + "V"
+        self.eps_screen.ids.c4b_value.text = c4b + "A"
+        self.eps_screen.ids.v4b_value.text = v4b + "V"
         self.mimic_screen.ids.altitude_value.text = str(altitude) + " km"
         self.mimic_screen.ids.velocity_value.text = str(velocity) + " m/s"
         self.mimic_screen.ids.stationmass_value.text = str(iss_mass) + " kg"
