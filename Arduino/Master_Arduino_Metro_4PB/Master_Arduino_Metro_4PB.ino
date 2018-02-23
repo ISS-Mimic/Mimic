@@ -1,7 +1,7 @@
 
 // MIMIC!!! MIMIC!!!
 //
-//
+//  This one is for the Arduino connected to 4 Port BGAs
 
 // Prior problems with Mega interrupt limitations led to use of Arduino Due instead.  This board can
 // support hardware interrupts on any digital pin, although pin 13 is avoided since connects to LED.
@@ -39,6 +39,8 @@ Adafruit_DCMotor *myMotorB2A = AFMS.getMotor(1);
 Adafruit_DCMotor *myMotorB4A = AFMS.getMotor(2);
 Adafruit_DCMotor *myMotorB2B = AFMS.getMotor(3);
 Adafruit_DCMotor *myMotorB4B = AFMS.getMotor(4);
+//Adafruit_DCMotor *myMotorPSARJ = AFMS.getMotor(4);
+
 
 
 Encoder myEnc2A(2, 3);
@@ -46,7 +48,9 @@ Encoder myEnc4A(6, 7); //for some reason, these do not register blips if motor m
 //Encoder myEnc4A(A1,A2);// was 0,1
 Encoder myEnc2B(5, 8);
 Encoder myEnc4B(11, 12);
+//Encoder myEncPSARJ(11, 12);
 
+float signflip = -1.0;
 void setup() {
 
   // Attach a servo to pin #10
@@ -72,6 +76,9 @@ void setup() {
 
   myMotorB4B->setSpeed(150);
   myMotorB4B->run(RELEASE);
+
+//  myMotorPSARJ->setSpeed(150);
+//  myMotorPSARJ->run(RELEASE);
 
   // For debugging
   //  pinMode(13, OUTPUT); //LED

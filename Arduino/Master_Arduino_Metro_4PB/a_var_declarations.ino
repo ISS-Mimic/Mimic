@@ -10,8 +10,8 @@ unsigned long mytime;
 
 // ======== B2B PID Vals=====================
 //  PID Constants
-float Kp_B2B = 40; // Proportional Gain of PID
-float Ki_B2B = 5; // Integral Gain of PID
+float Kp_B2B = 20; // Proportional Gain of PID
+float Ki_B2B = 5*0; // Integral Gain of PID
 float Kd_B2B = 10*0; // Derivative Gain of PID
 
 // B2B vars that change every iteration
@@ -30,7 +30,7 @@ int CmdSpeed_B2B=0;
 // ======== B4B PID Vals=====================
 //  PID Constants
 float Kp_B4B = 20; // Proportional Gain of PID
-float Ki_B4B = 5; // Integral Gain of PID
+float Ki_B4B = 0; // Integral Gain of PID
 float Kd_B4B = 0; // Derivative Gain of PID
 
 // B4B vars that change every iteration
@@ -48,9 +48,9 @@ int CmdSpeed_B4B=0;
 
 // ======== B2A PID Vals=====================
 //  PID Constants
-float Kp_B2A = 20; // Proportional Gain of PID
-float Ki_B2A = 0; // Integral Gain of PID
-float Kd_B2A = 0; // Derivative Gain of PID
+float Kp_B2A = 30; // Proportional Gain of PID
+float Ki_B2A = 2; // Integral Gain of PID
+float Kd_B2A = 2; // Derivative Gain of PID
 
 // B2A vars that change every iteration
 int Count_B2A = 0;
@@ -86,7 +86,7 @@ int CmdSpeed_B4A=0;
 
 //// ======== PSARJ PID Vals=====================
 ////  PID Constants
-float Kp_PSARJ = 50; // Proportional Gain of PID
+float Kp_PSARJ = 40; // Proportional Gain of PID
 float Ki_PSARJ = 0; // Integral Gain of PID
 float Kd_PSARJ = 0; // Derivative Gain of PID
 
@@ -140,13 +140,13 @@ double SSARJcheck = 0.00;
 double SSARJstep = 0.00;
 
 double B1B = 30.0;
-double B2B = 30.0;
+double B2B = -30.0;
 double B3B = 30.0;
 double B4B = 30.0;
 double B1A = 30.0;
 double B2A = 30.0;
 double B3A = 30.0;
-double B4A = 30.0;
+double B4A = -30.0;
 double PSARJ = -10.0;
 double SSARJ = 0.0;
 double PTRRJ = -10.0;

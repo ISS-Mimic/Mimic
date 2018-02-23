@@ -16,7 +16,7 @@ int  debug_mode=6;
   // ========= Servo Stuff =============================
   //map(value, fromLow, fromHigh, toLow, toHigh)
      servo1.write(map(PTRRJ, -115,115, 0, 255)); // from +/- 115deg to servo command min and max.
-     servo2.write(map(PTRRJ, -115,115, 0, 255)); // from +/- 115deg to servo command min and max.
+     servo2.write(map(STRRJ, -115,115, 0, 255)); // from +/- 115deg to servo command min and max.
   //servo1.write(PTRRJ+180);
   //servo2.write(PTRRJ+180);
 
@@ -37,9 +37,11 @@ int  debug_mode=6;
   // ================================================================================
 
   Count_B2B = myEnc2B.read(); // Feb08
-  Count_B4B = myEnc4B.read();
-  Count_B2A = myEnc2A.read();
+ 
+   Count_B2A = myEnc2A.read();
   Count_B4A = myEnc4A.read();
+// Count_B4B = myEnc4B.read();
+  Count_PSARJ= myEncPSARJ.read();
   //   Serial.println(currentPosition); //shows you the current position in the serial monitor  // Feb08
 
   // ============== BGA 2A ==========================================================
@@ -186,79 +188,101 @@ int  debug_mode=6;
 
   // ============== BGA 4B ==========================================================
 
-  // 150 motor shaft rotations / gearbox output shaft rotation * 12 encoder counts / motor rotation  /(360 deg per /output rotation) = 150*12/360 = 5 encoder counts per output shaft degree
-  Pos_B4B = float(Count_B4B) / 5;
+//  // 150 motor shaft rotations / gearbox output shaft rotation * 12 encoder counts / motor rotation  /(360 deg per /output rotation) = 150*12/360 = 5 encoder counts per output shaft degree
+//  Pos_B4B = float(Count_B4B) / 5;
+//
+//  PosErr_B4B = B4B - Pos_B4B; // Compute Pos_B4Bition Error
+//  dPosErr_B4B = PosErr_B4B - PosErr_old_B4B;
+//
+//  if (abs(PosErr_B4B) < 0.1) {
+//    PosErr_B4B = 0;
+//    dPosErr_B4B = 0;
+//    PosErr_old_B4B = 0;
+//    IntOld_B4B = 0;
+//    //Serial.println("Small4B Err");
+//  }
+//
+//  dErrDt_B4B = dPosErr_B4B * inverse_delta_t_millis * 0.001; // For Derivative
+//  IntNow_B4B = IntOld_B4B + PosErr_B4B * inverse_delta_t_millis * 0.001; // For Integrator
+//  IntOld_B4B = IntNow_B4B;
+//
+//  // Integrator reset when error sign changes
+//  if (PosErr_old_B4B * PosErr_B4B <= 0) { // sign on error has changed or is zero
+//    IntNow_B4B = 0;
+//    IntOld_B4B = 0;
+//  }
+//  PosErr_old_B4B = PosErr_B4B; // For use on the next iteration
+//
+//  // Calculate motor speed setpoint based on PID constants and computed params for this iteration.
+//  tmpSpeed_B4B = Kp_B4B * PosErr_B4B + Kd_B4B * (dErrDt_B4B) + Ki_B4B * IntNow_B4B;
+//  // Deadband seems to be about 40 (for 5V input to motor board);
+//  CmdSpeed_B4B = abs(tmpSpeed_B4B);
+//  if ((CmdSpeed_B4B < 40) && (CmdSpeed_B4B > 5)) { // We want a dead space at 5 counts, but want it to move for larger vals.
+//    CmdSpeed_B4B = 40;
+//  }
+//
+//  CmdSpeed_B4B = max(min(CmdSpeed_B4B, 250), 0); // At least 0, at most 250.  Update as needed per motor.
+//
+//  // Set motor speed
+//  if (tmpSpeed_B4B > 0) {
+//    myMotorB4B->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
+//  }
+//  else {
+//    myMotorB4B->run(BACKWARD);
+//  }
+//  myMotorB4B->setSpeed(CmdSpeed_B4B);// + 20);
+  //=====================================================================================
 
-  PosErr_B4B = B4B - Pos_B4B; // Compute Pos_B4Bition Error
-  dPosErr_B4B = PosErr_B4B - PosErr_old_B4B;
+//  // 150 motor shaft rotations / gearbox output shaft rotation * 12 encoder counts / motor rotation  /(360 deg per /output rotation) = 150*12/360 = 5 encoder counts per output shaft degree
+//Pinion has 12 teeth, printed bull gear has 45
+//  Pos_PSARJ = float(Count_PSARJ)*(12/45) / 5;
+  Pos_PSARJ = float(Count_PSARJ) / 5;
 
-  if (abs(PosErr_B4B) < 0.1) {
-    PosErr_B4B = 0;
-    dPosErr_B4B = 0;
-    PosErr_old_B4B = 0;
-    IntOld_B4B = 0;
+  PosErr_PSARJ = PSARJ - Pos_PSARJ; // Compute Pos_PSARJition Error
+  dPosErr_PSARJ = PosErr_PSARJ - PosErr_old_PSARJ;
+
+  if (abs(PosErr_PSARJ) < 0.1) {
+    PosErr_PSARJ = 0;
+    dPosErr_PSARJ = 0;
+    PosErr_old_PSARJ = 0;
+    IntOld_PSARJ = 0;
     //Serial.println("Small4B Err");
   }
 
-  dErrDt_B4B = dPosErr_B4B * inverse_delta_t_millis * 0.001; // For Derivative
-  IntNow_B4B = IntOld_B4B + PosErr_B4B * inverse_delta_t_millis * 0.001; // For Integrator
-  IntOld_B4B = IntNow_B4B;
+  dErrDt_PSARJ = dPosErr_PSARJ * inverse_delta_t_millis * 0.001; // For Derivative
+  IntNow_PSARJ = IntOld_PSARJ + PosErr_PSARJ * inverse_delta_t_millis * 0.001; // For Integrator
+  IntOld_PSARJ = IntNow_PSARJ;
 
   // Integrator reset when error sign changes
-  if (PosErr_old_B4B * PosErr_B4B <= 0) { // sign on error has changed or is zero
-    IntNow_B4B = 0;
-    IntOld_B4B = 0;
+  if (PosErr_old_PSARJ * PosErr_PSARJ <= 0) { // sign on error has changed or is zero
+    IntNow_PSARJ = 0;
+    IntOld_PSARJ = 0;
   }
-  PosErr_old_B4B = PosErr_B4B; // For use on the next iteration
+  PosErr_old_PSARJ = PosErr_PSARJ; // For use on the next iteration
 
   // Calculate motor speed setpoint based on PID constants and computed params for this iteration.
-  tmpSpeed_B4B = Kp_B4B * PosErr_B4B + Kd_B4B * (dErrDt_B4B) + Ki_B4B * IntNow_B4B;
+  tmpSpeed_PSARJ = Kp_PSARJ * PosErr_PSARJ + Kd_PSARJ * (dErrDt_PSARJ) + Ki_PSARJ * IntNow_PSARJ;
+  tmpSpeed_PSARJ = -85;
+  
   // Deadband seems to be about 40 (for 5V input to motor board);
-  CmdSpeed_B4B = abs(tmpSpeed_B4B);
-  if ((CmdSpeed_B4B < 40) && (CmdSpeed_B4B > 5)) { // We want a dead space at 5 counts, but want it to move for larger vals.
-    CmdSpeed_B4B = 40;
+  CmdSpeed_PSARJ = abs(tmpSpeed_PSARJ);
+  if ((CmdSpeed_PSARJ < 40) && (CmdSpeed_PSARJ > 5)) { // We want a dead space at 5 counts, but want it to move for larger vals.
+    CmdSpeed_PSARJ = 40;
   }
 
-  CmdSpeed_B4B = max(min(CmdSpeed_B4B, 250), 0); // At least 0, at most 250.  Update as needed per motor.
+CmdSpeed_PSARJ = max(min(CmdSpeed_PSARJ, 250), 0); // At least 0, at most 250.  Update as needed per motor.
+
+
 
   // Set motor speed
-  if (tmpSpeed_B4B > 0) {
-    myMotorB4B->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
+  if (tmpSpeed_PSARJ > 0) {
+    myMotorPSARJ->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
   }
   else {
-    myMotorB4B->run(BACKWARD);
+    myMotorPSARJ->run(BACKWARD);
   }
-  myMotorB4B->setSpeed(CmdSpeed_B4B);// + 20);
+  myMotorPSARJ->setSpeed(CmdSpeed_PSARJ);// + 20);
   //=====================================================================================
-
-  //  // ============== PSARJ    ============================================================
-  //  Pos_PSARJ = float(Count_PSARJ) / 2.5; // / 25; // 150:1 gear ratio, 6 encoder counts per motor shaft rotation 150/6=25;
-  //
-  //  PosErr_PSARJ = PSARJ - Pos_PSARJ; // Compute Pos_PSARJition Error
-  //  dPosErr_PSARJ = PosErr_PSARJ - PosErr_old_PSARJ;
-  //  dErrDt_PSARJ = dPosErr_PSARJ * inverse_delta_t_millis * 0.001; // For Derivative
-  //  IntNow_PSARJ = IntOld_PSARJ + PosErr_PSARJ * inverse_delta_t_millis * 0.001; // For Integrator
-  //  IntOld_PSARJ = IntNow_PSARJ;
-  //  PosErr_old_PSARJ = PosErr_PSARJ; // For use on the next iteration
-  //  // Integrator reset when error sign changes
-  //  if (PosErr_old_PSARJ * PosErr_PSARJ < 0) { // sign on error has changed
-  //    IntNow_PSARJ = 0;
-  //    IntOld_PSARJ = 0;
-  //  }
-  //
-  //  // Calculate motor speed setpoint based on PID constants and computed params for this iteration.
-  //  tmpSpeed_PSARJ = Kp_PSARJ * PosErr_PSARJ + Kd_PSARJ * (dErrDt_PSARJ) + Ki_PSARJ * IntNow_PSARJ;
-  //  CmdSpeed_PSARJ = map(abs(tmpSpeed_PSARJ), 2, 250, 2, 250); // Deadband seems to be about 40 (for 5V input to motor board);
-  //  CmdSpeed_PSARJ = max(min(CmdSpeed_PSARJ, 150), 0); // At least 10, at most 250.  Update as needed per motor.
-  //
-  //  // Set motor speed
-  //  if (tmpSpeed_PSARJ < 0) {
-  //    myMotorPSARJ->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
-  //  }
-  //  else {
-  //    myMotorPSARJ->run(BACKWARD);
-  //  }
-  //  myMotorPSARJ->setSpeed(CmdSpeed_PSARJ);// + 20);
   //  //====================================================================================
 
   millisChPt2 = millis() - LoopStartMillis;
