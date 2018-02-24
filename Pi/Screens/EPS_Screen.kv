@@ -57,13 +57,6 @@
             anim_loop: 0
             keep_ratio: False
             pos_hint: {"center_x": 0.68, "center_y": 0.8}
-##        Label:
-##            id: beta1a_label
-##            pos_hint: {"center_x": 0.57, "center_y": 0.78}
-##            text: 'Angle:'
-##            markup: True
-##            color: 1,1,1
-##            font_size: 20
         Label:
             id: beta1a_value
             pos_hint: {"center_x": 0.57, "center_y": 0.78}
@@ -71,13 +64,6 @@
             markup: True
             color: 1,1,1
             font_size: 20
-##        Label:
-##            id: c1a_label
-##            pos_hint: {"center_x": 0.57, "center_y": 0.71}
-##            text: 'Current:'
-##            markup: True
-##            color: 1,1,1
-##            font_size: 20
         Label:
             id: c1a_value
             pos_hint: {"center_x": 0.57, "center_y": 0.71}
@@ -85,13 +71,6 @@
             markup: True
             color: 1,1,1
             font_size: 20
-##        Label:
-##            id: v1a_label
-##            pos_hint: {"center_x": 0.57, "center_y": 0.64}
-##            text: 'Voltage:'
-##            markup: True
-##            color: 1,1,1
-##            font_size: 20
         Label:
             id: v1a_value
             pos_hint: {"center_x": 0.57, "center_y": 0.64}
@@ -101,7 +80,7 @@
             font_size: 20
 ##----------------------------------------------------------------------        
         Label:
-            pos_hint: {"center_x": 0.93, "center_y": 0.38}
+            pos_hint: {"center_x": 0.93, "center_y": 0.45}
             text: '1B'
             markup: True
             color: 1,0,1
@@ -126,51 +105,30 @@
                     origin: self.center
             canvas.after:
                 PopMatrix
-##        Label:
-##            id: beta1b_label
-##            pos_hint: {"center_x": 0.82, "center_y": 0.31}
-##            text: 'Angle:'
-##            markup: True
-##            color: 1,1,1
-##            font_size: 20
         Label:
             id: beta1b_value
+            pos_hint: {"center_x": 0.93, "center_y": 0.38}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Label:
+            id: c1b_value
             pos_hint: {"center_x": 0.93, "center_y": 0.31}
             text: '0.003'
             markup: True
             color: 1,1,1
             font_size: 20
-##        Label:
-##            id: c1b_label
-##            pos_hint: {"center_x": 0.82, "center_y": 0.24}
-##            text: 'Current:'
-##            markup: True
-##            color: 1,1,1
-##            font_size: 20
-        Label:
-            id: c1b_value
-            pos_hint: {"center_x": 0.93, "center_y": 0.24}
-            text: '0.003'
-            markup: True
-            color: 1,1,1
-            font_size: 20
-##        Label:
-##            id: v1b_label
-##            pos_hint: {"center_x": 0.82, "center_y": 0.17}
-##            text: 'Voltage:'
-##            markup: True
-##            color: 1,1,1
-##            font_size: 20
         Label:
             id: v1b_value
-            pos_hint: {"center_x": 0.93, "center_y": 0.17}
+            pos_hint: {"center_x": 0.93, "center_y": 0.24}
             text: '0.003'
             markup: True
             color: 1,1,1
             font_size: 20
 ##----------------------------------------------------------------------        
         Label:
-            pos_hint: {"center_x": 0.43, "center_y": 0.38}
+            pos_hint: {"center_x": 0.43, "center_y": 0.45}
             text: '2A'
             markup: True
             color: 1,0,1
@@ -195,44 +153,23 @@
                     origin: self.center
             canvas.after:
                 PopMatrix
-##        Label:
-##            id: beta2a_label
-##            pos_hint: {"center_x": 0.32, "center_y": 0.31}
-##            text: 'Angle:'
-##            markup: True
-##            color: 1,1,1
-##            font_size: 20
         Label:
             id: beta2a_value
+            pos_hint: {"center_x": 0.43, "center_y": 0.38}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Label:
+            id: c2a_value
             pos_hint: {"center_x": 0.43, "center_y": 0.31}
             text: '0.003'
             markup: True
             color: 1,1,1
             font_size: 20
         Label:
-##            id: c2a_label
-##            pos_hint: {"center_x": 0.32, "center_y": 0.24}
-##            text: 'Current:'
-##            markup: True
-##            color: 1,1,1
-##            font_size: 20
-        Label:
-            id: c2a_value
-            pos_hint: {"center_x": 0.43, "center_y": 0.24}
-            text: '0.003'
-            markup: True
-            color: 1,1,1
-            font_size: 20
-##        Label:
-##            id: v2a_label
-##            pos_hint: {"center_x": 0.32, "center_y": 0.17}
-##            text: 'Voltage:'
-##            markup: True
-##            color: 1,1,1
-##            font_size: 20
-        Label:
             id: v2a_value
-            pos_hint: {"center_x": 0.43, "center_y": 0.17}
+            pos_hint: {"center_x": 0.43, "center_y": 0.24}
             text: '0.003'
             markup: True
             color: 1,1,1
@@ -254,13 +191,6 @@
             anim_loop: 0
             keep_ratio: False
             pos_hint: {"center_x": 0.17, "center_y": 0.8}
-##        Label:
-##            id: beta2b_label
-##            pos_hint: {"center_x": 0.07, "center_y": 0.78}
-##            text: 'Angle:'
-##            markup: True
-##            color: 1,1,1
-##            font_size: 20
         Label:
             id: beta2b_value
             pos_hint: {"center_x": 0.07, "center_y": 0.78}
@@ -268,13 +198,6 @@
             markup: True
             color: 1,1,1
             font_size: 20
-##        Label:
-##            id: c2b_label
-##            pos_hint: {"center_x": 0.07, "center_y": 0.71}
-##            text: 'Current:'
-##            markup: True
-##            color: 1,1,1
-##            font_size: 20
         Label:
             id: c2b_value
             pos_hint: {"center_x": 0.07, "center_y": 0.71}
@@ -282,13 +205,6 @@
             markup: True
             color: 1,1,1
             font_size: 20
-##        Label:
-##            id: v2b_label
-##            pos_hint: {"center_x": 0.07, "center_y": 0.64}
-##            text: 'Voltage:'
-##            markup: True
-##            color: 1,1,1
-##            font_size: 20
         Label:
             id: v2b_value
             pos_hint: {"center_x": 0.07, "center_y": 0.64}
@@ -298,7 +214,7 @@
             font_size: 20    
 ##----------------------------------------------------------------------        
         Label:
-            pos_hint: {"center_x": 0.57, "center_y": 0.38}
+            pos_hint: {"center_x": 0.57, "center_y": 0.45}
             text: '3A'
             markup: True
             color: 1,0,1
@@ -323,44 +239,23 @@
                     origin: self.center
             canvas.after:
                 PopMatrix
-##        Label:
-##            id: beta3a_label
-##            pos_hint: {"center_x": 0.57, "center_y": 0.31}
-##            text: 'Angle:'
-##            markup: True
-##            color: 1,1,1
-##            font_size: 20
         Label:
             id: beta3a_value
-            pos_hint: {"center_x": 0.57, "center_y": 0.31}
+            pos_hint: {"center_x": 0.57, "center_y": 0.38}
             text: '0.003'
             markup: True
             color: 1,1,1
             font_size: 20   
-##        Label:
-##            id: c3a_label
-##            pos_hint: {"center_x": 0.57, "center_y": 0.24}
-##            text: 'Current:'
-##            markup: True
-##            color: 1,1,1
-##            font_size: 20
         Label:
             id: c3a_value
-            pos_hint: {"center_x": 0.57, "center_y": 0.24}
+            pos_hint: {"center_x": 0.57, "center_y": 0.31}
             text: '0.003'
             markup: True
             color: 1,1,1
             font_size: 20
-##        Label:
-##            id: v3a_label
-##            pos_hint: {"center_x": 0.57, "center_y": 0.17}
-##            text: 'Voltage:'
-##            markup: True
-##            color: 1,1,1
-##            font_size: 20
         Label:
             id: v3a_value
-            pos_hint: {"center_x": 0.57, "center_y": 0.17}
+            pos_hint: {"center_x": 0.57, "center_y": 0.24}
             text: '0.003'
             markup: True
             color: 1,1,1
@@ -382,13 +277,6 @@
             anim_loop: 0
             keep_ratio: False
             pos_hint: {"center_x": 0.83, "center_y": 0.8}
-##        Label:
-##            id: beta3b_label
-##            pos_hint: {"center_x": 0.82, "center_y": 0.78}
-##            text: 'Angle:'
-##            markup: True
-##            color: 1,1,1
-##            font_size: 20
         Label:
             id: beta3b_value
             pos_hint: {"center_x": 0.93, "center_y": 0.78}
@@ -396,13 +284,6 @@
             markup: True
             color: 1,1,1
             font_size: 20
-##        Label:
-##            id: c3b_label
-##            pos_hint: {"center_x": 0.82, "center_y": 0.71}
-##            text: 'Current:'
-##            markup: True
-##            color: 1,1,1
-##            font_size: 20
         Label:
             id: c3b_value
             pos_hint: {"center_x": 0.93, "center_y": 0.71}
@@ -410,13 +291,6 @@
             markup: True
             color: 1,1,1
             font_size: 20
-##        Label:
-##            id: v3b_label
-##            pos_hint: {"center_x": 0.82, "center_y": 0.64}
-##            text: 'Voltage:'
-##            markup: True
-##            color: 1,1,1
-##            font_size: 20
         Label:
             id: v3b_value
             pos_hint: {"center_x": 0.93, "center_y": 0.64}
@@ -441,13 +315,6 @@
             size_hint_x: 1
             keep_ratio: False
             pos_hint: {"center_x": 0.32, "center_y": 0.8}
-##        Label:
-##            id: beta4a_label
-##            pos_hint: {"center_x": 0.32, "center_y": 0.78}
-##            text: 'Angle:'
-##            markup: True
-##            color: 1,1,1
-##            font_size: 20
         Label:
             id: beta4a_value
             pos_hint: {"center_x": 0.43, "center_y": 0.78}
@@ -455,13 +322,6 @@
             markup: True
             color: 1,1,1
             font_size: 20
-##        Label:
-##            id: c4a_label
-##            pos_hint: {"center_x": 0.32, "center_y": 0.71}
-##            text: 'Current:'
-##            markup: True
-##            color: 1,1,1
-##            font_size: 20
         Label:
             id: c4a_value
             pos_hint: {"center_x": 0.43, "center_y": 0.71}
@@ -469,13 +329,6 @@
             markup: True
             color: 1,1,1
             font_size: 20
-##        Label:
-##            id: v4a_label
-##            pos_hint: {"center_x": 0.32, "center_y": 0.64}
-##            text: 'Voltage:'
-##            markup: True
-##            color: 1,1,1
-##            font_size: 20
         Label:
             id: v4a_value
             pos_hint: {"center_x": 0.43, "center_y": 0.64}
@@ -485,7 +338,7 @@
             font_size: 20
 ##----------------------------------------------------------------------        
         Label:
-            pos_hint: {"center_x": 0.07, "center_y": 0.38}
+            pos_hint: {"center_x": 0.07, "center_y": 0.45}
             text: '4B'
             markup: True
             color: 1,0,1
@@ -510,44 +363,23 @@
                     origin: self.center
             canvas.after:
                 PopMatrix
-##        Label:
-##            id: beta4b_label
-##            pos_hint: {"center_x": 0.07, "center_y": 0.31}
-##            text: 'Angle:'
-##            markup: True
-##            color: 1,1,1
-##            font_size: 20
         Label:
             id: beta4b_value
+            pos_hint: {"center_x": 0.07, "center_y": 0.38}
+            text: '0.003'
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Label:
+            id: c4b_value
             pos_hint: {"center_x": 0.07, "center_y": 0.31}
             text: '0.003'
             markup: True
             color: 1,1,1
             font_size: 20
-##        Label:
-##            id: c4b_label
-##            pos_hint: {"center_x": 0.07, "center_y": 0.24}
-##            text: 'Current:'
-##            markup: True
-##            color: 1,1,1
-##            font_size: 20
-        Label:
-            id: c4b_value
-            pos_hint: {"center_x": 0.07, "center_y": 0.24}
-            text: '0.003'
-            markup: True
-            color: 1,1,1
-            font_size: 20
-##        Label:
-##            id: v4b_label
-##            pos_hint: {"center_x": 0.07, "center_y": 0.17}
-##            text: 'Voltage:'
-##            markup: True
-##            color: 1,1,1
-##            font_size: 20
         Label:
             id: v4b_value
-            pos_hint: {"center_x": 0.07, "center_y": 0.17}
+            pos_hint: {"center_x": 0.07, "center_y": 0.24}
             text: '0.003'
             markup: True
             color: 1,1,1
