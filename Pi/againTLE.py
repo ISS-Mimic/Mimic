@@ -8,6 +8,8 @@ soup = BeautifulSoup(urllib2.urlopen(nasaissurl), 'html.parser')
 body = soup.find_all("pre")
 index = 0
 firstTLE = False
+
+results = []
 for tag in body:
     if "ISS" in tag.text:
-        print tag.text
+        results
