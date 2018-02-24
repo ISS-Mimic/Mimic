@@ -4,8 +4,9 @@ import urllib2
 from bs4 import BeautifulSoup
 from calendar import timegm
 from datetime import datetime
-#import reverse_geocode #test1uncomment
+import reverse_geocode #test1uncomment
 import sys
+import ephem
 import os
 import subprocess
 import json
@@ -87,11 +88,6 @@ errorlog = open('./Logs/errorlog.txt','w')
 mimiclog = open('./Logs/mimiclog.txt','w')
 locationlog = open('./Logs/locationlog.txt','a')
 
-iss_crew_url = 'http://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'        
-nasaissurl = 'http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html'
-#req = urllib2.Request("http://api.open-notify.org/iss-now.json")
-ISS_Location_URL = "http://api.open-notify.org/iss-now.json"
-TLE_req = urllib2.Request("http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html")
 
 #-------------------------Look for a connected arduino-----------------------------------
 SerialConnection = False
@@ -310,6 +306,15 @@ depress1 = False
 depress2 = False
 leakhold = False
 repress = False
+
+year = datetime.today().year
+yearshort = str(year)[2:]
+line1 = "1 25544U 98067A   "+yearshort+"054.53022634  .00002085  00000-0  38716-4 0  9997"
+line2 = "2 25544  51.6413 225.3169 0003311 126.1963 312.9849 15.54138274100845"
+#print line1
+#print line2
+
+tle_rec = ephem.readtle("ISS (ZARYA)",str(line1),str(line2))
 
 EVA_picture_urls = []
 urlindex = 0
@@ -613,7 +618,7 @@ class MainApp(App):
         Clock.schedule_interval(self.update_labels, 1)
         Clock.schedule_interval(self.deleteURLPictures, 86400)
         Clock.schedule_interval(self.animate3,0.1)
-        Clock.schedule_interval(self.checkLatLon, 5)
+        Clock.schedule_interval(self.orbitUpdate, 5)
         Clock.schedule_interval(self.checkCrew, 3600)
         Clock.schedule_interval(self.checkTwitter, 65) #change back to 65 after testing
         Clock.schedule_interval(self.changePictures, 10)
@@ -622,7 +627,7 @@ class MainApp(App):
         if startup == True:
             startup = False
             #self.checkCrew(60)
-        #Clock.schedule_interval(self.getTLE, 3600)
+        Clock.schedule_interval(self.getTLE, 10)
         #Clock.schedule_once(self.getTLE)
         return root
 
@@ -994,39 +999,60 @@ class MainApp(App):
     def changeManualControlBoolean(self, *args):
         global manualcontrol
         manualcontrol = args[0]
-        
-    #this code based on code from natronics open-notify.org
-    def getTLE(self, *args):
-        self.fetchTLE(self, *args)
-        #try:
-        #    self.fetchTLE(self, *args)
-        #except:
-        #    errorlog.write(str(datetime.utcnow()))
-        #    errorlog.write(' ')
-        #    errorlog.write("TLE Fetch - URL Error")
-        #    errorlog.write('\n')
-        #    print "TLE Fetch - URL Error"
+       
+    def orbitUpdate(self, dt):
+        global overcountry
+        global latitude
+        global longitude
+        global tle_rec
+        tle_rec.compute()
+        latitude = tle_rec.sublat 
+        longitude = tle_rec.sublong
+        latitude = float(str(latitude).split(':')[0]) + float(str(latitude).split(':')[1])/60 + float(str(latitude).split(':')[2])/3600
+        longitude = float(str(longitude).split(':')[0]) + float(str(longitude).split(':')[1])/60 + float(str(longitude).split(':')[2])/3600
+        coordinates = ((latitude,longitude),(latitude,longitude))
+        results = reverse_geocode.search(coordinates)
+        overcountry =  results[0]['country']
+        self.mimic_screen.ids.iss_over_country.text = "The ISS is over " + overcountry
+        #converting lat lon to x,y for map
+        fromLatSpan = 180.0
+        fromLonSpan = 360.0
+        toLatSpan = 0.598
+        toLonSpan = 0.716
+        valueLatScaled = (float(latitude)+90.0)/float(fromLatSpan)
+        valueLonScaled = (float(longitude)+180.0)/float(fromLonSpan)
+        newLat = (0.265) + (valueLatScaled * toLatSpan) 
+        newLon = (0.14) + (valueLonScaled * toLonSpan) 
+        self.orbit_screen.ids.OrbitISStiny.pos_hint = {"center_x": newLon, "center_y": newLat}
+        self.orbit_screen.ids.latitude.text = str("{:.2f}".format(latitude))
+        self.orbit_screen.ids.longitude.text = str("{:.2f}".format(longitude))
 
-    def fetchTLE(self, *args):
-        TLE = BeautifulSoup(urllib2.urlopen(nasaissurl), 'html.parser')
-        WebpageStuff = TLE.find('pre') 
-        TLE_reduced = WebpageStuff.split('TWO LINE MEAN ELEMENT SET')
-        print TLE_reduced
-        #TLE_response = urllib2.urlopen(TLE_req)
-        #TLE_read = TLE_response.read()
-        #TLE_read = TLE_read.split("<PRE>")[1]
-        #TLE_read = TLE_read.split("</PRE>")[0]
-        #TLE_read = TLE_read.split("Vector Time (GMT): ")[1:]
+    def getTLE(self, *args):
+        global tle_rec
+        def process_tag_text(tag_text):
+            firstTLE = True
+            marker = 'TWO LINE MEAN ELEMENT SET'
+            text = iter(tag_text.split('\n'))
+            for line in text:
+                if (marker in line) and firstTLE:
+                    firstTLE = False
+                    next(text)
+                    results.append('\n'.join(
+                        (next(text), next(text), next(text))))
+            return results
         
-         #print TLE_read
-         #print group
-        
-         #for group in TLE_read:
-         #   tle = group.split("TWO LINE MEAN ELEMENT SET")[1]
-         #   tle = tle[8:160]
-         #   lines = tle.split('\n')[0:3]
-         #   print lines
-        
+        soup = BeautifulSoup(urllib2.urlopen('http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html'), 'html.parser')
+        body = soup.find_all("pre")
+        results = []
+        for tag in body:
+            if "ISS" in tag.text:
+                results.extend(process_tag_text(tag.text))
+
+        parsed = str(results[0]).split('\n')
+        line1 = parsed[1]
+        line2 = parsed[2]
+        tle_rec = ephem.readtle("ISS (ZARYA)",str(line1),str(line2))
+                
     def updateCrew(self, dt):
         try:
             self.checkCrew(self, *args)
@@ -1046,6 +1072,7 @@ class MainApp(App):
         global crewmemberdays
         global crewmemberpicture
         global crewmembercountry
+        iss_crew_url = 'http://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'        
         req = urllib2.Request(iss_crew_url, headers={'User-Agent' : "Magic Browser"})
         global ser
         stuff = urllib2.urlopen(req)
@@ -1143,50 +1170,6 @@ class MainApp(App):
         #self.crew_screen.ids.crew12daysonISS.text = crewmemberdays[11]
         #self.crew_screen.ids.crew12image.source = str(crewmemberpicture[11]) 
         
-    def checkLatLon(self, dt):
-        global overcountry
-        global latitude
-        global longitude
-        iss_location_url = "http://api.open-notify.org/iss-now.json"
-        self.mimic_screen.ids.iss_over_country.text = "The ISS is over " + overcountry
-       
-        #converting lat lon to x,y for map
-        fromLatSpan = 180.0
-        fromLonSpan = 360.0
-        toLatSpan = 0.598
-        toLonSpan = 0.716
-        valueLatScaled = (float(latitude)+90.0)/float(fromLatSpan)
-        valueLonScaled = (float(longitude)+180.0)/float(fromLonSpan)
-        newLat = (0.265) + (valueLatScaled * toLatSpan) 
-        newLon = (0.14) + (valueLonScaled * toLonSpan) 
-        self.orbit_screen.ids.OrbitISStiny.pos_hint = {"center_x": newLon, "center_y": newLat}
-        self.orbit_screen.ids.latitude.text = str(latitude)
-        self.orbit_screen.ids.longitude.text = str(longitude)
-        
-        def res(self,*args):
-            global latitude
-            global longitude
-            global overcountry
-            latitude = self.result['iss_position']['latitude']        
-            longitude = self.result['iss_position']['longitude']        
-            coordinates = (latitude,longitude),(latitude,longitude) #sending one pair causes errors so send duplicate cause lol
-            
-            #try:
-            #    print "skip geo"
-            #    #location = reverse_geocode.search(coordinates) #test1uncomment
-            #except:
-            #    print "geopy url error"
-            #else:
-            #    try:
-            #        location[0]['country']
-            #    except:
-            #        print "Water"
-            #        overcountry = "Water"
-            #    else:
-            #        overcountry = str(location[0]['country'])
-            
-        self.request = UrlRequest(iss_location_url, res)
-
     def map_rotation(self, args):
         scalefactor = 0.083333
         scaledValue = float(args)/scalefactor
