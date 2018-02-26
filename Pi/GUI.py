@@ -308,15 +308,6 @@ leakhold = False
 repress = False
 
 TLE_acquired = False
-#year = datetime.today().year
-#yearshort = str(year)[2:]
-#line1 = "1 25544U 98067A   "+yearshort+"054.53022634  .00002085  00000-0  38716-4 0  9997"
-#line2 = "2 25544  51.6413 225.3169 0003311 126.1963 312.9849 15.54138274100845"
-
-#print line1
-#print line2
-
-#tle_rec = ephem.readtle("ISS (ZARYA)",str(line1),str(line2))
 
 EVA_picture_urls = []
 urlindex = 0
@@ -628,14 +619,21 @@ class MainApp(App):
             Clock.schedule_once(self.checkCrew, 10)
         if startup == True:
             startup = False
-            #self.checkCrew(60)
-        Clock.schedule_interval(self.getTLE, 10)
+
+        if TLE_acquired == False:
+            Clock.schedule_once(self.getTLE)
+        Clock.schedule_interval(self.getTLE, 3600)
+        Clock.schedule_interval(self.check_internet, 10)
         #Clock.schedule_once(self.getTLE)
         return root
 
-    def kill():
-        global p
-        p.kill()
+    def check_internet(self, dt):
+        try:
+            urllib2.urlopen('http://www.google.com', timeout=1)
+            print 'True'
+        except:
+            print 'False'
+
 
     def deleteURLPictures(self, dt):
         mimiclog.write(str(datetime.utcnow()))
@@ -1014,6 +1012,7 @@ class MainApp(App):
             coordinates = ((latitude,longitude),(latitude,longitude))
             results = reverse_geocode.search(coordinates)
             overcountry =  results[0]['country']
+            print results
             self.mimic_screen.ids.iss_over_country.text = "The ISS is over " + overcountry
             #converting lat lon to x,y for map
             fromLatSpan = 180.0
@@ -1087,11 +1086,15 @@ class MainApp(App):
             if "ISS" in tag.text:
                 results.extend(process_tag_text(tag.text))
 
-        parsed = str(results[0]).split('\n')
-        line1 = parsed[1]
-        line2 = parsed[2]
-        tle_rec = ephem.readtle("ISS (ZARYA)",str(line1),str(line2))
-        TLE_acquired = True
+        if len(results) > 0:
+            print results
+            parsed = str(results[0]).split('\n')
+            line1 = parsed[1]
+            line2 = parsed[2]
+            tle_rec = ephem.readtle("ISS (ZARYA)",str(line1),str(line2))
+            TLE_acquired = True
+        else:
+            TLE_acquired = False
 
     def updateCrew(self, dt):
         try:
