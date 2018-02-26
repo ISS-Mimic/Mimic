@@ -307,14 +307,16 @@ depress2 = False
 leakhold = False
 repress = False
 
-year = datetime.today().year
-yearshort = str(year)[2:]
-line1 = "1 25544U 98067A   "+yearshort+"054.53022634  .00002085  00000-0  38716-4 0  9997"
-line2 = "2 25544  51.6413 225.3169 0003311 126.1963 312.9849 15.54138274100845"
+TLE_acquired = False
+#year = datetime.today().year
+#yearshort = str(year)[2:]
+#line1 = "1 25544U 98067A   "+yearshort+"054.53022634  .00002085  00000-0  38716-4 0  9997"
+#line2 = "2 25544  51.6413 225.3169 0003311 126.1963 312.9849 15.54138274100845"
+
 #print line1
 #print line2
 
-tle_rec = ephem.readtle("ISS (ZARYA)",str(line1),str(line2))
+#tle_rec = ephem.readtle("ISS (ZARYA)",str(line1),str(line2))
 
 EVA_picture_urls = []
 urlindex = 0
@@ -1001,34 +1003,71 @@ class MainApp(App):
         manualcontrol = args[0]
        
     def orbitUpdate(self, dt):
-        global overcountry
-        global latitude
-        global longitude
-        global tle_rec
-        tle_rec.compute()
-        latitude = tle_rec.sublat 
-        longitude = tle_rec.sublong
-        latitude = float(str(latitude).split(':')[0]) + float(str(latitude).split(':')[1])/60 + float(str(latitude).split(':')[2])/3600
-        longitude = float(str(longitude).split(':')[0]) + float(str(longitude).split(':')[1])/60 + float(str(longitude).split(':')[2])/3600
-        coordinates = ((latitude,longitude),(latitude,longitude))
-        results = reverse_geocode.search(coordinates)
-        overcountry =  results[0]['country']
-        self.mimic_screen.ids.iss_over_country.text = "The ISS is over " + overcountry
-        #converting lat lon to x,y for map
-        fromLatSpan = 180.0
-        fromLonSpan = 360.0
-        toLatSpan = 0.598
-        toLonSpan = 0.716
-        valueLatScaled = (float(latitude)+90.0)/float(fromLatSpan)
-        valueLonScaled = (float(longitude)+180.0)/float(fromLonSpan)
-        newLat = (0.265) + (valueLatScaled * toLatSpan) 
-        newLon = (0.14) + (valueLonScaled * toLonSpan) 
-        self.orbit_screen.ids.OrbitISStiny.pos_hint = {"center_x": newLon, "center_y": newLat}
-        self.orbit_screen.ids.latitude.text = str("{:.2f}".format(latitude))
-        self.orbit_screen.ids.longitude.text = str("{:.2f}".format(longitude))
+        global overcountry, latitude, longitude, tle_rec, line1, line2, TLE_acquired
+        if TLE_acquired:
+            tle_rec.compute()
+            #------------------Latitude/Longitude Stuff---------------------------
+            latitude = tle_rec.sublat 
+            longitude = tle_rec.sublong
+            latitude = float(str(latitude).split(':')[0]) + float(str(latitude).split(':')[1])/60 + float(str(latitude).split(':')[2])/3600
+            longitude = float(str(longitude).split(':')[0]) + float(str(longitude).split(':')[1])/60 + float(str(longitude).split(':')[2])/3600
+            coordinates = ((latitude,longitude),(latitude,longitude))
+            results = reverse_geocode.search(coordinates)
+            overcountry =  results[0]['country']
+            self.mimic_screen.ids.iss_over_country.text = "The ISS is over " + overcountry
+            #converting lat lon to x,y for map
+            fromLatSpan = 180.0
+            fromLonSpan = 360.0
+            toLatSpan = 0.598
+            toLonSpan = 0.716
+            valueLatScaled = (float(latitude)+90.0)/float(fromLatSpan)
+            valueLonScaled = (float(longitude)+180.0)/float(fromLonSpan)
+            newLat = (0.265) + (valueLatScaled * toLatSpan) 
+            newLon = (0.14) + (valueLonScaled * toLonSpan) 
+            self.orbit_screen.ids.OrbitISStiny.pos_hint = {"center_x": newLon, "center_y": newLat}
+            self.orbit_screen.ids.latitude.text = str("{:.2f}".format(latitude))
+            self.orbit_screen.ids.longitude.text = str("{:.2f}".format(longitude))
+            #------------------Orbit Stuff---------------------------
+            now = datetime.utcnow() 
+            mins = (now - now.replace(hour=0,minute=0,second=0,microsecond=0)).total_seconds()
+            orbits_today = math.floor((float(mins)/60)/90)
+            self.orbit_screen.ids.dailyorbit.text = str(int(orbits_today)) #display number of orbits since utc midnight
+            
+            def toYearFraction(date):
+                def sinceEpoch(date): # returns seconds since epoch
+                    return time.mktime(date.timetuple())
+                s = sinceEpoch
+                year = date.year
+                startOfThisYear = datetime(year=year, month=1, day=1)
+                startOfNextYear = datetime(year=year+1, month=1, day=1)
+                yearElapsed = s(date) - s(startOfThisYear)
+                yearDuration = s(startOfNextYear) - s(startOfThisYear)
+                fraction = yearElapsed/yearDuration
+                if float(fraction*365.24) < 100:
+                    current_epoch = str(date.year)[2:] + "0" + str(fraction*365.24)
+                else:
+                    current_epoch = str(date.year)[2:] + str(fraction*365.24)
+                return current_epoch
+
+            time_since_epoch = float(toYearFraction(datetime.utcnow())) - float(line1[22:36])
+            totalorbits = int(line2[68:72]) + 100000 + int(float(time_since_epoch)*24/1.5) #add number of orbits since the tle was generated
+            self.orbit_screen.ids.totalorbits.text = str(totalorbits) #display number of orbits since utc midnight
+            #------------------ISS Pass Detection---------------------------
+            location = ephem.Observer()
+            location.lon         = '-95:21:59' #will next to make these an input option
+            location.lat         = '29:45:43'
+            location.elevation   = 10
+            location.name        = 'location'
+            location.horizon    = '20'
+            location.date = datetime.utcnow()
+            tle_rec.compute(location)
+            nextpassinfo = location.next_pass(tle_rec)
+            self.orbit_screen.ids.iss_next_pass.text = str(nextpassinfo[0]) #display number of orbits since utc midnight
+
+
 
     def getTLE(self, *args):
-        global tle_rec
+        global tle_rec, line1, line2, TLE_acquired
         def process_tag_text(tag_text):
             firstTLE = True
             marker = 'TWO LINE MEAN ELEMENT SET'
@@ -1052,7 +1091,8 @@ class MainApp(App):
         line1 = parsed[1]
         line2 = parsed[2]
         tle_rec = ephem.readtle("ISS (ZARYA)",str(line1),str(line2))
-                
+        TLE_acquired = True
+
     def updateCrew(self, dt):
         try:
             self.checkCrew(self, *args)
