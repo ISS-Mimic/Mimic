@@ -155,7 +155,266 @@ else:
 
 #----------------Open SQLITE3 Database that holds the current ISS Telemetry--------------
 conn = sqlite3.connect('/dev/shm/iss_telemetry.db')
+conn.isolation_level = None
 c = conn.cursor() 
+c.execute("pragma journal_mode=wal");
+c.execute("CREATE TABLE IF NOT EXISTS telemetry (`Label` TEXT PRIMARY KEY, `Timestamp` TEXT, `Value` TEXT, `ID` TEXT, `dbID` NUMERIC )");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('psarj','1216.72738833328','233.039337158203','S0000004',1)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('ssarj','1216.72738833328','126.911819458008','S0000003',2)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('ptrrj','1175.8188055555','-39.9920654296875','S0000002',3)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('strrj','1216.72741666661','25.1238956451416','S0000001',4)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta1b','1216.72669444442','253.663330078125','S6000008',5)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta1a','1216.72669444442','110.802612304688','S4000007',6)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta2b','1216.72724999997','291.62109375','P6000008',7)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta2a','1216.72344388889','345.602416992188','P4000007',8)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta3b','1216.72355444445','194.144897460938','S6000007',9)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta3a','1216.72669444442','249.076538085938','S4000008',10)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta4b','1216.72669444442','69.818115234375','P6000007',11)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta4a','1216.7269722222','14.3975830078125','P4000008',12)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('aos','1216.72733833333','1','AOS',13)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('los','7084.92338888884','0','LOS',14)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('sasa1_elevation','1216.7273047222','101.887496948242','S1000005',15)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('sgant_elevation','1216.72727777772','105.172134399414','Z1000014',16)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('crewlock_pres','1216.65458361109','754.457946777344','AIRLOCK000049',17)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('sgant_xel','1216.72727777772','-38.6938552856445','Z1000015',18)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('sasa1_azimuth','1216.71619333333','185.268753051758','S1000004',19)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('loopb_flowrate','1216.69486111111','4349.26708984375','P1000001',20)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('loopb_pressure','1216.72730527778','2162.86865234375','P1000002',21)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('loopb_temp','1216.72108277778','4.13970804214478','P1000003',22)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('loopa_flowrate','1216.72683361106','3519.21850585938','S1000001',23)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('loopa_pressure','1216.70883222222','2103.71728515625','S1000002',24)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('loopa_temp','1216.72386055556','3.63912987709045','S1000003',25)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('voltage_1a','1216.72469388889','160.576171875','S4000001',26)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('voltage_1b','1216.72480444445','159.49951171875','S6000004',27)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('voltage_2a','1216.72422194441','159.90966796875','P4000001',28)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('voltage_2b','1216.72433249997','152.73193359375','P6000004',29)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('voltage_3a','1216.72469388889','158.78173828125','S4000004',30)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('voltage_3b','1216.72480444445','160.986328125','S6000001',31)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('voltage_4a','1216.72422194441','158.73046875','P4000004',32)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('voltage_4b','1216.71599916663','159.8583984375','P6000001',33)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('current_1a','1216.72597222222','-32.1090566730273','S4000002',34)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('current_1b','1216.72597222222','-65.9772260650065','S6000005',35)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('current_2a','1216.72574972219','-45.60829685216','P4000002',36)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('current_2b','1216.72594388889','-30.1572487651965','P6000005',37)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('current_3a','1216.72597222222','-41.1726404259626','S4000005',38)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('current_3b','1216.72597222222','-35.8874645656566','S6000002',39)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('current_4a','1216.72594388889','-44.8238382407841','P4000005',40)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('current_4b','1216.72594388889','-35.2639276439644','P6000002',41)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('kuband_transmit','1216.7250719444','1','Z1000013',42)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('ptrrj_mode','1161.24824999995','4','S0000006',43)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('strrj_mode','1161.24824999995','4','S0000007',44)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('psarj_mode','1160.65219388889','5','S0000008',45)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('ssarj_mode','1160.65219388889','5','S0000009',46)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('russian_mode','1160.65213861108','7','RUSSEG000001',47)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('iss_mode','1160.65419361108','1','USLAB000086',48)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('iss_mass','1161.24836194442','417501.5625','USLAB000039',49)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('us_gnc_mode','1160.65438777778','5','USLAB000012',50)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('sasa2_elevation','1216.7273047222','101.90625','P1000005',51)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('sasa2_azimuth','1216.71572138886','185.268753051758','P1000004',52)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('sasa2_status','1160.66299888889','1','P1000007',53)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('sasa1_status','1160.66066611111','1','S1000009',54)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('active_sasa','1160.66272111111','1','USLAB000092',55)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('position_x','1216.725805','29.8297033276271','USLAB000032',56)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('position_y','1216.725805','5964.89191167363','USLAB000033',57)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('position_z','1216.725805','-3237.06743854422','USLAB000034',58)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('velocity_x','1216.725805','-5433.68688146446','USLAB000035',59)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('velocity_y','1216.725805','-2551.23487465513','USLAB000036',60)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('velocity_z','1216.725805','-4762.70709805804','USLAB000037',61)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('PSA_EMU1_VOLTS','1216.69152805554','-0.0286679994314909','AIRLOCK000001',62)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('PSA_EMU1_AMPS','1216.69041694442','-0.00489299977198243','AIRLOCK000002',63)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('PSA_EMU2_VOLTS','1216.68263916665','-0.0286679994314909','AIRLOCK000003',64)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('PSA_EMU2_AMPS','1216.69013916665','-0.00489299977198243','AIRLOCK000004',65)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('PSA_IRU_Utility_VOLTS','1216.68238833328','-0.0286679994314909','AIRLOCK000005',66)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('PSA_IRU_Utility_AMPS','1216.7271105555','-0.00489299977198243','AIRLOCK000006',67)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('UIA_EV_1_VOLTS','1216.69177749998','-0.0286679994314909','AIRLOCK000007',68)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('UIA_EV_1_AMPS','1216.6839997222','-0.00489299977198243','AIRLOCK000008',69)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('UIA_EV_2_VOLTS','1216.72705527776','-0.0286679994314909','AIRLOCK000009',70)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('UIA_EV_2_AMPS','1216.69122194442','-0.00489299977198243','AIRLOCK000010',71)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_AL1A4A_A_RPC_01_Depress_Pump_On_Off_Stat','1160.66247166667','0','AIRLOCK000047',72)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_Depress_Pump_Power_Switch','1161.24977777772','0','AIRLOCK000048',73)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_O2_Hi_P_Supply_Vlv_Actual_Posn','1161.24997194442','0','AIRLOCK000050',74)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_O2_Lo_P_Supply_Vlv_Actual_Posn','1161.24997194442','1','AIRLOCK000051',75)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_N2_Supply_Vlv_Actual_Posn','1161.24997194442','1','AIRLOCK000052',76)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_CCAA_State','1161.24994361109','5','AIRLOCK000053',77)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_PCA_Cabin_Pressure','1216.07402833336','752.088439941406','AIRLOCK000054',78)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_O2_Hi_P_Supply_Pressure','1216.72674916665','12801.83984375','AIRLOCK000055',79)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_O2_Lo_P_Supply_Pressure','1216.72388888889','5624.67041015625','AIRLOCK000056',80)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_N2_Supply_Pressure','1216.66397138887','11619.3896484375','AIRLOCK000057',81)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node2_MTL_PPA_Avg_Accum_Qty','1161.2497227778','42.8092460632324','NODE2000001',82)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node2_LTL_PPA_Avg_Accum_Qty','1216.72069444444','33.9924049377441','NODE2000002',83)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_2_CCAA_State','1161.24991694444','5','NODE2000003',84)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node2_LTL_TWMV_Out_Temp','1216.72733333336','10.0628938674927','NODE2000006',85)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node2_MTL_TWMV_Out_Temp','1216.694555','17.1698589324951','NODE2000007',86)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_MCA_ppO2','1215.93880527774','171.485071057186','NODE3000001',87)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_MCA_ppN2','1215.93880527774','566.382082394791','NODE3000002',88)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_MCA_ppCO2','1215.93880527774','3.21665350504667','NODE3000003',89)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_UPA_Current_State','1214.98497222225','32','NODE3000004',90)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_UPA_WSTA_Qty_Ctrl_Pct','1216.18163861109','48','NODE3000005',91)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_WPA_Process_Cmd_Status','1209.33855500003','4','NODE3000006',92)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_WPA_Process_Step','1209.58580666668','4','NODE3000007',93)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_WPA_Waste_Water_Qty_Ctrl','1216.72741805553','13.1700000762939','NODE3000008',94)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_WPA_Water_Storage_Qty_Ctrl','1216.72741805553','82.1500015258789','NODE3000009',95)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_OGA_Process_Cmd_Status','1160.66252694441','1','NODE3000010',96)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_OGA_O2_Production_Rate','1216.72730500003','2.7396981716156','NODE3000011',97)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node3_MTL_TWMV_Out_Temp','1216.69444444444','17.1069641113281','NODE3000012',98)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node3_LTL_TWMV_Out_Temp','1216.59625083334','9.4375','NODE3000013',99)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node3_MTL_PPA_Avg_Accum_Qty','1214.82188833336','78.7650146484375','NODE3000017',100)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_CCAA_State','1161.2465836111','5','NODE3000018',101)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node3_LTL_PPA_Avg_Accum_Qty','1214.23022166669','59.9398651123047','NODE3000019',102)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_2A_PVCU_On_Off_V_Stat','1161.24858444446','1','P4000003',103)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_4A_PVCU_On_Off_V_Stat','1161.24980611112','1','P4000006',104)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_4B_RBI_6_Integ_I','0','0','P6000002',105)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_4B_PVCU_On_Off_V_Stat','1161.25161166668','1','P6000003',106)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_2B_PVCU_On_Off_V_Stat','1161.24980611112','1','P6000006',107)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_KURS1_On','1161.24980527778','0','RUSSEG000002',108)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_KURS2_On','1161.24980527778','0','RUSSEG000003',109)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('SM_ECW_KURS_Fail','1161.24980527778','0','RUSSEG000004',110)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_KURS_Rng','1161.24991749995','96348.265625','RUSSEG000005',111)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_KURS_Vel','1161.24991749995','134.808670043945','RUSSEG000006',112)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('SM_KURS_P_Test_Mode_RS','1161.24980527778','0','RUSSEG000007',113)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('SM_KURS_P_Capture_Signal_RS','1161.24980527778','0','RUSSEG000008',114)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('SM_KURS_P_Target_Acquisition_Signal_RS','1161.24980527778','0','RUSSEG000009',115)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('SM_KURS_P_Functional_Mode_Signal_RS','1161.24980527778','0','RUSSEG000010',116)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('SM_KURS_P_In_Stand_by_Mode_RS','1161.24980527778','0','RUSSEG000011',117)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_Dock_Contact','1161.24977833331','0','RUSSEG000012',118)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_Forward_Port_Engaged','1161.24977833331','1','RUSSEG000013',119)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_Aft_Port_Engaged','1161.24977833331','1','RUSSEG000014',120)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_Nadir_Port_Engaged','1161.24977833331','1','RUSSEG000015',121)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_FGB_Nadir_Port_Engaged','1161.24977833331','1','RUSSEG000016',122)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_UDM_Nadir_Port_Engaged','1161.24977833331','1','RUSSEG000017',123)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_MRM1_Port_Engaged','1161.24977833331','1','RUSSEG000018',124)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_MRM2_Port_Engaged','1161.24977833331','1','RUSSEG000019',125)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_ETOV_Hooks_Closed','1161.24986222221','0','RUSSEG000020',126)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_Act_Att_Ref_Frame','1161.24977833331','1','RUSSEG000021',127)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_RS_Is_Master','1161.24977833331','0','RUSSEG000022',128)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_Ready_For_Indicator','1161.24977833331','0','RUSSEG000023',129)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSProp_SM_Thrstr_Mode_Terminated','1161.24983388888','0','RUSSEG000024',130)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_SUDN_Mode','1160.65194444444','6','RUSSEG000025',131)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('SARJ_Port_Commanded_Position','1216.72741666661','233.195175170898','S0000005',132)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_S01A_C_RPC_01_Ext_1_MDM_On_Off_Stat','1160.6606108333','1','S0000010',133)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_S01A_C_RPC_16_S0_1_MDM_On_Off_Stat','1160.66217666666','1','S0000011',134)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_S02B_C_RPC_01_Ext_2_MDM_On_Off_Stat','1160.6606108333','0','S0000012',135)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_S02B_C_RPC_16_S0_2_MDM_On_Off_Stat','1160.6606108333','1','S0000013',136)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_S11A_C_RPC_03_STR_MDM_On_Off_Stat','1160.66066611111','1','S1000006',137)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_S11A_C_RPC_16_S1_1_MDM_On_Off_Stat','1160.66066611111','1','S1000007',138)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_S12B_B_RPC_05_S1_2_MDM_On_Off_Stat','1160.66069444444','1','S1000008',139)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_1A_PVCU_On_Off_V_Stat','1161.2484738889','1','S4000003',140)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_3A_PVCU_On_Off_V_Stat','1161.24980611112','1','S4000006',141)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_3B_PVCU_On_Off_V_Stat','1161.2484738889','1','S6000003',142)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_1B_PVCU_On_Off_V_Stat','1161.24980611112','1','S6000006',143)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Time of Occurrence','1216.72744333333','4380218418','TIME_000001',144)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Year of Occurrence','1160.65017138885','2018','TIME_000002',145)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_SEQ_CMG1_Online','1161.24816638887','1','USLAB000001',146)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_SEQ_CMG2_Online','1161.24816638887','1','USLAB000002',147)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_SEQ_CMG3_Online','1161.24816638887','1','USLAB000003',148)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_SEQ_CMG4_Online','1161.24816638887','1','USLAB000004',149)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Num_CMGs_Online','1161.24808277773','4','USLAB000005',150)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Unlim_Cntl_Trq_InBody_X','1216.72744388892','-2.45458972872734','USLAB000006',151)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Unlim_Cntl_Trq_InBody_Y','1216.72744388892','4.61879036814499','USLAB000007',152)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Unlim_Cntl_Trq_InBody_Z','1216.72744388892','-2.27159083915615','USLAB000008',153)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_CMG_Mom_Act_Mag','1216.72736222221','2185.16832879028','USLAB000009',154)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_CMG_Mom_Act_Cap_Pct','1216.72736222221','11.193434715271','USLAB000010',155)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Desat_Request_Inh','1161.25058416665','0','USLAB000011',156)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_AD_Selected_Att_Source','1161.24819611112','1','USLAB000013',157)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_AD_Selected_Rate_Source','1161.24819611112','1','USLAB000014',158)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_SD_Selected_State_Source','1161.24850083331','4','USLAB000015',159)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Act_CCDB_Att_Cntl_Type','1161.24808277773','1','USLAB000016',160)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Act_CCDB_Att_Cntl_Ref_Frame','1160.65273222221','0','USLAB000017',161)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_PS_Pointing_LVLH_Att_Quatrn_0','1216.72744416667','0.999212622642517','USLAB000018',162)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_PS_Pointing_LVLH_Att_Quatrn_1','1216.72744416667','0.00867813266813755','USLAB000019',163)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_PS_Pointing_LVLH_Att_Quatrn_2','1216.72744416667','-0.0168247651308775','USLAB000020',164)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_PS_Pointing_LVLH_Att_Quatrn_3','1216.72744416667','-0.0348674207925797','USLAB000021',165)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Att_Error_X','1216.72741777778','0.368115151294135','USLAB000022',166)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Att_Error_Y','1216.72741777778','0.0822624275713228','USLAB000023',167)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Att_Error_Z','1216.72741777778','-0.00235306124983981','USLAB000024',168)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_PS_Pointing_Current_Inert_Rate_Vector_X','1216.72744416667','0.00437836543317244','USLAB000025',169)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_PS_Pointing_Current_Inert_Rate_Vector_Y','1216.72744416667','-0.0643700269413879','USLAB000026',170)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_PS_Pointing_Current_Inert_Rate_Vector_Z','1216.72744416667','0.00107732213344025','USLAB000027',171)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Act_CCDB_AttQuatrn_0_Cmd','1160.65173305551','0.999223709106445','USLAB000028',172)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Act_CCDB_AttQuatrn_1_Cmd','1160.65173305551','0.00549489445984364','USLAB000029',173)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Act_CCDB_AttQuatrn_2_Cmd','1160.65173305551','-0.0176546052098274','USLAB000030',174)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Act_CCDB_AttQuatrn_3_Cmd','1160.65173305551','-0.0347869843244553','USLAB000031',175)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_CMG_Mom_Act_Cap','1216.72466555556','19521.8739049785','USLAB000038',176)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_PS_Solar_Beta_Angle','1216.72409416662','-62.734375','USLAB000040',177)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Loss_Of_CMG_Att_Cntl_Latched_Caution','1161.2498047222','0','USLAB000041',178)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CCS_Loss_of_ISS_Attitude_Control_Warning','1161.24986250003','0','USLAB000042',179)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_GPS1_Operational_Status','1216.72222222222','0','USLAB000043',180)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_GPS2_Operational_Status','1216.32369361109','0','USLAB000044',181)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG1_SpinBrg_Temp1','1216.72562749995','27.6041679382324','USLAB000045',182)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG2_SpinBrg_Temp1','1216.72573805551','22.6085071563721','USLAB000046',183)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG3_SpinBrg_Temp1','1216.72237777776','34.7960090637207','USLAB000047',184)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG4_SpinBrg_Temp1','1216.72579333332','34.8828163146973','USLAB000048',185)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG1_SpinBrg_Temp2','1216.7223211111','26.1024322509766','USLAB000049',186)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG2_SpinBrg_Temp2','1216.72573805551','17.3784732818604','USLAB000050',187)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG3_SpinBrg_Temp2','1216.52016749998','45.776912689209','USLAB000051',188)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG4_SpinBrg_Temp2','1216.72579333332','33.589412689209','USLAB000052',189)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_MCA_ppO2','1161.24661055558','156.316830573616','USLAB000053',190)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_MCA_ppN2','1161.24661055558','574.227483380585','USLAB000054',191)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_MCA_ppCO2','1160.65574972219','2.2482170546557','USLAB000055',192)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_LTL_PPA_Avg_Accum_Qty','1215.30244388892','79.7446594238281','USLAB000056',193)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_MTL_PPA_Avg_Accum_Qty','1191.26744388892','80.2742004394531','USLAB000057',194)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_PCA_Cabin_Pressure','1216.52375055558','751.785461425781','USLAB000058',195)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB1P6_CCAA_In_T1','1216.71502694441','23.3861961364746','USLAB000059',196)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_MTL_Regen_TWMV_Out_Temp','1216.68211083333','17.2327518463135','USLAB000060',197)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_LTL_TWMV_Out_Temp','1216.70669361108','9.0625','USLAB000061',198)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_VRS_Vent_Vlv_Posn_Raw','1185.75786055558','1','USLAB000062',199)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_VES_Vent_Vlv_Posn_Raw','1185.70063833336','1','USLAB000063',200)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB1P6_CCAA_State','1161.2465836111','5','USLAB000064',201)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB1S6_CCAA_State','1161.2465836111','4','USLAB000065',202)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD11B_A_RPC_07_CC_1_MDM_On_Off_Stat','1160.66283305552','1','USLAB000066',203)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD52B_A_RPC_03_CC_2_MDM_On_Off_Stat','1160.66283305552','1','USLAB000067',204)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA1A4A_E_RPC_01_CC_3_MDM_On_Off_Stat','1160.66283305552','1','USLAB000068',205)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD11B_A_RPC_09_Int_1_MDM_On_Off_Stat','1160.66283305552','0','USLAB000069',206)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD52B_A_RPC_04_Int_2_MDM_On_Off_Stat','1160.66283305552','1','USLAB000070',207)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD11B_A_RPC_11_PL_1_MDM_On_Off_Stat','1160.66283305552','1','USLAB000071',208)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD22B_A_RPC_01_PL_2_MDM_On_Off_Stat','1160.66283305552','1','USLAB000072',209)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA1B_B_RPC_14_GNC_1_MDM_On_Off_Stat','1160.65444444444','1','USLAB000073',210)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA2B_E_RPC_03_GNC_2_MDM_On_Off_Stat','1160.65447138886','1','USLAB000074',211)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD11B_A_RPC_08_PMCU_1_MDM_On_Off_Stat','1160.66283305552','1','USLAB000075',212)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD52B_A_RPC_01_PMCU_2_MDM_On_Off_Stat','1160.66283305552','0','USLAB000076',213)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA1B_B_RPC_09_LAB_1_MDM_On_Off_Stat','1160.66277777778','1','USLAB000077',214)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA2B_E_RPC_04_LAB_2_MDM_On_Off_Stat','1160.66280472219','1','USLAB000078',215)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA2B_E_RPC_13_LAB_3_MDM_On_Off_Stat','1160.66280472219','1','USLAB000079',216)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA1B_D_RPC_01_LAB_FSEGF_Sys_Pwr_1_On_Off_Stat','1160.66280472219','0','USLAB000080',217)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_AttMnvr_In_Progress','1160.65958333333','0','USLAB000081',218)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Prim_CCS_MDM_Std_Cmd_Accept_Cnt','1216.693305','4089','USLAB000082',219)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Prim_CCS_MDM_Data_Load_Cmd_Accept_Cnt','1216.05608333336','28711','USLAB000083',220)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Coarse_Time','1216.72722222222','1203093836','USLAB000084',221)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Fine_Time','1216.72747166667','0.59765625','USLAB000085',222)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Prim_CCS_MDM_PCS_Cnct_Cnt','1171.44763999999','7','USLAB000087',223)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Ku_HRFM_VBSP_1_Activity_Indicator','1161.24988833328','1','USLAB000088',224)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Ku_HRFM_VBSP_2_Activity_Indicator','1161.24988833328','1','USLAB000089',225)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Ku_HRFM_VBSP_3_Activity_Indicator','1161.24988833328','1','USLAB000090',226)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Ku_HRFM_VBSP_4_Activity_Indicator','1161.24988833328','1','USLAB000091',227)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Audio_IAC1_Mode_Indication','1161.24972305556','1','USLAB000093',228)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Audio_IAC2_Mode_Indication','1161.24972333332','1','USLAB000094',229)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('VDS_Destination_9_Source_ID','1166.30116777778','19','USLAB000095',230)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('VDS_Destination_13_Source_ID','1161.24977888889','28','USLAB000096',231)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('VDS_Destination_14_Source_ID','1161.24977888889','19','USLAB000097',232)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('VDS_Destination_29_Source_ID','1161.24977888889','0','USLAB000098',233)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD52B_A_RPC_08_UHF_SSSR_1_On_Off_Stat','1160.66283305552','0','USLAB000099',234)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA1B_H_RPC_04_UHF_SSSR_2_On_Off_Stat','1170.84539000001','0','USLAB000100',235)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('UHF_Frame_Sync','1170.83724944439','0','USLAB000101',236)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_SD_Selected_State_Time_Tag','1216.725805','1203093820.00567','USLAB000102',237)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG1_IG_Vibration','1216.68952833335','0','Z1000001',238)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG2_IG_Vibration','1216.68958500001','0.006805419921875','Z1000002',239)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG3_IG_Vibration','1216.68961194442','0.005828857421875','Z1000003',240)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG4_IG_Vibration','1216.68688944446','0.004364013671875','Z1000004',241)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG1_SpinMtr_Current','1216.6867788889','0.63671875','Z1000005',242)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG2_SpinMtr_Current','1216.68961194442','0.5029296875','Z1000006',243)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG3_SpinMtr_Current','1216.68964027776','1.0947265625','Z1000007',244)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG4_SpinMtr_Current','1216.68691777779','0.9013671875','Z1000008',245)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG1_Current_Wheel_Speed','1216.7223211111','6601','Z1000009',246)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG2_Current_Wheel_Speed','1216.72573805551','6601','Z1000010',247)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG3_Current_Wheel_Speed','1216.7273886111','6601','Z1000011',248)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG4_Current_Wheel_Speed','1216.72579333332','6600','Z1000012',249)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('eva_crew_1','0','crew1','0',250)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('eva_crew_2','0','crew2','0',251)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('us_eva_#','0','43','0',252)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('rs_eva_#','0','43','0',253)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('last_us_eva_duration','0','450','0',254)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('last_rs_eva_duration','0','450','0',255)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer','0','Subscribed','0',0)");
 
 #----------------------------------Variables---------------------------------------------
 LS_Subscription = False
@@ -335,15 +594,12 @@ class MainScreen(Screen):
     def killproc(*args):
         global p
         global p2
-        #os.system('rm /dev/shm/iss_telemetry.db')
         try:
             p.kill()
             p2.kill()
         except:
             print "no process"
-        else:
-            p.kill()
-            p2.kill()
+        os.system('rm /dev/shm/iss_telemetry.db')
 
 class CalibrateScreen(Screen):
     def serialWrite(self, *args):
@@ -618,12 +874,12 @@ class MainApp(App):
         Clock.schedule_interval(self.checkCrew, 3600)
         Clock.schedule_interval(self.checkTwitter, 65) #change back to 65 after testing
         Clock.schedule_interval(self.changePictures, 10)
-        if crewjsonsuccess == False: #check crew every 10s until success then once per hour
+        if internet == True and crewjsonsuccess == False: #check crew every 10s until success then once per hour
             Clock.schedule_once(self.checkCrew, 10)
         if startup == True:
             startup = False
 
-        if TLE_acquired == False:
+        if internet == True and TLE_acquired == False:
             Clock.schedule_once(self.getTLE)
         Clock.schedule_interval(self.getTLE, 3600)
         Clock.schedule_interval(self.check_internet, 10)
@@ -632,12 +888,28 @@ class MainApp(App):
 
     def check_internet(self, dt):
         global internet
-        try:
-            urllib2.urlopen('http://www.google.com', timeout=1)
+
+        def on_success(req, result):
+            global internet
+            #print "success"
             internet = True
-        except:
+
+        def on_redirect(req, result):
+            global internet
+            #print "redirect"
+            internet = True
+
+        def on_failure(req, result):
+            global internet
+            #print "failure"
             internet = False
 
+        def on_error(req, result):
+            global internet
+            #print "error"
+            internet = False
+
+        req = UrlRequest("http://google.com", on_success, on_redirect, on_failure, on_error, timeout=1)
 
     def deleteURLPictures(self, dt):
         mimiclog.write(str(datetime.utcnow()))
@@ -1014,7 +1286,7 @@ class MainApp(App):
             latitude = float(str(latitude).split(':')[0]) + float(str(latitude).split(':')[1])/60 + float(str(latitude).split(':')[2])/3600
             longitude = float(str(longitude).split(':')[0]) + float(str(longitude).split(':')[1])/60 + float(str(longitude).split(':')[2])/3600
             coordinates = ((latitude,longitude),(latitude,longitude))
-            results = reverse_geocode.search(coordinates)
+            #results = reverse_geocode.search(coordinates)
             overcountry =  results[0]['country']
             self.mimic_screen.ids.iss_over_country.text = "The ISS is over " + overcountry
             #converting lat lon to x,y for map
@@ -1110,47 +1382,50 @@ class MainApp(App):
     
     def checkCrew(self, dt):
         #crew_response = urllib2.urlopen(crew_req)
-        global isscrew    
-        global crewmember 
-        global crewmemberbio
-        global crewmembertitle
-        global crewmemberdays
-        global crewmemberpicture
-        global crewmembercountry
-        iss_crew_url = 'http://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'        
-        req = urllib2.Request(iss_crew_url, headers={'User-Agent' : "Magic Browser"})
-        global ser
-        stuff = urllib2.urlopen(req)
-        now = datetime.now()
-        if (stuff.info().getsubtype()=='json'):
-            mimiclog.write(str(datetime.utcnow()))
-            mimiclog.write(' ')
-            mimiclog.write("Crew Check - JSON Success")
-            mimiclog.write('\n')
-            crewjsonsuccess = True
-            data = json.load(stuff)
-            number_of_space = int(data['number'])
-            for num in range(1,number_of_space+1):
-                if(str(data['people'][num-1]['location']) == str("International Space Station")):
-                    crewmember[isscrew] = str(data['people'][num-1]['name'])
-                    crewmemberbio[isscrew] = (data['people'][num-1]['bio'])
-                    crewmembertitle[isscrew] = str(data['people'][num-1]['title'])
-                    datetime_object = datetime.strptime(str(data['people'][num-1]['launchdate']),'%Y-%m-%d')
-                    previousdays = int(data['people'][num-1]['careerdays'])
-                    totaldaysinspace = str(now-datetime_object)
-                    d_index = totaldaysinspace.index('d')
-                    crewmemberdays[isscrew] = str(int(totaldaysinspace[:d_index])+previousdays)+" days in space"
-                    crewmemberpicture[isscrew] = str(data['people'][num-1]['biophoto'])
-                    crewmembercountry[isscrew] = str(data['people'][num-1]['country']).title()
-                    if(str(data['people'][num-1]['country'])==str('usa')):
-                        crewmembercountry[isscrew] = str('USA')
-                    isscrew = isscrew+1  
-        else:
-            mimiclog.write(str(datetime.utcnow()))
-            mimiclog.write(' ')
-            mimiclog.write("Crew Check - JSON Error")
-            mimiclog.write('\n')
-            crewjsonsuccess = False
+        global isscrew, crewmember, crewmemberbio, crewmembertitle, crewmemberdays, crewmemberpicture, crewmembercountry
+        global internet
+
+        if internet:
+            iss_crew_url = 'http://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'        
+            req = urllib2.Request(iss_crew_url, headers={'User-Agent' : "Magic Browser"})
+            stuff = 0
+            try:
+                stuff = urllib2.urlopen(req, timeout = 2)
+            except:
+                mimiclog.write(str(datetime.utcnow()))
+                mimiclog.write(' ')
+                mimiclog.write("Crew Check - URL Failure")
+                mimiclog.write('\n')
+            
+            if (stuff.info().getsubtype()=='json'):
+                mimiclog.write(str(datetime.utcnow()))
+                mimiclog.write(' ')
+                mimiclog.write("Crew Check - JSON Success")
+                mimiclog.write('\n')
+                crewjsonsuccess = True
+                data = json.load(stuff)
+                number_of_space = int(data['number'])
+                for num in range(1,number_of_space+1):
+                    if(str(data['people'][num-1]['location']) == str("International Space Station")):
+                        crewmember[isscrew] = str(data['people'][num-1]['name'])
+                        crewmemberbio[isscrew] = (data['people'][num-1]['bio'])
+                        crewmembertitle[isscrew] = str(data['people'][num-1]['title'])
+                        datetime_object = datetime.strptime(str(data['people'][num-1]['launchdate']),'%Y-%m-%d')
+                        previousdays = int(data['people'][num-1]['careerdays'])
+                        totaldaysinspace = str(now-datetime_object)
+                        d_index = totaldaysinspace.index('d')
+                        crewmemberdays[isscrew] = str(int(totaldaysinspace[:d_index])+previousdays)+" days in space"
+                        crewmemberpicture[isscrew] = str(data['people'][num-1]['biophoto'])
+                        crewmembercountry[isscrew] = str(data['people'][num-1]['country']).title()
+                        if(str(data['people'][num-1]['country'])==str('usa')):
+                            crewmembercountry[isscrew] = str('USA')
+                        isscrew = isscrew+1  
+            else:
+                mimiclog.write(str(datetime.utcnow()))
+                mimiclog.write(' ')
+                mimiclog.write("Crew Check - JSON Error")
+                mimiclog.write('\n')
+                crewjsonsuccess = False
 
         #print crewmemberpicture[0]
         isscrew = 0
