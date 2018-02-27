@@ -6,22 +6,8 @@
     FloatLayout:
         Image:
             id: Orbit_background
-            source: './imgs/unsorted/OrbitEweekBase.png'
+            source: './imgs/orbit/OrbitBase.png'
             allow_stretch: False
-        Image:
-            id: latitude_background
-            source: './imgs/eva/GuageBar.png'
-            size_hint: 0.15, 0.05
-            pos_hint: {"center_x": 0.12, "center_y": 0.22}
-            allow_stretch: True
-            keep_ratio: False
-        Image:
-            id: longitude_backround
-            source: './imgs/eva/GuageBar.png'
-            size_hint: 0.15, 0.05
-            pos_hint: {"center_x": 0.13, "center_y": 0.185}
-            allow_stretch: True
-            keep_ratio: False
         AsyncImage:
             id: OrbitMap
             source: './imgs/orbit/map.jpg'

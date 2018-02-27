@@ -156,6 +156,7 @@ else:
 #----------------Open SQLITE3 Database that holds the current ISS Telemetry--------------
 conn = sqlite3.connect('/dev/shm/iss_telemetry.db')
 c = conn.cursor() 
+
 #----------------------------------Variables---------------------------------------------
 LS_Subscription = False
 overcountry = "None"
@@ -311,6 +312,8 @@ TLE_acquired = False
 
 EVA_picture_urls = []
 urlindex = 0
+
+internet = False
 
 class MainScreen(Screen):
     def changeManualControlBoolean(self, *args):
@@ -628,11 +631,12 @@ class MainApp(App):
         return root
 
     def check_internet(self, dt):
+        global internet
         try:
             urllib2.urlopen('http://www.google.com', timeout=1)
-            print 'True'
+            internet = True
         except:
-            print 'False'
+            internet = False
 
 
     def deleteURLPictures(self, dt):
@@ -1012,7 +1016,6 @@ class MainApp(App):
             coordinates = ((latitude,longitude),(latitude,longitude))
             results = reverse_geocode.search(coordinates)
             overcountry =  results[0]['country']
-            print results
             self.mimic_screen.ids.iss_over_country.text = "The ISS is over " + overcountry
             #converting lat lon to x,y for map
             fromLatSpan = 180.0
@@ -1087,7 +1090,6 @@ class MainApp(App):
                 results.extend(process_tag_text(tag.text))
 
         if len(results) > 0:
-            print results
             parsed = str(results[0]).split('\n')
             line1 = parsed[1]
             line2 = parsed[2]
@@ -1245,14 +1247,24 @@ class MainApp(App):
         self.us_eva.ids.Hold_bar.pos_hint = {"center_x": new_bar_x, "center_y": 0.49}
         self.us_eva.ids.Crewlock_Status_image.source = './imgs/eva/LeakCheckLights.png'
 
-    def signal_unsubscribed(self):
-        self.orbit_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
-        self.mimic_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
-        self.eps_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
-        self.ct_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
-        self.tcs_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
-        self.us_eva.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
-        self.rs_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+    def signal_unsubscribed(self): #change images, used stale signal image
+        global internet
+        if internet == False:
+            self.orbit_screen.ids.signal.source = './imgs/signal/offline.png'
+            self.mimic_screen.ids.signal.source = './imgs/signal/offline.png'
+            self.eps_screen.ids.signal.source = './imgs/signal/offline.png'
+            self.ct_screen.ids.signal.source = './imgs/signal/offline.png'
+            self.tcs_screen.ids.signal.source = './imgs/signal/offline.png'
+            self.us_eva.ids.signal.source = './imgs/signal/offline.png'
+            self.rs_screen.ids.signal.source = './imgs/signal/offline.png'
+        else:
+            self.orbit_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+            self.mimic_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+            self.eps_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+            self.ct_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+            self.tcs_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+            self.us_eva.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+            self.rs_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
         self.orbit_screen.ids.signal.size_hint_y = 0.112
         self.mimic_screen.ids.signal.size_hint_y = 0.112
         self.eps_screen.ids.signal.size_hint_y = 0.112
@@ -1262,13 +1274,24 @@ class MainApp(App):
         self.rs_screen.ids.signal.size_hint_y = 0.112
     
     def signal_lost(self):
-        self.orbit_screen.ids.signal.source = './imgs/signal/signalred.zip'
-        self.mimic_screen.ids.signal.source = './imgs/signal/signalred.zip'
-        self.eps_screen.ids.signal.source = './imgs/signal/signalred.zip'
-        self.ct_screen.ids.signal.source = './imgs/signal/signalred.zip'
-        self.tcs_screen.ids.signal.source = './imgs/signal/signalred.zip'
-        self.us_eva.ids.signal.source = './imgs/signal/signalred.zip'
-        self.rs_screen.ids.signal.source = './imgs/signal/signalred.zip'
+        global internet
+        if internet == False:
+            self.orbit_screen.ids.signal.source = './imgs/signal/offline.png'
+            self.mimic_screen.ids.signal.source = './imgs/signal/offline.png'
+            self.eps_screen.ids.signal.source = './imgs/signal/offline.png'
+            self.ct_screen.ids.signal.source = './imgs/signal/offline.png'
+            self.tcs_screen.ids.signal.source = './imgs/signal/offline.png'
+            self.us_eva.ids.signal.source = './imgs/signal/offline.png'
+            self.rs_screen.ids.signal.source = './imgs/signal/offline.png'
+        else:
+            self.orbit_screen.ids.signal.source = './imgs/signal/signalred.zip'
+            self.mimic_screen.ids.signal.source = './imgs/signal/signalred.zip'
+            self.eps_screen.ids.signal.source = './imgs/signal/signalred.zip'
+            self.ct_screen.ids.signal.source = './imgs/signal/signalred.zip'
+            self.tcs_screen.ids.signal.source = './imgs/signal/signalred.zip'
+            self.us_eva.ids.signal.source = './imgs/signal/signalred.zip'
+            self.rs_screen.ids.signal.source = './imgs/signal/signalred.zip'
+
         self.orbit_screen.ids.signal.anim_delay = 0.4
         self.mimic_screen.ids.signal.anim_delay = 0.4
         self.eps_screen.ids.signal.anim_delay = 0.4
@@ -1285,13 +1308,23 @@ class MainApp(App):
         self.rs_screen.ids.signal.size_hint_y = 0.112
 
     def signal_acquired(self):
-        self.orbit_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
-        self.mimic_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
-        self.eps_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
-        self.ct_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
-        self.tcs_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
-        self.us_eva.ids.signal.source = './imgs/signal/pulse-transparent.zip'
-        self.rs_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
+        global internet
+        if internet == False:
+            self.orbit_screen.ids.signal.source = './imgs/signal/offline.png'
+            self.mimic_screen.ids.signal.source = './imgs/signal/offline.png'
+            self.eps_screen.ids.signal.source = './imgs/signal/offline.png'
+            self.ct_screen.ids.signal.source = './imgs/signal/offline.png'
+            self.tcs_screen.ids.signal.source = './imgs/signal/offline.png'
+            self.us_eva.ids.signal.source = './imgs/signal/offline.png'
+            self.rs_screen.ids.signal.source = './imgs/signal/offline.png'
+        else:
+            self.orbit_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
+            self.mimic_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
+            self.eps_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
+            self.ct_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
+            self.tcs_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
+            self.us_eva.ids.signal.source = './imgs/signal/pulse-transparent.zip'
+            self.rs_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
         self.orbit_screen.ids.signal.anim_delay = 0.05
         self.mimic_screen.ids.signal.anim_delay = 0.05
         self.eps_screen.ids.signal.anim_delay = 0.05
@@ -1308,13 +1341,23 @@ class MainApp(App):
         self.rs_screen.ids.signal.size_hint_y = 0.15
     
     def signal_stale(self):
-        self.orbit_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
-        self.mimic_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
-        self.eps_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
-        self.ct_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
-        self.tcs_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
-        self.us_eva.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
-        self.rs_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+        global internet
+        if internet == False:
+            self.orbit_screen.ids.signal.source = './imgs/signal/offline.png'
+            self.mimic_screen.ids.signal.source = './imgs/signal/offline.png'
+            self.eps_screen.ids.signal.source = './imgs/signal/offline.png'
+            self.ct_screen.ids.signal.source = './imgs/signal/offline.png'
+            self.tcs_screen.ids.signal.source = './imgs/signal/offline.png'
+            self.us_eva.ids.signal.source = './imgs/signal/offline.png'
+            self.rs_screen.ids.signal.source = './imgs/signal/offline.png'
+        else:
+            self.orbit_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+            self.mimic_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+            self.eps_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+            self.ct_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+            self.tcs_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+            self.us_eva.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+            self.rs_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
         self.orbit_screen.ids.signal.anim_delay = 0.12
         self.mimic_screen.ids.signal.anim_delay = 0.12
         self.eps_screen.ids.signal.anim_delay = 0.12
