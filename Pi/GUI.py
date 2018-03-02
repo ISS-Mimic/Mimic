@@ -84,7 +84,6 @@ auth.set_access_token(accessToken, accessTokenSecret)
 # Creation of the actual interface, using authentication
 api = tweepy.API(auth)
 
-errorlog = open('./Logs/errorlog.txt','w')
 mimiclog = open('./Logs/mimiclog.txt','w')
 locationlog = open('./Logs/locationlog.txt','a')
 
@@ -100,57 +99,57 @@ SerialConnection4 = False
 try:
     ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
 except:
-    errorlog.write(str(datetime.utcnow()))
-    errorlog.write(' ')
-    errorlog.write("serial connection ACM0 not found")
-    errorlog.write('\n')
+    mimiclog.write(str(datetime.utcnow()))
+    mimiclog.write(' ')
+    mimiclog.write("Error - serial connection ACM0 not found")
+    mimiclog.write('\n')
 else:
     SerialConnection1 = True
     ser.write("test")
-    errorlog.write("Successful connection to ")
-    errorlog.write(str(ser))
+    mimiclog.write("Error - Successful connection to ")
+    mimiclog.write(str(ser))
     print str(ser)
 
 try:
     ser2 = serial.Serial('/dev/ttyACM1', 115200, timeout=0)
 except:
-    errorlog.write(str(datetime.utcnow()))
-    errorlog.write(' ')
-    errorlog.write("serial connection ACM1 not found")
-    errorlog.write('\n')
+    mimiclog.write(str(datetime.utcnow()))
+    mimiclog.write(' ')
+    mimiclog.write("Error - serial connection ACM1 not found")
+    mimiclog.write('\n')
 else:
     SerialConnection2 = True
     ser2.write("test")
-    errorlog.write("Successful connection to ")
-    errorlog.write(str(ser2))
+    mimiclog.write("Error - Successful connection to ")
+    mimiclog.write(str(ser2))
     print str(ser2)
 
 try:
     ser3 = serial.Serial('/dev/ttyACM2', 115200, timeout=0)
 except:
-    errorlog.write(str(datetime.utcnow()))
-    errorlog.write(' ')
-    errorlog.write("serial connection ACM2 not found")
-    errorlog.write('\n')
+    mimiclog.write(str(datetime.utcnow()))
+    mimiclog.write(' ')
+    mimiclog.write("Error - serial connection ACM2 not found")
+    mimiclog.write('\n')
 else:
     SerialConnection3 = True
     ser.write("test")
-    errorlog.write("Successful connection to ")
-    errorlog.write(str(ser3))
+    mimiclog.write("Error - Successful connection to ")
+    mimiclog.write(str(ser3))
     print str(ser3)
 
 try:
     ser4 = serial.Serial('/dev/ttyAMA00', 115200, timeout=0)
 except:
-    errorlog.write(str(datetime.utcnow()))
-    errorlog.write(' ')
-    errorlog.write("serial connection AMA00 not found")
-    errorlog.write('\n')
+    mimiclog.write(str(datetime.utcnow()))
+    mimiclog.write(' ')
+    mimiclog.write("Error - serial connection AMA00 not found")
+    mimiclog.write('\n')
 else:
     SerialConnection4 = True
     ser.write("test")
-    errorlog.write("Successful connection to ")
-    errorlog.write(str(ser4))
+    mimiclog.write("Error - Successful connection to ")
+    mimiclog.write(str(ser4))
     print str(ser4)
 
 #----------------Open SQLITE3 Database that holds the current ISS Telemetry--------------
@@ -414,7 +413,7 @@ c.execute("INSERT OR IGNORE INTO telemetry VALUES('us_eva_#','0','43','0',252)")
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('rs_eva_#','0','43','0',253)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('last_us_eva_duration','0','450','0',254)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('last_rs_eva_duration','0','450','0',255)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer','0','Subscribed','0',0)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer','0','Unsubscribed','0',0)");
 
 #----------------------------------Variables---------------------------------------------
 LS_Subscription = False
@@ -607,10 +606,10 @@ class CalibrateScreen(Screen):
         #try:
         #    self.serialActualWrite(self, *args)
         #except:
-        #    errorlog.write(str(datetime.utcnow()))
-        #    errorlog.write(' ')
-        #    errorlog.write("Attempted write - no serial device connected")
-        #    errorlog.write('\n')
+        #    mimiclog.write(str(datetime.utcnow()))
+        #    mimiclog.write(' ')
+        #    mimiclog.write("Error - Attempted write - no serial device connected")
+        #    mimiclog.write('\n')
 
     def zeroJoints(self):
         self.changeBoolean(True)
@@ -817,6 +816,30 @@ class MimicScreen(Screen, EventDispatcher):
     def changeSwitchBoolean(self, *args):
         global switchtofake
         switchtofake = args[0]
+    
+    def startBGA(*args):
+        global p2
+        p2 = subprocess.Popen("./fakeBGA.sh")
+    
+    def stopBGA(*args):
+        global p2
+        p2.kill()
+    
+    def startproc(*args):
+        global p
+        print "mimic starting node"
+        p = subprocess.Popen(["node", "./ISS_Telemetry.js"]) 
+
+    def killproc(*args):
+        global p
+        global p2
+        global c
+        c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer','0','Unsubscribed','0',0)");
+        try:
+            p.kill()
+            p2.kill()
+        except:
+            print "no process"
 
 class MainScreenManager(ScreenManager):
     pass
@@ -879,11 +902,11 @@ class MainApp(App):
         if startup == True:
             startup = False
 
-        if internet == True and TLE_acquired == False:
-            Clock.schedule_once(self.getTLE)
+        #if TLE_acquired == False:
+        #    print "check tle"
+        #    Clock.schedule_once(self.getTLE)
         Clock.schedule_interval(self.getTLE, 3600)
         Clock.schedule_interval(self.check_internet, 10)
-        #Clock.schedule_once(self.getTLE)
         return root
 
     def check_internet(self, dt):
@@ -997,7 +1020,7 @@ class MainApp(App):
         self.us_eva.ids.EV1_EVAtime.text = "Total EVA Time = " + str(EV1_hours) + "h " + str(EV1_minutes) + "m"
         self.us_eva.ids.EV2_EVAtime.text = "Total EVA Time = " + str(EV2_hours) + "h " + str(EV2_minutes) + "m"
 
-    def checkTwitter(self, dt):
+    def checkTwitter(self, dt): #trying to send the twitter stuff to a background thread but I don't know how
         background_thread = Thread(target=self.checkTwitter2)
         background_thread.daemon = True
         background_thread.start()
@@ -1016,10 +1039,10 @@ class MainApp(App):
             #stuff = api.user_timeline(screen_name = 'iss_mimic', count = 1, include_rts = True, tweet_mode = 'extended')
         except:
             self.us_eva.ids.EVAstatus.text = str("Twitter Error")
-            errorlog.write(str(datetime.utcnow()))
-            errorlog.write(' ')
-            errorlog.write("Tweepy - Error Retrieving Tweet, make sure clock is correct")
-            errorlog.write('\n')
+            mimiclog.write(str(datetime.utcnow()))
+            mimiclog.write(' ')
+            mimiclog.write("Error - Tweepy - Error Retrieving Tweet, make sure clock is correct")
+            mimiclog.write('\n')
         try:
             stuff
         except NameError:
@@ -1098,10 +1121,10 @@ class MainApp(App):
         try:
             stuff = api.user_timeline(screen_name = 'iss101', count = 50, include_rts = False, tweet_mode = 'extended')
         except:
-            errorlog.write(str(datetime.utcnow()))
-            errorlog.write(' ')
-            errorlog.write("Tweepy - Error Retrieving Tweet, make sure clock is correct")
-            errorlog.write('\n')
+            mimiclog.write(str(datetime.utcnow()))
+            mimiclog.write(' ')
+            mimiclog.write("Error - Tweepy - Error Retrieving Tweet, make sure clock is correct")
+            mimiclog.write('\n')
         try:
             stuff
         except NameError:
@@ -1236,10 +1259,10 @@ class MainApp(App):
         #try:
         #   ser.write(*args)
         #except:
-        #   errorlog.write(str(datetime.utcnow()))
-        #   errorlog.write(' ')
-        #   errorlog.write("Attempted write - no serial device connected")
-        #   errorlog.write('\n')
+        #   mimiclog.write(str(datetime.utcnow()))
+        #   mimiclog.write(' ')
+        #   mimiclog.write("Error - Attempted write - no serial device connected")
+        #   mimiclog.write('\n')
 
     def changeColors(self, *args):   #this function sets all labels on mimic screen to a certain color based on signal status
         self.eps_screen.ids.psarj_value.color = args[0],args[1],args[2]
@@ -1339,7 +1362,6 @@ class MainApp(App):
             self.orbit_screen.ids.iss_next_pass.text = str(nextpassinfo[0]) #display number of orbits since utc midnight
 
 
-
     def getTLE(self, *args):
         global tle_rec, line1, line2, TLE_acquired
         def process_tag_text(tag_text):
@@ -1352,9 +1374,11 @@ class MainApp(App):
                     next(text)
                     results.append('\n'.join(
                         (next(text), next(text), next(text))))
+            TLE_acquired = True
             return results
         
-        soup = BeautifulSoup(urllib2.urlopen('http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html'), 'html.parser')
+        req = urllib2.urlopen('http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html')
+        soup = BeautifulSoup(req, 'html.parser')
         body = soup.find_all("pre")
         results = []
         for tag in body:
@@ -1365,8 +1389,9 @@ class MainApp(App):
             parsed = str(results[0]).split('\n')
             line1 = parsed[1]
             line2 = parsed[2]
+            print line1
+            print line2
             tle_rec = ephem.readtle("ISS (ZARYA)",str(line1),str(line2))
-            TLE_acquired = True
         else:
             TLE_acquired = False
 
@@ -1374,11 +1399,10 @@ class MainApp(App):
         try:
             self.checkCrew(self, *args)
         except:
-            errorlog.write(str(datetime.utcnow()))
-            errorlog.write(' ')
-            errorlog.write("Crew Check - URL Error")
-            errorlog.write('\n')
-            print "Crew Check URL Error"
+            mimiclog.write(str(datetime.utcnow()))
+            mimiclog.write(' ')
+            mimiclog.write("Error - Crew Check - URL Error")
+            mimiclog.write('\n')
     
     def checkCrew(self, dt):
         #crew_response = urllib2.urlopen(crew_req)
@@ -1396,7 +1420,8 @@ class MainApp(App):
                 mimiclog.write(' ')
                 mimiclog.write("Crew Check - URL Failure")
                 mimiclog.write('\n')
-            
+           
+            now = datetime.utcnow()
             if (stuff.info().getsubtype()=='json'):
                 mimiclog.write(str(datetime.utcnow()))
                 mimiclog.write(' ')

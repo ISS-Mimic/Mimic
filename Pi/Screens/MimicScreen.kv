@@ -154,6 +154,58 @@
             on_release: mimicstopbutton.disabled = True
             on_release: mimicstartbutton.disabled = False
         Button:
+            id: fakeBGAstart
+            size_hint: 0.2,0.1
+            pos_hint: {"center_x": 0.87, "center_y": 0.35}
+            text: 'Start BGA'
+            font_size: 30
+            width: 50
+            height: 20
+            on_release: fakeBGAstop.disabled = False
+            on_release: startTelemetry.disabled = True
+            on_release: self.disabled = True
+            ##on_release: root.killproc()
+            on_release: root.startBGA()
+        Button:
+            id: fakeBGAstop
+            size_hint: 0.2,0.1
+            pos_hint: {"center_x": 0.87, "center_y": 0.25}
+            text: 'Stop BGA'
+            font_size: 30
+            disabled: True
+            width: 50
+            height: 20
+            on_release: fakeBGAstart.disabled = False
+            on_release: startTelemetry.disabled = False
+            on_release: self.disabled = True
+            on_release: root.stopBGA()
+        Button:
+            id: startTelemetry
+            size_hint: 0.2,0.1
+            pos_hint: {"center_x": 0.87, "center_y": 0.6}
+            text: 'Start Telem'
+            font_size: 30
+            width: 50
+            height: 20
+            on_release: stopTelemetry.disabled = False
+            on_release: fakeBGAstart.disabled = True
+            on_release: self.disabled = True
+            ##on_release: root.killproc()
+            on_release: root.startproc()
+        Button:
+            id: stopTelemetry
+            size_hint: 0.2,0.1
+            pos_hint: {"center_x": 0.87, "center_y": 0.5}
+            text: 'Stop Telem'
+            font_size: 30
+            width: 50
+            height: 20
+            disabled: True
+            on_release: startTelemetry.disabled = False
+            on_release: fakeBGAstart.disabled = False
+            on_release: self.disabled = True
+            on_release: root.killproc()
+        Button:
             size_hint: 0.2,0.1
             pos_hint: {"right":1, "bottom":1}
             text: 'Return'
