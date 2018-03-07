@@ -58,7 +58,7 @@ accessToken = ''
 accessTokenSecret = ''
 
 # Retrieving key and tokens used for 0Auth
-tree = etree.parse('TwitterKeys.xml')
+tree = etree.parse('/home/pi/Mimic/Pi/TwitterKeys.xml')
 root = tree.getroot()
 for child in root:
     if child.tag == 'ConsumerKey' and child.text is not None:
@@ -84,8 +84,8 @@ auth.set_access_token(accessToken, accessTokenSecret)
 # Creation of the actual interface, using authentication
 api = tweepy.API(auth)
 
-mimiclog = open('./Logs/mimiclog.txt','w')
-locationlog = open('./Logs/locationlog.txt','a')
+mimiclog = open('/home/pi/Mimic/Pi/Logs/mimiclog.txt','w')
+locationlog = open('/home/pi/Mimic/Pi/Logs/locationlog.txt','a')
 
 
 #-------------------------Look for a connected arduino-----------------------------------
@@ -580,7 +580,7 @@ class MainScreen(Screen):
 
     def startBGA(*args):
         global p2
-        p2 = subprocess.Popen("./fakeBGA.sh")
+        p2 = subprocess.Popen("/home/pi/Mimic/Pi/fakeBGA.sh")
     
     def stopBGA(*args):
         global p2
@@ -588,7 +588,7 @@ class MainScreen(Screen):
     
     def startproc(*args):
         global p
-        p = subprocess.Popen(["node", "./ISS_Telemetry.js"]) 
+        p = subprocess.Popen(["node", "/home/pi/Mimic/Pi/ISS_Telemetry.js"]) 
     
     def killproc(*args):
         global p
@@ -819,7 +819,7 @@ class MimicScreen(Screen, EventDispatcher):
     
     def startBGA(*args):
         global p2
-        p2 = subprocess.Popen("./fakeBGA.sh")
+        p2 = subprocess.Popen("/home/pi/Mimic/Pi/fakeBGA.sh")
     
     def stopBGA(*args):
         global p2
@@ -828,7 +828,7 @@ class MimicScreen(Screen, EventDispatcher):
     def startproc(*args):
         global p
         print "mimic starting node"
-        p = subprocess.Popen(["node", "./ISS_Telemetry.js"]) 
+        p = subprocess.Popen(["node", "/home/pi/Mimic/Pi/ISS_Telemetry.js"]) 
 
     def killproc(*args):
         global p
@@ -1545,26 +1545,26 @@ class MainApp(App):
         new_bar_x = self.map_hold_bar(260-seconds2)
         self.us_eva.ids.leak_timer.text = "~"+ str(int(seconds2)) + "s"
         self.us_eva.ids.Hold_bar.pos_hint = {"center_x": new_bar_x, "center_y": 0.49}
-        self.us_eva.ids.Crewlock_Status_image.source = './imgs/eva/LeakCheckLights.png'
+        self.us_eva.ids.Crewlock_Status_image.source = '/home/pi/Mimic/Pi/imgs/eva/LeakCheckLights.png'
 
     def signal_unsubscribed(self): #change images, used stale signal image
         global internet
         if internet == False:
-            self.orbit_screen.ids.signal.source = './imgs/signal/offline.png'
-            self.mimic_screen.ids.signal.source = './imgs/signal/offline.png'
-            self.eps_screen.ids.signal.source = './imgs/signal/offline.png'
-            self.ct_screen.ids.signal.source = './imgs/signal/offline.png'
-            self.tcs_screen.ids.signal.source = './imgs/signal/offline.png'
-            self.us_eva.ids.signal.source = './imgs/signal/offline.png'
-            self.rs_screen.ids.signal.source = './imgs/signal/offline.png'
+            self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
         else:
-            self.orbit_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
-            self.mimic_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
-            self.eps_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
-            self.ct_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
-            self.tcs_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
-            self.us_eva.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
-            self.rs_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+            self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
         self.orbit_screen.ids.signal.size_hint_y = 0.112
         self.mimic_screen.ids.signal.size_hint_y = 0.112
         self.eps_screen.ids.signal.size_hint_y = 0.112
@@ -1576,21 +1576,21 @@ class MainApp(App):
     def signal_lost(self):
         global internet
         if internet == False:
-            self.orbit_screen.ids.signal.source = './imgs/signal/offline.png'
-            self.mimic_screen.ids.signal.source = './imgs/signal/offline.png'
-            self.eps_screen.ids.signal.source = './imgs/signal/offline.png'
-            self.ct_screen.ids.signal.source = './imgs/signal/offline.png'
-            self.tcs_screen.ids.signal.source = './imgs/signal/offline.png'
-            self.us_eva.ids.signal.source = './imgs/signal/offline.png'
-            self.rs_screen.ids.signal.source = './imgs/signal/offline.png'
+            self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
         else:
-            self.orbit_screen.ids.signal.source = './imgs/signal/signalred.zip'
-            self.mimic_screen.ids.signal.source = './imgs/signal/signalred.zip'
-            self.eps_screen.ids.signal.source = './imgs/signal/signalred.zip'
-            self.ct_screen.ids.signal.source = './imgs/signal/signalred.zip'
-            self.tcs_screen.ids.signal.source = './imgs/signal/signalred.zip'
-            self.us_eva.ids.signal.source = './imgs/signal/signalred.zip'
-            self.rs_screen.ids.signal.source = './imgs/signal/signalred.zip'
+            self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
+            self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
+            self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
+            self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
+            self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
+            self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
+            self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
 
         self.orbit_screen.ids.signal.anim_delay = 0.4
         self.mimic_screen.ids.signal.anim_delay = 0.4
@@ -1610,21 +1610,21 @@ class MainApp(App):
     def signal_acquired(self):
         global internet
         if internet == False:
-            self.orbit_screen.ids.signal.source = './imgs/signal/offline.png'
-            self.mimic_screen.ids.signal.source = './imgs/signal/offline.png'
-            self.eps_screen.ids.signal.source = './imgs/signal/offline.png'
-            self.ct_screen.ids.signal.source = './imgs/signal/offline.png'
-            self.tcs_screen.ids.signal.source = './imgs/signal/offline.png'
-            self.us_eva.ids.signal.source = './imgs/signal/offline.png'
-            self.rs_screen.ids.signal.source = './imgs/signal/offline.png'
+            self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
         else:
-            self.orbit_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
-            self.mimic_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
-            self.eps_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
-            self.ct_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
-            self.tcs_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
-            self.us_eva.ids.signal.source = './imgs/signal/pulse-transparent.zip'
-            self.rs_screen.ids.signal.source = './imgs/signal/pulse-transparent.zip'
+            self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
+            self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
+            self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
+            self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
+            self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
+            self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
+            self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
         self.orbit_screen.ids.signal.anim_delay = 0.05
         self.mimic_screen.ids.signal.anim_delay = 0.05
         self.eps_screen.ids.signal.anim_delay = 0.05
@@ -1643,21 +1643,21 @@ class MainApp(App):
     def signal_stale(self):
         global internet
         if internet == False:
-            self.orbit_screen.ids.signal.source = './imgs/signal/offline.png'
-            self.mimic_screen.ids.signal.source = './imgs/signal/offline.png'
-            self.eps_screen.ids.signal.source = './imgs/signal/offline.png'
-            self.ct_screen.ids.signal.source = './imgs/signal/offline.png'
-            self.tcs_screen.ids.signal.source = './imgs/signal/offline.png'
-            self.us_eva.ids.signal.source = './imgs/signal/offline.png'
-            self.rs_screen.ids.signal.source = './imgs/signal/offline.png'
+            self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
         else:
-            self.orbit_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
-            self.mimic_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
-            self.eps_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
-            self.ct_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
-            self.tcs_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
-            self.us_eva.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
-            self.rs_screen.ids.signal.source = './imgs/signal/SignalOrangeGray.png'
+            self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
         self.orbit_screen.ids.signal.anim_delay = 0.12
         self.mimic_screen.ids.signal.anim_delay = 0.12
         self.eps_screen.ids.signal.anim_delay = 0.12
@@ -1837,92 +1837,92 @@ class MainApp(App):
             self.eps_screen.ids.eps_sun.color = 1,1,1,0.1
 
         if halfavg_1a < 151.5: #discharging
-            self.eps_screen.ids.array_1a.source = "./imgs/eps/array-discharging.zip"
+            self.eps_screen.ids.array_1a.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
             self.eps_screen.ids.array_1a.color = 1,1,1,0.8
         elif avg_1a > 160.0: #charged
-            self.eps_screen.ids.array_1a.source = "./imgs/eps/array-charged.zip"
+            self.eps_screen.ids.array_1a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
         elif halfavg_1a >= 151.5:  #charging
-            self.eps_screen.ids.array_1a.source = "./imgs/eps/array-charging.zip"
+            self.eps_screen.ids.array_1a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_1a.color = 1,1,1,1.0
         if float(c1a) > 0.0:    #power channel offline!
-            self.eps_screen.ids.array_1a.source = "./imgs/eps/array-offline.png"
+            self.eps_screen.ids.array_1a.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
         
         if halfavg_1b < 151.5: #discharging
-            self.eps_screen.ids.array_1b.source = "./imgs/eps/array-discharging.zip"
+            self.eps_screen.ids.array_1b.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
             self.eps_screen.ids.array_1b.color = 1,1,1,0.8
         elif avg_1b > 160.0: #charged
-            self.eps_screen.ids.array_1b.source = "./imgs/eps/array-charged.zip"
+            self.eps_screen.ids.array_1b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
         elif halfavg_1b >= 151.5:  #charging
-            self.eps_screen.ids.array_1b.source = "./imgs/eps/array-charging.zip"
+            self.eps_screen.ids.array_1b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_1b.color = 1,1,1,1.0
         if float(c1b) > 0.0:                                  #power channel offline!
-            self.eps_screen.ids.array_1b.source = "./imgs/eps/array-offline.png"
+            self.eps_screen.ids.array_1b.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
         
         if halfavg_2a < 151.5: #discharging
-            self.eps_screen.ids.array_2a.source = "./imgs/eps/array-discharging.zip"
+            self.eps_screen.ids.array_2a.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
             self.eps_screen.ids.array_2a.color = 1,1,1,0.8
         elif avg_2a > 160.0: #charged
-            self.eps_screen.ids.array_2a.source = "./imgs/eps/array-charged.zip"
+            self.eps_screen.ids.array_2a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
         elif halfavg_2a >= 151.5:  #charging
-            self.eps_screen.ids.array_2a.source = "./imgs/eps/array-charging.zip"
+            self.eps_screen.ids.array_2a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_2a.color = 1,1,1,1.0
         if float(c2a) > 0.0:                                  #power channel offline!
-            self.eps_screen.ids.array_2a.source = "./imgs/eps/array-offline.png"
+            self.eps_screen.ids.array_2a.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
         
         if halfavg_2b < 151.5: #discharging
-            self.eps_screen.ids.array_2b.source = "./imgs/eps/array-discharging.zip"
+            self.eps_screen.ids.array_2b.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
             self.eps_screen.ids.array_2b.color = 1,1,1,0.8
         elif avg_2b > 160.0: #charged
-            self.eps_screen.ids.array_2b.source = "./imgs/eps/array-charged.zip"
+            self.eps_screen.ids.array_2b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
         elif halfavg_2b >= 151.5:  #charging
-            self.eps_screen.ids.array_2b.source = "./imgs/eps/array-charging.zip"
+            self.eps_screen.ids.array_2b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_2b.color = 1,1,1,1.0
         if float(c2b) > 0.0:                                  #power channel offline!
-            self.eps_screen.ids.array_2b.source = "./imgs/eps/array-offline.png"
+            self.eps_screen.ids.array_2b.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
         
         if halfavg_3a < 151.5: #discharging
-            self.eps_screen.ids.array_3a.source = "./imgs/eps/array-discharging.zip"
+            self.eps_screen.ids.array_3a.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
             self.eps_screen.ids.array_3a.color = 1,1,1,0.8
         elif avg_3a > 160.0: #charged
-            self.eps_screen.ids.array_3a.source = "./imgs/eps/array-charged.zip"
+            self.eps_screen.ids.array_3a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
         elif halfavg_3a >= 151.5:  #charging
-            self.eps_screen.ids.array_3a.source = "./imgs/eps/array-charging.zip"
+            self.eps_screen.ids.array_3a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_3a.color = 1,1,1,1.0
         if float(c3a) > 0.0:                                  #power channel offline!
-            self.eps_screen.ids.array_3a.source = "./imgs/eps/array-offline.png"
+            self.eps_screen.ids.array_3a.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
         
         if halfavg_3b < 151.5: #discharging
-            self.eps_screen.ids.array_3b.source = "./imgs/eps/array-discharging.zip"
+            self.eps_screen.ids.array_3b.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
             self.eps_screen.ids.array_3b.color = 1,1,1,0.8
         elif avg_3b > 160.0: #charged
-            self.eps_screen.ids.array_3b.source = "./imgs/eps/array-charged.zip"
+            self.eps_screen.ids.array_3b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
         elif halfavg_3b >= 151.5:  #charging
-            self.eps_screen.ids.array_3b.source = "./imgs/eps/array-charging.zip"
+            self.eps_screen.ids.array_3b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_3b.color = 1,1,1,1.0
         if float(c3b) > 0.0:                                  #power channel offline!
-            self.eps_screen.ids.array_3b.source = "./imgs/eps/array-offline.png"
+            self.eps_screen.ids.array_3b.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
         
         if halfavg_4a < 151.5: #discharging
-            self.eps_screen.ids.array_4a.source = "./imgs/eps/array-discharging.zip"
+            self.eps_screen.ids.array_4a.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
             self.eps_screen.ids.array_4a.color = 1,1,1,0.8
         elif avg_4a > 160.0: #charged
-            self.eps_screen.ids.array_4a.source = "./imgs/eps/array-charged.zip"
+            self.eps_screen.ids.array_4a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
         elif halfavg_4a >= 151.5:  #charging
-            self.eps_screen.ids.array_4a.source = "./imgs/eps/array-charging.zip"
+            self.eps_screen.ids.array_4a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_4a.color = 1,1,1,1.0
         if float(c4a) > 0.0:                                  #power channel offline!
-            self.eps_screen.ids.array_4a.source = "./imgs/eps/array-offline.png"
+            self.eps_screen.ids.array_4a.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
         
         if halfavg_4b < 151.5: #discharging
-            self.eps_screen.ids.array_4b.source = "./imgs/eps/array-discharging.zip"
+            self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
             self.eps_screen.ids.array_4b.color = 1,1,1,0.8
         elif avg_4b > 160.0: #charged
-            self.eps_screen.ids.array_4b.source = "./imgs/eps/array-charged.zip"
+            self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
         elif halfavg_4b >= 151.5:  #charging
-            self.eps_screen.ids.array_4b.source = "./imgs/eps/array-charging.zip"
+            self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_4b.color = 1,1,1,1.0
         if float(c4b) > 0.0:                                  #power channel offline!
-            self.eps_screen.ids.array_4b.source = "./imgs/eps/array-offline.png"
+            self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
         
         
         ##-------------------EVA Functionality-------------------##
@@ -1955,7 +1955,7 @@ class MainApp(App):
         if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and crewlockpres > 740 and airlockpres > 740: 
             eva = False   
             self.us_eva.ids.leak_timer.text = ""
-            self.us_eva.ids.Crewlock_Status_image.source = './imgs/eva/BlankLights.png'
+            self.us_eva.ids.Crewlock_Status_image.source = '/home/pi/Mimic/Pi/imgs/eva/BlankLights.png'
             self.us_eva.ids.EVA_occuring.color = 1,0,0
             self.us_eva.ids.EVA_occuring.text = "Currently No EVA"
 
@@ -1963,7 +1963,7 @@ class MainApp(App):
         if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres > 740 and airlockpres > 740: 
             standby = True
             self.us_eva.ids.leak_timer.text = "~160s Leak Check"
-            self.us_eva.ids.Crewlock_Status_image.source = './imgs/eva/StandbyLights.png'
+            self.us_eva.ids.Crewlock_Status_image.source = '/home/pi/Mimic/Pi/imgs/eva/StandbyLights.png'
             self.us_eva.ids.EVA_occuring.color = 0,0,1
             self.us_eva.ids.EVA_occuring.text = "EVA Standby"
         else:
@@ -1972,7 +1972,7 @@ class MainApp(App):
         ##EVA Prebreath Pressure
         if airlock_pump_voltage == 1 and crewlockpres > 740 and airlockpres > 740: 
             prebreath1 = True
-            self.us_eva.ids.Crewlock_Status_image.source = './imgs/eva/PreBreatheLights.png'
+            self.us_eva.ids.Crewlock_Status_image.source = '/home/pi/Mimic/Pi/imgs/eva/PreBreatheLights.png'
             self.us_eva.ids.leak_timer.text = "~160s Leak Check"
             self.us_eva.ids.EVA_occuring.color = 0,0,1
             self.us_eva.ids.EVA_occuring.text = "Pre-EVA Nitrogen Purge"
@@ -1983,7 +1983,7 @@ class MainApp(App):
             self.us_eva.ids.leak_timer.text = "~160s Leak Check"
             self.us_eva.ids.EVA_occuring.text = "Crewlock Depressurizing"
             self.us_eva.ids.EVA_occuring.color = 0,0,1
-            self.us_eva.ids.Crewlock_Status_image.source = './imgs/eva/DepressLights.png'
+            self.us_eva.ids.Crewlock_Status_image.source = '/home/pi/Mimic/Pi/imgs/eva/DepressLights.png'
 
         ##EVA Leakcheck
         if airlock_pump_voltage == 1 and crewlockpres < 260 and crewlockpres > 250 and (depress1 or leakhold): 
@@ -1994,7 +1994,7 @@ class MainApp(App):
             self.us_eva.ids.EVA_occuring.text = "Leak Check in Progress!"
             self.us_eva.ids.EVA_occuring.color = 0,0,1
             Clock.schedule_once(self.hold_timer, 1)
-            self.us_eva.ids.Crewlock_Status_image.source = './imgs/eva/LeakCheckLights.png'
+            self.us_eva.ids.Crewlock_Status_image.source = '/home/pi/Mimic/Pi/imgs/eva/LeakCheckLights.png'
         else:
             leakhold = False
 
@@ -2004,7 +2004,7 @@ class MainApp(App):
             self.us_eva.ids.leak_timer.text = "Complete"
             self.us_eva.ids.EVA_occuring.text = "Crewlock Depressurizing"
             self.us_eva.ids.EVA_occuring.color = 0,0,1
-            self.us_eva.ids.Crewlock_Status_image.source = './imgs/eva/DepressLights.png'
+            self.us_eva.ids.Crewlock_Status_image.source = '/home/pi/Mimic/Pi/imgs/eva/DepressLights.png'
         
         ##EVA in progress
         if crewlockpres < 2.5: 
@@ -2014,7 +2014,7 @@ class MainApp(App):
             self.us_eva.ids.EVA_occuring.text = "EVA In Progress!!!"
             self.us_eva.ids.EVA_occuring.color = 0.33,0.7,0.18
             self.us_eva.ids.leak_timer.text = "Complete"
-            self.us_eva.ids.Crewlock_Status_image.source = './imgs/eva/InProgressLights.png'
+            self.us_eva.ids.Crewlock_Status_image.source = '/home/pi/Mimic/Pi/imgs/eva/InProgressLights.png'
             evatimerevent = Clock.schedule_once(self.EVA_clock, 1)
 
         ##Repress
@@ -2022,7 +2022,7 @@ class MainApp(App):
             eva = False
             self.us_eva.ids.EVA_occuring.color = 0,0,1
             self.us_eva.ids.EVA_occuring.text = "Crewlock Repressurizing"
-            self.us_eva.ids.Crewlock_Status_image.source = './imgs/eva/RepressLights.png'
+            self.us_eva.ids.Crewlock_Status_image.source = '/home/pi/Mimic/Pi/imgs/eva/RepressLights.png'
 
         ##-------------------EVA Functionality End-------------------##
 
@@ -2186,22 +2186,22 @@ class MainApp(App):
             self.serialWrite("Voltage4B=" + v4b + " ")
 
 #All GUI Screens are on separate kv files
-Builder.load_file('./Screens/Settings_Screen.kv')
-Builder.load_file('./Screens/FakeOrbitScreen.kv')
-Builder.load_file('./Screens/Orbit_Screen.kv')
-Builder.load_file('./Screens/EPS_Screen.kv')
-Builder.load_file('./Screens/CT_Screen.kv')
-Builder.load_file('./Screens/TCS_Screen.kv')
-Builder.load_file('./Screens/EVA_US_Screen.kv')
-Builder.load_file('./Screens/EVA_RS_Screen.kv')
-Builder.load_file('./Screens/EVA_Main_Screen.kv')
-Builder.load_file('./Screens/EVA_Pictures.kv')
-Builder.load_file('./Screens/Crew_Screen.kv')
-Builder.load_file('./Screens/RS_Screen.kv')
-Builder.load_file('./Screens/ManualControlScreen.kv')
-Builder.load_file('./Screens/MimicScreen.kv')
-Builder.load_file('./Screens/CalibrateScreen.kv')
-Builder.load_file('./Screens/MainScreen.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/Settings_Screen.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/FakeOrbitScreen.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/Orbit_Screen.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/EPS_Screen.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/CT_Screen.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/TCS_Screen.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/EVA_US_Screen.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/EVA_RS_Screen.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/EVA_Main_Screen.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/EVA_Pictures.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/Crew_Screen.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/RS_Screen.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/ManualControlScreen.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/MimicScreen.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/CalibrateScreen.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/MainScreen.kv')
 
 Builder.load_string('''
 #:kivy 1.8
