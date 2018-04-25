@@ -14,126 +14,134 @@
             font_size: 30
         Button:
             id: EPS_button
-            size_hint: 0.2,0.1
+            size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.12, "center_y": 0.9}
-            text: 'EPS'
+            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/EPSunlit.png'
+            text: ''
             font_size: 30
             on_release: root.manager.current = 'eps'
         Button:
             id: Crew_button
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.12, "center_y": 0.78}
-            text: 'Crew'
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.12, "center_y": 0.75}
+            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/CrewUnlit.png'
+            text: ''
             font_size: 30
             on_release: root.manager.current = 'crew'
         Button:
             id: CT_button
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.37, "center_y": 0.9}
-            text: 'C&T'
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.375, "center_y": 0.9}
+            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/CTunlit.png'
+            text: ''
             font_size: 30
             on_release: root.manager.current = 'ct'
         Button:
             id: EVA_button
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.37, "center_y": 0.78}
-            text: 'EVA'
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.375, "center_y": 0.75}
+            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/EVAunlit.png'
+            text: ''
             font_size: 30
             on_release: root.manager.current = 'eva_main'
         Button:
             id: TCS_button
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.62, "center_y": 0.9}
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.625, "center_y": 0.9}
+            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/TCSunlit.png'
             text: 'TCS'
             font_size: 30
             on_release: root.manager.current = 'tcs'
         Button:
             id: ROS_button
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.62, "center_y": 0.78}
-            text: 'ROS'
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.625, "center_y": 0.75}
+            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/RSOSunlit.png'
+            text: ''
             font_size: 30
             on_release: root.manager.current = 'rs'
         Button:
             id: GNC_button
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.87, "center_y": 0.9}
-            text: 'GNC'
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.88, "center_y": 0.9}
+            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/GNCunlit.png'
+            text: ''
             font_size: 30
             on_release: root.manager.current = 'tcs'
         Button:
             id: Orbit_button
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.87, "center_y": 0.78}
-            text: 'Orbit'
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.88, "center_y": 0.75}
+            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/OrbitUnlit.png'
+            text: ''
             font_size: 30
             on_release: root.manager.current = 'orbit'
         Label:
-            pos_hint: {"center_x": 0.55, "center_y": 0.68}
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
             text: 'ISS Information'
             markup: True
             color: 1,1,1
-            font_size: 30
+            font_size: 20
         Label:
             id: velocity_label
-            pos_hint: {"center_x": 0.4, "center_y": 0.6}
+            pos_hint: {"center_x": 0.35, "center_y": 0.44}
             text: 'Speed'
             markup: True
             color: 1,1,1
-            font_size: 30
+            font_size: 20
         Label:
             id: velocity_value
-            pos_hint: {"center_x": 0.65, "center_y": 0.6}
+            pos_hint: {"center_x": 0.6, "center_y": 0.44}
             text: '0.00'
             markup: True
             color: 1,1,1
-            font_size: 30
+            font_size: 20
         Label:
             id: altitude_label
-            pos_hint: {"center_x": 0.4, "center_y": 0.5}
+            pos_hint: {"center_x": 0.35, "center_y": 0.3}
             text: 'Altitude'
             markup: True
             color: 1,1,1
-            font_size: 30
+            font_size: 20
         Label:
             id: altitude_value
-            pos_hint: {"center_x": 0.65, "center_y": 0.5}
+            pos_hint: {"center_x": 0.6, "center_y": 0.3}
             text: '0.00'
             markup: True
             color: 1,1,1
-            font_size: 30
+            font_size: 20
         Label:
             id: stationmass_label
-            pos_hint: {"center_x": 0.4, "center_y": 0.4}
+            pos_hint: {"center_x": 0.35, "center_y": 0.2}
             text: 'Total Mass'
             markup: True
             color: 1,1,1
-            font_size: 30
+            font_size: 20
         Label:
             id: stationmass_value
-            pos_hint: {"center_x": 0.65, "center_y": 0.4}
+            pos_hint: {"center_x": 0.6, "center_y": 0.2}
             text: '0.00 kg'
             markup: True
             color: 1,1,1
-            font_size: 30
+            font_size: 20
         Label:
             id: stationmode_label
-            pos_hint: {"center_x": 0.4, "center_y": 0.3}
+            pos_hint: {"center_x": 0.35, "center_y": 0.1}
             text: 'Station Mode'
             markup: True
             color: 1,1,1
-            font_size: 30
+            font_size: 20
         Label:
             id: stationmode_value
-            pos_hint: {"center_x": 0.65, "center_y": 0.3}
+            pos_hint: {"center_x": 0.6, "center_y": 0.1}
             text: 'Standard'
             markup: True
             color: 1,1,1
-            font_size: 30
+            font_size: 20
         Button:
             id: mimicstartbutton
             size_hint: 0.2,0.1
-            pos_hint: {"x": 0.05, "y": 0.5}
+            pos_hint: {"center_x": 0.12, "center_y": 0.5}
             text: 'Transmit'
             disabled: False
             font_size: 30
@@ -144,7 +152,7 @@
         Button:
             id: mimicstopbutton
             size_hint: 0.2,0.1
-            pos_hint: {"x": 0.05, "y": 0.4}
+            pos_hint: {"center_x": 0.12, "center_y": 0.4}
             text: 'Stop'
             disabled: True
             font_size: 30
@@ -156,7 +164,7 @@
         Button:
             id: fakeBGAstart
             size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.87, "center_y": 0.35}
+            pos_hint: {"center_x": 0.87, "center_y": 0.30}
             text: 'Start BGA'
             font_size: 30
             width: 50
@@ -169,7 +177,7 @@
         Button:
             id: fakeBGAstop
             size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.87, "center_y": 0.25}
+            pos_hint: {"center_x": 0.87, "center_y": 0.20}
             text: 'Stop BGA'
             font_size: 30
             disabled: True
@@ -182,7 +190,7 @@
         Button:
             id: startTelemetry
             size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.87, "center_y": 0.6}
+            pos_hint: {"center_x": 0.87, "center_y": 0.52}
             text: 'Start Telem'
             font_size: 30
             width: 50
@@ -195,7 +203,7 @@
         Button:
             id: stopTelemetry
             size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.87, "center_y": 0.5}
+            pos_hint: {"center_x": 0.87, "center_y": 0.42}
             text: 'Stop Telem'
             font_size: 30
             width: 50
