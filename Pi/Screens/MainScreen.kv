@@ -7,20 +7,20 @@
     FloatLayout:
         orientation: 'vertical'
         Image:
-            source: './imgs/ISSmimicLogoPartsGroundtrackLightBlue.png'
+            source: '/home/pi/Mimic/Pi/imgs/ISSmimicLogoPartsGroundtrackLightBlue.png'
             allow_stretch: False
             keep_ratio: True
             pos_hint: {"center_x": 0.5, "center_y": 0.82}
         Image:
             id: ISStiny
-            source: './imgs/ISSmimicLogoPartsGlowingISSblue.png'
+            source: '/home/pi/Mimic/Pi/imgs/ISSmimicLogoPartsGlowingISSblue.png'
             keep_ratio: False
             allow_stretch: True
             size_hint: 0.07,0.07
             pos_hint: {"center_x": 0.25, "center_y": 0.25}
         Image:
             id: ISStiny2
-            source: './imgs/ISSmimicLogoPartsGlowingISSblue.png'
+            source: '/home/pi/Mimic/Pi/imgs/ISSmimicLogoPartsGlowingISSblue.png'
             keep_ratio: False
             allow_stretch: True
             size_hint: 0.0,0.0
@@ -36,7 +36,7 @@
         Button:
             size_hint: 0.1,0.15
             pos_hint: {"center_x": 0.9, "center_y": 0.3}
-            background_normal: './imgs/Settings_Icon.png'
+            background_normal: '/home/pi/Mimic/Pi/imgs/Settings_Icon.png'
             canvas.before:
                 PushMatrix
                 Rotate:

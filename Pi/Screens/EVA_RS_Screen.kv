@@ -6,13 +6,13 @@
     FloatLayout:
         Image:
             id: RS_EVA_background
-            source: './imgs/eva/RSpageEVAbase.png'
+            source: '/home/pi/Mimic/Pi/imgs/eva/RSpageEVAbase.png'
             allow_stretch: False
             ##size_hint_y: 1
             ##keep_ratio: False
         Image:
             id: signal
-            source: "./imgs/signal/pulse-transparent.zip"
+            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
             size_hint_y: 0.15
             anim_delay: 0.05
             anim_loop: 0
@@ -22,7 +22,7 @@
             size_hint: 0.1,0.11
             ##pos_hint: {"Left": 1, "Bottom": 1}
             pos_hint: {"center_x": 0.32, "center_y": 0.085}
-            background_normal: './imgs/eva/BackButton.png'
+            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
             text: ''
             font_size: 30
             on_release: app.root.current = 'eva_main'

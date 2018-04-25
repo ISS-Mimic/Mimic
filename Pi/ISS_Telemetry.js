@@ -6,10 +6,10 @@ function alert(message)
 var ls = require("lightstreamer-client");
 var sqlite3 = require("sqlite3");
 
-//var db = new sqlite3.Database("./iss_telemetry.db", sqlite3.OPEN_READWRITE, db_err);
+//var db = new sqlite3.Database("/home/pi/Mimic/Pi/iss_telemetry.db", sqlite3.OPEN_READWRITE, db_err);
 var db = new sqlite3.Database("/dev/shm/iss_telemetry.db", sqlite3.OPEN_CREATE | sqlite3.OPEN_READWRITE);
 
-var telemetry = require("./Telemetry_identifiers.js");
+var telemetry = require("/home/pi/Mimic/Pi/Telemetry_identifiers.js");
 var classes = ["TimeStamp", "Value"];
 
 var lsClient = new ls.LightstreamerClient("http://push.lightstreamer.com", "ISSLIVE");

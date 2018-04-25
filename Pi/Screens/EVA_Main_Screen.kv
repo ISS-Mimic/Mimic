@@ -6,7 +6,7 @@
     FloatLayout:
         Image:
             id: EVA_background
-            source: './imgs/eva/GenericEVAexample.png'
+            source: '/home/pi/Mimic/Pi/imgs/eva/GenericEVAexample.png'
             allow_stretch: False
             ##size_hint_y: 1
             ##keep_ratio: False
@@ -15,18 +15,22 @@
             size_hint: 0.15,0.13
             ##pos_hint: {"Left": 1, "Bottom": 1}
             pos_hint: {"center_x": 0.31, "center_y": 0.465}
-            background_normal: './imgs/eva/GenericEVAusButton.png'
+            background_normal: '/home/pi/Mimic/Pi/imgs/eva/GenericEVAusButton.png'
+            text: ''
+            font_size: 30
             on_release: app.root.current = 'us_eva'
         Button:
             id: RS_EVA_Button
             size_hint: 0.15,0.13
             ##pos_hint: {"Left": 1, "Bottom": 1}
             pos_hint: {"center_x": 0.31, "center_y": 0.23}
-            background_normal: './imgs/eva/GenericEVArsButton.png'
+            ##background_normal: '/home/pi/Mimic/Pi/imgs/eva/GenericEVArsButton.png'
+            text: ''
+            font_size: 30
             on_release: app.root.current = 'rs_eva'
         Image:
             id: signal
-            source: "./imgs/signal/pulse-transparent.zip"
+            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
             size_hint_y: 0.15
             anim_delay: 0.05
             anim_loop: 0
@@ -36,7 +40,7 @@
             size_hint: 0.1,0.11
             ##pos_hint: {"Left": 1, "Bottom": 1}
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: './imgs/eva/BackButton.png'
+            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
             text: ''
             font_size: 30
             on_release: app.root.current = 'mimic'
