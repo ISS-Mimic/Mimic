@@ -4,7 +4,7 @@ import urllib2
 from bs4 import BeautifulSoup
 from calendar import timegm
 from datetime import datetime
-import reverse_geocode #test1uncomment
+## import reverse_geocode #test1uncomment
 import sys
 import ephem
 import os
