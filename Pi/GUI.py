@@ -1139,14 +1139,19 @@ class MainApp(App):
                 EVnames = []
                 EVpics = []
                 index = 0
+                index2 = 0
 
                 if ("EVA BEGINS" in past_tweet) and past_tweet.count('@') == 2:
                     crew_mention = True
                     while index < len(past_tweet):
                         index = past_tweet.find('@',index)
+                        index2 = past_tweet.find(',',index2)
                         if index == -1:
                             break
-                        EVnames.append(str(past_tweet[index:]))
+                        if index2 == -1:
+                            EVnames.append(str(past_tweet[index:]))
+                        else:
+                            EVnames.append(str(past_tweet[index:index2]))
                         EVpics.append("")
                         index += 1
                     count = 0
@@ -1155,9 +1160,16 @@ class MainApp(App):
                         count += 1
                     count = 0
                     while count < len(EVnames):
-                        EVpics[count] = str(api.get_user(EVnames[count]).profile_image_url)
-                        EVnames[count] = str(api.get_user(EVnames[count]).name)
-                        EVpics[count] = EVpics[count].replace("_normal","_bigger")
+                        try:
+                            EVpics[count] = str(api.get_user(EVnames[count]).profile_image_url)
+                        except: 
+                            print "Twitter EVA crew pic error"
+                        else:
+                            EVpics[count] = EVpics[count].replace("_normal","_bigger")
+                        try:
+                            EVnames[count] = str(api.get_user(EVnames[count]).name)
+                        except: 
+                            print "Twitter EVA name error"
                         count += 1
 
                 if crew_mention:
@@ -1838,7 +1850,7 @@ class MainApp(App):
 
         if halfavg_1a < 151.5: #discharging
             self.eps_screen.ids.array_1a.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
-            self.eps_screen.ids.array_1a.color = 1,1,1,0.8
+            #self.eps_screen.ids.array_1a.color = 1,1,1,0.8
         elif avg_1a > 160.0: #charged
             self.eps_screen.ids.array_1a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
         elif halfavg_1a >= 151.5:  #charging
@@ -1849,7 +1861,7 @@ class MainApp(App):
         
         if halfavg_1b < 151.5: #discharging
             self.eps_screen.ids.array_1b.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
-            self.eps_screen.ids.array_1b.color = 1,1,1,0.8
+            #self.eps_screen.ids.array_1b.color = 1,1,1,0.8
         elif avg_1b > 160.0: #charged
             self.eps_screen.ids.array_1b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
         elif halfavg_1b >= 151.5:  #charging
@@ -1860,7 +1872,7 @@ class MainApp(App):
         
         if halfavg_2a < 151.5: #discharging
             self.eps_screen.ids.array_2a.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
-            self.eps_screen.ids.array_2a.color = 1,1,1,0.8
+            #self.eps_screen.ids.array_2a.color = 1,1,1,0.8
         elif avg_2a > 160.0: #charged
             self.eps_screen.ids.array_2a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
         elif halfavg_2a >= 151.5:  #charging
@@ -1871,7 +1883,7 @@ class MainApp(App):
         
         if halfavg_2b < 151.5: #discharging
             self.eps_screen.ids.array_2b.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
-            self.eps_screen.ids.array_2b.color = 1,1,1,0.8
+            #self.eps_screen.ids.array_2b.color = 1,1,1,0.8
         elif avg_2b > 160.0: #charged
             self.eps_screen.ids.array_2b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
         elif halfavg_2b >= 151.5:  #charging
@@ -1882,7 +1894,7 @@ class MainApp(App):
         
         if halfavg_3a < 151.5: #discharging
             self.eps_screen.ids.array_3a.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
-            self.eps_screen.ids.array_3a.color = 1,1,1,0.8
+            #self.eps_screen.ids.array_3a.color = 1,1,1,0.8
         elif avg_3a > 160.0: #charged
             self.eps_screen.ids.array_3a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
         elif halfavg_3a >= 151.5:  #charging
@@ -1893,7 +1905,7 @@ class MainApp(App):
         
         if halfavg_3b < 151.5: #discharging
             self.eps_screen.ids.array_3b.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
-            self.eps_screen.ids.array_3b.color = 1,1,1,0.8
+            #self.eps_screen.ids.array_3b.color = 1,1,1,0.8
         elif avg_3b > 160.0: #charged
             self.eps_screen.ids.array_3b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
         elif halfavg_3b >= 151.5:  #charging
@@ -1904,7 +1916,7 @@ class MainApp(App):
         
         if halfavg_4a < 151.5: #discharging
             self.eps_screen.ids.array_4a.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
-            self.eps_screen.ids.array_4a.color = 1,1,1,0.8
+            #self.eps_screen.ids.array_4a.color = 1,1,1,0.8
         elif avg_4a > 160.0: #charged
             self.eps_screen.ids.array_4a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
         elif halfavg_4a >= 151.5:  #charging
@@ -1915,7 +1927,7 @@ class MainApp(App):
         
         if halfavg_4b < 151.5: #discharging
             self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
-            self.eps_screen.ids.array_4b.color = 1,1,1,0.8
+            #self.eps_screen.ids.array_4b.color = 1,1,1,0.8
         elif avg_4b > 160.0: #charged
             self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
         elif halfavg_4b >= 151.5:  #charging
