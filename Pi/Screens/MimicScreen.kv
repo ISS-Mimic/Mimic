@@ -4,7 +4,12 @@
 <MimicScreen>:
     name: 'mimic'
     FloatLayout:
-        id: mimicscreenlayout
+         Image:
+            id: Mimic_background
+            source: '/home/pi/Mimic/Pi/imgs/unsorted/MimicBase.png'
+            allow_stretch: False
+            ##size_hint_y: 1
+            ##keep_ratio: False
          Image:
             source: '/home/pi/Mimic/Pi/imgs/ISSmimicLogoPartsGroundtrackLightBlue.png'
             allow_stretch: False
@@ -17,12 +22,6 @@
             allow_stretch: True
             size_hint: 0.0,0.0
             pos_hint: {"center_x": 0.25, "center_y": 0.25}
-        Image:
-            id: Mimic_background
-            source: '/home/pi/Mimic/Pi/imgs/unsorted/MimicBase.png'
-            allow_stretch: False
-            ##size_hint_y: 1
-            ##keep_ratio: False
         Label:
             id: iss_over_country
             pos_hint: {"center_x": 0.5, "center_y": 0.2}
