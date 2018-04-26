@@ -5,6 +5,18 @@
     name: 'mimic'
     FloatLayout:
         id: mimicscreenlayout
+       Image:
+            source: '/home/pi/Mimic/Pi/imgs/ISSmimicLogoPartsGroundtrackLightBlue.png'
+            allow_stretch: False
+            keep_ratio: True
+            pos_hint: {"center_x": 0.5, "center_y": 0.82}
+        Image:
+            id: ISStiny
+            source: '/home/pi/Mimic/Pi/imgs/ISSmimicLogoPartsGlowingISSblue.png'
+            keep_ratio: False
+            allow_stretch: True
+            size_hint: 0.07,0.07
+            pos_hint: {"center_x": 0.25, "center_y": 0.25}
         Label:
             id: iss_over_country
             pos_hint: {"center_x": 0.5, "center_y": 0.2}
@@ -15,7 +27,7 @@
         Button:
             id: EPS_button
             size_hint: 0.15,0.13
-            pos_hint: {"center_x": 0.12, "center_y": 0.9}
+            pos_hint: {"center_x": 0.12, "center_y": 0.65}
             background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/EPSunlit.png'
             text: ''
             font_size: 30
@@ -23,7 +35,7 @@
         Button:
             id: Crew_button
             size_hint: 0.15,0.13
-            pos_hint: {"center_x": 0.12, "center_y": 0.75}
+            pos_hint: {"center_x": 0.12, "center_y": 0.40}
             background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/CrewUnlit.png'
             text: ''
             font_size: 30
@@ -31,7 +43,7 @@
         Button:
             id: CT_button
             size_hint: 0.15,0.13
-            pos_hint: {"center_x": 0.375, "center_y": 0.9}
+            pos_hint: {"center_x": 0.375, "center_y": 0.65}
             background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/CTunlit.png'
             text: ''
             font_size: 30
@@ -39,7 +51,7 @@
         Button:
             id: EVA_button
             size_hint: 0.15,0.13
-            pos_hint: {"center_x": 0.375, "center_y": 0.75}
+            pos_hint: {"center_x": 0.375, "center_y": 0.40}
             background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/EVAunlit.png'
             text: ''
             font_size: 30
@@ -47,7 +59,7 @@
         Button:
             id: TCS_button
             size_hint: 0.15,0.13
-            pos_hint: {"center_x": 0.625, "center_y": 0.9}
+            pos_hint: {"center_x": 0.625, "center_y": 0.65}
             background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/TCSunlit.png'
             text: ''
             font_size: 30
@@ -55,7 +67,7 @@
         Button:
             id: ROS_button
             size_hint: 0.15,0.13
-            pos_hint: {"center_x": 0.625, "center_y": 0.75}
+            pos_hint: {"center_x": 0.625, "center_y": 0.40}
             background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/RSOSunlit.png'
             text: ''
             font_size: 30
@@ -63,7 +75,7 @@
         Button:
             id: GNC_button
             size_hint: 0.15,0.13
-            pos_hint: {"center_x": 0.88, "center_y": 0.9}
+            pos_hint: {"center_x": 0.88, "center_y": 0.65}
             background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/GNCunlit.png'
             text: ''
             font_size: 30
@@ -71,7 +83,7 @@
         Button:
             id: Orbit_button
             size_hint: 0.15,0.13
-            pos_hint: {"center_x": 0.88, "center_y": 0.75}
+            pos_hint: {"center_x": 0.88, "center_y": 0.40}
             background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/OrbitUnlit.png'
             text: ''
             font_size: 30
@@ -140,22 +152,22 @@
             font_size: 20
         Button:
             id: mimicstartbutton
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.12, "center_y": 0.5}
+            size_hint: 0.1,0.1
+            pos_hint: {"center_x": 0.12, "center_y": 0.15}
             text: 'Transmit'
             disabled: False
-            font_size: 30
+            font_size: 20
             on_release: mimicstartbutton.text = 'Sending...'
             on_release: root.changeMimicBoolean(True)
             on_release: mimicstopbutton.disabled = False
             on_release: mimicstartbutton.disabled = True
         Button:
             id: mimicstopbutton
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.12, "center_y": 0.4}
+            size_hint: 0.1,0.1
+            pos_hint: {"center_x": 0.27, "center_y": 0.15}
             text: 'Stop'
             disabled: True
-            font_size: 30
+            font_size: 20
             on_release: mimicstartbutton.text = 'Transmit'
             on_release: root.changeMimicBoolean(False)
             on_release: root.changeSwitchBoolean(False)
@@ -163,10 +175,10 @@
             on_release: mimicstartbutton.disabled = False
         Button:
             id: fakeBGAstart
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.87, "center_y": 0.30}
+            size_hint: 0.1,0.1
+            pos_hint: {"center_x": 0.72, "center_y": 0.15}
             text: 'Start BGA'
-            font_size: 30
+            font_size: 20
             width: 50
             height: 20
             on_release: fakeBGAstop.disabled = False
@@ -176,10 +188,10 @@
             on_release: root.startBGA()
         Button:
             id: fakeBGAstop
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.87, "center_y": 0.20}
+            size_hint: 0.1,0.1
+            pos_hint: {"center_x": 0.87, "center_y": 0.15}
             text: 'Stop BGA'
-            font_size: 30
+            font_size: 20
             disabled: True
             width: 50
             height: 20
@@ -189,10 +201,10 @@
             on_release: root.stopBGA()
         Button:
             id: startTelemetry
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.87, "center_y": 0.52}
+            size_hint: 0.1,0.1
+            pos_hint: {"center_x": 0.42, "center_y": 0.15}
             text: 'Start Telem'
-            font_size: 30
+            font_size: 20
             width: 50
             height: 20
             on_release: stopTelemetry.disabled = False
@@ -202,10 +214,10 @@
             on_release: root.startproc()
         Button:
             id: stopTelemetry
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.87, "center_y": 0.42}
+            size_hint: 0.1,0.1
+            pos_hint: {"center_x": 0.57, "center_y": 0.15}
             text: 'Stop Telem'
-            font_size: 30
+            font_size: 20
             width: 50
             height: 20
             disabled: True
