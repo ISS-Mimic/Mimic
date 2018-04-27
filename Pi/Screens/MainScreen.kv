@@ -31,55 +31,61 @@
             size_hint: 0.0,0.0
             pos_hint: {"center_x": 0.25, "center_y": 0.25}
         Button:
-            size_hint: 0.3,0.1
-            pos_hint: {"center_x": 0.2, "center_y": 0.3}
-            text: 'Fake Orbit'
+            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/MainSimulateButton.png'
+            size_hint: 0.15,0.4
+            pos_hint: {"center_x": 0.68, "center_y": 0.37}
+            text: ''
             font_size: 30
             width: 50
             height: 20
             on_release: root.manager.current = 'fakeorbit'
         Button:
-            size_hint: 0.1,0.15
-            pos_hint: {"center_x": 0.9, "center_y": 0.3}
-            background_normal: '/home/pi/Mimic/Pi/imgs/Settings_Icon.png'
-            canvas.before:
-                PushMatrix
-                Rotate:
-                    angle: 0
-                    axis: 0,0,1
-                    origin: self.center
-            canvas.after:
-                PopMatrix
+            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/MainSettingsButton.png'
+            size_hint: 0.15,0.18
+            pos_hint: {"center_x": 0.85, "center_y": 0.47}
             text: ''
+            font_size: 30
+            width: 50
+            height:20
             on_release: root.manager.current = 'settings'
-        BoxLayout:
-            size_hint_y: None
-            Button:
-                text: 'Control'
-                font_size: 30
-                width: 50
-                height: 20
-                on_press: root.changeManualControlBoolean(True)
-                on_release: root.manager.current = 'manualcontrol'
-            Button:
-                text: 'Calibrate'
-                font_size: 30
-                width: 50
-                height: 20
-                on_release: root.manager.current = 'calibrate'
-                on_release: my_button.disabled = False
-            Button:
-                id: my_button
-                text: 'Mimic'
-                disabled: False
-                font_size: 30
-                width: 50
-                height: 20
-                on_release: app.root.current = 'mimic'
-            Button:
-                text: 'Exit'
-                font_size: 30
-                width: 50
-                height: 20
-                on_press: root.killproc()
-                on_release: app.stop(*args)
+        Button:
+            size_hint: 0.15,0.4
+            pos_hint: {"center_x": 0.15, "center_y": 0.37}
+            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/MainControlButton.png'
+            text: ''
+            font_size: 30
+            width: 50
+            height: 20
+            on_press: root.changeManualControlBoolean(True)
+            on_release: root.manager.current = 'manualcontrol'
+        Button:
+            size_hint: 0.15,0.4
+            pos_hint: {"center_x": 0.33, "center_y": 0.37}
+            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/MainCalibrateButton.png'
+            text: ''
+            font_size: 30
+            width: 50
+            height: 20
+            on_release: root.manager.current = 'calibrate'
+            on_release: my_button.disabled = False
+        Button:
+            id: my_button
+            size_hint: 0.15,0.4
+            pos_hint: {"center_x": 0.505, "center_y": 0.37}
+            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/MainMimicButton.png'
+            text: ''
+            disabled: False
+            font_size: 30
+            width: 50
+            height: 20
+            on_release: app.root.current = 'mimic'
+        Button:
+            size_hint: 0.15,0.18
+            pos_hint: {"center_x": 0.85, "center_y": 0.27}
+            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/MainExitButton.png'
+            text: ''
+            font_size: 30
+            width: 50
+            height: 20
+            on_press: root.killproc()
+            on_release: app.stop(*args)
