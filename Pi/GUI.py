@@ -464,7 +464,6 @@ channel3B_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1
 channel4A_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
 channel4B_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
 USOS_Power = 0.0
-ISS_total_power = 0.0
 latitude = 0.00
 longitude = 0.00
 sizeX = 0.00
@@ -1551,6 +1550,7 @@ class MainApp(App):
             self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.changeColors(1,0,0)
         else:
             self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
@@ -1559,6 +1559,7 @@ class MainApp(App):
             self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            self.changeColors(1,0.5,0)
         self.orbit_screen.ids.signal.size_hint_y = 0.112
         self.mimic_screen.ids.signal.size_hint_y = 0.112
         self.eps_screen.ids.signal.size_hint_y = 0.112
@@ -1577,6 +1578,7 @@ class MainApp(App):
             self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.changeColors(1,0,0)
         else:
             self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
             self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
@@ -1585,6 +1587,7 @@ class MainApp(App):
             self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
             self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
             self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
+            self.changeColors(1,0,0)
 
         self.orbit_screen.ids.signal.anim_delay = 0.4
         self.mimic_screen.ids.signal.anim_delay = 0.4
@@ -1611,6 +1614,7 @@ class MainApp(App):
             self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.changeColors(1,0,0)
         else:
             self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
             self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
@@ -1619,6 +1623,7 @@ class MainApp(App):
             self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
             self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
             self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
+            self.changeColors(0,1,0)
         self.orbit_screen.ids.signal.anim_delay = 0.05
         self.mimic_screen.ids.signal.anim_delay = 0.05
         self.eps_screen.ids.signal.anim_delay = 0.05
@@ -1644,6 +1649,7 @@ class MainApp(App):
             self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.changeColors(1,0,0)
         else:
             self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
@@ -1652,6 +1658,7 @@ class MainApp(App):
             self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            self.changeColors(1,0.5,0)
         self.orbit_screen.ids.signal.anim_delay = 0.12
         self.mimic_screen.ids.signal.anim_delay = 0.12
         self.eps_screen.ids.signal.anim_delay = 0.12
@@ -1671,7 +1678,7 @@ class MainApp(App):
         global mimicbutton,switchtofake,fakeorbitboolean,psarj2,ssarj2,manualcontrol,psarj,ssarj,ptrrj,strrj,beta1b,beta1a,beta2b,beta2a,beta3b,beta3a,beta4b,beta4a,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,c1a,c1b,c3a,c3b,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress,oldAirlockPump,obtained_EVA_crew,EVAstartTime,beta1a2,beta1b2,beta2a2,beta2b2,beta3a2,beta3b2,beta4a2,beta4b2
         global holdstartTime, LS_Subscription, SerialConnection
         global eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
-        global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power, ISS_total_power
+        global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power
         
         if SerialConnection1 or SerialConnection2 or SerialConnection3 or SerialConnection4:
             if mimicbutton:
@@ -1789,7 +1796,7 @@ class MainApp(App):
         power_4b = float(v4b) * float(c4b)
         
         USOS_Power = power_1a + power_1b + power_2a + power_2b + power_3a + power_3b + power_4a + power_4b
-        self.eps_screen.ids.usos_power.text = str(USOS_Power*-1.0)
+        self.eps_screen.ids.usos_power.text = str("{:.0f}".format(USOS_Power*-1.0)) + " W"
 
         avg_total_voltage = (float(v1a)+float(v1b)+float(v2a)+float(v2b)+float(v3a)+float(v3b)+float(v4a)+float(v4b))/8.0
 
@@ -2136,7 +2143,7 @@ class MainApp(App):
         self.us_eva.ids.EVA_psi_bar.pos_hint = {"center_x": psi_bar_x, "center_y": 0.56} 
        
         if float(aos) == 1.00:
-            self.changeColors(0,1,0)
+            #self.changeColors(0,1,0)
             if self.root.current == 'mimic':
                fakeorbitboolean = False
                if mimicbutton == True:
@@ -2146,12 +2153,12 @@ class MainApp(App):
             else:
                 self.signal_unsubscribed()
         elif float(aos) == 0.00:
-            self.changeColors(1,0,0)
+            #self.changeColors(1,0,0)
             if self.root.current == 'mimic':
                fakeorbitboolean = True
             self.signal_lost()
         elif float(aos) == 2.00:
-            self.changeColors(1,0.5,0)
+            #self.changeColors(1,0.5,0)
             if self.root.current == 'mimic':
                fakeorbitboolean = True
             self.signal_stale()
