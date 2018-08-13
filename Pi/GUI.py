@@ -36,6 +36,7 @@ from kivy.clock import Clock
 from kivy.properties import ListProperty
 from kivy.properties import ObjectProperty
 from kivy.properties import NumericProperty
+from kivy.properties import ReferenceListProperty
 from kivy.vector import Vector
 from kivy.core.window import Window
 from kivy.lang import Builder
@@ -49,7 +50,6 @@ from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, WipeTransition, SwapTransition
 import tweepy
 import xml.etree.ElementTree as etree
-
 
 # Twitter API credentials
 consumerKey = ''
@@ -565,7 +565,6 @@ depress1 = False
 depress2 = False
 leakhold = False
 repress = False
-
 TLE_acquired = False
 
 EVA_picture_urls = []
@@ -782,27 +781,31 @@ class Orbit_Screen(Screen, EventDispatcher):
     pass
 
 class EPS_Screen(Screen, EventDispatcher):
-    pass
+    signalcolor = ObjectProperty([1,1,1])
 
 class CT_Screen(Screen, EventDispatcher):
-    pass
+    signalcolor = ObjectProperty([1,1,1])
 
 class EVA_Main_Screen(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1,1,1])
     pass
 
 class EVA_US_Screen(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1,1,1])
     pass
 
 class EVA_RS_Screen(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1,1,1])
     pass
 
 class EVA_Pictures(Screen, EventDispatcher):
     pass
 
 class TCS_Screen(Screen, EventDispatcher):
-    pass
+    signalcolor = ObjectProperty([1,1,1])
 
 class RS_Screen(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1,1,1])
     pass
 
 class Crew_Screen(Screen, EventDispatcher):
@@ -853,7 +856,7 @@ class MainApp(App):
         global startup
         global crewjsonsuccess
         global stopAnimation
-
+        
         self.main_screen = MainScreen(name = 'main')
         self.calibrate_screen = CalibrateScreen(name = 'calibrate')
         self.control_screen = ManualControlScreen(name = 'manualcontrol')
@@ -894,18 +897,15 @@ class MainApp(App):
         Clock.schedule_interval(self.deleteURLPictures, 86400)
         Clock.schedule_interval(self.animate3,0.1)
         Clock.schedule_interval(self.orbitUpdate, 5)
-        Clock.schedule_interval(self.checkCrew, 3600)
+        Clock.schedule_interval(self.checkCrew, 120)
         Clock.schedule_interval(self.checkTwitter, 65) #change back to 65 after testing
         Clock.schedule_interval(self.changePictures, 10)
-        if internet == True and crewjsonsuccess == False: #check crew every 10s until success then once per hour
-            Clock.schedule_once(self.checkCrew, 10)
         if startup == True:
             startup = False
 
-        #if TLE_acquired == False:
-        #    print "check tle"
-        #    Clock.schedule_once(self.getTLE)
-        Clock.schedule_interval(self.getTLE, 3600)
+        Clock.schedule_once(self.getTLE, 30)
+        Clock.schedule_interval(self.getTLE, 600)
+        #Clock.schedule_interval(self.getTLE, 3600)
         Clock.schedule_interval(self.check_internet, 10)
         return root
 
@@ -914,22 +914,22 @@ class MainApp(App):
 
         def on_success(req, result):
             global internet
-            #print "success"
+            #print "internet success"
             internet = True
 
         def on_redirect(req, result):
             global internet
-            #print "redirect"
+            #print "internet redirect"
             internet = True
 
         def on_failure(req, result):
             global internet
-            #print "failure"
+            #print "internet failure"
             internet = False
 
         def on_error(req, result):
             global internet
-            #print "error"
+            #print "internet error"
             internet = False
 
         req = UrlRequest("http://google.com", on_success, on_redirect, on_failure, on_error, timeout=1)
@@ -1277,35 +1277,14 @@ class MainApp(App):
         #   mimiclog.write('\n')
 
     def changeColors(self, *args):   #this function sets all labels on mimic screen to a certain color based on signal status
-        self.eps_screen.ids.psarj_value.color = args[0],args[1],args[2]
-        self.eps_screen.ids.ssarj_value.color = args[0],args[1],args[2]
-        self.tcs_screen.ids.ptrrj_value.color = args[0],args[1],args[2]
-        self.tcs_screen.ids.strrj_value.color = args[0],args[1],args[2]
-        self.eps_screen.ids.beta1a_value.color = args[0],args[1],args[2]
-        self.eps_screen.ids.beta1b_value.color = args[0],args[1],args[2]
-        self.eps_screen.ids.beta2a_value.color = args[0],args[1],args[2]
-        self.eps_screen.ids.beta2b_value.color = args[0],args[1],args[2]
-        self.eps_screen.ids.beta3a_value.color = args[0],args[1],args[2]
-        self.eps_screen.ids.beta3b_value.color = args[0],args[1],args[2]
-        self.eps_screen.ids.beta4a_value.color = args[0],args[1],args[2]
-        self.eps_screen.ids.beta4b_value.color = args[0],args[1],args[2]
-        
-        self.eps_screen.ids.c1a_value.color = args[0],args[1],args[2]
-        self.eps_screen.ids.v1a_value.color = args[0],args[1],args[2]
-        self.eps_screen.ids.c1b_value.color = args[0],args[1],args[2]
-        self.eps_screen.ids.v1b_value.color = args[0],args[1],args[2]
-        self.eps_screen.ids.c2a_value.color = args[0],args[1],args[2]
-        self.eps_screen.ids.v2a_value.color = args[0],args[1],args[2]
-        self.eps_screen.ids.c2b_value.color = args[0],args[1],args[2]
-        self.eps_screen.ids.v2b_value.color = args[0],args[1],args[2]
-        self.eps_screen.ids.c3a_value.color = args[0],args[1],args[2]
-        self.eps_screen.ids.v3a_value.color = args[0],args[1],args[2]
-        self.eps_screen.ids.c3b_value.color = args[0],args[1],args[2]
-        self.eps_screen.ids.v3b_value.color = args[0],args[1],args[2]
-        self.eps_screen.ids.c4a_value.color = args[0],args[1],args[2]
-        self.eps_screen.ids.v4a_value.color = args[0],args[1],args[2]
-        self.eps_screen.ids.c4b_value.color = args[0],args[1],args[2]
-        self.eps_screen.ids.v4b_value.color = args[0],args[1],args[2]
+        #the signalcolor is a kv property that will update all signal status dependant values to whatever color is received by this function 
+        self.tcs_screen.signalcolor = args[0],args[1],args[2]
+        self.eps_screen.signalcolor = args[0],args[1],args[2]
+        self.ct_screen.signalcolor = args[0],args[1],args[2]
+        self.orbit_screen.signalcolor = args[0],args[1],args[2]
+        self.us_eva.signalcolor = args[0],args[1],args[2]
+        self.rs_eva.signalcolor = args[0],args[1],args[2]
+        self.eva_main.signalcolor = args[0],args[1],args[2]
     
     def changeManualControlBoolean(self, *args):
         global manualcontrol
@@ -1322,8 +1301,8 @@ class MainApp(App):
             longitude = float(str(longitude).split(':')[0]) + float(str(longitude).split(':')[1])/60 + float(str(longitude).split(':')[2])/3600
             coordinates = ((latitude,longitude),(latitude,longitude))
             #results = reverse_geocode.search(coordinates)
-            overcountry =  results[0]['country']
-            self.mimic_screen.ids.iss_over_country.text = "The ISS is over " + overcountry
+            #overcountry =  results[0]['country']
+            #self.mimic_screen.ids.iss_over_country.text = "The ISS is over " + overcountry
             #converting lat lon to x,y for map
             fromLatSpan = 180.0
             fromLonSpan = 360.0
@@ -1367,14 +1346,15 @@ class MainApp(App):
             location.lat         = '29:45:43'
             location.elevation   = 10
             location.name        = 'location'
-            location.horizon    = '20'
+            location.horizon    = '10'
             location.date = datetime.utcnow()
             tle_rec.compute(location)
             nextpassinfo = location.next_pass(tle_rec)
-            self.orbit_screen.ids.iss_next_pass.text = str(nextpassinfo[0]) #display number of orbits since utc midnight
-
+            self.orbit_screen.ids.iss_next_pass1.text = str(nextpassinfo[0]).split()[0] #display next pass time
+            self.orbit_screen.ids.iss_next_pass2.text = str(nextpassinfo[0]).split()[1] #display next pass time
 
     def getTLE(self, *args):
+        #print "inside getTLE"
         global tle_rec, line1, line2, TLE_acquired
         def process_tag_text(tag_text):
             firstTLE = True
@@ -1386,7 +1366,6 @@ class MainApp(App):
                     next(text)
                     results.append('\n'.join(
                         (next(text), next(text), next(text))))
-            TLE_acquired = True
             return results
         
         req = urllib2.urlopen('http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html')
@@ -1404,7 +1383,10 @@ class MainApp(App):
             print line1
             print line2
             tle_rec = ephem.readtle("ISS (ZARYA)",str(line1),str(line2))
+            TLE_acquired = True
+            print "TLE Success!"
         else:
+            print "TLE not acquired"
             TLE_acquired = False
 
     def updateCrew(self, dt):
@@ -1444,7 +1426,7 @@ class MainApp(App):
                 number_of_space = int(data['number'])
                 for num in range(1,number_of_space+1):
                     if(str(data['people'][num-1]['location']) == str("International Space Station")):
-                        crewmember[isscrew] = str(data['people'][num-1]['name'])
+                        crewmember[isscrew] = (data['people'][num-1]['name']).encode('utf-8')
                         crewmemberbio[isscrew] = (data['people'][num-1]['bio'])
                         crewmembertitle[isscrew] = str(data['people'][num-1]['title'])
                         datetime_object = datetime.strptime(str(data['people'][num-1]['launchdate']),'%Y-%m-%d')

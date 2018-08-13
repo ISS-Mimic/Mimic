@@ -49,7 +49,7 @@
             pos_hint: {"center_x": 0.83, "center_y": 0.61}
             text: '0.00'
             markup: True
-            color: 1,1,1
+            color: root.signalcolor 
             font_size: 20
         Image:
             id: Hold_bar
@@ -78,7 +78,7 @@
             text: 'Airlock Pump Switch Off'
             text_size: self.width, None
             markup: True
-            color: 0,0,0
+            color: root.signalcolor 
             font_size: 20
         Label:
             id: pumpvoltage
@@ -87,7 +87,7 @@
             text: 'Airlock Pump Power Off'
             text_size: self.width, None
             markup: True
-            color: 0,0,0
+            color: root.signalcolor 
             font_size: 20
         AsyncImage:
             id: EV1_Pic
@@ -233,16 +233,6 @@
             anim_loop: 0
             keep_ratio: True
             pos_hint: {"center_x": 0.05, "center_y": 0.07}
-            ##angle: 0
-            ##canvas.before:
-            ##    PushMatrix
-            ##    Scale:
-            ##        x: -1
-            ##        y: 1
-            ##        z: 1
-            ##        origin: self.center
-            ##canvas.after:
-            ##    PopMatrix
         Button:
             size_hint: 0.1,0.11
             ##pos_hint: {"Left": 1, "Bottom": 1}

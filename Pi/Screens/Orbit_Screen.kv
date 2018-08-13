@@ -8,13 +8,13 @@
             id: Orbit_background
             source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitBase.png'
             allow_stretch: False
-        ##AsyncImage:
-        ##    id: OrbitMap
-        ##    source: '/home/pi/Mimic/Pi/imgs/orbit/map.jpg'
-        ##    pos_hint: {"center_x": 0.5, "center_y": 0.56}
-        ##    size_hint_y: 0.598
-        ##    allow_stretch: False
-        ##    keep_ratio: True
+        AsyncImage:
+            id: OrbitMap
+            source: '/home/pi/Mimic/Pi/imgs/orbit/map.jpg'
+            pos_hint: {"center_x": 0.5, "center_y": 0.56}
+            size_hint_y: 0.598
+            allow_stretch: False
+            keep_ratio: True
         Image:
             id: OrbitISStiny
             source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitYellowISSicon.png'
@@ -37,9 +37,24 @@
             color: 1,1,1
             font_size: 26
         Label:
-            id: iss_next_pass
-            pos_hint: {"center_x": 0.5, "center_y": 0.2}
-            text: ''
+            id: iss_next_pass1
+            pos_hint: {"center_x": 0.92, "center_y": 0.6}
+            text: '-----'
+            size_hint_y: None
+            size_hint_x: 0.1
+            halign: 'center'
+            text_size: self.width, None
+            markup: True
+            color: 1,1,1
+            font_size: 16
+        Label:
+            id: iss_next_pass2
+            pos_hint: {"center_x": 0.92, "center_y": 0.55}
+            text: '-----'
+            size_hint_y: None
+            size_hint_x: 0.1
+            halign: 'center'
+            text_size: self.width, None
             markup: True
             color: 1,1,1
             font_size: 16
