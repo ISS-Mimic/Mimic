@@ -566,6 +566,7 @@ depress2 = False
 leakhold = False
 repress = False
 TLE_acquired = False
+stationmode = 0.00
 
 EVA_picture_urls = []
 urlindex = 0
@@ -812,6 +813,7 @@ class Crew_Screen(Screen, EventDispatcher):
     pass
 
 class MimicScreen(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1,1,1])
     def changeMimicBoolean(self, *args):
         global mimicbutton
         mimicbutton = args[0]
@@ -1203,8 +1205,8 @@ class MainApp(App):
         def reset_color(*args):
             self.eva_main.ids.US_EVA_Button.background_color = (1,1,1,1)
         Clock.schedule_once(reset_color, 0.5) 
-		
-	def flashRS_EVAbutton(self, instace):
+
+    def flashRS_EVAbutton(self, instace):
         mimiclog.write(str(datetime.utcnow()))
         mimiclog.write(' ')
         mimiclog.write(str("flash rs eva button"))
@@ -1214,8 +1216,8 @@ class MainApp(App):
         def reset_color(*args):
             self.eva_main.ids.RS_EVA_Button.background_color = (1,1,1,1)
         Clock.schedule_once(reset_color, 0.5) 
-		
-	def flashEVAbutton(self, instace):
+
+    def flashEVAbutton(self, instace):
         mimiclog.write(str(datetime.utcnow()))
         mimiclog.write(' ')
         mimiclog.write(str("flash eva button"))
@@ -1306,6 +1308,7 @@ class MainApp(App):
         self.us_eva.signalcolor = args[0],args[1],args[2]
         self.rs_eva.signalcolor = args[0],args[1],args[2]
         self.eva_main.signalcolor = args[0],args[1],args[2]
+        self.mimic_screen.signalcolor = args[0],args[1],args[2]
     
     def changeManualControlBoolean(self, *args):
         global manualcontrol
@@ -1705,7 +1708,8 @@ class MainApp(App):
         global holdstartTime, LS_Subscription, SerialConnection
         global eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
         global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power
-        
+        global stationmode
+
         if SerialConnection1 or SerialConnection2 or SerialConnection3 or SerialConnection4:
             if mimicbutton:
                 self.mimic_screen.ids.mimicstartbutton.disabled = True
@@ -1811,12 +1815,9 @@ class MainApp(App):
         c3b = "{:.2f}".format(float((values[38])[0]))
         c4a = "{:.2f}".format(float((values[39])[0]))
         c4b = "{:.2f}".format(float((values[40])[0]))
-		
-		stationmode = "{:.2f}".format(float((values[46])[0])) #russian segment mode
-		
-
-		##US EPS Stuff---------------------------##
-		
+        stationmode = float((values[46])[0]) #russian segment mode same as usos mode
+        ##US EPS Stuff---------------------------##
+        
         power_1a = float(v1a) * float(c1a)
         power_1b = float(v1b) * float(c1b)
         power_2a = float(v2a) * float(c2a)
@@ -1852,25 +1853,25 @@ class MainApp(App):
         if EPSstorageindex > 9:
             EPSstorageindex = 0
         
-		
-		## Station Mode ##
-		
-		if stationmode == 1.0:
-			self.mimic_screen.stationmode_value.text = "Crew Rescue"
-		elif stationmode == 2.0:
-			self.mimic_screen.stationmode_value.text = "Survival"
-		elif stationmode == 3.0:
-			self.mimic_screen.stationmode_value.text = "Reboost"
-		elif stationmode == 4.0:
-			self.mimic_screen.stationmode_value.text = "Proximity Operations"
-		elif stationmode == 5.0:
-			self.mimic_screen.stationmode_value.text = "EVA"
-		elif stationmode == 6.0:
-			self.mimic_screen.stationmode_value.text = "Microgravity"
-		elif stationmode == 2.0:
-			self.mimic_screen.stationmode_value.text = "Standard"
-		else:
-			self.mimic_screen.stationmode_value.text = "n/a"
+
+        ## Station Mode ##
+
+        if stationmode == 1.0:
+            self.mimic_screen.ids.stationmode_value.text = "Crew Rescue"
+        elif stationmode == 2.0:
+            self.mimic_screen.ids.stationmode_value.text = "Survival"
+        elif stationmode == 3.0:
+            self.mimic_screen.ids.stationmode_value.text = "Reboost"
+        elif stationmode == 4.0:
+            self.mimic_screen.ids.stationmode_value.text = "Proximity Operations"
+        elif stationmode == 5.0:
+            self.mimic_screen.ids.stationmode_value.text = "EVA"
+        elif stationmode == 6.0:
+            self.mimic_screen.ids.stationmode_value.text = "Microgravity"
+        elif stationmode == 7.0:
+            self.mimic_screen.ids.stationmode_value.text = "Standard"
+        else:
+            self.mimic_screen.ids.stationmode_value.text = "n/a"
 
         ##-------------------EPS Stuff---------------------------##
 
@@ -1975,15 +1976,10 @@ class MainApp(App):
         if float(c4b) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
         
-		##-------------------EVA Functionality-------------------##
+        ##-------------------EVA Functionality-------------------##
         if stationmode == 5:
-			evaflashevent = Clock.schedule_once(self.flashEVAbutton, 1)
-		
-		##-------------------RS EVA Functionality-------------------##
-		##if eva station mode and not us eva
-		if airlock_pump_voltage == 0 and crewlockpres >= 734:
-			rsevaflashevent = Clock.schedule_once(self.flashRS_EVAbutton, 1)
-		
+            evaflashevent = Clock.schedule_once(self.flashEVAbutton, 1)
+    
         ##-------------------US EVA Functionality-------------------##
         
         airlock_pump_voltage = int((values[71])[0])
@@ -2082,6 +2078,12 @@ class MainApp(App):
             self.us_eva.ids.EVA_occuring.color = 0,0,1
             self.us_eva.ids.EVA_occuring.text = "Crewlock Repressurizing"
             self.us_eva.ids.Crewlock_Status_image.source = '/home/pi/Mimic/Pi/imgs/eva/RepressLights.png'
+        
+        ##-------------------RS EVA Functionality-------------------##
+        ##if eva station mode and not us eva
+        if airlock_pump_voltage == 0 and crewlockpres >= 734:
+            rsevaflashevent = Clock.schedule_once(self.flashRS_EVAbutton, 1)
+    
 
         ##-------------------EVA Functionality End-------------------##
 
