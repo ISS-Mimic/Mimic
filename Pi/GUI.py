@@ -4,6 +4,7 @@ import urllib2
 from bs4 import BeautifulSoup
 from calendar import timegm
 from datetime import datetime
+import pytz
 ## import reverse_geocode #test1uncomment
 import sys
 import ephem
@@ -1347,10 +1348,14 @@ class MainApp(App):
             location.name        = 'location'
             location.horizon    = '10'
             location.date = datetime.utcnow()
-            tle_rec.compute(location)
+            tle_rec.compute(location) #compute tle propagation based on provided location
             nextpassinfo = location.next_pass(tle_rec)
-            self.orbit_screen.ids.iss_next_pass1.text = str(nextpassinfo[0]).split()[0] #display next pass time
-            self.orbit_screen.ids.iss_next_pass2.text = str(nextpassinfo[0]).split()[1] #display next pass time
+            nextpassdatetime = datetime.strptime(str(nextpassinfo[0]),'%Y/%m/%d %H:%M:%S') #convert to datetime object for timezone conversion
+            nextpassinfo_format = nextpassdatetime.replace(tzinfo=pytz.utc)
+            localtimezone = pytz.timezone('America/Chicago')
+            localnextpass = nextpassinfo_format.astimezone(localtimezone)
+            self.orbit_screen.ids.iss_next_pass1.text = str(localnextpass).split()[0] #display next pass time
+            self.orbit_screen.ids.iss_next_pass2.text = str(localnextpass).split()[1].split('-')[0] #display next pass time
 
     def getTLE(self, *args):
         #print "inside getTLE"
