@@ -514,7 +514,7 @@ beta3bmc = 0.00
 beta3amc = 0.00
 beta4bmc = 0.00
 beta4amc = 0.00
-EVAinProgress = False
+US_EVAinProgress = False
 leak_hold = False
 firstcrossing = True
 oldAirlockPump = 0.00
@@ -1192,13 +1192,34 @@ class MainApp(App):
                     obtained_EVA_crew = True 
                     crew_mention = False
             
-    def flashEVAbutton(self, instace):
+    def flashUS_EVAbutton(self, instace):
+        mimiclog.write(str(datetime.utcnow()))
+        mimiclog.write(' ')
+        mimiclog.write(str("flash us eva button"))
+        mimiclog.write('\n')
+
+        self.eva_main.ids.US_EVA_Button.background_color = (0,0,1,1)
+        def reset_color(*args):
+            self.eva_main.ids.US_EVA_Button.background_color = (1,1,1,1)
+        Clock.schedule_once(reset_color, 0.5) 
+		
+	def flashRS_EVAbutton(self, instace):
+        mimiclog.write(str(datetime.utcnow()))
+        mimiclog.write(' ')
+        mimiclog.write(str("flash rs eva button"))
+        mimiclog.write('\n')
+
+        self.eva_main.ids.RS_EVA_Button.background_color = (0,0,1,1)
+        def reset_color(*args):
+            self.eva_main.ids.RS_EVA_Button.background_color = (1,1,1,1)
+        Clock.schedule_once(reset_color, 0.5) 
+		
+	def flashEVAbutton(self, instace):
         mimiclog.write(str(datetime.utcnow()))
         mimiclog.write(' ')
         mimiclog.write(str("flash eva button"))
         mimiclog.write('\n')
-        global EVAinProgress
-
+    
         self.mimic_screen.ids.EVA_button.background_color = (0,0,1,1)
         def reset_color(*args):
             self.mimic_screen.ids.EVA_button.background_color = (1,1,1,1)
@@ -1675,7 +1696,7 @@ class MainApp(App):
         self.rs_screen.ids.signal.size_hint_y = 0.112
 
     def update_labels(self, dt):
-        global mimicbutton,switchtofake,fakeorbitboolean,psarj2,ssarj2,manualcontrol,psarj,ssarj,ptrrj,strrj,beta1b,beta1a,beta2b,beta2a,beta3b,beta3a,beta4b,beta4a,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,c1a,c1b,c3a,c3b,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress,oldAirlockPump,obtained_EVA_crew,EVAstartTime,beta1a2,beta1b2,beta2a2,beta2b2,beta3a2,beta3b2,beta4a2,beta4b2
+        global mimicbutton,switchtofake,fakeorbitboolean,psarj2,ssarj2,manualcontrol,psarj,ssarj,ptrrj,strrj,beta1b,beta1a,beta2b,beta2a,beta3b,beta3a,beta4b,beta4a,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,US_EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,c1a,c1b,c3a,c3b,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress,oldAirlockPump,obtained_EVA_crew,EVAstartTime,beta1a2,beta1b2,beta2a2,beta2b2,beta3a2,beta3b2,beta4a2,beta4b2
         global holdstartTime, LS_Subscription, SerialConnection
         global eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
         global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power
@@ -1785,7 +1806,12 @@ class MainApp(App):
         c3b = "{:.2f}".format(float((values[38])[0]))
         c4a = "{:.2f}".format(float((values[39])[0]))
         c4b = "{:.2f}".format(float((values[40])[0]))
+		
+		stationmode = "{:.2f}".format(float((values[46])[0])) #russian segment mode
+		
 
+		##US EPS Stuff---------------------------##
+		
         power_1a = float(v1a) * float(c1a)
         power_1b = float(v1b) * float(c1b)
         power_2a = float(v2a) * float(c2a)
@@ -1821,6 +1847,25 @@ class MainApp(App):
         if EPSstorageindex > 9:
             EPSstorageindex = 0
         
+		
+		## Station Mode ##
+		
+		if stationmode == 1.0:
+			self.mimic_screen.stationmode_value.text = "Crew Rescue"
+		elif stationmode == 2.0:
+			self.mimic_screen.stationmode_value.text = "Survival"
+		elif stationmode == 3.0:
+			self.mimic_screen.stationmode_value.text = "Reboost"
+		elif stationmode == 4.0:
+			self.mimic_screen.stationmode_value.text = "Proximity Operations"
+		elif stationmode == 5.0:
+			self.mimic_screen.stationmode_value.text = "EVA"
+		elif stationmode == 6.0:
+			self.mimic_screen.stationmode_value.text = "Microgravity"
+		elif stationmode == 2.0:
+			self.mimic_screen.stationmode_value.text = "Standard"
+		else:
+			self.mimic_screen.stationmode_value.text = "n/a"
 
         ##-------------------EPS Stuff---------------------------##
 
@@ -1925,8 +1970,16 @@ class MainApp(App):
         if float(c4b) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
         
-        
-        ##-------------------EVA Functionality-------------------##
+		##-------------------EVA Functionality-------------------##
+        if stationmode == 5:
+			evaflashevent = Clock.schedule_once(self.flashEVAbutton, 1)
+		
+		##-------------------RS EVA Functionality-------------------##
+		##if eva station mode and not us eva
+		if airlock_pump_voltage == 0 and crewlockpres >= 734:
+			rsevaflashevent = Clock.schedule_once(self.flashRS_EVAbutton, 1)
+		
+        ##-------------------US EVA Functionality-------------------##
         
         airlock_pump_voltage = int((values[71])[0])
         airlock_pump_voltage_timestamp = float((timestamps[71])[0])
@@ -1950,7 +2003,7 @@ class MainApp(App):
        
         ##activate EVA button flash
         if airlock_pump_voltage == 1 or crewlockpres < 734:
-            evaflashevent = Clock.schedule_once(self.flashEVAbutton, 1)
+            usevaflashevent = Clock.schedule_once(self.flashUS_EVAbutton, 1)
 
         ##No EVA Currently
         if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and crewlockpres > 740 and airlockpres > 740: 
