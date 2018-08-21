@@ -1309,6 +1309,7 @@ class MainApp(App):
         self.tcs_screen.signalcolor = args[0],args[1],args[2]
         self.eps_screen.signalcolor = args[0],args[1],args[2]
         self.ct_screen.signalcolor = args[0],args[1],args[2]
+        self.gnc_screen.signalcolor = args[0],args[1],args[2]
         self.orbit_screen.signalcolor = args[0],args[1],args[2]
         self.us_eva.signalcolor = args[0],args[1],args[2]
         self.rs_eva.signalcolor = args[0],args[1],args[2]
@@ -1823,20 +1824,17 @@ class MainApp(App):
         
         stationmode = float((values[46])[0]) #russian segment mode same as usos mode
         
+        rollerror = float((values[165])[0]) 
+        pitcherror = float((values[166])[0]) 
+        yawerror = float((values[167])[0]) 
+
         quaternion0 = float((values[171])[0])
         quaternion1 = float((values[172])[0])
         quaternion2 = float((values[173])[0])
         quaternion3 = float((values[174])[0])
         
-        roll = math.atan2(2.0 * (quaternion0 * quaternion1 + quaternion2 * quaternion3), 1.0 - 2.0 * (quaternion1 * quaternion1 + quaternion2 * quaternion2))
-        pitch = math.asin(max(-1.0, min(1.0, 2.0 * (quaternion0 * quaternion2 - quaternion3 * quaternion1))))
-        yaw = math.atan2(2.0 * (quaternion0 * quaternion3 + quaternion1 * quaternion2), 1.0 - 2.0 * (quaternion2 * quaternion2 + quaternion3 * quaternion3))
-        
-        print "roll " + roll
-        print "pitch " + pitch
-        print "yaw " + yaw
-        
         ##US EPS Stuff---------------------------##
+
         solarbeta = "{:.2f}".format(float((values[176])[0]))
         
         power_1a = float(v1a) * float(c1a)
@@ -1897,7 +1895,13 @@ class MainApp(App):
             
         ##-------------------GNC Stuff---------------------------##    
         
+        roll = math.degrees(math.atan2(2.0 * (quaternion0 * quaternion1 + quaternion2 * quaternion3), 1.0 - 2.0 * (quaternion1 * quaternion1 + quaternion2 * quaternion2))) + rollerror
+        pitch = math.degrees(math.asin(max(-1.0, min(1.0, 2.0 * (quaternion0 * quaternion2 - quaternion3 * quaternion1))))) + pitcherror
+        yaw = math.degrees(math.atan2(2.0 * (quaternion0 * quaternion3 + quaternion1 * quaternion2), 1.0 - 2.0 * (quaternion2 * quaternion2 + quaternion3 * quaternion3))) + yawerror
         
+        self.gnc_screen.ids.yaw.text = str("{:.2f}".format(yaw))
+        self.gnc_screen.ids.pitch.text = str("{:.2f}".format(pitch))
+        self.gnc_screen.ids.roll.text = str("{:.2f}".format(roll))
         
 
         ##-------------------EPS Stuff---------------------------##
