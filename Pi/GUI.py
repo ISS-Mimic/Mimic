@@ -787,6 +787,9 @@ class EPS_Screen(Screen, EventDispatcher):
 class CT_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1,1,1])
 
+class GNC_Screen(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1,1,1])
+
 class EVA_Main_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1,1,1])
     pass
@@ -867,6 +870,7 @@ class MainApp(App):
         self.mimic_screen = MimicScreen(name = 'mimic')
         self.eps_screen = EPS_Screen(name = 'eps')
         self.ct_screen = CT_Screen(name = 'ct')
+        self.gnc_screen = GNC_Screen(name = 'gnc')
         self.tcs_screen = TCS_Screen(name = 'tcs')
         self.crew_screen = Crew_Screen(name = 'crew')
         self.settings_screen = Settings_Screen(name = 'settings')
@@ -885,6 +889,7 @@ class MainApp(App):
         root.add_widget(self.orbit_screen)
         root.add_widget(self.eps_screen)
         root.add_widget(self.ct_screen)
+        root.add_widget(self.gnc_screen)
         root.add_widget(self.us_eva)
         root.add_widget(self.rs_eva)
         root.add_widget(self.rs_screen)
@@ -1817,6 +1822,7 @@ class MainApp(App):
         c4b = "{:.2f}".format(float((values[40])[0]))
         stationmode = float((values[46])[0]) #russian segment mode same as usos mode
         ##US EPS Stuff---------------------------##
+        solarbeta = "{:.2f}".format(float((values[176])[0]))
         
         power_1a = float(v1a) * float(c1a)
         power_1b = float(v1b) * float(c1b)
@@ -1829,6 +1835,7 @@ class MainApp(App):
         
         USOS_Power = power_1a + power_1b + power_2a + power_2b + power_3a + power_3b + power_4a + power_4b
         self.eps_screen.ids.usos_power.text = str("{:.0f}".format(USOS_Power*-1.0)) + " W"
+        self.eps_screen.ids.solarbeta.text = str(solarbeta)
 
         avg_total_voltage = (float(v1a)+float(v1b)+float(v2a)+float(v2b)+float(v3a)+float(v3b)+float(v4a)+float(v4b))/8.0
 
@@ -2252,6 +2259,7 @@ Builder.load_file('/home/pi/Mimic/Pi/Screens/FakeOrbitScreen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/Orbit_Screen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/EPS_Screen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/CT_Screen.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/GNC_Screen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/TCS_Screen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/EVA_US_Screen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/EVA_RS_Screen.kv')
@@ -2274,6 +2282,7 @@ ScreenManager:
     Orbit_Screen:
     EPS_Screen:
     CT_Screen:
+    GNC_Screen:
     TCS_Screen:
     EVA_US_Screen:
     EVA_RS_Screen:
