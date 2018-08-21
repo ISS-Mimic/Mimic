@@ -1818,15 +1818,18 @@ class MainApp(App):
         
         stationmode = float((values[46])[0]) #russian segment mode same as usos mode
         
-        quaternion0 = (values[171])[0]
-        quaternion1 = (values[172])[0]
-        quaternion2 = (values[173])[0]
-        quaternion3 = (values[174])[0]
-
-        print quaternion0
-        print quaternion1
-        print quaternion2
-        print quaternion3
+        quaternion0 = float((values[171])[0])
+        quaternion1 = float((values[172])[0])
+        quaternion2 = float((values[173])[0])
+        quaternion3 = float((values[174])[0])
+        
+        roll = math.atan2(2.0 * (quaternion0 * quaternion1 + quaternion2 * quaternion3), 1.0 - 2.0 * (quaternion1 * quaternion1 + quaternion2 * quaternion2))
+        pitch = math.asin(max(-1.0, min(1.0, 2.0 * (quaternion0 * quaternion2 - quaternion3 * quaternion1))))
+        yaw = math.atan2(2.0 * (quaternion0 * quaternion3 + quaternion1 * quaternion2), 1.0 - 2.0 * (quaternion2 * quaternion2 + quaternion3 * quaternion3))
+        
+        print "roll " + roll
+        print "pitch " + pitch
+        print "yaw " + yaw
         
         ##US EPS Stuff---------------------------##
         
