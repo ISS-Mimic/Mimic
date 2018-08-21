@@ -86,6 +86,7 @@ auth.set_access_token(accessToken, accessTokenSecret)
 api = tweepy.API(auth)
 
 mimiclog = open('/home/pi/Mimic/Pi/Logs/mimiclog.txt','w')
+sgantlog = open('/home/pi/Mimic/Pi/Logs/sgantlog.txt','w')
 locationlog = open('/home/pi/Mimic/Pi/Logs/locationlog.txt','a')
 
 
@@ -171,7 +172,7 @@ c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta3b','1216.72355444445','1
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta3a','1216.72669444442','249.076538085938','S4000008',10)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta4b','1216.72669444442','69.818115234375','P6000007',11)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta4a','1216.7269722222','14.3975830078125','P4000008',12)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('aos','1216.72733833333','1','AOS',13)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('aos','1216.72733833333','2','AOS',13)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('los','7084.92338888884','0','LOS',14)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('sasa1_elevation','1216.7273047222','101.887496948242','S1000005',15)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('sgant_elevation','1216.72727777772','105.172134399414','Z1000014',16)");
@@ -464,8 +465,6 @@ channel3A_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1
 channel3B_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
 channel4A_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
 channel4B_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
-latitude = 0.00
-longitude = 0.00
 sizeX = 0.00
 sizeY = 0.00
 psarj2 = 1.0
@@ -476,6 +475,8 @@ new_x2 = 0
 new_y2 = 0
 aos = 0.00
 los = 0.00
+sgant_elevation = 0.00
+sgant_xelevation = 0.00
 seconds2 = 260
 timenew = float(time.time())
 timeold = 0.00
@@ -1296,7 +1297,7 @@ class MainApp(App):
         manualcontrol = args[0]
        
     def orbitUpdate(self, dt):
-        global overcountry, latitude, longitude, tle_rec, line1, line2, TLE_acquired
+        global overcountry, tle_rec, line1, line2, TLE_acquired, sgant_elevation, sgant_xelevation, aos
         if TLE_acquired:
             tle_rec.compute()
             #------------------Latitude/Longitude Stuff---------------------------
@@ -1305,6 +1306,20 @@ class MainApp(App):
             latitude = float(str(latitude).split(':')[0]) + float(str(latitude).split(':')[1])/60 + float(str(latitude).split(':')[2])/3600
             longitude = float(str(longitude).split(':')[0]) + float(str(longitude).split(':')[1])/60 + float(str(longitude).split(':')[2])/3600
             coordinates = ((latitude,longitude),(latitude,longitude))
+            
+            #sgantlog.write(str(datetime.utcnow()))
+            #sgantlog.write(' ')
+            #sgantlog.write(str(sgant_elevation))
+            #sgantlog.write(' ')
+            #sgantlog.write(str(sgant_xelevation))
+            #sgantlog.write(' ')
+            #sgantlog.write(str(latitude))
+            #sgantlog.write(' ')
+            #sgantlog.write(str(longitude))
+            #sgantlog.write(' ')
+            #sgantlog.write(str(aos))
+            #sgantlog.write('\n')
+            
             #results = reverse_geocode.search(coordinates)
             #overcountry =  results[0]['country']
             #self.mimic_screen.ids.iss_over_country.text = "The ISS is over " + overcountry
@@ -1361,6 +1376,12 @@ class MainApp(App):
             localnextpass = nextpassinfo_format.astimezone(localtimezone)
             self.orbit_screen.ids.iss_next_pass1.text = str(localnextpass).split()[0] #display next pass time
             self.orbit_screen.ids.iss_next_pass2.text = str(localnextpass).split()[1].split('-')[0] #display next pass time
+            timeuntilnextpass = nextpassinfo[0] - location.date
+            #print timeuntilnextpass
+            nextpasshours = timeuntilnextpass*24.0
+            nextpassmins = (nextpasshours-math.floor(nextpasshours))*60
+            nextpassseconds = (nextpassmins-math.floor(nextpassmins))*60
+            self.orbit_screen.ids.countdown.text = str("{:.0f}".format(math.floor(nextpasshours))) + ":" + str("{:.0f}".format(math.floor(nextpassmins))) + ":" + str("{:.1f}".format(nextpassseconds)) #display time until next pass
 
     def getTLE(self, *args):
         #print "inside getTLE"
@@ -1689,7 +1710,7 @@ class MainApp(App):
         global holdstartTime, LS_Subscription, SerialConnection
         global eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
         global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power
-        global stationmode
+        global stationmode, sgant_elevation, sgant_xelevation
 
         if SerialConnection1 or SerialConnection2 or SerialConnection3 or SerialConnection4:
             if mimicbutton:
@@ -1770,8 +1791,10 @@ class MainApp(App):
         aos = "{:.2f}".format(int((values[12])[0]))
         los = "{:.2f}".format(int((values[13])[0]))      
         sasa_el = "{:.2f}".format(float((values[14])[0]))
-        sgant_el = "{:.2f}".format(float((values[15])[0]))
-        difference = float(sgant_el)-float(sasa_el) 
+        
+        sgant_elevation = float((values[15])[0])
+        sgant_xelevation = float((values[17])[0])
+        
         v1a = "{:.2f}".format(float((values[25])[0]))
         channel1A_voltage[EPSstorageindex] = float(v1a)
         v1b = "{:.2f}".format(float((values[26])[0]))
@@ -2087,7 +2110,7 @@ class MainApp(App):
         
         ##-------------------RS EVA Functionality-------------------##
         ##if eva station mode and not us eva
-        if airlock_pump_voltage == 0 and crewlockpres >= 734:
+        if airlock_pump_voltage == 0 and crewlockpres >= 734 and stationmode == 5:
             rsevaflashevent = Clock.schedule_once(self.flashRS_EVAbutton, 1)
     
 

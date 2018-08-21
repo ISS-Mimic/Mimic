@@ -59,6 +59,17 @@
             color: 1,1,1
             font_size: 16
         Label:
+            id: countdown
+            pos_hint: {"center_x": 0.92, "center_y": 0.5}
+            text: '-----'
+            size_hint_y: None
+            size_hint_x: 0.1
+            halign: 'center'
+            text_size: self.width, None
+            markup: True
+            color: 1,1,1
+            font_size: 16
+        Label:
             id: latitude
             pos_hint: {"center_x": 0.12, "center_y": 0.22}
             text: '0.00'
