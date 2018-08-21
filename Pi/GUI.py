@@ -464,7 +464,6 @@ channel3A_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1
 channel3B_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
 channel4A_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
 channel4B_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
-USOS_Power = 0.0
 latitude = 0.00
 longitude = 0.00
 sizeX = 0.00
@@ -475,26 +474,6 @@ new_x = 0
 new_y = 0
 new_x2 = 0
 new_y2 = 0
-psarj = 0.00
-ssarj = 0.00
-ptrrj = 0.00
-strrj = 0.00
-beta1b = 0.00
-beta1a = 0.00
-beta2b = 0.00
-beta2a = 0.00
-beta3b = 0.00
-beta3a = 0.00
-beta4b = 0.00
-beta4a = 0.00
-beta1b2 = 0.00
-beta1a2 = 0.00
-beta2b2 = 0.00
-beta2a2 = 0.00
-beta3b2 = 0.00
-beta3a2 = 0.00
-beta4b2 = 0.00
-beta4a2 = 0.00
 aos = 0.00
 los = 0.00
 seconds2 = 260
@@ -528,10 +507,6 @@ velocity_z = 0.00
 velocity = 0.00
 altitude = 0.00
 mass = 0.00
-c1b = 0.00
-c1a = 0.00
-c3b = 0.00
-c3a = 0.00
 airlock_pump_voltage = 0
 crewlockpres = 758
 EVA_activities = False
@@ -1710,7 +1685,7 @@ class MainApp(App):
         self.rs_screen.ids.signal.size_hint_y = 0.112
 
     def update_labels(self, dt):
-        global mimicbutton,switchtofake,fakeorbitboolean,psarj2,ssarj2,manualcontrol,psarj,ssarj,ptrrj,strrj,beta1b,beta1a,beta2b,beta2a,beta3b,beta3a,beta4b,beta4a,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,US_EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,c1a,c1b,c3a,c3b,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress,oldAirlockPump,obtained_EVA_crew,EVAstartTime,beta1a2,beta1b2,beta2a2,beta2b2,beta3a2,beta3b2,beta4a2,beta4b2
+        global mimicbutton,switchtofake,fakeorbitboolean,psarj2,ssarj2,manualcontrol,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,US_EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress,oldAirlockPump,obtained_EVA_crew,EVAstartTime
         global holdstartTime, LS_Subscription, SerialConnection
         global eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
         global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power
