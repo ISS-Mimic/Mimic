@@ -1815,7 +1815,19 @@ class MainApp(App):
         c3b = "{:.2f}".format(float((values[38])[0]))
         c4a = "{:.2f}".format(float((values[39])[0]))
         c4b = "{:.2f}".format(float((values[40])[0]))
+        
         stationmode = float((values[46])[0]) #russian segment mode same as usos mode
+        
+        quaternion0 = (values[171])[0]
+        quaternion1 = (values[172])[0]
+        quaternion2 = (values[173])[0]
+        quaternion3 = (values[174])[0]
+
+        print quaternion0
+        print quaternion1
+        print quaternion2
+        print quaternion3
+        
         ##US EPS Stuff---------------------------##
         
         power_1a = float(v1a) * float(c1a)
@@ -1872,6 +1884,11 @@ class MainApp(App):
             self.mimic_screen.ids.stationmode_value.text = "Standard"
         else:
             self.mimic_screen.ids.stationmode_value.text = "n/a"
+            
+        ##-------------------GNC Stuff---------------------------##    
+        
+        
+        
 
         ##-------------------EPS Stuff---------------------------##
 
