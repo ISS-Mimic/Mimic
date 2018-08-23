@@ -1120,6 +1120,7 @@ class MainApp(App):
         self.orbit_screen.ids.TDRSe.pos_hint = {"center_x": scaleLatLon(0,-41)['newLon'], "center_y": scaleLatLon(0,-41)['newLat']}
         self.orbit_screen.ids.TDRSw.pos_hint = {"center_x": scaleLatLon(0,-174)['newLon'], "center_y": scaleLatLon(0,-174)['newLat']}
         self.orbit_screen.ids.TDRSz.pos_hint = {"center_x": scaleLatLon(0,85)['newLon'], "center_y": scaleLatLon(0,85)['newLat']}
+        self.orbit_screen.ids.ZOE.pos_hint = {"center_x": scaleLatLon(0,77)['newLon'], "center_y": scaleLatLon(0,77)['newLat']}
         
         if TLE_acquired:
             tle_rec.compute()
