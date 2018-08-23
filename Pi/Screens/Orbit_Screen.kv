@@ -15,6 +15,47 @@
             size_hint_y: 0.598
             allow_stretch: False
             keep_ratio: True
+        Widget:
+            id: mylocation
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            size_hint: '0.01dp', '0.02dp'
+            canvas:
+                Color:
+                    rgb: 0,0,1
+                Ellipse:
+                    pos: self.pos
+                    size: self.size
+        Widget:
+            id: TDRSe
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            size_hint: '0.01dp', '0.02dp'
+            canvas:
+                Color:
+                    rgb: 1,1,1
+                Ellipse:
+                    pos: self.pos
+                    size: self.size
+        Widget:
+            id: TDRSw
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            size_hint: '0.01dp', '0.02dp'
+            canvas:
+                Color:
+                    rgb: 1,1,1
+                Ellipse:
+                    pos: self.pos
+                    size: self.size
+        Widget:
+            id: TDRSz
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            size_hint: '0.01dp', '0.02dp'
+            canvas:
+                Color:
+                    rgb: 1,1,1
+                Ellipse:
+                    id: TDRSz
+                    pos: self.pos
+                    size: self.size
         Image:
             id: OrbitISStiny
             source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitYellowISSicon.png'

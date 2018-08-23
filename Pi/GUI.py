@@ -49,42 +49,8 @@ from kivy.uix.stacklayout import StackLayout
 from kivy.core.image import Image
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, WipeTransition, SwapTransition
-import tweepy
-import xml.etree.ElementTree as etree
 
-# Twitter API credentials
-consumerKey = ''
-consumerSecret = ''
-accessToken = ''
-accessTokenSecret = ''
-
-# Retrieving key and tokens used for 0Auth
-tree = etree.parse('/home/pi/Mimic/Pi/TwitterKeys.xml')
-root = tree.getroot()
-for child in root:
-    if child.tag == 'ConsumerKey' and child.text is not None:
-        consumerKey = child.text
-        #print("Consumer Key: " + consumerKey)
-    elif child.tag == 'ConsumerSecret' and child.text is not None:
-        consumerSecret = child.text
-        #print("Consumer Secret: " + consumerSecret)
-    elif child.tag == 'AccessToken' and child.text is not None:
-        accessToken = child.text
-        #print("Access Token: " + accessToken)
-    elif child.tag == 'AccessTokenSecret' and child.text is not None:
-        accessTokenSecret = child.text
-        #print("Access Token Secret: " + accessTokenSecret)
-    else:
-        print("Warning: Unknown or Empty element: " + child.tag)
-        print(" Twitter fetching may not work.")
-
-#OAuth process, using the keys and tokens
-auth = tweepy.OAuthHandler(consumerKey, consumerSecret)
-auth.set_access_token(accessToken, accessTokenSecret)
-
-# Creation of the actual interface, using authentication
-api = tweepy.API(auth)
-
+# Create Program Logs 
 mimiclog = open('/home/pi/Mimic/Pi/Logs/mimiclog.txt','w')
 sgantlog = open('/home/pi/Mimic/Pi/Logs/sgantlog.txt','w')
 locationlog = open('/home/pi/Mimic/Pi/Logs/locationlog.txt','a')
@@ -431,7 +397,6 @@ switchtofake = False
 manualcontrol = False
 startup = True
 isscrew = 0
-different_tweet = False
 val = ""
 lastsignal = 0
 testvalue = 0
@@ -517,7 +482,6 @@ seconds = 0
 minutes = 0
 hours = 0
 leak_hold = False
-latest_tweet = "No Tweet"
 crewmember = ['','','','','','','','','','','','']
 crewmemberbio = ['','','','','','','','','','','','']
 crewmembertitle = ['','','','','','','','','','','','']
@@ -881,7 +845,6 @@ class MainApp(App):
         Clock.schedule_interval(self.animate3,0.1)
         Clock.schedule_interval(self.orbitUpdate, 5)
         Clock.schedule_interval(self.checkCrew, 120)
-        Clock.schedule_interval(self.checkTwitter, 65) #change back to 65 after testing
         Clock.schedule_interval(self.changePictures, 10)
         if startup == True:
             startup = False
@@ -1003,179 +966,6 @@ class MainApp(App):
         self.us_eva.ids.EV1_EVAtime.text = "Total EVA Time = " + str(EV1_hours) + "h " + str(EV1_minutes) + "m"
         self.us_eva.ids.EV2_EVAtime.text = "Total EVA Time = " + str(EV2_hours) + "h " + str(EV2_minutes) + "m"
 
-    def checkTwitter(self, dt): #trying to send the twitter stuff to a background thread but I don't know how
-        background_thread = Thread(target=self.checkTwitter2)
-        background_thread.daemon = True
-        background_thread.start()
-
-
-    def checkTwitter2(self):
-        mimiclog.write(str(datetime.utcnow()))
-        mimiclog.write(' ')
-        mimiclog.write(str("check twitter"))
-        mimiclog.write('\n')
-        
-        global latest_tweet, obtained_EVA_crew, crew_mention, different_tweet, crewmember, crewmemberpicture, numEVAs1, EVAtime_hours1, EVAtime_minutes1, numEVAs2, EVAtime_hours2, EVAtime_minutes2, EV1, EV2
-
-        try:
-            stuff = api.user_timeline(screen_name = 'iss101', count = 1, include_rts = True, tweet_mode = 'extended')
-            #stuff = api.user_timeline(screen_name = 'iss_mimic', count = 1, include_rts = True, tweet_mode = 'extended')
-        except:
-            self.us_eva.ids.EVAstatus.text = str("Twitter Error")
-            mimiclog.write(str(datetime.utcnow()))
-            mimiclog.write(' ')
-            mimiclog.write("Error - Tweepy - Error Retrieving Tweet, make sure clock is correct")
-            mimiclog.write('\n')
-        try:
-            stuff
-        except NameError:
-            print "No tweet - ensure correct time is set"
-            self.us_eva.ids.EVAstatus.text = str("Twitter Error")
-        else:
-            for status in stuff:
-                if status.full_text == latest_tweet:
-                    different_tweet = False
-                else:
-                    different_tweet = True
-
-                latest_tweet = status.full_text
-                if u'extended_entities' in status._json:
-                    if u'media' in status._json[u'extended_entities']:
-                        for pic in status._json[u'extended_entities'][u'media']:
-                            EVA_picture_urls.append(str(pic[u'media_url']))
-
-        emoji_pattern = re.compile("["u"\U0000007F-\U0001F1FF""]+", flags=re.UNICODE)
-        tweet_string_no_emojis = str(emoji_pattern.sub(r'?', latest_tweet)) #cleanse the emojis!!
-        self.us_eva.ids.EVAstatus.text = str(tweet_string_no_emojis.split("http",1)[0])
-
-        EVnames = []
-        EVpics = []
-        index = 0
-
-        if ("EVA BEGINS" in latest_tweet) and latest_tweet.count('@') == 2 and different_tweet:
-            crew_mention = True
-            while index < len(latest_tweet):
-                index = latest_tweet.find('@',index)
-                if index == -1:
-                    break
-                EVnames.append(str(latest_tweet[index:]))
-                EVpics.append("")
-                index += 1
-            count = 0
-            while count < len(EVnames):
-                EVnames[count] = (EVnames[count].split('@')[1]).split(' ')[0]
-                count += 1
-            count = 0
-            while count < len(EVnames):
-                EVpics[count] = str(api.get_user(EVnames[count]).profile_image_url)
-                EVnames[count] = str(api.get_user(EVnames[count]).name)
-                EVpics[count] = EVpics[count].replace("_normal","_bigger")
-                count += 1
-
-        if crew_mention:
-            EV1_surname = EVnames[0].split()[-1]
-            EV1_firstname = EVnames[0].split()[0]
-            #EV1_surname = 'Bresnik'
-            EV2_surname = EVnames[1].split()[-1]
-            EV2_firstname = EVnames[1].split()[0]
-            #EV2_surname = 'Hei'
-            EV1 = EVnames[0]
-            EV2 = EVnames[1]
-            self.us_eva.ids.EV1_Pic.source = str(EVpics[0])
-            self.us_eva.ids.EV1_name.text = str(EV1_firstname)
-            self.us_eva.ids.EV2_Pic.source = str(EVpics[1])
-            self.us_eva.ids.EV2_name.text = str(EV2_firstname)
-
-            background_thread = Thread(target=self.check_EVA_stats, args=(EV1_surname,EV1_firstname,EV2_surname,EV2_firstname))
-            background_thread.daemon = True
-            background_thread.start()
-            #self.check_EVA_stats(EV1_surname,EV2surname)
-            obtained_EVA_crew = True 
-            crew_mention = False
-            
-    def checkpasttweets(self):
-        mimiclog.write(str(datetime.utcnow()))
-        mimiclog.write(' ')
-        mimiclog.write(str("check twitter past"))
-        mimiclog.write('\n')
-        
-        global obtained_EVA_crew, crew_mention, different_tweet, crewmember, crewmemberpicture, numEVAs1, EVAtime_hours1, EVAtime_minutes1, numEVAs2, EVAtime_hours2, EVAtime_minutes2, EV1, EV2
-
-        try:
-            stuff = api.user_timeline(screen_name = 'iss101', count = 50, include_rts = False, tweet_mode = 'extended')
-        except:
-            mimiclog.write(str(datetime.utcnow()))
-            mimiclog.write(' ')
-            mimiclog.write("Error - Tweepy - Error Retrieving Tweet, make sure clock is correct")
-            mimiclog.write('\n')
-        try:
-            stuff
-        except NameError:
-            print "No tweet - ensure correct time is set"
-        else:
-            for status in stuff:
-                past_tweet = status.full_text
-
-                emoji_pattern = re.compile("["u"\U0000007F-\U0001F1FF""]+", flags=re.UNICODE)
-                tweet_string_no_emojis = str(emoji_pattern.sub(r'?', past_tweet)) #cleanse the emojis!!
-
-                EVnames = []
-                EVpics = []
-                index = 0
-                index2 = 0
-
-                if ("EVA BEGINS" in past_tweet) and past_tweet.count('@') == 2:
-                    crew_mention = True
-                    while index < len(past_tweet):
-                        index = past_tweet.find('@',index)
-                        index2 = past_tweet.find(',',index2)
-                        if index == -1:
-                            break
-                        if index2 == -1:
-                            EVnames.append(str(past_tweet[index:]))
-                        else:
-                            EVnames.append(str(past_tweet[index:index2]))
-                        EVpics.append("")
-                        index += 1
-                    count = 0
-                    while count < len(EVnames):
-                        EVnames[count] = (EVnames[count].split('@')[1]).split(' ')[0]
-                        count += 1
-                    count = 0
-                    while count < len(EVnames):
-                        try:
-                            EVpics[count] = str(api.get_user(EVnames[count]).profile_image_url)
-                        except: 
-                            print "Twitter EVA crew pic error"
-                        else:
-                            EVpics[count] = EVpics[count].replace("_normal","_bigger")
-                        try:
-                            EVnames[count] = str(api.get_user(EVnames[count]).name)
-                        except: 
-                            print "Twitter EVA name error"
-                        count += 1
-
-                if crew_mention:
-                    EV1_surname = EVnames[0].split()[-1]
-                    EV1_firstname = EVnames[0].split()[0]
-                    #EV1_surname = 'Bresnik'
-                    EV2_surname = EVnames[1].split()[-1]
-                    EV2_firstname = EVnames[1].split()[0]
-                    #EV2_surname = 'Hei'
-                    EV1 = EVnames[0]
-                    EV2 = EVnames[1]
-                    self.us_eva.ids.EV1_Pic.source = str(EVpics[0])
-                    self.us_eva.ids.EV1_name.text = str(EV1_firstname)
-                    self.us_eva.ids.EV2_Pic.source = str(EVpics[1])
-                    self.us_eva.ids.EV2_name.text = str(EV2_firstname)
-
-                    background_thread = Thread(target=self.check_EVA_stats, args=(EV1_surname,EV1_firstname,EV2_surname,EV2_firstname))
-                    background_thread.daemon = True
-                    background_thread.start()
-                    #self.check_EVA_stats(EV1_surname,EV2surname)
-                    obtained_EVA_crew = True 
-                    crew_mention = False
-            
     def flashUS_EVAbutton(self, instace):
         mimiclog.write(str(datetime.utcnow()))
         mimiclog.write(' ')
@@ -1298,32 +1088,8 @@ class MainApp(App):
        
     def orbitUpdate(self, dt):
         global overcountry, tle_rec, line1, line2, TLE_acquired, sgant_elevation, sgant_xelevation, aos
-        if TLE_acquired:
-            tle_rec.compute()
-            #------------------Latitude/Longitude Stuff---------------------------
-            latitude = tle_rec.sublat 
-            longitude = tle_rec.sublong
-            latitude = float(str(latitude).split(':')[0]) + float(str(latitude).split(':')[1])/60 + float(str(latitude).split(':')[2])/3600
-            longitude = float(str(longitude).split(':')[0]) + float(str(longitude).split(':')[1])/60 + float(str(longitude).split(':')[2])/3600
-            coordinates = ((latitude,longitude),(latitude,longitude))
-            
-            #sgantlog.write(str(datetime.utcnow()))
-            #sgantlog.write(' ')
-            #sgantlog.write(str(sgant_elevation))
-            #sgantlog.write(' ')
-            #sgantlog.write(str(sgant_xelevation))
-            #sgantlog.write(' ')
-            #sgantlog.write(str(latitude))
-            #sgantlog.write(' ')
-            #sgantlog.write(str(longitude))
-            #sgantlog.write(' ')
-            #sgantlog.write(str(aos))
-            #sgantlog.write('\n')
-            
-            #results = reverse_geocode.search(coordinates)
-            #overcountry =  results[0]['country']
-            #self.mimic_screen.ids.iss_over_country.text = "The ISS is over " + overcountry
-            #converting lat lon to x,y for map
+        def scaleLatLon(latitude,longitude):
+            #converting lat lon to x,y for orbit map
             fromLatSpan = 180.0
             fromLonSpan = 360.0
             toLatSpan = 0.598
@@ -1332,7 +1098,56 @@ class MainApp(App):
             valueLonScaled = (float(longitude)+180.0)/float(fromLonSpan)
             newLat = (0.265) + (valueLatScaled * toLatSpan) 
             newLon = (0.14) + (valueLonScaled * toLonSpan) 
-            self.orbit_screen.ids.OrbitISStiny.pos_hint = {"center_x": newLon, "center_y": newLat}
+            return {'newLat': newLat, 'newLon': newLon}
+
+        def toYearFraction(date):
+            def sinceEpoch(date): # returns seconds since epoch
+                return time.mktime(date.timetuple())
+            s = sinceEpoch
+            year = date.year
+            startOfThisYear = datetime(year=year, month=1, day=1)
+            startOfNextYear = datetime(year=year+1, month=1, day=1)
+            yearElapsed = s(date) - s(startOfThisYear)
+            yearDuration = s(startOfNextYear) - s(startOfThisYear)
+            fraction = yearElapsed/yearDuration
+            if float(fraction*365.24) < 100:
+                current_epoch = str(date.year)[2:] + "0" + str(fraction*365.24)
+            else:
+                current_epoch = str(date.year)[2:] + str(fraction*365.24)
+            return current_epoch
+        
+        #draw the TDRS satellite locations
+        self.orbit_screen.ids.TDRSe.pos_hint = {"center_x": scaleLatLon(0,-41)['newLon'], "center_y": scaleLatLon(0,-41)['newLat']}
+        self.orbit_screen.ids.TDRSw.pos_hint = {"center_x": scaleLatLon(0,-174)['newLon'], "center_y": scaleLatLon(0,-174)['newLat']}
+        self.orbit_screen.ids.TDRSz.pos_hint = {"center_x": scaleLatLon(0,85)['newLon'], "center_y": scaleLatLon(0,85)['newLat']}
+        
+        if TLE_acquired:
+            tle_rec.compute()
+            #------------------Latitude/Longitude Stuff---------------------------
+            latitude = tle_rec.sublat 
+            longitude = tle_rec.sublong
+            latitude = float(str(latitude).split(':')[0]) + float(str(latitude).split(':')[1])/60 + float(str(latitude).split(':')[2])/3600
+            longitude = float(str(longitude).split(':')[0]) + float(str(longitude).split(':')[1])/60 + float(str(longitude).split(':')[2])/3600
+            coordinates = ((latitude,longitude),(latitude,longitude))
+           
+            if aos == 0.00:
+                sgantlog.write(str(datetime.utcnow()))
+                sgantlog.write(' ')
+                sgantlog.write(str(sgant_elevation))
+                sgantlog.write(' ')
+                sgantlog.write(str(sgant_xelevation))
+                sgantlog.write(' ')
+                sgantlog.write(str(latitude))
+                sgantlog.write(' ')
+                sgantlog.write(str(longitude))
+                #sgantlog.write(' ')
+                #sgantlog.write(str(aos))
+                sgantlog.write('\n')
+            
+            #results = reverse_geocode.search(coordinates)
+            #overcountry =  results[0]['country']
+            #self.mimic_screen.ids.iss_over_country.text = "The ISS is over " + overcountry
+            self.orbit_screen.ids.OrbitISStiny.pos_hint = {"center_x": scaleLatLon(latitude,longitude)['newLon'], "center_y": scaleLatLon(latitude,longitude)['newLat']}
             self.orbit_screen.ids.latitude.text = str("{:.2f}".format(latitude))
             self.orbit_screen.ids.longitude.text = str("{:.2f}".format(longitude))
             #------------------Orbit Stuff---------------------------
@@ -1340,23 +1155,7 @@ class MainApp(App):
             mins = (now - now.replace(hour=0,minute=0,second=0,microsecond=0)).total_seconds()
             orbits_today = math.floor((float(mins)/60)/90)
             self.orbit_screen.ids.dailyorbit.text = str(int(orbits_today)) #display number of orbits since utc midnight
-            
-            def toYearFraction(date):
-                def sinceEpoch(date): # returns seconds since epoch
-                    return time.mktime(date.timetuple())
-                s = sinceEpoch
-                year = date.year
-                startOfThisYear = datetime(year=year, month=1, day=1)
-                startOfNextYear = datetime(year=year+1, month=1, day=1)
-                yearElapsed = s(date) - s(startOfThisYear)
-                yearDuration = s(startOfNextYear) - s(startOfThisYear)
-                fraction = yearElapsed/yearDuration
-                if float(fraction*365.24) < 100:
-                    current_epoch = str(date.year)[2:] + "0" + str(fraction*365.24)
-                else:
-                    current_epoch = str(date.year)[2:] + str(fraction*365.24)
-                return current_epoch
-
+           
             time_since_epoch = float(toYearFraction(datetime.utcnow())) - float(line1[22:36])
             totalorbits = int(line2[68:72]) + 100000 + int(float(time_since_epoch)*24/1.5) #add number of orbits since the tle was generated
             self.orbit_screen.ids.totalorbits.text = str(totalorbits) #display number of orbits since utc midnight
@@ -1368,6 +1167,11 @@ class MainApp(App):
             location.name        = 'location'
             location.horizon    = '10'
             location.date = datetime.utcnow()
+            #use location to draw dot on orbit map
+            mylatitude = float(str(location.lat).split(':')[0]) + float(str(location.lat).split(':')[1])/60 + float(str(location.lat).split(':')[2])/3600
+            mylongitude = float(str(location.lon).split(':')[0]) + float(str(location.lon).split(':')[1])/60 + float(str(location.lon).split(':')[2])/3600
+            self.orbit_screen.ids.mylocation.pos_hint = {"center_x": scaleLatLon(mylatitude,mylongitude)['newLon'], "center_y": scaleLatLon(mylatitude,mylongitude)['newLat']}
+            
             tle_rec.compute(location) #compute tle propagation based on provided location
             nextpassinfo = location.next_pass(tle_rec)
             nextpassdatetime = datetime.strptime(str(nextpassinfo[0]),'%Y/%m/%d %H:%M:%S') #convert to datetime object for timezone conversion
@@ -1381,11 +1185,11 @@ class MainApp(App):
             nextpasshours = timeuntilnextpass*24.0
             nextpassmins = (nextpasshours-math.floor(nextpasshours))*60
             nextpassseconds = (nextpassmins-math.floor(nextpassmins))*60
-            self.orbit_screen.ids.countdown.text = str("{:.0f}".format(math.floor(nextpasshours))) + ":" + str("{:.0f}".format(math.floor(nextpassmins))) + ":" + str("{:.1f}".format(nextpassseconds)) #display time until next pass
+            self.orbit_screen.ids.countdown.text = str("{:.0f}".format(math.floor(nextpasshours))) + ":" + str("{:.0f}".format(math.floor(nextpassmins))) + ":" + str("{:.0f}".format(math.floor(nextpassseconds))) #display time until next pass
 
     def getTLE(self, *args):
         #print "inside getTLE"
-        global tle_rec, line1, line2, TLE_acquired
+        global tle_rec, line1, line2, TLE_acquired, internet
         def process_tag_text(tag_text):
             firstTLE = True
             marker = 'TWO LINE MEAN ELEMENT SET'
@@ -2093,8 +1897,6 @@ class MainApp(App):
         ##EVA in progress
         if crewlockpres < 2.5: 
             eva = True
-            if obtained_EVA_crew == False:
-                self.checkpasttweets()
             self.us_eva.ids.EVA_occuring.text = "EVA In Progress!!!"
             self.us_eva.ids.EVA_occuring.color = 0.33,0.7,0.18
             self.us_eva.ids.leak_timer.text = "Complete"
