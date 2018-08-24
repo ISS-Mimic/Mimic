@@ -1599,6 +1599,7 @@ class MainApp(App):
         
         sgant_elevation = float((values[15])[0])
         sgant_xelevation = float((values[17])[0])
+        sgant_transmit = float((values[41])[0])
         
         v1a = "{:.2f}".format(float((values[25])[0]))
         channel1A_voltage[EPSstorageindex] = float(v1a)
@@ -1809,6 +1810,17 @@ class MainApp(App):
             self.eps_screen.ids.array_4b.color = 1,1,1,1.0
         if float(c4b) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
+        
+        ##-------------------C&T Functionality-------------------##
+        self.ct_screen.ids.sgant_dish.angle = float(sgant_elevation)
+        self.ct_screen.ids.sgant_elevation.text = "{:.2f}".format(float(sgant_elevation))
+        if sgant_transmit == 1.00:
+            self.ct_screen.ids.sgant_transmit.text = "Transmitting!"
+        elif sgant_transmit == 0.00:
+            self.ct_screen.ids.sgant_transmit.text = "Not Transmitting"
+        else:
+            self.ct_screen.ids.sgant_transmit.text = "Error"
+
         
         ##-------------------EVA Functionality-------------------##
         if stationmode == 5:

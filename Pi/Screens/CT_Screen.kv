@@ -10,17 +10,58 @@
             markup: True
             color: root.signalcolor
             font_size: 30
+        Label:
+            id: sgant_elevation
+            pos_hint: {"center_x": 0.5, "center_y": 0.1}
+            text: ''
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: sgant_transmit
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            text: 'n/a'
+            markup: True
+            color: root.signalcolor
+            font_size: 20
         Image:
             id: sgant_dish
             source: "/home/pi/Mimic/Pi/imgs/ct/SGANT_placeholder1.png"
             ##anim_delay: 0.12
             ##anim_loop: 0
             color: 1,1,1,1
-            size_hint_y: 0.6
+            size_hint_y: 1
             size_hint_x: 1
             keep_ratio: False
-            pos_hint: {"center_x": 0.83, "center_y": 0.2}
+            pos_hint: {"center_x": 0.5, "center_y": 0.25}
             angle: 0
+            canvas.before:
+                PushMatrix
+                Rotate:
+                    angle: self.angle
+                    axis: 0,0,1
+                    origin: self.center
+            canvas.after:
+                PopMatrix
+        Image:
+            id: tdrs
+            source: "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            ##anim_delay: 0.12
+            ##anim_loop: 0
+            color: 1,1,1,1
+            size_hint_y: 1
+            size_hint_x: 1
+            keep_ratio: False
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            angle: 0
+            canvas.before:
+                PushMatrix
+                Rotate:
+                    angle: self.angle
+                    axis: 0,0,1
+                    origin: self.center
+            canvas.after:
+                PopMatrix
         Button:
             size_hint: 0.1,0.11
             ##pos_hint: {"Left": 1, "Bottom": 1}
