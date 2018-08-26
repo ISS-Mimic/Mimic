@@ -1151,6 +1151,10 @@ class MainApp(App):
             self.orbit_screen.ids.OrbitISStiny.pos_hint = {"center_x": scaleLatLon(latitude,longitude)['newLon'], "center_y": scaleLatLon(latitude,longitude)['newLat']}
             self.orbit_screen.ids.latitude.text = str("{:.2f}".format(latitude))
             self.orbit_screen.ids.longitude.text = str("{:.2f}".format(longitude))
+            
+            #need to determine which tdrs is being used based on longitude and sgant elevation
+            #if longitude > 78 && sgant_elevation < -40:
+
             #------------------Orbit Stuff---------------------------
             now = datetime.utcnow() 
             mins = (now - now.replace(hour=0,minute=0,second=0,microsecond=0)).total_seconds()

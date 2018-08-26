@@ -27,8 +27,6 @@
         Image:
             id: sgant_dish
             source: "/home/pi/Mimic/Pi/imgs/ct/SGANT_placeholder1.png"
-            ##anim_delay: 0.12
-            ##anim_loop: 0
             color: 1,1,1,1
             size_hint_y: 1
             size_hint_x: 1
@@ -44,20 +42,54 @@
             canvas.after:
                 PopMatrix
         Image:
-            id: tdrs
-            source: "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
-            ##anim_delay: 0.12
-            ##anim_loop: 0
+            id: radio_up
+            source: "/home/pi/Mimic/Pi/imgs/ct/Radio.zip"
+            anim_delay: 0.02
+            anim_loop: 0
             color: 1,1,1,1
-            size_hint_y: 0.3
-            size_hint_x: 0.3
+            size_hint_y: 0.6
+            size_hint_x: 1
             keep_ratio: False
-            pos_hint: {"center_x": 0.5, "center_y": 0.8}
-            angle: 180
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            angle: sgant_dish.angle
             canvas.before:
                 PushMatrix
                 Rotate:
                     angle: self.angle
+                    axis: 0,0,1
+                    origin: sgant_dish.center
+            canvas.after:
+                PopMatrix
+        Label:
+            id: tdrs_label
+            pos: tdrs.center
+            text: ''
+            markup: True
+            color: root.signalcolor
+            font_size: 18
+        Image:
+            id: tdrs
+            source: "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            color: 1,1,1,1
+            size_hint_y: 0.15
+            size_hint_x: 0.15
+            keep_ratio: False
+            pos_hint: {"center_x": 0.5, "center_y": 0.8}
+            angle: sgant_dish.angle
+            angle2: 180
+            canvas.before:
+                PushMatrix
+                Scale:
+                    x: 1
+                    y: 1
+                    z: -1
+                    origin: self.center
+                Rotate:
+                    angle: self.angle
+                    axis: 0,0,1
+                    origin: sgant_dish.center
+                Rotate:
+                    angle: self.angle2
                     axis: 0,0,1
                     origin: self.center
             canvas.after:
