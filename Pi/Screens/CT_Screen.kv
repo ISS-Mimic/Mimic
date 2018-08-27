@@ -5,10 +5,10 @@
     name: 'ct'
     FloatLayout:
         Label:
-            pos_hint: {"center_x": 0.15, "center_y": 0.8}
-            text: 'C&T Stuff'
+            pos_hint: {"center_x": 0.5, "center_y": 0.92}
+            text: 'Communications and Tracking'
             markup: True
-            color: root.signalcolor
+            color: 1,1,1
             font_size: 30
         Label:
             id: sgant_elevation
@@ -17,21 +17,14 @@
             markup: True
             color: root.signalcolor
             font_size: 20
-        Label:
-            id: sgant_transmit
-            pos_hint: {"center_x": 0.5, "center_y": 0.5}
-            text: 'n/a'
-            markup: True
-            color: root.signalcolor
-            font_size: 20
         Image:
             id: sgant_dish
-            source: "/home/pi/Mimic/Pi/imgs/ct/SGANT_placeholder1.png"
+            source: "/home/pi/Mimic/Pi/imgs/ct/SGANTantenna.png"
             color: 1,1,1,1
-            size_hint_y: 1
-            size_hint_x: 1
+            size_hint_y: 0.4
+            size_hint_x: 0.4
             keep_ratio: False
-            pos_hint: {"center_x": 0.5, "center_y": 0.25}
+            pos_hint: {"center_x": 0.5, "center_y": 0.35}
             angle: 0
             canvas.before:
                 PushMatrix
@@ -47,10 +40,10 @@
             anim_delay: 0.02
             anim_loop: 0
             color: 1,1,1,1
-            size_hint_y: 0.6
-            size_hint_x: 1
+            size_hint_y: 0.4
+            size_hint_x: 1.5
             keep_ratio: False
-            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            pos_hint: {"center_x": 0.5, "center_y": 0.6}
             angle: sgant_dish.angle
             canvas.before:
                 PushMatrix
@@ -60,13 +53,13 @@
                     origin: sgant_dish.center
             canvas.after:
                 PopMatrix
-        Label:
-            id: tdrs_label
-            pos: tdrs.center
-            text: ''
-            markup: True
-            color: root.signalcolor
-            font_size: 18
+        Image:
+            id: sgant_base
+            source: "/home/pi/Mimic/Pi/imgs/ct/SGANTbase.png"
+            pos_hint: {"center_x": 0.5, "center_y": 0.3}
+            size_hint_y: 0.15
+            size_hint_x: 0.15
+            keep_ratio: True
         Image:
             id: tdrs
             source: "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
@@ -94,6 +87,14 @@
                     origin: self.center
             canvas.after:
                 PopMatrix
+        Label:
+            id: tdrs_label
+            ##pos: tdrs.pos
+            pos_hint: {"center_x": 0.5, "center_y": 0.85}
+            text: '---'
+            markup: True
+            color: root.signalcolor
+            font_size: 18
         Button:
             size_hint: 0.1,0.11
             ##pos_hint: {"Left": 1, "Bottom": 1}

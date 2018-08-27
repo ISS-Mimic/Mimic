@@ -442,6 +442,7 @@ aos = 0.00
 los = 0.00
 sgant_elevation = 0.00
 sgant_xelevation = 0.00
+sgant_elevation_old = -110.00
 seconds2 = 260
 timenew = float(time.time())
 timeold = 0.00
@@ -1087,7 +1088,7 @@ class MainApp(App):
         manualcontrol = args[0]
        
     def orbitUpdate(self, dt):
-        global overcountry, tle_rec, line1, line2, TLE_acquired, sgant_elevation, sgant_xelevation, aos
+        global overcountry, tle_rec, line1, line2, TLE_acquired, sgant_elevation, sgant_elevation_old, sgant_xelevation, aos
         def scaleLatLon(latitude,longitude):
             #converting lat lon to x,y for orbit map
             fromLatSpan = 180.0
@@ -1153,7 +1154,23 @@ class MainApp(App):
             self.orbit_screen.ids.longitude.text = str("{:.2f}".format(longitude))
             
             #need to determine which tdrs is being used based on longitude and sgant elevation
-            #if longitude > 78 && sgant_elevation < -40:
+            #TDRSw = -174
+            #TDRSe = -41
+            #TDRSz = 85
+
+            #if sgant_elevation > sgant_elevation_old:
+            #    sgant_elevation_old = sgant_elevation
+            #    if sgant_elevation < sgant_elevation_old:
+            #        sgant_elevation_old = -110
+                                
+
+            if longitude > 80 and sgant_elevation < 0:
+                self.ct_screen.ids.tdrs_label.text = "TDRS-West"
+            elif longitude > -174 and longitude < 0 and sgant_elevation < -40:
+                self.ct_screen.ids.tdrs_label.text = "TDRS-East"
+            elif longitude < 80 and sgant_elevation < 0:
+                self.ct_screen.ids.tdrs_label.text = "TDRS-Z"
+
 
             #------------------Orbit Stuff---------------------------
             now = datetime.utcnow() 
@@ -1818,12 +1835,18 @@ class MainApp(App):
         ##-------------------C&T Functionality-------------------##
         self.ct_screen.ids.sgant_dish.angle = float(sgant_elevation)
         self.ct_screen.ids.sgant_elevation.text = "{:.2f}".format(float(sgant_elevation))
-        if sgant_transmit == 1.00:
-            self.ct_screen.ids.sgant_transmit.text = "Transmitting!"
-        elif sgant_transmit == 0.00:
-            self.ct_screen.ids.sgant_transmit.text = "Not Transmitting"
-        else:
-            self.ct_screen.ids.sgant_transmit.text = "Error"
+
+        if float(sgant_transmit) == 1.0 and float(aos) == 1.0:
+            self.ct_screen.ids.radio_up.color = 1,1,1,1
+        elif float(sgant_transmit) == 1.0 and float(aos) == 0.0:
+            self.ct_screen.ids.radio_up.color = 0,0,0,0
+        elif float(sgant_transmit) == 0.0:
+            self.ct_screen.ids.radio_up.color = 0,0,0,0
+        elif float(aos) == 0.0:
+            self.ct_screen.ids.radio_up.color = 0,0,0,0
+        
+        #print "sgant " + str(sgant_transmit)
+        #print "aos " + str(aos)
 
         
         ##-------------------EVA Functionality-------------------##
