@@ -10,94 +10,56 @@
             markup: True
             color: 1,1,1
             font_size: 30
-        Label:
-            id: sgant_elevation
-            pos_hint: {"center_x": 0.5, "center_y": 0.1}
-            text: ''
-            markup: True
-            color: root.signalcolor
-            font_size: 20
         Image:
-            id: sgant_dish
-            source: "/home/pi/Mimic/Pi/imgs/ct/SGANTantenna.png"
-            color: 1,1,1,1
-            size_hint_y: 0.4
-            size_hint_x: 0.4
-            keep_ratio: False
-            pos_hint: {"center_x": 0.5, "center_y": 0.35}
-            angle: 0
-            canvas.before:
-                PushMatrix
-                Rotate:
-                    angle: self.angle
-                    axis: 0,0,1
-                    origin: self.center
-            canvas.after:
-                PopMatrix
-        Image:
-            id: radio_up
-            source: "/home/pi/Mimic/Pi/imgs/ct/Radio.zip"
-            anim_delay: 0.02
-            anim_loop: 0
-            color: 1,1,1,1
-            size_hint_y: 0.4
-            size_hint_x: 1.5
-            keep_ratio: False
-            pos_hint: {"center_x": 0.5, "center_y": 0.6}
-            angle: sgant_dish.angle
-            canvas.before:
-                PushMatrix
-                Rotate:
-                    angle: self.angle
-                    axis: 0,0,1
-                    origin: sgant_dish.center
-            canvas.after:
-                PopMatrix
-        Image:
-            id: sgant_base
-            source: "/home/pi/Mimic/Pi/imgs/ct/SGANTbase.png"
-            pos_hint: {"center_x": 0.5, "center_y": 0.3}
-            size_hint_y: 0.15
-            size_hint_x: 0.15
+            id: ISS_CT
+            source: "/home/pi/Mimic/Pi/imgs/ct/CT_ISS3.png"
+            size_hint_y: 0.95
             keep_ratio: True
-        Image:
-            id: tdrs
-            source: "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
-            color: 1,1,1,1
-            size_hint_y: 0.15
-            size_hint_x: 0.15
-            keep_ratio: False
-            pos_hint: {"center_x": 0.5, "center_y": 0.8}
-            angle: sgant_dish.angle
-            angle2: 180
-            canvas.before:
-                PushMatrix
-                Scale:
-                    x: 1
-                    y: 1
-                    z: -1
-                    origin: self.center
-                Rotate:
-                    angle: self.angle
-                    axis: 0,0,1
-                    origin: sgant_dish.center
-                Rotate:
-                    angle: self.angle2
-                    axis: 0,0,1
-                    origin: self.center
-            canvas.after:
-                PopMatrix
-        Label:
-            id: tdrs_label
-            ##pos: tdrs.pos
-            pos_hint: {"center_x": 0.5, "center_y": 0.85}
-            text: '---'
-            markup: True
-            color: root.signalcolor
-            font_size: 18
+            pos_hint: {"center_x": 0.5, "center_y": 0.4}
+        Button:
+            id: SGANT1
+            size_hint: 0.1,0.2
+            opacity: 0.1
+            pos_hint: {"center_x": 0.43, "center_y": 0.65}
+            font_size: 30
+            on_release: app.root.current = 'ct_sgant'
+        Button:
+            id: SGANT2
+            size_hint: 0.1,0.2
+            opacity: 0.1
+            pos_hint: {"center_x": 0.57, "center_y": 0.65}
+            font_size: 30
+            on_release: app.root.current = 'ct_sgant'
+        Button:
+            id: SASA1
+            size_hint: 0.1,0.2
+            opacity: 0.1
+            pos_hint: {"center_x": 0.22, "center_y": 0.62}
+            font_size: 30
+            on_release: app.root.current = 'ct_sgant'
+        Button:
+            id: SASA2
+            size_hint: 0.1,0.2
+            opacity: 0.1
+            pos_hint: {"center_x": 0.7, "center_y": 0.62}
+            font_size: 30
+            on_release: app.root.current = 'ct_sgant'
+        Button:
+            id: UHF1
+            size_hint: 0.1,0.2
+            opacity: 0.1
+            pos_hint: {"center_x": 0.4, "center_y": 0.2}
+            font_size: 30
+            on_release: app.root.current = 'ct_sgant'
+        Button:
+            id: UHF2
+            size_hint: 0.1,0.2
+            opacity: 0.1
+            pos_hint: {"center_x": 0.8, "center_y": 0.62}
+            font_size: 30
+            on_release: app.root.current = 'ct_sgant'
         Button:
             size_hint: 0.1,0.11
-            ##pos_hint: {"Left": 1, "Bottom": 1}
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
             background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
             text: ''
