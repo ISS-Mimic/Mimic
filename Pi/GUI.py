@@ -1164,18 +1164,41 @@ class MainApp(App):
             #TDRSe = -41
             #TDRSz = 85
 
+            if longitude > 90 and sgant_elevation < -10:
+                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West"
+                print "if 1"
+            elif longitude > 70 and longitude < 120 and sgant_elevation > -10:
+                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-Z"
+                print "if 2"
+            elif longitude > 0 and longitude <= 90 and sgant_elevation < -10:
+                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-Z"
+                print "if 3"
+            elif longitude > -60 and longitude <= 70 and sgant_elevation > -10:
+                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East"
+                print "if 4"
+            elif longitude > -160 and longitude <= 0 and sgant_elevation < -10:
+                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East"
+                print "if 5"
+            elif ((longitude >= -180 and longitude <= -60) or (longitude > 120)) and sgant_elevation > -10:
+                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West"
+                print "if 6"
+            else:
+                self.ct_sgant_screen.ids.tdrs_label.text = "---"
+                print "if 7"
+
+
             #if sgant_elevation > sgant_elevation_old:
             #    sgant_elevation_old = sgant_elevation
             #    if sgant_elevation < sgant_elevation_old:
             #        sgant_elevation_old = -110
                                 
 
-            if longitude > 80 and sgant_elevation < 0:
-                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West"
-            elif longitude > -174 and longitude < 0 and sgant_elevation < -40:
-                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East"
-            elif longitude < 80 and sgant_elevation < 0:
-                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-Z"
+            #if longitude > 80 and sgant_elevation < 0:
+            #    self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West"
+            #elif longitude > -174 and longitude < 0 and sgant_elevation < -40:
+            #    self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East"
+            #elif longitude < 80 and sgant_elevation < 0:
+            #    self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-Z"
 
 
             #------------------Orbit Stuff---------------------------
@@ -1409,6 +1432,7 @@ class MainApp(App):
             self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.ct_sgant_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
@@ -1418,6 +1442,7 @@ class MainApp(App):
             self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.ct_sgant_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
@@ -1426,6 +1451,7 @@ class MainApp(App):
         self.orbit_screen.ids.signal.size_hint_y = 0.112
         self.mimic_screen.ids.signal.size_hint_y = 0.112
         self.eps_screen.ids.signal.size_hint_y = 0.112
+        self.ct_screen.ids.signal.size_hint_y = 0.112
         self.ct_sgant_screen.ids.signal.size_hint_y = 0.112
         self.tcs_screen.ids.signal.size_hint_y = 0.112
         self.us_eva.ids.signal.size_hint_y = 0.112
@@ -1437,6 +1463,7 @@ class MainApp(App):
             self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.ct_sgant_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
@@ -1446,6 +1473,7 @@ class MainApp(App):
             self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
             self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
             self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
+            self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
             self.ct_sgant_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
             self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
             self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
@@ -1455,6 +1483,7 @@ class MainApp(App):
         self.orbit_screen.ids.signal.anim_delay = 0.4
         self.mimic_screen.ids.signal.anim_delay = 0.4
         self.eps_screen.ids.signal.anim_delay = 0.4
+        self.ct_screen.ids.signal.anim_delay = 0.4
         self.ct_sgant_screen.ids.signal.anim_delay = 0.4
         self.tcs_screen.ids.signal.anim_delay = 0.4
         self.us_eva.ids.signal.anim_delay = 0.4
@@ -1462,6 +1491,7 @@ class MainApp(App):
         self.orbit_screen.ids.signal.size_hint_y = 0.112
         self.mimic_screen.ids.signal.size_hint_y = 0.112
         self.eps_screen.ids.signal.size_hint_y = 0.112
+        self.ct_screen.ids.signal.size_hint_y = 0.112
         self.ct_sgant_screen.ids.signal.size_hint_y = 0.112
         self.tcs_screen.ids.signal.size_hint_y = 0.112
         self.us_eva.ids.signal.size_hint_y = 0.112
@@ -1473,6 +1503,7 @@ class MainApp(App):
             self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.ct_sgant_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
@@ -1482,6 +1513,7 @@ class MainApp(App):
             self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
             self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
             self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
+            self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
             self.ct_sgant_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
             self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
             self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
@@ -1490,6 +1522,7 @@ class MainApp(App):
         self.orbit_screen.ids.signal.anim_delay = 0.05
         self.mimic_screen.ids.signal.anim_delay = 0.05
         self.eps_screen.ids.signal.anim_delay = 0.05
+        self.ct_screen.ids.signal.anim_delay = 0.05
         self.ct_sgant_screen.ids.signal.anim_delay = 0.05
         self.tcs_screen.ids.signal.anim_delay = 0.05
         self.us_eva.ids.signal.anim_delay = 0.05
@@ -1497,6 +1530,7 @@ class MainApp(App):
         self.orbit_screen.ids.signal.size_hint_y = 0.15
         self.mimic_screen.ids.signal.size_hint_y = 0.15
         self.eps_screen.ids.signal.size_hint_y = 0.15
+        self.ct_screen.ids.signal.size_hint_y = 0.15
         self.ct_sgant_screen.ids.signal.size_hint_y = 0.15
         self.tcs_screen.ids.signal.size_hint_y = 0.15
         self.us_eva.ids.signal.size_hint_y = 0.15
@@ -1508,6 +1542,7 @@ class MainApp(App):
             self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.ct_sgant_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
@@ -1517,6 +1552,7 @@ class MainApp(App):
             self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.ct_sgant_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
@@ -1525,6 +1561,7 @@ class MainApp(App):
         self.orbit_screen.ids.signal.anim_delay = 0.12
         self.mimic_screen.ids.signal.anim_delay = 0.12
         self.eps_screen.ids.signal.anim_delay = 0.12
+        self.ct_screen.ids.signal.anim_delay = 0.12
         self.ct_sgant_screen.ids.signal.anim_delay = 0.12
         self.tcs_screen.ids.signal.anim_delay = 0.12
         self.us_eva.ids.signal.anim_delay = 0.12
@@ -1532,6 +1569,7 @@ class MainApp(App):
         self.orbit_screen.ids.signal.size_hint_y = 0.112
         self.mimic_screen.ids.signal.size_hint_y = 0.112
         self.eps_screen.ids.signal.size_hint_y = 0.112
+        self.ct_screen.ids.signal.size_hint_y = 0.112
         self.ct_sgant_screen.ids.signal.size_hint_y = 0.112
         self.tcs_screen.ids.signal.size_hint_y = 0.112
         self.us_eva.ids.signal.size_hint_y = 0.112
@@ -1620,10 +1658,13 @@ class MainApp(App):
             beta4a2 = float(beta4a) #+ 20.00
         if manualcontrol == False:
             beta4amc = float(beta4a)
+        
         aos = "{:.2f}".format(int((values[12])[0]))
         los = "{:.2f}".format(int((values[13])[0]))      
         sasa_el = "{:.2f}".format(float((values[14])[0]))
-        
+        active_sasa = int((values[54])[0])      
+        sasa1_active = int((values[53])[0])      
+        sasa2_active = int((values[52])[0])      
         sgant_elevation = float((values[15])[0])
         sgant_xelevation = float((values[17])[0])
         sgant_transmit = float((values[41])[0])
@@ -1655,6 +1696,7 @@ class MainApp(App):
         
         stationmode = float((values[46])[0]) #russian segment mode same as usos mode
         
+        #GNC Telemetry
         rollerror = float((values[165])[0]) 
         pitcherror = float((values[166])[0]) 
         yawerror = float((values[167])[0]) 
@@ -1663,6 +1705,25 @@ class MainApp(App):
         quaternion1 = float((values[172])[0])
         quaternion2 = float((values[173])[0])
         quaternion3 = float((values[174])[0])
+        
+        iss_mass = "{:.2f}".format(float((values[48])[0]))
+        position_x = "{:.2f}".format(float((values[55])[0]))
+        position_y = "{:.2f}".format(float((values[56])[0]))
+        position_z = "{:.2f}".format(float((values[57])[0]))
+        velocity_x = "{:.2f}".format(float((values[58])[0]))
+        velocity_y = "{:.2f}".format(float((values[59])[0]))
+        velocity_z = "{:.2f}".format(float((values[60])[0]))
+        
+        altitude = "{:.2f}".format((math.sqrt( math.pow(float(position_x), 2) + math.pow(float(position_y), 2) + math.pow(float(position_z), 2) )-6371.00))
+        velocity = "{:.2f}".format(((math.sqrt( math.pow(float(velocity_x), 2) + math.pow(float(velocity_y), 2) + math.pow(float(velocity_z), 2) ))/1.00))
+        
+        #EVA Telemetry
+        airlock_pump_voltage = int((values[71])[0])
+        airlock_pump_voltage_timestamp = float((timestamps[71])[0])
+        airlock_pump_switch = int((values[72])[0])
+        crewlockpres = float((values[16])[0])
+        airlockpres = float((values[77])[0])
+        
         
         ##US EPS Stuff---------------------------##
 
@@ -1724,6 +1785,18 @@ class MainApp(App):
         else:
             self.mimic_screen.ids.stationmode_value.text = "n/a"
             
+        ## ISS Potential Problems ##
+        #ISS Leak - Check Pressure Levels
+        #Number of CMGs online could reveal CMG failure
+        #CMG speed less than 6600rpm
+        #Solar arrays offline
+        #Loss of attitude control, loss of cmg control
+        #ISS altitude too low
+        
+    
+
+
+
         ##-------------------GNC Stuff---------------------------##    
         
         roll = math.degrees(math.atan2(2.0 * (quaternion0 * quaternion1 + quaternion2 * quaternion3), 1.0 - 2.0 * (quaternion1 * quaternion1 + quaternion2 * quaternion2))) + rollerror
@@ -1842,30 +1915,59 @@ class MainApp(App):
         self.ct_sgant_screen.ids.sgant_dish.angle = float(sgant_elevation)
         self.ct_sgant_screen.ids.sgant_elevation.text = "{:.2f}".format(float(sgant_elevation))
 
+        #make sure radio animations turn off when no signal or no transmit
         if float(sgant_transmit) == 1.0 and float(aos) == 1.0:
             self.ct_sgant_screen.ids.radio_up.color = 1,1,1,1
+            self.ct_sgant_screen.ids.tdrs.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.zip"
         elif float(sgant_transmit) == 1.0 and float(aos) == 0.0:
             self.ct_sgant_screen.ids.radio_up.color = 0,0,0,0
+            self.ct_sgant_screen.ids.tdrs.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
         elif float(sgant_transmit) == 0.0:
             self.ct_sgant_screen.ids.radio_up.color = 0,0,0,0
+            self.ct_sgant_screen.ids.tdrs.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
         elif float(aos) == 0.0:
             self.ct_sgant_screen.ids.radio_up.color = 0,0,0,0
-        
-        #print "sgant " + str(sgant_transmit)
-        #print "aos " + str(aos)
+            self.ct_sgant_screen.ids.tdrs.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+       
+        #now check main CT screen radio signal
+        if float(sgant_transmit) == 1.0 and float(aos) == 1.0:
+            self.ct_screen.ids.sgant1_radio.color = 1,1,1,1
+            self.ct_screen.ids.sgant2_radio.color = 1,1,1,1
+        elif float(sgant_transmit) == 1.0 and float(aos) == 0.0:
+            self.ct_screen.ids.sgant1_radio.color = 0,0,0,0
+            self.ct_screen.ids.sgant2_radio.color = 0,0,0,0
+        elif float(sgant_transmit) == 0.0:
+            self.ct_screen.ids.sgant1_radio.color = 0,0,0,0
+            self.ct_screen.ids.sgant2_radio.color = 0,0,0,0
+        elif float(aos) == 0.0:
+            self.ct_screen.ids.sgant1_radio.color = 0,0,0,0
+            self.ct_screen.ids.sgant2_radio.color = 0,0,0,0
+            
+        if float(sasa1_active) == 1.0 and float(aos) == 1.0:
+            self.ct_screen.ids.sasa1_radio.color = 1,1,1,1
+        elif float(sasa1_active) == 1.0 and float(aos) == 0.0:
+            self.ct_screen.ids.sasa1_radio.color = 0,0,0,0
+        elif float(sasa1_active) == 0.0:
+            self.ct_screen.ids.sasa1_radio.color = 0,0,0,0
+        elif float(aos) == 0.0:
+            self.ct_screen.ids.sasa1_radio.color = 0,0,0,0
+            
 
-        
+        if float(sasa2_active) == 1.0 and float(aos) == 1.0:
+            self.ct_screen.ids.sasa2_radio.color = 1,1,1,1
+        elif float(sasa2_active) == 1.0 and float(aos) == 0.0:
+            self.ct_screen.ids.sasa2_radio.color = 0,0,0,0
+        elif float(sasa2_active) == 0.0:
+            self.ct_screen.ids.sasa2_radio.color = 0,0,0,0
+        elif float(aos) == 0.0:
+            self.ct_screen.ids.sasa2_radio.color = 0,0,0,0
+
         ##-------------------EVA Functionality-------------------##
         if stationmode == 5:
             evaflashevent = Clock.schedule_once(self.flashEVAbutton, 1)
     
         ##-------------------US EVA Functionality-------------------##
         
-        airlock_pump_voltage = int((values[71])[0])
-        airlock_pump_voltage_timestamp = float((timestamps[71])[0])
-        airlock_pump_switch = int((values[72])[0])
-        crewlockpres = float((values[16])[0])
-        airlockpres = float((values[77])[0])
 
         if airlock_pump_voltage == 1:
             self.us_eva.ids.pumpvoltage.text = "Airlock Pump Power On!"
@@ -1882,7 +1984,7 @@ class MainApp(App):
             self.us_eva.ids.pumpswitch.color = 0,0,0
        
         ##activate EVA button flash
-        if airlock_pump_voltage == 1 or crewlockpres < 734:
+        if (airlock_pump_voltage == 1 or crewlockpres < 734) and int(stationmode) == 5:
             usevaflashevent = Clock.schedule_once(self.flashUS_EVAbutton, 1)
 
         ##No EVA Currently
@@ -1894,7 +1996,7 @@ class MainApp(App):
             self.us_eva.ids.EVA_occuring.text = "Currently No EVA"
 
         ##EVA Standby - NOT UNIQUE
-        if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres > 740 and airlockpres > 740: 
+        if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres > 740 and airlockpres > 740 and int(stationmode) == 5: 
             standby = True
             self.us_eva.ids.leak_timer.text = "~160s Leak Check"
             self.us_eva.ids.Crewlock_Status_image.source = '/home/pi/Mimic/Pi/imgs/eva/StandbyLights.png'
@@ -1904,7 +2006,7 @@ class MainApp(App):
             standby = False
 
         ##EVA Prebreath Pressure
-        if airlock_pump_voltage == 1 and crewlockpres > 740 and airlockpres > 740: 
+        if airlock_pump_voltage == 1 and crewlockpres > 740 and airlockpres > 740 and int(stationmode) == 5: 
             prebreath1 = True
             self.us_eva.ids.Crewlock_Status_image.source = '/home/pi/Mimic/Pi/imgs/eva/PreBreatheLights.png'
             self.us_eva.ids.leak_timer.text = "~160s Leak Check"
@@ -1912,7 +2014,7 @@ class MainApp(App):
             self.us_eva.ids.EVA_occuring.text = "Pre-EVA Nitrogen Purge"
         
         ##EVA Depress1
-        if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres < 740 and airlockpres > 740: 
+        if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres < 740 and airlockpres > 740 and int(stationmode) == 5: 
             depress1 = True
             self.us_eva.ids.leak_timer.text = "~160s Leak Check"
             self.us_eva.ids.EVA_occuring.text = "Crewlock Depressurizing"
@@ -1920,7 +2022,7 @@ class MainApp(App):
             self.us_eva.ids.Crewlock_Status_image.source = '/home/pi/Mimic/Pi/imgs/eva/DepressLights.png'
 
         ##EVA Leakcheck
-        if airlock_pump_voltage == 1 and crewlockpres < 260 and crewlockpres > 250 and (depress1 or leakhold): 
+        if airlock_pump_voltage == 1 and crewlockpres < 260 and crewlockpres > 250 and (depress1 or leakhold) and int(stationmode) == 5: 
             if depress1:
                 holdstartTime = float(unixconvert[7])*24+unixconvert[3]+float(unixconvert[4])/60+float(unixconvert[5])/3600
             leakhold = True
@@ -1933,7 +2035,7 @@ class MainApp(App):
             leakhold = False
 
         ##EVA Depress2
-        if airlock_pump_voltage == 1 and crewlockpres <= 250 and crewlockpres > 3 : 
+        if airlock_pump_voltage == 1 and crewlockpres <= 250 and crewlockpres > 3 and int(stationmode) == 5: 
             leakhold = False
             self.us_eva.ids.leak_timer.text = "Complete"
             self.us_eva.ids.EVA_occuring.text = "Crewlock Depressurizing"
@@ -1941,7 +2043,7 @@ class MainApp(App):
             self.us_eva.ids.Crewlock_Status_image.source = '/home/pi/Mimic/Pi/imgs/eva/DepressLights.png'
         
         ##EVA in progress
-        if crewlockpres < 2.5: 
+        if crewlockpres < 2.5 and int(stationmode) == 5: 
             eva = True
             self.us_eva.ids.EVA_occuring.text = "EVA In Progress!!!"
             self.us_eva.ids.EVA_occuring.color = 0.33,0.7,0.18
@@ -1950,7 +2052,7 @@ class MainApp(App):
             evatimerevent = Clock.schedule_once(self.EVA_clock, 1)
 
         ##Repress
-        if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and crewlockpres >= 3 and crewlockpres < 734:
+        if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and crewlockpres >= 3 and crewlockpres < 734 and int(stationmode) == 5:
             eva = False
             self.us_eva.ids.EVA_occuring.color = 0,0,1
             self.us_eva.ids.EVA_occuring.text = "Crewlock Repressurizing"
@@ -1969,16 +2071,6 @@ class MainApp(App):
 #            LOSpopup.open()
 #            print "popup"    
 
-        iss_mass = "{:.2f}".format(float((values[48])[0]))
-        position_x = "{:.2f}".format(float((values[55])[0]))
-        position_y = "{:.2f}".format(float((values[56])[0]))
-        position_z = "{:.2f}".format(float((values[57])[0]))
-        velocity_x = "{:.2f}".format(float((values[58])[0]))
-        velocity_y = "{:.2f}".format(float((values[59])[0]))
-        velocity_z = "{:.2f}".format(float((values[60])[0]))
-        
-        altitude = "{:.2f}".format((math.sqrt( math.pow(float(position_x), 2) + math.pow(float(position_y), 2) + math.pow(float(position_z), 2) )-6371.00))
-        velocity = "{:.2f}".format(((math.sqrt( math.pow(float(velocity_x), 2) + math.pow(float(velocity_y), 2) + math.pow(float(velocity_z), 2) ))/1.00))
 
         if (fakeorbitboolean == True and (mimicbutton == True or switchtofake == True)):
             if psarj2 <= 0.00:

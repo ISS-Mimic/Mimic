@@ -15,49 +15,105 @@
             source: "/home/pi/Mimic/Pi/imgs/ct/CT_ISS3.png"
             size_hint_y: 0.95
             keep_ratio: True
-            pos_hint: {"center_x": 0.5, "center_y": 0.4}
+            pos_hint: {"center_x": 0.5, "center_y": 0.45}
         Button:
             id: SGANT1
             size_hint: 0.1,0.2
             opacity: 0.1
-            pos_hint: {"center_x": 0.43, "center_y": 0.65}
+            pos_hint: {"center_x": 0.57, "center_y": 0.7}
             font_size: 30
             on_release: app.root.current = 'ct_sgant'
         Button:
             id: SGANT2
             size_hint: 0.1,0.2
             opacity: 0.1
-            pos_hint: {"center_x": 0.57, "center_y": 0.65}
+            pos_hint: {"center_x": 0.43, "center_y": 0.7}
             font_size: 30
             on_release: app.root.current = 'ct_sgant'
         Button:
             id: SASA1
             size_hint: 0.1,0.2
             opacity: 0.1
-            pos_hint: {"center_x": 0.22, "center_y": 0.62}
+            pos_hint: {"center_x": 0.22, "center_y": 0.67}
             font_size: 30
             on_release: app.root.current = 'ct_sgant'
         Button:
             id: SASA2
             size_hint: 0.1,0.2
             opacity: 0.1
-            pos_hint: {"center_x": 0.7, "center_y": 0.62}
+            pos_hint: {"center_x": 0.7, "center_y": 0.67}
             font_size: 30
             on_release: app.root.current = 'ct_sgant'
         Button:
             id: UHF1
             size_hint: 0.1,0.2
             opacity: 0.1
-            pos_hint: {"center_x": 0.4, "center_y": 0.2}
+            pos_hint: {"center_x": 0.4, "center_y": 0.25}
             font_size: 30
             on_release: app.root.current = 'ct_sgant'
         Button:
             id: UHF2
             size_hint: 0.1,0.2
             opacity: 0.1
-            pos_hint: {"center_x": 0.8, "center_y": 0.62}
+            pos_hint: {"center_x": 0.8, "center_y": 0.67}
             font_size: 30
             on_release: app.root.current = 'ct_sgant'
+        Image:
+            id: uhf1_radio
+            source: "/home/pi/Mimic/Pi/imgs/ct/RadioSphere.zip"
+            anim_delay: 0.12
+            anim_loop: 0
+            color: 1,1,1,1
+            size_hint_y: 0.2
+            keep_ratio: True
+            pos_hint: {"center_x": 0.37, "center_y": 0.18}
+        Image:
+            id: uhf2_radio
+            source: "/home/pi/Mimic/Pi/imgs/ct/RadioSphere.zip"
+            anim_delay: 0.12
+            anim_loop: 0
+            color: 1,1,1,1
+            size_hint_y: 0.2
+            keep_ratio: True
+            pos_hint: {"center_x": 0.805, "center_y": 0.69}
+        Image:
+            id: sasa1_radio
+            source: "/home/pi/Mimic/Pi/imgs/ct/Radio.zip"
+            anim_delay: 0.02
+            anim_loop: 0
+            color: 1,1,1,1
+            size_hint_y: 0.2
+            keep_ratio: True
+            pos_hint: {"center_x": 0.245, "center_y": 0.8}
+        Image:
+            id: sasa2_radio
+            source: "/home/pi/Mimic/Pi/imgs/ct/Radio.zip"
+            anim_delay: 0.02
+            anim_loop: 0
+            color: 1,1,1,1
+            size_hint_y: 0.2
+            keep_ratio: True
+            pos_hint: {"center_x": 0.71, "center_y": 0.8}
+        Image:
+            id: sgant1_radio
+            source: "/home/pi/Mimic/Pi/imgs/ct/Radio.zip"
+            anim_delay: 0.02
+            anim_loop: 0
+            color: 1,1,1,1
+            size_hint_y: 0.2
+            size_hint_y: 0.5
+            keep_ratio: False
+            pos_hint: {"center_x": 0.44, "center_y": 0.83}
+        Image:
+            id: sgant2_radio
+            source: "/home/pi/Mimic/Pi/imgs/ct/Radio.zip"
+            anim_delay: 0.02
+            anim_loop: 0
+            color: 1,1,1,1
+            size_hint_y: 0.2
+            size_hint_y: 0.5
+            keep_ratio: False
+            pos_hint: {"center_x": 0.58, "center_y": 0.83}
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
