@@ -419,7 +419,6 @@ STRRJcontrol = False
 stopAnimation = True
 startingAnim = True
 
-
 #-----------EPS Variables----------------------
 EPSstorageindex = 0
 channel1A_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
@@ -734,6 +733,15 @@ class EPS_Screen(Screen, EventDispatcher):
 class CT_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1,1,1])
 
+class CT_SASA_Screen(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1,1,1])
+
+class CT_Camera_Screen(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1,1,1])
+
+class CT_UHF_Screen(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1,1,1])
+
 class CT_SGANT_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1,1,1])
 
@@ -822,6 +830,9 @@ class MainApp(App):
         self.mimic_screen = MimicScreen(name = 'mimic')
         self.eps_screen = EPS_Screen(name = 'eps')
         self.ct_screen = CT_Screen(name = 'ct')
+        self.ct_sasa_screen = CT_SASA_Screen(name = 'ct_sasa')
+        self.ct_uhf_screen = CT_UHF_Screen(name = 'ct_uhf')
+        self.ct_camera_screen = CT_Camera_Screen(name = 'ct_camera')
         self.ct_sgant_screen = CT_SGANT_Screen(name = 'ct_sgant')
         self.gnc_screen = GNC_Screen(name = 'gnc')
         self.tcs_screen = TCS_Screen(name = 'tcs')
@@ -844,6 +855,9 @@ class MainApp(App):
         root.add_widget(self.eclss_screen)
         root.add_widget(self.eps_screen)
         root.add_widget(self.ct_screen)
+        root.add_widget(self.ct_sasa_screen)
+        root.add_widget(self.ct_uhf_screen)
+        root.add_widget(self.ct_camera_screen)
         root.add_widget(self.ct_sgant_screen)
         root.add_widget(self.gnc_screen)
         root.add_widget(self.us_eva)
@@ -1092,6 +1106,9 @@ class MainApp(App):
         self.eps_screen.signalcolor = args[0],args[1],args[2]
         self.ct_screen.signalcolor = args[0],args[1],args[2]
         self.ct_sgant_screen.signalcolor = args[0],args[1],args[2]
+        self.ct_sasa_screen.signalcolor = args[0],args[1],args[2]
+        self.ct_uhf_screen.signalcolor = args[0],args[1],args[2]
+        self.ct_camera_screen.signalcolor = args[0],args[1],args[2]
         self.gnc_screen.signalcolor = args[0],args[1],args[2]
         self.orbit_screen.signalcolor = args[0],args[1],args[2]
         self.us_eva.signalcolor = args[0],args[1],args[2]
@@ -1444,6 +1461,9 @@ class MainApp(App):
             self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.ct_sgant_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.ct_sasa_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.ct_uhf_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.ct_camera_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
@@ -1454,6 +1474,9 @@ class MainApp(App):
             self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.ct_sgant_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            self.ct_sasa_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            self.ct_uhf_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            self.ct_camera_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
@@ -1463,6 +1486,9 @@ class MainApp(App):
         self.eps_screen.ids.signal.size_hint_y = 0.112
         self.ct_screen.ids.signal.size_hint_y = 0.112
         self.ct_sgant_screen.ids.signal.size_hint_y = 0.112
+        self.ct_sasa_screen.ids.signal.size_hint_y = 0.112
+        self.ct_uhf_screen.ids.signal.size_hint_y = 0.112
+        self.ct_camera_screen.ids.signal.size_hint_y = 0.112
         self.tcs_screen.ids.signal.size_hint_y = 0.112
         self.us_eva.ids.signal.size_hint_y = 0.112
         self.rs_screen.ids.signal.size_hint_y = 0.112
@@ -1475,6 +1501,9 @@ class MainApp(App):
             self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.ct_sgant_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.ct_sasa_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.ct_uhf_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.ct_camera_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
@@ -1485,6 +1514,9 @@ class MainApp(App):
             self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
             self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
             self.ct_sgant_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
+            self.ct_sasa_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
+            self.ct_uhf_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
+            self.ct_camera_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
             self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
             self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
             self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
@@ -1495,6 +1527,9 @@ class MainApp(App):
         self.eps_screen.ids.signal.anim_delay = 0.4
         self.ct_screen.ids.signal.anim_delay = 0.4
         self.ct_sgant_screen.ids.signal.anim_delay = 0.4
+        self.ct_sasa_screen.ids.signal.anim_delay = 0.4
+        self.ct_uhf_screen.ids.signal.anim_delay = 0.4
+        self.ct_camera_screen.ids.signal.anim_delay = 0.4
         self.tcs_screen.ids.signal.anim_delay = 0.4
         self.us_eva.ids.signal.anim_delay = 0.4
         self.rs_screen.ids.signal.anim_delay = 0.4
@@ -1503,6 +1538,9 @@ class MainApp(App):
         self.eps_screen.ids.signal.size_hint_y = 0.112
         self.ct_screen.ids.signal.size_hint_y = 0.112
         self.ct_sgant_screen.ids.signal.size_hint_y = 0.112
+        self.ct_sasa_screen.ids.signal.size_hint_y = 0.112
+        self.ct_uhf_screen.ids.signal.size_hint_y = 0.112
+        self.ct_camera_screen.ids.signal.size_hint_y = 0.112
         self.tcs_screen.ids.signal.size_hint_y = 0.112
         self.us_eva.ids.signal.size_hint_y = 0.112
         self.rs_screen.ids.signal.size_hint_y = 0.112
@@ -1515,6 +1553,9 @@ class MainApp(App):
             self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.ct_sgant_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.ct_sasa_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.ct_uhf_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.ct_camera_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
@@ -1525,6 +1566,9 @@ class MainApp(App):
             self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
             self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
             self.ct_sgant_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
+            self.ct_sasa_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
+            self.ct_uhf_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
+            self.ct_camera_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
             self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
             self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
             self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
@@ -1534,6 +1578,9 @@ class MainApp(App):
         self.eps_screen.ids.signal.anim_delay = 0.05
         self.ct_screen.ids.signal.anim_delay = 0.05
         self.ct_sgant_screen.ids.signal.anim_delay = 0.05
+        self.ct_sasa_screen.ids.signal.anim_delay = 0.05
+        self.ct_uhf_screen.ids.signal.anim_delay = 0.05
+        self.ct_camera_screen.ids.signal.anim_delay = 0.05
         self.tcs_screen.ids.signal.anim_delay = 0.05
         self.us_eva.ids.signal.anim_delay = 0.05
         self.rs_screen.ids.signal.anim_delay = 0.05
@@ -1542,6 +1589,9 @@ class MainApp(App):
         self.eps_screen.ids.signal.size_hint_y = 0.15
         self.ct_screen.ids.signal.size_hint_y = 0.15
         self.ct_sgant_screen.ids.signal.size_hint_y = 0.15
+        self.ct_sasa_screen.ids.signal.size_hint_y = 0.15
+        self.ct_uhf_screen.ids.signal.size_hint_y = 0.15
+        self.ct_camera_screen.ids.signal.size_hint_y = 0.15
         self.tcs_screen.ids.signal.size_hint_y = 0.15
         self.us_eva.ids.signal.size_hint_y = 0.15
         self.rs_screen.ids.signal.size_hint_y = 0.15
@@ -1554,6 +1604,9 @@ class MainApp(App):
             self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.ct_sgant_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.ct_sasa_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.ct_uhf_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.ct_camera_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
@@ -1564,6 +1617,9 @@ class MainApp(App):
             self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.ct_sgant_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            self.ct_sasa_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            self.ct_uhf_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            self.ct_camera_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
@@ -1573,6 +1629,9 @@ class MainApp(App):
         self.eps_screen.ids.signal.anim_delay = 0.12
         self.ct_screen.ids.signal.anim_delay = 0.12
         self.ct_sgant_screen.ids.signal.anim_delay = 0.12
+        self.ct_sasa_screen.ids.signal.anim_delay = 0.12
+        self.ct_uhf_screen.ids.signal.anim_delay = 0.12
+        self.ct_camera_screen.ids.signal.anim_delay = 0.12
         self.tcs_screen.ids.signal.anim_delay = 0.12
         self.us_eva.ids.signal.anim_delay = 0.12
         self.rs_screen.ids.signal.anim_delay = 0.12
@@ -1581,6 +1640,9 @@ class MainApp(App):
         self.eps_screen.ids.signal.size_hint_y = 0.112
         self.ct_screen.ids.signal.size_hint_y = 0.112
         self.ct_sgant_screen.ids.signal.size_hint_y = 0.112
+        self.ct_sasa_screen.ids.signal.size_hint_y = 0.112
+        self.ct_uhf_screen.ids.signal.size_hint_y = 0.112
+        self.ct_camera_screen.ids.signal.size_hint_y = 0.112
         self.tcs_screen.ids.signal.size_hint_y = 0.112
         self.us_eva.ids.signal.size_hint_y = 0.112
         self.rs_screen.ids.signal.size_hint_y = 0.112
@@ -2200,7 +2262,6 @@ class MainApp(App):
         self.us_eva.ids.EVA_psi_bar.pos_hint = {"center_x": psi_bar_x, "center_y": 0.56} 
        
         if float(aos) == 1.00:
-            #self.changeColors(0,1,0)
             if self.root.current == 'mimic':
                fakeorbitboolean = False
                if mimicbutton == True:
@@ -2210,12 +2271,10 @@ class MainApp(App):
             else:
                 self.signal_unsubscribed()
         elif float(aos) == 0.00:
-            #self.changeColors(1,0,0)
             if self.root.current == 'mimic':
                fakeorbitboolean = True
             self.signal_lost()
         elif float(aos) == 2.00:
-            #self.changeColors(1,0.5,0)
             if self.root.current == 'mimic':
                fakeorbitboolean = True
             self.signal_stale()
@@ -2228,15 +2287,11 @@ class MainApp(App):
             self.serialWrite("Beta1B=" + beta1b + " ")
             self.serialWrite("Beta1A=" + beta1a + " ")
             self.serialWrite("Beta2B=" + beta2b + " ")
-            print "2B = " + str(beta2b)
             self.serialWrite("Beta2A=" + beta2a + " ")
-            print "2A = " + str(beta2a)
             self.serialWrite("Beta3B=" + beta3b + " ")
             self.serialWrite("Beta3A=" + beta3a + " ")
             self.serialWrite("Beta4B=" + beta4b + " ")
-            print "4B = " + str(beta4b)
             self.serialWrite("Beta4A=" + beta4a + " ")
-            print "4A = " + str(beta4a)
             self.serialWrite("AOS=" + aos + " ")
             self.serialWrite("Voltage1A=" + v1a + " ")
             self.serialWrite("Voltage2A=" + v2a + " ")
@@ -2256,6 +2311,9 @@ Builder.load_file('/home/pi/Mimic/Pi/Screens/ECLSS_Screen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/EPS_Screen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/CT_Screen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/CT_SGANT_Screen.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/CT_SASA_Screen.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/CT_UHF_Screen.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/CT_Camera_Screen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/GNC_Screen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/TCS_Screen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/EVA_US_Screen.kv')
@@ -2279,6 +2337,9 @@ ScreenManager:
     Orbit_Screen:
     EPS_Screen:
     CT_Screen:
+    CT_SASA_Screen:
+    CT_UHF_Screen:
+    CT_Camera_Screen:
     CT_SGANT_Screen:
     ISS_Screen:
     ECLSS_Screen:
