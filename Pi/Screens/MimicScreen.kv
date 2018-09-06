@@ -63,6 +63,24 @@
             font_size: 30
             on_release: root.manager.current = 'tcs'
         Button:
+            id: ISS_button
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.5, "center_y": 0.62}
+            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/TCSunlit.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/unsorted/TCSdown.png'
+            text: ''
+            font_size: 30
+            on_release: root.manager.current = 'iss'
+        Button:
+            id: ECLSS_button
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.5, "center_y": 0.48}
+            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/TCSunlit.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/unsorted/TCSdown.png'
+            text: ''
+            font_size: 30
+            on_release: root.manager.current = 'eclss'
+        Button:
             id: ROS_button
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.68, "center_y": 0.48}

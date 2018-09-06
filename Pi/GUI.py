@@ -722,6 +722,12 @@ class Settings_Screen(Screen, EventDispatcher):
 class Orbit_Screen(Screen, EventDispatcher):
     pass
 
+class ISS_Screen(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1,1,1])
+
+class ECLSS_Screen(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1,1,1])
+
 class EPS_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1,1,1])
 
@@ -807,6 +813,8 @@ class MainApp(App):
         global stopAnimation
         
         self.main_screen = MainScreen(name = 'main')
+        self.iss_screen = ISS_Screen(name = 'iss')
+        self.eclss_screen = ECLSS_Screen(name = 'eclss')
         self.calibrate_screen = CalibrateScreen(name = 'calibrate')
         self.control_screen = ManualControlScreen(name = 'manualcontrol')
         self.orbit_screen = Orbit_Screen(name = 'orbit')
@@ -832,6 +840,8 @@ class MainApp(App):
         root.add_widget(self.mimic_screen)
         root.add_widget(self.fakeorbit_screen)
         root.add_widget(self.orbit_screen)
+        root.add_widget(self.iss_screen)
+        root.add_widget(self.eclss_screen)
         root.add_widget(self.eps_screen)
         root.add_widget(self.ct_screen)
         root.add_widget(self.ct_sgant_screen)
@@ -1167,19 +1177,19 @@ class MainApp(App):
             if longitude > 90 and sgant_elevation < -10:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West"
                 print "if 1"
-            elif longitude > 70 and longitude < 120 and sgant_elevation > -10:
+            elif longitude > 55 and longitude < 120 and sgant_elevation > -10:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-Z"
                 print "if 2"
             elif longitude > 0 and longitude <= 90 and sgant_elevation < -10:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-Z"
                 print "if 3"
-            elif longitude > -60 and longitude <= 70 and sgant_elevation > -10:
+            elif longitude > -80 and longitude <= 55 and sgant_elevation > -10:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East"
                 print "if 4"
             elif longitude > -160 and longitude <= 0 and sgant_elevation < -10:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East"
                 print "if 5"
-            elif ((longitude >= -180 and longitude <= -60) or (longitude > 120)) and sgant_elevation > -10:
+            elif ((longitude >= -180 and longitude <= -80) or (longitude > 120)) and sgant_elevation > -40:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West"
                 print "if 6"
             else:
@@ -1668,6 +1678,9 @@ class MainApp(App):
         sgant_elevation = float((values[15])[0])
         sgant_xelevation = float((values[17])[0])
         sgant_transmit = float((values[41])[0])
+        uhf1_power = int((values[233])[0]) #0 = off, 1 = on, 3 = failed
+        uhf2_power = int((values[234])[0]) #0 = off, 1 = on, 3 = failed
+        uhf_framesync = int((values[235])[0]) #1 or 0
         
         v1a = "{:.2f}".format(float((values[25])[0]))
         channel1A_voltage[EPSstorageindex] = float(v1a)
@@ -1792,6 +1805,7 @@ class MainApp(App):
         #Solar arrays offline
         #Loss of attitude control, loss of cmg control
         #ISS altitude too low
+        #Russion hook status - make sure all modules remain docked
         
     
 
@@ -1961,6 +1975,20 @@ class MainApp(App):
             self.ct_screen.ids.sasa2_radio.color = 0,0,0,0
         elif float(aos) == 0.0:
             self.ct_screen.ids.sasa2_radio.color = 0,0,0,0
+
+        if float(uhf1_power) == 1.0 and float(aos) == 1.0:
+            self.ct_screen.ids.uhf1_radio.color = 1,1,1,1
+        elif float(uhf1_power) == 1.0 and float(aos) == 0.0:
+            self.ct_screen.ids.uhf1_radio.color = 1,0,0,1
+        elif float(uhf1_power) == 0.0:
+            self.ct_screen.ids.uhf1_radio.color = 0,0,0,0
+        
+        if float(uhf2_power) == 1.0 and float(aos) == 1.0:
+            self.ct_screen.ids.uhf2_radio.color = 1,1,1,1
+        elif float(uhf2_power) == 1.0 and float(aos) == 0.0:
+            self.ct_screen.ids.uhf2_radio.color = 1,0,0,1
+        elif float(uhf2_power) == 0.0:
+            self.ct_screen.ids.uhf2_radio.color = 0,0,0,0
 
         ##-------------------EVA Functionality-------------------##
         if stationmode == 5:
@@ -2200,11 +2228,15 @@ class MainApp(App):
             self.serialWrite("Beta1B=" + beta1b + " ")
             self.serialWrite("Beta1A=" + beta1a + " ")
             self.serialWrite("Beta2B=" + beta2b + " ")
+            print "2B = " + str(beta2b)
             self.serialWrite("Beta2A=" + beta2a + " ")
+            print "2A = " + str(beta2a)
             self.serialWrite("Beta3B=" + beta3b + " ")
             self.serialWrite("Beta3A=" + beta3a + " ")
             self.serialWrite("Beta4B=" + beta4b + " ")
+            print "4B = " + str(beta4b)
             self.serialWrite("Beta4A=" + beta4a + " ")
+            print "4A = " + str(beta4a)
             self.serialWrite("AOS=" + aos + " ")
             self.serialWrite("Voltage1A=" + v1a + " ")
             self.serialWrite("Voltage2A=" + v2a + " ")
@@ -2219,6 +2251,8 @@ class MainApp(App):
 Builder.load_file('/home/pi/Mimic/Pi/Screens/Settings_Screen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/FakeOrbitScreen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/Orbit_Screen.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/ISS_Screen.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/ECLSS_Screen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/EPS_Screen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/CT_Screen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/CT_SGANT_Screen.kv')
@@ -2246,6 +2280,8 @@ ScreenManager:
     EPS_Screen:
     CT_Screen:
     CT_SGANT_Screen:
+    ISS_Screen:
+    ECLSS_Screen:
     GNC_Screen:
     TCS_Screen:
     EVA_US_Screen:
