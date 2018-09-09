@@ -52,7 +52,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, WipeTr
 
 # Create Program Logs 
 mimiclog = open('/home/pi/Mimic/Pi/Logs/mimiclog.txt','w')
-sgantlog = open('/home/pi/Mimic/Pi/Logs/sgantlog.txt','w')
+sgantlog = open('/home/pi/Mimic/Pi/Logs/sgantlog.txt','a+')
 locationlog = open('/home/pi/Mimic/Pi/Logs/locationlog.txt','a')
 
 
@@ -418,7 +418,7 @@ PTRRJcontrol = False
 STRRJcontrol = False
 stopAnimation = True
 startingAnim = True
-
+oldtdrs = "n/a"
 #-----------EPS Variables----------------------
 EPSstorageindex = 0
 channel1A_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
@@ -1121,7 +1121,7 @@ class MainApp(App):
         manualcontrol = args[0]
        
     def orbitUpdate(self, dt):
-        global overcountry, tle_rec, line1, line2, TLE_acquired, sgant_elevation, sgant_elevation_old, sgant_xelevation, aos
+        global overcountry, tle_rec, line1, line2, TLE_acquired, sgant_elevation, sgant_elevation_old, sgant_xelevation, aos, oldtdrs
         def scaleLatLon(latitude,longitude):
             #converting lat lon to x,y for orbit map
             fromLatSpan = 180.0
@@ -1190,29 +1190,48 @@ class MainApp(App):
             #TDRSw = -174
             #TDRSe = -41
             #TDRSz = 85
+            tdrs = "n/a"
 
             if longitude > 90 and sgant_elevation < -10:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West"
                 print "if 1"
+                tdrs = "west"
             elif longitude > 55 and longitude < 120 and sgant_elevation > -10:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-Z"
                 print "if 2"
+                tdrs = "z"
             elif longitude > 0 and longitude <= 90 and sgant_elevation < -10:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-Z"
                 print "if 3"
+                tdrs = "z"
             elif longitude > -80 and longitude <= 55 and sgant_elevation > -10:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East"
                 print "if 4"
+                tdrs = "east"
             elif longitude > -160 and longitude <= 0 and sgant_elevation < -10:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East"
                 print "if 5"
+                tdrs = "east"
             elif ((longitude >= -180 and longitude <= -80) or (longitude > 120)) and sgant_elevation > -40:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West"
                 print "if 6"
+                tdrs = "west"
             else:
                 self.ct_sgant_screen.ids.tdrs_label.text = "---"
                 print "if 7"
+                tdrs = "----"
 
+            if tdrs != oldtdrs and float(aos) == 1.0:
+                oldtdrs = tdrs
+                sgantlog.write(str(datetime.utcnow()))
+                sgantlog.write(' ')
+                sgantlog.write(str(sgant_elevation))
+                sgantlog.write(' ')
+                sgantlog.write(str(longitude))
+                sgantlog.write(' ')
+                sgantlog.write(str(tdrs))
+                sgantlog.write(' ')
+                sgantlog.write('\n')
 
             #if sgant_elevation > sgant_elevation_old:
             #    sgant_elevation_old = sgant_elevation
