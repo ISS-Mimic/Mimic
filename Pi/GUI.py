@@ -1811,6 +1811,38 @@ class MainApp(App):
         altitude = "{:.2f}".format((math.sqrt( math.pow(float(position_x), 2) + math.pow(float(position_y), 2) + math.pow(float(position_z), 2) )-6371.00))
         velocity = "{:.2f}".format(((math.sqrt( math.pow(float(velocity_x), 2) + math.pow(float(velocity_y), 2) + math.pow(float(velocity_z), 2) ))/1.00))
         
+        cmg1_active = int((values[145])[0]) 
+        cmg2_active = int((values[146])[0])
+        cmg3_active = int((values[147])[0])
+        cmg4_active = int((values[148])[0])
+        numCMGs = int((values[149])[0])
+        CMGtorqueRoll = float((values[150])[0])
+        CMGtorquePitch = float((values[151])[0])
+        CMGtorqueYaw = float((values[152])[0])
+        CMGmomentum = float((values[153])[0])
+        CMGmompercent = float((values[154])[0])
+        CMGmomcapacity = float((values[175])[0])
+        cmg1_spintemp = float((values[181])[0])
+        cmg2_spintemp = float((values[182])[0])
+        cmg3_spintemp = float((values[183])[0])
+        cmg4_spintemp = float((values[184])[0])
+        cmg1_halltemp = float((values[185])[0])
+        cmg2_halltemp = float((values[186])[0])
+        cmg3_halltemp = float((values[187])[0])
+        cmg4_halltemp = float((values[188])[0])
+        cmg1_vibration = float((values[237])[0])
+        cmg2_vibration = float((values[238])[0])
+        cmg3_vibration = float((values[239])[0])
+        cmg4_vibration = float((values[240])[0])
+        cmg1_motorcurrent = float((values[241])[0])
+        cmg2_motorcurrent = float((values[242])[0])
+        cmg3_motorcurrent = float((values[243])[0])
+        cmg4_motorcurrent = float((values[244])[0])
+        cmg1_wheelspeed = float((values[245])[0])
+        cmg2_wheelspeed = float((values[246])[0])
+        cmg3_wheelspeed = float((values[247])[0])
+        cmg4_wheelspeed = float((values[248])[0])
+        
         #EVA Telemetry
         airlock_pump_voltage = int((values[71])[0])
         airlock_pump_voltage_timestamp = float((timestamps[71])[0])
@@ -1902,7 +1934,30 @@ class MainApp(App):
         self.gnc_screen.ids.pitch.text = str("{:.2f}".format(pitch))
         self.gnc_screen.ids.roll.text = str("{:.2f}".format(roll))
         
-
+        self.gnc_screen.ids.cmg1spintemp.text = "Spin Temp " + str("{:.1f}".format(cmg1_spintemp))
+        self.gnc_screen.ids.cmg1halltemp.text = "Hall Temp " + str("{:.1f}".format(cmg1_halltemp))
+        self.gnc_screen.ids.cmg1vibration.text = "Vibration " + str("{:.1f}".format(cmg1_vibration))
+        self.gnc_screen.ids.cmg1current.text = "Current " + str("{:.1f}".format(cmg1_motorcurrent))
+        self.gnc_screen.ids.cmg1speed.text = "Speed " + str("{:.1f}".format(cmg1_wheelspeed))
+        
+        self.gnc_screen.ids.cmg2spintemp.text = "Spin Temp " + str("{:.1f}".format(cmg2_spintemp))
+        self.gnc_screen.ids.cmg2halltemp.text = "Hall Temp " + str("{:.1f}".format(cmg2_halltemp))
+        self.gnc_screen.ids.cmg2vibration.text = "Vibration " + str("{:.1f}".format(cmg2_vibration))
+        self.gnc_screen.ids.cmg2current.text = "Current " + str("{:.1f}".format(cmg2_motorcurrent))
+        self.gnc_screen.ids.cmg2speed.text = "Speed " + str("{:.1f}".format(cmg2_wheelspeed))
+        
+        self.gnc_screen.ids.cmg3spintemp.text = "Spin Temp " + str("{:.1f}".format(cmg3_spintemp))
+        self.gnc_screen.ids.cmg3halltemp.text = "Hall Temp " + str("{:.1f}".format(cmg3_halltemp))
+        self.gnc_screen.ids.cmg3vibration.text = "Vibration " + str("{:.1f}".format(cmg3_vibration))
+        self.gnc_screen.ids.cmg3current.text = "Current " + str("{:.1f}".format(cmg3_motorcurrent))
+        self.gnc_screen.ids.cmg3speed.text = "Speed " + str("{:.1f}".format(cmg3_wheelspeed))
+        
+        self.gnc_screen.ids.cmg4spintemp.text = "Spin Temp " + str("{:.1f}".format(cmg4_spintemp))
+        self.gnc_screen.ids.cmg4halltemp.text = "Hall Temp " + str("{:.1f}".format(cmg4_halltemp))
+        self.gnc_screen.ids.cmg4vibration.text = "Vibration " + str("{:.1f}".format(cmg4_vibration))
+        self.gnc_screen.ids.cmg4current.text = "Current " + str("{:.1f}".format(cmg4_motorcurrent))
+        self.gnc_screen.ids.cmg4speed.text = "Speed " + str("{:.1f}".format(cmg4_wheelspeed))
+        
         ##-------------------EPS Stuff---------------------------##
 
         if avg_total_voltage > 151.5:
