@@ -1934,27 +1934,50 @@ class MainApp(App):
         self.gnc_screen.ids.pitch.text = str("{:.2f}".format(pitch))
         self.gnc_screen.ids.roll.text = str("{:.2f}".format(roll))
         
+        self.gnc_screen.ids.cmgsaturation.value = CMGmompercent
+        self.gnc_screen.ids.cmgsaturation_value.text = "CMG Saturation " + str("{:.1f}".format(CMGmompercent)) + "%"
+       
+        if cmg1_active == 1:
+            self.gnc_screen.ids.cmg1.source = "/home/pi/Mimic/Pi/imgs/gnc/cmg.png"
+        else:
+            self.gnc_screen.ids.cmg1.source = "/home/pi/Mimic/Pi/imgs/gnc/cmg_offline.png"
+
+        if cmg2_active == 1:
+            self.gnc_screen.ids.cmg2.source = "/home/pi/Mimic/Pi/imgs/gnc/cmg.png"
+        else:
+            self.gnc_screen.ids.cmg2.source = "/home/pi/Mimic/Pi/imgs/gnc/cmg_offline.png"
+        
+        if cmg3_active == 1:
+            self.gnc_screen.ids.cmg3.source = "/home/pi/Mimic/Pi/imgs/gnc/cmg.png"
+        else:
+            self.gnc_screen.ids.cmg3.source = "/home/pi/Mimic/Pi/imgs/gnc/cmg_offline.png"
+        
+        if cmg4_active == 1:
+            self.gnc_screen.ids.cmg4.source = "/home/pi/Mimic/Pi/imgs/gnc/cmg.png"
+        else:
+            self.gnc_screen.ids.cmg4.source = "/home/pi/Mimic/Pi/imgs/gnc/cmg_offline.png"
+        
         self.gnc_screen.ids.cmg1spintemp.text = "Spin Temp " + str("{:.1f}".format(cmg1_spintemp))
         self.gnc_screen.ids.cmg1halltemp.text = "Hall Temp " + str("{:.1f}".format(cmg1_halltemp))
-        self.gnc_screen.ids.cmg1vibration.text = "Vibration " + str("{:.1f}".format(cmg1_vibration))
+        self.gnc_screen.ids.cmg1vibration.text = "Vibration " + str("{:.4f}".format(cmg1_vibration))
         self.gnc_screen.ids.cmg1current.text = "Current " + str("{:.1f}".format(cmg1_motorcurrent))
         self.gnc_screen.ids.cmg1speed.text = "Speed " + str("{:.1f}".format(cmg1_wheelspeed))
         
         self.gnc_screen.ids.cmg2spintemp.text = "Spin Temp " + str("{:.1f}".format(cmg2_spintemp))
         self.gnc_screen.ids.cmg2halltemp.text = "Hall Temp " + str("{:.1f}".format(cmg2_halltemp))
-        self.gnc_screen.ids.cmg2vibration.text = "Vibration " + str("{:.1f}".format(cmg2_vibration))
+        self.gnc_screen.ids.cmg2vibration.text = "Vibration " + str("{:.4f}".format(cmg2_vibration))
         self.gnc_screen.ids.cmg2current.text = "Current " + str("{:.1f}".format(cmg2_motorcurrent))
         self.gnc_screen.ids.cmg2speed.text = "Speed " + str("{:.1f}".format(cmg2_wheelspeed))
         
         self.gnc_screen.ids.cmg3spintemp.text = "Spin Temp " + str("{:.1f}".format(cmg3_spintemp))
         self.gnc_screen.ids.cmg3halltemp.text = "Hall Temp " + str("{:.1f}".format(cmg3_halltemp))
-        self.gnc_screen.ids.cmg3vibration.text = "Vibration " + str("{:.1f}".format(cmg3_vibration))
+        self.gnc_screen.ids.cmg3vibration.text = "Vibration " + str("{:.4f}".format(cmg3_vibration))
         self.gnc_screen.ids.cmg3current.text = "Current " + str("{:.1f}".format(cmg3_motorcurrent))
         self.gnc_screen.ids.cmg3speed.text = "Speed " + str("{:.1f}".format(cmg3_wheelspeed))
         
         self.gnc_screen.ids.cmg4spintemp.text = "Spin Temp " + str("{:.1f}".format(cmg4_spintemp))
         self.gnc_screen.ids.cmg4halltemp.text = "Hall Temp " + str("{:.1f}".format(cmg4_halltemp))
-        self.gnc_screen.ids.cmg4vibration.text = "Vibration " + str("{:.1f}".format(cmg4_vibration))
+        self.gnc_screen.ids.cmg4vibration.text = "Vibration " + str("{:.4f}".format(cmg4_vibration))
         self.gnc_screen.ids.cmg4current.text = "Current " + str("{:.1f}".format(cmg4_motorcurrent))
         self.gnc_screen.ids.cmg4speed.text = "Speed " + str("{:.1f}".format(cmg4_wheelspeed))
         
