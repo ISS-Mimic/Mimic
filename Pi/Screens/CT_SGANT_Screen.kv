@@ -56,32 +56,19 @@
             keep_ratio: True
         Image:
             id: tdrs
-            ##source: "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
-            source: "/home/pi/Mimic/Pi/imgs/ct/TDRS.zip"
+            source: "/home/pi/Mimic/Pi/imgs/ct/TDRS_all.png"
             color: 1,1,1,1
-            anim_delay: 0.13
-            anim_loop: 0
-            size_hint_y: 0.15
-            size_hint_x: 0.15
+            size_hint_y: 1
+            size_hint_x: 1
             keep_ratio: False
-            pos_hint: {"center_x": 0.5, "center_y": 0.8}
-            angle: sgant_dish.angle
-            angle2: 180
+            pos: 0,-400
+            angle: 0
             canvas.before:
                 PushMatrix
-                Scale:
-                    x: 1
-                    y: 1
-                    z: -1
-                    origin: self.center
                 Rotate:
                     angle: self.angle
                     axis: 0,0,1
-                    origin: sgant_dish.center
-                Rotate:
-                    angle: self.angle2
-                    axis: 0,0,1
-                    origin: self.center
+                    origin: 0,0
             canvas.after:
                 PopMatrix
         Label:

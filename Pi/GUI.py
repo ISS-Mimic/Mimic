@@ -871,7 +871,7 @@ class MainApp(App):
         Clock.schedule_interval(self.update_labels, 1)
         Clock.schedule_interval(self.deleteURLPictures, 86400)
         Clock.schedule_interval(self.animate3,0.1)
-        Clock.schedule_interval(self.orbitUpdate, 5)
+        Clock.schedule_interval(self.orbitUpdate, 1)
         Clock.schedule_interval(self.checkCrew, 120)
         Clock.schedule_interval(self.changePictures, 10)
         if startup == True:
@@ -1179,6 +1179,10 @@ class MainApp(App):
             #TDRSz = 85
             tdrs = "n/a"
 
+            self.ct_sgant_screen.ids.tdrs.angle = -1*(float(str(longitude).split(':')[0]))-41
+           # tdrs_rotate_iss = -1*(float(str(longitude).split(':')[0]))-41 
+            
+            
             if longitude > 90 and sgant_elevation < -10 and float(aos) == 1.0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West"
                 print "if 1"
