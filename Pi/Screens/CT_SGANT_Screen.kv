@@ -58,17 +58,16 @@
             id: tdrs
             source: "/home/pi/Mimic/Pi/imgs/ct/TDRS_all.png"
             color: 1,1,1,1
-            size_hint_y: 1
-            size_hint_x: 1
+            size_hint: 1.5,1.5
             keep_ratio: False
-            pos: 0,-400
+            pos_hint: {"center_x": 0.5, "center_y": 0}
             angle: 0
             canvas.before:
                 PushMatrix
                 Rotate:
                     angle: self.angle
-                    axis: 0,0,1
-                    origin: 0,0
+                    axis: 0,0,-1
+                    origin: self.center
             canvas.after:
                 PopMatrix
         Label:

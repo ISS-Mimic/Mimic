@@ -1178,16 +1178,16 @@ class MainApp(App):
             #TDRSe = -41
             #TDRSz = 85
             tdrs = "n/a"
-
-            self.ct_sgant_screen.ids.tdrs.angle = -1*(float(str(longitude).split(':')[0]))-41
-           # tdrs_rotate_iss = -1*(float(str(longitude).split(':')[0]))-41 
+            print longitude
+            self.ct_sgant_screen.ids.tdrs.angle = (-1*(float(str(longitude).split(':')[0])))-41
+            print (-1*(float(str(longitude).split(':')[0])))-41 
             
             
             if longitude > 90 and sgant_elevation < -10 and float(aos) == 1.0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West"
                 print "if 1"
                 tdrs = "west"
-            elif longitude > 55 and longitude < 120 and sgant_elevation > -10 and float(aos) == 1.0:
+            elif longitude > 55 and longitude < 140 and sgant_elevation > -10 and float(aos) == 1.0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-Z"
                 print "if 2"
                 tdrs = "z"
@@ -1203,7 +1203,7 @@ class MainApp(App):
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East"
                 print "if 5"
                 tdrs = "east"
-            elif ((longitude >= -180 and longitude <= -80) or (longitude > 120)) and sgant_elevation > -40 and float(aos) == 1.0:
+            elif ((longitude >= -180 and longitude <= -80) or (longitude > 140)) and sgant_elevation > -40 and float(aos) == 1.0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West"
                 print "if 6"
                 tdrs = "west"
@@ -1961,16 +1961,16 @@ class MainApp(App):
         #make sure radio animations turn off when no signal or no transmit
         if float(sgant_transmit) == 1.0 and float(aos) == 1.0:
             self.ct_sgant_screen.ids.radio_up.color = 1,1,1,1
-            self.ct_sgant_screen.ids.tdrs.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.zip"
+            #self.ct_sgant_screen.ids.tdrs.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.zip"
         elif float(sgant_transmit) == 1.0 and float(aos) == 0.0:
             self.ct_sgant_screen.ids.radio_up.color = 0,0,0,0
-            self.ct_sgant_screen.ids.tdrs.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            #self.ct_sgant_screen.ids.tdrs.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
         elif float(sgant_transmit) == 0.0:
             self.ct_sgant_screen.ids.radio_up.color = 0,0,0,0
-            self.ct_sgant_screen.ids.tdrs.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            #self.ct_sgant_screen.ids.tdrs.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
         elif float(aos) == 0.0:
             self.ct_sgant_screen.ids.radio_up.color = 0,0,0,0
-            self.ct_sgant_screen.ids.tdrs.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            #self.ct_sgant_screen.ids.tdrs.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
        
         #now check main CT screen radio signal
         if float(sgant_transmit) == 1.0 and float(aos) == 1.0:
