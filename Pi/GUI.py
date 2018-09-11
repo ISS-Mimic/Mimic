@@ -1,18 +1,17 @@
 #!/usr/bin/python
 import kivy
-import urllib2
+import urllib2 #try to replace these calls with urlrequest which is async
 from bs4 import BeautifulSoup
 from calendar import timegm
 from datetime import datetime
-import pytz
-## import reverse_geocode #test1uncomment
+import pytz #used for timezone conversion in orbit pass predictions
 import sys
-import ephem
+import ephem #used for TLE propagation on orbit screen
 import os
-import subprocess
+import subprocess #used to start/stop Javascript telemetry program
 import json
-import sqlite3
-import serial
+import sqlite3 #javascript stores telemetry in sqlite db
+import serial #used to send data over serial to arduino
 import time
 import sched
 import smbus
@@ -34,10 +33,7 @@ from kivy.uix.label import Label
 from kivy.uix.widget import Widget
 from kivy.base import runTouchApp
 from kivy.clock import Clock
-from kivy.properties import ListProperty
-from kivy.properties import ObjectProperty
-from kivy.properties import NumericProperty
-from kivy.properties import ReferenceListProperty
+from kivy.properties import ListProperty, ObjectProperty, NumericProperty, ReferenceListProperty
 from kivy.vector import Vector
 from kivy.core.window import Window
 from kivy.lang import Builder
@@ -124,6 +120,7 @@ else:
 conn = sqlite3.connect('/dev/shm/iss_telemetry.db')
 conn.isolation_level = None
 c = conn.cursor() 
+#now we populate the blank database, this prevents locked database issues
 c.execute("pragma journal_mode=wal");
 c.execute("CREATE TABLE IF NOT EXISTS telemetry (`Label` TEXT PRIMARY KEY, `Timestamp` TEXT, `Value` TEXT, `ID` TEXT, `dbID` NUMERIC )");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('psarj','1216.72738833328','233.039337158203','S0000004',1)");
@@ -363,7 +360,7 @@ c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD52B_A_RPC_08_UHF_SSSR
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA1B_H_RPC_04_UHF_SSSR_2_On_Off_Stat','1170.84539000001','0','USLAB000100',235)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('UHF_Frame_Sync','1170.83724944439','0','USLAB000101',236)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_SD_Selected_State_Time_Tag','1216.725805','1203093820.00567','USLAB000102',237)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG1_IG_Vibration','1216.68952833335','0','Z1000001',238)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG1_IG_Vibration','1216.68958500001','0.006805419921875','Z1000001',238)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG2_IG_Vibration','1216.68958500001','0.006805419921875','Z1000002',239)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG3_IG_Vibration','1216.68961194442','0.005828857421875','Z1000003',240)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG4_IG_Vibration','1216.68688944446','0.004364013671875','Z1000004',241)");
@@ -816,9 +813,7 @@ class MyButton(Button):
 class MainApp(App):
 
     def build(self):
-        global startup
-        global crewjsonsuccess
-        global stopAnimation
+        global startup, ScreenList, crewjsonsuccess, stopAnimation
         
         self.main_screen = MainScreen(name = 'main')
         self.iss_screen = ISS_Screen(name = 'iss')
@@ -843,6 +838,9 @@ class MainApp(App):
         self.rs_screen = RS_Screen(name='rs')
         self.eva_main = EVA_Main_Screen(name='eva_main')
         self.eva_pictures = EVA_Pictures(name='eva_pictures')
+        
+        #Add all new telemetry screens to this list, this is used for the signal status icon and telemetry value colors
+        ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen', 'ct_screen', 'ct_sasa_screen', 'ct_sgant_screen', 'ct_uhf_screen', 'ct_camera_screen', 'gnc_screen', 'orbit_screen', 'us_eva', 'rs_eva', 'eva_main', 'mimic_screen'] 
 
         root = MainScreenManager(transition=SwapTransition())
         root.add_widget(self.main_screen)
@@ -878,6 +876,7 @@ class MainApp(App):
         Clock.schedule_interval(self.changePictures, 10)
         if startup == True:
             startup = False
+
 
         Clock.schedule_once(self.getTLE, 30) #uncomment when internet works again
         Clock.schedule_interval(self.getTLE, 600) #uncomment when internet works again
@@ -1102,19 +1101,10 @@ class MainApp(App):
 
     def changeColors(self, *args):   #this function sets all labels on mimic screen to a certain color based on signal status
         #the signalcolor is a kv property that will update all signal status dependant values to whatever color is received by this function 
-        self.tcs_screen.signalcolor = args[0],args[1],args[2]
-        self.eps_screen.signalcolor = args[0],args[1],args[2]
-        self.ct_screen.signalcolor = args[0],args[1],args[2]
-        self.ct_sgant_screen.signalcolor = args[0],args[1],args[2]
-        self.ct_sasa_screen.signalcolor = args[0],args[1],args[2]
-        self.ct_uhf_screen.signalcolor = args[0],args[1],args[2]
-        self.ct_camera_screen.signalcolor = args[0],args[1],args[2]
-        self.gnc_screen.signalcolor = args[0],args[1],args[2]
-        self.orbit_screen.signalcolor = args[0],args[1],args[2]
-        self.us_eva.signalcolor = args[0],args[1],args[2]
-        self.rs_eva.signalcolor = args[0],args[1],args[2]
-        self.eva_main.signalcolor = args[0],args[1],args[2]
-        self.mimic_screen.signalcolor = args[0],args[1],args[2]
+        global ScreenList
+        
+        for x in ScreenList:
+            getattr(self, x).signalcolor = args[0],args[1],args[2]
     
     def changeManualControlBoolean(self, *args):
         global manualcontrol
@@ -1179,9 +1169,6 @@ class MainApp(App):
                 #sgantlog.write(str(aos))
                 sgantlog.write('\n')
             
-            #results = reverse_geocode.search(coordinates)
-            #overcountry =  results[0]['country']
-            #self.mimic_screen.ids.iss_over_country.text = "The ISS is over " + overcountry
             self.orbit_screen.ids.OrbitISStiny.pos_hint = {"center_x": scaleLatLon(latitude,longitude)['newLon'], "center_y": scaleLatLon(latitude,longitude)['newLat']}
             self.orbit_screen.ids.latitude.text = str("{:.2f}".format(latitude))
             self.orbit_screen.ids.longitude.text = str("{:.2f}".format(longitude))
@@ -1192,32 +1179,32 @@ class MainApp(App):
             #TDRSz = 85
             tdrs = "n/a"
 
-            if longitude > 90 and sgant_elevation < -10:
+            if longitude > 90 and sgant_elevation < -10 and float(aos) == 1.0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West"
                 print "if 1"
                 tdrs = "west"
-            elif longitude > 55 and longitude < 120 and sgant_elevation > -10:
+            elif longitude > 55 and longitude < 120 and sgant_elevation > -10 and float(aos) == 1.0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-Z"
                 print "if 2"
                 tdrs = "z"
-            elif longitude > 0 and longitude <= 90 and sgant_elevation < -10:
+            elif longitude > 0 and longitude <= 90 and sgant_elevation < -10 and float(aos) == 1.0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-Z"
                 print "if 3"
                 tdrs = "z"
-            elif longitude > -80 and longitude <= 55 and sgant_elevation > -10:
+            elif longitude > -80 and longitude <= 55 and sgant_elevation > -10 and float(aos) == 1.0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East"
                 print "if 4"
                 tdrs = "east"
-            elif longitude > -160 and longitude <= 0 and sgant_elevation < -10:
+            elif longitude > -160 and longitude <= 0 and sgant_elevation < -10 and float(aos) == 1.0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East"
                 print "if 5"
                 tdrs = "east"
-            elif ((longitude >= -180 and longitude <= -80) or (longitude > 120)) and sgant_elevation > -40:
+            elif ((longitude >= -180 and longitude <= -80) or (longitude > 120)) and sgant_elevation > -40 and float(aos) == 1.0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West"
                 print "if 6"
                 tdrs = "west"
             else:
-                self.ct_sgant_screen.ids.tdrs_label.text = "---"
+                self.ct_sgant_screen.ids.tdrs_label.text = ""
                 print "if 7"
                 tdrs = "----"
 
@@ -1473,198 +1460,70 @@ class MainApp(App):
         self.us_eva.ids.Crewlock_Status_image.source = '/home/pi/Mimic/Pi/imgs/eva/LeakCheckLights.png'
 
     def signal_unsubscribed(self): #change images, used stale signal image
-        global internet
+        global internet, ScreenList
+        
         if internet == False:
-            self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.ct_sgant_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.ct_sasa_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.ct_uhf_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.ct_camera_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            for x in ScreenList:
+                getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.changeColors(1,0,0)
         else:
-            self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
-            self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
-            self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
-            self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
-            self.ct_sgant_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
-            self.ct_sasa_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
-            self.ct_uhf_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
-            self.ct_camera_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
-            self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
-            self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
-            self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            for x in ScreenList:
+                getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.changeColors(1,0.5,0)
-        self.orbit_screen.ids.signal.size_hint_y = 0.112
-        self.mimic_screen.ids.signal.size_hint_y = 0.112
-        self.eps_screen.ids.signal.size_hint_y = 0.112
-        self.ct_screen.ids.signal.size_hint_y = 0.112
-        self.ct_sgant_screen.ids.signal.size_hint_y = 0.112
-        self.ct_sasa_screen.ids.signal.size_hint_y = 0.112
-        self.ct_uhf_screen.ids.signal.size_hint_y = 0.112
-        self.ct_camera_screen.ids.signal.size_hint_y = 0.112
-        self.tcs_screen.ids.signal.size_hint_y = 0.112
-        self.us_eva.ids.signal.size_hint_y = 0.112
-        self.rs_screen.ids.signal.size_hint_y = 0.112
+        
+        for x in ScreenList:
+            getattr(self, x).ids.signal.size_hint_y = 0.112
     
     def signal_lost(self):
-        global internet
+        global internet, ScreenList
+        
         if internet == False:
-            self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.ct_sgant_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.ct_sasa_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.ct_uhf_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.ct_camera_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            for x in ScreenList:
+                getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.changeColors(1,0,0)
         else:
-            self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
-            self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
-            self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
-            self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
-            self.ct_sgant_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
-            self.ct_sasa_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
-            self.ct_uhf_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
-            self.ct_camera_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
-            self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
-            self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
-            self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
+            for x in ScreenList:
+                getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
             self.changeColors(1,0,0)
 
-        self.orbit_screen.ids.signal.anim_delay = 0.4
-        self.mimic_screen.ids.signal.anim_delay = 0.4
-        self.eps_screen.ids.signal.anim_delay = 0.4
-        self.ct_screen.ids.signal.anim_delay = 0.4
-        self.ct_sgant_screen.ids.signal.anim_delay = 0.4
-        self.ct_sasa_screen.ids.signal.anim_delay = 0.4
-        self.ct_uhf_screen.ids.signal.anim_delay = 0.4
-        self.ct_camera_screen.ids.signal.anim_delay = 0.4
-        self.tcs_screen.ids.signal.anim_delay = 0.4
-        self.us_eva.ids.signal.anim_delay = 0.4
-        self.rs_screen.ids.signal.anim_delay = 0.4
-        self.orbit_screen.ids.signal.size_hint_y = 0.112
-        self.mimic_screen.ids.signal.size_hint_y = 0.112
-        self.eps_screen.ids.signal.size_hint_y = 0.112
-        self.ct_screen.ids.signal.size_hint_y = 0.112
-        self.ct_sgant_screen.ids.signal.size_hint_y = 0.112
-        self.ct_sasa_screen.ids.signal.size_hint_y = 0.112
-        self.ct_uhf_screen.ids.signal.size_hint_y = 0.112
-        self.ct_camera_screen.ids.signal.size_hint_y = 0.112
-        self.tcs_screen.ids.signal.size_hint_y = 0.112
-        self.us_eva.ids.signal.size_hint_y = 0.112
-        self.rs_screen.ids.signal.size_hint_y = 0.112
+        for x in ScreenList:
+            getattr(self, x).ids.signal.anim_delay = 0.4
+        for x in ScreenList:
+            getattr(self, x).ids.signal.size_hint_y = 0.112
 
     def signal_acquired(self):
-        global internet
+        global internet, ScreenList
+        
         if internet == False:
-            self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.ct_sgant_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.ct_sasa_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.ct_uhf_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.ct_camera_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            for x in ScreenList:
+                getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.changeColors(1,0,0)
         else:
-            self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
-            self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
-            self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
-            self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
-            self.ct_sgant_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
-            self.ct_sasa_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
-            self.ct_uhf_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
-            self.ct_camera_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
-            self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
-            self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
-            self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
+            for x in ScreenList:
+                getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
             self.changeColors(0,1,0)
-        self.orbit_screen.ids.signal.anim_delay = 0.05
-        self.mimic_screen.ids.signal.anim_delay = 0.05
-        self.eps_screen.ids.signal.anim_delay = 0.05
-        self.ct_screen.ids.signal.anim_delay = 0.05
-        self.ct_sgant_screen.ids.signal.anim_delay = 0.05
-        self.ct_sasa_screen.ids.signal.anim_delay = 0.05
-        self.ct_uhf_screen.ids.signal.anim_delay = 0.05
-        self.ct_camera_screen.ids.signal.anim_delay = 0.05
-        self.tcs_screen.ids.signal.anim_delay = 0.05
-        self.us_eva.ids.signal.anim_delay = 0.05
-        self.rs_screen.ids.signal.anim_delay = 0.05
-        self.orbit_screen.ids.signal.size_hint_y = 0.15
-        self.mimic_screen.ids.signal.size_hint_y = 0.15
-        self.eps_screen.ids.signal.size_hint_y = 0.15
-        self.ct_screen.ids.signal.size_hint_y = 0.15
-        self.ct_sgant_screen.ids.signal.size_hint_y = 0.15
-        self.ct_sasa_screen.ids.signal.size_hint_y = 0.15
-        self.ct_uhf_screen.ids.signal.size_hint_y = 0.15
-        self.ct_camera_screen.ids.signal.size_hint_y = 0.15
-        self.tcs_screen.ids.signal.size_hint_y = 0.15
-        self.us_eva.ids.signal.size_hint_y = 0.15
-        self.rs_screen.ids.signal.size_hint_y = 0.15
+   
+        for x in ScreenList:
+            getattr(self, x).ids.signal.anim_delay = 0.05
+        for x in ScreenList:
+            getattr(self, x).ids.signal.size_hint_y = 0.15
     
     def signal_stale(self):
-        global internet
+        global internet, ScreenList
+        
         if internet == False:
-            self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.ct_sgant_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.ct_sasa_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.ct_uhf_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.ct_camera_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            for x in ScreenList:
+                getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.changeColors(1,0,0)
         else:
-            self.orbit_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
-            self.mimic_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
-            self.eps_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
-            self.ct_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
-            self.ct_sgant_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
-            self.ct_sasa_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
-            self.ct_uhf_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
-            self.ct_camera_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
-            self.tcs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
-            self.us_eva.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
-            self.rs_screen.ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            for x in ScreenList:
+                getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
             self.changeColors(1,0.5,0)
-        self.orbit_screen.ids.signal.anim_delay = 0.12
-        self.mimic_screen.ids.signal.anim_delay = 0.12
-        self.eps_screen.ids.signal.anim_delay = 0.12
-        self.ct_screen.ids.signal.anim_delay = 0.12
-        self.ct_sgant_screen.ids.signal.anim_delay = 0.12
-        self.ct_sasa_screen.ids.signal.anim_delay = 0.12
-        self.ct_uhf_screen.ids.signal.anim_delay = 0.12
-        self.ct_camera_screen.ids.signal.anim_delay = 0.12
-        self.tcs_screen.ids.signal.anim_delay = 0.12
-        self.us_eva.ids.signal.anim_delay = 0.12
-        self.rs_screen.ids.signal.anim_delay = 0.12
-        self.orbit_screen.ids.signal.size_hint_y = 0.112
-        self.mimic_screen.ids.signal.size_hint_y = 0.112
-        self.eps_screen.ids.signal.size_hint_y = 0.112
-        self.ct_screen.ids.signal.size_hint_y = 0.112
-        self.ct_sgant_screen.ids.signal.size_hint_y = 0.112
-        self.ct_sasa_screen.ids.signal.size_hint_y = 0.112
-        self.ct_uhf_screen.ids.signal.size_hint_y = 0.112
-        self.ct_camera_screen.ids.signal.size_hint_y = 0.112
-        self.tcs_screen.ids.signal.size_hint_y = 0.112
-        self.us_eva.ids.signal.size_hint_y = 0.112
-        self.rs_screen.ids.signal.size_hint_y = 0.112
+
+        for x in ScreenList:
+            getattr(self, x).ids.signal.anim_delay = 0.12
+        for x in ScreenList:
+            getattr(self, x).ids.signal.size_hint_y = 0.112
 
     def update_labels(self, dt):
         global mimicbutton,switchtofake,fakeorbitboolean,psarj2,ssarj2,manualcontrol,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,US_EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress,oldAirlockPump,obtained_EVA_crew,EVAstartTime
@@ -1692,7 +1551,14 @@ class MainApp(App):
             LS_Subscription = True
         else:
             LS_Subscription = False
-        
+       
+        #print "====================="
+        #print "====================="
+        #for key, val in self.ids.items():
+        #    print("key={0}, val={1}".format(key,val))
+        #print "====================="
+        #print "====================="
+
         psarj = "{:.2f}".format(float((values[0])[0]))
         if switchtofake == False:
             psarj2 = float(psarj)
@@ -1895,21 +1761,21 @@ class MainApp(App):
         ## Station Mode ##
 
         if stationmode == 1.0:
-            self.mimic_screen.ids.stationmode_value.text = "Crew Rescue"
+            self.iss_screen.ids.stationmode_value.text = "Crew Rescue"
         elif stationmode == 2.0:
-            self.mimic_screen.ids.stationmode_value.text = "Survival"
+            self.iss_screen.ids.stationmode_value.text = "Survival"
         elif stationmode == 3.0:
-            self.mimic_screen.ids.stationmode_value.text = "Reboost"
+            self.iss_screen.ids.stationmode_value.text = "Reboost"
         elif stationmode == 4.0:
-            self.mimic_screen.ids.stationmode_value.text = "Proximity Operations"
+            self.iss_screen.ids.stationmode_value.text = "Proximity Operations"
         elif stationmode == 5.0:
-            self.mimic_screen.ids.stationmode_value.text = "EVA"
+            self.iss_screen.ids.stationmode_value.text = "EVA"
         elif stationmode == 6.0:
-            self.mimic_screen.ids.stationmode_value.text = "Microgravity"
+            self.iss_screen.ids.stationmode_value.text = "Microgravity"
         elif stationmode == 7.0:
-            self.mimic_screen.ids.stationmode_value.text = "Standard"
+            self.iss_screen.ids.stationmode_value.text = "Standard"
         else:
-            self.mimic_screen.ids.stationmode_value.text = "n/a"
+            self.iss_screen.ids.stationmode_value.text = "n/a"
             
         ## ISS Potential Problems ##
         #ISS Leak - Check Pressure Levels
@@ -2347,9 +2213,9 @@ class MainApp(App):
         self.eps_screen.ids.v4a_value.text = v4a + "V"
         self.eps_screen.ids.c4b_value.text = c4b + "A"
         self.eps_screen.ids.v4b_value.text = v4b + "V"
-        self.mimic_screen.ids.altitude_value.text = str(altitude) + " km"
-        self.mimic_screen.ids.velocity_value.text = str(velocity) + " m/s"
-        self.mimic_screen.ids.stationmass_value.text = str(iss_mass) + " kg"
+        self.iss_screen.ids.altitude_value.text = str(altitude) + " km"
+        self.iss_screen.ids.velocity_value.text = str(velocity) + " m/s"
+        self.iss_screen.ids.stationmass_value.text = str(iss_mass) + " kg"
 
         self.us_eva.ids.EVA_needle.angle = float(self.map_rotation(0.0193368*float(crewlockpres)))
         self.us_eva.ids.crewlockpressure_value.text = "{:.2f}".format(0.0193368*float(crewlockpres))

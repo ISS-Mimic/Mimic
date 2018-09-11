@@ -10,13 +10,6 @@
             allow_stretch: False
             ##size_hint_y: 1
             ##keep_ratio: False
-        Label:
-            id: iss_over_country
-            pos_hint: {"center_x": 0.5, "center_y": 0.2}
-            text: ''
-            markup: True
-            color: 1,0,1
-            font_size: 30
         Button:
             id: EPS_button
             size_hint: 0.15,0.13
@@ -66,18 +59,18 @@
             id: ISS_button
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.5, "center_y": 0.62}
-            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/TCSunlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/unsorted/TCSdown.png'
-            text: ''
+            ##background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/TCSunlit.png'
+            ##background_down: '/home/pi/Mimic/Pi/imgs/unsorted/TCSdown.png'
+            text: 'ISS'
             font_size: 30
             on_release: root.manager.current = 'iss'
         Button:
             id: ECLSS_button
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.5, "center_y": 0.48}
-            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/TCSunlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/unsorted/TCSdown.png'
-            text: ''
+            ##background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/TCSunlit.png'
+            ##background_down: '/home/pi/Mimic/Pi/imgs/unsorted/TCSdown.png'
+            text: 'ECLSS'
             font_size: 30
             on_release: root.manager.current = 'eclss'
         Button:
@@ -107,68 +100,6 @@
             text: ''
             font_size: 30
             on_release: root.manager.current = 'orbit'
-        ##Label:
-            ##pos_hint: {"center_x": 0.5, "center_y": 0.5}
-            ##text: 'ISS Information'
-            ##markup: True
-            ##color: 1,1,1
-            ##font_size: 20
-        Label:
-            id: velocity_label
-            pos_hint: {"center_x": 0.15, "center_y": 0.35}
-            text: 'Speed'
-            markup: True
-            color: 1,1,1
-            font_size: 20
-        Label:
-            id: velocity_value
-            pos_hint: {"center_x": 0.15, "center_y": 0.29}
-            text: '0.00'
-            markup: True
-            color: root.signalcolor
-            font_size: 20
-        Label:
-            id: altitude_label
-            pos_hint: {"center_x": 0.35, "center_y": 0.35}
-            text: 'Altitude'
-            markup: True
-            color: 1,1,1
-            font_size: 20
-        Label:
-            id: altitude_value
-            pos_hint: {"center_x": 0.35, "center_y": 0.29}
-            text: '0.00'
-            markup: True
-            color: root.signalcolor
-            font_size: 20
-        Label:
-            id: stationmass_label
-            pos_hint: {"center_x": 0.65, "center_y": 0.35}
-            text: 'Total Mass'
-            markup: True
-            color: 1,1,1
-            font_size: 20
-        Label:
-            id: stationmass_value
-            pos_hint: {"center_x": 0.65, "center_y": 0.29}
-            text: '0.00 kg'
-            markup: True
-            color: root.signalcolor
-            font_size: 20
-        Label:
-            id: stationmode_label
-            pos_hint: {"center_x": 0.85, "center_y": 0.35}
-            text: 'Station Mode'
-            markup: True
-            color: 1,1,1
-            font_size: 20
-        Label:
-            id: stationmode_value
-            pos_hint: {"center_x": 0.85, "center_y": 0.29}
-            text: ''
-            markup: True
-            color: root.signalcolor
-            font_size: 20
         Button:
             id: mimicstartbutton
             size_hint: 0.15,0.1
