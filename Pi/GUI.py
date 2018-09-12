@@ -504,10 +504,10 @@ leakhold = False
 repress = False
 TLE_acquired = False
 stationmode = 0.00
-
+tdrs = ""
 EVA_picture_urls = []
 urlindex = 0
-
+module = ""
 internet = False
 
 class MainScreen(Screen):
@@ -720,6 +720,9 @@ class Orbit_Screen(Screen, EventDispatcher):
 
 class ISS_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1,1,1])
+    def selectModule(*args):
+        global module
+        module = str(args[1])
 
 class ECLSS_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1,1,1])
@@ -1111,7 +1114,7 @@ class MainApp(App):
         manualcontrol = args[0]
        
     def orbitUpdate(self, dt):
-        global overcountry, tle_rec, line1, line2, TLE_acquired, sgant_elevation, sgant_elevation_old, sgant_xelevation, aos, oldtdrs
+        global overcountry, tle_rec, line1, line2, TLE_acquired, sgant_elevation, sgant_elevation_old, sgant_xelevation, aos, oldtdrs, tdrs
         def scaleLatLon(latitude,longitude):
             #converting lat lon to x,y for orbit map
             fromLatSpan = 180.0
@@ -1178,10 +1181,10 @@ class MainApp(App):
             #TDRSe = -41
             #TDRSz = 85
             tdrs = "n/a"
-            print longitude
-            self.ct_sgant_screen.ids.tdrs.angle = (-1*(float(str(longitude).split(':')[0])))-41
-            print (-1*(float(str(longitude).split(':')[0])))-41 
             
+            self.ct_sgant_screen.ids.tdrs_east.angle = (-1*longitude)-41
+            self.ct_sgant_screen.ids.tdrs_west.angle = ((-1*longitude)-41)+133
+            self.ct_sgant_screen.ids.tdrs_z.angle = ((-1*longitude)-41)-126
             
             if longitude > 90 and sgant_elevation < -10 and float(aos) == 1.0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West"
@@ -1535,7 +1538,8 @@ class MainApp(App):
         global eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
         global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power
         global stationmode, sgant_elevation, sgant_xelevation
-
+        global tdrs, module
+        
         if SerialConnection1 or SerialConnection2 or SerialConnection3 or SerialConnection4:
             if mimicbutton:
                 self.mimic_screen.ids.mimicstartbutton.disabled = True
@@ -1961,16 +1965,34 @@ class MainApp(App):
         #make sure radio animations turn off when no signal or no transmit
         if float(sgant_transmit) == 1.0 and float(aos) == 1.0:
             self.ct_sgant_screen.ids.radio_up.color = 1,1,1,1
-            #self.ct_sgant_screen.ids.tdrs.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.zip"
+            print tdrs
+            if tdrs == "west":
+                self.ct_sgant_screen.ids.tdrs_west.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.zip"
+                self.ct_sgant_screen.ids.tdrs_east.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+                self.ct_sgant_screen.ids.tdrs_z.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            elif tdrs == "east":
+                self.ct_sgant_screen.ids.tdrs_east.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.zip"
+                self.ct_sgant_screen.ids.tdrs_west.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+                self.ct_sgant_screen.ids.tdrs_z.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            elif tdrs == "z":
+                self.ct_sgant_screen.ids.tdrs_z.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.zip"
+                self.ct_sgant_screen.ids.tdrs_west.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+                self.ct_sgant_screen.ids.tdrs_east.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
         elif float(sgant_transmit) == 1.0 and float(aos) == 0.0:
             self.ct_sgant_screen.ids.radio_up.color = 0,0,0,0
-            #self.ct_sgant_screen.ids.tdrs.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            self.ct_sgant_screen.ids.tdrs_east.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            self.ct_sgant_screen.ids.tdrs_west.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            self.ct_sgant_screen.ids.tdrs_z.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
         elif float(sgant_transmit) == 0.0:
             self.ct_sgant_screen.ids.radio_up.color = 0,0,0,0
-            #self.ct_sgant_screen.ids.tdrs.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            self.ct_sgant_screen.ids.tdrs_east.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            self.ct_sgant_screen.ids.tdrs_west.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            self.ct_sgant_screen.ids.tdrs_z.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
         elif float(aos) == 0.0:
             self.ct_sgant_screen.ids.radio_up.color = 0,0,0,0
-            #self.ct_sgant_screen.ids.tdrs.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            self.ct_sgant_screen.ids.tdrs_east.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            self.ct_sgant_screen.ids.tdrs_west.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            self.ct_sgant_screen.ids.tdrs_z.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
        
         #now check main CT screen radio signal
         if float(sgant_transmit) == 1.0 and float(aos) == 1.0:
@@ -2268,6 +2290,11 @@ class MainApp(App):
             self.serialWrite("Voltage2B=" + v2b + " ")
             self.serialWrite("Voltage3B=" + v3b + " ")
             self.serialWrite("Voltage4B=" + v4b + " ")
+        
+        #data to send regardless of signal status
+        if mimicbutton == True: 
+            self.serialWrite("Module=" + module)
+
 
 #All GUI Screens are on separate kv files
 Builder.load_file('/home/pi/Mimic/Pi/Screens/Settings_Screen.kv')

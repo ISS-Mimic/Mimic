@@ -10,65 +10,136 @@
             markup: True
             color: 1,0,1
             font_size: 30
+        ToggleButton:
+            id: SM_button
+            size_hint: 0.1,0.2
+            pos_hint: {"center_x": 0.5, "center_y": 0.9}
+            text: 'SM'
+            group: "modules"
+            font_size: 16
+            on_release: root.selectModule("SM")
+        ToggleButton:
+            id: FGB_button
+            size_hint: 0.1,0.2
+            pos_hint: {"center_x": 0.5, "center_y": 0.7}
+            text: 'FGB'
+            group: "modules"
+            font_size: 16
+            on_release: root.selectModule("FGB")
+        ToggleButton:
+            id: Node1_button
+            size_hint: 0.1,0.15
+            pos_hint: {"center_x": 0.5, "center_y": 0.55}
+            text: 'Node 1'
+            group: "modules"
+            font_size: 16
+            on_release: root.selectModule("Node1")
+        ToggleButton:
+            id: Airlock_button
+            size_hint: 0.1,0.15
+            pos_hint: {"center_x": 0.4, "center_y": 0.55}
+            text: 'US Airlock'
+            group: "modules"
+            font_size: 16
+            on_release: root.selectModule("AL")
+        ToggleButton:
+            id: Node3_button
+            size_hint: 0.1,0.15
+            pos_hint: {"center_x": 0.6, "center_y": 0.55}
+            text: 'Node 3'
+            group: "modules"
+            font_size: 16
+            on_release: root.selectModule("Node3")
+        ToggleButton:
+            id: USLab_button
+            size_hint: 0.1,0.2
+            pos_hint: {"center_x": 0.5, "center_y": 0.4}
+            text: 'US Lab'
+            group: "modules"
+            font_size: 16
+            on_release: root.selectModule("USL")
+        ToggleButton:
+            id: Node2_button
+            size_hint: 0.1,0.15
+            pos_hint: {"center_x": 0.5, "center_y": 0.25}
+            text: 'Node2'
+            group: "modules"
+            font_size: 16
+            on_release: root.selectModule("Node2")
+        ToggleButton:
+            id: Columbus_button
+            size_hint: 0.1,0.15
+            pos_hint: {"center_x": 0.4, "center_y": 0.25}
+            text: 'Columbus'
+            group: "modules"
+            font_size: 16
+            on_release: root.selectModule("Col")
+        ToggleButton:
+            id: JEM_button
+            size_hint: 0.1,0.15
+            pos_hint: {"center_x": 0.6, "center_y": 0.25}
+            text: 'JEM'
+            group: "modules"
+            font_size: 16
+            on_release: root.selectModule("JEM")
         Label:
             id: velocity_label
-            pos_hint: {"center_x": 0.15, "center_y": 0.35}
+            pos_hint: {"center_x": 0.85, "center_y": 0.9}
             text: 'Speed'
             markup: True
             color: 1,1,1
             font_size: 20
         Label:
             id: velocity_value
-            pos_hint: {"center_x": 0.15, "center_y": 0.29}
+            pos_hint: {"center_x": 0.85, "center_y": 0.85}
             text: '0.00'
             markup: True
             color: root.signalcolor
             font_size: 20
         Label:
             id: altitude_label
-            pos_hint: {"center_x": 0.35, "center_y": 0.35}
+            pos_hint: {"center_x": 0.85, "center_y": 0.7}
             text: 'Altitude'
             markup: True
             color: 1,1,1
             font_size: 20
         Label:
             id: altitude_value
-            pos_hint: {"center_x": 0.35, "center_y": 0.29}
+            pos_hint: {"center_x": 0.85, "center_y": 0.65}
             text: '0.00'
             markup: True
             color: root.signalcolor
             font_size: 20
         Label:
             id: stationmass_label
-            pos_hint: {"center_x": 0.65, "center_y": 0.35}
+            pos_hint: {"center_x": 0.85, "center_y": 0.5}
             text: 'Total Mass'
             markup: True
             color: 1,1,1
             font_size: 20
         Label:
             id: stationmass_value
-            pos_hint: {"center_x": 0.65, "center_y": 0.29}
+            pos_hint: {"center_x": 0.85, "center_y": 0.45}
             text: '0.00 kg'
             markup: True
             color: root.signalcolor
             font_size: 20
         Label:
             id: stationmode_label
-            pos_hint: {"center_x": 0.85, "center_y": 0.35}
+            pos_hint: {"center_x": 0.85, "center_y": 0.3}
             text: 'Station Mode'
             markup: True
             color: 1,1,1
             font_size: 20
         Label:
             id: stationmode_value
-            pos_hint: {"center_x": 0.85, "center_y": 0.29}
+            pos_hint: {"center_x": 0.85, "center_y": 0.25}
             text: ''
             markup: True
             color: root.signalcolor
             font_size: 20
         Button:
             size_hint: 0.1,0.11
-            ##pos_hint: {"Left": 1, "Bottom": 1}
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
             background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
             text: ''
