@@ -10,78 +10,110 @@
             markup: True
             color: 1,0,1
             font_size: 30
+        Image:
+            id: modulestack
+            source: "/home/pi/Mimic/Pi/imgs/LEDstack.png"
+            size_hint: 1,1
+            pos_hint: {"center_x": 0.5, "center_y": 0.65}
+            keep_ratio: True
+            angle: 0
+            canvas.before:
+                PushMatrix
+                Rotate:
+                    angle: self.angle
+                    axis: 0,0,1
+                    origin: self.center
+            canvas.after:
+                PopMatrix
         ToggleButton:
             id: SM_button
-            size_hint: 0.1,0.2
-            pos_hint: {"center_x": 0.5, "center_y": 0.9}
+            size_hint: 0.25,0.2
+            pos_hint: {"center_x": 0.1, "center_y": 0.6}
             text: 'SM'
             group: "modules"
+            opacity: 0.1
             font_size: 16
             on_release: root.selectModule("SM")
         ToggleButton:
             id: FGB_button
-            size_hint: 0.1,0.2
-            pos_hint: {"center_x": 0.5, "center_y": 0.7}
+            size_hint: 0.25,0.2
+            pos_hint: {"center_x": 0.35, "center_y": 0.6}
             text: 'FGB'
             group: "modules"
+            opacity: 0.1
             font_size: 16
             on_release: root.selectModule("FGB")
         ToggleButton:
             id: Node1_button
-            size_hint: 0.1,0.15
-            pos_hint: {"center_x": 0.5, "center_y": 0.55}
+            size_hint: 0.13,0.18
+            pos_hint: {"center_x": 0.58, "center_y": 0.6}
             text: 'Node 1'
             group: "modules"
+            opacity: 0.1
             font_size: 16
             on_release: root.selectModule("Node1")
         ToggleButton:
             id: Airlock_button
-            size_hint: 0.1,0.15
-            pos_hint: {"center_x": 0.4, "center_y": 0.55}
+            size_hint: 0.1,0.2
+            pos_hint: {"center_x": 0.6, "center_y": 0.42}
             text: 'US Airlock'
             group: "modules"
+            opacity: 0.1
             font_size: 16
             on_release: root.selectModule("AL")
         ToggleButton:
             id: Node3_button
-            size_hint: 0.1,0.15
-            pos_hint: {"center_x": 0.6, "center_y": 0.55}
+            size_hint: 0.1,0.25
+            pos_hint: {"center_x": 0.6, "center_y": 0.8}
             text: 'Node 3'
             group: "modules"
+            opacity: 0.1
             font_size: 16
             on_release: root.selectModule("Node3")
         ToggleButton:
             id: USLab_button
-            size_hint: 0.1,0.2
-            pos_hint: {"center_x": 0.5, "center_y": 0.4}
+            size_hint: 0.17,0.18
+            pos_hint: {"center_x": 0.73, "center_y": 0.6}
             text: 'US Lab'
             group: "modules"
+            opacity: 0.1
             font_size: 16
             on_release: root.selectModule("USL")
         ToggleButton:
             id: Node2_button
-            size_hint: 0.1,0.15
-            pos_hint: {"center_x": 0.5, "center_y": 0.25}
+            size_hint: 0.14,0.18
+            pos_hint: {"center_x": 0.88, "center_y": 0.6}
             text: 'Node2'
             group: "modules"
+            opacity: 0.1
             font_size: 16
             on_release: root.selectModule("Node2")
         ToggleButton:
             id: Columbus_button
-            size_hint: 0.1,0.15
-            pos_hint: {"center_x": 0.4, "center_y": 0.25}
+            size_hint: 0.1,0.18
+            pos_hint: {"center_x": 0.901, "center_y": 0.41}
             text: 'Columbus'
             group: "modules"
+            opacity: 0.1
             font_size: 16
             on_release: root.selectModule("Col")
         ToggleButton:
             id: JEM_button
-            size_hint: 0.1,0.15
-            pos_hint: {"center_x": 0.6, "center_y": 0.25}
+            size_hint: 0.1,0.26
+            pos_hint: {"center_x": 0.901, "center_y": 0.82}
             text: 'JEM'
             group: "modules"
+            opacity: 0.1
             font_size: 16
             on_release: root.selectModule("JEM")
+        ToggleButton:
+            id: clear_module_button
+            size_hint: 0.1,0.15
+            pos_hint: {"center_x": 0.1, "center_y": 0.2}
+            text: 'Reset'
+            group: "modules"
+            font_size: 16
+            on_release: root.selectModule("reset")
         Label:
             id: velocity_label
             pos_hint: {"center_x": 0.85, "center_y": 0.9}

@@ -58,6 +58,8 @@ SerialConnection1 = False
 SerialConnection2 = False
 SerialConnection3 = False
 SerialConnection4 = False
+SerialConnection5 = False
+SerialConnection6 = False
 
 #setting up 2 serial connections to control neopixels and motors seperately 
 try:
@@ -115,6 +117,36 @@ else:
     mimiclog.write("Error - Successful connection to ")
     mimiclog.write(str(ser4))
     print str(ser4)
+
+#try:
+#    ser5 = serial.Serial('/dev/ttyAMA0', 115200, timeout=0)
+#except:
+#    mimiclog.write(str(datetime.utcnow()))
+#    mimiclog.write(' ')
+#    mimiclog.write("Error - serial connection ACM0 not found")
+#    mimiclog.write('\n')
+#else:
+#    SerialConnection5 = True
+#    ser5.write("test")
+#    mimiclog.write("Error - Successful connection to ")
+#    mimiclog.write(str(ser5))
+#    print str(ser5)
+
+try:
+    ser6 = serial.Serial('/dev/ttyUSB0', 115200, timeout=0)
+except:
+    mimiclog.write(str(datetime.utcnow()))
+    mimiclog.write(' ')
+    mimiclog.write("Error - serial connection ACM0 not found")
+    mimiclog.write('\n')
+else:
+    SerialConnection6 = True
+    ser6.write("test")
+    mimiclog.write("Error - Successful connection to ")
+    mimiclog.write(str(ser6))
+    print str(ser6)
+
+
 
 #----------------Open SQLITE3 Database that holds the current ISS Telemetry--------------
 conn = sqlite3.connect('/dev/shm/iss_telemetry.db')
@@ -1084,7 +1116,7 @@ class MainApp(App):
                     startingAnim = False
 
     def serialWrite(self, *args):
-        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4
+        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, SerialConnection6
         
         if SerialConnection1:
             ser.write(*args)
@@ -1094,6 +1126,10 @@ class MainApp(App):
             ser3.write(*args)
         if SerialConnection4:
             ser4.write(*args)
+        if SerialConnection5:
+            ser5.write(*args)
+        if SerialConnection6:
+            ser6.write(*args)
         #try:
         #   ser.write(*args)
         #except:
@@ -1181,10 +1217,10 @@ class MainApp(App):
             #TDRSe = -41
             #TDRSz = 85
             tdrs = "n/a"
-            
+            print longitude 
             self.ct_sgant_screen.ids.tdrs_east.angle = (-1*longitude)-41
-            self.ct_sgant_screen.ids.tdrs_west.angle = ((-1*longitude)-41)+133
-            self.ct_sgant_screen.ids.tdrs_z.angle = ((-1*longitude)-41)-126
+            self.ct_sgant_screen.ids.tdrs_z.angle = ((-1*longitude)-41)+126
+            self.ct_sgant_screen.ids.tdrs_west.angle = ((-1*longitude)-41)-133
             
             if longitude > 90 and sgant_elevation < -10 and float(aos) == 1.0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West"
@@ -1265,6 +1301,12 @@ class MainApp(App):
             
             tle_rec.compute(location) #compute tle propagation based on provided location
             nextpassinfo = location.next_pass(tle_rec)
+            print nextpassinfo #might need to add try block to next line
+            #if nextpassinfo == None:
+            #    self.orbit_screen.ids.iss_next_pass1.text = "n/a"
+            #    self.orbit_screen.ids.iss_next_pass2.text = "n/a"
+            #    self.orbit_screen.ids.countdown.text = "n/a"
+            #else:
             nextpassdatetime = datetime.strptime(str(nextpassinfo[0]),'%Y/%m/%d %H:%M:%S') #convert to datetime object for timezone conversion
             nextpassinfo_format = nextpassdatetime.replace(tzinfo=pytz.utc)
             localtimezone = pytz.timezone('America/Chicago')
@@ -1534,13 +1576,13 @@ class MainApp(App):
 
     def update_labels(self, dt):
         global mimicbutton,switchtofake,fakeorbitboolean,psarj2,ssarj2,manualcontrol,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,US_EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress,oldAirlockPump,obtained_EVA_crew,EVAstartTime
-        global holdstartTime, LS_Subscription, SerialConnection
+        global holdstartTime, LS_Subscription, SerialConnection, SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, SerialConnection6
         global eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
         global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power
         global stationmode, sgant_elevation, sgant_xelevation
         global tdrs, module
-        
-        if SerialConnection1 or SerialConnection2 or SerialConnection3 or SerialConnection4:
+    
+        if SerialConnection1 or SerialConnection2 or SerialConnection3 or SerialConnection4 or SerialConnection5 or SerialConnection6:
             if mimicbutton:
                 self.mimic_screen.ids.mimicstartbutton.disabled = True
             else:
@@ -2293,7 +2335,8 @@ class MainApp(App):
         
         #data to send regardless of signal status
         if mimicbutton == True: 
-            self.serialWrite("Module=" + module)
+            self.serialWrite("Module=" + module + " ")
+            print "Module send: " + str(module)
 
 
 #All GUI Screens are on separate kv files
