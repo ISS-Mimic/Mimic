@@ -51,6 +51,11 @@ mimiclog = open('/home/pi/Mimic/Pi/Logs/mimiclog.txt','w')
 sgantlog = open('/home/pi/Mimic/Pi/Logs/sgantlog.txt','a+')
 locationlog = open('/home/pi/Mimic/Pi/Logs/locationlog.txt','a')
 
+def logWrite(string):
+    mimiclog.write(str(datetime.utcnow()))
+    mimiclog.write(' ')
+    mimiclog.write(str(string))
+    mimiclog.write('\n')
 
 #-------------------------Look for a connected arduino-----------------------------------
 SerialConnection = False
@@ -59,94 +64,52 @@ SerialConnection2 = False
 SerialConnection3 = False
 SerialConnection4 = False
 SerialConnection5 = False
-SerialConnection6 = False
 
 #setting up 2 serial connections to control neopixels and motors seperately 
 try:
     ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
 except:
-    mimiclog.write(str(datetime.utcnow()))
-    mimiclog.write(' ')
-    mimiclog.write("Error - serial connection ACM0 not found")
-    mimiclog.write('\n')
+    logWrite("Warning - Serial Connection ACM0 not found")
 else:
     SerialConnection1 = True
-    ser.write("test")
-    mimiclog.write("Error - Successful connection to ")
-    mimiclog.write(str(ser))
+    logWrite("Successful connection to Serial on ACMO")
     print str(ser)
 
 try:
     ser2 = serial.Serial('/dev/ttyACM1', 115200, timeout=0)
 except:
-    mimiclog.write(str(datetime.utcnow()))
-    mimiclog.write(' ')
-    mimiclog.write("Error - serial connection ACM1 not found")
-    mimiclog.write('\n')
+    logWrite("Warning - Serial Connection ACM1 not found")
 else:
     SerialConnection2 = True
-    ser2.write("test")
-    mimiclog.write("Error - Successful connection to ")
-    mimiclog.write(str(ser2))
+    logWrite("Successful connection to Serial on ACM1")
     print str(ser2)
 
 try:
     ser3 = serial.Serial('/dev/ttyACM2', 115200, timeout=0)
 except:
-    mimiclog.write(str(datetime.utcnow()))
-    mimiclog.write(' ')
-    mimiclog.write("Error - serial connection ACM2 not found")
-    mimiclog.write('\n')
+    logWrite("Warning - Serial Connection ACM2 not found")
 else:
     SerialConnection3 = True
-    ser.write("test")
-    mimiclog.write("Error - Successful connection to ")
-    mimiclog.write(str(ser3))
+    logWrite("Successful connection to Serial on ACM2")
     print str(ser3)
 
 try:
     ser4 = serial.Serial('/dev/ttyAMA00', 115200, timeout=0)
 except:
-    mimiclog.write(str(datetime.utcnow()))
-    mimiclog.write(' ')
-    mimiclog.write("Error - serial connection AMA00 not found")
-    mimiclog.write('\n')
+    logWrite("Warning - Serial Connection AMA00 not found")
 else:
     SerialConnection4 = True
-    ser.write("test")
-    mimiclog.write("Error - Successful connection to ")
-    mimiclog.write(str(ser4))
+    logWrite("Successful connection to Serial on AMA0O")
     print str(ser4)
 
-#try:
-#    ser5 = serial.Serial('/dev/ttyAMA0', 115200, timeout=0)
-#except:
-#    mimiclog.write(str(datetime.utcnow()))
-#    mimiclog.write(' ')
-#    mimiclog.write("Error - serial connection ACM0 not found")
-#    mimiclog.write('\n')
-#else:
-#    SerialConnection5 = True
-#    ser5.write("test")
-#    mimiclog.write("Error - Successful connection to ")
-#    mimiclog.write(str(ser5))
-#    print str(ser5)
-
 try:
-    ser6 = serial.Serial('/dev/ttyUSB0', 115200, timeout=0)
+    ser5 = serial.Serial('/dev/ttyUSB0', 115200, timeout=0)
 except:
-    mimiclog.write(str(datetime.utcnow()))
-    mimiclog.write(' ')
-    mimiclog.write("Error - serial connection ACM0 not found")
-    mimiclog.write('\n')
+    logWrite("Warning - Serial Connection USB0 not found")
 else:
-    SerialConnection6 = True
-    ser6.write("test")
-    mimiclog.write("Error - Successful connection to ")
-    mimiclog.write(str(ser6))
-    print str(ser6)
-
-
+    SerialConnection5 = True
+    logWrite("Successful connection to Serial on USBO")
+    print str(ser5)
 
 #----------------Open SQLITE3 Database that holds the current ISS Telemetry--------------
 conn = sqlite3.connect('/dev/shm/iss_telemetry.db')
@@ -411,10 +374,9 @@ c.execute("INSERT OR IGNORE INTO telemetry VALUES('rs_eva_#','0','43','0',253)")
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('last_us_eva_duration','0','450','0',254)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('last_rs_eva_duration','0','450','0',255)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer','0','Unsubscribed','0',0)");
-
+logWrite("Successfully initialized SQlite database")
 #----------------------------------Variables---------------------------------------------
 LS_Subscription = False
-overcountry = "None"
 isslocationsuccess = False
 testfactor = -1
 crew_mention= False
@@ -550,14 +512,17 @@ class MainScreen(Screen):
     def startBGA(*args):
         global p2
         p2 = subprocess.Popen("/home/pi/Mimic/Pi/fakeBGA.sh")
+        logWrite("Successfully started fake BGA script")
     
     def stopBGA(*args):
         global p2
         p2.kill()
+        logWrite("Successfully stopped fake BGA script")
     
     def startproc(*args):
         global p
         p = subprocess.Popen(["node", "/home/pi/Mimic/Pi/ISS_Telemetry.js"]) 
+        logWrite("Successfully started ISS telemetry javascript")
     
     def killproc(*args):
         global p
@@ -568,6 +533,7 @@ class MainScreen(Screen):
         except:
             print "no process"
         os.system('rm /dev/shm/iss_telemetry.db')
+        logWrite("Successfully stopped ISS telemetry javascript and removed database")
 
 class CalibrateScreen(Screen):
     def serialWrite(self, *args):
@@ -590,18 +556,7 @@ class CalibrateScreen(Screen):
 
 class ManualControlScreen(Screen):
     def setActive(*args):
-        global Beta4Bcontrol
-        global Beta3Bcontrol
-        global Beta2Bcontrol
-        global Beta1Bcontrol
-        global Beta4Acontrol
-        global Beta3Acontrol
-        global Beta2Acontrol
-        global Beta1Acontrol
-        global PSARJcontrol
-        global SSARJcontrol
-        global PTRRJcontrol
-        global STRRJcontrol
+        global Beta4Bcontrol, Beta3Bcontrol, Beta2Bcontrol, Beta1Bcontrol, Beta4Acontrol, Beta3Acontrol, Beta2Acontrol, Beta1Acontrol, PSARJcontrol, SSARJcontrol, PTRRJcontrol, STRRJcontrol
         if str(args[1])=="Beta4B":
             Beta4Bcontrol = True
         if str(args[1])=="Beta3B":
@@ -628,18 +583,7 @@ class ManualControlScreen(Screen):
             SSARJcontrol = True
 
     def incrementActive(self, *args):
-        global Beta4Bcontrol
-        global Beta3Bcontrol
-        global Beta2Bcontrol
-        global Beta1Bcontrol
-        global Beta4Acontrol
-        global Beta3Acontrol
-        global Beta2Acontrol
-        global Beta1Acontrol
-        global PSARJcontrol
-        global SSARJcontrol
-        global PTRRJcontrol
-        global STRRJcontrol
+        global Beta4Bcontrol, Beta3Bcontrol, Beta2Bcontrol, Beta1Bcontrol, Beta4Acontrol, Beta3Acontrol, Beta2Acontrol, Beta1Acontrol, PSARJcontrol, SSARJcontrol, PTRRJcontrol, STRRJcontrol
 
         if Beta4Bcontrol == True:
             self.incrementBeta4B(args[0])
@@ -945,19 +889,13 @@ class MainApp(App):
         req = UrlRequest("http://google.com", on_success, on_redirect, on_failure, on_error, timeout=1)
 
     def deleteURLPictures(self, dt):
-        mimiclog.write(str(datetime.utcnow()))
-        mimiclog.write(' ')
-        mimiclog.write(str("deleteURLpictures"))
-        mimiclog.write('\n')
+        logWrite("Function call - deleteURLPictures")
         global EVA_picture_urls
         del EVA_picture_urls[:]
         EVA_picture_urls[:] = []
 
     def changePictures(self, dt):
-        mimiclog.write(str(datetime.utcnow()))
-        mimiclog.write(' ')
-        mimiclog.write(str("changeURLpictures"))
-        mimiclog.write('\n')
+        logWrite("Function call - changeURLPictures")
         global EVA_picture_urls
         global urlindex
         urlsize = len(EVA_picture_urls)
@@ -971,19 +909,8 @@ class MainApp(App):
             urlindex = 0
 
     def check_EVA_stats(self,lastname1,firstname1,lastname2,firstname2):                
-        mimiclog.write(str(datetime.utcnow()))
-        mimiclog.write(' ')
-        mimiclog.write(str("check EVA stats"))
-        mimiclog.write('\n')
-
-        global numEVAs1
-        global EVAtime_hours1
-        global EVAtime_minutes1
-        global numEVAs2
-        global EVAtime_hours2
-        global EVAtime_minutes2
-        global EV1
-        global EV2
+        global numEVAs1, EVAtime_hours1, EVAtime_minutes1, numEVAs2, EVAtime_hours2, EVAtime_minutes2, EV1, EV2
+        logWrite("Function call - check EVA stats")
 
         eva_url = 'http://spacefacts.de/eva/e_eva_az.htm'
         urlthingy = urllib2.urlopen(eva_url)
@@ -1030,33 +957,24 @@ class MainApp(App):
         self.us_eva.ids.EV1_EVAtime.text = "Total EVA Time = " + str(EV1_hours) + "h " + str(EV1_minutes) + "m"
         self.us_eva.ids.EV2_EVAtime.text = "Total EVA Time = " + str(EV2_hours) + "h " + str(EV2_minutes) + "m"
 
-    def flashUS_EVAbutton(self, instace):
-        mimiclog.write(str(datetime.utcnow()))
-        mimiclog.write(' ')
-        mimiclog.write(str("flash us eva button"))
-        mimiclog.write('\n')
+    def flashUS_EVAbutton(self, instance):
+        logWrite("Function call - flashUS_EVA")
 
         self.eva_main.ids.US_EVA_Button.background_color = (0,0,1,1)
         def reset_color(*args):
             self.eva_main.ids.US_EVA_Button.background_color = (1,1,1,1)
         Clock.schedule_once(reset_color, 0.5) 
 
-    def flashRS_EVAbutton(self, instace):
-        mimiclog.write(str(datetime.utcnow()))
-        mimiclog.write(' ')
-        mimiclog.write(str("flash rs eva button"))
-        mimiclog.write('\n')
+    def flashRS_EVAbutton(self, instance):
+        logWrite("Function call - flashRS_EVA")
 
         self.eva_main.ids.RS_EVA_Button.background_color = (0,0,1,1)
         def reset_color(*args):
             self.eva_main.ids.RS_EVA_Button.background_color = (1,1,1,1)
         Clock.schedule_once(reset_color, 0.5) 
 
-    def flashEVAbutton(self, instace):
-        mimiclog.write(str(datetime.utcnow()))
-        mimiclog.write(' ')
-        mimiclog.write(str("flash eva button"))
-        mimiclog.write('\n')
+    def flashEVAbutton(self, instance):
+        logWrite("Function call - flashEVA")
     
         self.mimic_screen.ids.EVA_button.background_color = (0,0,1,1)
         def reset_color(*args):
@@ -1064,14 +982,7 @@ class MainApp(App):
         Clock.schedule_once(reset_color, 0.5) 
     
     def EVA_clock(self, dt):
-        mimiclog.write(str(datetime.utcnow()))
-        mimiclog.write(' ')
-        mimiclog.write(str("eva timer"))
-        mimiclog.write('\n')
-        global seconds
-        global minutes
-        global hours
-        global EVAstartTime
+        global seconds, minutes, hours, EVAstartTime
         unixconvert = time.gmtime(time.time())
         currenthours = float(unixconvert[7])*24+unixconvert[3]+float(unixconvert[4])/60+float(unixconvert[5])/3600
         difference = (currenthours-EVAstartTime)*3600
@@ -1086,8 +997,7 @@ class MainApp(App):
         self.us_eva.ids.EVA_clock.color = 0.33,0.7,0.18
 
     def animate(self, instance):
-        global new_x2
-        global new_y2
+        global new_x2, new_y2
         self.main_screen.ids.ISStiny2.size_hint = 0.07,0.07
         new_x2 = new_x2+0.007
         new_y2 = (math.sin(new_x2*30)/18)+0.75
@@ -1096,11 +1006,7 @@ class MainApp(App):
         self.main_screen.ids.ISStiny2.pos_hint = {"center_x": new_x2, "center_y": new_y2}
 
     def animate3(self, instance):
-        global new_x
-        global new_y
-        global sizeX
-        global sizeY
-        global startingAnim
+        global new_x, new_y, sizeX, sizeY, startingAnim
         if new_x<0.886:
             new_x = new_x+0.007
             new_y = (math.sin(new_x*30)/18)+0.75
@@ -1116,7 +1022,8 @@ class MainApp(App):
                     startingAnim = False
 
     def serialWrite(self, *args):
-        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, SerialConnection6
+        #logWrite("Function call - serial write")
+        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5
         
         if SerialConnection1:
             ser.write(*args)
@@ -1128,8 +1035,6 @@ class MainApp(App):
             ser4.write(*args)
         if SerialConnection5:
             ser5.write(*args)
-        if SerialConnection6:
-            ser6.write(*args)
         #try:
         #   ser.write(*args)
         #except:
@@ -1217,38 +1122,30 @@ class MainApp(App):
             #TDRSe = -41
             #TDRSz = 85
             tdrs = "n/a"
-            print longitude 
             self.ct_sgant_screen.ids.tdrs_east.angle = (-1*longitude)-41
             self.ct_sgant_screen.ids.tdrs_z.angle = ((-1*longitude)-41)+126
             self.ct_sgant_screen.ids.tdrs_west.angle = ((-1*longitude)-41)-133
             
             if longitude > 90 and sgant_elevation < -10 and float(aos) == 1.0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West"
-                print "if 1"
                 tdrs = "west"
             elif longitude > 55 and longitude < 140 and sgant_elevation > -10 and float(aos) == 1.0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-Z"
-                print "if 2"
                 tdrs = "z"
             elif longitude > 0 and longitude <= 90 and sgant_elevation < -10 and float(aos) == 1.0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-Z"
-                print "if 3"
                 tdrs = "z"
             elif longitude > -80 and longitude <= 55 and sgant_elevation > -10 and float(aos) == 1.0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East"
-                print "if 4"
                 tdrs = "east"
             elif longitude > -160 and longitude <= 0 and sgant_elevation < -10 and float(aos) == 1.0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East"
-                print "if 5"
                 tdrs = "east"
             elif ((longitude >= -180 and longitude <= -80) or (longitude > 140)) and sgant_elevation > -40 and float(aos) == 1.0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West"
-                print "if 6"
                 tdrs = "west"
             else:
                 self.ct_sgant_screen.ids.tdrs_label.text = ""
-                print "if 7"
                 tdrs = "----"
 
             if tdrs != oldtdrs and float(aos) == 1.0:
@@ -1262,20 +1159,6 @@ class MainApp(App):
                 sgantlog.write(str(tdrs))
                 sgantlog.write(' ')
                 sgantlog.write('\n')
-
-            #if sgant_elevation > sgant_elevation_old:
-            #    sgant_elevation_old = sgant_elevation
-            #    if sgant_elevation < sgant_elevation_old:
-            #        sgant_elevation_old = -110
-                                
-
-            #if longitude > 80 and sgant_elevation < 0:
-            #    self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West"
-            #elif longitude > -174 and longitude < 0 and sgant_elevation < -40:
-            #    self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East"
-            #elif longitude < 80 and sgant_elevation < 0:
-            #    self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-Z"
-
 
             #------------------Orbit Stuff---------------------------
             now = datetime.utcnow() 
@@ -1301,7 +1184,7 @@ class MainApp(App):
             
             tle_rec.compute(location) #compute tle propagation based on provided location
             nextpassinfo = location.next_pass(tle_rec)
-            print nextpassinfo #might need to add try block to next line
+            #print nextpassinfo #might need to add try block to next line
             #if nextpassinfo == None:
             #    self.orbit_screen.ids.iss_next_pass1.text = "n/a"
             #    self.orbit_screen.ids.iss_next_pass2.text = "n/a"
@@ -1360,10 +1243,7 @@ class MainApp(App):
         try:
             self.checkCrew(self, *args)
         except:
-            mimiclog.write(str(datetime.utcnow()))
-            mimiclog.write(' ')
-            mimiclog.write("Error - Crew Check - URL Error")
-            mimiclog.write('\n')
+            logWrite("Warning - updateCrew failure")
     
     def checkCrew(self, dt):
         #crew_response = urllib2.urlopen(crew_req)
@@ -1377,17 +1257,11 @@ class MainApp(App):
             try:
                 stuff = urllib2.urlopen(req, timeout = 2)
             except:
-                mimiclog.write(str(datetime.utcnow()))
-                mimiclog.write(' ')
-                mimiclog.write("Crew Check - URL Failure")
-                mimiclog.write('\n')
+                logWrite("Warning - checkCrew failure")
            
             now = datetime.utcnow()
             if (stuff.info().getsubtype()=='json'):
-                mimiclog.write(str(datetime.utcnow()))
-                mimiclog.write(' ')
-                mimiclog.write("Crew Check - JSON Success")
-                mimiclog.write('\n')
+                logWrite("Successfully fetched crew JSON")
                 crewjsonsuccess = True
                 data = json.load(stuff)
                 number_of_space = int(data['number'])
@@ -1407,10 +1281,7 @@ class MainApp(App):
                             crewmembercountry[isscrew] = str('USA')
                         isscrew = isscrew+1  
             else:
-                mimiclog.write(str(datetime.utcnow()))
-                mimiclog.write(' ')
-                mimiclog.write("Crew Check - JSON Error")
-                mimiclog.write('\n')
+                logWrite("Warning - checkCrew JSON failure")
                 crewjsonsuccess = False
 
         #print crewmemberpicture[0]
@@ -1492,12 +1363,8 @@ class MainApp(App):
         return scaledValue
     
     def hold_timer(self, dt):
-        mimiclog.write(str(datetime.utcnow()))
-        mimiclog.write(' ')
-        mimiclog.write(str("hold timer"))
-        mimiclog.write('\n')
-        global seconds2
-        global holdstartTime
+        global seconds2, holdstartTime
+        logWrite("Function Call - hold timer")
         unixconvert = time.gmtime(time.time())
         currenthours = float(unixconvert[7])*24+unixconvert[3]+float(unixconvert[4])/60+float(unixconvert[5])/3600
         seconds2 = (currenthours-EVAstartTime)*3600
@@ -1576,13 +1443,13 @@ class MainApp(App):
 
     def update_labels(self, dt):
         global mimicbutton,switchtofake,fakeorbitboolean,psarj2,ssarj2,manualcontrol,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,US_EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress,oldAirlockPump,obtained_EVA_crew,EVAstartTime
-        global holdstartTime, LS_Subscription, SerialConnection, SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, SerialConnection6
+        global holdstartTime, LS_Subscription, SerialConnection, SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5
         global eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
         global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power
         global stationmode, sgant_elevation, sgant_xelevation
         global tdrs, module
     
-        if SerialConnection1 or SerialConnection2 or SerialConnection3 or SerialConnection4 or SerialConnection5 or SerialConnection6:
+        if SerialConnection1 or SerialConnection2 or SerialConnection3 or SerialConnection4 or SerialConnection5:
             if mimicbutton:
                 self.mimic_screen.ids.mimicstartbutton.disabled = True
             else:
@@ -1602,13 +1469,6 @@ class MainApp(App):
         else:
             LS_Subscription = False
        
-        #print "====================="
-        #print "====================="
-        #for key, val in self.ids.items():
-        #    print("key={0}, val={1}".format(key,val))
-        #print "====================="
-        #print "====================="
-
         psarj = "{:.2f}".format(float((values[0])[0]))
         if switchtofake == False:
             psarj2 = float(psarj)
@@ -1836,9 +1696,6 @@ class MainApp(App):
         #ISS altitude too low
         #Russion hook status - make sure all modules remain docked
         
-    
-
-
 
         ##-------------------GNC Stuff---------------------------##    
         
@@ -1900,16 +1757,8 @@ class MainApp(App):
         ##-------------------EPS Stuff---------------------------##
 
         if avg_total_voltage > 151.5:
-            #for x in range(0,1000,1):
-            #self.eps_screen.ids.eps_sun.color = 1,1,1,0.1
-            #anim = Animation(self.eps_screen.ids.eps_sun.color=(1,1,1,1.0))
-            #anim.start(self.eps_screen.ids.eps_sun.color)
             self.eps_screen.ids.eps_sun.color = 1,1,1,1
         else:
-            #for x in range(1000,0,-1):
-            #self.eps_screen.ids.eps_sun.color = 1,1,1,1.0
-            #anim = Animation(self.eps_screen.ids.eps_sun.color=(1,1,1,0.1))
-            #anim.start(self.eps_screen.ids.eps_sun.color)
             self.eps_screen.ids.eps_sun.color = 1,1,1,0.1
 
         if halfavg_1a < 151.5: #discharging
@@ -2007,7 +1856,6 @@ class MainApp(App):
         #make sure radio animations turn off when no signal or no transmit
         if float(sgant_transmit) == 1.0 and float(aos) == 1.0:
             self.ct_sgant_screen.ids.radio_up.color = 1,1,1,1
-            print tdrs
             if tdrs == "west":
                 self.ct_sgant_screen.ids.tdrs_west.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.zip"
                 self.ct_sgant_screen.ids.tdrs_east.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
