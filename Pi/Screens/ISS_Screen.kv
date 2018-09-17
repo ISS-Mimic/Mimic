@@ -12,7 +12,7 @@
             font_size: 30
         Image:
             id: modulestack
-            source: "/home/pi/Mimic/Pi/imgs/LEDstack.png"
+            source: "/home/pi/Mimic/Pi/imgs/iss/LEDstack.png"
             size_hint: 1,1
             pos_hint: {"center_x": 0.5, "center_y": 0.65}
             keep_ratio: True
@@ -31,8 +31,9 @@
             pos_hint: {"center_x": 0.1, "center_y": 0.6}
             text: 'SM'
             group: "modules"
-            opacity: 0.1
+            opacity: 0.0
             font_size: 16
+            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack_SM.png"
             on_release: root.selectModule("SM")
         ToggleButton:
             id: FGB_button
@@ -40,8 +41,9 @@
             pos_hint: {"center_x": 0.35, "center_y": 0.6}
             text: 'FGB'
             group: "modules"
-            opacity: 0.1
+            opacity: 0.0
             font_size: 16
+            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack_FGB.png"
             on_release: root.selectModule("FGB")
         ToggleButton:
             id: Node1_button
@@ -49,8 +51,9 @@
             pos_hint: {"center_x": 0.58, "center_y": 0.6}
             text: 'Node 1'
             group: "modules"
-            opacity: 0.1
+            opacity: 0.0
             font_size: 16
+            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack_Node1.png"
             on_release: root.selectModule("Node1")
         ToggleButton:
             id: Airlock_button
@@ -58,8 +61,9 @@
             pos_hint: {"center_x": 0.6, "center_y": 0.42}
             text: 'US Airlock'
             group: "modules"
-            opacity: 0.1
+            opacity: 0.0
             font_size: 16
+            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack_AL.png"
             on_release: root.selectModule("AL")
         ToggleButton:
             id: Node3_button
@@ -67,8 +71,9 @@
             pos_hint: {"center_x": 0.6, "center_y": 0.8}
             text: 'Node 3'
             group: "modules"
-            opacity: 0.1
+            opacity: 0.0
             font_size: 16
+            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack_Node3.png"
             on_release: root.selectModule("Node3")
         ToggleButton:
             id: USLab_button
@@ -76,8 +81,9 @@
             pos_hint: {"center_x": 0.73, "center_y": 0.6}
             text: 'US Lab'
             group: "modules"
-            opacity: 0.1
+            opacity: 0.0
             font_size: 16
+            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack_USL.png"
             on_release: root.selectModule("USL")
         ToggleButton:
             id: Node2_button
@@ -85,8 +91,9 @@
             pos_hint: {"center_x": 0.88, "center_y": 0.6}
             text: 'Node2'
             group: "modules"
-            opacity: 0.1
+            opacity: 0.0
             font_size: 16
+            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack_Node2.png"
             on_release: root.selectModule("Node2")
         ToggleButton:
             id: Columbus_button
@@ -94,8 +101,9 @@
             pos_hint: {"center_x": 0.901, "center_y": 0.41}
             text: 'Columbus'
             group: "modules"
-            opacity: 0.1
+            opacity: 0.0
             font_size: 16
+            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack_Col.png"
             on_release: root.selectModule("Col")
         ToggleButton:
             id: JEM_button
@@ -103,8 +111,9 @@
             pos_hint: {"center_x": 0.901, "center_y": 0.82}
             text: 'JEM'
             group: "modules"
-            opacity: 0.1
+            opacity: 0.0
             font_size: 16
+            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack_JEM.png"
             on_release: root.selectModule("JEM")
         ToggleButton:
             id: clear_module_button
@@ -113,6 +122,7 @@
             text: 'Reset'
             group: "modules"
             font_size: 16
+            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack.png"
             on_release: root.selectModule("reset")
         Label:
             id: velocity_label
