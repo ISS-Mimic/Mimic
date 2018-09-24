@@ -1,0 +1,152 @@
+#:kivy 1.8
+#:import kivy kivy
+#:import win kivy.core.window
+<CT_SGANT_Screen>:
+    name: 'ct_sgant'
+    FloatLayout:
+        Label:
+            id: sgant_elevation
+            pos_hint: {"center_x": 0.5, "center_y": 0.1}
+            text: ''
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Image:
+            id: sgant_dish
+            source: "/home/pi/Mimic/Pi/imgs/ct/SGANTantenna.png"
+            color: 1,1,1,1
+            size_hint_y: 0.4
+            size_hint_x: 0.4
+            keep_ratio: False
+            pos_hint: {"center_x": 0.5, "center_y": 0.35}
+            angle: 0
+            canvas.before:
+                PushMatrix
+                Rotate:
+                    angle: self.angle
+                    axis: 0,0,1
+                    origin: self.center
+            canvas.after:
+                PopMatrix
+        Image:
+            id: radio_up
+            source: "/home/pi/Mimic/Pi/imgs/ct/Radio.zip"
+            anim_delay: 0.03
+            anim_loop: 0
+            color: 1,1,1,1
+            size_hint_y: 0.4
+            size_hint_x: 2
+            keep_ratio: False
+            pos_hint: {"center_x": 0.5, "center_y": 0.6}
+            angle: sgant_dish.angle
+            canvas.before:
+                PushMatrix
+                Rotate:
+                    angle: self.angle
+                    axis: 0,0,1
+                    origin: sgant_dish.center
+            canvas.after:
+                PopMatrix
+        Image:
+            id: sgant_base
+            source: "/home/pi/Mimic/Pi/imgs/ct/SGANTbase.png"
+            pos_hint: {"center_x": 0.5, "center_y": 0.3}
+            size_hint_y: 0.15
+            size_hint_x: 0.15
+            keep_ratio: True
+        Image:
+            id: tdrs_east
+            source: "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            color: 1,1,1,1
+            size_hint: 0.15,0.15
+            anim_delay: 0.12
+            anim_loop: 0
+            keep_ratio: False
+            pos_hint: {"center_x": 0.5, "center_y": 0.8}
+            angle: 0
+            angle2: 180
+            canvas.before:
+                PushMatrix
+                Rotate:
+                    angle: self.angle
+                    axis: 0,0,-1
+                    ##origin: sgant_dish.center
+                    origin: 400,0
+                Rotate:
+                    angle: self.angle2
+                    axis: 0,0,1
+                    origin: self.center
+            canvas.after:
+                PopMatrix
+        Image:
+            id: tdrs_west
+            source: "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            color: 1,1,1,1
+            size_hint: 0.15,0.15
+            anim_delay: 0.12
+            anim_loop: 0
+            keep_ratio: False
+            pos_hint: {"center_x": 0.5, "center_y": 0.8}
+            angle: 0
+            angle2: 180
+            canvas.before:
+                PushMatrix
+                Rotate:
+                    angle: self.angle
+                    axis: 0,0,-1
+                    ##origin: sgant_dish.center
+                    origin: 400,0
+                Rotate:
+                    angle: self.angle2
+                    axis: 0,0,1
+                    origin: self.center
+            canvas.after:
+                PopMatrix
+        Image:
+            id: tdrs_z
+            source: "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            color: 1,1,1,1
+            size_hint: 0.15,0.15
+            anim_delay: 0.12
+            anim_loop: 0
+            keep_ratio: False
+            pos_hint: {"center_x": 0.5, "center_y": 0.8}
+            angle: 0
+            angle2: 180
+            canvas.before:
+                PushMatrix
+                Rotate:
+                    angle: self.angle
+                    axis: 0,0,-1
+                    ##origin: sgant_dish.center
+                    origin: 400,0
+                Rotate:
+                    angle: self.angle2
+                    axis: 0,0,1
+                    origin: self.center
+            canvas.after:
+                PopMatrix
+        Label:
+            id: tdrs_label
+            ##pos: tdrs.pos
+            pos_hint: {"center_x": 0.5, "center_y": 0.85}
+            text: '---'
+            markup: True
+            color: root.signalcolor
+            font_size: 18
+        Button:
+            size_hint: 0.1,0.11
+            ##pos_hint: {"Left": 1, "Bottom": 1}
+            pos_hint: {"center_x": 0.9375, "center_y": 0.082}
+            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
+            text: ''
+            font_size: 30
+            on_release: app.root.current = 'ct'
+        Image:
+            id: signal
+            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+            size_hint_y: 0.15
+            anim_delay: 0.12
+            anim_loop: 0
+            keep_ratio: True
+            pos_hint: {"center_x": 0.05, "center_y": 0.07}

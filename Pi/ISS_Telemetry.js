@@ -2,10 +2,14 @@ function alert(message)
 {
 
 }
+
 var ls = require("lightstreamer-client");
 var sqlite3 = require("sqlite3");
-var db = new sqlite3.Database("iss_telemetry.db");
-var telemetry = require("./Telemetry_identifiers.js");
+
+//var db = new sqlite3.Database("/home/pi/Mimic/Pi/iss_telemetry.db", sqlite3.OPEN_READWRITE, db_err);
+var db = new sqlite3.Database("/dev/shm/iss_telemetry.db", sqlite3.OPEN_CREATE | sqlite3.OPEN_READWRITE);
+
+var telemetry = require("/home/pi/Mimic/Pi/Telemetry_identifiers.js");
 var classes = ["TimeStamp", "Value"];
 
 var lsClient = new ls.LightstreamerClient("http://push.lightstreamer.com", "ISSLIVE");
@@ -36,9 +40,11 @@ lsClient.connect();
 sub.addListener({
   onSubscription: function() {
     console.log("Subscribed");
+    db.run("UPDATE telemetry set Value = ? where Label = ?", "Subscribed", "Lightstreamer");
   },
   onUnsubscription: function() {
     console.log("Unsubscribed");
+    db.run("UPDATE telemetry set Value = ? where Label = ?", "Unsubscribed", "Lightstreamer");
   },
   onItemUpdate: function(update) 
   {

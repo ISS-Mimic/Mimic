@@ -6,14 +6,16 @@
     FloatLayout:
         Image:
             id: US_EVA_background
-            source: './imgs/eva/USpageEVAbase.png'
+            source: '/home/pi/Mimic/Pi/imgs/eva/USpageEVAbaseNew.png'
             allow_stretch: False
             ##size_hint_y: 1
             ##keep_ratio: False
         Image:
             id: EVA_needle
             source: './imgs/eva/GuageNeedle.png'
-            pos_hint: {"center_x": 0.83, "center_y": 0.583}
+            pos_hint: {"center_x": 0.83, "center_y": 0.633}
+            source: '/home/pi/Mimic/Pi/imgs/eva/GuageNeedle.png'
+            pos_hint: {"center_x": 0.83, "center_y": 0.633}
             size_hint_x: 0.24 
             allow_stretch: False
             keep_ratio: True
@@ -28,64 +30,64 @@
                 PopMatrix
         Image:
             id: Crewlock_Status_image
-            source: './imgs/eva/BlankLights.png'
+            source: '/home/pi/Mimic/Pi/imgs/eva/BlankLights.png'
             size_hint_y: 0.14
-            pos_hint: {"center_x": 0.83, "center_y": 0.8}
+            pos_hint: {"center_x": 0.835, "center_y": 0.87}
             allow_stretch: False
             keep_ratio: True
         Image:
             id: EVA_psi_bar
-            source: './imgs/eva/GuageBar.png'
+            source: '/home/pi/Mimic/Pi/imgs/eva/GuageBar.png'
             size_hint_y: 0.15
-            pos_hint: {"center_x": 0.945, "center_y": 0.56}
+            pos_hint: {"center_x": 0.945, "center_y": 0.61}
             ##pos_hint_x: 0.71
             ##pos_hint_y: 0.552
             allow_stretch: False
             keep_ratio: True
         Label:
             id: crewlockpressure_value
-            pos_hint: {"center_x": 0.83, "center_y": 0.56}
+            pos_hint: {"center_x": 0.83, "center_y": 0.61}
             text: '0.00'
             markup: True
-            color: 1,1,1
+            color: root.signalcolor 
             font_size: 20
         Image:
             id: Hold_bar
-            source: './imgs/eva/GuageBar.png'
+            source: '/home/pi/Mimic/Pi/imgs/eva/GuageBar.png'
             size_hint_y: 0.15
-            pos_hint: {"center_x": 0.95, "center_y": 0.49}
+            pos_hint: {"center_x": 0.95, "center_y": 0.54}
             allow_stretch: False
             keep_ratio: True
         Label:
             id: leak_timer
-            pos_hint: {"center_x": 0.83, "center_y": 0.49}
+            pos_hint: {"center_x": 0.83, "center_y": 0.54}
             text: '~260s Leak Check'
             markup: True
             color: 0,0,0
             font_size: 20
         Label:
-            pos_hint: {"center_x": 0.83, "center_y": 0.65}
+            pos_hint: {"center_x": 0.83, "center_y": 0.70}
             text: '(psi)'
             markup: True
             color: 0,0,0
             font_size: 14
         Label:
             id: pumpswitch
-            pos_hint: {"center_x": 0.55, "center_y": 0.55}
+            pos_hint: {"center_x": 0.55, "center_y": 0.60}
             size_hint: 0.3,0.15
             text: 'Airlock Pump Switch Off'
             text_size: self.width, None
             markup: True
-            color: 0,0,0
+            color: root.signalcolor 
             font_size: 20
         Label:
             id: pumpvoltage
-            pos_hint: {"center_x": 0.55, "center_y": 0.5}
+            pos_hint: {"center_x": 0.55, "center_y": 0.55}
             size_hint: 0.3,0.15
             text: 'Airlock Pump Power Off'
             text_size: self.width, None
             markup: True
-            color: 0,0,0
+            color: root.signalcolor 
             font_size: 20
         AsyncImage:
             id: EV1_Pic
@@ -93,10 +95,10 @@
             size_hint_y: 0.17
             allow_stretch: True
             keep_ratio: True
-            pos_hint: {"center_x": 0.764, "center_y": 0.241}
+            pos_hint: {"center_x": 0.764, "center_y": 0.291}
         Label:
             id: EV1_name
-            pos_hint: {"center_x": 0.763, "center_y": 0.12}
+            pos_hint: {"center_x": 0.763, "center_y": 0.17}
             text: 'EV1'
             markup: True
             color: 0,0,0
@@ -107,10 +109,10 @@
             size_hint_y: 0.17
             allow_stretch: True
             keep_ratio: True
-            pos_hint: {"center_x": 0.895, "center_y": 0.241}
+            pos_hint: {"center_x": 0.895, "center_y": 0.291}
         Label:
             id: EV2_name
-            pos_hint: {"center_x": 0.894, "center_y": 0.12}
+            pos_hint: {"center_x": 0.894, "center_y": 0.17}
             text: 'EV2'
             markup: True
             color: 0,0,0
@@ -118,7 +120,7 @@
         AsyncImage:
             id: EVAimage
             source: "http://pbs.twimg.com/media/DJm3BvbXkAAuMzp.jpg"
-            ##source: './imgs/eva/GuageBar.png'
+            ##source: '/home/pi/Mimic/Pi/imgs/eva/GuageBar.png'
             size_hint: 0.42, 0.38
             size_hint_max: 270, 220
             ##width: 700
@@ -153,7 +155,7 @@
             font_size: 14
         Label:
             id: EVA_clock
-            pos_hint: {"center_x": 0.53, "center_y": 0.82}
+            pos_hint: {"center_x": 0.53, "center_y": 0.87}
             text: '0:00:00'
             size_hint_y: 0.5
             text_size: None, self.height
@@ -162,7 +164,7 @@
             font_size: 70
         Label:
             id: EV1
-            pos_hint: {"center_x": 0.55, "center_y": 0.4}
+            pos_hint: {"center_x": 0.55, "center_y": 0.47}
             size_hint: 0.3,0.15
             text: 'EV1 Crewmember:'
             text_size: self.width, None
@@ -171,7 +173,7 @@
             font_size: 18
         Label:
             id: EV1_EVAnum
-            pos_hint: {"center_x": 0.55, "center_y": 0.35}
+            pos_hint: {"center_x": 0.55, "center_y": 0.42}
             size_hint: 0.3,0.15
             text: 'Number of EVAs = 0'
             text_size: self.width, None
@@ -180,7 +182,7 @@
             font_size: 18
         Label:
             id: EV1_EVAtime
-            pos_hint: {"center_x": 0.55, "center_y": 0.3}
+            pos_hint: {"center_x": 0.55, "center_y": 0.37}
             size_hint: 0.3,0.15
             text: 'Total EVA Time = 0:00'
             text_size: self.width, None
@@ -189,7 +191,7 @@
             font_size: 18
         Label:
             id: EV2
-            pos_hint: {"center_x": 0.55, "center_y": 0.22}
+            pos_hint: {"center_x": 0.55, "center_y": 0.30}
             size_hint: 0.3,0.15
             text: 'EV2 Crewmember:'
             text_size: self.width, None
@@ -198,7 +200,7 @@
             font_size: 18
         Label:
             id: EV2_EVAnum
-            pos_hint: {"center_x": 0.55, "center_y": 0.17}
+            pos_hint: {"center_x": 0.55, "center_y": 0.25}
             size_hint: 0.3,0.15
             text: 'Number of EVAs = 0'
             text_size: self.width, None
@@ -207,7 +209,7 @@
             font_size: 18
         Label:
             id: EV2_EVAtime
-            pos_hint: {"center_x": 0.55, "center_y": 0.12}
+            pos_hint: {"center_x": 0.55, "center_y": 0.20}
             size_hint: 0.3,0.15
             text: 'Total EVA Time = 0:00'
             text_size: self.width, None
@@ -216,7 +218,7 @@
             font_size: 18
         Label:
             id: EVA_occuring
-            pos_hint: {"center_x": 0.57, "center_y": 0.76}
+            pos_hint: {"center_x": 0.57, "center_y": 0.81}
             size_hint: 0.35,0.35
             text: 'EVA Status'
             text_size: self.width, None
@@ -225,27 +227,17 @@
             font_size: 20
         Image:
             id: signal
-            source: "./imgs/signal/pulse-transparent.zip"
+            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
             size_hint_y: 0.15
             anim_delay: 0.05
             anim_loop: 0
             keep_ratio: True
             pos_hint: {"center_x": 0.05, "center_y": 0.07}
-            ##angle: 0
-            ##canvas.before:
-            ##    PushMatrix
-            ##    Scale:
-            ##        x: -1
-            ##        y: 1
-            ##        z: 1
-            ##        origin: self.center
-            ##canvas.after:
-            ##    PopMatrix
         Button:
-            size_hint: 0.1,0.1
+            size_hint: 0.1,0.11
             ##pos_hint: {"Left": 1, "Bottom": 1}
-            pos_hint: {"center_x": 0.32, "center_y": 0.085}
-            background_normal: './imgs/eva/BackButton.png'
+            pos_hint: {"center_x": 0.9375, "center_y": 0.082}
+            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
             text: ''
             font_size: 30
             on_release: app.root.current = 'eva_main'

@@ -1,0 +1,36 @@
+#:kivy 1.8
+#:import kivy kivy
+#:import win kivy.core.window
+<CT_SASA_Screen>:
+    name: 'ct_sasa'
+    FloatLayout:
+        Label:
+            id: tdrs_label
+            ##pos: tdrs.pos
+            pos_hint: {"center_x": 0.5, "center_y": 0.85}
+            text: '---'
+            markup: True
+            color: root.signalcolor
+            font_size: 18
+        Image:
+            id: SASA
+            source: "/home/pi/Mimic/Pi/imgs/ct/SASA.png"
+            size_hint_y: 1
+            keep_ratio: True
+            pos_hint: {"center_x": 0.1, "center_y": 0.5}
+        Button:
+            size_hint: 0.1,0.11
+            ##pos_hint: {"Left": 1, "Bottom": 1}
+            pos_hint: {"center_x": 0.9375, "center_y": 0.082}
+            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
+            text: ''
+            font_size: 30
+            on_release: app.root.current = 'ct'
+        Image:
+            id: signal
+            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+            size_hint_y: 0.15
+            anim_delay: 0.12
+            anim_loop: 0
+            keep_ratio: True
+            pos_hint: {"center_x": 0.05, "center_y": 0.07}

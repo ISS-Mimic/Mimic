@@ -4,174 +4,190 @@
 <MimicScreen>:
     name: 'mimic'
     FloatLayout:
-        id: mimicscreenlayout
-        Label:
-            id: iss_over_country
-            pos_hint: {"center_x": 0.5, "center_y": 0.2}
-            text: ''
-            markup: True
-            color: 1,0,1
-            font_size: 30
-        Label:
-            id: EVA_value
-            pos_hint: {"center_x": 0.2, "center_y": 0.17}
-            text: ''
-            markup: True
-            color: 0,0,0
-            font_size: 30
+        Image:
+            id: Mimic_background
+            source: '/home/pi/Mimic/Pi/imgs/unsorted/MimicBase.png'
+            allow_stretch: False
+            ##size_hint_y: 1
+            ##keep_ratio: False
         Button:
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.12, "center_y": 0.9}
-            text: 'EPS'
+            id: EPS_button
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.15, "center_y": 0.62}
+            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/EPSunlit.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/unsorted/EPSdown.png'
+            text: ''
             font_size: 30
             on_release: root.manager.current = 'eps'
         Button:
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.245, "center_y": 0.78}
-            text: 'Crew'
+            id: Crew_button
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.15, "center_y": 0.48}
+            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/CrewUnlit.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/unsorted/CrewDown.png'
+            text: ''
             font_size: 30
             on_release: root.manager.current = 'crew'
         Button:
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.85, "center_y": 0.78}
-            text: 'Orbit'
-            font_size: 30
-            on_release: root.manager.current = 'orbit'
-        Button:
-            id: EVA_button
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.85, "center_y": 0.25}
-            text: 'EVA'
-            font_size: 30
-            on_release: root.manager.current = 'eva_main'
-        Button:
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.37, "center_y": 0.9}
-            text: 'C&T'
+            id: CT_button
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.33, "center_y": 0.62}
+            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/CTunlit.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/unsorted/CTdown.png'
+            text: ''
             font_size: 30
             on_release: root.manager.current = 'ct'
         Button:
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.62, "center_y": 0.9}
-            text: 'TCS'
+            id: EVA_button
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.33, "center_y": 0.48}
+            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/EVAunlit.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/unsorted/EVAdown.png'
+            text: ''
+            font_size: 30
+            on_release: root.manager.current = 'eva_main'
+        Button:
+            id: TCS_button
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.68, "center_y": 0.62}
+            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/TCSunlit.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/unsorted/TCSdown.png'
+            text: ''
             font_size: 30
             on_release: root.manager.current = 'tcs'
         Button:
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.87, "center_y": 0.9}
-            text: 'GNC'
+            id: ISS_button
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.5, "center_y": 0.62}
+            ##background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/TCSunlit.png'
+            ##background_down: '/home/pi/Mimic/Pi/imgs/unsorted/TCSdown.png'
+            text: 'ISS'
             font_size: 30
-            on_release: root.manager.current = 'tcs'
-        Label:
-            pos_hint: {"center_x": 0.55, "center_y": 0.78}
-            text: 'ISS Information'
-            markup: True
-            color: 1,1,1
+            on_release: root.manager.current = 'iss'
+        Button:
+            id: ECLSS_button
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.5, "center_y": 0.48}
+            ##background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/TCSunlit.png'
+            ##background_down: '/home/pi/Mimic/Pi/imgs/unsorted/TCSdown.png'
+            text: 'ECLSS'
             font_size: 30
-        Label:
-            id: velocity_label
-            pos_hint: {"center_x": 0.4, "center_y": 0.7}
-            text: 'Speed'
-            markup: True
-            color: 1,1,1
+            on_release: root.manager.current = 'eclss'
+        Button:
+            id: ROS_button
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.68, "center_y": 0.48}
+            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/RSOSunlit.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/unsorted/RSOSdown.png'
+            text: ''
             font_size: 30
-        Label:
-            id: velocity_value
-            pos_hint: {"center_x": 0.65, "center_y": 0.7}
-            text: '0.00'
-            markup: True
-            color: 1,1,1
+            on_release: root.manager.current = 'rs'
+        Button:
+            id: GNC_button
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.855, "center_y": 0.62}
+            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/GNCunlit.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/unsorted/GNCdown.png'
+            text: ''
             font_size: 30
-        Label:
-            id: altitude_label
-            pos_hint: {"center_x": 0.4, "center_y": 0.6}
-            text: 'Altitude'
-            markup: True
-            color: 1,1,1
+            on_release: root.manager.current = 'gnc'
+        Button:
+            id: Orbit_button
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.855, "center_y": 0.48}
+            background_normal: '/home/pi/Mimic/Pi/imgs/unsorted/OrbitUnlit.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/unsorted/OrbitDown.png'
+            text: ''
             font_size: 30
-        Label:
-            id: altitude_value
-            pos_hint: {"center_x": 0.65, "center_y": 0.6}
-            text: '0.00'
-            markup: True
-            color: 1,1,1
-            font_size: 30
-        Label:
-            id: stationmass_label
-            pos_hint: {"center_x": 0.4, "center_y": 0.5}
-            text: 'Total Mass'
-            markup: True
-            color: 1,1,1
-            font_size: 30
-        Label:
-            id: stationmass_value
-            pos_hint: {"center_x": 0.65, "center_y": 0.5}
-            text: '0.00 kg'
-            markup: True
-            color: 1,1,1
-            font_size: 30
-        Label:
-            id: stationmode_label
-            pos_hint: {"center_x": 0.4, "center_y": 0.4}
-            text: 'Station Mode'
-            markup: True
-            color: 1,1,1
-            font_size: 30
-        Label:
-            id: stationmode_value
-            pos_hint: {"center_x": 0.65, "center_y": 0.4}
-            text: 'Standard'
-            markup: True
-            color: 1,1,1
-            font_size: 30
-        ##Label:
-            ##id: aoslabel
-            ##pos_hint: {"center_x": 0.2, "center_y": 0.2}
-            ##text: '[u]ISS Signal Status:[/u]'
-            ##markup: True
-            ##color: 1,1,1
-            ##font_size: 30
-        ##Label:
-            ##id: aosvalue
-            ##pos_hint: {"center_x": 0.2, "center_y": 0.1}
-            ##text: ' '
-            ##markup: True
-            ##color: 1,1,1
-            ##font_size: 30
+            on_release: root.manager.current = 'orbit'
         Button:
             id: mimicstartbutton
-            size_hint: 0.2,0.1
-            pos_hint: {"x": 0.05, "y": 0.6}
+            size_hint: 0.15,0.1
+            pos_hint: {"center_x": 0.09, "center_y": 0.2}
             text: 'Transmit'
             disabled: False
-            font_size: 30
+            font_size: 20
             on_release: mimicstartbutton.text = 'Sending...'
             on_release: root.changeMimicBoolean(True)
             on_release: mimicstopbutton.disabled = False
             on_release: mimicstartbutton.disabled = True
         Button:
             id: mimicstopbutton
-            size_hint: 0.2,0.1
-            pos_hint: {"x": 0.05, "y": 0.45}
+            size_hint: 0.15,0.1
+            pos_hint: {"center_x": 0.24, "center_y": 0.2}
             text: 'Stop'
             disabled: True
-            font_size: 30
+            font_size: 20
             on_release: mimicstartbutton.text = 'Transmit'
             on_release: root.changeMimicBoolean(False)
             on_release: root.changeSwitchBoolean(False)
             on_release: mimicstopbutton.disabled = True
             on_release: mimicstartbutton.disabled = False
         Button:
-            size_hint: 0.2,0.1
-            pos_hint: {"right":1, "bottom":1}
-            text: 'Return'
+            id: fakeBGAstart
+            size_hint: 0.15,0.1
+            pos_hint: {"center_x": 0.75, "center_y": 0.2}
+            text: 'Start BGA'
+            font_size: 20
+            width: 50
+            height: 20
+            on_release: fakeBGAstop.disabled = False
+            on_release: startTelemetry.disabled = True
+            on_release: self.disabled = True
+            ##on_release: root.killproc()
+            on_release: root.startBGA()
+        Button:
+            id: fakeBGAstop
+            size_hint: 0.15,0.1
+            pos_hint: {"center_x": 0.90, "center_y": 0.2}
+            text: 'Stop BGA'
+            font_size: 20
+            disabled: True
+            width: 50
+            height: 20
+            on_release: fakeBGAstart.disabled = False
+            on_release: startTelemetry.disabled = False
+            on_release: self.disabled = True
+            on_release: root.stopBGA()
+        Button:
+            id: startTelemetry
+            size_hint: 0.15,0.1
+            pos_hint: {"center_x": 0.45, "center_y": 0.2}
+            text: 'Start Telem'
+            font_size: 20
+            width: 50
+            height: 20
+            on_release: stopTelemetry.disabled = False
+            on_release: fakeBGAstart.disabled = True
+            on_release: self.disabled = True
+            ##on_release: root.killproc()
+            on_release: root.startproc()
+        Button:
+            id: stopTelemetry
+            size_hint: 0.15,0.1
+            pos_hint: {"center_x": 0.60, "center_y": 0.2}
+            text: 'Stop Telem'
+            font_size: 20
+            width: 50
+            height: 20
+            disabled: True
+            on_release: startTelemetry.disabled = False
+            on_release: fakeBGAstart.disabled = False
+            on_release: self.disabled = True
+            on_release: root.killproc()
+        Button:
+            size_hint: 0.1,0.11
+            ##pos_hint: {"right":1, "bottom":1}
+            pos_hint: {"center_x": 0.9375, "center_y": 0.082}
+            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
+            text: ''
             font_size: 30
             on_release: root.changeMimicBoolean(False)
             on_release: root.changeSwitchBoolean(False)
             on_release: app.root.current = 'main'
         Image:
             id: signal
-            source: "./imgs/signal/signalred.zip"
+            source: "/home/pi/Mimic/Pi/imgs/signal/signalred.zip"
             ##size_hint_y: 0.15
             size_hint_y: 0.112
             anim_delay: 0.05

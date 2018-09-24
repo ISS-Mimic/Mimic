@@ -1,0 +1,8 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Mimic
+Icon=/home/pi/Mimic/Pi/imgs/ISSmimicLogoPartsGlowingISSblue.png
+Exec=/usr/bin/python /home/pi/Mimic/Pi/GUI.py 2>errors.txt
+Comment[en_US]=ISS_Mimic
+Terminal=true
+Type=Application

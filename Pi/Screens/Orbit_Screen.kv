@@ -4,38 +4,148 @@
 <Orbit_Screen>:
     name: 'orbit'
     FloatLayout:
- ## GridLAyout
-        ##rows: 3
-        ##cols: 1
-        Label:
-            pos_hint: {"center_x": 0.15, "center_y": 0.8}
-            text: 'Orbit Stuff'
-            markup: True
-            color: 1,0,1
-            font_size: 30
-        Label:
-            pos_hint: {"center_x": 0.45, "center_y": 0.5}
-            text: 'Bar:'
-            markup: True
-            color: 1,0,1
-            font_size: 30
         Image:
-            id: Orbitbar
-            source: './imgs/eva/GenericEVAbuttonQuest.png'
-            size_hint_x: 0.2
-            size_hint_y: 0.15
-            pos_hint: {"x": 0.5, "center_y": 0.5}
-            allow_stretch: True
+            id: Orbit_background
+            source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitBase.png'
+            allow_stretch: False
+        AsyncImage:
+            id: OrbitMap
+            source: '/home/pi/Mimic/Pi/imgs/orbit/map.jpg'
+            pos_hint: {"center_x": 0.5, "center_y": 0.56}
+            size_hint_y: 0.598
+            allow_stretch: False
+            keep_ratio: True
+        Widget:
+            id: mylocation
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            size_hint: '0.01dp', '0.02dp'
+            canvas:
+                Color:
+                    rgb: 0,0,1
+                Ellipse:
+                    pos: self.pos
+                    size: self.size
+        Widget:
+            id: TDRSe
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            size_hint: '0.01dp', '0.02dp'
+            canvas:
+                Color:
+                    rgb: 1,1,1
+                Ellipse:
+                    pos: self.pos
+                    size: self.size
+        Widget:
+            id: TDRSw
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            size_hint: '0.01dp', '0.02dp'
+            canvas:
+                Color:
+                    rgb: 1,1,1
+                Ellipse:
+                    pos: self.pos
+                    size: self.size
+        Widget:
+            id: ZOE
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            size_hint: '0.06dp', '0.38dp'
+            opacity: 0.2
+            canvas:
+                Color:
+                    rgb: 1,0.5,0
+                Ellipse:
+                    pos: self.pos
+                    size: self.size
+        Widget:
+        Widget:
+            id: TDRSz
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            size_hint: '0.01dp', '0.02dp'
+            canvas:
+                Color:
+                    rgb: 1,1,1
+                Ellipse:
+                    id: TDRSz
+                    pos: self.pos
+                    size: self.size
+        Image:
+            id: OrbitISStiny
+            source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitYellowISSicon.png'
             keep_ratio: False
+            allow_stretch: True
+            size_hint: 0.07,0.07
+            pos_hint: {"center_x": 0.888, "center_y": 0.888}
+        Label:
+            id: dailyorbit
+            pos_hint: {"center_x": 0.08, "center_y": 0.7}
+            text: '0'
+            markup: True
+            color: 1,1,1
+            font_size: 50
+        Label:
+            id: totalorbits
+            pos_hint: {"center_x": 0.08, "center_y": 0.5}
+            text: '0'
+            markup: True
+            color: 1,1,1
+            font_size: 26
+        Label:
+            id: iss_next_pass1
+            pos_hint: {"center_x": 0.92, "center_y": 0.6}
+            text: '-----'
+            size_hint_y: None
+            size_hint_x: 0.1
+            halign: 'center'
+            text_size: self.width, None
+            markup: True
+            color: 1,1,1
+            font_size: 16
+        Label:
+            id: iss_next_pass2
+            pos_hint: {"center_x": 0.92, "center_y": 0.55}
+            text: '-----'
+            size_hint_y: None
+            size_hint_x: 0.1
+            halign: 'center'
+            text_size: self.width, None
+            markup: True
+            color: 1,1,1
+            font_size: 16
+        Label:
+            id: countdown
+            pos_hint: {"center_x": 0.92, "center_y": 0.5}
+            text: '-----'
+            size_hint_y: None
+            size_hint_x: 0.1
+            halign: 'center'
+            text_size: self.width, None
+            markup: True
+            color: 1,1,1
+            font_size: 16
+        Label:
+            id: latitude
+            pos_hint: {"center_x": 0.12, "center_y": 0.22}
+            text: '0.00'
+            markup: True
+            color: 1,1,1
+            font_size: 16
+        Label:
+            id: longitude
+            pos_hint: {"center_x": 0.13, "center_y": 0.185}
+            text: '0.00'
+            markup: True
+            color: 1,1,1
+            font_size: 16
         Button:
-            size_hint: 0.3,0.1
-            pos_hint: {"Left": 1, "Bottom": 1}
-            text: 'Return'
+            size_hint: 0.1,0.11
+            pos_hint: {"center_x": 0.9375, "center_y": 0.082}
+            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
+            text: ''
             font_size: 30
             on_release: app.root.current = 'mimic'
         Image:
             id: signal
-            source: "./imgs/signal/pulse-transparent.zip"
+            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
             size_hint_y: 0.15
             anim_delay: 0.12
             anim_loop: 0
