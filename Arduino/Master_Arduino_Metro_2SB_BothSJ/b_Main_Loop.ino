@@ -1,8 +1,20 @@
 void loop() {
 delay(1);
+
+if (run_internal_pos_command_flag=1){
+
+  B2A = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
+  B4A = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
+  B2B = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
+  B4B = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
+  PTRRJ=104*sin(1*3.14159*0.01*millis()/1000.0); 
+  PSARJ=100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
+}
+
 if(Serial.available())
 {
 checkSerial();
+run_internal_pos_command_flag=0; // Set this flag to zero, so it won't try to use it again.
 }
 
 int  debug_mode=6;

@@ -1,5 +1,5 @@
 // pins for the encoder inputs
-
+int run_internal_pos_command_flag=1;
 String test;
 unsigned long previousMillis = 0;
 unsigned long LoopStartMillis = 0;
