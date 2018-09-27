@@ -33,9 +33,9 @@ void setup()
   pinMode(ledRedPin, OUTPUT);
   pinMode(ledBluePin, OUTPUT);
   pinMode(ledGreenPin, OUTPUT);
-  Serial.begin(9600);
-  Serial1.begin(115200);
-  Serial1.setTimeout(50);
+  Serial1.begin(9600);
+  Serial.begin(115200);
+  Serial.setTimeout(50);
   strip.begin();
   module_strip.begin();
   strip.show();
@@ -48,70 +48,70 @@ void loop()
   digitalWrite(ledRedPin, LOW);
   digitalWrite(ledGreenPin, LOW);
   digitalWrite(ledBluePin, LOW);
-  Serial.println("-------");
-  if(Serial1.available())
+  Serial1.println("-------");
+  if(Serial.available())
   {
     checkSerial();
   }
   allSet_module(module_strip.Color(0,0,0),0);
-  //Serial.println(module);
+  //Serial1.println(module);
   if(module == "SM")
   {
     module_strip.setPixelColor(0, strip.Color(255,255,255));
     module_strip.show();
-    //Serial.println("SM");
+    //Serial1.println("SM");
   }
   else if(module == "FGB")
   {
     module_strip.setPixelColor(1, strip.Color(255,255,255));
     module_strip.show();
-    //Serial.println("FGB");
+    //Serial1.println("FGB");
   }
   else if(module == "Node1")
   {
     module_strip.setPixelColor(2, strip.Color(255,255,255));
     module_strip.show();
-    //Serial.println("Node1");
+    //Serial1.println("Node1");
   }
   else if(module == "Node2")
   {
-    module_strip.setPixelColor(3, strip.Color(255,255,255));
+    module_strip.setPixelColor(6, strip.Color(255,255,255));
     module_strip.show();
-    //Serial.println("Node2");
+    //Serial1.println("Node2");
   }
   else if(module == "Node3")
   {
     module_strip.setPixelColor(4, strip.Color(255,255,255));
     module_strip.show();
-    //Serial.println("Node3");
+    //Serial1.println("Node3");
   }
   else if(module == "AL")
   {
-    module_strip.setPixelColor(5, strip.Color(255,255,255));
+    module_strip.setPixelColor(3, strip.Color(255,255,255));
     module_strip.show();
-    //Serial.println("AL");
+    //Serial1.println("AL");
   }
   else if(module == "USL")
   {
-    module_strip.setPixelColor(6, strip.Color(255,255,255));
+    module_strip.setPixelColor(5, strip.Color(255,255,255));
     module_strip.show();
-    //Serial.println("USL");
+    //Serial1.println("USL");
   }
   else if(module == "Col")
   {
     module_strip.setPixelColor(7, strip.Color(255,255,255));
     module_strip.show();
-    //Serial.println("Col");
+    //Serial1.println("Col");
   }
   else if(module == "JEM")
   {
     module_strip.setPixelColor(8, strip.Color(255,255,255));
     module_strip.show();
-    //Serial.println("JEM");
+    //Serial1.println("JEM");
   }
   else
   {
-    allSet_module(module_strip.Color(0,255,0),5);
+    allSet_module(module_strip.Color(0,0,0),0);
     module_strip.show();
   }
   
@@ -245,11 +245,11 @@ void checkSerial()
   digitalWrite(ledBluePin, HIGH);
   test = "";
   
-  while(Serial1.available())  
+  while(Serial.available())  
   {
-    test = Serial1.readString();
+    test = Serial.readString();
   }
-  Serial.println(test);
+  Serial1.println(test);
   char sz[test.length() + 1];
   char copy[test.length() + 1];
   strcpy(sz, test.c_str());  
@@ -329,14 +329,14 @@ void checkSerial()
     //module Selection
     else if(test2.substring(0,delimeter)=="Module")
     {
-      //Serial.println("----Module!------");
+      //Serial1.println("----Module!------");
       module = (test2.substring(delimeter+1));
     }
     else if(test2.substring(0,delimeter)=="AOS")
     {
-      //Serial1.println(test2);
+      //Serial.println(test2);
       AOS = (test2.substring(delimeter+1)).toFloat();
-      //Serial1.println(AOS);
+      //Serial.println(AOS);
       if(AOS == 1.00)
       {
         digitalWrite(ledGreenPin, HIGH);
@@ -347,7 +347,7 @@ void checkSerial()
       }
     }
   }
-  Serial.println();
+  Serial1.println();
 }
 void allSet(uint32_t c, uint8_t wait) {
   for(uint16_t i=0; i<strip.numPixels(); i++) 
