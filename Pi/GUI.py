@@ -511,13 +511,13 @@ class MainScreen(Screen):
 
     def startBGA(*args):
         global p2
-        p2 = subprocess.Popen("/home/pi/Mimic/Pi/fakeBGA.sh")
-        logWrite("Successfully started fake BGA script")
+        p2 = subprocess.Popen("/home/pi/Mimic/Pi/demoOrbit.sh")
+        logWrite("Successfully started Demo Orbit script")
     
     def stopBGA(*args):
         global p2
         p2.kill()
-        logWrite("Successfully stopped fake BGA script")
+        logWrite("Successfully stopped Demo Orbit script")
     
     def startproc(*args):
         global p
@@ -761,7 +761,7 @@ class MimicScreen(Screen, EventDispatcher):
     
     def startBGA(*args):
         global p2
-        p2 = subprocess.Popen("/home/pi/Mimic/Pi/fakeBGA.sh")
+        p2 = subprocess.Popen("/home/pi/Mimic/Pi/demoOrbit.sh")
     
     def stopBGA(*args):
         global p2
@@ -784,9 +784,6 @@ class MimicScreen(Screen, EventDispatcher):
             print "no process"
 
 class MainScreenManager(ScreenManager):
-    pass
-
-class MyButton(Button):
     pass
 
 class MainApp(App):
@@ -851,12 +848,13 @@ class MainApp(App):
         Clock.schedule_interval(self.deleteURLPictures, 86400)
         Clock.schedule_interval(self.animate3,0.1)
         Clock.schedule_interval(self.orbitUpdate, 1)
-        Clock.schedule_interval(self.checkCrew, 120)
+        Clock.schedule_interval(self.checkCrew, 600)
         Clock.schedule_interval(self.changePictures, 10)
         if startup == True:
             startup = False
 
 
+        Clock.schedule_once(self.checkCrew, 20)
         Clock.schedule_once(self.getTLE, 30) #uncomment when internet works again
         Clock.schedule_interval(self.getTLE, 600) #uncomment when internet works again
         #Clock.schedule_interval(self.getTLE, 3600)
@@ -1249,6 +1247,7 @@ class MainApp(App):
         #crew_response = urllib2.urlopen(crew_req)
         global isscrew, crewmember, crewmemberbio, crewmembertitle, crewmemberdays, crewmemberpicture, crewmembercountry
         global internet
+        urlsuccess = False
 
         if internet:
             iss_crew_url = 'http://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'        
@@ -1258,9 +1257,15 @@ class MainApp(App):
                 stuff = urllib2.urlopen(req, timeout = 2)
             except:
                 logWrite("Warning - checkCrew failure")
+                urlsuccess = False
+                print stuff
+            else:
+                stuff = urllib2.urlopen(req, timeout = 2)
+                urlsuccess = True
            
             now = datetime.utcnow()
-            if (stuff.info().getsubtype()=='json'):
+            if urlsuccess:
+            #stuff.info().getsubtype()=='json':
                 logWrite("Successfully fetched crew JSON")
                 crewjsonsuccess = True
                 data = json.load(stuff)
