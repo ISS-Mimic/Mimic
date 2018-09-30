@@ -3,78 +3,78 @@ void checkSerial()
 {
   //digitalWrite(ledBluePin, HIGH);
   test = "";
-  
-  while(Serial.available())  
+
+  while (Serial.available())
   {
     test = Serial.readString();
   }
- Serial1.println(test);
+//  Serial1.println(test);
   char sz[test.length() + 1];
   char copy[test.length() + 1];
-  strcpy(sz, test.c_str());  
+  strcpy(sz, test.c_str());
   char *p = sz;
   char *str;
   int delimeter = 0;
-  String test2 = ""; 
-  
-  while((str = strtok_r(p," ",&p))!=NULL)
+  String test2 = "";
+
+  while ((str = strtok_r(p, " ", &p)) != NULL)
   {
     test2 = String(str);
-    delimeter = test2.indexOf('=');  
-    if(test2.substring(0,delimeter)=="PSARJ")
+    delimeter = test2.indexOf('=');
+    if (test2.substring(0, delimeter) == "PSARJ")
     {
-      PSARJ = (test2.substring(delimeter+1)).toFloat();
-    }  
-    else if(test2.substring(0,delimeter)=="SSARJ")
-    {
-      SSARJ = (test2.substring(delimeter+1)).toFloat();
-    }  
-    else if(test2.substring(0,delimeter)=="PTRRJ")
-    {
-      PTRRJ = (test2.substring(delimeter+1)).toFloat();
-    } 
-    else if(test2.substring(0,delimeter)=="STRRJ")
-    {
-      STRRJ = (test2.substring(delimeter+1)).toFloat();
-    } 
-    else if(test2.substring(0,delimeter)=="Beta1B")
-    {
-      B1B = (test2.substring(delimeter+1)).toFloat();
+      PSARJ = (test2.substring(delimeter + 1)).toFloat();
     }
-    else if(test2.substring(0,delimeter)=="Beta1A")
+    else if (test2.substring(0, delimeter) == "SSARJ")
     {
-      B1A = (test2.substring(delimeter+1)).toFloat();
+      SSARJ = (test2.substring(delimeter + 1)).toFloat();
     }
-    else if(test2.substring(0,delimeter)=="Beta2B")
+    else if (test2.substring(0, delimeter) == "PTRRJ")
     {
-      B2B = (test2.substring(delimeter+1)).toFloat();
+      PTRRJ = (test2.substring(delimeter + 1)).toFloat();
     }
-    else if(test2.substring(0,delimeter)=="Beta2A")
+    else if (test2.substring(0, delimeter) == "STRRJ")
     {
-      B2A = (test2.substring(delimeter+1)).toFloat();
+      STRRJ = (test2.substring(delimeter + 1)).toFloat();
     }
-    else if(test2.substring(0,delimeter)=="Beta3B")
+    else if (test2.substring(0, delimeter) == "Beta1B")
     {
-      B3B = (test2.substring(delimeter+1)).toFloat();
+      B1B = (test2.substring(delimeter + 1)).toFloat();
     }
-    else if(test2.substring(0,delimeter)=="Beta3A")
+    else if (test2.substring(0, delimeter) == "Beta1A")
     {
-      B3A = (test2.substring(delimeter+1)).toFloat();
+      B1A = (test2.substring(delimeter + 1)).toFloat();
     }
-    else if(test2.substring(0,delimeter)=="Beta4B")
+    else if (test2.substring(0, delimeter) == "Beta2B")
     {
-      B4B = (test2.substring(delimeter+1)).toFloat();
+      B2B = (test2.substring(delimeter + 1)).toFloat();
     }
-    else if(test2.substring(0,delimeter)=="Beta4A")
+    else if (test2.substring(0, delimeter) == "Beta2A")
     {
-      B4A = (test2.substring(delimeter+1)).toFloat();
+      B2A = (test2.substring(delimeter + 1)).toFloat();
     }
-    else if(test2.substring(0,delimeter)=="AOS")
+    else if (test2.substring(0, delimeter) == "Beta3B")
+    {
+      B3B = (test2.substring(delimeter + 1)).toFloat();
+    }
+    else if (test2.substring(0, delimeter) == "Beta3A")
+    {
+      B3A = (test2.substring(delimeter + 1)).toFloat();
+    }
+    else if (test2.substring(0, delimeter) == "Beta4B")
+    {
+      B4B = (test2.substring(delimeter + 1)).toFloat();
+    }
+    else if (test2.substring(0, delimeter) == "Beta4A")
+    {
+      B4A = (test2.substring(delimeter + 1)).toFloat();
+    }
+    else if (test2.substring(0, delimeter) == "AOS")
     {
       //Serial.println(test2);
-      AOS = (test2.substring(delimeter+1)).toFloat();
+      AOS = (test2.substring(delimeter + 1)).toFloat();
       //Serial.println(AOS);
-      if(AOS == 1.00)
+      if (AOS == 1.00)
       {
         //digitalWrite(ledGreenPin, HIGH);
       }
@@ -84,5 +84,5 @@ void checkSerial()
       }
     }
   }
-  
+
 }

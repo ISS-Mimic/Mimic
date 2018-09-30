@@ -138,19 +138,18 @@ double oldSSARJangle = 0.00;
 double oldSSARJ = 0.00;
 double SSARJcheck = 0.00;
 double SSARJstep = 0.00;
+double B2A = 30.0;
+double B4A = 30.0;
+double B2B = 30.0;
+double B4B = 30.0;
 
 double B1B = 30.0;
-double B2B = 30.0;
 double B3B = 30.0;
-double B4B = 30.0;
 double B1A = 30.0;
-double B2A = 30.0;
 double B3A = 30.0;
-double B4A = 30.0;
+
 double PSARJ = -10.0;
 double SSARJ = 0.0;
 double PTRRJ = -10.0;
 double STRRJ = 0.0;
 boolean AOS = false;
-
-

@@ -5,7 +5,7 @@ if(Serial.available())
 checkSerial();
 }
 
-int  debug_mode=6;
+int  debug_mode=8;
 //  B2A = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
 //  B4A = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
 //  B2B = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
@@ -263,58 +263,80 @@ int  debug_mode=6;
 
   millisChPt2 = millis() - LoopStartMillis;
 
-if (debug_mode==5){
-Serial1.print("[Joint]:Cmd,Act,Err|  ");
-Serial1.print("2A:c");
-Serial1.print(B2A);
-Serial1.print(",a");
-Serial1.print(Pos_B2A);
-Serial1.print(",e");
-Serial1.print(PosErr_B2A);
+//if (debug_mode==5){
+//Serial1.print("[Joint]:Cmd,Act,Err|  ");
+//Serial1.print("2A:c");
+//Serial1.print(B2A);
+//Serial1.print(",a");
+//Serial1.print(Pos_B2A);
+//Serial1.print(",e");
+//Serial1.print(PosErr_B2A);
+//
+//Serial1.print("|,  ");
+//Serial1.print("4A:c");
+//Serial1.print(B4A);
+//Serial1.print(",a");
+//Serial1.print(Pos_B4A);
+//Serial1.print(",e");
+//Serial1.print(PosErr_B4A);
+//
+//Serial1.print("|,  ");
+//Serial1.print("2B:c");
+//Serial1.print(B2B);
+//Serial1.print(",a");
+//Serial1.print(Pos_B2B);
+//Serial1.print(",e");
+//Serial1.print(PosErr_B2B);
+//
+//Serial1.print("|,  ");
+//Serial1.print("4B:c");
+//Serial1.print(B4B);
+//Serial1.print(",a");
+//Serial1.print(Pos_B4B);
+//Serial1.print(",e");
+//Serial1.print(PosErr_B4B);
+//Serial1.print("|,");
+//Serial1.println("");
+//}
+//  
+//
+//
+//if (debug_mode==6){
+//Serial1.print(PosErr_B2A);
+//
+//Serial1.print(", ");
+//Serial1.print(PosErr_B4A);
+//
+//Serial1.print(", ");
+//Serial1.print(PosErr_B2B);
+//
+//Serial1.print(", ");
+//Serial1.print(PosErr_B4B);
+//Serial1.println("");
+//}
 
-Serial1.print("|,  ");
-Serial1.print("4A:c");
-Serial1.print(B4A);
-Serial1.print(",a");
-Serial1.print(Pos_B4A);
-Serial1.print(",e");
-Serial1.print(PosErr_B4A);
+if (debug_mode==8){
+    Serial.print("|  ");
+    
+  Serial.print("  Count_B2A: ");
+  Serial.print(Count_B2A);
+  Serial.print("  Count_B4A: ");
+  Serial.print(Count_B4A);
+  Serial.print("Count_B2B: ");
+  Serial.print(Count_B2B);
+  Serial.print("  Count_B4B: ");
+  Serial.print(Count_B4B);
+  Serial.print("| PosErrs ");
+Serial.print(PosErr_B2A);
+Serial.print(", ");
+Serial.print(PosErr_B4A);
+Serial.print(", ");
+Serial.print(PosErr_B2B);
+Serial.print(", ");
+Serial.print(PosErr_B4B);
 
-Serial1.print("|,  ");
-Serial1.print("2B:c");
-Serial1.print(B2B);
-Serial1.print(",a");
-Serial1.print(Pos_B2B);
-Serial1.print(",e");
-Serial1.print(PosErr_B2B);
-
-Serial1.print("|,  ");
-Serial1.print("4B:c");
-Serial1.print(B4B);
-Serial1.print(",a");
-Serial1.print(Pos_B4B);
-Serial1.print(",e");
-Serial1.print(PosErr_B4B);
-Serial1.print("|,");
-Serial1.println("");
+  Serial.println("|  ");
 }
-  
-
-
-if (debug_mode==6){
-Serial1.print(PosErr_B2A);
-
-Serial1.print(", ");
-Serial1.print(PosErr_B4A);
-
-Serial1.print(", ");
-Serial1.print(PosErr_B2B);
-
-Serial1.print(", ");
-Serial1.print(PosErr_B4B);
-Serial1.println("");
-}
-
 
 
 

@@ -30,7 +30,7 @@ Servo servo1;
 Servo servo2;
 
 // Create the motor shield object with the default I2C address
-Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x60);
+Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x61);
 // Or, create it with a different I2C address (say for stacking)
 // Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x61);
 
@@ -41,16 +41,22 @@ Adafruit_DCMotor *myMotorB2B = AFMS.getMotor(3);
 Adafruit_DCMotor *myMotorB4B = AFMS.getMotor(4);
 
 
-Encoder myEnc2A(2, 3);
-Encoder myEnc4A(6, 7); //for some reason, these do not register blips if motor moves fast, within a few deg of desired position
-//Encoder myEnc4A(A1,A2);// was 0,1
-Encoder myEnc2B(5, 8);
+Encoder myEnc2A(0, 1);
+Encoder myEnc4A(5, 6); //for some reason, these do not register blips if motor moves fast, within a few deg of desired position
+// Pins 9, 10 are used by Servos.  Odd issues with Pins 2-4.
+Encoder myEnc2B(7, 8);
 Encoder myEnc4B(11, 12);
 
 
-
-
 void setup() {
+
+  // Set some pins to high, just for convenient connection to power Hall Effect Sensors
+pinMode(A0, OUTPUT);
+digitalWrite(A0, HIGH);
+pinMode(A1, OUTPUT);
+digitalWrite(A1, HIGH);
+pinMode(A2, OUTPUT);
+digitalWrite(A2, HIGH);
 
   // Attach a servo to pin #10
   servo1.attach(10);
@@ -59,7 +65,7 @@ void setup() {
   Serial.begin(115200);
   //Serial3.begin(115200);          //Serial1 is connected to the RasPi
   Serial.setTimeout(50);
-  Serial1.begin(9600);
+ // Serial1.begin(9600);
 
   //Serial.println("Motor test!");
 
@@ -79,5 +85,3 @@ void setup() {
   // For debugging
   //  pinMode(13, OUTPUT); //LED
 }
-
-
