@@ -383,6 +383,7 @@ crew_mention= False
 crewjsonsuccess = False
 mimicbutton = False
 fakeorbitboolean = False
+demoboolean = False
 zerocomplete = False
 switchtofake = False
 manualcontrol = False
@@ -509,14 +510,17 @@ class MainScreen(Screen):
         global manualcontrol
         manualcontrol = args[0]        
 
-    def startBGA(*args):
+    def startDemo(*args):
         global p2
         p2 = subprocess.Popen("/home/pi/Mimic/Pi/demoOrbit.sh")
         logWrite("Successfully started Demo Orbit script")
     
-    def stopBGA(*args):
+    def stopDemo(*args):
         global p2
-        p2.kill()
+        try:
+            p2.kill()
+        except:
+            print "no process"
         logWrite("Successfully stopped Demo Orbit script")
     
     def startproc(*args):
@@ -679,14 +683,21 @@ class ManualControlScreen(Screen):
         ser.write(*args)
 
 class FakeOrbitScreen(Screen):
-    def serialWrite(self, *args):
-        ser.write(*args)
+    
+    def changeDemoBoolean(self, *args):
+        global demoboolean
+        demoboolean = args[0]
 
-    def changeBoolean(self, *args):
-        global fakeorbitboolean
-        global switchtofake
-        switchtofake = args[0]
-        fakeorbitboolean = args[0]
+    def startDemo(*args):
+        global p2
+        p2 = subprocess.Popen("/home/pi/Mimic/Pi/demoOrbit.sh")
+    
+    def stopDemo(*args):
+        global p2
+        try:
+            p2.kill()
+        except:
+            print "no process"
 
 class Settings_Screen(Screen, EventDispatcher):
     pass
@@ -754,18 +765,6 @@ class MimicScreen(Screen, EventDispatcher):
     def changeMimicBoolean(self, *args):
         global mimicbutton
         mimicbutton = args[0]
-    
-    def changeSwitchBoolean(self, *args):
-        global switchtofake
-        switchtofake = args[0]
-    
-    def startBGA(*args):
-        global p2
-        p2 = subprocess.Popen("/home/pi/Mimic/Pi/demoOrbit.sh")
-    
-    def stopBGA(*args):
-        global p2
-        p2.kill()
     
     def startproc(*args):
         global p
@@ -1447,7 +1446,7 @@ class MainApp(App):
             getattr(self, x).ids.signal.size_hint_y = 0.112
 
     def update_labels(self, dt):
-        global mimicbutton,switchtofake,fakeorbitboolean,psarj2,ssarj2,manualcontrol,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,US_EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress,oldAirlockPump,obtained_EVA_crew,EVAstartTime
+        global mimicbutton,switchtofake,demoboolean,fakeorbitboolean,psarj2,ssarj2,manualcontrol,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,US_EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress,oldAirlockPump,obtained_EVA_crew,EVAstartTime
         global holdstartTime, LS_Subscription, SerialConnection, SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5
         global eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
         global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power
@@ -2046,65 +2045,28 @@ class MainApp(App):
 #            print "popup"    
 
 
-        if (fakeorbitboolean == True and (mimicbutton == True or switchtofake == True)):
-            if psarj2 <= 0.00:
-                psarj2 = 360.0
-            if ssarj2 >= 360.00:                
-                ssarj2 = 0.0
-            if beta1a2 >= 360.00:
-                beta1a2 = 0.0
-            if beta1b2 >= 360.00:
-                beta1b2 = 0.0
-            if beta2a2 >= 360.00:
-                beta2a2 = 0.0
-            if beta2b2 <= 0.00:
-                beta2b2 = 360.0
-            if beta3a2 >= 360.00:
-                beta3a2 = 0.0
-            if beta3b2 >= 360.00:
-                beta3b2 = 0.0
-            if beta4a2 <= 0.00:
-                beta4a2 = 360.0
-            if beta4b2 >= 360.00:
-                beta4b2 = 0.0
-            self.fakeorbit_screen.ids.fakepsarj_value.text = "{:.2f}".format(psarj2)
-            self.fakeorbit_screen.ids.fakessarj_value.text = "{:.2f}".format(ssarj2)
-            
-            #psarj2 -= 0.0666
-            psarj2 -= 6.66
-            #ssarj2 += 0.0666
-            ssarj2 += 6.66
+        if demoboolean == True:
+            self.fakeorbit_screen.ids.psarj.text = str(psarj)
+            self.fakeorbit_screen.ids.ssarj.text = str(ssarj)
+            self.fakeorbit_screen.ids.beta1a.text = str(beta1a)
+            self.fakeorbit_screen.ids.beta1b.text = str(beta1b)
+            self.fakeorbit_screen.ids.beta2a.text = str(beta2a)
+            self.fakeorbit_screen.ids.beta2b.text = str(beta2b)
+            self.fakeorbit_screen.ids.beta3a.text = str(beta3a)
+            self.fakeorbit_screen.ids.beta3b.text = str(beta3b)
+            self.fakeorbit_screen.ids.beta4a.text = str(beta4a)
+            self.fakeorbit_screen.ids.beta4b.text = str(beta4b)
 
-            beta1a2 += 3.00
-            beta1b2 += 3.00
-            beta2a2 += 3.00
-            beta2b2 -= 3.00
-            beta3a2 += 3.00
-            beta3b2 += 3.00
-            beta4a2 -= 3.00
-            beta4b2 += 3.00
-
-            self.serialWrite("PSARJ=" + str(psarj2) + " ")
-            self.serialWrite("SSARJ=" + str(ssarj2) + " ")
-            self.serialWrite("PTRRJ=" + str(ptrrj) + " ")
-            self.serialWrite("STRRJ=" + str(strrj) + " ")
-            self.serialWrite("Beta1B=" + str(beta1b2) + " ")
-            self.serialWrite("Beta1A=" + str(beta1a2) + " ")
-            self.serialWrite("Beta2B=" + str(beta2b2) + " ")
-            self.serialWrite("Beta2A=" + str(beta2a2) + " ")
-            self.serialWrite("Beta3B=" + str(beta3b2) + " ")
-            self.serialWrite("Beta3A=" + str(beta3a2) + " ")
-            self.serialWrite("Beta4B=" + str(beta4b2) + " ")
-            self.serialWrite("Beta4A=" + str(beta4a2) + " ")
-            self.serialWrite("AOS=" + str(aos) + " ")
-            self.serialWrite("Voltage1A=" + str(v1a) + " ")
-            self.serialWrite("Voltage2A=" + str(v2a) + " ")
-            self.serialWrite("Voltage3A=" + str(v3a) + " ")
-            self.serialWrite("Voltage4A=" + str(v4a) + " ")
-            self.serialWrite("Voltage1B=" + str(v1b) + " ")
-            self.serialWrite("Voltage2B=" + str(v2b) + " ")
-            self.serialWrite("Voltage3B=" + str(v3b) + " ")
-            self.serialWrite("Voltage4B=" + str(v4b) + " ")
+            self.serialWrite("PSARJ=" + str(psarj) + " ")
+            self.serialWrite("SSARJ=" + str(ssarj) + " ")
+            self.serialWrite("Beta1B=" + str(beta1b) + " ")
+            self.serialWrite("Beta1A=" + str(beta1a) + " ")
+            self.serialWrite("Beta2B=" + str(beta2b) + " ")
+            self.serialWrite("Beta2A=" + str(beta2a) + " ")
+            self.serialWrite("Beta3B=" + str(beta3b) + " ")
+            self.serialWrite("Beta3A=" + str(beta3a) + " ")
+            self.serialWrite("Beta4B=" + str(beta4b) + " ")
+            self.serialWrite("Beta4A=" + str(beta4a) + " ")
        
         self.eps_screen.ids.psarj_value.text = psarj + "deg" 
         self.eps_screen.ids.ssarj_value.text = ssarj + "deg"
