@@ -58,18 +58,18 @@ def logWrite(string):
     mimiclog.write('\n')
 
 #-------------------------Look for a connected arduino-----------------------------------
-SerialConnection = False
 SerialConnection1 = False
 SerialConnection2 = False
 SerialConnection3 = False
 SerialConnection4 = False
 SerialConnection5 = False
 
-#setting up 2 serial connections to control neopixels and motors seperately 
 try:
     ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
-except:
+except Exception:
     logWrite("Warning - Serial Connection ACM0 not found")
+    SerialConnection1 = False
+    ser = None
 else:
     SerialConnection1 = True
     logWrite("Successful connection to Serial on ACMO")
@@ -77,8 +77,10 @@ else:
 
 try:
     ser2 = serial.Serial('/dev/ttyACM1', 115200, timeout=0)
-except:
+except Exception:
     logWrite("Warning - Serial Connection ACM1 not found")
+    SerialConnection2 = False
+    ser2 = None
 else:
     SerialConnection2 = True
     logWrite("Successful connection to Serial on ACM1")
@@ -86,8 +88,10 @@ else:
 
 try:
     ser3 = serial.Serial('/dev/ttyACM2', 115200, timeout=0)
-except:
+except Exception:
     logWrite("Warning - Serial Connection ACM2 not found")
+    SerialConnection3 = False
+    ser3 = None
 else:
     SerialConnection3 = True
     logWrite("Successful connection to Serial on ACM2")
@@ -95,8 +99,10 @@ else:
 
 try:
     ser4 = serial.Serial('/dev/ttyAMA00', 115200, timeout=0)
-except:
+except Exception:
     logWrite("Warning - Serial Connection AMA00 not found")
+    SerialConnection4 = False
+    ser4 = None
 else:
     SerialConnection4 = True
     logWrite("Successful connection to Serial on AMA0O")
@@ -104,8 +110,10 @@ else:
 
 try:
     ser5 = serial.Serial('/dev/ttyUSB0', 115200, timeout=0)
-except:
+except Exception:
     logWrite("Warning - Serial Connection USB0 not found")
+    SerialConnection5 = False
+    ser5 = None
 else:
     SerialConnection5 = True
     logWrite("Successful connection to Serial on USBO")
@@ -519,8 +527,8 @@ class MainScreen(Screen):
         global p2
         try:
             p2.kill()
-        except:
-            print "no process"
+        except Exception:
+            pass
         logWrite("Successfully stopped Demo Orbit script")
     
     def startproc(*args):
@@ -534,8 +542,8 @@ class MainScreen(Screen):
         try:
             p.kill()
             p2.kill()
-        except:
-            print "no process"
+        except Exception:
+            pass
         os.system('rm /dev/shm/iss_telemetry.db')
         logWrite("Successfully stopped ISS telemetry javascript and removed database")
 
@@ -544,7 +552,7 @@ class CalibrateScreen(Screen):
         ser.write(*args)
         #try:
         #    self.serialActualWrite(self, *args)
-        #except:
+        #except Exception:
         #    mimiclog.write(str(datetime.utcnow()))
         #    mimiclog.write(' ')
         #    mimiclog.write("Error - Attempted write - no serial device connected")
@@ -696,8 +704,8 @@ class FakeOrbitScreen(Screen):
         global p2
         try:
             p2.kill()
-        except:
-            print "no process"
+        except Exception:
+            pass
 
 class Settings_Screen(Screen, EventDispatcher):
     pass
@@ -779,8 +787,8 @@ class MimicScreen(Screen, EventDispatcher):
         try:
             p.kill()
             p2.kill()
-        except:
-            print "no process"
+        except Exception:
+            pass
 
 class MainScreenManager(ScreenManager):
     pass
@@ -852,13 +860,75 @@ class MainApp(App):
         if startup == True:
             startup = False
 
-
         Clock.schedule_once(self.checkCrew, 20)
         Clock.schedule_once(self.getTLE, 30) #uncomment when internet works again
         Clock.schedule_interval(self.getTLE, 600) #uncomment when internet works again
         #Clock.schedule_interval(self.getTLE, 3600)
         Clock.schedule_interval(self.check_internet, 10)
+        Clock.schedule_interval(self.check_serial, 10)
         return root
+
+    def check_serial(self, dt):
+        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
+        if ser == None:
+            try:
+                ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
+            except Exception:
+                logWrite("Warning - Serial Connection ACM0 not found")
+                SerialConnection1 = False
+                ser = None
+            else:
+                SerialConnection1 = True
+                logWrite("Successful connection to Serial on ACMO")
+                print str(ser)
+
+        if ser2 == None:
+            try:
+                ser2 = serial.Serial('/dev/ttyACM1', 115200, timeout=0)
+            except Exception:
+                logWrite("Warning - Serial Connection ACM1 not found")
+                SerialConnection2 = False
+                ser2 = None
+            else:
+                SerialConnection2 = True
+                logWrite("Successful connection to Serial on ACM1")
+                print str(ser2)
+
+        if ser3 == None:
+            try:
+                ser3 = serial.Serial('/dev/ttyACM2', 115200, timeout=0)
+            except Exception:
+                logWrite("Warning - Serial Connection ACM2 not found")
+                SerialConnection3 = False
+                ser3 = None
+            else:
+                SerialConnection3 = True
+                logWrite("Successful connection to Serial on ACM2")
+                print str(ser3)
+
+        if ser4 == None:
+            try:
+                ser4 = serial.Serial('/dev/ttyAMA00', 115200, timeout=0)
+            except Exception:
+                logWrite("Warning - Serial Connection AMA00 not found")
+                SerialConnection4 = False
+                ser4 = None
+            else:
+                SerialConnection4 = True
+                logWrite("Successful connection to Serial on AMA0O")
+                print str(ser4)
+
+        if ser5 == None:
+            try:
+                ser5 = serial.Serial('/dev/ttyUSB0', 115200, timeout=0)
+            except Exception:
+                logWrite("Warning - Serial Connection USB0 not found")
+                SerialConnection5 = False
+                ser5 = None
+            else:
+                SerialConnection5 = True
+                logWrite("Successful connection to Serial on USBO")
+                print str(ser5)
 
     def check_internet(self, dt):
         global internet
@@ -1020,25 +1090,53 @@ class MainApp(App):
 
     def serialWrite(self, *args):
         #logWrite("Function call - serial write")
-        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5
+        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
         
         if SerialConnection1:
-            ser.write(*args)
+            #ser.write(*args)
+            try:
+                ser.write(*args)
+            except Exception:
+                ser = None
+                SerialConnection1 = False
+            #else:
+            #    ser.write(*args)
         if SerialConnection2:
             ser2.write(*args)
+            try:
+                ser2.write(*args)
+            except Exception:
+                ser2 = None
+                SerialConnection2 = False
+            #else:
+            #    ser.write(*args)
         if SerialConnection3:
             ser3.write(*args)
+            try:
+                ser3.write(*args)
+            except Exception:
+                ser3 = None
+                SerialConnection3 = False
+            #else:
+            #    ser.write(*args)
         if SerialConnection4:
             ser4.write(*args)
+            try:
+                ser4.write(*args)
+            except Exception:
+                ser4 = None
+                SerialConnection4 = False
+            #else:
+            #    ser.write(*args)
         if SerialConnection5:
             ser5.write(*args)
-        #try:
-        #   ser.write(*args)
-        #except:
-        #   mimiclog.write(str(datetime.utcnow()))
-        #   mimiclog.write(' ')
-        #   mimiclog.write("Error - Attempted write - no serial device connected")
-        #   mimiclog.write('\n')
+            try:
+                ser5.write(*args)
+            except Exception:
+                ser5 = None
+                SerialConnection5 = False
+            #else:
+            #    ser.write(*args)
 
     def changeColors(self, *args):   #this function sets all labels on mimic screen to a certain color based on signal status
         #the signalcolor is a kv property that will update all signal status dependant values to whatever color is received by this function 
@@ -1239,7 +1337,7 @@ class MainApp(App):
     def updateCrew(self, dt):
         try:
             self.checkCrew(self, *args)
-        except:
+        except Exception:
             logWrite("Warning - updateCrew failure")
     
     def checkCrew(self, dt):
@@ -1254,7 +1352,7 @@ class MainApp(App):
             stuff = 0
             try:
                 stuff = urllib2.urlopen(req, timeout = 2)
-            except:
+            except Exception:
                 logWrite("Warning - checkCrew failure")
                 urlsuccess = False
                 print stuff
@@ -1447,20 +1545,25 @@ class MainApp(App):
 
     def update_labels(self, dt):
         global mimicbutton,switchtofake,demoboolean,fakeorbitboolean,psarj2,ssarj2,manualcontrol,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,US_EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress,oldAirlockPump,obtained_EVA_crew,EVAstartTime
-        global holdstartTime, LS_Subscription, SerialConnection, SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5
+        global holdstartTime, LS_Subscription, SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5
         global eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
         global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power
         global stationmode, sgant_elevation, sgant_xelevation
         global tdrs, module
     
         if SerialConnection1 or SerialConnection2 or SerialConnection3 or SerialConnection4 or SerialConnection5:
+            self.fakeorbit_screen.ids.serialstatus.text = "Arduino Connected"
+            self.mimic_screen.ids.mimicstartbutton.disabled = False
+            self.fakeorbit_screen.ids.DemoStart.disabled = False
             if mimicbutton:
                 self.mimic_screen.ids.mimicstartbutton.disabled = True
             else:
                 self.mimic_screen.ids.mimicstartbutton.disabled = False
         else:
+            self.fakeorbit_screen.ids.serialstatus.text = "No Arduino Connected"
             self.mimic_screen.ids.mimicstartbutton.disabled = True
-            self.mimic_screen.ids.mimicstopbutton.disabled = True
+            self.mimic_screen.ids.mimicstartbutton.text = "Transmit"
+            self.fakeorbit_screen.ids.DemoStart.disabled = True
 
         c.execute('select Value from telemetry')
         values = c.fetchall()
@@ -2151,8 +2254,6 @@ class MainApp(App):
         #data to send regardless of signal status
         if mimicbutton == True: 
             self.serialWrite("Module=" + module + " ")
-            print "Module send: " + str(module)
-
 
 #All GUI Screens are on separate kv files
 Builder.load_file('/home/pi/Mimic/Pi/Screens/Settings_Screen.kv')
