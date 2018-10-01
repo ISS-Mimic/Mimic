@@ -58,18 +58,18 @@ def logWrite(string):
     mimiclog.write('\n')
 
 #-------------------------Look for a connected arduino-----------------------------------
-SerialConnection = False
 SerialConnection1 = False
 SerialConnection2 = False
 SerialConnection3 = False
 SerialConnection4 = False
 SerialConnection5 = False
 
-#setting up 2 serial connections to control neopixels and motors seperately 
 try:
     ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
-except:
+except Exception:
     logWrite("Warning - Serial Connection ACM0 not found")
+    SerialConnection1 = False
+    ser = None
 else:
     SerialConnection1 = True
     logWrite("Successful connection to Serial on ACMO")
@@ -77,8 +77,10 @@ else:
 
 try:
     ser2 = serial.Serial('/dev/ttyACM1', 115200, timeout=0)
-except:
+except Exception:
     logWrite("Warning - Serial Connection ACM1 not found")
+    SerialConnection2 = False
+    ser2 = None
 else:
     SerialConnection2 = True
     logWrite("Successful connection to Serial on ACM1")
@@ -86,8 +88,10 @@ else:
 
 try:
     ser3 = serial.Serial('/dev/ttyACM2', 115200, timeout=0)
-except:
+except Exception:
     logWrite("Warning - Serial Connection ACM2 not found")
+    SerialConnection3 = False
+    ser3 = None
 else:
     SerialConnection3 = True
     logWrite("Successful connection to Serial on ACM2")
@@ -95,8 +99,10 @@ else:
 
 try:
     ser4 = serial.Serial('/dev/ttyAMA00', 115200, timeout=0)
-except:
+except Exception:
     logWrite("Warning - Serial Connection AMA00 not found")
+    SerialConnection4 = False
+    ser4 = None
 else:
     SerialConnection4 = True
     logWrite("Successful connection to Serial on AMA0O")
@@ -104,8 +110,10 @@ else:
 
 try:
     ser5 = serial.Serial('/dev/ttyUSB0', 115200, timeout=0)
-except:
+except Exception:
     logWrite("Warning - Serial Connection USB0 not found")
+    SerialConnection5 = False
+    ser5 = None
 else:
     SerialConnection5 = True
     logWrite("Successful connection to Serial on USBO")
@@ -383,6 +391,7 @@ crew_mention= False
 crewjsonsuccess = False
 mimicbutton = False
 fakeorbitboolean = False
+demoboolean = False
 zerocomplete = False
 switchtofake = False
 manualcontrol = False
@@ -509,15 +518,18 @@ class MainScreen(Screen):
         global manualcontrol
         manualcontrol = args[0]        
 
-    def startBGA(*args):
+    def startDemo(*args):
         global p2
-        p2 = subprocess.Popen("/home/pi/Mimic/Pi/fakeBGA.sh")
-        logWrite("Successfully started fake BGA script")
+        p2 = subprocess.Popen("/home/pi/Mimic/Pi/demoOrbit.sh")
+        logWrite("Successfully started Demo Orbit script")
     
-    def stopBGA(*args):
+    def stopDemo(*args):
         global p2
-        p2.kill()
-        logWrite("Successfully stopped fake BGA script")
+        try:
+            p2.kill()
+        except Exception:
+            pass
+        logWrite("Successfully stopped Demo Orbit script")
     
     def startproc(*args):
         global p
@@ -530,8 +542,8 @@ class MainScreen(Screen):
         try:
             p.kill()
             p2.kill()
-        except:
-            print "no process"
+        except Exception:
+            pass
         os.system('rm /dev/shm/iss_telemetry.db')
         logWrite("Successfully stopped ISS telemetry javascript and removed database")
 
@@ -540,7 +552,7 @@ class CalibrateScreen(Screen):
         ser.write(*args)
         #try:
         #    self.serialActualWrite(self, *args)
-        #except:
+        #except Exception:
         #    mimiclog.write(str(datetime.utcnow()))
         #    mimiclog.write(' ')
         #    mimiclog.write("Error - Attempted write - no serial device connected")
@@ -679,14 +691,21 @@ class ManualControlScreen(Screen):
         ser.write(*args)
 
 class FakeOrbitScreen(Screen):
-    def serialWrite(self, *args):
-        ser.write(*args)
+    
+    def changeDemoBoolean(self, *args):
+        global demoboolean
+        demoboolean = args[0]
 
-    def changeBoolean(self, *args):
-        global fakeorbitboolean
-        global switchtofake
-        switchtofake = args[0]
-        fakeorbitboolean = args[0]
+    def startDemo(*args):
+        global p2
+        p2 = subprocess.Popen("/home/pi/Mimic/Pi/demoOrbit.sh")
+    
+    def stopDemo(*args):
+        global p2
+        try:
+            p2.kill()
+        except Exception:
+            pass
 
 class Settings_Screen(Screen, EventDispatcher):
     pass
@@ -755,18 +774,6 @@ class MimicScreen(Screen, EventDispatcher):
         global mimicbutton
         mimicbutton = args[0]
     
-    def changeSwitchBoolean(self, *args):
-        global switchtofake
-        switchtofake = args[0]
-    
-    def startBGA(*args):
-        global p2
-        p2 = subprocess.Popen("/home/pi/Mimic/Pi/fakeBGA.sh")
-    
-    def stopBGA(*args):
-        global p2
-        p2.kill()
-    
     def startproc(*args):
         global p
         print "mimic starting node"
@@ -780,13 +787,10 @@ class MimicScreen(Screen, EventDispatcher):
         try:
             p.kill()
             p2.kill()
-        except:
-            print "no process"
+        except Exception:
+            pass
 
 class MainScreenManager(ScreenManager):
-    pass
-
-class MyButton(Button):
     pass
 
 class MainApp(App):
@@ -851,17 +855,80 @@ class MainApp(App):
         Clock.schedule_interval(self.deleteURLPictures, 86400)
         Clock.schedule_interval(self.animate3,0.1)
         Clock.schedule_interval(self.orbitUpdate, 1)
-        Clock.schedule_interval(self.checkCrew, 120)
+        Clock.schedule_interval(self.checkCrew, 600)
         Clock.schedule_interval(self.changePictures, 10)
         if startup == True:
             startup = False
 
-
+        Clock.schedule_once(self.checkCrew, 20)
         Clock.schedule_once(self.getTLE, 30) #uncomment when internet works again
         Clock.schedule_interval(self.getTLE, 600) #uncomment when internet works again
         #Clock.schedule_interval(self.getTLE, 3600)
         Clock.schedule_interval(self.check_internet, 10)
+        Clock.schedule_interval(self.check_serial, 10)
         return root
+
+    def check_serial(self, dt):
+        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
+        if ser == None:
+            try:
+                ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
+            except Exception:
+                logWrite("Warning - Serial Connection ACM0 not found")
+                SerialConnection1 = False
+                ser = None
+            else:
+                SerialConnection1 = True
+                logWrite("Successful connection to Serial on ACMO")
+                print str(ser)
+
+        if ser2 == None:
+            try:
+                ser2 = serial.Serial('/dev/ttyACM1', 115200, timeout=0)
+            except Exception:
+                logWrite("Warning - Serial Connection ACM1 not found")
+                SerialConnection2 = False
+                ser2 = None
+            else:
+                SerialConnection2 = True
+                logWrite("Successful connection to Serial on ACM1")
+                print str(ser2)
+
+        if ser3 == None:
+            try:
+                ser3 = serial.Serial('/dev/ttyACM2', 115200, timeout=0)
+            except Exception:
+                logWrite("Warning - Serial Connection ACM2 not found")
+                SerialConnection3 = False
+                ser3 = None
+            else:
+                SerialConnection3 = True
+                logWrite("Successful connection to Serial on ACM2")
+                print str(ser3)
+
+        if ser4 == None:
+            try:
+                ser4 = serial.Serial('/dev/ttyAMA00', 115200, timeout=0)
+            except Exception:
+                logWrite("Warning - Serial Connection AMA00 not found")
+                SerialConnection4 = False
+                ser4 = None
+            else:
+                SerialConnection4 = True
+                logWrite("Successful connection to Serial on AMA0O")
+                print str(ser4)
+
+        if ser5 == None:
+            try:
+                ser5 = serial.Serial('/dev/ttyUSB0', 115200, timeout=0)
+            except Exception:
+                logWrite("Warning - Serial Connection USB0 not found")
+                SerialConnection5 = False
+                ser5 = None
+            else:
+                SerialConnection5 = True
+                logWrite("Successful connection to Serial on USBO")
+                print str(ser5)
 
     def check_internet(self, dt):
         global internet
@@ -1023,25 +1090,53 @@ class MainApp(App):
 
     def serialWrite(self, *args):
         #logWrite("Function call - serial write")
-        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5
+        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
         
         if SerialConnection1:
-            ser.write(*args)
+            #ser.write(*args)
+            try:
+                ser.write(*args)
+            except Exception:
+                ser = None
+                SerialConnection1 = False
+            #else:
+            #    ser.write(*args)
         if SerialConnection2:
             ser2.write(*args)
+            try:
+                ser2.write(*args)
+            except Exception:
+                ser2 = None
+                SerialConnection2 = False
+            #else:
+            #    ser.write(*args)
         if SerialConnection3:
             ser3.write(*args)
+            try:
+                ser3.write(*args)
+            except Exception:
+                ser3 = None
+                SerialConnection3 = False
+            #else:
+            #    ser.write(*args)
         if SerialConnection4:
             ser4.write(*args)
+            try:
+                ser4.write(*args)
+            except Exception:
+                ser4 = None
+                SerialConnection4 = False
+            #else:
+            #    ser.write(*args)
         if SerialConnection5:
             ser5.write(*args)
-        #try:
-        #   ser.write(*args)
-        #except:
-        #   mimiclog.write(str(datetime.utcnow()))
-        #   mimiclog.write(' ')
-        #   mimiclog.write("Error - Attempted write - no serial device connected")
-        #   mimiclog.write('\n')
+            try:
+                ser5.write(*args)
+            except Exception:
+                ser5 = None
+                SerialConnection5 = False
+            #else:
+            #    ser.write(*args)
 
     def changeColors(self, *args):   #this function sets all labels on mimic screen to a certain color based on signal status
         #the signalcolor is a kv property that will update all signal status dependant values to whatever color is received by this function 
@@ -1242,13 +1337,14 @@ class MainApp(App):
     def updateCrew(self, dt):
         try:
             self.checkCrew(self, *args)
-        except:
+        except Exception:
             logWrite("Warning - updateCrew failure")
     
     def checkCrew(self, dt):
         #crew_response = urllib2.urlopen(crew_req)
         global isscrew, crewmember, crewmemberbio, crewmembertitle, crewmemberdays, crewmemberpicture, crewmembercountry
         global internet
+        urlsuccess = False
 
         if internet:
             iss_crew_url = 'http://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'        
@@ -1256,11 +1352,17 @@ class MainApp(App):
             stuff = 0
             try:
                 stuff = urllib2.urlopen(req, timeout = 2)
-            except:
+            except Exception:
                 logWrite("Warning - checkCrew failure")
+                urlsuccess = False
+                print stuff
+            else:
+                stuff = urllib2.urlopen(req, timeout = 2)
+                urlsuccess = True
            
             now = datetime.utcnow()
-            if (stuff.info().getsubtype()=='json'):
+            if urlsuccess:
+            #stuff.info().getsubtype()=='json':
                 logWrite("Successfully fetched crew JSON")
                 crewjsonsuccess = True
                 data = json.load(stuff)
@@ -1442,21 +1544,26 @@ class MainApp(App):
             getattr(self, x).ids.signal.size_hint_y = 0.112
 
     def update_labels(self, dt):
-        global mimicbutton,switchtofake,fakeorbitboolean,psarj2,ssarj2,manualcontrol,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,US_EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress,oldAirlockPump,obtained_EVA_crew,EVAstartTime
-        global holdstartTime, LS_Subscription, SerialConnection, SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5
+        global mimicbutton,switchtofake,demoboolean,fakeorbitboolean,psarj2,ssarj2,manualcontrol,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,US_EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress,oldAirlockPump,obtained_EVA_crew,EVAstartTime
+        global holdstartTime, LS_Subscription, SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5
         global eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
         global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power
         global stationmode, sgant_elevation, sgant_xelevation
         global tdrs, module
     
         if SerialConnection1 or SerialConnection2 or SerialConnection3 or SerialConnection4 or SerialConnection5:
+            self.fakeorbit_screen.ids.serialstatus.text = "Arduino Connected"
+            self.mimic_screen.ids.mimicstartbutton.disabled = False
+            self.fakeorbit_screen.ids.DemoStart.disabled = False
             if mimicbutton:
                 self.mimic_screen.ids.mimicstartbutton.disabled = True
             else:
                 self.mimic_screen.ids.mimicstartbutton.disabled = False
         else:
+            self.fakeorbit_screen.ids.serialstatus.text = "No Arduino Connected"
             self.mimic_screen.ids.mimicstartbutton.disabled = True
-            self.mimic_screen.ids.mimicstopbutton.disabled = True
+            self.mimic_screen.ids.mimicstartbutton.text = "Transmit"
+            self.fakeorbit_screen.ids.DemoStart.disabled = True
 
         c.execute('select Value from telemetry')
         values = c.fetchall()
@@ -2041,65 +2148,28 @@ class MainApp(App):
 #            print "popup"    
 
 
-        if (fakeorbitboolean == True and (mimicbutton == True or switchtofake == True)):
-            if psarj2 <= 0.00:
-                psarj2 = 360.0
-            if ssarj2 >= 360.00:                
-                ssarj2 = 0.0
-            if beta1a2 >= 360.00:
-                beta1a2 = 0.0
-            if beta1b2 >= 360.00:
-                beta1b2 = 0.0
-            if beta2a2 >= 360.00:
-                beta2a2 = 0.0
-            if beta2b2 <= 0.00:
-                beta2b2 = 360.0
-            if beta3a2 >= 360.00:
-                beta3a2 = 0.0
-            if beta3b2 >= 360.00:
-                beta3b2 = 0.0
-            if beta4a2 <= 0.00:
-                beta4a2 = 360.0
-            if beta4b2 >= 360.00:
-                beta4b2 = 0.0
-            self.fakeorbit_screen.ids.fakepsarj_value.text = "{:.2f}".format(psarj2)
-            self.fakeorbit_screen.ids.fakessarj_value.text = "{:.2f}".format(ssarj2)
-            
-            #psarj2 -= 0.0666
-            psarj2 -= 6.66
-            #ssarj2 += 0.0666
-            ssarj2 += 6.66
+        if demoboolean == True:
+            self.fakeorbit_screen.ids.psarj.text = str(psarj)
+            self.fakeorbit_screen.ids.ssarj.text = str(ssarj)
+            self.fakeorbit_screen.ids.beta1a.text = str(beta1a)
+            self.fakeorbit_screen.ids.beta1b.text = str(beta1b)
+            self.fakeorbit_screen.ids.beta2a.text = str(beta2a)
+            self.fakeorbit_screen.ids.beta2b.text = str(beta2b)
+            self.fakeorbit_screen.ids.beta3a.text = str(beta3a)
+            self.fakeorbit_screen.ids.beta3b.text = str(beta3b)
+            self.fakeorbit_screen.ids.beta4a.text = str(beta4a)
+            self.fakeorbit_screen.ids.beta4b.text = str(beta4b)
 
-            beta1a2 += 3.00
-            beta1b2 += 3.00
-            beta2a2 += 3.00
-            beta2b2 -= 3.00
-            beta3a2 += 3.00
-            beta3b2 += 3.00
-            beta4a2 -= 3.00
-            beta4b2 += 3.00
-
-            self.serialWrite("PSARJ=" + str(psarj2) + " ")
-            self.serialWrite("SSARJ=" + str(ssarj2) + " ")
-            self.serialWrite("PTRRJ=" + str(ptrrj) + " ")
-            self.serialWrite("STRRJ=" + str(strrj) + " ")
-            self.serialWrite("Beta1B=" + str(beta1b2) + " ")
-            self.serialWrite("Beta1A=" + str(beta1a2) + " ")
-            self.serialWrite("Beta2B=" + str(beta2b2) + " ")
-            self.serialWrite("Beta2A=" + str(beta2a2) + " ")
-            self.serialWrite("Beta3B=" + str(beta3b2) + " ")
-            self.serialWrite("Beta3A=" + str(beta3a2) + " ")
-            self.serialWrite("Beta4B=" + str(beta4b2) + " ")
-            self.serialWrite("Beta4A=" + str(beta4a2) + " ")
-            self.serialWrite("AOS=" + str(aos) + " ")
-            self.serialWrite("Voltage1A=" + str(v1a) + " ")
-            self.serialWrite("Voltage2A=" + str(v2a) + " ")
-            self.serialWrite("Voltage3A=" + str(v3a) + " ")
-            self.serialWrite("Voltage4A=" + str(v4a) + " ")
-            self.serialWrite("Voltage1B=" + str(v1b) + " ")
-            self.serialWrite("Voltage2B=" + str(v2b) + " ")
-            self.serialWrite("Voltage3B=" + str(v3b) + " ")
-            self.serialWrite("Voltage4B=" + str(v4b) + " ")
+            self.serialWrite("PSARJ=" + str(psarj) + " ")
+            self.serialWrite("SSARJ=" + str(ssarj) + " ")
+            self.serialWrite("Beta1B=" + str(beta1b) + " ")
+            self.serialWrite("Beta1A=" + str(beta1a) + " ")
+            self.serialWrite("Beta2B=" + str(beta2b) + " ")
+            self.serialWrite("Beta2A=" + str(beta2a) + " ")
+            self.serialWrite("Beta3B=" + str(beta3b) + " ")
+            self.serialWrite("Beta3A=" + str(beta3a) + " ")
+            self.serialWrite("Beta4B=" + str(beta4b) + " ")
+            self.serialWrite("Beta4A=" + str(beta4a) + " ")
        
         self.eps_screen.ids.psarj_value.text = psarj + "deg" 
         self.eps_screen.ids.ssarj_value.text = ssarj + "deg"
@@ -2184,8 +2254,6 @@ class MainApp(App):
         #data to send regardless of signal status
         if mimicbutton == True: 
             self.serialWrite("Module=" + module + " ")
-            print "Module send: " + str(module)
-
 
 #All GUI Screens are on separate kv files
 Builder.load_file('/home/pi/Mimic/Pi/Screens/Settings_Screen.kv')
