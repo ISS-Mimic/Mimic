@@ -716,6 +716,100 @@ class FakeOrbitScreen(Screen):
         else:
             runningDemo = False
 
+    def send90(self, *args):
+        self.serialWrite("Beta1A=90 ")
+        self.serialWrite("Beta1B=90 ")
+        self.serialWrite("Beta2A=90 ")
+        self.serialWrite("Beta2B=90 ")
+        self.serialWrite("Beta3A=90 ")
+        self.serialWrite("Beta3B=90 ")
+        self.serialWrite("Beta4A=90 ")
+        self.serialWrite("Beta4B=90 ")
+        self.serialWrite("PSARJ=90 ")
+        self.serialWrite("SSARJ=90 ")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta1a'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta1b'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta2a'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta2b'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta3a'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta3b'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta4a'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta4b'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'psarj'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'ssarj'");
+        
+    def send0(self, *args):
+        self.serialWrite("Beta1A=0 ")
+        self.serialWrite("Beta1B=0 ")
+        self.serialWrite("Beta2A=0 ")
+        self.serialWrite("Beta2B=0 ")
+        self.serialWrite("Beta3A=0 ")
+        self.serialWrite("Beta3B=0 ")
+        self.serialWrite("Beta4A=0 ")
+        self.serialWrite("Beta4B=0 ")
+        self.serialWrite("PSARJ=0 ")
+        self.serialWrite("SSARJ=0 ")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'psarj'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ssarj'");
+    
+    def serialWrite(self, *args):
+        #logWrite("Function call - serial write")
+        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
+        
+        if SerialConnection1:
+            #ser.write(*args)
+            try:
+                ser.write(*args)
+            except Exception:
+                ser = None
+                SerialConnection1 = False
+            #else:
+            #    ser.write(*args)
+        if SerialConnection2:
+            #ser2.write(*args)
+            try:
+                ser2.write(*args)
+            except Exception:
+                ser2 = None
+                SerialConnection2 = False
+            #else:
+            #    ser.write(*args)
+        if SerialConnection3:
+            #ser3.write(*args)
+            try:
+                ser3.write(*args)
+            except Exception:
+                ser3 = None
+                SerialConnection3 = False
+            #else:
+            #    ser.write(*args)
+        if SerialConnection4:
+            #ser4.write(*args)
+            try:
+                ser4.write(*args)
+            except Exception:
+                ser4 = None
+                SerialConnection4 = False
+            #else:
+            #    ser.write(*args)
+        if SerialConnection5:
+            #ser5.write(*args)
+            try:
+                ser5.write(*args)
+            except Exception:
+                ser5 = None
+                SerialConnection5 = False
+            #else:
+            #    ser.write(*args)
+
 class Settings_Screen(Screen, EventDispatcher):
     pass
 
@@ -861,11 +955,9 @@ class MainApp(App):
         root.current = 'main' #change this back to main when done with eva setup
 
         Clock.schedule_interval(self.update_labels, 1)
-        Clock.schedule_interval(self.deleteURLPictures, 86400)
         Clock.schedule_interval(self.animate3,0.1)
         Clock.schedule_interval(self.orbitUpdate, 1)
         Clock.schedule_interval(self.checkCrew, 600)
-        Clock.schedule_interval(self.changePictures, 10)
         if startup == True:
             startup = False
 
@@ -873,8 +965,8 @@ class MainApp(App):
         Clock.schedule_once(self.getTLE, 30) #uncomment when internet works again
         Clock.schedule_interval(self.getTLE, 600) #uncomment when internet works again
         #Clock.schedule_interval(self.getTLE, 3600)
-        Clock.schedule_interval(self.check_internet, 10)
-        Clock.schedule_interval(self.check_serial, 10)
+        Clock.schedule_interval(self.check_internet, 1)
+        Clock.schedule_interval(self.check_serial, 1)
         return root
 
     def check_serial(self, dt):
@@ -1623,6 +1715,7 @@ class MainApp(App):
             self.fakeorbit_screen.ids.arduino_count.text = ""
             self.mimic_screen.ids.arduino.source = "/home/pi/Mimic/Pi/imgs/signal/arduino_offline.png"
             self.fakeorbit_screen.ids.arduino.source = "/home/pi/Mimic/Pi/imgs/signal/arduino_offline.png"
+            runningDemo = False
 
         if SerialConnection1 or SerialConnection2 or SerialConnection3 or SerialConnection4 or SerialConnection5:
             self.mimic_screen.ids.mimicstartbutton.disabled = False
@@ -1641,7 +1734,6 @@ class MainApp(App):
             self.fakeorbit_screen.ids.DemoStart.disabled = True
             self.fakeorbit_screen.ids.DemoStop.disabled = False
             self.fakeorbit_screen.ids.arduino.source = "/home/pi/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
-
 
         c.execute('select Value from telemetry')
         values = c.fetchall()
@@ -2225,19 +2317,19 @@ class MainApp(App):
 #            LOSpopup.open()
 #            print "popup"    
 
+        ##-------------------Fake Orbit Simulator-------------------##
+        self.fakeorbit_screen.ids.psarj.text = str(psarj)
+        self.fakeorbit_screen.ids.ssarj.text = str(ssarj)
+        self.fakeorbit_screen.ids.beta1a.text = str(beta1a)
+        self.fakeorbit_screen.ids.beta1b.text = str(beta1b)
+        self.fakeorbit_screen.ids.beta2a.text = str(beta2a)
+        self.fakeorbit_screen.ids.beta2b.text = str(beta2b)
+        self.fakeorbit_screen.ids.beta3a.text = str(beta3a)
+        self.fakeorbit_screen.ids.beta3b.text = str(beta3b)
+        self.fakeorbit_screen.ids.beta4a.text = str(beta4a)
+        self.fakeorbit_screen.ids.beta4b.text = str(beta4b)
 
         if demoboolean == True:
-            self.fakeorbit_screen.ids.psarj.text = str(psarj)
-            self.fakeorbit_screen.ids.ssarj.text = str(ssarj)
-            self.fakeorbit_screen.ids.beta1a.text = str(beta1a)
-            self.fakeorbit_screen.ids.beta1b.text = str(beta1b)
-            self.fakeorbit_screen.ids.beta2a.text = str(beta2a)
-            self.fakeorbit_screen.ids.beta2b.text = str(beta2b)
-            self.fakeorbit_screen.ids.beta3a.text = str(beta3a)
-            self.fakeorbit_screen.ids.beta3b.text = str(beta3b)
-            self.fakeorbit_screen.ids.beta4a.text = str(beta4a)
-            self.fakeorbit_screen.ids.beta4b.text = str(beta4b)
-
             self.serialWrite("PSARJ=" + str(psarj) + " ")
             self.serialWrite("SSARJ=" + str(ssarj) + " ")
             self.serialWrite("Beta1B=" + str(beta1b) + " ")
