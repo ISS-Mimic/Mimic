@@ -13,13 +13,6 @@
             markup: True
             color: 1,1,1
         Label:
-            id: serialstatus
-            text: ''
-            font_size: 30
-            pos_hint: {"center_x": 0.2, "center_y": 0.2}
-            markup: True
-            color: 1,1,1
-        Label:
             pos_hint: {"center_x": 0.30, "center_y": 0.55}
             text: 'PSARJ: '
             color: 1,1,1
@@ -132,8 +125,8 @@
         Button:
             id: DemoStart
             size_hint: 0.15,0.1
-            pos_hint: {"center_x": 0.1, "center_y": 0.6}
-            text: 'Start BGA'
+            pos_hint: {"center_x": 0.1, "center_y": 0.8}
+            text: 'Start Demo'
             font_size: 20
             on_release: DemoStop.disabled = False
             on_release: fakeorbitstatus.text = 'Transmitting Demo Orbit'
@@ -143,8 +136,8 @@
         Button:
             id: DemoStop
             size_hint: 0.15,0.1
-            pos_hint: {"center_x": 0.1, "center_y": 0.4}
-            text: 'Stop BGA'
+            pos_hint: {"center_x": 0.1, "center_y": 0.7}
+            text: 'Stop Demo'
             font_size: 20
             disabled: True
             on_release: DemoStart.disabled = False
@@ -152,6 +145,18 @@
             on_release: root.changeDemoBoolean(False)
             on_release: self.disabled = True
             on_release: root.stopDemo()
+        Button:
+            size_hint: 0.15,0.1
+            pos_hint: {"center_x": 0.1, "center_y": 0.5}
+            text: 'Set 90'
+            font_size: 20
+            on_release: root.send90()
+        Button:
+            size_hint: 0.15,0.1
+            pos_hint: {"center_x": 0.1, "center_y": 0.35}
+            text: 'Set 0'
+            font_size: 20
+            on_release: root.send0()
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
@@ -161,3 +166,18 @@
             on_release: root.changeDemoBoolean(False)
             on_release: root.stopDemo()
             on_release: root.manager.current = 'main'
+        Image:
+            id: arduino
+            source: "/home/pi/Mimic/Pi/imgs/signal/arduino_offline.png"
+            size_hint_y: 0.15
+            anim_delay: 0.2
+            anim_loop: 0
+            keep_ratio: True
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+        Label:
+            id: arduino_count
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+            text: ''
+            markup: True
+            color: 1,1,1
+            font_size: 55
