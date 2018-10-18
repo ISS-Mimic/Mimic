@@ -1366,13 +1366,13 @@ class MainApp(App):
             if longitude > 90 and sgant_elevation < -10 and float(aos) == 1.0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West"
                 tdrs = "west"
-            elif longitude > 55 and longitude < 140 and sgant_elevation > -10 and float(aos) == 1.0:
+            elif longitude > 60 and longitude < 140 and sgant_elevation > -10 and float(aos) == 1.0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-Z"
                 tdrs = "z"
             elif longitude > 0 and longitude <= 90 and sgant_elevation < -10 and float(aos) == 1.0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-Z"
                 tdrs = "z"
-            elif longitude > -80 and longitude <= 55 and sgant_elevation > -10 and float(aos) == 1.0:
+            elif longitude > -80 and longitude <= 60 and sgant_elevation > -10 and float(aos) == 1.0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East"
                 tdrs = "east"
             elif longitude > -160 and longitude <= 0 and sgant_elevation < -10 and float(aos) == 1.0:
