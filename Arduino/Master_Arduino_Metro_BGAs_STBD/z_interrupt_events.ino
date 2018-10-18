@@ -47,11 +47,11 @@ void checkSerial()
     }
     else if (test2.substring(0, delimeter) == "Beta2B")
     {
-      B1B = (test2.substring(delimeter + 1)).toFloat();
+      B2B = (test2.substring(delimeter + 1)).toFloat();
     }
     else if (test2.substring(0, delimeter) == "Beta2A")
     {
-      B1A = (test2.substring(delimeter + 1)).toFloat();
+      B2A = (test2.substring(delimeter + 1)).toFloat();
     }
     else if (test2.substring(0, delimeter) == "Beta3B")
     {
@@ -63,11 +63,11 @@ void checkSerial()
     }
     else if (test2.substring(0, delimeter) == "Beta4B")
     {
-      B3B = (test2.substring(delimeter + 1)).toFloat();
+      B4B = (test2.substring(delimeter + 1)).toFloat();
     }
     else if (test2.substring(0, delimeter) == "Beta4A")
     {
-      B3A = (test2.substring(delimeter + 1)).toFloat();
+      B4A = (test2.substring(delimeter + 1)).toFloat();
     }
     else if (test2.substring(0, delimeter) == "AOS")
     {
