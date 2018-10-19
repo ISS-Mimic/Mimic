@@ -26,8 +26,8 @@
 #include "utility/Adafruit_MS_PWMServoDriver.h"
 #include <string.h>
 #include <Servo.h>
-Servo servo1;
-Servo servo2;
+Servo servo_PTRRJ;
+Servo servo_STRRJ;
 
 // Create the motor shield object with the default I2C address
 Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x68);
@@ -49,8 +49,8 @@ Adafruit_DCMotor *myMotorSSARJ = AFMS2.getMotor(2);
 
 
 Encoder myEnc1A(0, 1);
-Encoder myEnc3A(5, 6); //for some reason, these do not register blips if motor moves fast, within a few deg of desired position
-// Pins 9, 10 are used by Servos.  Odd issues with Pins 2-4.
+Encoder myEnc3A(5, 6); 
+// Pins 9, 10 are used by Servos.  Odd issues with Pins 2-4. Pin 13 is nominally used by LED and general guidance from encoder library is to avoid it.
 Encoder myEnc1B(7, 8);
 Encoder myEnc3B(11, 12);
 
@@ -68,13 +68,15 @@ pinMode(A0, OUTPUT);
 digitalWrite(A0, HIGH);
 pinMode(A1, OUTPUT);
 digitalWrite(A1, HIGH);
-pinMode(A2, OUTPUT);
-digitalWrite(A2, HIGH);
+//pinMode(A2, OUTPUT);
+//digitalWrite(A2, HIGH);
 
-  // Attach a servo to pin #10
-  servo1.attach(10);
-  servo2.attach(9);
+  // Attach a servo to dedicated pins 9,10.  Note that all shields in the stack will have these as common, so can connect to any.
+  servo_PTRRJ.attach(9);
+  servo_STRRJ.attach(10);
   AFMS.begin(200);  // I set this at 200 previously to reduce audible buzz.
+  AFMS2.begin(200);  // I set this at 200 previously to reduce audible buzz.
+  
   Serial.begin(115200);
   //Serial3.begin(115200);          //Serial1 is connected to the RasPi
   Serial.setTimeout(50);

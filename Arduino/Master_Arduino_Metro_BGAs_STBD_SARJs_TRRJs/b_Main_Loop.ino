@@ -15,15 +15,15 @@ int  debug_mode=8;
 
   // ========= Servo Stuff =============================
   //map(value, fromLow, fromHigh, toLow, toHigh)
-     servo1.write(map(PTRRJ, -115,115, 0, 255)); // from +/- 115deg to servo command min and max.
-     servo2.write(map(PTRRJ, -115,115, 0, 255)); // from +/- 115deg to servo command min and max.
-  //servo1.write(PTRRJ+180);
-  //servo2.write(PTRRJ+180);
+     servo_PTRRJ.write(map(PTRRJ, -115,115, 0, 180)); // from +/- 115deg to servo command min and max.
+     servo_STRRJ.write(map(STRRJ, -115,115, 0, 180)); // from +/- 115deg to servo command min and max.
+  //servo_PTRRJ.write(PTRRJ+180);
+  //servo_STRRJ.write(PTRRJ+180);
 
   delay(1);
   //delay(10);
 //  for (i = 255; i != 0; i--) {
-//    servo1.write(map(i, 0, 255, 0, 180));
+//    servo_PTRRJ.write(map(i, 0, 255, 0, 180));
 //    delay(1);
 //  }
   //delay(10);
