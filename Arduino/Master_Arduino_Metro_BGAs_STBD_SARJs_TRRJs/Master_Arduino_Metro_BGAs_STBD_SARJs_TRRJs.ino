@@ -50,24 +50,27 @@ Adafruit_DCMotor *myMotorSSARJ = AFMS2.getMotor(2);
 
 Encoder myEnc1A(0, 1);
 Encoder myEnc3A(5, 6); 
-// Pins 9, 10 are used by Servos.  Odd issues with Pins 2-4. Pin 13 is nominally used by LED and general guidance from encoder library is to avoid it.
+// Pins 9, 10 are used by Servos. 
+// Odd issues with Pins 2-4. 
+// Pin 13 is nominally used by LED and general guidance from encoder library is to avoid it.
 Encoder myEnc1B(7, 8);
 Encoder myEnc3B(11, 12);
 
 // Per here, Analog pins on Metro M0 are also digtial IO. https://learn.adafruit.com/adafruit-metro-m0-express-designed-for-circuitpython/pinouts
 // From here, A1 is digital 15, A2 is 16, A3 is 17, A4 is 18, A5 is 19. http://www.pighixxx.net/portfolio_tags/pinout-2/#prettyPhoto[gallery1368]/0/
 
-Encoder myEncPSARJ(15, 16); // 15,16 is A2, A3
-Encoder myEncSSARJ(17, 18); // 17,18 is A4 ,A5
+Encoder myEncPSARJ(14, 15); // 14,15 is A0, A1
+Encoder myEncSSARJ(16, 17); // 16,17 is A2 ,A3
+// Also avoiding A4, A5 as these are coupled to the I2C SLA, SCA pins via the Motor Shield (for backward compatibility with older Ards).
 
 
 void setup() {
 
-  // Set some pins to high, just for convenient connection to power Hall Effect Sensors
-pinMode(A0, OUTPUT);
-digitalWrite(A0, HIGH);
-pinMode(A1, OUTPUT);
-digitalWrite(A1, HIGH);
+  // Set some pins to high, just for convenient connection to power Hall Effect Sensors - can't, per above use of these pins
+//pinMode(A0, OUTPUT);
+//digitalWrite(A0, HIGH);
+//pinMode(A1, OUTPUT);
+//digitalWrite(A1, HIGH);
 //pinMode(A2, OUTPUT);
 //digitalWrite(A2, HIGH);
 
