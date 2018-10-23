@@ -1,7 +1,7 @@
 
 /// MIMIC!!! MIMIC!!!
 //
-// This version is just for STBD BGAs, board 60
+// This version is just for PORT BGAs, board 60
 // 2A is Motor 1, Encoder pins 2,3
 // 3A is Motor 2, Encoder pins 5,6
 // 2B is Motor 3, Encoder pins 7,8
