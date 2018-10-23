@@ -159,7 +159,7 @@ double SSARJcheck = 0.00;
 double SSARJstep = 0.00;
 double B1A = 30.0;
 double B3A = 30.0;
-double B1B = -180.0;
+double B1B = 30.0;
 double B3B = 30.0;
 
 double B2B = 30.0;

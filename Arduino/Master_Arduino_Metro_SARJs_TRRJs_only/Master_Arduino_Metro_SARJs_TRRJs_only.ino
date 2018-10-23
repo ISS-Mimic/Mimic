@@ -1,24 +1,14 @@
 
 // MIMIC!!! MIMIC!!!
 //
-//
+// This version is just for SARJs and TRRJs
+// PSARJ is Motor 1, Encoder pins 14 & 15 (aka A0, A1)
+// SSARJ is Motor 2, Encoder pins 16 & 17 (aka A2, A3)
 
-// Prior problems with Mega interrupt limitations led to use of Arduino Due instead.  This board can
-// support hardware interrupts on any digital pin, although pin 13 is avoided since connects to LED.
-// This means we can (theoretically) use an interrupt pin for each encoder signal on each motor.
-// That's two per motor, times ten (8 BGA and 2 SARJ) motors = 20 interrupts. A minor issue discovered
-// with the Due is that it's pull-up resistors have a large value (100 Kohms), which made for problems
-// with counting encoder pulses.  Web search indicated that using a 2.2K resistor on each utilized pin
-// to 3.3v is the solution, which seems to work well.
-// Subsequently, discovered Due is problematic with I2C, so moved to Metro M0
+// PTRRJ is Servo 1 (uses pin 9)
+// STRRJ is Servo 2 (uses pin 10)
 
-// To Do's
-// 1) Test with four motors -- DONE 1/20/2018 with Metro M0
-// 2) Set I2C address for 2nd and 3rd motor driver boards, as each board can drive only 4 DC motors.
-// 3) Try 20 interrupts (driven by encoders) at once to ensure no loss of counts  --  DONE 1/20/2018 with Metro M0
-// 4) Rewrite Motor algorithms as re-usable class, rather than explicit for each one.
-// 5) Add capability for servos, to drive the TRRJs. DONE 1/0?/2018 with Metro M0
-// 6) De-ugli-fication of the code.
+
 
 
 // for LCD  =============================================
@@ -71,17 +61,17 @@ Servo servo_PTRRJ;
 Servo servo_STRRJ;
 
 // Create the motor shield object with the default I2C address
-Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x78);
+//Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x78);
 Adafruit_MotorShield AFMS2 = Adafruit_MotorShield(0x68);
 
 // Or, create it with a different I2C address (say for stacking)
 // Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x61);
 
 // Select which 'port' M1, M2, M3 or M4. In this case, M1,2,4
-Adafruit_DCMotor *myMotorB1A = AFMS.getMotor(1);
-Adafruit_DCMotor *myMotorB3A = AFMS.getMotor(2);
-Adafruit_DCMotor *myMotorB1B = AFMS.getMotor(3);
-Adafruit_DCMotor *myMotorB3B = AFMS.getMotor(4);
+//Adafruit_DCMotor *myMotorB1A = AFMS.getMotor(1);
+//Adafruit_DCMotor *myMotorB3A = AFMS.getMotor(2);
+//Adafruit_DCMotor *myMotorB1B = AFMS.getMotor(3);
+//Adafruit_DCMotor *myMotorB3B = AFMS.getMotor(4);
 
 Adafruit_DCMotor *myMotorPSARJ = AFMS2.getMotor(1);
 Adafruit_DCMotor *myMotorSSARJ = AFMS2.getMotor(2);
@@ -89,28 +79,52 @@ Adafruit_DCMotor *myMotorSSARJ = AFMS2.getMotor(2);
 
 
 
-Encoder myEncPSARJ(14, 15);
-Encoder myEnc3A(5, 6); 
+//Encoder myEnc1A(2, 12);
+//Encoder myEnc3A(8, 11); 
 // Pins 9, 10 are used by Servos. 
 // Odd issues with Pins 2-4. 
 // Pin 13 is nominally used by LED and general guidance from encoder library is to avoid it.
-Encoder myEnc1B(7, 8);
-Encoder myEnc3B(11, 12);
+//Encoder myEnc1B(14, 15);
+//Encoder myEnc3B(16, 17);
 
 // Per here, Analog pins on Metro M0 are also digtial IO. https://learn.adafruit.com/adafruit-metro-m0-express-designed-for-circuitpython/pinouts
 // From here, A1 is digital 15, A2 is 16, A3 is 17, A4 is 18, A5 is 19. http://www.pighixxx.net/portfolio_tags/pinout-2/#prettyPhoto[gallery1368]/0/
 
 
 
-//Encoder myEncPSARJ(14, 15); // 14,15 is A0, A1
-Encoder myEnc1A(0, 1); // 14,15 is A0, A1
+Encoder myEncPSARJ(14,15); // 14,15 is A0, A1
+//Encoder myEnc1A(0, 1); // 14,15 is A0, A1    ============================================================================================== KILLED 1A encoder here and call to counter
 Encoder myEncSSARJ(16, 17); // 16,17 is A2 ,A3
 // Also avoiding A4, A5 as these are coupled to the I2C SLA, SCA pins via the Motor Shield (for backward compatibility with older Ards).
 
+//int D0 =0;
+//int D1 =0;
+int D2 =0;
+//int D3 =0;
+int D4 =0;
+int D5 =0;
+int D6 =0;
+int D7 =0;
+int D8 =0;
+//int D9 =0;
+//int D10=0;
+int D11=0;
+int D12=0;
+//int D13=0;
+int D14=0;
+int D15=0;
+int D16=0;
+int D17=0;
 
 void setup() {
-//pinMode(A0, INPUT);
-//pinMode(A1, INPUT);
+//pinMode(0, INPUT_PULLUP);
+//pinMode(1, INPUT_PULLUP);
+//pinMode(2, INPUT_PULLUP);
+//pinMode(3, INPUT_PULLUP);
+
+
+  
+
 //// for LCD  =============================================
 //
 //
@@ -131,8 +145,8 @@ void setup() {
 
 
   // Set some pins to high, just for convenient connection to power Hall Effect Sensors - can't, per above use of these pins
-//pinMode(A0, OUTPUT);
-//digitalWrite(A0, HIGH);
+pinMode(13, OUTPUT);
+digitalWrite(13, HIGH);
 //pinMode(A1, OUTPUT);
 //digitalWrite(A1, HIGH);
 //pinMode(A2, OUTPUT);
@@ -141,7 +155,7 @@ void setup() {
   // Attach a servo to dedicated pins 9,10.  Note that all shields in the stack will have these as common, so can connect to any.
   servo_PTRRJ.attach(9);
   servo_STRRJ.attach(10);
-  AFMS.begin(200);  // I set this at 200 previously to reduce audible buzz.
+//  AFMS.begin(200);  // I set this at 200 previously to reduce audible buzz.
   AFMS2.begin(200);  // I set this at 200 previously to reduce audible buzz.
   
   Serial.begin(115200);
@@ -152,17 +166,23 @@ void setup() {
   //Serial.println("Motor test!");
 
   // turn on motor   NOTE: May be able to remove all of these setSpeed and run commands here, although they are fine.
-  myMotorB1A->setSpeed(150);
-  myMotorB1A->run(RELEASE); 
+//  myMotorB1A->setSpeed(150);
+//  myMotorB1A->run(RELEASE); 
+//
+//  myMotorB3A->setSpeed(150);
+//  myMotorB3A->run(RELEASE);
+//
+//  myMotorB1B->setSpeed(150);
+//  myMotorB1B->run(RELEASE);
+//
+//  myMotorB3B->setSpeed(150);
+//  myMotorB3B->run(RELEASE);
+//
+//    myMotorPSARJ->setSpeed(150);
+//  myMotorPSARJ->run(RELEASE);
 
-  myMotorB3A->setSpeed(150);
-  myMotorB3A->run(RELEASE);
-
-  myMotorB1B->setSpeed(150);
-  myMotorB1B->run(RELEASE);
-
-  myMotorB3B->setSpeed(150);
-  myMotorB3B->run(RELEASE);
+  myMotorSSARJ->setSpeed(150);
+  myMotorSSARJ->run(RELEASE);
 
   // For debugging
   //  pinMode(13, OUTPUT); //LED

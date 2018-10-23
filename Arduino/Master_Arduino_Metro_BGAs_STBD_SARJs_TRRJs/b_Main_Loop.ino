@@ -40,6 +40,8 @@ int  debug_mode=8;
   Count_B3B = myEnc3B.read();
   Count_B1A = myEnc1A.read();
   Count_B3A = myEnc3A.read();
+    Count_PSARJ = myEncPSARJ.read();
+  Count_SSARJ = myEncSSARJ.read();
   //   Serial.println(currentPosition); //shows you the current position in the serial monitor  // Feb08
 
   // ============== BGA 2A ==========================================================
@@ -359,6 +361,10 @@ if (debug_mode==8){
   Serial.print(Count_B1B);
   Serial.print("  Count_B3B: ");
   Serial.print(Count_B3B);
+    Serial.print("  Count_PSARJ: ");
+  Serial.print(Count_PSARJ);
+    Serial.print("  Count_SSARJ: ");
+  Serial.print(Count_SSARJ);
   Serial.print("| PosErrs ");
 Serial.print(PosErr_B1A);
 Serial.print(", ");
@@ -368,7 +374,135 @@ Serial.print(PosErr_B1B);
 Serial.print(", ");
 Serial.print(PosErr_B3B);
 
+Serial.print(", ");
+Serial.print(PosErr_PSARJ);
+
+Serial.print(", ");
+Serial.print(PosErr_SSARJ);
   Serial.println("|  ");
+
+//
+//  // LCD =======================================
+//  // text display tests
+//  display.setTextSize(1);
+//  display.setTextColor(WHITE);
+//  display.setCursor(0,0);
+//  display.setTextColor(BLACK, WHITE); // 'inverted' text
+//  display.println("Jnt|-ERR-|-CMD-|-ACT-");
+//    
+////   display.println("3600.0|3600.0|3600.0");
+////     float d=12345.6789;
+//    //tostrf(floatVar, minStringWidthIncDecimalPoint, numVarsAfterDecimal, charBuf);
+//
+//
+//    //int sensorValue = analogRead(A0); 
+//  //String stringThree = "I want " + sensorValue;
+////  String temp="1A:" + PosErr_B1A + "|" + Count_B3B;
+////
+////dtostrf(PosErr_B1A, 4, 1, dtostrfbuffer);
+////sendBuffer
+////  sprintf(sendBuffer, "X%dY%dT", first, second);
+//  //  display.print("1A:");
+//  //  dtostrf(PosErr_B1A, 4, 1, dtostrfbuffer);
+//
+//  //Goal is "1A:[PosErr]|[PosCmd]|[ActPos]
+//  display.setTextColor(WHITE, BLACK);
+//display.print("1A:");
+//dtostrf(PosErr_B1A, 5, 1, dtostrfbuffer);
+//display.print( dtostrfbuffer);
+//display.print("|");
+//dtostrf(B1A, 5, 1, dtostrfbuffer); //Cmd Pos
+//display.print( dtostrfbuffer);
+//display.print("|");
+//dtostrf(Pos_B1A, 5, 1, dtostrfbuffer);
+//display.println( dtostrfbuffer);
+//
+// display.setTextColor(BLACK, WHITE); // 'inverted' text
+//display.print("3A:");
+//dtostrf(PosErr_B3A, 5, 1, dtostrfbuffer);
+//display.print( dtostrfbuffer);
+//display.print("|");
+//dtostrf(B3A, 5, 1, dtostrfbuffer); //Cmd Pos
+//display.print( dtostrfbuffer);
+//display.print("|");
+//dtostrf(Pos_B3A, 5, 1, dtostrfbuffer);
+//display.println( dtostrfbuffer);
+//
+//display.setTextColor(WHITE, BLACK);
+//display.print("1B:");
+//dtostrf(PosErr_B1B, 5, 1, dtostrfbuffer);
+//display.print( dtostrfbuffer);
+//display.print("|");
+//dtostrf(B1B, 5, 1, dtostrfbuffer); //Cmd Pos
+//display.print( dtostrfbuffer);
+//display.print("|");
+//dtostrf(Pos_B1B, 5, 1, dtostrfbuffer);
+//display.println( dtostrfbuffer);
+//
+// display.setTextColor(BLACK, WHITE); // 'inverted' text
+//display.print("3B:");
+//dtostrf(PosErr_B3B, 5, 1, dtostrfbuffer);
+//display.print( dtostrfbuffer);
+//display.print("|");
+//dtostrf(B3B, 5, 1, dtostrfbuffer); //Cmd Pos
+//display.print( dtostrfbuffer);
+//display.print("|");
+//dtostrf(Pos_B3B, 5, 1, dtostrfbuffer);
+//display.println( dtostrfbuffer);
+//  
+//display.setTextColor(WHITE, BLACK);
+//display.print("SS:");
+//dtostrf(PosErr_SSARJ, 5, 1, dtostrfbuffer);
+//display.print( dtostrfbuffer);
+//display.print("|");
+//dtostrf(SSARJ, 5, 1, dtostrfbuffer); //Cmd Pos
+//display.print( dtostrfbuffer);
+//display.print("|");
+//dtostrf(Pos_SSARJ, 5, 1, dtostrfbuffer);
+//display.println( dtostrfbuffer);
+//  
+//
+//display.setTextColor(BLACK, WHITE); // 'inverted' text
+//display.print("PS:");
+//dtostrf(PosErr_PSARJ, 5, 1, dtostrfbuffer);
+//display.print( dtostrfbuffer);
+//display.print("|");
+//dtostrf(PSARJ, 5, 1, dtostrfbuffer); //Cmd Pos
+//display.print( dtostrfbuffer);
+//display.print("|");
+//dtostrf(Pos_PSARJ, 5, 1, dtostrfbuffer);
+//display.println( dtostrfbuffer);
+//   
+//   
+//display.setTextColor(WHITE, BLACK);
+//display.print("STJ:");
+//dtostrf(STRRJ, 6, 1, dtostrfbuffer);
+//display.print( dtostrfbuffer);   
+//
+//
+//display.setTextColor(BLACK, WHITE); // 'inverted' text
+//display.print("|PTJ:");
+//dtostrf(PTRRJ, 6, 1, dtostrfbuffer);
+//display.println( dtostrfbuffer); 
+//   
+//   
+////   
+////   // display.print(",");
+////
+////     display.println("4. Hello, world!");
+////      display.println("5. Hello, world!");
+////       display.println("6. Hello, world!");
+////        display.println("7. Hello, world!");
+////              display.println("8. Hello, world!");
+////       display.println("9. Hello, world!");
+////        display.println("10. Hello, world!");
+// 
+//  
+//  display.display();
+//  delay(10);
+//  display.clearDisplay();
+//  
+//  // LCD =======================================
 }
 
 
