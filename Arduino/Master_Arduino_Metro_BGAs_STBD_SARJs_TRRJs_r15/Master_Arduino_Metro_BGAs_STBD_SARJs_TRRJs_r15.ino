@@ -1,11 +1,25 @@
 
-/// MIMIC!!! MIMIC!!!
+// MIMIC!!! MIMIC!!!
 //
-// This version is just for STBD BGAs, board 78
-// 1A is Motor 1, Encoder pins 2,12
-// 3A is Motor 2, Encoder pins 8,11
-// 1B is Motor 3, Encoder pins 14,15
-// 3B is Motor 4, Encoder pins 16,17
+//
+
+// Prior problems with Mega interrupt limitations led to use of Arduino Due instead.  This board can
+// support hardware interrupts on any digital pin, although pin 13 is avoided since connects to LED.
+// This means we can (theoretically) use an interrupt pin for each encoder signal on each motor.
+// That's two per motor, times ten (8 BGA and 2 SARJ) motors = 20 interrupts. A minor issue discovered
+// with the Due is that it's pull-up resistors have a large value (100 Kohms), which made for problems
+// with counting encoder pulses.  Web search indicated that using a 2.2K resistor on each utilized pin
+// to 3.3v is the solution, which seems to work well.
+// Subsequently, discovered Due is problematic with I2C, so moved to Metro M0
+
+// To Do's
+// 1) Test with four motors -- DONE 1/20/2018 with Metro M0
+// 2) Set I2C address for 2nd and 3rd motor driver boards, as each board can drive only 4 DC motors.
+// 3) Try 20 interrupts (driven by encoders) at once to ensure no loss of counts  --  DONE 1/20/2018 with Metro M0
+// 4) Rewrite Motor algorithms as re-usable class, rather than explicit for each one.
+// 5) Add capability for servos, to drive the TRRJs. DONE 1/0?/2018 with Metro M0
+// 6) De-ugli-fication of the code.
+
 
 // for LCD  =============================================
 
@@ -52,13 +66,13 @@
 #include <Adafruit_MotorShield.h>
 #include "utility/Adafruit_MS_PWMServoDriver.h"
 #include <string.h>
-//#include <Servo.h>
-//Servo servo_PTRRJ;
-//Servo servo_STRRJ;
+#include <Servo.h>
+Servo servo_PTRRJ;
+Servo servo_STRRJ;
 
 // Create the motor shield object with the default I2C address
 Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x78);
-//Adafruit_MotorShield AFMS2 = Adafruit_MotorShield(0x68);
+Adafruit_MotorShield AFMS2 = Adafruit_MotorShield(0x68);
 
 // Or, create it with a different I2C address (say for stacking)
 // Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x61);
@@ -69,7 +83,7 @@ Adafruit_DCMotor *myMotorB3A = AFMS.getMotor(2);
 Adafruit_DCMotor *myMotorB1B = AFMS.getMotor(3);
 Adafruit_DCMotor *myMotorB3B = AFMS.getMotor(4);
 
-//Adafruit_DCMotor *myMotorPSARJ = AFMS2.getMotor(1);
+Adafruit_DCMotor *myMotorPSARJ = AFMS2.getMotor(1);
 //Adafruit_DCMotor *myMotorSSARJ = AFMS2.getMotor(2);
 
 
@@ -88,7 +102,7 @@ Encoder myEnc3B(16, 17);
 
 
 
-//Encoder myEncPSARJ(5,6); // 14,15 is A0, A1
+Encoder myEncPSARJ(5,6); // 14,15 is A0, A1
 //Encoder myEnc1A(0, 1); // 14,15 is A0, A1    ============================================================================================== KILLED 1A encoder here and call to counter
 //Encoder myEncSSARJ(16, 17); // 16,17 is A2 ,A3
 // Also avoiding A4, A5 as these are coupled to the I2C SLA, SCA pins via the Motor Shield (for backward compatibility with older Ards).
@@ -149,8 +163,8 @@ digitalWrite(13, HIGH);
 //digitalWrite(A2, HIGH);
 
   // Attach a servo to dedicated pins 9,10.  Note that all shields in the stack will have these as common, so can connect to any.
-//  servo_PTRRJ.attach(9);
-//  servo_STRRJ.attach(10);
+  servo_PTRRJ.attach(9);
+  servo_STRRJ.attach(10);
   AFMS.begin(200);  // I set this at 200 previously to reduce audible buzz.
 //  AFMS2.begin(200);  // I set this at 200 previously to reduce audible buzz.
   
@@ -174,8 +188,8 @@ digitalWrite(13, HIGH);
   myMotorB3B->setSpeed(150);
   myMotorB3B->run(RELEASE);
 
-//    myMotorPSARJ->setSpeed(150);
-//  myMotorPSARJ->run(RELEASE);
+    myMotorPSARJ->setSpeed(150);
+  myMotorPSARJ->run(RELEASE);
 
 //  myMotorSSARJ->setSpeed(150);
 //  myMotorSSARJ->run(RELEASE);

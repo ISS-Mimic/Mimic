@@ -38,8 +38,8 @@ void loop() {
 
   // ========= Servo Stuff =============================
   //map(value, fromLow, fromHigh, toLow, toHigh)
-//  servo_PTRRJ.write(map(PTRRJ, -115, 115, 0, 180)); // from +/- 115deg to servo command min and max.
-//  servo_STRRJ.write(map(STRRJ, -115, 115, 0, 180)); // from +/- 115deg to servo command min and max.
+  servo_PTRRJ.write(map(PTRRJ, -115, 115, 0, 180)); // from +/- 115deg to servo command min and max.
+  servo_STRRJ.write(map(STRRJ, -115, 115, 0, 180)); // from +/- 115deg to servo command min and max.
   //servo_PTRRJ.write(PTRRJ+180);
   //servo_STRRJ.write(PTRRJ+180);
 
@@ -63,7 +63,7 @@ void loop() {
   Count_B3B = myEnc3B.read();
   Count_B1A = myEnc1A.read();
   Count_B3A = myEnc3A.read();
-//  Count_PSARJ = myEncPSARJ.read();
+  Count_PSARJ = myEncPSARJ.read();
   //  Count_SSARJ = myEncSSARJ.read();
   //   Serial.println(currentPosition); //shows you the current position in the serial monitor  // Feb08
 
@@ -256,35 +256,35 @@ void loop() {
   myMotorB3B->setSpeed(CmdSpeed_B3B);// + 20);
   //=====================================================================================
 
-//  //  // ============== PSARJ    ============================================================
-//  Pos_PSARJ = float(Count_PSARJ) / 2.5; // / 25; // 150:1 gear ratio, 6 encoder counts per motor shaft rotation 150/6=25;
-//
-//  PosErr_PSARJ = PSARJ - Pos_PSARJ; // Compute Pos_PSARJition Error
-//  dPosErr_PSARJ = PosErr_PSARJ - PosErr_old_PSARJ;
-//  dErrDt_PSARJ = dPosErr_PSARJ * inverse_delta_t_millis * 0.001; // For Derivative
-//  IntNow_PSARJ = IntOld_PSARJ + PosErr_PSARJ * inverse_delta_t_millis * 0.001; // For Integrator
-//  IntOld_PSARJ = IntNow_PSARJ;
-//  PosErr_old_PSARJ = PosErr_PSARJ; // For use on the next iteration
-//  // Integrator reset when error sign changes
-//  if (PosErr_old_PSARJ * PosErr_PSARJ < 0) { // sign on error has changed
-//    IntNow_PSARJ = 0;
-//    IntOld_PSARJ = 0;
-//  }
-//
-//  // Calculate motor speed setpoint based on PID constants and computed params for this iteration.
-//  tmpSpeed_PSARJ = Kp_PSARJ * PosErr_PSARJ + Kd_PSARJ * (dErrDt_PSARJ) + Ki_PSARJ * IntNow_PSARJ;
-//  CmdSpeed_PSARJ = map(abs(tmpSpeed_PSARJ), 2, 250, 2, 250); // Deadband seems to be about 40 (for 5V input to motor board);
-//  CmdSpeed_PSARJ = max(min(CmdSpeed_PSARJ, 150), 0); // At least 10, at most 250.  Update as needed per motor.
-//
-//  // Set motor speed
-//  if (tmpSpeed_PSARJ < 0) {
-//    myMotorPSARJ->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
-//  }
-//  else {
-//    myMotorPSARJ->run(BACKWARD);
-//  }
-//  myMotorPSARJ->setSpeed(CmdSpeed_PSARJ);// + 20);
-//  //  //====================================================================================
+  //  // ============== PSARJ    ============================================================
+  Pos_PSARJ = float(Count_PSARJ) / 2.5; // / 25; // 150:1 gear ratio, 6 encoder counts per motor shaft rotation 150/6=25;
+
+  PosErr_PSARJ = PSARJ - Pos_PSARJ; // Compute Pos_PSARJition Error
+  dPosErr_PSARJ = PosErr_PSARJ - PosErr_old_PSARJ;
+  dErrDt_PSARJ = dPosErr_PSARJ * inverse_delta_t_millis * 0.001; // For Derivative
+  IntNow_PSARJ = IntOld_PSARJ + PosErr_PSARJ * inverse_delta_t_millis * 0.001; // For Integrator
+  IntOld_PSARJ = IntNow_PSARJ;
+  PosErr_old_PSARJ = PosErr_PSARJ; // For use on the next iteration
+  // Integrator reset when error sign changes
+  if (PosErr_old_PSARJ * PosErr_PSARJ < 0) { // sign on error has changed
+    IntNow_PSARJ = 0;
+    IntOld_PSARJ = 0;
+  }
+
+  // Calculate motor speed setpoint based on PID constants and computed params for this iteration.
+  tmpSpeed_PSARJ = Kp_PSARJ * PosErr_PSARJ + Kd_PSARJ * (dErrDt_PSARJ) + Ki_PSARJ * IntNow_PSARJ;
+  CmdSpeed_PSARJ = map(abs(tmpSpeed_PSARJ), 2, 250, 2, 250); // Deadband seems to be about 40 (for 5V input to motor board);
+  CmdSpeed_PSARJ = max(min(CmdSpeed_PSARJ, 150), 0); // At least 10, at most 250.  Update as needed per motor.
+
+  // Set motor speed
+  if (tmpSpeed_PSARJ < 0) {
+    myMotorPSARJ->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
+  }
+  else {
+    myMotorPSARJ->run(BACKWARD);
+  }
+  myMotorPSARJ->setSpeed(CmdSpeed_PSARJ);// + 20);
+  //  //====================================================================================
 
 
 
@@ -384,8 +384,8 @@ void loop() {
     Serial.print(Count_B1B);
     Serial.print(",Count_B3B: ");
     Serial.print(Count_B3B);    
-//    Serial.print(",Count_PSARJ: ");
-//    Serial.print(Count_PSARJ);
+    Serial.print(",Count_PSARJ: ");
+    Serial.print(Count_PSARJ);
     //Serial.print(",D0:");
     //  Serial.print(D0);
     //Serial.print(",D1:");
@@ -430,7 +430,7 @@ void loop() {
     Serial.print(", ");
     Serial.print(PosErr_B3B);
     Serial.print(", ");
-//    Serial.print(PosErr_PSARJ);
+    Serial.print(PosErr_PSARJ);
     //
     //Serial.print(", ");
     //Serial.print(PosErr_SSARJ);
