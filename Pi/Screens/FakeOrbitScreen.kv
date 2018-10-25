@@ -123,6 +123,13 @@
             color: 0.5,0,0.5
             font_size: 20
         Button:
+            id: popupbutton
+            size_hint: 0.1,0.1
+            pos_hint: {"center_x": 0.2, "center_y": 0.2}
+            text: 'i'
+            font_size: 20
+            on_release: root.HTVpopup()
+        Button:
             id: DemoStart
             size_hint: 0.15,0.1
             pos_hint: {"center_x": 0.1, "center_y": 0.8}
@@ -146,12 +153,36 @@
             on_release: self.disabled = True
             on_release: root.stopDemo()
         Button:
+            id: HTVDemoStart
+            size_hint: 0.2,0.1
+            pos_hint: {"center_x": 0.3, "center_y": 0.8}
+            text: 'Start HTV Demo'
+            font_size: 20
+            on_release: HTVDemoStop.disabled = False
+            on_release: fakeorbitstatus.text = 'Transmitting HTV Demo Orbit'
+            on_release: root.changeDemoBoolean(True)
+            on_release: self.disabled = True
+            on_release: root.startHTVDemo()
+        Button:
+            id: HTVDemoStop
+            size_hint: 0.2,0.1
+            pos_hint: {"center_x": 0.3, "center_y": 0.7}
+            text: 'Stop HTV Demo'
+            font_size: 20
+            disabled: True
+            on_release: HTVDemoStart.disabled = False
+            on_release: fakeorbitstatus.text = 'Stopped'
+            on_release: root.changeDemoBoolean(False)
+            on_release: self.disabled = True
+        Button:
+            id: set90
             size_hint: 0.15,0.1
             pos_hint: {"center_x": 0.1, "center_y": 0.5}
             text: 'Set 90'
             font_size: 20
             on_release: root.send90()
         Button:
+            id: set0
             size_hint: 0.15,0.1
             pos_hint: {"center_x": 0.1, "center_y": 0.35}
             text: 'Set 0'

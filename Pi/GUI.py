@@ -536,6 +536,23 @@ class MainScreen(Screen):
             logWrite("Successfully stopped Demo Orbit script")
             runningDemo = False
     
+    def startHTVDemo(*args):
+        global p2, runningDemo
+        if runningDemo == False:
+            p2 = subprocess.Popen("/home/pi/Mimic/Pi/demoHTVOrbit.sh")
+            runningDemo = True
+            logWrite("Successfully started Demo HTV Orbit script")
+    
+    def stopHTVDemo(*args):
+        global p2, runningDemo
+        try:
+            p2.kill()
+        except Exception:
+            pass
+        else:
+            logWrite("Successfully stopped Demo HTV Orbit script")
+            runningDemo = False
+    
     def startproc(*args):
         global p
         p = subprocess.Popen(["node", "/home/pi/Mimic/Pi/ISS_Telemetry.js"]) 
@@ -701,6 +718,10 @@ class FakeOrbitScreen(Screen):
         global demoboolean
         demoboolean = args[0]
 
+    def HTVpopup(*args):
+        HTVpopup = Popup(title='HTV Berthing Orbit', content=Label(text='This will playback recorded data from when the Japanese HTV spacecraft berthed to the ISS. During berthing, the SARJs and nadir BGAs lock but the zenith BGAs autotrack'),size_hint=(0.5,0.3),auto_dismiss=True)
+        HTVpopup.open()
+
     def startDemo(*args):
         global p2, runningDemo
         if runningDemo == False:
@@ -714,6 +735,23 @@ class FakeOrbitScreen(Screen):
         except Exception:
             pass
         else:
+            runningDemo = False
+    
+    def startHTVDemo(*args):
+        global p2, runningDemo
+        if runningDemo == False:
+            p2 = subprocess.Popen("/home/pi/Mimic/Pi/demoHTVOrbit.sh")
+            runningDemo = True
+            logWrite("Successfully started Demo HTV Orbit script")
+    
+    def stopHTVDemo(*args):
+        global p2, runningDemo
+        try:
+            p2.kill()
+        except Exception:
+            pass
+        else:
+            logWrite("Successfully stopped Demo HTV Orbit script")
             runningDemo = False
 
     def send90(self, *args):
@@ -1720,6 +1758,9 @@ class MainApp(App):
         if SerialConnection1 or SerialConnection2 or SerialConnection3 or SerialConnection4 or SerialConnection5:
             self.mimic_screen.ids.mimicstartbutton.disabled = False
             self.fakeorbit_screen.ids.DemoStart.disabled = False
+            self.fakeorbit_screen.ids.HTVDemoStart.disabled = False
+            self.fakeorbit_screen.ids.set90.disabled = False
+            self.fakeorbit_screen.ids.set0.disabled = False
             if mimicbutton:
                 self.mimic_screen.ids.mimicstartbutton.disabled = True
                 self.mimic_screen.ids.arduino.source = "/home/pi/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
@@ -1729,10 +1770,15 @@ class MainApp(App):
             self.mimic_screen.ids.mimicstartbutton.disabled = True
             self.mimic_screen.ids.mimicstartbutton.text = "Transmit"
             self.fakeorbit_screen.ids.DemoStart.disabled = True
+            self.fakeorbit_screen.ids.HTVDemoStart.disabled = True
+            self.fakeorbit_screen.ids.set90.disabled = True
+            self.fakeorbit_screen.ids.set0.disabled = True
 
         if runningDemo == True:
             self.fakeorbit_screen.ids.DemoStart.disabled = True
+            self.fakeorbit_screen.ids.HTVDemoStart.disabled = True
             self.fakeorbit_screen.ids.DemoStop.disabled = False
+            self.fakeorbit_screen.ids.HTVDemoStop.disabled = False
             self.fakeorbit_screen.ids.arduino.source = "/home/pi/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
 
         c.execute('select Value from telemetry')
