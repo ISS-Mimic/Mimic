@@ -1001,8 +1001,8 @@ class MainApp(App):
 
         Clock.schedule_once(self.checkCrew, 20)
         Clock.schedule_once(self.getTLE, 30) #uncomment when internet works again
-        Clock.schedule_interval(self.getTLE, 600) #uncomment when internet works again
-        #Clock.schedule_interval(self.getTLE, 3600)
+        #Clock.schedule_interval(self.getTLE, 600) #uncomment when internet works again
+        Clock.schedule_interval(self.getTLE, 3600)
         Clock.schedule_interval(self.check_internet, 1)
         Clock.schedule_interval(self.check_serial, 1)
         return root
