@@ -718,8 +718,9 @@ class FakeOrbitScreen(Screen):
         global demoboolean
         demoboolean = args[0]
 
-    def HTVpopup(*args):
-        HTVpopup = Popup(title='HTV Berthing Orbit', content=Label(text='This will playback recorded data from when the Japanese HTV spacecraft berthed to the ISS. During berthing, the SARJs and nadir BGAs lock but the zenith BGAs autotrack'),size_hint=(0.5,0.3),auto_dismiss=True)
+    def HTVpopup(self, *args):
+        HTVpopup = Popup(title='HTV Berthing Orbit', content=Label(text='This will playback recorded data from when the Japanese HTV spacecraft berthed to the ISS. During berthing, the SARJs and nadir BGAs lock but the zenith BGAs autotrack'),text_size=self.size,size_hint=(0.5,0.3),auto_dismiss=True)
+        HTVpopup.text_size = self.size
         HTVpopup.open()
 
     def startDemo(*args):
@@ -1492,24 +1493,27 @@ class MainApp(App):
                     results.append('\n'.join(
                         (next(text), next(text), next(text))))
             return results
-        
-        req = urllib2.urlopen('http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html')
-        soup = BeautifulSoup(req, 'html.parser')
-        body = soup.find_all("pre")
-        results = []
-        for tag in body:
-            if "ISS" in tag.text:
-                results.extend(process_tag_text(tag.text))
+        if internet: 
+            req = urllib2.urlopen('http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html')
+            soup = BeautifulSoup(req, 'html.parser')
+            body = soup.find_all("pre")
+            results = []
+            for tag in body:
+                if "ISS" in tag.text:
+                    results.extend(process_tag_text(tag.text))
 
-        if len(results) > 0:
-            parsed = str(results[0]).split('\n')
-            line1 = parsed[1]
-            line2 = parsed[2]
-            print line1
-            print line2
-            tle_rec = ephem.readtle("ISS (ZARYA)",str(line1),str(line2))
-            TLE_acquired = True
-            print "TLE Success!"
+            if len(results) > 0:
+                parsed = str(results[0]).split('\n')
+                line1 = parsed[1]
+                line2 = parsed[2]
+                print line1
+                print line2
+                tle_rec = ephem.readtle("ISS (ZARYA)",str(line1),str(line2))
+                TLE_acquired = True
+                print "TLE Success!"
+            else:
+                print "TLE not acquired"
+                TLE_acquired = False
         else:
             print "TLE not acquired"
             TLE_acquired = False
