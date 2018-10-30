@@ -65,7 +65,7 @@ SerialConnection4 = False
 SerialConnection5 = False
 
 try:
-    ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
+    ser = serial.Serial('/dev/ttyACM0', 9600, timeout=0)
 except Exception:
     logWrite("Warning - Serial Connection ACM0 not found")
     SerialConnection1 = False
@@ -76,7 +76,7 @@ else:
     print str(ser)
 
 try:
-    ser2 = serial.Serial('/dev/ttyACM1', 115200, timeout=0)
+    ser2 = serial.Serial('/dev/ttyACM1', 9600, timeout=0)
 except Exception:
     logWrite("Warning - Serial Connection ACM1 not found")
     SerialConnection2 = False
@@ -87,7 +87,7 @@ else:
     print str(ser2)
 
 try:
-    ser3 = serial.Serial('/dev/ttyACM2', 115200, timeout=0)
+    ser3 = serial.Serial('/dev/ttyACM2', 9600, timeout=0)
 except Exception:
     logWrite("Warning - Serial Connection ACM2 not found")
     SerialConnection3 = False
@@ -98,7 +98,7 @@ else:
     print str(ser3)
 
 try:
-    ser4 = serial.Serial('/dev/ttyAMA00', 115200, timeout=0)
+    ser4 = serial.Serial('/dev/ttyAMA00', 9600, timeout=0)
 except Exception:
     logWrite("Warning - Serial Connection AMA00 not found")
     SerialConnection4 = False
@@ -109,7 +109,7 @@ else:
     print str(ser4)
 
 try:
-    ser5 = serial.Serial('/dev/ttyUSB0', 115200, timeout=0)
+    ser5 = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
 except Exception:
     logWrite("Warning - Serial Connection USB0 not found")
     SerialConnection5 = False
@@ -1013,7 +1013,7 @@ class MainApp(App):
         
         if ser == None:
             try:
-                ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
+                ser = serial.Serial('/dev/ttyACM0', 9600, timeout=0)
             except Exception:
                 logWrite("Warning - Serial Connection ACM0 not found")
                 SerialConnection1 = False
@@ -1033,7 +1033,7 @@ class MainApp(App):
 
         if ser2 == None:
             try:
-                ser2 = serial.Serial('/dev/ttyACM1', 115200, timeout=0)
+                ser2 = serial.Serial('/dev/ttyACM1', 9600, timeout=0)
             except Exception:
                 logWrite("Warning - Serial Connection ACM1 not found")
                 SerialConnection2 = False
@@ -1053,7 +1053,7 @@ class MainApp(App):
 
         if ser3 == None:
             try:
-                ser3 = serial.Serial('/dev/ttyACM2', 115200, timeout=0)
+                ser3 = serial.Serial('/dev/ttyACM2', 9600, timeout=0)
             except Exception:
                 logWrite("Warning - Serial Connection ACM2 not found")
                 SerialConnection3 = False
@@ -1073,7 +1073,7 @@ class MainApp(App):
 
         if ser4 == None:
             try:
-                ser4 = serial.Serial('/dev/ttyAMA00', 115200, timeout=0)
+                ser4 = serial.Serial('/dev/ttyAMA00', 9600, timeout=0)
             except Exception:
                 logWrite("Warning - Serial Connection AMA00 not found")
                 SerialConnection4 = False
@@ -1093,7 +1093,7 @@ class MainApp(App):
 
         if ser5 == None:
             try:
-                ser5 = serial.Serial('/dev/ttyUSB0', 115200, timeout=0)
+                ser5 = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
             except Exception:
                 logWrite("Warning - Serial Connection USB0 not found")
                 SerialConnection5 = False
@@ -2474,6 +2474,7 @@ class MainApp(App):
         #data to send regardless of signal status
         if mimicbutton == True: 
             self.serialWrite("Module=" + module + " ")
+            print "Module=" + module + " "
 
 #All GUI Screens are on separate kv files
 Builder.load_file('/home/pi/Mimic/Pi/Screens/Settings_Screen.kv')

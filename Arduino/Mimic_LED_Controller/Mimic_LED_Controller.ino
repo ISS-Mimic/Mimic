@@ -34,7 +34,7 @@ void setup()
   pinMode(ledBluePin, OUTPUT);
   pinMode(ledGreenPin, OUTPUT);
   Serial1.begin(9600);
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial.setTimeout(50);
   strip.begin();
   module_strip.begin();
@@ -48,7 +48,7 @@ void loop()
   digitalWrite(ledRedPin, LOW);
   digitalWrite(ledGreenPin, LOW);
   digitalWrite(ledBluePin, LOW);
-  Serial1.println("-------");
+  //wSerial1.println("-------");
   if(Serial.available())
   {
     checkSerial();
@@ -111,7 +111,7 @@ void loop()
   }
   else
   {
-    allSet_module(module_strip.Color(0,0,0),0);
+    allSet_module(module_strip.Color(0,0,50),0);
     module_strip.show();
   }
   
@@ -245,11 +245,13 @@ void checkSerial()
   digitalWrite(ledBluePin, HIGH);
   test = "";
   
-  while(Serial.available())  
+  while(Serial.available() > 0)  
   {
-    test = Serial.readString();
+    test = Serial.readStringUntil('\n');
+    //test = Serial.readString();
   }
   Serial1.println(test);
+  
   char sz[test.length() + 1];
   char copy[test.length() + 1];
   strcpy(sz, test.c_str());  
@@ -365,4 +367,3 @@ void allSet_module(uint32_t c, uint8_t wait) {
     delay(wait);
   }
 }
-
