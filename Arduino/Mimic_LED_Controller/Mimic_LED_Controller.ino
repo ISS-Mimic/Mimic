@@ -111,7 +111,7 @@ void loop()
   }
   else
   {
-    allSet_module(module_strip.Color(0,0,50),0);
+    allSet_module(module_strip.Color(0,0,0),0);
     module_strip.show();
   }
   
