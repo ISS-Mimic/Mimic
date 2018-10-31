@@ -646,62 +646,62 @@ class ManualControlScreen(Screen):
 
     def incrementPSARJ(self, *args):
         global psarjmc
-        psarjmc += args[1]
+        psarjmc += args[0]
         self.serialWrite("PSARJ=" + str(psarjmc) + " ")   
      
     def incrementSSARJ(self, *args):
         global ssarjmc
-        ssarjmc += args[1]
+        ssarjmc += args[0]
         self.serialWrite("SSARJ=" + str(ssarjmc) + " ")   
      
     def incrementPTTRJ(self, *args):
         global ptrrjmc
-        ptrrjmc += args[1]
+        ptrrjmc += args[0]
         self.serialWrite("PTRRJ=" + str(ptrrjmc) + " ")   
      
     def incrementSTRRJ(self, *args):
         global strrjmc
-        strrjmc += args[1]
+        strrjmc += args[0]
         self.serialWrite("STRRJ=" + str(strrjmc) + " ")   
      
     def incrementBeta1B(self, *args):
         global beta1bmc
-        beta1bmc += args[1]
+        beta1bmc += args[0]
         self.serialWrite("Beta1B=" + str(beta1bmc) + " ")   
      
     def incrementBeta1A(self, *args):
         global beta1amc
-        beta1amc += args[1]
+        beta1amc += args[0]
         self.serialWrite("Beta1A=" + str(beta1amc) + " ")   
      
     def incrementBeta2B(self, *args):
         global beta2bmc
-        beta2bmc += args[1]
+        beta2bmc += args[0]
         self.serialWrite("Beta2B=" + str(beta2bmc) + " ")   
      
     def incrementBeta2A(self, *args):
         global beta2amc
-        beta2amc += args[1]
+        beta2amc += args[0]
         self.serialWrite("Beta2A=" + str(beta2amc) + " ")   
      
     def incrementBeta3B(self, *args):
         global beta3bmc
-        beta3bmc += args[1]
+        beta3bmc += args[0]
         self.serialWrite("Beta3B=" + str(beta3bmc) + " ")   
      
     def incrementBeta3A(self, *args):
         global beta3amc
-        beta3amc += args[1]
+        beta3amc += args[0]
         self.serialWrite("Beta3A=" + str(beta3amc) + " ")   
      
     def incrementBeta4B(self, *args):
         global beta4bmc
-        beta4bmc += args[1]
+        beta4bmc += args[0]
         self.serialWrite("Beta4B=" + str(beta4bmc) + " ")   
      
     def incrementBeta4A(self, *args):
         global beta4amc
-        beta4amc += args[1]
+        beta4amc += args[0]
         self.serialWrite("Beta4A=" + str(beta4amc) + " ")   
      
     def changeBoolean(self, *args):
@@ -709,8 +709,55 @@ class ManualControlScreen(Screen):
         manualcontrol = args[0]
     
     def serialWrite(self, *args):
-        print args
-        ser.write(*args)
+        #logWrite("Function call - serial write")
+        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
+        
+        if SerialConnection1:
+            #ser.write(*args)
+            try:
+                ser.write(*args)
+            except Exception:
+                ser = None
+                SerialConnection1 = False
+            #else:
+            #    ser.write(*args)
+        if SerialConnection2:
+            #ser2.write(*args)
+            try:
+                ser2.write(*args)
+            except Exception:
+                ser2 = None
+                SerialConnection2 = False
+            #else:
+            #    ser.write(*args)
+        if SerialConnection3:
+            #ser3.write(*args)
+            try:
+                ser3.write(*args)
+            except Exception:
+                ser3 = None
+                SerialConnection3 = False
+            #else:
+            #    ser.write(*args)
+        if SerialConnection4:
+            #ser4.write(*args)
+            try:
+                ser4.write(*args)
+            except Exception:
+                ser4 = None
+                SerialConnection4 = False
+            #else:
+            #    ser.write(*args)
+        if SerialConnection5:
+            #ser5.write(*args)
+            try:
+                ser5.write(*args)
+            except Exception:
+                ser5 = None
+                SerialConnection5 = False
+            #else:
+            #    ser.write(*args)
+
 
 class FakeOrbitScreen(Screen):
     

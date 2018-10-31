@@ -108,17 +108,51 @@
         Button:
             size_hint: 0.1,0.1
             pos_hint: {"center_x": 0.4, "center_y": 0.83}
-            text: '+'
-            disabled: True
-            font_size: 30
+            text: '+1'
+            font_size: 20
             on_press: root.incrementActive(1)
         Button:
             size_hint: 0.1,0.1
             pos_hint: {"center_x": 0.6, "center_y": 0.83}
-            text: '-'
-            disabled: True
-            font_size: 30
+            text: '-1'
+            font_size: 20
             on_press: root.incrementActive(-1)
+        Button:
+            size_hint: 0.1,0.1
+            pos_hint: {"center_x": 0.4, "center_y": 0.73}
+            text: '+5'
+            font_size: 20
+            on_press: root.incrementActive(5)
+        Button:
+            size_hint: 0.1,0.1
+            pos_hint: {"center_x": 0.6, "center_y": 0.73}
+            text: '-5'
+            font_size: 20
+            on_press: root.incrementActive(-5)
+        Button:
+            size_hint: 0.1,0.1
+            pos_hint: {"center_x": 0.4, "center_y": 0.63}
+            text: '+20'
+            font_size: 20
+            on_press: root.incrementActive(20)
+        Button:
+            size_hint: 0.1,0.1
+            pos_hint: {"center_x": 0.6, "center_y": 0.63}
+            text: '-20'
+            font_size: 20
+            on_press: root.incrementActive(-20)
+        Button:
+            size_hint: 0.1,0.1
+            pos_hint: {"center_x": 0.4, "center_y": 0.53}
+            text: '+90'
+            font_size: 20
+            on_press: root.incrementActive(90)
+        Button:
+            size_hint: 0.1,0.1
+            pos_hint: {"center_x": 0.6, "center_y": 0.53}
+            text: '-90'
+            font_size: 20
+            on_press: root.incrementActive(-90)
         Button:
             size_hint: 0.3,0.1
             pos_hint: {"center_x": 0.5, "Bottom": 1}
