@@ -2448,7 +2448,7 @@ class MainApp(App):
                fakeorbitboolean = True
             self.signal_stale()
 
-        if (mimicbutton == True and float(aos) == 1.00): 
+        if mimicbutton: # and float(aos) == 1.00): 
             self.serialWrite("PSARJ=" + psarj + " ")
             self.serialWrite("SSARJ=" + ssarj + " ")
             self.serialWrite("PTRRJ=" + ptrrj + " ")
@@ -2472,9 +2472,8 @@ class MainApp(App):
             self.serialWrite("Voltage4B=" + v4b + " ")
         
         #data to send regardless of signal status
-        if mimicbutton == True: 
+        if mimicbutton: 
             self.serialWrite("Module=" + module + " ")
-            print "Module=" + module + " "
 
 #All GUI Screens are on separate kv files
 Builder.load_file('/home/pi/Mimic/Pi/Screens/Settings_Screen.kv')

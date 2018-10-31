@@ -5,52 +5,22 @@
     name: 'fakeorbit'
     FloatLayout:
         orientation: 'vertical'
+        Image:
+            source: '/home/pi/Mimic/Pi/imgs/fakeorbit/SimulatedOrbit.png'
+            allow_stretch: False
         Label:
             id: fakeorbitstatus
             text: ''
             font_size: 30
-            pos_hint: {"center_x": 0.5, "center_y": 0.95}
+            pos_hint: {"center_x": 0.5, "center_y": 0.1}
             markup: True
             color: 1,1,1
         Label:
-            pos_hint: {"center_x": 0.30, "center_y": 0.55}
+            pos_hint: {"center_x": 0.60, "center_y": 0.75}
             text: 'PSARJ: '
             color: 1,1,1
         Label:
             id: psarj
-            pos_hint: {"center_x": 0.40, "center_y": 0.55}
-            text: 'n/a'
-            markup: True
-            color: 0.5,0,0.5
-            font_size: 20
-        Label:
-            pos_hint: {"center_x": 0.30, "center_y": 0.45}
-            text: 'SSARJ: '
-            color: 1,1,1
-        Label:
-            id: ssarj
-            pos_hint: {"center_x": 0.40, "center_y": 0.45}
-            text: 'n/a'
-            markup: True
-            color: 0.5,0,0.5
-            font_size: 20
-        Label:
-            pos_hint: {"center_x": 0.60, "center_y": 0.85}
-            text: 'Beta1A: '
-            color: 1,1,1
-        Label:
-            id: beta1a
-            pos_hint: {"center_x": 0.70, "center_y": 0.85}
-            text: 'n/a'
-            markup: True
-            color: 0.5,0,0.5
-            font_size: 20
-        Label:
-            pos_hint: {"center_x": 0.60, "center_y": 0.75}
-            text: 'Beta1B: '
-            color: 1,1,1
-        Label:
-            id: beta1b
             pos_hint: {"center_x": 0.70, "center_y": 0.75}
             text: 'n/a'
             markup: True
@@ -58,10 +28,10 @@
             font_size: 20
         Label:
             pos_hint: {"center_x": 0.60, "center_y": 0.65}
-            text: 'Beta2A: '
+            text: 'Beta4A: '
             color: 1,1,1
         Label:
-            id: beta2a
+            id: beta4a
             pos_hint: {"center_x": 0.70, "center_y": 0.65}
             text: 'n/a'
             markup: True
@@ -69,10 +39,10 @@
             font_size: 20
         Label:
             pos_hint: {"center_x": 0.60, "center_y": 0.55}
-            text: 'Beta2B: '
+            text: 'Beta2A: '
             color: 1,1,1
         Label:
-            id: beta2b
+            id: beta2a
             pos_hint: {"center_x": 0.70, "center_y": 0.55}
             text: 'n/a'
             markup: True
@@ -80,10 +50,10 @@
             font_size: 20
         Label:
             pos_hint: {"center_x": 0.60, "center_y": 0.45}
-            text: 'Beta3A: '
+            text: 'Beta2B: '
             color: 1,1,1
         Label:
-            id: beta3a
+            id: beta2b
             pos_hint: {"center_x": 0.70, "center_y": 0.45}
             text: 'n/a'
             markup: True
@@ -91,50 +61,87 @@
             font_size: 20
         Label:
             pos_hint: {"center_x": 0.60, "center_y": 0.35}
-            text: 'Beta3B: '
+            text: 'Beta4B: '
             color: 1,1,1
         Label:
-            id: beta3b
+            id: beta4b
             pos_hint: {"center_x": 0.70, "center_y": 0.35}
             text: 'n/a'
             markup: True
             color: 0.5,0,0.5
             font_size: 20
         Label:
-            pos_hint: {"center_x": 0.60, "center_y": 0.25}
-            text: 'Beta4A: '
+            pos_hint: {"center_x": 0.80, "center_y": 0.75}
+            text: 'SSARJ: '
             color: 1,1,1
         Label:
-            id: beta4a
-            pos_hint: {"center_x": 0.70, "center_y": 0.25}
+            id: ssarj
+            pos_hint: {"center_x": 0.90, "center_y": 0.75}
             text: 'n/a'
             markup: True
             color: 0.5,0,0.5
             font_size: 20
         Label:
-            pos_hint: {"center_x": 0.60, "center_y": 0.15}
-            text: 'Beta4B: '
+            pos_hint: {"center_x": 0.80, "center_y": 0.65}
+            text: 'Beta1A: '
             color: 1,1,1
         Label:
-            id: beta4b
-            pos_hint: {"center_x": 0.70, "center_y": 0.15}
+            id: beta1a
+            pos_hint: {"center_x": 0.90, "center_y": 0.65}
+            text: 'n/a'
+            markup: True
+            color: 0.5,0,0.5
+            font_size: 20
+        Label:
+            pos_hint: {"center_x": 0.80, "center_y": 0.55}
+            text: 'Beta3A: '
+            color: 1,1,1
+        Label:
+            id: beta3a
+            pos_hint: {"center_x": 0.90, "center_y": 0.55}
+            text: 'n/a'
+            markup: True
+            color: 0.5,0,0.5
+            font_size: 20
+        Label:
+            pos_hint: {"center_x": 0.80, "center_y": 0.45}
+            text: 'Beta3B: '
+            color: 1,1,1
+        Label:
+            id: beta3b
+            pos_hint: {"center_x": 0.90, "center_y": 0.45}
+            text: 'n/a'
+            markup: True
+            color: 0.5,0,0.5
+            font_size: 20
+        Label:
+            pos_hint: {"center_x": 0.80, "center_y": 0.35}
+            text: 'Beta1B: '
+            color: 1,1,1
+        Label:
+            id: beta1b
+            pos_hint: {"center_x": 0.90, "center_y": 0.35}
             text: 'n/a'
             markup: True
             color: 0.5,0,0.5
             font_size: 20
         Button:
             id: popupbutton
-            size_hint: 0.1,0.1
-            pos_hint: {"center_x": 0.2, "center_y": 0.2}
+            size_hint: 0.01,0.02
+            pos_hint: {"center_x": 0.4, "center_y": 0.8}
             text: 'i'
-            font_size: 20
+            font_size: 10
+            ##background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/InfoIcon.png'
             on_release: root.HTVpopup()
         Button:
             id: DemoStart
-            size_hint: 0.15,0.1
-            pos_hint: {"center_x": 0.1, "center_y": 0.8}
-            text: 'Start Demo'
-            font_size: 20
+            allow_stretch: False
+            keep_ratio: True
+            size_hint: 0.14,0.115
+            ##size_hint_y: 0.115
+            pos_hint: {"center_x": 0.122, "center_y": 0.57}
+            background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartUnlit.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartDown.png'
             on_release: DemoStop.disabled = False
             on_release: fakeorbitstatus.text = 'Transmitting Demo Orbit'
             on_release: root.changeDemoBoolean(True)
@@ -142,10 +149,13 @@
             on_release: root.startDemo()
         Button:
             id: DemoStop
-            size_hint: 0.15,0.1
-            pos_hint: {"center_x": 0.1, "center_y": 0.7}
-            text: 'Stop Demo'
-            font_size: 20
+            allow_stretch: False
+            keep_ratio: True
+            size_hint: 0.14,0.115
+            ##size_hint_y: 0.115
+            pos_hint: {"center_x": 0.122, "center_y": 0.424}
+            background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopUnlit.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopDown.png'
             disabled: True
             on_release: DemoStart.disabled = False
             on_release: fakeorbitstatus.text = 'Stopped'
@@ -154,10 +164,13 @@
             on_release: root.stopDemo()
         Button:
             id: HTVDemoStart
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.3, "center_y": 0.8}
-            text: 'Start HTV Demo'
-            font_size: 20
+            allow_stretch: False
+            keep_ratio: True
+            size_hint: 0.14,0.115
+            ##size_hint_y: 0.115
+            pos_hint: {"center_x": 0.322, "center_y": 0.57}
+            background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartUnlit.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartDown.png'
             on_release: HTVDemoStop.disabled = False
             on_release: fakeorbitstatus.text = 'Transmitting HTV Demo Orbit'
             on_release: root.changeDemoBoolean(True)
@@ -165,29 +178,32 @@
             on_release: root.startHTVDemo()
         Button:
             id: HTVDemoStop
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.3, "center_y": 0.7}
-            text: 'Stop HTV Demo'
-            font_size: 20
+            allow_stretch: False
+            keep_ratio: True
+            size_hint: 0.14,0.115
+            ##size_hint_y: 0.115
+            pos_hint: {"center_x": 0.322, "center_y": 0.424}
+            background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopUnlit.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopDown.png'
             disabled: True
             on_release: HTVDemoStart.disabled = False
             on_release: fakeorbitstatus.text = 'Stopped'
             on_release: root.changeDemoBoolean(False)
             on_release: self.disabled = True
         Button:
-            id: set90
-            size_hint: 0.15,0.1
-            pos_hint: {"center_x": 0.1, "center_y": 0.5}
-            text: 'Set 90'
-            font_size: 20
-            on_release: root.send90()
-        Button:
             id: set0
             size_hint: 0.15,0.1
-            pos_hint: {"center_x": 0.1, "center_y": 0.35}
+            pos_hint: {"center_x": 0.65, "center_y": 0.25}
             text: 'Set 0'
             font_size: 20
             on_release: root.send0()
+        Button:
+            id: set90
+            size_hint: 0.15,0.1
+            pos_hint: {"center_x": 0.85, "center_y": 0.25}
+            text: 'Set 90'
+            font_size: 20
+            on_release: root.send90()
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
