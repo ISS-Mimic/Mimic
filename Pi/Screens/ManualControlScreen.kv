@@ -154,6 +154,20 @@
             font_size: 20
             on_press: root.incrementActive(-90)
         Button:
+            id: set0
+            size_hint: 0.15,0.1
+            pos_hint: {"center_x": 0.45, "center_y": 0.25}
+            text: 'Set 0'
+            font_size: 20
+            on_release: root.send0()
+        Button:
+            id: set90
+            size_hint: 0.15,0.1
+            pos_hint: {"center_x": 0.55, "center_y": 0.25}
+            text: 'Set 90'
+            font_size: 20
+            on_release: root.send90()
+        Button:
             size_hint: 0.3,0.1
             pos_hint: {"center_x": 0.5, "Bottom": 1}
             text: 'Return'

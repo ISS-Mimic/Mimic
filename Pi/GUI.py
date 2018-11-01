@@ -593,28 +593,160 @@ class ManualControlScreen(Screen):
         global Beta4Bcontrol, Beta3Bcontrol, Beta2Bcontrol, Beta1Bcontrol, Beta4Acontrol, Beta3Acontrol, Beta2Acontrol, Beta1Acontrol, PSARJcontrol, SSARJcontrol, PTRRJcontrol, STRRJcontrol
         if str(args[1])=="Beta4B":
             Beta4Bcontrol = True
+            Beta4Acontrol = False
+            Beta3Bcontrol = False
+            Beta3Acontrol = False
+            Beta2Bcontrol = False
+            Beta2Acontrol = False
+            Beta1Bcontrol = False
+            Beta1Acontrol = False
+            PSARJcontrol = False
+            SSARJcontrol = False
+            PTRRJcontrol = False
+            STRRJcontrol = False
         if str(args[1])=="Beta3B":
             Beta3Bcontrol = True
+            Beta4Bcontrol = False
+            Beta4Acontrol = False
+            Beta3Acontrol = False
+            Beta2Bcontrol = False
+            Beta2Acontrol = False
+            Beta1Bcontrol = False
+            Beta1Acontrol = False
+            PSARJcontrol = False
+            SSARJcontrol = False
+            PTRRJcontrol = False
+            STRRJcontrol = False
         if str(args[1])=="Beta2B":
             Beta2Bcontrol = True
+            Beta4Bcontrol = False
+            Beta4Acontrol = False
+            Beta3Bcontrol = False
+            Beta3Acontrol = False
+            Beta2Acontrol = False
+            Beta1Bcontrol = False
+            Beta1Acontrol = False
+            PSARJcontrol = False
+            SSARJcontrol = False
+            PTRRJcontrol = False
+            STRRJcontrol = False
         if str(args[1])=="Beta1B":
             Beta1Bcontrol = True
+            Beta4Bcontrol = False
+            Beta4Acontrol = False
+            Beta3Bcontrol = False
+            Beta3Acontrol = False
+            Beta2Bcontrol = False
+            Beta2Acontrol = False
+            Beta1Acontrol = False
+            PSARJcontrol = False
+            SSARJcontrol = False
+            PTRRJcontrol = False
+            STRRJcontrol = False
         if str(args[1])=="Beta4A":
             Beta4Acontrol = True
+            Beta4Bcontrol = False
+            Beta3Bcontrol = False
+            Beta3Acontrol = False
+            Beta2Bcontrol = False
+            Beta2Acontrol = False
+            Beta1Bcontrol = False
+            Beta1Acontrol = False
+            PSARJcontrol = False
+            SSARJcontrol = False
+            PTRRJcontrol = False
+            STRRJcontrol = False
         if str(args[1])=="Beta3A":
             Beta3Acontrol = True
+            Beta4Bcontrol = False
+            Beta4Acontrol = False
+            Beta3Bcontrol = False
+            Beta2Bcontrol = False
+            Beta2Acontrol = False
+            Beta1Bcontrol = False
+            Beta1Acontrol = False
+            PSARJcontrol = False
+            SSARJcontrol = False
+            PTRRJcontrol = False
+            STRRJcontrol = False
         if str(args[1])=="Beta2A":
             Beta2Acontrol = True
+            Beta4Bcontrol = False
+            Beta4Acontrol = False
+            Beta3Bcontrol = False
+            Beta3Acontrol = False
+            Beta2Bcontrol = False
+            Beta1Bcontrol = False
+            Beta1Acontrol = False
+            PSARJcontrol = False
+            SSARJcontrol = False
+            PTRRJcontrol = False
+            STRRJcontrol = False
         if str(args[1])=="Beta1A":
             Beta1Acontrol = True
+            Beta4Bcontrol = False
+            Beta4Acontrol = False
+            Beta3Bcontrol = False
+            Beta3Acontrol = False
+            Beta2Bcontrol = False
+            Beta2Acontrol = False
+            Beta1Bcontrol = False
+            PSARJcontrol = False
+            SSARJcontrol = False
+            PTRRJcontrol = False
+            STRRJcontrol = False
         if str(args[1])=="PTRRJ":
             PTRRJcontrol = True
+            Beta4Bcontrol = False
+            Beta4Acontrol = False
+            Beta3Bcontrol = False
+            Beta3Acontrol = False
+            Beta2Bcontrol = False
+            Beta2Acontrol = False
+            Beta1Bcontrol = False
+            Beta1Acontrol = False
+            PSARJcontrol = False
+            SSARJcontrol = False
+            STRRJcontrol = False
         if str(args[1])=="STRRJ":
             STRRJcontrol = True
+            Beta4Bcontrol = False
+            Beta4Acontrol = False
+            Beta3Bcontrol = False
+            Beta3Acontrol = False
+            Beta2Bcontrol = False
+            Beta2Acontrol = False
+            Beta1Bcontrol = False
+            Beta1Acontrol = False
+            PSARJcontrol = False
+            SSARJcontrol = False
+            PTRRJcontrol = False
         if str(args[1])=="PSARJ":
             PSARJcontrol = True
+            Beta4Bcontrol = False
+            Beta4Acontrol = False
+            Beta3Bcontrol = False
+            Beta3Acontrol = False
+            Beta2Bcontrol = False
+            Beta2Acontrol = False
+            Beta1Bcontrol = False
+            Beta1Acontrol = False
+            SSARJcontrol = False
+            PTRRJcontrol = False
+            STRRJcontrol = False
         if str(args[1])=="SSARJ":
             SSARJcontrol = True
+            Beta4Bcontrol = False
+            Beta4Acontrol = False
+            Beta3Bcontrol = False
+            Beta3Acontrol = False
+            Beta2Bcontrol = False
+            Beta2Acontrol = False
+            Beta1Bcontrol = False
+            Beta1Acontrol = False
+            PSARJcontrol = False
+            PTRRJcontrol = False
+            STRRJcontrol = False
 
     def incrementActive(self, *args):
         global Beta4Bcontrol, Beta3Bcontrol, Beta2Bcontrol, Beta1Bcontrol, Beta4Acontrol, Beta3Acontrol, Beta2Acontrol, Beta1Acontrol, PSARJcontrol, SSARJcontrol, PTRRJcontrol, STRRJcontrol
@@ -708,10 +840,62 @@ class ManualControlScreen(Screen):
         global manualcontrol
         manualcontrol = args[0]
     
+    def send90(self, *args):
+        self.serialWrite("Beta1A=90 ")
+        self.serialWrite("Beta1B=90 ")
+        self.serialWrite("Beta2A=90 ")
+        self.serialWrite("Beta2B=90 ")
+        self.serialWrite("Beta3A=90 ")
+        self.serialWrite("Beta3B=90 ")
+        self.serialWrite("Beta4A=90 ")
+        self.serialWrite("Beta4B=90 ")
+        self.serialWrite("PSARJ=90 ")
+        self.serialWrite("SSARJ=90 ")
+        self.serialWrite("PTRRJ=90 ")
+        self.serialWrite("STRRJ=90 ")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta1a'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta1b'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta2a'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta2b'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta3a'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta3b'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta4a'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta4b'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'psarj'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'ssarj'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'ptrrj'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'strrj'");
+        
+    def send0(self, *args):
+        self.serialWrite("Beta1A=0 ")
+        self.serialWrite("Beta1B=0 ")
+        self.serialWrite("Beta2A=0 ")
+        self.serialWrite("Beta2B=0 ")
+        self.serialWrite("Beta3A=0 ")
+        self.serialWrite("Beta3B=0 ")
+        self.serialWrite("Beta4A=0 ")
+        self.serialWrite("Beta4B=0 ")
+        self.serialWrite("PSARJ=0 ")
+        self.serialWrite("SSARJ=0 ")
+        self.serialWrite("PTRRJ=0 ")
+        self.serialWrite("STRRJ=0 ")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'psarj'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ssarj'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ptrrj'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'strrj'");
+    
     def serialWrite(self, *args):
         #logWrite("Function call - serial write")
         global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
-        
+        #print str(*args) 
         if SerialConnection1:
             #ser.write(*args)
             try:
@@ -802,49 +986,6 @@ class FakeOrbitScreen(Screen):
             logWrite("Successfully stopped Demo HTV Orbit script")
             runningDemo = False
 
-    def send90(self, *args):
-        self.serialWrite("Beta1A=90 ")
-        self.serialWrite("Beta1B=90 ")
-        self.serialWrite("Beta2A=90 ")
-        self.serialWrite("Beta2B=90 ")
-        self.serialWrite("Beta3A=90 ")
-        self.serialWrite("Beta3B=90 ")
-        self.serialWrite("Beta4A=90 ")
-        self.serialWrite("Beta4B=90 ")
-        self.serialWrite("PSARJ=90 ")
-        self.serialWrite("SSARJ=90 ")
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta1a'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta1b'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta2a'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta2b'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta3a'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta3b'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta4a'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta4b'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'psarj'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'ssarj'");
-        
-    def send0(self, *args):
-        self.serialWrite("Beta1A=0 ")
-        self.serialWrite("Beta1B=0 ")
-        self.serialWrite("Beta2A=0 ")
-        self.serialWrite("Beta2B=0 ")
-        self.serialWrite("Beta3A=0 ")
-        self.serialWrite("Beta3B=0 ")
-        self.serialWrite("Beta4A=0 ")
-        self.serialWrite("Beta4B=0 ")
-        self.serialWrite("PSARJ=0 ")
-        self.serialWrite("SSARJ=0 ")
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1a'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1b'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2a'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2b'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3a'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3b'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4a'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4b'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'psarj'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ssarj'");
     
     def serialWrite(self, *args):
         #logWrite("Function call - serial write")
@@ -1810,8 +1951,8 @@ class MainApp(App):
             self.mimic_screen.ids.mimicstartbutton.disabled = False
             self.fakeorbit_screen.ids.DemoStart.disabled = False
             self.fakeorbit_screen.ids.HTVDemoStart.disabled = False
-            self.fakeorbit_screen.ids.set90.disabled = False
-            self.fakeorbit_screen.ids.set0.disabled = False
+            self.control_screen.ids.set90.disabled = False
+            self.control_screen.ids.set0.disabled = False
             if mimicbutton:
                 self.mimic_screen.ids.mimicstartbutton.disabled = True
                 self.mimic_screen.ids.arduino.source = "/home/pi/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
@@ -1822,8 +1963,8 @@ class MainApp(App):
             self.mimic_screen.ids.mimicstartbutton.text = "Transmit"
             self.fakeorbit_screen.ids.DemoStart.disabled = True
             self.fakeorbit_screen.ids.HTVDemoStart.disabled = True
-            self.fakeorbit_screen.ids.set90.disabled = True
-            self.fakeorbit_screen.ids.set0.disabled = True
+            self.control_screen.ids.set90.disabled = True
+            self.control_screen.ids.set0.disabled = True
 
         if runningDemo == True:
             self.fakeorbit_screen.ids.DemoStart.disabled = True
