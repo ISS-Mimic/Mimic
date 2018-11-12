@@ -65,7 +65,7 @@ SerialConnection4 = False
 SerialConnection5 = False
 
 try:
-    ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
+    ser = serial.Serial('/dev/ttyACM0', 9600, timeout=0)
 except Exception:
     logWrite("Warning - Serial Connection ACM0 not found")
     SerialConnection1 = False
@@ -76,7 +76,7 @@ else:
     print str(ser)
 
 try:
-    ser2 = serial.Serial('/dev/ttyACM1', 115200, timeout=0)
+    ser2 = serial.Serial('/dev/ttyACM1', 9600, timeout=0)
 except Exception:
     logWrite("Warning - Serial Connection ACM1 not found")
     SerialConnection2 = False
@@ -87,7 +87,7 @@ else:
     print str(ser2)
 
 try:
-    ser3 = serial.Serial('/dev/ttyACM2', 115200, timeout=0)
+    ser3 = serial.Serial('/dev/ttyACM2', 9600, timeout=0)
 except Exception:
     logWrite("Warning - Serial Connection ACM2 not found")
     SerialConnection3 = False
@@ -98,7 +98,7 @@ else:
     print str(ser3)
 
 try:
-    ser4 = serial.Serial('/dev/ttyAMA00', 115200, timeout=0)
+    ser4 = serial.Serial('/dev/ttyAMA00', 9600, timeout=0)
 except Exception:
     logWrite("Warning - Serial Connection AMA00 not found")
     SerialConnection4 = False
@@ -109,7 +109,7 @@ else:
     print str(ser4)
 
 try:
-    ser5 = serial.Serial('/dev/ttyUSB0', 115200, timeout=0)
+    ser5 = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
 except Exception:
     logWrite("Warning - Serial Connection USB0 not found")
     SerialConnection5 = False
@@ -536,6 +536,23 @@ class MainScreen(Screen):
             logWrite("Successfully stopped Demo Orbit script")
             runningDemo = False
     
+    def startHTVDemo(*args):
+        global p2, runningDemo
+        if runningDemo == False:
+            p2 = subprocess.Popen("/home/pi/Mimic/Pi/demoHTVOrbit.sh")
+            runningDemo = True
+            logWrite("Successfully started Demo HTV Orbit script")
+    
+    def stopHTVDemo(*args):
+        global p2, runningDemo
+        try:
+            p2.kill()
+        except Exception:
+            pass
+        else:
+            logWrite("Successfully stopped Demo HTV Orbit script")
+            runningDemo = False
+    
     def startproc(*args):
         global p
         p = subprocess.Popen(["node", "/home/pi/Mimic/Pi/ISS_Telemetry.js"]) 
@@ -576,28 +593,160 @@ class ManualControlScreen(Screen):
         global Beta4Bcontrol, Beta3Bcontrol, Beta2Bcontrol, Beta1Bcontrol, Beta4Acontrol, Beta3Acontrol, Beta2Acontrol, Beta1Acontrol, PSARJcontrol, SSARJcontrol, PTRRJcontrol, STRRJcontrol
         if str(args[1])=="Beta4B":
             Beta4Bcontrol = True
+            Beta4Acontrol = False
+            Beta3Bcontrol = False
+            Beta3Acontrol = False
+            Beta2Bcontrol = False
+            Beta2Acontrol = False
+            Beta1Bcontrol = False
+            Beta1Acontrol = False
+            PSARJcontrol = False
+            SSARJcontrol = False
+            PTRRJcontrol = False
+            STRRJcontrol = False
         if str(args[1])=="Beta3B":
             Beta3Bcontrol = True
+            Beta4Bcontrol = False
+            Beta4Acontrol = False
+            Beta3Acontrol = False
+            Beta2Bcontrol = False
+            Beta2Acontrol = False
+            Beta1Bcontrol = False
+            Beta1Acontrol = False
+            PSARJcontrol = False
+            SSARJcontrol = False
+            PTRRJcontrol = False
+            STRRJcontrol = False
         if str(args[1])=="Beta2B":
             Beta2Bcontrol = True
+            Beta4Bcontrol = False
+            Beta4Acontrol = False
+            Beta3Bcontrol = False
+            Beta3Acontrol = False
+            Beta2Acontrol = False
+            Beta1Bcontrol = False
+            Beta1Acontrol = False
+            PSARJcontrol = False
+            SSARJcontrol = False
+            PTRRJcontrol = False
+            STRRJcontrol = False
         if str(args[1])=="Beta1B":
             Beta1Bcontrol = True
+            Beta4Bcontrol = False
+            Beta4Acontrol = False
+            Beta3Bcontrol = False
+            Beta3Acontrol = False
+            Beta2Bcontrol = False
+            Beta2Acontrol = False
+            Beta1Acontrol = False
+            PSARJcontrol = False
+            SSARJcontrol = False
+            PTRRJcontrol = False
+            STRRJcontrol = False
         if str(args[1])=="Beta4A":
             Beta4Acontrol = True
+            Beta4Bcontrol = False
+            Beta3Bcontrol = False
+            Beta3Acontrol = False
+            Beta2Bcontrol = False
+            Beta2Acontrol = False
+            Beta1Bcontrol = False
+            Beta1Acontrol = False
+            PSARJcontrol = False
+            SSARJcontrol = False
+            PTRRJcontrol = False
+            STRRJcontrol = False
         if str(args[1])=="Beta3A":
             Beta3Acontrol = True
+            Beta4Bcontrol = False
+            Beta4Acontrol = False
+            Beta3Bcontrol = False
+            Beta2Bcontrol = False
+            Beta2Acontrol = False
+            Beta1Bcontrol = False
+            Beta1Acontrol = False
+            PSARJcontrol = False
+            SSARJcontrol = False
+            PTRRJcontrol = False
+            STRRJcontrol = False
         if str(args[1])=="Beta2A":
             Beta2Acontrol = True
+            Beta4Bcontrol = False
+            Beta4Acontrol = False
+            Beta3Bcontrol = False
+            Beta3Acontrol = False
+            Beta2Bcontrol = False
+            Beta1Bcontrol = False
+            Beta1Acontrol = False
+            PSARJcontrol = False
+            SSARJcontrol = False
+            PTRRJcontrol = False
+            STRRJcontrol = False
         if str(args[1])=="Beta1A":
             Beta1Acontrol = True
+            Beta4Bcontrol = False
+            Beta4Acontrol = False
+            Beta3Bcontrol = False
+            Beta3Acontrol = False
+            Beta2Bcontrol = False
+            Beta2Acontrol = False
+            Beta1Bcontrol = False
+            PSARJcontrol = False
+            SSARJcontrol = False
+            PTRRJcontrol = False
+            STRRJcontrol = False
         if str(args[1])=="PTRRJ":
             PTRRJcontrol = True
+            Beta4Bcontrol = False
+            Beta4Acontrol = False
+            Beta3Bcontrol = False
+            Beta3Acontrol = False
+            Beta2Bcontrol = False
+            Beta2Acontrol = False
+            Beta1Bcontrol = False
+            Beta1Acontrol = False
+            PSARJcontrol = False
+            SSARJcontrol = False
+            STRRJcontrol = False
         if str(args[1])=="STRRJ":
             STRRJcontrol = True
+            Beta4Bcontrol = False
+            Beta4Acontrol = False
+            Beta3Bcontrol = False
+            Beta3Acontrol = False
+            Beta2Bcontrol = False
+            Beta2Acontrol = False
+            Beta1Bcontrol = False
+            Beta1Acontrol = False
+            PSARJcontrol = False
+            SSARJcontrol = False
+            PTRRJcontrol = False
         if str(args[1])=="PSARJ":
             PSARJcontrol = True
+            Beta4Bcontrol = False
+            Beta4Acontrol = False
+            Beta3Bcontrol = False
+            Beta3Acontrol = False
+            Beta2Bcontrol = False
+            Beta2Acontrol = False
+            Beta1Bcontrol = False
+            Beta1Acontrol = False
+            SSARJcontrol = False
+            PTRRJcontrol = False
+            STRRJcontrol = False
         if str(args[1])=="SSARJ":
             SSARJcontrol = True
+            Beta4Bcontrol = False
+            Beta4Acontrol = False
+            Beta3Bcontrol = False
+            Beta3Acontrol = False
+            Beta2Bcontrol = False
+            Beta2Acontrol = False
+            Beta1Bcontrol = False
+            Beta1Acontrol = False
+            PSARJcontrol = False
+            PTRRJcontrol = False
+            STRRJcontrol = False
 
     def incrementActive(self, *args):
         global Beta4Bcontrol, Beta3Bcontrol, Beta2Bcontrol, Beta1Bcontrol, Beta4Acontrol, Beta3Acontrol, Beta2Acontrol, Beta1Acontrol, PSARJcontrol, SSARJcontrol, PTRRJcontrol, STRRJcontrol
@@ -629,77 +778,181 @@ class ManualControlScreen(Screen):
 
     def incrementPSARJ(self, *args):
         global psarjmc
-        psarjmc += args[1]
+        psarjmc += args[0]
         self.serialWrite("PSARJ=" + str(psarjmc) + " ")   
      
     def incrementSSARJ(self, *args):
         global ssarjmc
-        ssarjmc += args[1]
+        ssarjmc += args[0]
         self.serialWrite("SSARJ=" + str(ssarjmc) + " ")   
      
     def incrementPTTRJ(self, *args):
         global ptrrjmc
-        ptrrjmc += args[1]
+        ptrrjmc += args[0]
         self.serialWrite("PTRRJ=" + str(ptrrjmc) + " ")   
      
     def incrementSTRRJ(self, *args):
         global strrjmc
-        strrjmc += args[1]
+        strrjmc += args[0]
         self.serialWrite("STRRJ=" + str(strrjmc) + " ")   
      
     def incrementBeta1B(self, *args):
         global beta1bmc
-        beta1bmc += args[1]
+        beta1bmc += args[0]
         self.serialWrite("Beta1B=" + str(beta1bmc) + " ")   
      
     def incrementBeta1A(self, *args):
         global beta1amc
-        beta1amc += args[1]
+        beta1amc += args[0]
         self.serialWrite("Beta1A=" + str(beta1amc) + " ")   
      
     def incrementBeta2B(self, *args):
         global beta2bmc
-        beta2bmc += args[1]
+        beta2bmc += args[0]
         self.serialWrite("Beta2B=" + str(beta2bmc) + " ")   
      
     def incrementBeta2A(self, *args):
         global beta2amc
-        beta2amc += args[1]
+        beta2amc += args[0]
         self.serialWrite("Beta2A=" + str(beta2amc) + " ")   
      
     def incrementBeta3B(self, *args):
         global beta3bmc
-        beta3bmc += args[1]
+        beta3bmc += args[0]
         self.serialWrite("Beta3B=" + str(beta3bmc) + " ")   
      
     def incrementBeta3A(self, *args):
         global beta3amc
-        beta3amc += args[1]
+        beta3amc += args[0]
         self.serialWrite("Beta3A=" + str(beta3amc) + " ")   
      
     def incrementBeta4B(self, *args):
         global beta4bmc
-        beta4bmc += args[1]
+        beta4bmc += args[0]
         self.serialWrite("Beta4B=" + str(beta4bmc) + " ")   
      
     def incrementBeta4A(self, *args):
         global beta4amc
-        beta4amc += args[1]
+        beta4amc += args[0]
         self.serialWrite("Beta4A=" + str(beta4amc) + " ")   
      
     def changeBoolean(self, *args):
         global manualcontrol
         manualcontrol = args[0]
     
+    def send90(self, *args):
+        self.serialWrite("Beta1A=90 ")
+        self.serialWrite("Beta1B=90 ")
+        self.serialWrite("Beta2A=90 ")
+        self.serialWrite("Beta2B=90 ")
+        self.serialWrite("Beta3A=90 ")
+        self.serialWrite("Beta3B=90 ")
+        self.serialWrite("Beta4A=90 ")
+        self.serialWrite("Beta4B=90 ")
+        self.serialWrite("PSARJ=90 ")
+        self.serialWrite("SSARJ=90 ")
+        self.serialWrite("PTRRJ=90 ")
+        self.serialWrite("STRRJ=90 ")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta1a'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta1b'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta2a'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta2b'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta3a'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta3b'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta4a'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta4b'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'psarj'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'ssarj'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'ptrrj'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'strrj'");
+        
+    def send0(self, *args):
+        self.serialWrite("Beta1A=0 ")
+        self.serialWrite("Beta1B=0 ")
+        self.serialWrite("Beta2A=0 ")
+        self.serialWrite("Beta2B=0 ")
+        self.serialWrite("Beta3A=0 ")
+        self.serialWrite("Beta3B=0 ")
+        self.serialWrite("Beta4A=0 ")
+        self.serialWrite("Beta4B=0 ")
+        self.serialWrite("PSARJ=0 ")
+        self.serialWrite("SSARJ=0 ")
+        self.serialWrite("PTRRJ=0 ")
+        self.serialWrite("STRRJ=0 ")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'psarj'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ssarj'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ptrrj'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'strrj'");
+    
     def serialWrite(self, *args):
-        print args
-        ser.write(*args)
+        #logWrite("Function call - serial write")
+        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
+        #print str(*args) 
+        if SerialConnection1:
+            #ser.write(*args)
+            try:
+                ser.write(*args)
+            except Exception:
+                ser = None
+                SerialConnection1 = False
+            #else:
+            #    ser.write(*args)
+        if SerialConnection2:
+            #ser2.write(*args)
+            try:
+                ser2.write(*args)
+            except Exception:
+                ser2 = None
+                SerialConnection2 = False
+            #else:
+            #    ser.write(*args)
+        if SerialConnection3:
+            #ser3.write(*args)
+            try:
+                ser3.write(*args)
+            except Exception:
+                ser3 = None
+                SerialConnection3 = False
+            #else:
+            #    ser.write(*args)
+        if SerialConnection4:
+            #ser4.write(*args)
+            try:
+                ser4.write(*args)
+            except Exception:
+                ser4 = None
+                SerialConnection4 = False
+            #else:
+            #    ser.write(*args)
+        if SerialConnection5:
+            #ser5.write(*args)
+            try:
+                ser5.write(*args)
+            except Exception:
+                ser5 = None
+                SerialConnection5 = False
+            #else:
+            #    ser.write(*args)
+
 
 class FakeOrbitScreen(Screen):
     
     def changeDemoBoolean(self, *args):
         global demoboolean
         demoboolean = args[0]
+
+    def HTVpopup(self, *args):
+        HTVpopup = Popup(title='HTV Berthing Orbit', content=Label(text='This will playback recorded data from when the Japanese HTV spacecraft berthed to the ISS. During berthing, the SARJs and nadir BGAs lock but the zenith BGAs autotrack'),text_size=self.size,size_hint=(0.5,0.3),auto_dismiss=True)
+        HTVpopup.text_size = self.size
+        HTVpopup.open()
 
     def startDemo(*args):
         global p2, runningDemo
@@ -715,50 +968,24 @@ class FakeOrbitScreen(Screen):
             pass
         else:
             runningDemo = False
+    
+    def startHTVDemo(*args):
+        global p2, runningDemo
+        if runningDemo == False:
+            p2 = subprocess.Popen("/home/pi/Mimic/Pi/demoHTVOrbit.sh")
+            runningDemo = True
+            logWrite("Successfully started Demo HTV Orbit script")
+    
+    def stopHTVDemo(*args):
+        global p2, runningDemo
+        try:
+            p2.kill()
+        except Exception:
+            pass
+        else:
+            logWrite("Successfully stopped Demo HTV Orbit script")
+            runningDemo = False
 
-    def send90(self, *args):
-        self.serialWrite("Beta1A=90 ")
-        self.serialWrite("Beta1B=90 ")
-        self.serialWrite("Beta2A=90 ")
-        self.serialWrite("Beta2B=90 ")
-        self.serialWrite("Beta3A=90 ")
-        self.serialWrite("Beta3B=90 ")
-        self.serialWrite("Beta4A=90 ")
-        self.serialWrite("Beta4B=90 ")
-        self.serialWrite("PSARJ=90 ")
-        self.serialWrite("SSARJ=90 ")
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta1a'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta1b'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta2a'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta2b'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta3a'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta3b'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta4a'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta4b'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'psarj'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'ssarj'");
-        
-    def send0(self, *args):
-        self.serialWrite("Beta1A=0 ")
-        self.serialWrite("Beta1B=0 ")
-        self.serialWrite("Beta2A=0 ")
-        self.serialWrite("Beta2B=0 ")
-        self.serialWrite("Beta3A=0 ")
-        self.serialWrite("Beta3B=0 ")
-        self.serialWrite("Beta4A=0 ")
-        self.serialWrite("Beta4B=0 ")
-        self.serialWrite("PSARJ=0 ")
-        self.serialWrite("SSARJ=0 ")
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1a'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1b'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2a'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2b'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3a'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3b'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4a'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4b'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'psarj'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ssarj'");
     
     def serialWrite(self, *args):
         #logWrite("Function call - serial write")
@@ -963,8 +1190,8 @@ class MainApp(App):
 
         Clock.schedule_once(self.checkCrew, 20)
         Clock.schedule_once(self.getTLE, 30) #uncomment when internet works again
-        Clock.schedule_interval(self.getTLE, 600) #uncomment when internet works again
-        #Clock.schedule_interval(self.getTLE, 3600)
+        #Clock.schedule_interval(self.getTLE, 600) #uncomment when internet works again
+        Clock.schedule_interval(self.getTLE, 3600)
         Clock.schedule_interval(self.check_internet, 1)
         Clock.schedule_interval(self.check_serial, 1)
         return root
@@ -974,7 +1201,7 @@ class MainApp(App):
         
         if ser == None:
             try:
-                ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
+                ser = serial.Serial('/dev/ttyACM0', 9600, timeout=0)
             except Exception:
                 logWrite("Warning - Serial Connection ACM0 not found")
                 SerialConnection1 = False
@@ -994,7 +1221,7 @@ class MainApp(App):
 
         if ser2 == None:
             try:
-                ser2 = serial.Serial('/dev/ttyACM1', 115200, timeout=0)
+                ser2 = serial.Serial('/dev/ttyACM1', 9600, timeout=0)
             except Exception:
                 logWrite("Warning - Serial Connection ACM1 not found")
                 SerialConnection2 = False
@@ -1014,7 +1241,7 @@ class MainApp(App):
 
         if ser3 == None:
             try:
-                ser3 = serial.Serial('/dev/ttyACM2', 115200, timeout=0)
+                ser3 = serial.Serial('/dev/ttyACM2', 9600, timeout=0)
             except Exception:
                 logWrite("Warning - Serial Connection ACM2 not found")
                 SerialConnection3 = False
@@ -1034,7 +1261,7 @@ class MainApp(App):
 
         if ser4 == None:
             try:
-                ser4 = serial.Serial('/dev/ttyAMA00', 115200, timeout=0)
+                ser4 = serial.Serial('/dev/ttyAMA00', 9600, timeout=0)
             except Exception:
                 logWrite("Warning - Serial Connection AMA00 not found")
                 SerialConnection4 = False
@@ -1054,7 +1281,7 @@ class MainApp(App):
 
         if ser5 == None:
             try:
-                ser5 = serial.Serial('/dev/ttyUSB0', 115200, timeout=0)
+                ser5 = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
             except Exception:
                 logWrite("Warning - Serial Connection USB0 not found")
                 SerialConnection5 = False
@@ -1454,24 +1681,27 @@ class MainApp(App):
                     results.append('\n'.join(
                         (next(text), next(text), next(text))))
             return results
-        
-        req = urllib2.urlopen('http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html')
-        soup = BeautifulSoup(req, 'html.parser')
-        body = soup.find_all("pre")
-        results = []
-        for tag in body:
-            if "ISS" in tag.text:
-                results.extend(process_tag_text(tag.text))
+        if internet: 
+            req = urllib2.urlopen('http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html')
+            soup = BeautifulSoup(req, 'html.parser')
+            body = soup.find_all("pre")
+            results = []
+            for tag in body:
+                if "ISS" in tag.text:
+                    results.extend(process_tag_text(tag.text))
 
-        if len(results) > 0:
-            parsed = str(results[0]).split('\n')
-            line1 = parsed[1]
-            line2 = parsed[2]
-            print line1
-            print line2
-            tle_rec = ephem.readtle("ISS (ZARYA)",str(line1),str(line2))
-            TLE_acquired = True
-            print "TLE Success!"
+            if len(results) > 0:
+                parsed = str(results[0]).split('\n')
+                line1 = parsed[1]
+                line2 = parsed[2]
+                print line1
+                print line2
+                tle_rec = ephem.readtle("ISS (ZARYA)",str(line1),str(line2))
+                TLE_acquired = True
+                print "TLE Success!"
+            else:
+                print "TLE not acquired"
+                TLE_acquired = False
         else:
             print "TLE not acquired"
             TLE_acquired = False
@@ -1720,6 +1950,9 @@ class MainApp(App):
         if SerialConnection1 or SerialConnection2 or SerialConnection3 or SerialConnection4 or SerialConnection5:
             self.mimic_screen.ids.mimicstartbutton.disabled = False
             self.fakeorbit_screen.ids.DemoStart.disabled = False
+            self.fakeorbit_screen.ids.HTVDemoStart.disabled = False
+            self.control_screen.ids.set90.disabled = False
+            self.control_screen.ids.set0.disabled = False
             if mimicbutton:
                 self.mimic_screen.ids.mimicstartbutton.disabled = True
                 self.mimic_screen.ids.arduino.source = "/home/pi/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
@@ -1729,10 +1962,15 @@ class MainApp(App):
             self.mimic_screen.ids.mimicstartbutton.disabled = True
             self.mimic_screen.ids.mimicstartbutton.text = "Transmit"
             self.fakeorbit_screen.ids.DemoStart.disabled = True
+            self.fakeorbit_screen.ids.HTVDemoStart.disabled = True
+            self.control_screen.ids.set90.disabled = True
+            self.control_screen.ids.set0.disabled = True
 
         if runningDemo == True:
             self.fakeorbit_screen.ids.DemoStart.disabled = True
+            self.fakeorbit_screen.ids.HTVDemoStart.disabled = True
             self.fakeorbit_screen.ids.DemoStop.disabled = False
+            self.fakeorbit_screen.ids.HTVDemoStop.disabled = False
             self.fakeorbit_screen.ids.arduino.source = "/home/pi/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
 
         c.execute('select Value from telemetry')
@@ -2398,7 +2636,7 @@ class MainApp(App):
                fakeorbitboolean = True
             self.signal_stale()
 
-        if (mimicbutton == True and float(aos) == 1.00): 
+        if mimicbutton: # and float(aos) == 1.00): 
             self.serialWrite("PSARJ=" + psarj + " ")
             self.serialWrite("SSARJ=" + ssarj + " ")
             self.serialWrite("PTRRJ=" + ptrrj + " ")
@@ -2422,7 +2660,7 @@ class MainApp(App):
             self.serialWrite("Voltage4B=" + v4b + " ")
         
         #data to send regardless of signal status
-        if mimicbutton == True: 
+        if mimicbutton: 
             self.serialWrite("Module=" + module + " ")
 
 #All GUI Screens are on separate kv files
