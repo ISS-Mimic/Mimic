@@ -77,14 +77,14 @@ Adafruit_DCMotor *myMotorSSARJ = AFMS2.getMotor(2);
 
 
 Encoder myEnc2A(0, 1);
-Encoder myEnc4A(4, 5);
+Encoder myEnc4A(2, 3); // was 4,5 but motor was oozing, digital pins were toggleing, but count wasn't incrementing (interrupt prob?) 
 // Pins 9, 10 are used by Servos.
 // Odd issues with Pins 2-4.
 // Pin 13 is nominally used by LED and general guidance from encoder library is to avoid it.
-Encoder myEnc2B(6, 7);
+Encoder myEnc2B(7, 8); // BCM changed from 6,7 to 7,8 on Nov 15, 2018
 Encoder myEnc4B(11, 12);
 
-Encoder myEncPSARJ(14, 15);
+Encoder myEncPSARJ(9, 10);// BCM changed from 14,15 to 9,10 since pin 15 always staed high for some reason on Nov 15, 2018
 Encoder myEncSSARJ(16, 17);
 
 // Per here, Analog pins on Metro M0 are also digtial IO. https://learn.adafruit.com/adafruit-metro-m0-express-designed-for-circuitpython/pinouts
@@ -93,13 +93,13 @@ Encoder myEncSSARJ(16, 17);
 
 int D0 = 0;
 int D1 = 0;
-//int D2 =0;
-//int D3 =0;
-int D4 = 0;
-int D5 = 0;
-int D6 = 0;
+int D2 =0;
+int D3 =0;
+//int D4 = 0;
+//int D5 = 0;
+//int D6 = 0;
 int D7 = 0;
-//int D8 =0;
+int D8 =0;
 //int D9 =0;
 //int D10=0;
 int D11 = 0;
@@ -135,6 +135,8 @@ void setup() {
   // Set some pins to high, just for convenient connection to power Hall Effect Sensors - can't, per above use of these pins
   pinMode(13, OUTPUT);
   digitalWrite(13, HIGH);
+  pinMode(6, OUTPUT);
+  digitalWrite(6, HIGH);
   //pinMode(A1, OUTPUT);
   //digitalWrite(A1, HIGH);
   //pinMode(A2, OUTPUT);
