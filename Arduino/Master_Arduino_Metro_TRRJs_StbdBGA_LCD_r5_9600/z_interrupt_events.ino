@@ -13,7 +13,7 @@ void checkSerial()
   {
     test = Serial.readString();
   }
-//  Serial1.println(test);
+  //  Serial1.println(test);
   char sz[test.length() + 1];
   char copy[test.length() + 1];
   strcpy(sz, test.c_str());
@@ -31,19 +31,19 @@ void checkSerial()
       PSARJ = (test2.substring(delimeter + 1)).toFloat();
     }
 
-else if (test2.substring(0, delimeter) == "Kp_PSARJ")
+    else if (test2.substring(0, delimeter) == "Kp_PSARJ")
     {
       Kp_PSARJ = (test2.substring(delimeter + 1)).toFloat();
     }
-else if (test2.substring(0, delimeter) == "Ki_PSARJ")
+    else if (test2.substring(0, delimeter) == "Ki_PSARJ")
     {
       Ki_PSARJ = (test2.substring(delimeter + 1)).toFloat();
     }
-else if (test2.substring(0, delimeter) == "Kd_PSARJ")
+    else if (test2.substring(0, delimeter) == "Kd_PSARJ")
     {
       Kd_PSARJ = (test2.substring(delimeter + 1)).toFloat();
     }
-    
+
     else if (test2.substring(0, delimeter) == "SSARJ")
     {
       SSARJ = (test2.substring(delimeter + 1)).toFloat();

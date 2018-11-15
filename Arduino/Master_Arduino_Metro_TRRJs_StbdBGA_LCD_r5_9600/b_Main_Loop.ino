@@ -3,13 +3,13 @@ void loop() {
 
   D0 = digitalRead(0);
   D1 = digitalRead(1);
-//  D2 = digitalRead(2);
+  //  D2 = digitalRead(2);
   //D3 = digitalRead(3);
   D4 = digitalRead(4);
   D5 = digitalRead(5);
-//  D6 = digitalRead(6);
-//  D7 = digitalRead(7);
-//  D8 = digitalRead(8);
+  //  D6 = digitalRead(6);
+  //  D7 = digitalRead(7);
+  //  D8 = digitalRead(8);
   //D9= digitalRead(9);
   //D10= digitalRead(10);
   D11 = digitalRead(11);
@@ -17,8 +17,8 @@ void loop() {
   //D13 = digitalRead(13);
   D14 = digitalRead(14);
   D15 = digitalRead(15);
-//  D16 = digitalRead(16);
-//  D17 = digitalRead(17);
+  //  D16 = digitalRead(16);
+  //  D17 = digitalRead(17);
 
 
 
@@ -55,7 +55,7 @@ void loop() {
   // ============== Time measures ===================================================
   LoopStartMillis = millis();
   delta_t_millis = max(LoopStartMillis - previousMillis, 1); // ensure always equal to at least one, for later inversion
-  inverse_delta_t_millis = 1/((float) delta_t_millis); // BCM mod 10/28/2018: for some reason, was not inverted (just = value, rather than 1/value).
+  inverse_delta_t_millis = 1 / ((float) delta_t_millis); // BCM mod 10/28/2018: for some reason, was not inverted (just = value, rather than 1/value).
   millisChPt1 = millis() - LoopStartMillis;
   // ================================================================================
 
@@ -63,7 +63,7 @@ void loop() {
   Count_B3B = myEnc3B.read();
   Count_B1A = myEnc1A.read();
   Count_B3A = myEnc3A.read();
-//  Count_PSARJ = myEncPSARJ.read();
+  //  Count_PSARJ = myEncPSARJ.read();
   //  Count_SSARJ = myEncSSARJ.read();
   //   Serial.println(currentPosition); //shows you the current position in the serial monitor  // Feb08
 
@@ -210,7 +210,7 @@ void loop() {
   //=====================================================================================
 
 
-//  // ============== BGA 4B ==========================================================
+  //  // ============== BGA 4B ==========================================================
 
   // 150 motor shaft rotations / gearbox output shaft rotation * 12 encoder counts / motor rotation  /(360 deg per /output rotation) = 150*12/360 = 5 encoder counts per output shaft degree
   Pos_B3B = float(Count_B3B) / 5;
@@ -257,70 +257,70 @@ void loop() {
   myMotorB3B->setSpeed(CmdSpeed_B3B);// + 20);
   //=====================================================================================
 
-//  //  // ============== PSARJ    ============================================================
-//  Pos_PSARJ = float(Count_PSARJ) / (5*40/12); // / 25; // 150:1 gear ratio, 6 encoder counts per motor shaft rotation 150/6=25;  42 teeth on bull gear. T12 pinion
-//
-//  PosErr_PSARJ = PSARJ - Pos_PSARJ; // Compute Pos_PSARJition Error
-//
-//  // Kill error if error within tolerance
-//if (abs(PosErr_PSARJ)<0.5) {
-//  PosErr_PSARJ=0;
-//  IntOld_PSARJ=0;
-//  PosErr_old_PSARJ=0;
-//}  
-//  dPosErr_PSARJ = PosErr_PSARJ - PosErr_old_PSARJ;
-//  dErrDt_PSARJ = dPosErr_PSARJ * inverse_delta_t_millis * 0.001; // For Derivative
-//  // IntNow_PSARJ = IntOld_PSARJ + PosErr_PSARJ * inverse_delta_t_millis * 0.001; // For Integrator
-//  IntNow_PSARJ = IntOld_PSARJ + PosErr_PSARJ * delta_t_millis * 0.001; // For Integrator; BCM mod 10/28/2018
-//
-//int sign=0;
-//
-//
-//
-//if (abs(PosErr_PSARJ) == PosErr_PSARJ){
-//  sign = 1;
-//  }
-//else{
-//  sign = -1;
-//}
-//
-//IntNow_PSARJ = min(abs(IntNow_PSARJ),70)*sign;
-//  
-//  IntOld_PSARJ = IntNow_PSARJ;
-//  PosErr_old_PSARJ = PosErr_PSARJ; // For use on the next iteration
-//  // Integrator reset when error sign changes
-//  if (PosErr_old_PSARJ * PosErr_PSARJ < 0) { // sign on error has changed
-//    IntNow_PSARJ = 0;
-//    IntOld_PSARJ = 0;
-//  }
-//
-//  // Calculate motor speed setpoint based on PID constants and computed params for this iteration.
-// 
-////int sign=0;
-//if (abs(PosErr_PSARJ) == PosErr_PSARJ){
-//  sign = 1;
-//  }
-//else{
-//  sign = -1;
-//}
-//
-// int tmp_KP=sign * min(abs(PosErr_PSARJ),100);
-//
-//  tmpSpeed_PSARJ = Kp_PSARJ * tmp_KP + Kd_PSARJ * (dErrDt_PSARJ) + Ki_PSARJ * IntNow_PSARJ;
-//  
-//  CmdSpeed_PSARJ=min(abs(tmpSpeed_PSARJ),255); // BCM added 10/28/2018 to limit value to 255, since expecting 8-bit integer (uint8_t).  May want to later update data type.
-//  //CmdSpeed_PSARJ = map(abs(tmpSpeed_PSARJ), 2, 250, 2, 250); // Deadband seems to be about 40 (for 5V input to motor board);
-// // CmdSpeed_PSARJ = max(min(CmdSpeed_PSARJ, 150), 0); // At least 10, at most 250.  Update as needed per motor.
-//
-//  // Set motor speed
-//  if (tmpSpeed_PSARJ < 0) {
-//    myMotorPSARJ->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
-//  }
-//  else {
-//    myMotorPSARJ->run(BACKWARD);
-//  }
-//  myMotorPSARJ->setSpeed(CmdSpeed_PSARJ);// + 20);
-//  //  //====================================================================================
+  //  //  // ============== PSARJ    ============================================================
+  //  Pos_PSARJ = float(Count_PSARJ) / (5*40/12); // / 25; // 150:1 gear ratio, 6 encoder counts per motor shaft rotation 150/6=25;  42 teeth on bull gear. T12 pinion
+  //
+  //  PosErr_PSARJ = PSARJ - Pos_PSARJ; // Compute Pos_PSARJition Error
+  //
+  //  // Kill error if error within tolerance
+  //if (abs(PosErr_PSARJ)<0.5) {
+  //  PosErr_PSARJ=0;
+  //  IntOld_PSARJ=0;
+  //  PosErr_old_PSARJ=0;
+  //}
+  //  dPosErr_PSARJ = PosErr_PSARJ - PosErr_old_PSARJ;
+  //  dErrDt_PSARJ = dPosErr_PSARJ * inverse_delta_t_millis * 0.001; // For Derivative
+  //  // IntNow_PSARJ = IntOld_PSARJ + PosErr_PSARJ * inverse_delta_t_millis * 0.001; // For Integrator
+  //  IntNow_PSARJ = IntOld_PSARJ + PosErr_PSARJ * delta_t_millis * 0.001; // For Integrator; BCM mod 10/28/2018
+  //
+  //int sign=0;
+  //
+  //
+  //
+  //if (abs(PosErr_PSARJ) == PosErr_PSARJ){
+  //  sign = 1;
+  //  }
+  //else{
+  //  sign = -1;
+  //}
+  //
+  //IntNow_PSARJ = min(abs(IntNow_PSARJ),70)*sign;
+  //
+  //  IntOld_PSARJ = IntNow_PSARJ;
+  //  PosErr_old_PSARJ = PosErr_PSARJ; // For use on the next iteration
+  //  // Integrator reset when error sign changes
+  //  if (PosErr_old_PSARJ * PosErr_PSARJ < 0) { // sign on error has changed
+  //    IntNow_PSARJ = 0;
+  //    IntOld_PSARJ = 0;
+  //  }
+  //
+  //  // Calculate motor speed setpoint based on PID constants and computed params for this iteration.
+  //
+  ////int sign=0;
+  //if (abs(PosErr_PSARJ) == PosErr_PSARJ){
+  //  sign = 1;
+  //  }
+  //else{
+  //  sign = -1;
+  //}
+  //
+  // int tmp_KP=sign * min(abs(PosErr_PSARJ),100);
+  //
+  //  tmpSpeed_PSARJ = Kp_PSARJ * tmp_KP + Kd_PSARJ * (dErrDt_PSARJ) + Ki_PSARJ * IntNow_PSARJ;
+  //
+  //  CmdSpeed_PSARJ=min(abs(tmpSpeed_PSARJ),255); // BCM added 10/28/2018 to limit value to 255, since expecting 8-bit integer (uint8_t).  May want to later update data type.
+  //  //CmdSpeed_PSARJ = map(abs(tmpSpeed_PSARJ), 2, 250, 2, 250); // Deadband seems to be about 40 (for 5V input to motor board);
+  // // CmdSpeed_PSARJ = max(min(CmdSpeed_PSARJ, 150), 0); // At least 10, at most 250.  Update as needed per motor.
+  //
+  //  // Set motor speed
+  //  if (tmpSpeed_PSARJ < 0) {
+  //    myMotorPSARJ->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
+  //  }
+  //  else {
+  //    myMotorPSARJ->run(BACKWARD);
+  //  }
+  //  myMotorPSARJ->setSpeed(CmdSpeed_PSARJ);// + 20);
+  //  //  //====================================================================================
 
 
 
@@ -416,30 +416,30 @@ void loop() {
     Serial.print(Count_B1A);
     Serial.print(",Count_B3A: ");
     Serial.print(Count_B3A);
-        Serial.print("Count_B1B: ");
+    Serial.print("Count_B1B: ");
     Serial.print(Count_B1B);
     Serial.print(",Count_B3B: ");
-    Serial.print(Count_B3B);    
-//    Serial.print(",Count_PSARJ: ");
-//    Serial.print(Count_PSARJ);
+    Serial.print(Count_B3B);
+    //    Serial.print(",Count_PSARJ: ");
+    //    Serial.print(Count_PSARJ);
     Serial.print(",D0:");
-      Serial.print(D0);
+    Serial.print(D0);
     Serial.print(",D1:");
-      Serial.print(D1);
-//    Serial.print(",D2:");
-//    Serial.print(D2);
-//    Serial.print(",D3:");
-//    Serial.print(D3);
+    Serial.print(D1);
+    //    Serial.print(",D2:");
+    //    Serial.print(D2);
+    //    Serial.print(",D3:");
+    //    Serial.print(D3);
     Serial.print(",D4:");
     Serial.print(D4);
     Serial.print(",D5: ");
     Serial.print(D5);
-//    Serial.print(",D6:");
-//    Serial.print(D6);
-//    Serial.print(",D7: ");
-//    Serial.print(D7);
-//    Serial.print(",D8:");
-//    Serial.print(D8);
+    //    Serial.print(",D6:");
+    //    Serial.print(D6);
+    //    Serial.print(",D7: ");
+    //    Serial.print(D7);
+    //    Serial.print(",D8:");
+    //    Serial.print(D8);
     Serial.print(",D11: ");
     Serial.print(D11);
     Serial.print(",D12: ");
@@ -450,13 +450,13 @@ void loop() {
     Serial.print(D14);
     Serial.print(",D15: ");
     Serial.print(D15);
-//    Serial.print(",D16: ");
-//    Serial.print(D16);
-//    Serial.print(",D17: ");
-//    Serial.print(D17);
+    //    Serial.print(",D16: ");
+    //    Serial.print(D16);
+    //    Serial.print(",D17: ");
+    //    Serial.print(D17);
 
-//    Serial.print("  Count_SSARJ: ");
-//    Serial.print(Count_SSARJ);
+    //    Serial.print("  Count_SSARJ: ");
+    //    Serial.print(Count_SSARJ);
     Serial.print("| PosErrs ");
     Serial.print(PosErr_B1A);
     Serial.print(", ");
@@ -465,41 +465,41 @@ void loop() {
     Serial.print(PosErr_B1B);
     Serial.print(", ");
     Serial.print(PosErr_B3B);
-//    Serial.print(", ");
-//    Serial.print(PosErr_PSARJ);
+    //    Serial.print(", ");
+    //    Serial.print(PosErr_PSARJ);
     //
-//    Serial.print(", ");
-//    Serial.print("Integer Mtr Spd Cmd to Shield(PortSrj):");
-//    Serial.print(CmdSpeed_PSARJ);
+    //    Serial.print(", ");
+    //    Serial.print("Integer Mtr Spd Cmd to Shield(PortSrj):");
+    //    Serial.print(CmdSpeed_PSARJ);
     //Serial.print(PosErr_SSARJ);
     Serial.println("|  ");
 
     //
-      // LCD =======================================
-      // text display tests
-      display.setTextSize(1);
-      display.setTextColor(WHITE);
-      display.setCursor(0,0);
-      display.setTextColor(BLACK, WHITE); // 'inverted' text
-      display.println("Jnt|-ERR-|-CMD-|-ACT-");
-    
+    // LCD =======================================
+    // text display tests
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 0);
+    display.setTextColor(BLACK, WHITE); // 'inverted' text
+    display.println("Jnt|-ERR-|-CMD-|-ACT-");
+
     //   display.println("3600.0|3600.0|3600.0");
     //     float d=12345.6789;
-        //tostrf(floatVar, minStringWidthIncDecimalPoint, numVarsAfterDecimal, charBuf);
-    
-    
-        //int sensorValue = analogRead(A0);
-      //String stringThree = "I want " + sensorValue;
+    //tostrf(floatVar, minStringWidthIncDecimalPoint, numVarsAfterDecimal, charBuf);
+
+
+    //int sensorValue = analogRead(A0);
+    //String stringThree = "I want " + sensorValue;
     //  String temp="1A:" + PosErr_B1A + "|" + Count_B3B;
     //
     //dtostrf(PosErr_B1A, 4, 1, dtostrfbuffer);
     //sendBuffer
     //  sprintf(sendBuffer, "X%dY%dT", first, second);
-      //  display.print("1A:");
-      //  dtostrf(PosErr_B1A, 4, 1, dtostrfbuffer);
-    
-      //Goal is "1A:[PosErr]|[PosCmd]|[ActPos]
-      display.setTextColor(WHITE, BLACK);
+    //  display.print("1A:");
+    //  dtostrf(PosErr_B1A, 4, 1, dtostrfbuffer);
+
+    //Goal is "1A:[PosErr]|[PosCmd]|[ActPos]
+    display.setTextColor(WHITE, BLACK);
     display.print("1A:");
     dtostrf(PosErr_B1A, 5, 1, dtostrfbuffer);
     display.print( dtostrfbuffer);
@@ -509,8 +509,8 @@ void loop() {
     display.print("|");
     dtostrf(Pos_B1A, 5, 1, dtostrfbuffer);
     display.println( dtostrfbuffer);
-    
-     display.setTextColor(BLACK, WHITE); // 'inverted' text
+
+    display.setTextColor(BLACK, WHITE); // 'inverted' text
     display.print("3A:");
     dtostrf(PosErr_B3A, 5, 1, dtostrfbuffer);
     display.print( dtostrfbuffer);
@@ -520,7 +520,7 @@ void loop() {
     display.print("|");
     dtostrf(Pos_B3A, 5, 1, dtostrfbuffer);
     display.println( dtostrfbuffer);
-    
+
     display.setTextColor(WHITE, BLACK);
     display.print("1B:");
     dtostrf(PosErr_B1B, 5, 1, dtostrfbuffer);
@@ -531,8 +531,8 @@ void loop() {
     display.print("|");
     dtostrf(Pos_B1B, 5, 1, dtostrfbuffer);
     display.println( dtostrfbuffer);
-    
-     display.setTextColor(BLACK, WHITE); // 'inverted' text
+
+    display.setTextColor(BLACK, WHITE); // 'inverted' text
     display.print("3B:");
     dtostrf(PosErr_B3B, 5, 1, dtostrfbuffer);
     display.print( dtostrfbuffer);
@@ -542,61 +542,61 @@ void loop() {
     display.print("|");
     dtostrf(Pos_B3B, 5, 1, dtostrfbuffer);
     display.println( dtostrfbuffer);
-    
-//    display.setTextColor(WHITE, BLACK);
-//    display.print("SS:");
-//    dtostrf(PosErr_SSARJ, 5, 1, dtostrfbuffer);
-//    display.print( dtostrfbuffer);
-//    display.print("|");
-//    dtostrf(SSARJ, 5, 1, dtostrfbuffer); //Cmd Pos
-//    display.print( dtostrfbuffer);
-//    display.print("|");
-//    dtostrf(Pos_SSARJ, 5, 1, dtostrfbuffer);
-//    display.println( dtostrfbuffer);
-    
-//    
-//    display.setTextColor(BLACK, WHITE); // 'inverted' text
-//    display.print("PS:");
-//    dtostrf(PosErr_PSARJ, 5, 1, dtostrfbuffer);
-//    display.print( dtostrfbuffer);
-//    display.print("|");
-//    dtostrf(PSARJ, 5, 1, dtostrfbuffer); //Cmd Pos
-//    display.print( dtostrfbuffer);
-//    display.print("|");
-//    dtostrf(Pos_PSARJ, 5, 1, dtostrfbuffer);
-//    display.println( dtostrfbuffer);
-//
-//// PID vals
-//    display.print("Kpid:");
-//    dtostrf(Kp_PSARJ, 3, 0, dtostrfbuffer);
-//    display.print( dtostrfbuffer);
-//    display.print(",");
-//    dtostrf(Ki_PSARJ, 3, 0, dtostrfbuffer);
-//    display.print( dtostrfbuffer);
-//    display.print(",");
-//   dtostrf(Kd_PSARJ, 3, 0, dtostrfbuffer);
-//    display.print( dtostrfbuffer);
-//    display.print(",Mtr:");
-//    dtostrf(CmdSpeed_PSARJ, 3, 0, dtostrfbuffer);
-//    display.println( dtostrfbuffer);
-// end PID vals
+
+    //    display.setTextColor(WHITE, BLACK);
+    //    display.print("SS:");
+    //    dtostrf(PosErr_SSARJ, 5, 1, dtostrfbuffer);
+    //    display.print( dtostrfbuffer);
+    //    display.print("|");
+    //    dtostrf(SSARJ, 5, 1, dtostrfbuffer); //Cmd Pos
+    //    display.print( dtostrfbuffer);
+    //    display.print("|");
+    //    dtostrf(Pos_SSARJ, 5, 1, dtostrfbuffer);
+    //    display.println( dtostrfbuffer);
+
+    //
+    //    display.setTextColor(BLACK, WHITE); // 'inverted' text
+    //    display.print("PS:");
+    //    dtostrf(PosErr_PSARJ, 5, 1, dtostrfbuffer);
+    //    display.print( dtostrfbuffer);
+    //    display.print("|");
+    //    dtostrf(PSARJ, 5, 1, dtostrfbuffer); //Cmd Pos
+    //    display.print( dtostrfbuffer);
+    //    display.print("|");
+    //    dtostrf(Pos_PSARJ, 5, 1, dtostrfbuffer);
+    //    display.println( dtostrfbuffer);
+    //
+    //// PID vals
+    //    display.print("Kpid:");
+    //    dtostrf(Kp_PSARJ, 3, 0, dtostrfbuffer);
+    //    display.print( dtostrfbuffer);
+    //    display.print(",");
+    //    dtostrf(Ki_PSARJ, 3, 0, dtostrfbuffer);
+    //    display.print( dtostrfbuffer);
+    //    display.print(",");
+    //   dtostrf(Kd_PSARJ, 3, 0, dtostrfbuffer);
+    //    display.print( dtostrfbuffer);
+    //    display.print(",Mtr:");
+    //    dtostrf(CmdSpeed_PSARJ, 3, 0, dtostrfbuffer);
+    //    display.println( dtostrfbuffer);
+    // end PID vals
     //float Kp_PSARJ = 10; // Proportional Gain of PID
-//float Ki_PSARJ = 2; // Integral Gain of PID
-//float Kd_PSARJ = 2; // Derivative Gain of PID
+    //float Ki_PSARJ = 2; // Integral Gain of PID
+    //float Kd_PSARJ = 2; // Derivative Gain of PID
 
 
-//    display.print(",PSMtrSpdU8bot:");
-//    dtostrf(CmdSpeed_PSARJ, 5, 1, dtostrfbuffer);
-//    display.println( dtostrfbuffer);
-    
-    
-    
+    //    display.print(",PSMtrSpdU8bot:");
+    //    dtostrf(CmdSpeed_PSARJ, 5, 1, dtostrfbuffer);
+    //    display.println( dtostrfbuffer);
+
+
+
     display.setTextColor(WHITE, BLACK);
     display.print("STJ:");
     dtostrf(STRRJ, 6, 1, dtostrfbuffer);
     display.print( dtostrfbuffer);
-    
-    
+
+
     display.setTextColor(BLACK, WHITE); // 'inverted' text
     display.print("|PTJ:");
     dtostrf(PTRRJ, 6, 1, dtostrfbuffer);
@@ -615,9 +615,9 @@ void loop() {
     ////        display.println("10. Hello, world!");
     //
     //
-      display.display();
-      //delay(10);
-      display.clearDisplay();
+    display.display();
+    //delay(10);
+    display.clearDisplay();
     //
     //  // LCD =======================================
   }
