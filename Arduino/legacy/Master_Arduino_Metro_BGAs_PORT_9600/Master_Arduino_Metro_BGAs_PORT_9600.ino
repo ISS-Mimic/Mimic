@@ -28,8 +28,8 @@ Adafruit_DCMotor *myMotorB2B = AFMS.getMotor(3);
 Adafruit_DCMotor *myMotorB4B = AFMS.getMotor(4);
 
 
-Encoder myEnc2A(2, 3);
-Encoder myEnc4A(5, 6); //for some reason, these do not register blips if motor moves fast, within a few deg of desired position
+Encoder myEnc2A(5, 6);
+Encoder myEnc4A(0, 1); //for some reason, these do not register blips if motor moves fast, within a few deg of desired position
 // Pins 9, 10 are used by Servos.  Odd issues with Pins 2-4.
 Encoder myEnc2B(7, 8);
 Encoder myEnc4B(11, 12);
@@ -49,7 +49,8 @@ digitalWrite(A2, HIGH);
   servo1.attach(10);
   servo2.attach(9);
   AFMS.begin(200);  // I set this at 200 previously to reduce audible buzz.
-  Serial.begin(115200);
+ // Serial.begin(115200);
+    Serial.begin(9600);
   //Serial3.begin(115200);          //Serial1 is connected to the RasPi
   Serial.setTimeout(50);
  // Serial1.begin(9600);
