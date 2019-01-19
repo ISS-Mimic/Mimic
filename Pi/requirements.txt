@@ -1,0 +1,9 @@
+pytz==2017.3
+scipy==1.0.0
+matplotlib==2.1.0
+numpy==1.14.0
+wikipedia==1.4.0
+beautifulsoup4==4.7.1
+pyephem==3.7.6.0
+kivy==1.10.1
+pyserial==3.4
