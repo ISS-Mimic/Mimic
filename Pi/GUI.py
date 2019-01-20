@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import urllib2 #try to replace these calls with urlrequest which is async
+import urllib.request, urllib.error, urllib.parse #try to replace these calls with urlrequest which is async
 from datetime import datetime #used
 import os #used to remove database on program exit
 import subprocess #used to start/stop Javascript telemetry program
@@ -72,7 +72,7 @@ except Exception:
 else:
     SerialConnection1 = True
     logWrite("Successful connection to Serial on ACMO")
-    print str(ser)
+    print(str(ser))
 
 try:
     ser2 = serial.Serial('/dev/ttyACM1', 9600, timeout=0)
@@ -83,7 +83,7 @@ except Exception:
 else:
     SerialConnection2 = True
     logWrite("Successful connection to Serial on ACM1")
-    print str(ser2)
+    print(str(ser2))
 
 try:
     ser3 = serial.Serial('/dev/ttyACM2', 9600, timeout=0)
@@ -94,7 +94,7 @@ except Exception:
 else:
     SerialConnection3 = True
     logWrite("Successful connection to Serial on ACM2")
-    print str(ser3)
+    print(str(ser3))
 
 try:
     ser4 = serial.Serial('/dev/ttyAMA00', 9600, timeout=0)
@@ -105,7 +105,7 @@ except Exception:
 else:
     SerialConnection4 = True
     logWrite("Successful connection to Serial on AMA0O")
-    print str(ser4)
+    print(str(ser4))
 
 try:
     ser5 = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
@@ -116,7 +116,7 @@ except Exception:
 else:
     SerialConnection5 = True
     logWrite("Successful connection to Serial on USBO")
-    print str(ser5)
+    print(str(ser5))
 
 #----------------Open SQLITE3 Database that holds the current ISS Telemetry--------------
 conn = sqlite3.connect('/dev/shm/iss_telemetry.db')
@@ -1091,7 +1091,7 @@ class MimicScreen(Screen, EventDispatcher):
 
     def startproc(*args):
         global p
-        print "mimic starting node"
+        print("mimic starting node")
         p = subprocess.Popen(["node", "/home/pi/Mimic/Pi/ISS_Telemetry.js"])
 
     def killproc(*args):
@@ -1194,7 +1194,7 @@ class MainApp(App):
             else:
                 SerialConnection1 = True
                 logWrite("Successful connection to Serial on ACMO")
-                print str(ser)
+                print(str(ser))
         else:
             try:
                 ser.write("test")
@@ -1214,7 +1214,7 @@ class MainApp(App):
             else:
                 SerialConnection2 = True
                 logWrite("Successful connection to Serial on ACM1")
-                print str(ser2)
+                print(str(ser2))
         else:
             try:
                 ser2.write("test")
@@ -1234,7 +1234,7 @@ class MainApp(App):
             else:
                 SerialConnection3 = True
                 logWrite("Successful connection to Serial on ACM2")
-                print str(ser3)
+                print(str(ser3))
         else:
             try:
                 ser3.write("test")
@@ -1254,7 +1254,7 @@ class MainApp(App):
             else:
                 SerialConnection4 = True
                 logWrite("Successful connection to Serial on AMA0O")
-                print str(ser4)
+                print(str(ser4))
         else:
             try:
                 ser4.write("test")
@@ -1274,7 +1274,7 @@ class MainApp(App):
             else:
                 SerialConnection5 = True
                 logWrite("Successful connection to Serial on USBO")
-                print str(ser5)
+                print(str(ser5))
         else:
             try:
                 ser5.write("test")
@@ -1334,7 +1334,7 @@ class MainApp(App):
         logWrite("Function call - check EVA stats")
 
         eva_url = 'http://spacefacts.de/eva/e_eva_az.htm'
-        urlthingy = urllib2.urlopen(eva_url)
+        urlthingy = urllib.request.urlopen(eva_url)
         soup = BeautifulSoup(urlthingy, 'html.parser')
 
         numEVAs1 = 0
@@ -1717,7 +1717,7 @@ class MainApp(App):
                         (next(text), next(text), next(text))))
             return results
         if internet:
-            req = urllib2.urlopen('http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html')
+            req = urllib.request.urlopen('http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html')
             soup = BeautifulSoup(req, 'html.parser')
             body = soup.find_all("pre")
             results = []
@@ -1729,16 +1729,16 @@ class MainApp(App):
                 parsed = str(results[0]).split('\n')
                 line1 = parsed[1]
                 line2 = parsed[2]
-                print line1
-                print line2
+                print(line1)
+                print(line2)
                 tle_rec = ephem.readtle("ISS (ZARYA)", str(line1), str(line2))
                 TLE_acquired = True
-                print "TLE Success!"
+                print("TLE Success!")
             else:
-                print "TLE not acquired"
+                print("TLE not acquired")
                 TLE_acquired = False
         else:
-            print "TLE not acquired"
+            print("TLE not acquired")
             TLE_acquired = False
 
     def updateCrew(self, dt):
@@ -1755,16 +1755,16 @@ class MainApp(App):
 
         if internet:
             iss_crew_url = 'http://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'
-            req = urllib2.Request(iss_crew_url, headers={'User-Agent' : "Magic Browser"})
+            req = urllib.request.Request(iss_crew_url, headers={'User-Agent' : "Magic Browser"})
             stuff = 0
             try:
-                stuff = urllib2.urlopen(req, timeout = 2)
+                stuff = urllib.request.urlopen(req, timeout = 2)
             except Exception:
                 logWrite("Warning - checkCrew failure")
                 urlsuccess = False
-                print stuff
+                print(stuff)
             else:
-                stuff = urllib2.urlopen(req, timeout = 2)
+                stuff = urllib.request.urlopen(req, timeout = 2)
                 urlsuccess = True
 
             now = datetime.utcnow()
