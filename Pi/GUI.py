@@ -2,6 +2,7 @@
 import urllib.request, urllib.error, urllib.parse #try to replace these calls with urlrequest which is async
 from datetime import datetime #used
 import os #used to remove database on program exit
+os.environ['KIVY_GL_BACKEND'] = 'gl' #need this to fix a kivy segfault that occurs with python3 for some reason
 import subprocess #used to start/stop Javascript telemetry program
 import json #used to parse json data from peopleinspace
 import sqlite3 #javascript stores telemetry in sqlite db
@@ -1169,11 +1170,11 @@ class MainApp(App):
         Clock.schedule_interval(self.update_labels, 1)
         Clock.schedule_interval(self.animate3, 0.1)
         Clock.schedule_interval(self.orbitUpdate, 1)
-        Clock.schedule_interval(self.checkCrew, 600)
+        #Clock.schedule_interval(self.checkCrew, 600)
         if startup:
             startup = False
 
-        Clock.schedule_once(self.checkCrew, 20)
+        #Clock.schedule_once(self.checkCrew, 20)
         Clock.schedule_once(self.getTLE, 30) #uncomment when internet works again
         #Clock.schedule_interval(self.getTLE, 600) #uncomment when internet works again
         Clock.schedule_interval(self.getTLE, 3600)
