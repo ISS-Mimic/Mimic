@@ -20,31 +20,6 @@ from kivy.clock import Clock
 from kivy.event import EventDispatcher
 from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
-#from calendar import timegm
-#import sys
-#import sched
-#import smbus
-#import random
-#from threading import Thread
-#import re
-#from Naked.toolshed.shell import execute_js, muterun_js
-#import signal
-#import multiprocessing
-#from kivy.graphics.svg import Svg
-#from kivy.animation import Animation
-#from kivy.uix.behaviors.button import ButtonBehavior
-#from kivy.uix.popup import Popup
-#from kivy.uix.button import Button
-#from kivy.uix.label import Label
-#from kivy.uix.widget import Widget
-#from kivy.base import runTouchApp
-#from kivy.vector import Vector
-#from kivy.core.window import Window
-#from kivy.uix.floatlayout import FloatLayout
-#from kivy.uix.boxlayout import BoxLayout
-#from kivy.uix.gridlayout import GridLayout
-#from kivy.uix.stacklayout import StackLayout
-#from kivy.core.image import Image
 
 # Create Program Logs
 mimiclog = open('/home/pi/Mimic/Pi/Logs/mimiclog.txt', 'w')
@@ -1170,11 +1145,11 @@ class MainApp(App):
         Clock.schedule_interval(self.update_labels, 1)
         Clock.schedule_interval(self.animate3, 0.1)
         Clock.schedule_interval(self.orbitUpdate, 1)
-        #Clock.schedule_interval(self.checkCrew, 600)
+        Clock.schedule_interval(self.checkCrew, 600)
         if startup:
             startup = False
 
-        #Clock.schedule_once(self.checkCrew, 20)
+        Clock.schedule_once(self.checkCrew, 20)
         Clock.schedule_once(self.getTLE, 30) #uncomment when internet works again
         #Clock.schedule_interval(self.getTLE, 600) #uncomment when internet works again
         Clock.schedule_interval(self.getTLE, 3600)
@@ -1751,109 +1726,103 @@ class MainApp(App):
     def checkCrew(self, dt):
         #crew_response = urllib2.urlopen(crew_req)
         global isscrew, crewmember, crewmemberbio, crewmembertitle, crewmemberdays, crewmemberpicture, crewmembercountry
-        global internet
+        iss_crew_url = 'http://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'
         urlsuccess = False
 
-        if internet:
-            iss_crew_url = 'http://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'
-            req = urllib.request.Request(iss_crew_url, headers={'User-Agent' : "Magic Browser"})
-            stuff = 0
-            try:
-                stuff = urllib.request.urlopen(req, timeout = 2)
-            except Exception:
-                logWrite("Warning - checkCrew failure")
-                urlsuccess = False
-                print(stuff)
-            else:
-                stuff = urllib.request.urlopen(req, timeout = 2)
-                urlsuccess = True
-
+        def on_success(req, data):
+            global isscrew, crewmember, crewmemberbio, crewmembertitle, crewmemberdays, crewmemberpicture, crewmembercountry
+            logWrite("Successfully fetched crew JSON")
+            isscrew = 0
             now = datetime.utcnow()
-            if urlsuccess:
-            #stuff.info().getsubtype()=='json':
-                logWrite("Successfully fetched crew JSON")
-                data = json.load(stuff)
-                number_of_space = int(data['number'])
-                for num in range(1, number_of_space+1):
-                    if(str(data['people'][num-1]['location']) == str("International Space Station")):
-                        crewmember[isscrew] = (data['people'][num-1]['name']).encode('utf-8')
-                        crewmemberbio[isscrew] = (data['people'][num-1]['bio'])
-                        crewmembertitle[isscrew] = str(data['people'][num-1]['title'])
-                        datetime_object = datetime.strptime(str(data['people'][num-1]['launchdate']), '%Y-%m-%d')
-                        previousdays = int(data['people'][num-1]['careerdays'])
-                        totaldaysinspace = str(now-datetime_object)
-                        d_index = totaldaysinspace.index('d')
-                        crewmemberdays[isscrew] = str(int(totaldaysinspace[:d_index])+previousdays)+" days in space"
-                        crewmemberpicture[isscrew] = str(data['people'][num-1]['biophoto'])
-                        crewmembercountry[isscrew] = str(data['people'][num-1]['country']).title()
-                        if(str(data['people'][num-1]['country'])==str('usa')):
-                            crewmembercountry[isscrew] = str('USA')
-                        isscrew = isscrew+1
-            else:
-                logWrite("Warning - checkCrew JSON failure")
+            #print(data['number'])
+            number_of_space = int(data['number'])
+            for num in range(1, number_of_space+1):
+                if(str(data['people'][num-1]['location']) == str("International Space Station")):
+                    crewmember[isscrew] = str(data['people'][num-1]['name']) #.encode('utf-8')
+                    crewmemberbio[isscrew] = str(data['people'][num-1]['bio'])
+                    crewmembertitle[isscrew] = str(data['people'][num-1]['title'])
+                    datetime_object = datetime.strptime(str(data['people'][num-1]['launchdate']), '%Y-%m-%d')
+                    previousdays = int(data['people'][num-1]['careerdays'])
+                    totaldaysinspace = str(now-datetime_object)
+                    d_index = totaldaysinspace.index('d')
+                    crewmemberdays[isscrew] = str(int(totaldaysinspace[:d_index])+previousdays)+" days in space"
+                    crewmemberpicture[isscrew] = str(data['people'][num-1]['biophoto'])
+                    crewmembercountry[isscrew] = str(data['people'][num-1]['country']).title()
+                    if(str(data['people'][num-1]['country'])==str('usa')):
+                        crewmembercountry[isscrew] = str('USA')
+                    isscrew = isscrew+1
 
-        #print crewmemberpicture[0]
-        isscrew = 0
-        self.crew_screen.ids.crew1.text = crewmember[0]
-        self.crew_screen.ids.crew1title.text = crewmembertitle[0]
-        self.crew_screen.ids.crew1country.text = crewmembercountry[0]
-        self.crew_screen.ids.crew1daysonISS.text = crewmemberdays[0]
-        #self.crew_screen.ids.crew1image.source = str(crewmemberpicture[0])
-        self.crew_screen.ids.crew2.text = crewmember[1]
-        self.crew_screen.ids.crew2title.text = crewmembertitle[1]
-        self.crew_screen.ids.crew2country.text = crewmembercountry[1]
-        self.crew_screen.ids.crew2daysonISS.text = crewmemberdays[1]
-        #self.crew_screen.ids.crew2image.source = str(crewmemberpicture[1])
-        self.crew_screen.ids.crew3.text = crewmember[2]
-        self.crew_screen.ids.crew3title.text = crewmembertitle[2]
-        self.crew_screen.ids.crew3country.text = crewmembercountry[2]
-        self.crew_screen.ids.crew3daysonISS.text = crewmemberdays[2]
-        #self.crew_screen.ids.crew3image.source = str(crewmemberpicture[2])
-        self.crew_screen.ids.crew4.text = crewmember[3]
-        self.crew_screen.ids.crew4title.text = crewmembertitle[3]
-        self.crew_screen.ids.crew4country.text = crewmembercountry[3]
-        self.crew_screen.ids.crew4daysonISS.text = crewmemberdays[3]
-        #self.crew_screen.ids.crew4image.source = str(crewmemberpicture[3])
-        self.crew_screen.ids.crew5.text = crewmember[4]
-        self.crew_screen.ids.crew5title.text = crewmembertitle[4]
-        self.crew_screen.ids.crew5country.text = crewmembercountry[4]
-        self.crew_screen.ids.crew5daysonISS.text = crewmemberdays[4]
-        #self.crew_screen.ids.crew5image.source = str(crewmemberpicture[4])
-        self.crew_screen.ids.crew6.text = crewmember[5]
-        self.crew_screen.ids.crew6title.text = crewmembertitle[5]
-        self.crew_screen.ids.crew6country.text = crewmembercountry[5]
-        self.crew_screen.ids.crew6daysonISS.text = crewmemberdays[5]
-        #self.crew_screen.ids.crew6image.source = str(crewmemberpicture[5])
-        #self.crew_screen.ids.crew7.text = crewmember[6]
-        #self.crew_screen.ids.crew7title.text = crewmembertitle[6]
-        #self.crew_screen.ids.crew7country.text = crewmembercountry[6]
-        #self.crew_screen.ids.crew7daysonISS.text = crewmemberdays[6]
-        #self.crew_screen.ids.crew7image.source = str(crewmemberpicture[6])
-        #self.crew_screen.ids.crew8.text = crewmember[7]
-        #self.crew_screen.ids.crew8title.text = crewmembertitle[7]
-        #self.crew_screen.ids.crew8country.text = crewmembercountry[7]
-        #self.crew_screen.ids.crew8daysonISS.text = crewmemberdays[7]
-        #self.crew_screen.ids.crew8image.source = str(crewmemberpicture[7])
-        #self.crew_screen.ids.crew9.text = crewmember[8]
-        #self.crew_screen.ids.crew9title.text = crewmembertitle[8]
-        #self.crew_screen.ids.crew9country.text = crewmembercountry[8]
-        #self.crew_screen.ids.crew9daysonISS.text = crewmemberdays[8]
-        #self.crew_screen.ids.crew9image.source = str(crewmemberpicture[8])
-        #self.crew_screen.ids.crew10.text = crewmember[9]
-        #self.crew_screen.ids.crew10title.text = crewmembertitle[9]
-        #self.crew_screen.ids.crew10country.text = crewmembercountry[9]
-        #self.crew_screen.ids.crew10daysonISS.text = crewmemberdays[9]
-        #self.crew_screen.ids.crew10image.source = str(crewmemberpicture[9])
-        #self.crew_screen.ids.crew11.text = crewmember[10]
-        #self.crew_screen.ids.crew11title.text = crewmembertitle[10]
-        #self.crew_screen.ids.crew11country.text = crewmembercountry[10]
-        #self.crew_screen.ids.crew11daysonISS.text = crewmemberdays[10]
-        #self.crew_screen.ids.crew11image.source = str(crewmemberpicture[10])
-        #self.crew_screen.ids.crew12.text = crewmember[11]
-        #self.crew_screen.ids.crew12title.text = crewmembertitle[11]
-        #self.crew_screen.ids.crew12country.text = crewmembercountry[11]
-        #self.crew_screen.ids.crew12daysonISS.text = crewmemberdays[11]
-        #self.crew_screen.ids.crew12image.source = str(crewmemberpicture[11])
+            self.crew_screen.ids.crew1.text = str(crewmember[0])
+            self.crew_screen.ids.crew1title.text = str(crewmembertitle[0])
+            self.crew_screen.ids.crew1country.text = str(crewmembercountry[0])
+            self.crew_screen.ids.crew1daysonISS.text = str(crewmemberdays[0])
+            #self.crew_screen.ids.crew1image.source = str(crewmemberpicture[0])
+            self.crew_screen.ids.crew2.text = str(crewmember[1])
+            self.crew_screen.ids.crew2title.text = str(crewmembertitle[1])
+            self.crew_screen.ids.crew2country.text = str(crewmembercountry[1])
+            self.crew_screen.ids.crew2daysonISS.text = str(crewmemberdays[1])
+            #self.crew_screen.ids.crew2image.source = str(crewmemberpicture[1])
+            self.crew_screen.ids.crew3.text = str(crewmember[2])
+            self.crew_screen.ids.crew3title.text = str(crewmembertitle[2])
+            self.crew_screen.ids.crew3country.text = str(crewmembercountry[2])
+            self.crew_screen.ids.crew3daysonISS.text = str(crewmemberdays[2])
+            #self.crew_screen.ids.crew3image.source = str(crewmemberpicture[2])
+            self.crew_screen.ids.crew4.text = str(crewmember[3])
+            self.crew_screen.ids.crew4title.text = str(crewmembertitle[3])
+            self.crew_screen.ids.crew4country.text = str(crewmembercountry[3])
+            self.crew_screen.ids.crew4daysonISS.text = str(crewmemberdays[3])
+            #self.crew_screen.ids.crew4image.source = str(crewmemberpicture[3])
+            self.crew_screen.ids.crew5.text = str(crewmember[4])
+            self.crew_screen.ids.crew5title.text = str(crewmembertitle[4])
+            self.crew_screen.ids.crew5country.text = str(crewmembercountry[4])
+            self.crew_screen.ids.crew5daysonISS.text = str(crewmemberdays[4])
+            #self.crew_screen.ids.crew5image.source = str(crewmemberpicture[4])
+            self.crew_screen.ids.crew6.text = str(crewmember[5])
+            self.crew_screen.ids.crew6title.text = str(crewmembertitle[5])
+            self.crew_screen.ids.crew6country.text = str(crewmembercountry[5])
+            self.crew_screen.ids.crew6daysonISS.text = str(crewmemberdays[5])
+            #self.crew_screen.ids.crew6image.source = str(crewmemberpicture[5])
+            #self.crew_screen.ids.crew7.text = str(crewmember[6])
+            #self.crew_screen.ids.crew7title.text = str(crewmembertitle[6])
+            #self.crew_screen.ids.crew7country.text = str(crewmembercountry[6])
+            #self.crew_screen.ids.crew7daysonISS.text = str(crewmemberdays[6])
+            #self.crew_screen.ids.crew7image.source = str(crewmemberpicture[6])
+            #self.crew_screen.ids.crew8.text = str(crewmember[7])
+            #self.crew_screen.ids.crew8title.text = str(crewmembertitle[7])
+            #self.crew_screen.ids.crew8country.text = str(crewmembercountry[7])
+            #self.crew_screen.ids.crew8daysonISS.text = str(crewmemberdays[7])
+            #self.crew_screen.ids.crew8image.source = str(crewmemberpicture[7]))
+            #self.crew_screen.ids.crew9.text = str(crewmember[8])
+            #self.crew_screen.ids.crew9title.text = str(crewmembertitle[8])
+            #self.crew_screen.ids.crew9country.text = str(crewmembercountry[8])
+            #self.crew_screen.ids.crew9daysonISS.text = str(crewmemberdays[8])
+            #self.crew_screen.ids.crew9image.source = str(crewmemberpicture[8])
+            #self.crew_screen.ids.crew10.text = str(crewmember[9])
+            #self.crew_screen.ids.crew10title.text = str(crewmembertitle[9])
+            #self.crew_screen.ids.crew10country.text = str(crewmembercountry[9])
+            #self.crew_screen.ids.crew10daysonISS.text = str(crewmemberdays[9])
+            #self.crew_screen.ids.crew10image.source = str(crewmemberpicture[9])
+            #self.crew_screen.ids.crew11.text = str(crewmember[10])
+            #self.crew_screen.ids.crew11title.text = str(crewmembertitle[10])
+            #self.crew_screen.ids.crew11country.text = str(crewmembercountry[10])
+            #self.crew_screen.ids.crew11daysonISS.text = str(crewmemberdays[10])
+            #self.crew_screen.ids.crew11image.source = str(crewmemberpicture[10])
+            #self.crew_screen.ids.crew12.text = str(crewmember[11])
+            #self.crew_screen.ids.crew12title.text = str(crewmembertitle[11])
+            #self.crew_screen.ids.crew12country.text = str(crewmembercountry[11])
+            #self.crew_screen.ids.crew12daysonISS.text = str(crewmemberdays[11])
+            #self.crew_screen.ids.crew12image.source = str(crewmemberpicture[11])
+
+        def on_redirect(req, result):
+            logWrite("Warning - checkCrew JSON failure (redirect)")
+
+        def on_failure(req, result):
+            logWrite("Warning - checkCrew JSON failure (url failure)")
+
+        def on_error(req, result):
+            logWrite("Warning - checkCrew JSON failure (url error)")
+        
+        req = UrlRequest(iss_crew_url, on_success, on_redirect, on_failure, on_error, timeout=1)
 
     def map_rotation(self, args):
         scalefactor = 0.083333
