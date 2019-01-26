@@ -1,21 +1,19 @@
 #!/usr/bin/python
-import urllib.request, urllib.error, urllib.parse #try to replace these calls with urlrequest which is async
-from datetime import datetime #used
+from datetime import datetime #used for time conversions and logging timestamps
 import os #used to remove database on program exit
 os.environ['KIVY_GL_BACKEND'] = 'gl' #need this to fix a kivy segfault that occurs with python3 for some reason
 import subprocess #used to start/stop Javascript telemetry program
-import json #used to parse json data from peopleinspace
 import sqlite3 #javascript stores telemetry in sqlite db
-import time #used 
+import time #used for time
 import math #used for math
 import serial #used to send data over serial to arduino
 import ephem #used for TLE propagation on orbit screen
 import pytz #used for timezone conversion in orbit pass predictions
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup #used to parse webpages for data (EVA stats, ISS TLE)
 import kivy
 from kivy.app import App
 from kivy.lang import Builder
-from kivy.network.urlrequest import UrlRequest
+from kivy.network.urlrequest import UrlRequest #using this to request webpages
 from kivy.clock import Clock
 from kivy.event import EventDispatcher
 from kivy.properties import ObjectProperty
@@ -31,6 +29,9 @@ def logWrite(string):
     mimiclog.write(' ')
     mimiclog.write(str(string))
     mimiclog.write('\n')
+
+mimiclog.write("test")
+logWrite("Initialized Mimic Program Log")
 
 #-------------------------Look for a connected arduino-----------------------------------
 SerialConnection1 = False
@@ -53,7 +54,7 @@ else:
 try:
     ser2 = serial.Serial('/dev/ttyACM1', 9600, timeout=0)
 except Exception:
-    logWrite("Warning - Serial Connection ACM1 not found")
+    #logWrite("Warning - Serial Connection ACM1 not found")
     SerialConnection2 = False
     ser2 = None
 else:
@@ -64,7 +65,7 @@ else:
 try:
     ser3 = serial.Serial('/dev/ttyACM2', 9600, timeout=0)
 except Exception:
-    logWrite("Warning - Serial Connection ACM2 not found")
+    #logWrite("Warning - Serial Connection ACM2 not found")
     SerialConnection3 = False
     ser3 = None
 else:
@@ -75,7 +76,7 @@ else:
 try:
     ser4 = serial.Serial('/dev/ttyAMA00', 9600, timeout=0)
 except Exception:
-    logWrite("Warning - Serial Connection AMA00 not found")
+    #logWrite("Warning - Serial Connection AMA00 not found")
     SerialConnection4 = False
     ser4 = None
 else:
@@ -86,7 +87,7 @@ else:
 try:
     ser5 = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
 except Exception:
-    logWrite("Warning - Serial Connection USB0 not found")
+    #logWrite("Warning - Serial Connection USB0 not found")
     SerialConnection5 = False
     ser5 = None
 else:
@@ -419,10 +420,6 @@ sgant_elevation = 0.00
 sgant_xelevation = 0.00
 sgant_elevation_old = -110.00
 seconds2 = 260
-timenew = float(time.time())
-timeold = 0.00
-timenew2 = float(time.time())
-timeold2 = 0.00
 oldLOS = 0.00
 psarjmc = 0.00
 ssarjmc = 0.00
@@ -457,12 +454,6 @@ seconds = 0
 minutes = 0
 hours = 0
 leak_hold = False
-crewmember = ['', '', '', '', '', '', '', '', '', '', '', '']
-crewmemberbio = ['', '', '', '', '', '', '', '', '', '', '', '']
-crewmembertitle = ['', '', '', '', '', '', '', '', '', '', '', '']
-crewmemberdays = ['', '', '', '', '', '', '', '', '', '', '', '']
-crewmemberpicture = ['', '', '', '', '', '', '', '', '', '', '', '']
-crewmembercountry = ['', '', '', '', '', '', '', '', '', '', '', '']
 EV1 = ""
 EV2 = ""
 numEVAs1 = ""
@@ -1149,10 +1140,9 @@ class MainApp(App):
         if startup:
             startup = False
 
-        Clock.schedule_once(self.checkCrew, 20)
-        Clock.schedule_once(self.getTLE, 30) #uncomment when internet works again
-        #Clock.schedule_interval(self.getTLE, 600) #uncomment when internet works again
-        Clock.schedule_interval(self.getTLE, 3600)
+        Clock.schedule_once(self.checkCrew, 30)
+        Clock.schedule_once(self.getTLE, 40) #uncomment when internet works again
+        Clock.schedule_interval(self.getTLE, 300)
         Clock.schedule_interval(self.check_internet, 1)
         Clock.schedule_interval(self.check_serial, 1)
         return root
@@ -1164,7 +1154,7 @@ class MainApp(App):
             try:
                 ser = serial.Serial('/dev/ttyACM0', 9600, timeout=0)
             except Exception:
-                logWrite("Warning - Serial Connection ACM0 not found")
+                #logWrite("Warning - Serial Connection ACM0 not found")
                 SerialConnection1 = False
                 ser = None
             else:
@@ -1184,7 +1174,7 @@ class MainApp(App):
             try:
                 ser2 = serial.Serial('/dev/ttyACM1', 9600, timeout=0)
             except Exception:
-                logWrite("Warning - Serial Connection ACM1 not found")
+                #logWrite("Warning - Serial Connection ACM1 not found")
                 SerialConnection2 = False
                 ser2 = None
             else:
@@ -1204,7 +1194,7 @@ class MainApp(App):
             try:
                 ser3 = serial.Serial('/dev/ttyACM2', 9600, timeout=0)
             except Exception:
-                logWrite("Warning - Serial Connection ACM2 not found")
+                #logWrite("Warning - Serial Connection ACM2 not found")
                 SerialConnection3 = False
                 ser3 = None
             else:
@@ -1224,7 +1214,7 @@ class MainApp(App):
             try:
                 ser4 = serial.Serial('/dev/ttyAMA00', 9600, timeout=0)
             except Exception:
-                logWrite("Warning - Serial Connection AMA00 not found")
+                #logWrite("Warning - Serial Connection AMA00 not found")
                 SerialConnection4 = False
                 ser4 = None
             else:
@@ -1244,7 +1234,7 @@ class MainApp(App):
             try:
                 ser5 = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
             except Exception:
-                logWrite("Warning - Serial Connection USB0 not found")
+                #logWrite("Warning - Serial Connection USB0 not found")
                 SerialConnection5 = False
                 ser5 = None
             else:
@@ -1308,51 +1298,63 @@ class MainApp(App):
     def check_EVA_stats(self, lastname1, firstname1, lastname2, firstname2):
         global numEVAs1, EVAtime_hours1, EVAtime_minutes1, numEVAs2, EVAtime_hours2, EVAtime_minutes2, EV1, EV2
         logWrite("Function call - check EVA stats")
+        eva_url = 'http://www.spacefacts.de/eva/e_eva_az.htm'
 
-        eva_url = 'http://spacefacts.de/eva/e_eva_az.htm'
-        urlthingy = urllib.request.urlopen(eva_url)
-        soup = BeautifulSoup(urlthingy, 'html.parser')
+        def on_success(req, result):
+            logWrite("Check EVA Stats - Successs")
+            soup = BeautifulSoup(result, 'html.parser') #using bs4 to parse website
+            numEVAs1 = 0
+            EVAtime_hours1 = 0
+            EVAtime_minutes1 = 0
+            numEVAs2 = 0
+            EVAtime_hours2 = 0
+            EVAtime_minutes2 = 0
 
-        numEVAs1 = 0
-        EVAtime_hours1 = 0
-        EVAtime_minutes1 = 0
-        numEVAs2 = 0
-        EVAtime_hours2 = 0
-        EVAtime_minutes2 = 0
+            tabletags = soup.find_all("td")
+            for tag in tabletags:
+                if  lastname1 in tag.text:
+                    if firstname1 in tag.find_next_sibling("td").text:
+                        numEVAs1 = tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text
+                        EVAtime_hours1 = int(tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
+                        EVAtime_minutes1 = int(tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
+                        EVAtime_minutes1 += (EVAtime_hours1 * 60)
 
-        tabletags = soup.find_all("td")
-        for tag in tabletags:
-            if lastname1 in tag.text:
-                if firstname1 in tag.find_next_sibling("td").text:
-                    numEVAs1 = tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text
-                    EVAtime_hours1 = int(tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
-                    EVAtime_minutes1 = int(tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
-                    EVAtime_minutes1 += (EVAtime_hours1 * 60)
+            for tag in tabletags:
+                if lastname2 in tag.text:
+                    if firstname2 in tag.find_next_sibling("td").text:
+                        numEVAs2 = tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text
+                        EVAtime_hours2 = int(tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
+                        EVAtime_minutes2 = int(tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
+                        EVAtime_minutes2 += (EVAtime_hours2 * 60)
 
-        for tag in tabletags:
-            if lastname2 in tag.text:
-                if firstname2 in tag.find_next_sibling("td").text:
-                    numEVAs2 = tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text
-                    EVAtime_hours2 = int(tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
-                    EVAtime_minutes2 = int(tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
-                    EVAtime_minutes2 += (EVAtime_hours2 * 60)
+            EV1_EVA_number = numEVAs1
+            EV1_EVA_time  = EVAtime_minutes1
+            EV2_EVA_number = numEVAs2
+            EV2_EVA_time  = EVAtime_minutes2
 
-        EV1_EVA_number = numEVAs1
-        EV1_EVA_time  = EVAtime_minutes1
-        EV2_EVA_number = numEVAs2
-        EV2_EVA_time  = EVAtime_minutes2
+            EV1_minutes = str(EV1_EVA_time%60).zfill(2)
+            EV2_minutes = str(EV2_EVA_time%60).zfill(2)
+            EV1_hours = int(EV1_EVA_time/60)
+            EV2_hours = int(EV2_EVA_time/60)
 
-        EV1_minutes = str(EV1_EVA_time%60).zfill(2)
-        EV2_minutes = str(EV2_EVA_time%60).zfill(2)
-        EV1_hours = int(EV1_EVA_time/60)
-        EV2_hours = int(EV2_EVA_time/60)
+            self.us_eva.ids.EV1.text = str(EV1) + " (EV1):"
+            self.us_eva.ids.EV2.text = str(EV2) + " (EV2):"
+            self.us_eva.ids.EV1_EVAnum.text = "Number of EVAs = " + str(EV1_EVA_number)
+            self.us_eva.ids.EV2_EVAnum.text = "Number of EVAs = " + str(EV2_EVA_number)
+            self.us_eva.ids.EV1_EVAtime.text = "Total EVA Time = " + str(EV1_hours) + "h " + str(EV1_minutes) + "m"
+            self.us_eva.ids.EV2_EVAtime.text = "Total EVA Time = " + str(EV2_hours) + "h " + str(EV2_minutes) + "m"
 
-        self.us_eva.ids.EV1.text = str(EV1) + " (EV1):"
-        self.us_eva.ids.EV2.text = str(EV2) + " (EV2):"
-        self.us_eva.ids.EV1_EVAnum.text = "Number of EVAs = " + str(EV1_EVA_number)
-        self.us_eva.ids.EV2_EVAnum.text = "Number of EVAs = " + str(EV2_EVA_number)
-        self.us_eva.ids.EV1_EVAtime.text = "Total EVA Time = " + str(EV1_hours) + "h " + str(EV1_minutes) + "m"
-        self.us_eva.ids.EV2_EVAtime.text = "Total EVA Time = " + str(EV2_hours) + "h " + str(EV2_minutes) + "m"
+        def on_redirect(req, result):
+            logWrite("Warning - EVA stats failure (redirect)")
+
+        def on_failure(req, result):
+            logWrite("Warning - EVA stats failure (url failure)")
+
+        def on_error(req, result):
+            logWrite("Warning - EVA stats failure (url error)")
+        
+        #obtain eva statistics web page for parsing
+        req = UrlRequest(eva_url, on_success, on_redirect, on_failure, on_error, timeout=1)
 
     def flashUS_EVAbutton(self, instance):
         logWrite("Function call - flashUS_EVA")
@@ -1679,22 +1681,24 @@ class MainApp(App):
                 self.orbit_screen.ids.countdown.text = str("{:.0f}".format(math.floor(nextpasshours))) + ":" + str("{:.0f}".format(math.floor(nextpassmins))) + ":" + str("{:.0f}".format(math.floor(nextpassseconds))) #display time until next pass
 
     def getTLE(self, *args):
-        #print "inside getTLE"
-        global tle_rec, line1, line2, TLE_acquired, internet
-        def process_tag_text(tag_text):
-            firstTLE = True
-            marker = 'TWO LINE MEAN ELEMENT SET'
-            text = iter(tag_text.split('\n'))
-            for line in text:
-                if (marker in line) and firstTLE:
-                    firstTLE = False
-                    next(text)
-                    results.append('\n'.join(
-                        (next(text), next(text), next(text))))
-            return results
-        if internet:
-            req = urllib.request.urlopen('http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html')
-            soup = BeautifulSoup(req, 'html.parser')
+        global tle_rec, line1, line2, TLE_acquired
+        iss_tle_url =  'https://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html'
+        
+        def on_success(req, data): #if TLE data is successfully received, it is processed here
+            global tle_rec, line1, line2, TLE_acquired
+            def process_tag_text(tag_text): #this function splits up the data received into proper TLE format
+                firstTLE = True
+                marker = 'TWO LINE MEAN ELEMENT SET'
+                text = iter(tag_text.split('\n'))
+                for line in text:
+                    if (marker in line) and firstTLE:
+                        firstTLE = False
+                        next(text)
+                        results.append('\n'.join(
+                            (next(text), next(text), next(text))))
+                return results
+            logWrite("ISS TLE - Successfully fetched TLE page")
+            soup = BeautifulSoup(data, 'html.parser')
             body = soup.find_all("pre")
             results = []
             for tag in body:
@@ -1713,28 +1717,32 @@ class MainApp(App):
             else:
                 print("TLE not acquired")
                 TLE_acquired = False
-        else:
-            print("TLE not acquired")
-            TLE_acquired = False
 
-    def updateCrew(self, dt):
-        try:
-            self.checkCrew(self, *args)
-        except Exception:
-            logWrite("Warning - updateCrew failure")
+        def on_redirect(req, result):
+            logWrite("Warning - Get TLE failure (redirect)")
+
+        def on_failure(req, result):
+            logWrite("Warning - Get TLE failure (url failure)")
+
+        def on_error(req, result):
+            logWrite("Warning - Get TLE failure (url error)")
+        
+        req = UrlRequest(iss_tle_url, on_success, on_redirect, on_failure, on_error, timeout=1)
 
     def checkCrew(self, dt):
-        #crew_response = urllib2.urlopen(crew_req)
-        global isscrew, crewmember, crewmemberbio, crewmembertitle, crewmemberdays, crewmemberpicture, crewmembercountry
         iss_crew_url = 'http://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'
         urlsuccess = False
 
         def on_success(req, data):
-            global isscrew, crewmember, crewmemberbio, crewmembertitle, crewmemberdays, crewmemberpicture, crewmembercountry
             logWrite("Successfully fetched crew JSON")
             isscrew = 0
+            crewmember = ['', '', '', '', '', '', '', '', '', '', '', '']
+            crewmemberbio = ['', '', '', '', '', '', '', '', '', '', '', '']
+            crewmembertitle = ['', '', '', '', '', '', '', '', '', '', '', '']
+            crewmemberdays = ['', '', '', '', '', '', '', '', '', '', '', '']
+            crewmemberpicture = ['', '', '', '', '', '', '', '', '', '', '', '']
+            crewmembercountry = ['', '', '', '', '', '', '', '', '', '', '', '']
             now = datetime.utcnow()
-            #print(data['number'])
             number_of_space = int(data['number'])
             for num in range(1, number_of_space+1):
                 if(str(data['people'][num-1]['location']) == str("International Space Station")):
