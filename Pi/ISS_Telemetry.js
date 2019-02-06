@@ -34,9 +34,13 @@ var timestampnow = (diff / oneDay) * 24 + gmtoff;
 
 console.log('ISS Telemetry script active');
 //console.log('Current timestamp: ' + timestampnow);
-
+lsClient.addListener({
+    onStatusChange: function(newStatus) {
+        console.log("Client status:" + newStatus);
+    }
+});
 lsClient.connect();
-
+console.log(lsClient.getStatus());
 sub.addListener({
   onSubscription: function() {
     console.log("Subscribed");

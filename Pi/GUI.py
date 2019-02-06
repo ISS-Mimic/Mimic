@@ -7,7 +7,7 @@ import sqlite3 #javascript stores telemetry in sqlite db
 import time #used for time
 import math #used for math
 import serial #used to send data over serial to arduino
-import ephem #used for TLE propagation on orbit screen
+import ephem #used for TLE orbit information on orbit screen
 import pytz #used for timezone conversion in orbit pass predictions
 from bs4 import BeautifulSoup #used to parse webpages for data (EVA stats, ISS TLE)
 import kivy
@@ -359,6 +359,10 @@ c.execute("INSERT OR IGNORE INTO telemetry VALUES('last_us_eva_duration', '0', '
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('last_rs_eva_duration', '0', '0', '0', 255)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer', '0', 'Unsubscribed', '0', 0)");
 logWrite("Successfully initialized SQlite database")
+
+def staleTelemetry():
+    c.execute("UPDATE telemetry SET Value = 'Unsubscribed' where Label = 'Lightstreamer'");
+
 #----------------------------------Variables---------------------------------------------
 LS_Subscription = False
 isslocationsuccess = False
@@ -532,6 +536,7 @@ class MainScreen(Screen):
         except Exception:
             pass
         os.system('rm /dev/shm/iss_telemetry.db')
+        staleTelemetry()
         logWrite("Successfully stopped ISS telemetry javascript and removed database")
 
 class CalibrateScreen(Screen):
@@ -1919,6 +1924,23 @@ class MainApp(App):
         else:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
+            self.changeColors(1, 0.5, 0)
+
+        for x in ScreenList:
+            getattr(self, x).ids.signal.anim_delay = 0.12
+        for x in ScreenList:
+            getattr(self, x).ids.signal.size_hint_y = 0.112
+
+    def signal_client_offline(self):
+        global internet, ScreenList
+
+        if internet == False:
+            for x in ScreenList:
+                getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.changeColors(1, 0, 0)
+        else:
+            for x in ScreenList:
+                getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalClientLost.png'
             self.changeColors(1, 0.5, 0)
 
         for x in ScreenList:
