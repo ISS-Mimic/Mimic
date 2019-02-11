@@ -37,6 +37,7 @@ console.log('ISS Telemetry script active');
 lsClient.addListener({
     onStatusChange: function(newStatus) {
         console.log("Client status:" + newStatus);
+        //db.run("UPDATE telemetry set Value = ? where Label = ?", newStatus, "ClientStatus");
     }
 });
 lsClient.connect();

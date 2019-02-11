@@ -23,6 +23,8 @@ from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
 mimiclog = open('/home/pi/Mimic/Pi/Logs/mimiclog.txt', 'w')
 sgantlog = open('/home/pi/Mimic/Pi/Logs/sgantlog.txt', 'a+')
 locationlog = open('/home/pi/Mimic/Pi/Logs/locationlog.txt', 'a')
+testlog = open('/home/pi/Mimic/Pi/Logs/testlog.txt', 'w')
+testlog.write('test')
 
 def logWrite(string):
     mimiclog.write(str(datetime.utcnow()))
@@ -357,7 +359,8 @@ c.execute("INSERT OR IGNORE INTO telemetry VALUES('us_eva_#', '0', '0', '0', 252
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('rs_eva_#', '0', '0', '0', 253)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('last_us_eva_duration', '0', '0', '0', 254)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('last_rs_eva_duration', '0', '0', '0', 255)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer', '0', 'Unsubscribed', '0', 0)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer', '0', 'Unsubscribed', '0', 256)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('ClientStatus', '0', 'Unsubscribed', '0', 257)");
 logWrite("Successfully initialized SQlite database")
 
 def staleTelemetry():
@@ -535,7 +538,7 @@ class MainScreen(Screen):
             p2.kill()
         except Exception:
             pass
-        os.system('rm /dev/shm/iss_telemetry.db')
+        os.system('rm /dev/shm/iss_telemetry.db') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
         staleTelemetry()
         logWrite("Successfully stopped ISS telemetry javascript and removed database")
 
@@ -2012,10 +2015,8 @@ class MainApp(App):
         timestamps = c.fetchall()
 
         sub_status = str((values[255])[0]) #lightstreamer subscript checker
-        if sub_status == "Subscribed":
-            LS_Subscription = True
-        else:
-            LS_Subscription = False
+        client_status = str((values[256])[0]) #lightstreamer client checker
+        
         psarj = "{:.2f}".format(float((values[0])[0]))
         if not switchtofake:
             psarj2 = float(psarj)
@@ -2650,23 +2651,26 @@ class MainApp(App):
 
         self.us_eva.ids.EVA_psi_bar.pos_hint = {"center_x": psi_bar_x, "center_y": 0.56}
 
-        if float(aos) == 1.00:
-            if self.root.current == 'mimic':
-               fakeorbitboolean = False
-               if mimicbutton:
-                   switchtofake = False
-            if LS_Subscription:
-                self.signal_acquired()
+        
+        ##-------------------Signal Status Check-------------------##
+
+        print(client_status)
+
+        if client_status.split(:) == "Connected": 
+            if sub_status == "Subscribed":
+                #client connected and subscibed to ISS telemetry
+                if float(aos) == 1.00:
+                    self.signal_acquired() #signal status 1 means acquired
+
+                elif float(aos) == 0.00:
+                    self.signal_lost() #signal status 0 means loss of signal
+                
+                elif float(aos) == 2.00:
+                    self.signal_stale() #signal status 2 means data is not being updated from server
             else:
                 self.signal_unsubscribed()
-        elif float(aos) == 0.00:
-            if self.root.current == 'mimic':
-               fakeorbitboolean = True
-            self.signal_lost()
-        elif float(aos) == 2.00:
-            if self.root.current == 'mimic':
-               fakeorbitboolean = True
-            self.signal_stale()
+        else:
+            self.signal_unsubscribed()
 
         if mimicbutton: # and float(aos) == 1.00):
             self.serialWrite("PSARJ=" + psarj + " ")
