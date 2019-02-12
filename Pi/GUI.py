@@ -857,50 +857,50 @@ class ManualControlScreen(Screen):
         global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
         #print str(*args)
         if SerialConnection1:
-            #ser.write(*args)
+            #ser.write(str.encode(*args))
             try:
-                ser.write(*args)
+                ser.write(str.encode(*args))
             except Exception:
                 ser = None
                 SerialConnection1 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
         if SerialConnection2:
-            #ser2.write(*args)
+            #ser2.write(str.encode(*args))
             try:
-                ser2.write(*args)
+                ser2.write(str.encode(*args))
             except Exception:
                 ser2 = None
                 SerialConnection2 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
         if SerialConnection3:
-            #ser3.write(*args)
+            #ser3.write(str.encode(*args))
             try:
-                ser3.write(*args)
+                ser3.write(str.encode(*args))
             except Exception:
                 ser3 = None
                 SerialConnection3 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
         if SerialConnection4:
-            #ser4.write(*args)
+            #ser4.write(str.encode(*args))
             try:
-                ser4.write(*args)
+                ser4.write(str.encode(*args))
             except Exception:
                 ser4 = None
                 SerialConnection4 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
         if SerialConnection5:
-            #ser5.write(*args)
+            #ser5.write(str.encode(*args))
             try:
-                ser5.write(*args)
+                ser5.write(str.encode(*args))
             except Exception:
                 ser5 = None
                 SerialConnection5 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
 
 
 class FakeOrbitScreen(Screen):
@@ -952,50 +952,50 @@ class FakeOrbitScreen(Screen):
         global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
 
         if SerialConnection1:
-            #ser.write(*args)
+            #ser.write(str.encode(*args))
             try:
-                ser.write(*args)
+                ser.write(str.encode(*args))
             except Exception:
                 ser = None
                 SerialConnection1 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
         if SerialConnection2:
-            #ser2.write(*args)
+            #ser2.write(str.encode(*args))
             try:
-                ser2.write(*args)
+                ser2.write(str.encode(*args))
             except Exception:
                 ser2 = None
                 SerialConnection2 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
         if SerialConnection3:
-            #ser3.write(*args)
+            #ser3.write(str.encode(*args))
             try:
-                ser3.write(*args)
+                ser3.write(str.encode(*args))
             except Exception:
                 ser3 = None
                 SerialConnection3 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
         if SerialConnection4:
-            #ser4.write(*args)
+            #ser4.write(str.encode(*args))
             try:
-                ser4.write(*args)
+                ser4.write(str.encode(*args))
             except Exception:
                 ser4 = None
                 SerialConnection4 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
         if SerialConnection5:
-            #ser5.write(*args)
+            #ser5.write(str.encode(*args))
             try:
-                ser5.write(*args)
+                ser5.write(str.encode(*args))
             except Exception:
                 ser5 = None
                 SerialConnection5 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
 
 class Settings_Screen(Screen, EventDispatcher):
     pass
@@ -1161,8 +1161,9 @@ class MainApp(App):
         if ser == None:
             try:
                 ser = serial.Serial('/dev/ttyACM0', 9600, timeout=0)
-            except Exception:
+            except Exception as e:
                 #logWrite("Warning - Serial Connection ACM0 not found")
+                print(e)
                 SerialConnection1 = False
                 ser = None
             else:
@@ -1171,8 +1172,9 @@ class MainApp(App):
                 print(str(ser))
         else:
             try:
-                ser.write("test")
-            except Exception:
+                ser.write(str.encode("test"))
+            except Exception as e:
+                print(e)
                 SerialConnection1 = False
                 ser = None
             else:
@@ -1191,7 +1193,7 @@ class MainApp(App):
                 print(str(ser2))
         else:
             try:
-                ser2.write("test")
+                ser2.write(str.encode("test"))
             except Exception:
                 SerialConnection2 = False
                 ser2 = None
@@ -1211,7 +1213,7 @@ class MainApp(App):
                 print(str(ser3))
         else:
             try:
-                ser3.write("test")
+                ser3.write(str.encode("test"))
             except Exception:
                 SerialConnection3 = False
                 ser3 = None
@@ -1231,7 +1233,7 @@ class MainApp(App):
                 print(str(ser4))
         else:
             try:
-                ser4.write("test")
+                ser4.write(str.encode("test"))
             except Exception:
                 SerialConnection4 = False
                 ser4 = None
@@ -1251,7 +1253,7 @@ class MainApp(App):
                 print(str(ser5))
         else:
             try:
-                ser5.write("test")
+                ser5.write(str.encode("test"))
             except Exception:
                 SerialConnection5 = False
                 ser5 = None
@@ -1433,50 +1435,50 @@ class MainApp(App):
         global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
 
         if SerialConnection1:
-            #ser.write(*args)
+            #ser.write(str.encode(*args))
             try:
-                ser.write(*args)
+                ser.write(str.encode(*args))
             except Exception:
                 ser = None
                 SerialConnection1 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
         if SerialConnection2:
-            #ser2.write(*args)
+            #ser2.write(str.encode(*args))
             try:
-                ser2.write(*args)
+                ser2.write(str.encode(*args))
             except Exception:
                 ser2 = None
                 SerialConnection2 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
         if SerialConnection3:
-            #ser3.write(*args)
+            #ser3.write(str.encode(*args))
             try:
-                ser3.write(*args)
+                ser3.write(str.encode(*args))
             except Exception:
                 ser3 = None
                 SerialConnection3 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
         if SerialConnection4:
-            #ser4.write(*args)
+            #ser4.write(str.encode(*args))
             try:
-                ser4.write(*args)
+                ser4.write(str.encode(*args))
             except Exception:
                 ser4 = None
                 SerialConnection4 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
         if SerialConnection5:
-            #ser5.write(*args)
+            #ser5.write(str.encode(*args))
             try:
-                ser5.write(*args)
+                ser5.write(str.encode(*args))
             except Exception:
                 ser5 = None
                 SerialConnection5 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
 
     def changeColors(self, *args):   #this function sets all labels on mimic screen to a certain color based on signal status
         #the signalcolor is a kv property that will update all signal status dependant values to whatever color is received by this function
@@ -2654,7 +2656,7 @@ class MainApp(App):
         
         ##-------------------Signal Status Check-------------------##
 
-        if client_status.split(":")[0] == "CONNECTED": 
+        if client_status.split(":")[0] == "Connected": 
             if sub_status == "Subscribed":
                 #client connected and subscibed to ISS telemetry
                 if float(aos) == 1.00:

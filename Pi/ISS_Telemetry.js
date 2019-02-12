@@ -1050,6 +1050,7 @@ sub.addListener({
 timeSub.addListener({
   onItemUpdate: function (update) {
         var status = update.getValue("Status.Class");
+        //console.log("Status: " + status);
         AOStimestamp = parseFloat(update.getValue("TimeStamp"));
         //console.log("Timestamp: " + update.getValue("TimeStamp"));
         difference = timestampnow - AOStimestamp;
@@ -1075,9 +1076,18 @@ timeSub.addListener({
     }
     else
     {
-        console.log("Signal Lost!     @ " + update.getValue("TimeStamp"));
-        AOS = "Signal Lost";
-        AOSnum = 0;
+        if( difference > 0.00153680542553047 )
+        {
+            console.log("Signal Error!     @ " + update.getValue("TimeStamp"));
+            AOS = "Stale Signal";
+            AOSnum = 2;
+        }
+        else
+        {
+            console.log("Signal Lost!     @ " + update.getValue("TimeStamp"));
+            AOS = "Signal Lost";
+            AOSnum = 0;
+        }
     }
     db.run("UPDATE telemetry set Value = ? where Label = ?", AOSnum, "aos");
     db.run("UPDATE telemetry set Timestamp = ? where Label = ?", AOStimestamp, "aos");
