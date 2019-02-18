@@ -1,61 +1,39 @@
 #!/usr/bin/python
-import kivy
-import urllib2 #try to replace these calls with urlrequest which is async
-from bs4 import BeautifulSoup
-from calendar import timegm
-from datetime import datetime
-import pytz #used for timezone conversion in orbit pass predictions
-import sys
-import ephem #used for TLE propagation on orbit screen
-import os
+from datetime import datetime #used for time conversions and logging timestamps
+import os #used to remove database on program exit
+os.environ['KIVY_GL_BACKEND'] = 'gl' #need this to fix a kivy segfault that occurs with python3 for some reason
 import subprocess #used to start/stop Javascript telemetry program
-import json
 import sqlite3 #javascript stores telemetry in sqlite db
+import time #used for time
+import math #used for math
 import serial #used to send data over serial to arduino
-import time
-import sched
-import smbus
-import math
-import random
-from threading import Thread
-import re
-from Naked.toolshed.shell import execute_js, muterun_js
-import signal
-import multiprocessing
-from kivy.network.urlrequest import UrlRequest
-from kivy.graphics.svg import Svg
-from kivy.animation import Animation
-from kivy.uix.behaviors.button import ButtonBehavior
-from kivy.uix.popup import Popup 
-from kivy.uix.button import Button
+import ephem #used for TLE orbit information on orbit screen
+import pytz #used for timezone conversion in orbit pass predictions
+from bs4 import BeautifulSoup #used to parse webpages for data (EVA stats, ISS TLE)
+import kivy
 from kivy.app import App
-from kivy.uix.label import Label
-from kivy.uix.widget import Widget
-from kivy.base import runTouchApp
+from kivy.lang import Builder
+from kivy.network.urlrequest import UrlRequest #using this to request webpages
 from kivy.clock import Clock
-from kivy.properties import ListProperty, ObjectProperty, NumericProperty, ReferenceListProperty
-from kivy.vector import Vector
-from kivy.core.window import Window
-from kivy.lang import Builder
-from kivy.uix.floatlayout import FloatLayout
 from kivy.event import EventDispatcher
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.stacklayout import StackLayout
-from kivy.core.image import Image
-from kivy.lang import Builder
-from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition, WipeTransition, SwapTransition
+from kivy.properties import ObjectProperty
+from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
 
-# Create Program Logs 
-mimiclog = open('/home/pi/Mimic/Pi/Logs/mimiclog.txt','w')
-sgantlog = open('/home/pi/Mimic/Pi/Logs/sgantlog.txt','a+')
-locationlog = open('/home/pi/Mimic/Pi/Logs/locationlog.txt','a')
+# Create Program Logs
+mimiclog = open('/home/pi/Mimic/Pi/Logs/mimiclog.txt', 'w')
+sgantlog = open('/home/pi/Mimic/Pi/Logs/sgantlog.txt', 'a+')
+locationlog = open('/home/pi/Mimic/Pi/Logs/locationlog.txt', 'a')
+testlog = open('/home/pi/Mimic/Pi/Logs/testlog.txt', 'w')
+testlog.write('test')
 
 def logWrite(string):
     mimiclog.write(str(datetime.utcnow()))
     mimiclog.write(' ')
     mimiclog.write(str(string))
     mimiclog.write('\n')
+
+mimiclog.write("test")
+logWrite("Initialized Mimic Program Log")
 
 #-------------------------Look for a connected arduino-----------------------------------
 SerialConnection1 = False
@@ -73,322 +51,326 @@ except Exception:
 else:
     SerialConnection1 = True
     logWrite("Successful connection to Serial on ACMO")
-    print str(ser)
+    print(str(ser))
 
 try:
     ser2 = serial.Serial('/dev/ttyACM1', 9600, timeout=0)
 except Exception:
-    logWrite("Warning - Serial Connection ACM1 not found")
+    #logWrite("Warning - Serial Connection ACM1 not found")
     SerialConnection2 = False
     ser2 = None
 else:
     SerialConnection2 = True
     logWrite("Successful connection to Serial on ACM1")
-    print str(ser2)
+    print(str(ser2))
 
 try:
     ser3 = serial.Serial('/dev/ttyACM2', 9600, timeout=0)
 except Exception:
-    logWrite("Warning - Serial Connection ACM2 not found")
+    #logWrite("Warning - Serial Connection ACM2 not found")
     SerialConnection3 = False
     ser3 = None
 else:
     SerialConnection3 = True
     logWrite("Successful connection to Serial on ACM2")
-    print str(ser3)
+    print(str(ser3))
 
 try:
     ser4 = serial.Serial('/dev/ttyAMA00', 9600, timeout=0)
 except Exception:
-    logWrite("Warning - Serial Connection AMA00 not found")
+    #logWrite("Warning - Serial Connection AMA00 not found")
     SerialConnection4 = False
     ser4 = None
 else:
     SerialConnection4 = True
     logWrite("Successful connection to Serial on AMA0O")
-    print str(ser4)
+    print(str(ser4))
 
 try:
     ser5 = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
 except Exception:
-    logWrite("Warning - Serial Connection USB0 not found")
+    #logWrite("Warning - Serial Connection USB0 not found")
     SerialConnection5 = False
     ser5 = None
 else:
     SerialConnection5 = True
     logWrite("Successful connection to Serial on USBO")
-    print str(ser5)
+    print(str(ser5))
 
 #----------------Open SQLITE3 Database that holds the current ISS Telemetry--------------
 conn = sqlite3.connect('/dev/shm/iss_telemetry.db')
 conn.isolation_level = None
-c = conn.cursor() 
+c = conn.cursor()
 #now we populate the blank database, this prevents locked database issues
 c.execute("pragma journal_mode=wal");
 c.execute("CREATE TABLE IF NOT EXISTS telemetry (`Label` TEXT PRIMARY KEY, `Timestamp` TEXT, `Value` TEXT, `ID` TEXT, `dbID` NUMERIC )");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('psarj','1216.72738833328','233.039337158203','S0000004',1)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('ssarj','1216.72738833328','126.911819458008','S0000003',2)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('ptrrj','1175.8188055555','-39.9920654296875','S0000002',3)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('strrj','1216.72741666661','25.1238956451416','S0000001',4)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta1b','1216.72669444442','253.663330078125','S6000008',5)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta1a','1216.72669444442','110.802612304688','S4000007',6)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta2b','1216.72724999997','291.62109375','P6000008',7)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta2a','1216.72344388889','345.602416992188','P4000007',8)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta3b','1216.72355444445','194.144897460938','S6000007',9)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta3a','1216.72669444442','249.076538085938','S4000008',10)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta4b','1216.72669444442','69.818115234375','P6000007',11)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta4a','1216.7269722222','14.3975830078125','P4000008',12)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('aos','1216.72733833333','2','AOS',13)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('los','7084.92338888884','0','LOS',14)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('sasa1_elevation','1216.7273047222','101.887496948242','S1000005',15)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('sgant_elevation','1216.72727777772','105.172134399414','Z1000014',16)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('crewlock_pres','1216.65458361109','754.457946777344','AIRLOCK000049',17)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('sgant_xel','1216.72727777772','-38.6938552856445','Z1000015',18)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('sasa1_azimuth','1216.71619333333','185.268753051758','S1000004',19)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('loopb_flowrate','1216.69486111111','4349.26708984375','P1000001',20)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('loopb_pressure','1216.72730527778','2162.86865234375','P1000002',21)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('loopb_temp','1216.72108277778','4.13970804214478','P1000003',22)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('loopa_flowrate','1216.72683361106','3519.21850585938','S1000001',23)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('loopa_pressure','1216.70883222222','2103.71728515625','S1000002',24)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('loopa_temp','1216.72386055556','3.63912987709045','S1000003',25)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('voltage_1a','1216.72469388889','160.576171875','S4000001',26)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('voltage_1b','1216.72480444445','159.49951171875','S6000004',27)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('voltage_2a','1216.72422194441','159.90966796875','P4000001',28)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('voltage_2b','1216.72433249997','152.73193359375','P6000004',29)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('voltage_3a','1216.72469388889','158.78173828125','S4000004',30)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('voltage_3b','1216.72480444445','160.986328125','S6000001',31)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('voltage_4a','1216.72422194441','158.73046875','P4000004',32)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('voltage_4b','1216.71599916663','159.8583984375','P6000001',33)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('current_1a','1216.72597222222','-32.1090566730273','S4000002',34)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('current_1b','1216.72597222222','-65.9772260650065','S6000005',35)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('current_2a','1216.72574972219','-45.60829685216','P4000002',36)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('current_2b','1216.72594388889','-30.1572487651965','P6000005',37)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('current_3a','1216.72597222222','-41.1726404259626','S4000005',38)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('current_3b','1216.72597222222','-35.8874645656566','S6000002',39)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('current_4a','1216.72594388889','-44.8238382407841','P4000005',40)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('current_4b','1216.72594388889','-35.2639276439644','P6000002',41)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('kuband_transmit','1216.7250719444','1','Z1000013',42)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('ptrrj_mode','1161.24824999995','4','S0000006',43)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('strrj_mode','1161.24824999995','4','S0000007',44)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('psarj_mode','1160.65219388889','5','S0000008',45)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('ssarj_mode','1160.65219388889','5','S0000009',46)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('russian_mode','1160.65213861108','7','RUSSEG000001',47)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('iss_mode','1160.65419361108','1','USLAB000086',48)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('iss_mass','1161.24836194442','417501.5625','USLAB000039',49)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('us_gnc_mode','1160.65438777778','5','USLAB000012',50)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('sasa2_elevation','1216.7273047222','101.90625','P1000005',51)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('sasa2_azimuth','1216.71572138886','185.268753051758','P1000004',52)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('sasa2_status','1160.66299888889','1','P1000007',53)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('sasa1_status','1160.66066611111','1','S1000009',54)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('active_sasa','1160.66272111111','1','USLAB000092',55)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('position_x','1216.725805','29.8297033276271','USLAB000032',56)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('position_y','1216.725805','5964.89191167363','USLAB000033',57)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('position_z','1216.725805','-3237.06743854422','USLAB000034',58)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('velocity_x','1216.725805','-5433.68688146446','USLAB000035',59)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('velocity_y','1216.725805','-2551.23487465513','USLAB000036',60)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('velocity_z','1216.725805','-4762.70709805804','USLAB000037',61)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('PSA_EMU1_VOLTS','1216.69152805554','-0.0286679994314909','AIRLOCK000001',62)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('PSA_EMU1_AMPS','1216.69041694442','-0.00489299977198243','AIRLOCK000002',63)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('PSA_EMU2_VOLTS','1216.68263916665','-0.0286679994314909','AIRLOCK000003',64)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('PSA_EMU2_AMPS','1216.69013916665','-0.00489299977198243','AIRLOCK000004',65)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('PSA_IRU_Utility_VOLTS','1216.68238833328','-0.0286679994314909','AIRLOCK000005',66)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('PSA_IRU_Utility_AMPS','1216.7271105555','-0.00489299977198243','AIRLOCK000006',67)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('UIA_EV_1_VOLTS','1216.69177749998','-0.0286679994314909','AIRLOCK000007',68)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('UIA_EV_1_AMPS','1216.6839997222','-0.00489299977198243','AIRLOCK000008',69)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('UIA_EV_2_VOLTS','1216.72705527776','-0.0286679994314909','AIRLOCK000009',70)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('UIA_EV_2_AMPS','1216.69122194442','-0.00489299977198243','AIRLOCK000010',71)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_AL1A4A_A_RPC_01_Depress_Pump_On_Off_Stat','1160.66247166667','0','AIRLOCK000047',72)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_Depress_Pump_Power_Switch','1161.24977777772','0','AIRLOCK000048',73)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_O2_Hi_P_Supply_Vlv_Actual_Posn','1161.24997194442','0','AIRLOCK000050',74)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_O2_Lo_P_Supply_Vlv_Actual_Posn','1161.24997194442','1','AIRLOCK000051',75)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_N2_Supply_Vlv_Actual_Posn','1161.24997194442','1','AIRLOCK000052',76)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_CCAA_State','1161.24994361109','5','AIRLOCK000053',77)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_PCA_Cabin_Pressure','1216.07402833336','752.088439941406','AIRLOCK000054',78)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_O2_Hi_P_Supply_Pressure','1216.72674916665','12801.83984375','AIRLOCK000055',79)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_O2_Lo_P_Supply_Pressure','1216.72388888889','5624.67041015625','AIRLOCK000056',80)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_N2_Supply_Pressure','1216.66397138887','11619.3896484375','AIRLOCK000057',81)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node2_MTL_PPA_Avg_Accum_Qty','1161.2497227778','42.8092460632324','NODE2000001',82)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node2_LTL_PPA_Avg_Accum_Qty','1216.72069444444','33.9924049377441','NODE2000002',83)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_2_CCAA_State','1161.24991694444','5','NODE2000003',84)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node2_LTL_TWMV_Out_Temp','1216.72733333336','10.0628938674927','NODE2000006',85)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node2_MTL_TWMV_Out_Temp','1216.694555','17.1698589324951','NODE2000007',86)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_MCA_ppO2','1215.93880527774','171.485071057186','NODE3000001',87)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_MCA_ppN2','1215.93880527774','566.382082394791','NODE3000002',88)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_MCA_ppCO2','1215.93880527774','3.21665350504667','NODE3000003',89)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_UPA_Current_State','1214.98497222225','32','NODE3000004',90)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_UPA_WSTA_Qty_Ctrl_Pct','1216.18163861109','48','NODE3000005',91)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_WPA_Process_Cmd_Status','1209.33855500003','4','NODE3000006',92)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_WPA_Process_Step','1209.58580666668','4','NODE3000007',93)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_WPA_Waste_Water_Qty_Ctrl','1216.72741805553','13.1700000762939','NODE3000008',94)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_WPA_Water_Storage_Qty_Ctrl','1216.72741805553','82.1500015258789','NODE3000009',95)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_OGA_Process_Cmd_Status','1160.66252694441','1','NODE3000010',96)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_OGA_O2_Production_Rate','1216.72730500003','2.7396981716156','NODE3000011',97)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node3_MTL_TWMV_Out_Temp','1216.69444444444','17.1069641113281','NODE3000012',98)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node3_LTL_TWMV_Out_Temp','1216.59625083334','9.4375','NODE3000013',99)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node3_MTL_PPA_Avg_Accum_Qty','1214.82188833336','78.7650146484375','NODE3000017',100)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_CCAA_State','1161.2465836111','5','NODE3000018',101)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node3_LTL_PPA_Avg_Accum_Qty','1214.23022166669','59.9398651123047','NODE3000019',102)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_2A_PVCU_On_Off_V_Stat','1161.24858444446','1','P4000003',103)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_4A_PVCU_On_Off_V_Stat','1161.24980611112','1','P4000006',104)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_4B_RBI_6_Integ_I','0','0','P6000002',105)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_4B_PVCU_On_Off_V_Stat','1161.25161166668','1','P6000003',106)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_2B_PVCU_On_Off_V_Stat','1161.24980611112','1','P6000006',107)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_KURS1_On','1161.24980527778','0','RUSSEG000002',108)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_KURS2_On','1161.24980527778','0','RUSSEG000003',109)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('SM_ECW_KURS_Fail','1161.24980527778','0','RUSSEG000004',110)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_KURS_Rng','1161.24991749995','96348.265625','RUSSEG000005',111)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_KURS_Vel','1161.24991749995','134.808670043945','RUSSEG000006',112)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('SM_KURS_P_Test_Mode_RS','1161.24980527778','0','RUSSEG000007',113)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('SM_KURS_P_Capture_Signal_RS','1161.24980527778','0','RUSSEG000008',114)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('SM_KURS_P_Target_Acquisition_Signal_RS','1161.24980527778','0','RUSSEG000009',115)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('SM_KURS_P_Functional_Mode_Signal_RS','1161.24980527778','0','RUSSEG000010',116)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('SM_KURS_P_In_Stand_by_Mode_RS','1161.24980527778','0','RUSSEG000011',117)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_Dock_Contact','1161.24977833331','0','RUSSEG000012',118)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_Forward_Port_Engaged','1161.24977833331','1','RUSSEG000013',119)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_Aft_Port_Engaged','1161.24977833331','1','RUSSEG000014',120)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_Nadir_Port_Engaged','1161.24977833331','1','RUSSEG000015',121)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_FGB_Nadir_Port_Engaged','1161.24977833331','1','RUSSEG000016',122)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_UDM_Nadir_Port_Engaged','1161.24977833331','1','RUSSEG000017',123)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_MRM1_Port_Engaged','1161.24977833331','1','RUSSEG000018',124)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_MRM2_Port_Engaged','1161.24977833331','1','RUSSEG000019',125)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_ETOV_Hooks_Closed','1161.24986222221','0','RUSSEG000020',126)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_Act_Att_Ref_Frame','1161.24977833331','1','RUSSEG000021',127)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_RS_Is_Master','1161.24977833331','0','RUSSEG000022',128)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_Ready_For_Indicator','1161.24977833331','0','RUSSEG000023',129)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSProp_SM_Thrstr_Mode_Terminated','1161.24983388888','0','RUSSEG000024',130)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_SUDN_Mode','1160.65194444444','6','RUSSEG000025',131)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('SARJ_Port_Commanded_Position','1216.72741666661','233.195175170898','S0000005',132)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_S01A_C_RPC_01_Ext_1_MDM_On_Off_Stat','1160.6606108333','1','S0000010',133)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_S01A_C_RPC_16_S0_1_MDM_On_Off_Stat','1160.66217666666','1','S0000011',134)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_S02B_C_RPC_01_Ext_2_MDM_On_Off_Stat','1160.6606108333','0','S0000012',135)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_S02B_C_RPC_16_S0_2_MDM_On_Off_Stat','1160.6606108333','1','S0000013',136)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_S11A_C_RPC_03_STR_MDM_On_Off_Stat','1160.66066611111','1','S1000006',137)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_S11A_C_RPC_16_S1_1_MDM_On_Off_Stat','1160.66066611111','1','S1000007',138)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_S12B_B_RPC_05_S1_2_MDM_On_Off_Stat','1160.66069444444','1','S1000008',139)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_1A_PVCU_On_Off_V_Stat','1161.2484738889','1','S4000003',140)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_3A_PVCU_On_Off_V_Stat','1161.24980611112','1','S4000006',141)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_3B_PVCU_On_Off_V_Stat','1161.2484738889','1','S6000003',142)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_1B_PVCU_On_Off_V_Stat','1161.24980611112','1','S6000006',143)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Time of Occurrence','1216.72744333333','4380218418','TIME_000001',144)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Year of Occurrence','1160.65017138885','2018','TIME_000002',145)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_SEQ_CMG1_Online','1161.24816638887','1','USLAB000001',146)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_SEQ_CMG2_Online','1161.24816638887','1','USLAB000002',147)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_SEQ_CMG3_Online','1161.24816638887','1','USLAB000003',148)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_SEQ_CMG4_Online','1161.24816638887','1','USLAB000004',149)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Num_CMGs_Online','1161.24808277773','4','USLAB000005',150)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Unlim_Cntl_Trq_InBody_X','1216.72744388892','-2.45458972872734','USLAB000006',151)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Unlim_Cntl_Trq_InBody_Y','1216.72744388892','4.61879036814499','USLAB000007',152)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Unlim_Cntl_Trq_InBody_Z','1216.72744388892','-2.27159083915615','USLAB000008',153)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_CMG_Mom_Act_Mag','1216.72736222221','2185.16832879028','USLAB000009',154)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_CMG_Mom_Act_Cap_Pct','1216.72736222221','11.193434715271','USLAB000010',155)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Desat_Request_Inh','1161.25058416665','0','USLAB000011',156)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_AD_Selected_Att_Source','1161.24819611112','1','USLAB000013',157)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_AD_Selected_Rate_Source','1161.24819611112','1','USLAB000014',158)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_SD_Selected_State_Source','1161.24850083331','4','USLAB000015',159)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Act_CCDB_Att_Cntl_Type','1161.24808277773','1','USLAB000016',160)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Act_CCDB_Att_Cntl_Ref_Frame','1160.65273222221','0','USLAB000017',161)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_PS_Pointing_LVLH_Att_Quatrn_0','1216.72744416667','0.999212622642517','USLAB000018',162)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_PS_Pointing_LVLH_Att_Quatrn_1','1216.72744416667','0.00867813266813755','USLAB000019',163)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_PS_Pointing_LVLH_Att_Quatrn_2','1216.72744416667','-0.0168247651308775','USLAB000020',164)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_PS_Pointing_LVLH_Att_Quatrn_3','1216.72744416667','-0.0348674207925797','USLAB000021',165)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Att_Error_X','1216.72741777778','0.368115151294135','USLAB000022',166)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Att_Error_Y','1216.72741777778','0.0822624275713228','USLAB000023',167)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Att_Error_Z','1216.72741777778','-0.00235306124983981','USLAB000024',168)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_PS_Pointing_Current_Inert_Rate_Vector_X','1216.72744416667','0.00437836543317244','USLAB000025',169)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_PS_Pointing_Current_Inert_Rate_Vector_Y','1216.72744416667','-0.0643700269413879','USLAB000026',170)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_PS_Pointing_Current_Inert_Rate_Vector_Z','1216.72744416667','0.00107732213344025','USLAB000027',171)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Act_CCDB_AttQuatrn_0_Cmd','1160.65173305551','0.999223709106445','USLAB000028',172)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Act_CCDB_AttQuatrn_1_Cmd','1160.65173305551','0.00549489445984364','USLAB000029',173)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Act_CCDB_AttQuatrn_2_Cmd','1160.65173305551','-0.0176546052098274','USLAB000030',174)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Act_CCDB_AttQuatrn_3_Cmd','1160.65173305551','-0.0347869843244553','USLAB000031',175)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_CMG_Mom_Act_Cap','1216.72466555556','19521.8739049785','USLAB000038',176)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_PS_Solar_Beta_Angle','1216.72409416662','-62.734375','USLAB000040',177)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Loss_Of_CMG_Att_Cntl_Latched_Caution','1161.2498047222','0','USLAB000041',178)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CCS_Loss_of_ISS_Attitude_Control_Warning','1161.24986250003','0','USLAB000042',179)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_GPS1_Operational_Status','1216.72222222222','0','USLAB000043',180)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_GPS2_Operational_Status','1216.32369361109','0','USLAB000044',181)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG1_SpinBrg_Temp1','1216.72562749995','27.6041679382324','USLAB000045',182)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG2_SpinBrg_Temp1','1216.72573805551','22.6085071563721','USLAB000046',183)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG3_SpinBrg_Temp1','1216.72237777776','34.7960090637207','USLAB000047',184)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG4_SpinBrg_Temp1','1216.72579333332','34.8828163146973','USLAB000048',185)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG1_SpinBrg_Temp2','1216.7223211111','26.1024322509766','USLAB000049',186)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG2_SpinBrg_Temp2','1216.72573805551','17.3784732818604','USLAB000050',187)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG3_SpinBrg_Temp2','1216.52016749998','45.776912689209','USLAB000051',188)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG4_SpinBrg_Temp2','1216.72579333332','33.589412689209','USLAB000052',189)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_MCA_ppO2','1161.24661055558','156.316830573616','USLAB000053',190)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_MCA_ppN2','1161.24661055558','574.227483380585','USLAB000054',191)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_MCA_ppCO2','1160.65574972219','2.2482170546557','USLAB000055',192)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_LTL_PPA_Avg_Accum_Qty','1215.30244388892','79.7446594238281','USLAB000056',193)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_MTL_PPA_Avg_Accum_Qty','1191.26744388892','80.2742004394531','USLAB000057',194)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_PCA_Cabin_Pressure','1216.52375055558','751.785461425781','USLAB000058',195)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB1P6_CCAA_In_T1','1216.71502694441','23.3861961364746','USLAB000059',196)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_MTL_Regen_TWMV_Out_Temp','1216.68211083333','17.2327518463135','USLAB000060',197)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_LTL_TWMV_Out_Temp','1216.70669361108','9.0625','USLAB000061',198)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_VRS_Vent_Vlv_Posn_Raw','1185.75786055558','1','USLAB000062',199)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_VES_Vent_Vlv_Posn_Raw','1185.70063833336','1','USLAB000063',200)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB1P6_CCAA_State','1161.2465836111','5','USLAB000064',201)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB1S6_CCAA_State','1161.2465836111','4','USLAB000065',202)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD11B_A_RPC_07_CC_1_MDM_On_Off_Stat','1160.66283305552','1','USLAB000066',203)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD52B_A_RPC_03_CC_2_MDM_On_Off_Stat','1160.66283305552','1','USLAB000067',204)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA1A4A_E_RPC_01_CC_3_MDM_On_Off_Stat','1160.66283305552','1','USLAB000068',205)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD11B_A_RPC_09_Int_1_MDM_On_Off_Stat','1160.66283305552','0','USLAB000069',206)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD52B_A_RPC_04_Int_2_MDM_On_Off_Stat','1160.66283305552','1','USLAB000070',207)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD11B_A_RPC_11_PL_1_MDM_On_Off_Stat','1160.66283305552','1','USLAB000071',208)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD22B_A_RPC_01_PL_2_MDM_On_Off_Stat','1160.66283305552','1','USLAB000072',209)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA1B_B_RPC_14_GNC_1_MDM_On_Off_Stat','1160.65444444444','1','USLAB000073',210)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA2B_E_RPC_03_GNC_2_MDM_On_Off_Stat','1160.65447138886','1','USLAB000074',211)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD11B_A_RPC_08_PMCU_1_MDM_On_Off_Stat','1160.66283305552','1','USLAB000075',212)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD52B_A_RPC_01_PMCU_2_MDM_On_Off_Stat','1160.66283305552','0','USLAB000076',213)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA1B_B_RPC_09_LAB_1_MDM_On_Off_Stat','1160.66277777778','1','USLAB000077',214)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA2B_E_RPC_04_LAB_2_MDM_On_Off_Stat','1160.66280472219','1','USLAB000078',215)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA2B_E_RPC_13_LAB_3_MDM_On_Off_Stat','1160.66280472219','1','USLAB000079',216)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA1B_D_RPC_01_LAB_FSEGF_Sys_Pwr_1_On_Off_Stat','1160.66280472219','0','USLAB000080',217)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_AttMnvr_In_Progress','1160.65958333333','0','USLAB000081',218)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Prim_CCS_MDM_Std_Cmd_Accept_Cnt','1216.693305','4089','USLAB000082',219)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Prim_CCS_MDM_Data_Load_Cmd_Accept_Cnt','1216.05608333336','28711','USLAB000083',220)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Coarse_Time','1216.72722222222','1203093836','USLAB000084',221)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Fine_Time','1216.72747166667','0.59765625','USLAB000085',222)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Prim_CCS_MDM_PCS_Cnct_Cnt','1171.44763999999','7','USLAB000087',223)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Ku_HRFM_VBSP_1_Activity_Indicator','1161.24988833328','1','USLAB000088',224)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Ku_HRFM_VBSP_2_Activity_Indicator','1161.24988833328','1','USLAB000089',225)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Ku_HRFM_VBSP_3_Activity_Indicator','1161.24988833328','1','USLAB000090',226)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Ku_HRFM_VBSP_4_Activity_Indicator','1161.24988833328','1','USLAB000091',227)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Audio_IAC1_Mode_Indication','1161.24972305556','1','USLAB000093',228)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Audio_IAC2_Mode_Indication','1161.24972333332','1','USLAB000094',229)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('VDS_Destination_9_Source_ID','1166.30116777778','19','USLAB000095',230)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('VDS_Destination_13_Source_ID','1161.24977888889','28','USLAB000096',231)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('VDS_Destination_14_Source_ID','1161.24977888889','19','USLAB000097',232)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('VDS_Destination_29_Source_ID','1161.24977888889','0','USLAB000098',233)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD52B_A_RPC_08_UHF_SSSR_1_On_Off_Stat','1160.66283305552','0','USLAB000099',234)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA1B_H_RPC_04_UHF_SSSR_2_On_Off_Stat','1170.84539000001','0','USLAB000100',235)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('UHF_Frame_Sync','1170.83724944439','0','USLAB000101',236)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_SD_Selected_State_Time_Tag','1216.725805','1203093820.00567','USLAB000102',237)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG1_IG_Vibration','1216.68958500001','0.006805419921875','Z1000001',238)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG2_IG_Vibration','1216.68958500001','0.006805419921875','Z1000002',239)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG3_IG_Vibration','1216.68961194442','0.005828857421875','Z1000003',240)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG4_IG_Vibration','1216.68688944446','0.004364013671875','Z1000004',241)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG1_SpinMtr_Current','1216.6867788889','0.63671875','Z1000005',242)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG2_SpinMtr_Current','1216.68961194442','0.5029296875','Z1000006',243)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG3_SpinMtr_Current','1216.68964027776','1.0947265625','Z1000007',244)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG4_SpinMtr_Current','1216.68691777779','0.9013671875','Z1000008',245)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG1_Current_Wheel_Speed','1216.7223211111','6601','Z1000009',246)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG2_Current_Wheel_Speed','1216.72573805551','6601','Z1000010',247)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG3_Current_Wheel_Speed','1216.7273886111','6601','Z1000011',248)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG4_Current_Wheel_Speed','1216.72579333332','6600','Z1000012',249)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('eva_crew_1','0','crew1','0',250)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('eva_crew_2','0','crew2','0',251)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('us_eva_#','0','43','0',252)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('rs_eva_#','0','43','0',253)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('last_us_eva_duration','0','450','0',254)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('last_rs_eva_duration','0','450','0',255)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer','0','Unsubscribed','0',0)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('psarj', '0', '0', 'S0000004', 0)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('ssarj', '0', '0', 'S0000003', 1)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('ptrrj', '0', '0', 'S0000002', 2)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('strrj', '0', '0', 'S0000001', 3)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta1b', '0', '0', 'S6000008', 4)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta1a', '0', '0', 'S4000007', 5)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta2b', '0', '0', 'P6000008', 6)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta2a', '0', '0', 'P4000007', 7)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta3b', '0', '0', 'S6000007', 8)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta3a', '0', '0', 'S4000008', 9)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta4b', '0', '0', 'P6000007', 10)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta4a', '0', '0', 'P4000008', 11)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('aos', '0', '0', 'AOS', 12)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('los', '0', '0', 'LOS', 13)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('sasa1_elevation', '0', '0', 'S1000005', 14)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('sgant_elevation', '0', '0', 'Z1000014', 15)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('crewlock_pres', '0', '0', 'AIRLOCK000049', 16)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('sgant_xel', '0', '0', 'Z1000015', 17)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('sasa1_azimuth', '0', '0', 'S1000004', 18)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('loopb_flowrate', '0', '0', 'P1000001', 19)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('loopb_pressure', '0', '0', 'P1000002', 20)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('loopb_temp', '0', '0', 'P1000003', 21)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('loopa_flowrate', '0', '0', 'S1000001', 22)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('loopa_pressure', '0', '0', 'S1000002', 23)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('loopa_temp', '0', '0', 'S1000003', 24)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('voltage_1a', '0', '0', 'S4000001', 25)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('voltage_1b', '0', '0', 'S6000004', 26)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('voltage_2a', '0', '0', 'P4000001', 27)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('voltage_2b', '0', '0', 'P6000004', 28)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('voltage_3a', '0', '0', 'S4000004', 29)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('voltage_3b', '0', '0', 'S6000001', 30)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('voltage_4a', '0', '0', 'P4000004', 31)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('voltage_4b', '0', '0', 'P6000001', 32)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('current_1a', '0', '0', 'S4000002', 33)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('current_1b', '0', '0', 'S6000005', 34)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('current_2a', '0', '0', 'P4000002', 35)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('current_2b', '0', '0', 'P6000005', 36)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('current_3a', '0', '0', 'S4000005', 37)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('current_3b', '0', '0', 'S6000002', 38)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('current_4a', '0', '0', 'P4000005', 39)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('current_4b', '0', '0', 'P6000002', 40)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('kuband_transmit', '0', '0', 'Z1000013', 41)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('ptrrj_mode', '0', '0', 'S0000006', 42)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('strrj_mode', '0', '0', 'S0000007', 43)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('psarj_mode', '0', '0', 'S0000008', 44)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('ssarj_mode', '0', '0', 'S0000009', 45)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('russian_mode', '0', '0', 'RUSSEG000001', 46)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('iss_mode', '0', '0', 'USLAB000086', 47)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('iss_mass', '0', '0', 'USLAB000039', 48)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('us_gnc_mode', '0', '0', 'USLAB000012', 49)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('sasa2_elevation', '0', '0', 'P1000005', 50)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('sasa2_azimuth', '0', '0', 'P1000004', 51)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('sasa2_status', '0', '0', 'P1000007', 52)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('sasa1_status', '0', '0', 'S1000009', 53)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('active_sasa', '0', '0', 'USLAB000092', 54)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('position_x', '0', '0', 'USLAB000032', 55)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('position_y', '0', '0', 'USLAB000033', 56)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('position_z', '0', '0', 'USLAB000034', 57)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('velocity_x', '0', '0', 'USLAB000035', 58)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('velocity_y', '0', '0', 'USLAB000036', 59)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('velocity_z', '0', '0', 'USLAB000037', 60)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('PSA_EMU1_VOLTS', '0', '0', 'AIRLOCK000001', 61)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('PSA_EMU1_AMPS', '0', '0', 'AIRLOCK000002', 62)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('PSA_EMU2_VOLTS', '0', '0', 'AIRLOCK000003', 63)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('PSA_EMU2_AMPS', '0', '0', 'AIRLOCK000004', 64)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('PSA_IRU_Utility_VOLTS', '0', '0', 'AIRLOCK000005', 65)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('PSA_IRU_Utility_AMPS', '0', '0', 'AIRLOCK000006', 66)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('UIA_EV_1_VOLTS', '0', '0', 'AIRLOCK000007', 67)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('UIA_EV_1_AMPS', '0', '0', 'AIRLOCK000008', 68)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('UIA_EV_2_VOLTS', '0', '0', 'AIRLOCK000009', 69)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('UIA_EV_2_AMPS', '0', '0', 'AIRLOCK000010', 70)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_AL1A4A_A_RPC_01_Depress_Pump_On_Off_Stat', '0', '0', 'AIRLOCK000047', 71)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_Depress_Pump_Power_Switch', '0', '0', 'AIRLOCK000048', 72)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_O2_Hi_P_Supply_Vlv_Actual_Posn', '0', '0', 'AIRLOCK000050', 73)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_O2_Lo_P_Supply_Vlv_Actual_Posn', '0', '0', 'AIRLOCK000051', 74)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_N2_Supply_Vlv_Actual_Posn', '0', '0', 'AIRLOCK000052', 75)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_CCAA_State', '0', '0', 'AIRLOCK000053', 76)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_PCA_Cabin_Pressure', '0', '0', 'AIRLOCK000054', 77)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_O2_Hi_P_Supply_Pressure', '0', '0', 'AIRLOCK000055', 78)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_O2_Lo_P_Supply_Pressure', '0', '0', 'AIRLOCK000056', 79)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Airlock_N2_Supply_Pressure', '0', '0', 'AIRLOCK000057', 80)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node2_MTL_PPA_Avg_Accum_Qty', '0', '0', 'NODE2000001', 81)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node2_LTL_PPA_Avg_Accum_Qty', '0', '0', 'NODE2000002', 82)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_2_CCAA_State', '0', '0', 'NODE2000003', 83)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node2_LTL_TWMV_Out_Temp', '0', '0', 'NODE2000006', 84)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node2_MTL_TWMV_Out_Temp', '0', '0', 'NODE2000007', 85)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_MCA_ppO2', '0', '0', 'NODE3000001', 86)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_MCA_ppN2', '0', '0', 'NODE3000002', 87)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_MCA_ppCO2', '0', '0', 'NODE3000003', 88)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_UPA_Current_State', '0', '0', 'NODE3000004', 89)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_UPA_WSTA_Qty_Ctrl_Pct', '0', '0', 'NODE3000005', 90)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_WPA_Process_Cmd_Status', '0', '0', 'NODE3000006', 91)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_WPA_Process_Step', '0', '0', 'NODE3000007', 92)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_WPA_Waste_Water_Qty_Ctrl', '0', '0', 'NODE3000008', 93)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_WPA_Water_Storage_Qty_Ctrl', '0', '0', 'NODE3000009', 94)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_OGA_Process_Cmd_Status', '0', '0', 'NODE3000010', 95)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_OGA_O2_Production_Rate', '0', '0', 'NODE3000011', 96)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node3_MTL_TWMV_Out_Temp', '0', '0', 'NODE3000012', 97)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node3_LTL_TWMV_Out_Temp', '0', '0', 'NODE3000013', 98)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node3_MTL_PPA_Avg_Accum_Qty', '0', '0', 'NODE3000017', 99)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node_3_CCAA_State', '0', '0', 'NODE3000018', 100)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Node3_LTL_PPA_Avg_Accum_Qty', '0', '0', 'NODE3000019', 101)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_2A_PVCU_On_Off_V_Stat', '0', '0', 'P4000003', 102)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_4A_PVCU_On_Off_V_Stat', '0', '0', 'P4000006', 103)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_4B_RBI_6_Integ_I', '0', '0', 'P6000002', 104)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_4B_PVCU_On_Off_V_Stat', '0', '0', 'P6000003', 105)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_2B_PVCU_On_Off_V_Stat', '0', '0', 'P6000006', 106)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_KURS1_On', '0', '0', 'RUSSEG000002', 107)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_KURS2_On', '0', '0', 'RUSSEG000003', 108)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('SM_ECW_KURS_Fail', '0', '0', 'RUSSEG000004', 109)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_KURS_Rng', '0', '0', 'RUSSEG000005', 110)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_KURS_Vel', '0', '0', 'RUSSEG000006', 111)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('SM_KURS_P_Test_Mode_RS', '0', '0', 'RUSSEG000007', 112)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('SM_KURS_P_Capture_Signal_RS', '0', '0', 'RUSSEG000008', 113)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('SM_KURS_P_Target_Acquisition_Signal_RS', '0', '0', 'RUSSEG000009', 114)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('SM_KURS_P_Functional_Mode_Signal_RS', '0', '0', 'RUSSEG000010', 115)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('SM_KURS_P_In_Stand_by_Mode_RS', '0', '0', 'RUSSEG000011', 116)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_Dock_Contact', '0', '0', 'RUSSEG000012', 117)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_Forward_Port_Engaged', '0', '0', 'RUSSEG000013', 118)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_Aft_Port_Engaged', '0', '0', 'RUSSEG000014', 119)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_Nadir_Port_Engaged', '0', '0', 'RUSSEG000015', 120)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_FGB_Nadir_Port_Engaged', '0', '0', 'RUSSEG000016', 121)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_UDM_Nadir_Port_Engaged', '0', '0', 'RUSSEG000017', 122)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_MRM1_Port_Engaged', '0', '0', 'RUSSEG000018', 123)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_MRM2_Port_Engaged', '0', '0', 'RUSSEG000019', 124)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_ETOV_Hooks_Closed', '0', '0', 'RUSSEG000020', 125)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_Act_Att_Ref_Frame', '0', '0', 'RUSSEG000021', 126)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_RS_Is_Master', '0', '0', 'RUSSEG000022', 127)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_Ready_For_Indicator', '0', '0', 'RUSSEG000023', 128)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSProp_SM_Thrstr_Mode_Terminated', '0', '0', 'RUSSEG000024', 129)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RSMCS_SM_SUDN_Mode', '0', '0', 'RUSSEG000025', 130)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('SARJ_Port_Commanded_Position', '0', '0', 'S0000005', 131)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_S01A_C_RPC_01_Ext_1_MDM_On_Off_Stat', '0', '0', 'S0000010', 132)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_S01A_C_RPC_16_S0_1_MDM_On_Off_Stat', '0', '0', 'S0000011', 133)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_S02B_C_RPC_01_Ext_2_MDM_On_Off_Stat', '0', '0', 'S0000012', 134)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_S02B_C_RPC_16_S0_2_MDM_On_Off_Stat', '0', '0', 'S0000013', 135)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_S11A_C_RPC_03_STR_MDM_On_Off_Stat', '0', '0', 'S1000006', 136)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_S11A_C_RPC_16_S1_1_MDM_On_Off_Stat', '0', '0', 'S1000007', 137)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_S12B_B_RPC_05_S1_2_MDM_On_Off_Stat', '0', '0', 'S1000008', 138)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_1A_PVCU_On_Off_V_Stat', '0', '0', 'S4000003', 139)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_3A_PVCU_On_Off_V_Stat', '0', '0', 'S4000006', 140)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_3B_PVCU_On_Off_V_Stat', '0', '0', 'S6000003', 141)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('DCSU_1B_PVCU_On_Off_V_Stat', '0', '0', 'S6000006', 142)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Time of Occurrence', '0', '0', 'TIME_000001', 143)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Year of Occurrence', '0', '0', 'TIME_000002', 144)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_SEQ_CMG1_Online', '0', '0', 'USLAB000001', 145)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_SEQ_CMG2_Online', '0', '0', 'USLAB000002', 146)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_SEQ_CMG3_Online', '0', '0', 'USLAB000003', 147)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_SEQ_CMG4_Online', '0', '0', 'USLAB000004', 148)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Num_CMGs_Online', '0', '0', 'USLAB000005', 149)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Unlim_Cntl_Trq_InBody_X', '0', '0', 'USLAB000006', 150)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Unlim_Cntl_Trq_InBody_Y', '0', '0', 'USLAB000007', 151)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Unlim_Cntl_Trq_InBody_Z', '0', '0', 'USLAB000008', 152)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_CMG_Mom_Act_Mag', '0', '0', 'USLAB000009', 153)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_CMG_Mom_Act_Cap_Pct', '0', '0', 'USLAB000010', 154)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Desat_Request_Inh', '0', '0', 'USLAB000011', 155)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_AD_Selected_Att_Source', '0', '0', 'USLAB000013', 156)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_AD_Selected_Rate_Source', '0', '0', 'USLAB000014', 157)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_SD_Selected_State_Source', '0', '0', 'USLAB000015', 158)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Act_CCDB_Att_Cntl_Type', '0', '0', 'USLAB000016', 159)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Act_CCDB_Att_Cntl_Ref_Frame', '0', '0', 'USLAB000017', 160)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_PS_Pointing_LVLH_Att_Quatrn_0', '0', '0', 'USLAB000018', 161)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_PS_Pointing_LVLH_Att_Quatrn_1', '0', '0', 'USLAB000019', 162)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_PS_Pointing_LVLH_Att_Quatrn_2', '0', '0', 'USLAB000020', 163)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_PS_Pointing_LVLH_Att_Quatrn_3', '0', '0', 'USLAB000021', 164)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Att_Error_X', '0', '0', 'USLAB000022', 165)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Att_Error_Y', '0', '0', 'USLAB000023', 166)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Att_Error_Z', '0', '0', 'USLAB000024', 167)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_PS_Pointing_Current_Inert_Rate_Vector_X', '0', '0', 'USLAB000025', 168)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_PS_Pointing_Current_Inert_Rate_Vector_Y', '0', '0', 'USLAB000026', 169)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_PS_Pointing_Current_Inert_Rate_Vector_Z', '0', '0', 'USLAB000027', 170)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Act_CCDB_AttQuatrn_0_Cmd', '0', '0', 'USLAB000028', 171)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Act_CCDB_AttQuatrn_1_Cmd', '0', '0', 'USLAB000029', 172)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Act_CCDB_AttQuatrn_2_Cmd', '0', '0', 'USLAB000030', 173)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Act_CCDB_AttQuatrn_3_Cmd', '0', '0', 'USLAB000031', 174)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_CMG_Mom_Act_Cap', '0', '0', 'USLAB000038', 175)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_PS_Solar_Beta_Angle', '0', '0', 'USLAB000040', 176)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_Loss_Of_CMG_Att_Cntl_Latched_Caution', '0', '0', 'USLAB000041', 177)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CCS_Loss_of_ISS_Attitude_Control_Warning', '0', '0', 'USLAB000042', 178)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_GPS1_Operational_Status', '0', '0', 'USLAB000043', 179)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_GPS2_Operational_Status', '0', '0', 'USLAB000044', 180)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG1_SpinBrg_Temp1', '0', '0', 'USLAB000045', 181)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG2_SpinBrg_Temp1', '0', '0', 'USLAB000046', 182)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG3_SpinBrg_Temp1', '0', '0', 'USLAB000047', 183)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG4_SpinBrg_Temp1', '0', '0', 'USLAB000048', 184)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG1_SpinBrg_Temp2', '0', '0', 'USLAB000049', 185)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG2_SpinBrg_Temp2', '0', '0', 'USLAB000050', 186)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG3_SpinBrg_Temp2', '0', '0', 'USLAB000051', 187)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG4_SpinBrg_Temp2', '0', '0', 'USLAB000052', 188)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_MCA_ppO2', '0', '0', 'USLAB000053', 189)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_MCA_ppN2', '0', '0', 'USLAB000054', 190)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_MCA_ppCO2', '0', '0', 'USLAB000055', 191)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_LTL_PPA_Avg_Accum_Qty', '0', '0', 'USLAB000056', 192)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_MTL_PPA_Avg_Accum_Qty', '0', '0', 'USLAB000057', 193)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_PCA_Cabin_Pressure', '0', '0', 'USLAB000058', 194)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB1P6_CCAA_In_T1', '0', '0', 'USLAB000059', 195)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_MTL_Regen_TWMV_Out_Temp', '0', '0', 'USLAB000060', 196)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_LTL_TWMV_Out_Temp', '0', '0', 'USLAB000061', 197)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_VRS_Vent_Vlv_Posn_Raw', '0', '0', 'USLAB000062', 198)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB_VES_Vent_Vlv_Posn_Raw', '0', '0', 'USLAB000063', 199)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB1P6_CCAA_State', '0', '0', 'USLAB000064', 200)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('LAB1S6_CCAA_State', '0', '0', 'USLAB000065', 201)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD11B_A_RPC_07_CC_1_MDM_On_Off_Stat', '0', '0', 'USLAB000066', 202)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD52B_A_RPC_03_CC_2_MDM_On_Off_Stat', '0', '0', 'USLAB000067', 203)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA1A4A_E_RPC_01_CC_3_MDM_On_Off_Stat', '0', '0', 'USLAB000068', 204)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD11B_A_RPC_09_Int_1_MDM_On_Off_Stat', '0', '0', 'USLAB000069', 205)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD52B_A_RPC_04_Int_2_MDM_On_Off_Stat', '0', '0', 'USLAB000070', 206)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD11B_A_RPC_11_PL_1_MDM_On_Off_Stat', '0', '0', 'USLAB000071', 207)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD22B_A_RPC_01_PL_2_MDM_On_Off_Stat', '0', '0', 'USLAB000072', 208)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA1B_B_RPC_14_GNC_1_MDM_On_Off_Stat', '0', '0', 'USLAB000073', 209)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA2B_E_RPC_03_GNC_2_MDM_On_Off_Stat', '0', '0', 'USLAB000074', 210)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD11B_A_RPC_08_PMCU_1_MDM_On_Off_Stat', '0', '0', 'USLAB000075', 211)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD52B_A_RPC_01_PMCU_2_MDM_On_Off_Stat', '0', '0', 'USLAB000076', 212)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA1B_B_RPC_09_LAB_1_MDM_On_Off_Stat', '0', '0', 'USLAB000077', 213)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA2B_E_RPC_04_LAB_2_MDM_On_Off_Stat', '0', '0', 'USLAB000078', 214)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA2B_E_RPC_13_LAB_3_MDM_On_Off_Stat', '0', '0', 'USLAB000079', 215)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA1B_D_RPC_01_LAB_FSEGF_Sys_Pwr_1_On_Off_Stat', '0', '0', 'USLAB000080', 216)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CA_AttMnvr_In_Progress', '0', '0', 'USLAB000081', 217)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Prim_CCS_MDM_Std_Cmd_Accept_Cnt', '0', '0', 'USLAB000082', 218)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Prim_CCS_MDM_Data_Load_Cmd_Accept_Cnt', '0', '0', 'USLAB000083', 219)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Coarse_Time', '0', '0', 'USLAB000084', 220)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Fine_Time', '0', '0', 'USLAB000085', 221)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Prim_CCS_MDM_PCS_Cnct_Cnt', '0', '0', 'USLAB000087', 222)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Ku_HRFM_VBSP_1_Activity_Indicator', '0', '0', 'USLAB000088', 223)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Ku_HRFM_VBSP_2_Activity_Indicator', '0', '0', 'USLAB000089', 224)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Ku_HRFM_VBSP_3_Activity_Indicator', '0', '0', 'USLAB000090', 225)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Ku_HRFM_VBSP_4_Activity_Indicator', '0', '0', 'USLAB000091', 226)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Audio_IAC1_Mode_Indication', '0', '0', 'USLAB000093', 227)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Audio_IAC2_Mode_Indication', '0', '0', 'USLAB000094', 228)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('VDS_Destination_9_Source_ID', '0', '0', 'USLAB000095', 229)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('VDS_Destination_13_Source_ID', '0', '0', 'USLAB000096', 230)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('VDS_Destination_14_Source_ID', '0', '0', 'USLAB000097', 231)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('VDS_Destination_29_Source_ID', '0', '0', 'USLAB000098', 232)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LAD52B_A_RPC_08_UHF_SSSR_1_On_Off_Stat', '0', '0', 'USLAB000099', 233)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('RPCM_LA1B_H_RPC_04_UHF_SSSR_2_On_Off_Stat', '0', '0', 'USLAB000100', 234)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('UHF_Frame_Sync', '0', '0', 'USLAB000101', 235)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_SD_Selected_State_Time_Tag', '0', '0', 'USLAB000102', 236)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG1_IG_Vibration', '0', '0', 'Z1000001', 237)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG2_IG_Vibration', '0', '0', 'Z1000002', 238)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG3_IG_Vibration', '0', '0', 'Z1000003', 239)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG4_IG_Vibration', '0', '0', 'Z1000004', 240)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG1_SpinMtr_Current', '0', '0', 'Z1000005', 241)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG2_SpinMtr_Current', '0', '0', 'Z1000006', 242)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG3_SpinMtr_Current', '0', '0', 'Z1000007', 243)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG4_SpinMtr_Current', '0', '0', 'Z1000008', 244)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG1_Current_Wheel_Speed', '0', '0', 'Z1000009', 245)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG2_Current_Wheel_Speed', '0', '0', 'Z1000010', 246)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG3_Current_Wheel_Speed', '0', '0', 'Z1000011', 247)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('USGNC_CMG4_Current_Wheel_Speed', '0', '0', 'Z1000012', 248)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('eva_crew_1', '0', 'crew1', '0', 249)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('eva_crew_2', '0', 'crew2', '0', 250)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('us_eva_#', '0', '0', '0', 251)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('rs_eva_#', '0', '0', '0', 252)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('last_us_eva_duration', '0', '0', '0', 253)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('last_rs_eva_duration', '0', '0', '0', 254)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer', '0', 'Unsubscribed', '0', 255)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('ClientStatus', '0', '0', '0', 256)");
 logWrite("Successfully initialized SQlite database")
+
+def staleTelemetry():
+    c.execute("UPDATE telemetry SET Value = 'Unsubscribed' where Label = 'Lightstreamer'");
+
 #----------------------------------Variables---------------------------------------------
 LS_Subscription = False
 isslocationsuccess = False
 testfactor = -1
 crew_mention= False
-crewjsonsuccess = False
 mimicbutton = False
 fakeorbitboolean = False
 demoboolean = False
@@ -403,7 +385,7 @@ testvalue = 0
 obtained_EVA_crew = False
 unixconvert = time.gmtime(time.time())
 EVAstartTime = float(unixconvert[7])*24+unixconvert[3]+float(unixconvert[4])/60+float(unixconvert[5])/3600
-alternate = True       
+alternate = True
 Beta4Bcontrol = False
 Beta3Bcontrol = False
 Beta2Bcontrol = False
@@ -420,16 +402,17 @@ stopAnimation = True
 startingAnim = True
 oldtdrs = "n/a"
 runningDemo = False
+logged = False
 #-----------EPS Variables----------------------
 EPSstorageindex = 0
-channel1A_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
-channel1B_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
-channel2A_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
-channel2B_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
-channel3A_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
-channel3B_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
-channel4A_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
-channel4B_voltage = [154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1,154.1]
+channel1A_voltage = [154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1]
+channel1B_voltage = [154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1]
+channel2A_voltage = [154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1]
+channel2B_voltage = [154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1]
+channel3A_voltage = [154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1]
+channel3B_voltage = [154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1]
+channel4A_voltage = [154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1]
+channel4B_voltage = [154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1]
 sizeX = 0.00
 sizeY = 0.00
 psarj2 = 1.0
@@ -444,10 +427,6 @@ sgant_elevation = 0.00
 sgant_xelevation = 0.00
 sgant_elevation_old = -110.00
 seconds2 = 260
-timenew = float(time.time())
-timeold = 0.00
-timenew2 = float(time.time())
-timeold2 = 0.00
 oldLOS = 0.00
 psarjmc = 0.00
 ssarjmc = 0.00
@@ -474,7 +453,6 @@ velocity_z = 0.00
 velocity = 0.00
 altitude = 0.00
 mass = 0.00
-airlock_pump_voltage = 0
 crewlockpres = 758
 EVA_activities = False
 repress = False
@@ -483,12 +461,6 @@ seconds = 0
 minutes = 0
 hours = 0
 leak_hold = False
-crewmember = ['','','','','','','','','','','','']
-crewmemberbio = ['','','','','','','','','','','','']
-crewmembertitle = ['','','','','','','','','','','','']
-crewmemberdays = ['','','','','','','','','','','','']
-crewmemberpicture = ['','','','','','','','','','','','']
-crewmembercountry = ['','','','','','','','','','','','']
 EV1 = ""
 EV2 = ""
 numEVAs1 = ""
@@ -498,7 +470,7 @@ numEVAs2 = ""
 EVAtime_hours2 = ""
 EVAtime_minutes2 = ""
 holdstartTime = float(unixconvert[7])*24+unixconvert[3]+float(unixconvert[4])/60+float(unixconvert[5])/3600
-eva = False 
+eva = False
 standby = False
 prebreath1 = False
 prebreath2 = False
@@ -517,7 +489,7 @@ internet = False
 class MainScreen(Screen):
     def changeManualControlBoolean(self, *args):
         global manualcontrol
-        manualcontrol = args[0]        
+        manualcontrol = args[0]
 
     def startDemo(*args):
         global p2, runningDemo
@@ -525,7 +497,7 @@ class MainScreen(Screen):
             p2 = subprocess.Popen("/home/pi/Mimic/Pi/demoOrbit.sh")
             runningDemo = True
             logWrite("Successfully started Demo Orbit script")
-    
+
     def stopDemo(*args):
         global p2, runningDemo
         try:
@@ -535,14 +507,14 @@ class MainScreen(Screen):
         else:
             logWrite("Successfully stopped Demo Orbit script")
             runningDemo = False
-    
+
     def startHTVDemo(*args):
         global p2, runningDemo
         if runningDemo == False:
             p2 = subprocess.Popen("/home/pi/Mimic/Pi/demoHTVOrbit.sh")
             runningDemo = True
             logWrite("Successfully started Demo HTV Orbit script")
-    
+
     def stopHTVDemo(*args):
         global p2, runningDemo
         try:
@@ -552,12 +524,12 @@ class MainScreen(Screen):
         else:
             logWrite("Successfully stopped Demo HTV Orbit script")
             runningDemo = False
-    
+
     def startproc(*args):
         global p
-        p = subprocess.Popen(["node", "/home/pi/Mimic/Pi/ISS_Telemetry.js"]) 
+        p = subprocess.Popen(["node", "/home/pi/Mimic/Pi/ISS_Telemetry.js"])
         logWrite("Successfully started ISS telemetry javascript")
-    
+
     def killproc(*args):
         global p
         global p2
@@ -566,27 +538,15 @@ class MainScreen(Screen):
             p2.kill()
         except Exception:
             pass
-        os.system('rm /dev/shm/iss_telemetry.db')
+        os.system('rm /dev/shm/iss_telemetry.db') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
+        staleTelemetry()
         logWrite("Successfully stopped ISS telemetry javascript and removed database")
 
 class CalibrateScreen(Screen):
-    def serialWrite(self, *args):
-        ser.write(*args)
-        #try:
-        #    self.serialActualWrite(self, *args)
-        #except Exception:
-        #    mimiclog.write(str(datetime.utcnow()))
-        #    mimiclog.write(' ')
-        #    mimiclog.write("Error - Attempted write - no serial device connected")
-        #    mimiclog.write('\n')
 
     def zeroJoints(self):
         self.changeBoolean(True)
-        ser.write('Zero')
-
-    def changeBoolean(self, *args):
-        global zerocomplete
-        zerocomplete = args[0]
+        self.serialWrite("ZERO ")
 
 class ManualControlScreen(Screen):
     def setActive(*args):
@@ -751,95 +711,95 @@ class ManualControlScreen(Screen):
     def incrementActive(self, *args):
         global Beta4Bcontrol, Beta3Bcontrol, Beta2Bcontrol, Beta1Bcontrol, Beta4Acontrol, Beta3Acontrol, Beta2Acontrol, Beta1Acontrol, PSARJcontrol, SSARJcontrol, PTRRJcontrol, STRRJcontrol
 
-        if Beta4Bcontrol == True:
+        if Beta4Bcontrol:
             self.incrementBeta4B(args[0])
-        if Beta3Bcontrol == True:
+        if Beta3Bcontrol:
             self.incrementBeta3B(args[0])
-        if Beta2Bcontrol == True:
+        if Beta2Bcontrol:
             self.incrementBeta2B(args[0])
-        if Beta1Bcontrol == True:
+        if Beta1Bcontrol:
             self.incrementBeta1B(args[0])
-        if Beta4Acontrol == True:
+        if Beta4Acontrol:
             self.incrementBeta4A(args[0])
-        if Beta3Acontrol == True:
+        if Beta3Acontrol:
             self.incrementBeta3A(args[0])
-        if Beta2Acontrol == True:
+        if Beta2Acontrol:
             self.incrementBeta2A(args[0])
-        if Beta1Acontrol == True:
+        if Beta1Acontrol:
             self.incrementBeta1A(args[0])
-        if PTRRJcontrol == True:
+        if PTRRJcontrol:
             self.incrementPTRRJ(args[0])
-        if STRRJcontrol == True:
+        if STRRJcontrol:
             self.incrementSTRRJ(args[0])
-        if PSARJcontrol == True:
+        if PSARJcontrol:
             self.incrementPSARJ(args[0])
-        if SSARJcontrol == True:
+        if SSARJcontrol:
             self.incrementSSARJ(args[0])
 
     def incrementPSARJ(self, *args):
         global psarjmc
         psarjmc += args[0]
-        self.serialWrite("PSARJ=" + str(psarjmc) + " ")   
-     
+        self.serialWrite("PSARJ=" + str(psarjmc) + " ")
+
     def incrementSSARJ(self, *args):
         global ssarjmc
         ssarjmc += args[0]
-        self.serialWrite("SSARJ=" + str(ssarjmc) + " ")   
-     
+        self.serialWrite("SSARJ=" + str(ssarjmc) + " ")
+
     def incrementPTTRJ(self, *args):
         global ptrrjmc
         ptrrjmc += args[0]
-        self.serialWrite("PTRRJ=" + str(ptrrjmc) + " ")   
-     
+        self.serialWrite("PTRRJ=" + str(ptrrjmc) + " ")
+
     def incrementSTRRJ(self, *args):
         global strrjmc
         strrjmc += args[0]
-        self.serialWrite("STRRJ=" + str(strrjmc) + " ")   
-     
+        self.serialWrite("STRRJ=" + str(strrjmc) + " ")
+
     def incrementBeta1B(self, *args):
         global beta1bmc
         beta1bmc += args[0]
-        self.serialWrite("Beta1B=" + str(beta1bmc) + " ")   
-     
+        self.serialWrite("Beta1B=" + str(beta1bmc) + " ")
+
     def incrementBeta1A(self, *args):
         global beta1amc
         beta1amc += args[0]
-        self.serialWrite("Beta1A=" + str(beta1amc) + " ")   
-     
+        self.serialWrite("Beta1A=" + str(beta1amc) + " ")
+
     def incrementBeta2B(self, *args):
         global beta2bmc
         beta2bmc += args[0]
-        self.serialWrite("Beta2B=" + str(beta2bmc) + " ")   
-     
+        self.serialWrite("Beta2B=" + str(beta2bmc) + " ")
+
     def incrementBeta2A(self, *args):
         global beta2amc
         beta2amc += args[0]
-        self.serialWrite("Beta2A=" + str(beta2amc) + " ")   
-     
+        self.serialWrite("Beta2A=" + str(beta2amc) + " ")
+
     def incrementBeta3B(self, *args):
         global beta3bmc
         beta3bmc += args[0]
-        self.serialWrite("Beta3B=" + str(beta3bmc) + " ")   
-     
+        self.serialWrite("Beta3B=" + str(beta3bmc) + " ")
+
     def incrementBeta3A(self, *args):
         global beta3amc
         beta3amc += args[0]
-        self.serialWrite("Beta3A=" + str(beta3amc) + " ")   
-     
+        self.serialWrite("Beta3A=" + str(beta3amc) + " ")
+
     def incrementBeta4B(self, *args):
         global beta4bmc
         beta4bmc += args[0]
-        self.serialWrite("Beta4B=" + str(beta4bmc) + " ")   
-     
+        self.serialWrite("Beta4B=" + str(beta4bmc) + " ")
+
     def incrementBeta4A(self, *args):
         global beta4amc
         beta4amc += args[0]
-        self.serialWrite("Beta4A=" + str(beta4amc) + " ")   
-     
+        self.serialWrite("Beta4A=" + str(beta4amc) + " ")
+
     def changeBoolean(self, *args):
         global manualcontrol
         manualcontrol = args[0]
-    
+
     def send90(self, *args):
         self.serialWrite("Beta1A=90 ")
         self.serialWrite("Beta1B=90 ")
@@ -865,7 +825,7 @@ class ManualControlScreen(Screen):
         c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'ssarj'");
         c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'ptrrj'");
         c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'strrj'");
-        
+
     def send0(self, *args):
         self.serialWrite("Beta1A=0 ")
         self.serialWrite("Beta1B=0 ")
@@ -891,66 +851,66 @@ class ManualControlScreen(Screen):
         c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ssarj'");
         c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ptrrj'");
         c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'strrj'");
-    
+
     def serialWrite(self, *args):
         #logWrite("Function call - serial write")
         global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
-        #print str(*args) 
+        #print str(*args)
         if SerialConnection1:
-            #ser.write(*args)
+            #ser.write(str.encode(*args))
             try:
-                ser.write(*args)
+                ser.write(str.encode(*args))
             except Exception:
                 ser = None
                 SerialConnection1 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
         if SerialConnection2:
-            #ser2.write(*args)
+            #ser2.write(str.encode(*args))
             try:
-                ser2.write(*args)
+                ser2.write(str.encode(*args))
             except Exception:
                 ser2 = None
                 SerialConnection2 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
         if SerialConnection3:
-            #ser3.write(*args)
+            #ser3.write(str.encode(*args))
             try:
-                ser3.write(*args)
+                ser3.write(str.encode(*args))
             except Exception:
                 ser3 = None
                 SerialConnection3 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
         if SerialConnection4:
-            #ser4.write(*args)
+            #ser4.write(str.encode(*args))
             try:
-                ser4.write(*args)
+                ser4.write(str.encode(*args))
             except Exception:
                 ser4 = None
                 SerialConnection4 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
         if SerialConnection5:
-            #ser5.write(*args)
+            #ser5.write(str.encode(*args))
             try:
-                ser5.write(*args)
+                ser5.write(str.encode(*args))
             except Exception:
                 ser5 = None
                 SerialConnection5 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
 
 
 class FakeOrbitScreen(Screen):
-    
+
     def changeDemoBoolean(self, *args):
         global demoboolean
         demoboolean = args[0]
 
-    def HTVpopup(self, *args):
-        HTVpopup = Popup(title='HTV Berthing Orbit', content=Label(text='This will playback recorded data from when the Japanese HTV spacecraft berthed to the ISS. During berthing, the SARJs and nadir BGAs lock but the zenith BGAs autotrack'),text_size=self.size,size_hint=(0.5,0.3),auto_dismiss=True)
+    def HTVpopup(self, *args): #not fully working
+        HTVpopup = Popup(title='HTV Berthing Orbit', content=Label(text='This will playback recorded data from when the Japanese HTV spacecraft berthed to the ISS. During berthing, the SARJs and nadir BGAs lock but the zenith BGAs autotrack'), text_size=self.size, size_hint=(0.5, 0.3), auto_dismiss=True)
         HTVpopup.text_size = self.size
         HTVpopup.open()
 
@@ -959,7 +919,7 @@ class FakeOrbitScreen(Screen):
         if runningDemo == False:
             p2 = subprocess.Popen("/home/pi/Mimic/Pi/demoOrbit.sh")
             runningDemo = True
-    
+
     def stopDemo(*args):
         global p2, runningDemo
         try:
@@ -968,14 +928,14 @@ class FakeOrbitScreen(Screen):
             pass
         else:
             runningDemo = False
-    
+
     def startHTVDemo(*args):
         global p2, runningDemo
         if runningDemo == False:
             p2 = subprocess.Popen("/home/pi/Mimic/Pi/demoHTVOrbit.sh")
             runningDemo = True
             logWrite("Successfully started Demo HTV Orbit script")
-    
+
     def stopHTVDemo(*args):
         global p2, runningDemo
         try:
@@ -986,56 +946,56 @@ class FakeOrbitScreen(Screen):
             logWrite("Successfully stopped Demo HTV Orbit script")
             runningDemo = False
 
-    
+
     def serialWrite(self, *args):
         #logWrite("Function call - serial write")
         global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
-        
+
         if SerialConnection1:
-            #ser.write(*args)
+            #ser.write(str.encode(*args))
             try:
-                ser.write(*args)
+                ser.write(str.encode(*args))
             except Exception:
                 ser = None
                 SerialConnection1 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
         if SerialConnection2:
-            #ser2.write(*args)
+            #ser2.write(str.encode(*args))
             try:
-                ser2.write(*args)
+                ser2.write(str.encode(*args))
             except Exception:
                 ser2 = None
                 SerialConnection2 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
         if SerialConnection3:
-            #ser3.write(*args)
+            #ser3.write(str.encode(*args))
             try:
-                ser3.write(*args)
+                ser3.write(str.encode(*args))
             except Exception:
                 ser3 = None
                 SerialConnection3 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
         if SerialConnection4:
-            #ser4.write(*args)
+            #ser4.write(str.encode(*args))
             try:
-                ser4.write(*args)
+                ser4.write(str.encode(*args))
             except Exception:
                 ser4 = None
                 SerialConnection4 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
         if SerialConnection5:
-            #ser5.write(*args)
+            #ser5.write(str.encode(*args))
             try:
-                ser5.write(*args)
+                ser5.write(str.encode(*args))
             except Exception:
                 ser5 = None
                 SerialConnection5 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
 
 class Settings_Screen(Screen, EventDispatcher):
     pass
@@ -1044,76 +1004,76 @@ class Orbit_Screen(Screen, EventDispatcher):
     pass
 
 class ISS_Screen(Screen, EventDispatcher):
-    signalcolor = ObjectProperty([1,1,1])
+    signalcolor = ObjectProperty([1, 1, 1])
     def selectModule(*args):
         global module
         module = str(args[1])
 
 class ECLSS_Screen(Screen, EventDispatcher):
-    signalcolor = ObjectProperty([1,1,1])
+    signalcolor = ObjectProperty([1, 1, 1])
 
 class EPS_Screen(Screen, EventDispatcher):
-    signalcolor = ObjectProperty([1,1,1])
+    signalcolor = ObjectProperty([1, 1, 1])
 
 class CT_Screen(Screen, EventDispatcher):
-    signalcolor = ObjectProperty([1,1,1])
+    signalcolor = ObjectProperty([1, 1, 1])
 
 class CT_SASA_Screen(Screen, EventDispatcher):
-    signalcolor = ObjectProperty([1,1,1])
+    signalcolor = ObjectProperty([1, 1, 1])
 
 class CT_Camera_Screen(Screen, EventDispatcher):
-    signalcolor = ObjectProperty([1,1,1])
+    signalcolor = ObjectProperty([1, 1, 1])
 
 class CT_UHF_Screen(Screen, EventDispatcher):
-    signalcolor = ObjectProperty([1,1,1])
+    signalcolor = ObjectProperty([1, 1, 1])
 
 class CT_SGANT_Screen(Screen, EventDispatcher):
-    signalcolor = ObjectProperty([1,1,1])
+    signalcolor = ObjectProperty([1, 1, 1])
 
 class GNC_Screen(Screen, EventDispatcher):
-    signalcolor = ObjectProperty([1,1,1])
+    signalcolor = ObjectProperty([1, 1, 1])
 
 class EVA_Main_Screen(Screen, EventDispatcher):
-    signalcolor = ObjectProperty([1,1,1])
+    signalcolor = ObjectProperty([1, 1, 1])
     pass
 
 class EVA_US_Screen(Screen, EventDispatcher):
-    signalcolor = ObjectProperty([1,1,1])
+    signalcolor = ObjectProperty([1, 1, 1])
     pass
 
 class EVA_RS_Screen(Screen, EventDispatcher):
-    signalcolor = ObjectProperty([1,1,1])
+    signalcolor = ObjectProperty([1, 1, 1])
     pass
 
 class EVA_Pictures(Screen, EventDispatcher):
     pass
 
 class TCS_Screen(Screen, EventDispatcher):
-    signalcolor = ObjectProperty([1,1,1])
+    signalcolor = ObjectProperty([1, 1, 1])
 
 class RS_Screen(Screen, EventDispatcher):
-    signalcolor = ObjectProperty([1,1,1])
+    signalcolor = ObjectProperty([1, 1, 1])
     pass
 
 class Crew_Screen(Screen, EventDispatcher):
     pass
 
 class MimicScreen(Screen, EventDispatcher):
-    signalcolor = ObjectProperty([1,1,1])
+    signalcolor = ObjectProperty([1, 1, 1])
     def changeMimicBoolean(self, *args):
         global mimicbutton
         mimicbutton = args[0]
-    
+
     def startproc(*args):
         global p
-        print "mimic starting node"
-        p = subprocess.Popen(["node", "/home/pi/Mimic/Pi/ISS_Telemetry.js"]) 
+        print("mimic starting node")
+        p = subprocess.Popen(["node", "/home/pi/Mimic/Pi/ISS_Telemetry.js"])
 
     def killproc(*args):
         global p
         global p2
         global c
-        c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer','0','Unsubscribed','0',0)");
+        c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer', '0', 'Unsubscribed', '0', 0)");
         try:
             p.kill()
             p2.kill()
@@ -1126,8 +1086,8 @@ class MainScreenManager(ScreenManager):
 class MainApp(App):
 
     def build(self):
-        global startup, ScreenList, crewjsonsuccess, stopAnimation
-        
+        global startup, ScreenList, stopAnimation
+
         self.main_screen = MainScreen(name = 'main')
         self.iss_screen = ISS_Screen(name = 'iss')
         self.eclss_screen = ECLSS_Screen(name = 'eclss')
@@ -1151,9 +1111,9 @@ class MainApp(App):
         self.rs_screen = RS_Screen(name='rs')
         self.eva_main = EVA_Main_Screen(name='eva_main')
         self.eva_pictures = EVA_Pictures(name='eva_pictures')
-        
+
         #Add all new telemetry screens to this list, this is used for the signal status icon and telemetry value colors
-        ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen', 'ct_screen', 'ct_sasa_screen', 'ct_sgant_screen', 'ct_uhf_screen', 'ct_camera_screen', 'gnc_screen', 'orbit_screen', 'us_eva', 'rs_eva', 'eva_main', 'mimic_screen'] 
+        ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen', 'ct_screen', 'ct_sasa_screen', 'ct_sgant_screen', 'ct_uhf_screen', 'ct_camera_screen', 'gnc_screen', 'orbit_screen', 'us_eva', 'rs_eva', 'eva_main', 'mimic_screen']
 
         root = MainScreenManager(transition=SwapTransition())
         root.add_widget(self.main_screen)
@@ -1182,38 +1142,39 @@ class MainApp(App):
         root.current = 'main' #change this back to main when done with eva setup
 
         Clock.schedule_interval(self.update_labels, 1)
-        Clock.schedule_interval(self.animate3,0.1)
+        Clock.schedule_interval(self.animate3, 0.1)
         Clock.schedule_interval(self.orbitUpdate, 1)
         Clock.schedule_interval(self.checkCrew, 600)
-        if startup == True:
+        if startup:
             startup = False
 
-        Clock.schedule_once(self.checkCrew, 20)
-        Clock.schedule_once(self.getTLE, 30) #uncomment when internet works again
-        #Clock.schedule_interval(self.getTLE, 600) #uncomment when internet works again
-        Clock.schedule_interval(self.getTLE, 3600)
+        Clock.schedule_once(self.checkCrew, 30)
+        Clock.schedule_once(self.getTLE, 40) #uncomment when internet works again
+        Clock.schedule_interval(self.getTLE, 300)
         Clock.schedule_interval(self.check_internet, 1)
         Clock.schedule_interval(self.check_serial, 1)
         return root
 
     def check_serial(self, dt):
         global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
-        
+
         if ser == None:
             try:
                 ser = serial.Serial('/dev/ttyACM0', 9600, timeout=0)
-            except Exception:
-                logWrite("Warning - Serial Connection ACM0 not found")
+            except Exception as e:
+                #logWrite("Warning - Serial Connection ACM0 not found")
+                print(e)
                 SerialConnection1 = False
                 ser = None
             else:
                 SerialConnection1 = True
                 logWrite("Successful connection to Serial on ACMO")
-                print str(ser)
+                print(str(ser))
         else:
             try:
-                ser.write("test")
-            except Exception:
+                ser.write(str.encode("test"))
+            except Exception as e:
+                print(e)
                 SerialConnection1 = False
                 ser = None
             else:
@@ -1223,16 +1184,16 @@ class MainApp(App):
             try:
                 ser2 = serial.Serial('/dev/ttyACM1', 9600, timeout=0)
             except Exception:
-                logWrite("Warning - Serial Connection ACM1 not found")
+                #logWrite("Warning - Serial Connection ACM1 not found")
                 SerialConnection2 = False
                 ser2 = None
             else:
                 SerialConnection2 = True
                 logWrite("Successful connection to Serial on ACM1")
-                print str(ser2)
+                print(str(ser2))
         else:
             try:
-                ser2.write("test")
+                ser2.write(str.encode("test"))
             except Exception:
                 SerialConnection2 = False
                 ser2 = None
@@ -1243,16 +1204,16 @@ class MainApp(App):
             try:
                 ser3 = serial.Serial('/dev/ttyACM2', 9600, timeout=0)
             except Exception:
-                logWrite("Warning - Serial Connection ACM2 not found")
+                #logWrite("Warning - Serial Connection ACM2 not found")
                 SerialConnection3 = False
                 ser3 = None
             else:
                 SerialConnection3 = True
                 logWrite("Successful connection to Serial on ACM2")
-                print str(ser3)
+                print(str(ser3))
         else:
             try:
-                ser3.write("test")
+                ser3.write(str.encode("test"))
             except Exception:
                 SerialConnection3 = False
                 ser3 = None
@@ -1263,16 +1224,16 @@ class MainApp(App):
             try:
                 ser4 = serial.Serial('/dev/ttyAMA00', 9600, timeout=0)
             except Exception:
-                logWrite("Warning - Serial Connection AMA00 not found")
+                #logWrite("Warning - Serial Connection AMA00 not found")
                 SerialConnection4 = False
                 ser4 = None
             else:
                 SerialConnection4 = True
                 logWrite("Successful connection to Serial on AMA0O")
-                print str(ser4)
+                print(str(ser4))
         else:
             try:
-                ser4.write("test")
+                ser4.write(str.encode("test"))
             except Exception:
                 SerialConnection4 = False
                 ser4 = None
@@ -1283,16 +1244,16 @@ class MainApp(App):
             try:
                 ser5 = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
             except Exception:
-                logWrite("Warning - Serial Connection USB0 not found")
+                #logWrite("Warning - Serial Connection USB0 not found")
                 SerialConnection5 = False
                 ser5 = None
             else:
                 SerialConnection5 = True
                 logWrite("Successful connection to Serial on USBO")
-                print str(ser5)
+                print(str(ser5))
         else:
             try:
-                ser5.write("test")
+                ser5.write(str.encode("test"))
             except Exception:
                 SerialConnection5 = False
                 ser5 = None
@@ -1335,88 +1296,100 @@ class MainApp(App):
         global EVA_picture_urls
         global urlindex
         urlsize = len(EVA_picture_urls)
-        
+
         if urlsize > 0:
             self.us_eva.ids.EVAimage.source = EVA_picture_urls[urlindex]
             self.eva_pictures.ids.EVAimage.source = EVA_picture_urls[urlindex]
-        
+
         urlindex = urlindex + 1
         if urlindex > urlsize-1:
             urlindex = 0
 
-    def check_EVA_stats(self,lastname1,firstname1,lastname2,firstname2):                
+    def check_EVA_stats(self, lastname1, firstname1, lastname2, firstname2):
         global numEVAs1, EVAtime_hours1, EVAtime_minutes1, numEVAs2, EVAtime_hours2, EVAtime_minutes2, EV1, EV2
         logWrite("Function call - check EVA stats")
+        eva_url = 'http://www.spacefacts.de/eva/e_eva_az.htm'
 
-        eva_url = 'http://spacefacts.de/eva/e_eva_az.htm'
-        urlthingy = urllib2.urlopen(eva_url)
-        soup = BeautifulSoup(urlthingy, 'html.parser')
+        def on_success(req, result):
+            logWrite("Check EVA Stats - Successs")
+            soup = BeautifulSoup(result, 'html.parser') #using bs4 to parse website
+            numEVAs1 = 0
+            EVAtime_hours1 = 0
+            EVAtime_minutes1 = 0
+            numEVAs2 = 0
+            EVAtime_hours2 = 0
+            EVAtime_minutes2 = 0
+
+            tabletags = soup.find_all("td")
+            for tag in tabletags:
+                if  lastname1 in tag.text:
+                    if firstname1 in tag.find_next_sibling("td").text:
+                        numEVAs1 = tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text
+                        EVAtime_hours1 = int(tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
+                        EVAtime_minutes1 = int(tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
+                        EVAtime_minutes1 += (EVAtime_hours1 * 60)
+
+            for tag in tabletags:
+                if lastname2 in tag.text:
+                    if firstname2 in tag.find_next_sibling("td").text:
+                        numEVAs2 = tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text
+                        EVAtime_hours2 = int(tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
+                        EVAtime_minutes2 = int(tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
+                        EVAtime_minutes2 += (EVAtime_hours2 * 60)
+
+            EV1_EVA_number = numEVAs1
+            EV1_EVA_time  = EVAtime_minutes1
+            EV2_EVA_number = numEVAs2
+            EV2_EVA_time  = EVAtime_minutes2
+
+            EV1_minutes = str(EV1_EVA_time%60).zfill(2)
+            EV2_minutes = str(EV2_EVA_time%60).zfill(2)
+            EV1_hours = int(EV1_EVA_time/60)
+            EV2_hours = int(EV2_EVA_time/60)
+
+            self.us_eva.ids.EV1.text = str(EV1) + " (EV1):"
+            self.us_eva.ids.EV2.text = str(EV2) + " (EV2):"
+            self.us_eva.ids.EV1_EVAnum.text = "Number of EVAs = " + str(EV1_EVA_number)
+            self.us_eva.ids.EV2_EVAnum.text = "Number of EVAs = " + str(EV2_EVA_number)
+            self.us_eva.ids.EV1_EVAtime.text = "Total EVA Time = " + str(EV1_hours) + "h " + str(EV1_minutes) + "m"
+            self.us_eva.ids.EV2_EVAtime.text = "Total EVA Time = " + str(EV2_hours) + "h " + str(EV2_minutes) + "m"
+
+        def on_redirect(req, result):
+            logWrite("Warning - EVA stats failure (redirect)")
+
+        def on_failure(req, result):
+            logWrite("Warning - EVA stats failure (url failure)")
+
+        def on_error(req, result):
+            logWrite("Warning - EVA stats failure (url error)")
         
-        numEVAs1 = 0
-        EVAtime_hours1 = 0
-        EVAtime_minutes1 = 0
-        numEVAs2 = 0
-        EVAtime_hours2 = 0
-        EVAtime_minutes2 = 0
-
-        tabletags = soup.find_all("td")
-        for tag in tabletags:
-            if lastname1 in tag.text:
-                if firstname1 in tag.find_next_sibling("td").text:
-                    numEVAs1 = tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text
-                    EVAtime_hours1 = int(tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
-                    EVAtime_minutes1 = int(tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
-                    EVAtime_minutes1 += (EVAtime_hours1 * 60)
-
-        for tag in tabletags:
-            if lastname2 in tag.text:
-                if firstname2 in tag.find_next_sibling("td").text:
-                    numEVAs2 = tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text
-                    EVAtime_hours2 = int(tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
-                    EVAtime_minutes2 = int(tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
-                    EVAtime_minutes2 += (EVAtime_hours2 * 60)
-        
-        EV1_EVA_number = numEVAs1 
-        EV1_EVA_time  = EVAtime_minutes1
-        EV2_EVA_number = numEVAs2 
-        EV2_EVA_time  = EVAtime_minutes2
-
-        EV1_minutes = str(EV1_EVA_time%60).zfill(2)
-        EV2_minutes = str(EV2_EVA_time%60).zfill(2)
-        EV1_hours = int(EV1_EVA_time/60)
-        EV2_hours = int(EV2_EVA_time/60)
-
-        self.us_eva.ids.EV1.text = str(EV1) + " (EV1):"
-        self.us_eva.ids.EV2.text = str(EV2) + " (EV2):"
-        self.us_eva.ids.EV1_EVAnum.text = "Number of EVAs = " + str(EV1_EVA_number) 
-        self.us_eva.ids.EV2_EVAnum.text = "Number of EVAs = " + str(EV2_EVA_number)
-        self.us_eva.ids.EV1_EVAtime.text = "Total EVA Time = " + str(EV1_hours) + "h " + str(EV1_minutes) + "m"
-        self.us_eva.ids.EV2_EVAtime.text = "Total EVA Time = " + str(EV2_hours) + "h " + str(EV2_minutes) + "m"
+        #obtain eva statistics web page for parsing
+        req = UrlRequest(eva_url, on_success, on_redirect, on_failure, on_error, timeout=1)
 
     def flashUS_EVAbutton(self, instance):
         logWrite("Function call - flashUS_EVA")
 
-        self.eva_main.ids.US_EVA_Button.background_color = (0,0,1,1)
+        self.eva_main.ids.US_EVA_Button.background_color = (0, 0, 1, 1)
         def reset_color(*args):
-            self.eva_main.ids.US_EVA_Button.background_color = (1,1,1,1)
-        Clock.schedule_once(reset_color, 0.5) 
+            self.eva_main.ids.US_EVA_Button.background_color = (1, 1, 1, 1)
+        Clock.schedule_once(reset_color, 0.5)
 
     def flashRS_EVAbutton(self, instance):
         logWrite("Function call - flashRS_EVA")
 
-        self.eva_main.ids.RS_EVA_Button.background_color = (0,0,1,1)
+        self.eva_main.ids.RS_EVA_Button.background_color = (0, 0, 1, 1)
         def reset_color(*args):
-            self.eva_main.ids.RS_EVA_Button.background_color = (1,1,1,1)
-        Clock.schedule_once(reset_color, 0.5) 
+            self.eva_main.ids.RS_EVA_Button.background_color = (1, 1, 1, 1)
+        Clock.schedule_once(reset_color, 0.5)
 
     def flashEVAbutton(self, instance):
         logWrite("Function call - flashEVA")
-    
-        self.mimic_screen.ids.EVA_button.background_color = (0,0,1,1)
+
+        self.mimic_screen.ids.EVA_button.background_color = (0, 0, 1, 1)
         def reset_color(*args):
-            self.mimic_screen.ids.EVA_button.background_color = (1,1,1,1)
-        Clock.schedule_once(reset_color, 0.5) 
-    
+            self.mimic_screen.ids.EVA_button.background_color = (1, 1, 1, 1)
+        Clock.schedule_once(reset_color, 0.5)
+
     def EVA_clock(self, dt):
         global seconds, minutes, hours, EVAstartTime
         unixconvert = time.gmtime(time.time())
@@ -1430,11 +1403,11 @@ class MainApp(App):
         seconds = int(seconds)
 
         self.us_eva.ids.EVA_clock.text =(str(hours) + ":" + str(minutes).zfill(2) + ":" + str(int(seconds)).zfill(2))
-        self.us_eva.ids.EVA_clock.color = 0.33,0.7,0.18
+        self.us_eva.ids.EVA_clock.color = 0.33, 0.7, 0.18
 
     def animate(self, instance):
         global new_x2, new_y2
-        self.main_screen.ids.ISStiny2.size_hint = 0.07,0.07
+        self.main_screen.ids.ISStiny2.size_hint = 0.07, 0.07
         new_x2 = new_x2+0.007
         new_y2 = (math.sin(new_x2*30)/18)+0.75
         if new_x2 > 1:
@@ -1451,85 +1424,85 @@ class MainApp(App):
             if sizeX <= 0.15:
                 sizeX = sizeX + 0.01
                 sizeY = sizeY + 0.01
-                self.main_screen.ids.ISStiny.size_hint = sizeX,sizeY
+                self.main_screen.ids.ISStiny.size_hint = sizeX, sizeY
             else:
                 if startingAnim:
-                    Clock.schedule_interval(self.animate,0.1)
+                    Clock.schedule_interval(self.animate, 0.1)
                     startingAnim = False
 
     def serialWrite(self, *args):
         #logWrite("Function call - serial write")
         global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
-        
+
         if SerialConnection1:
-            #ser.write(*args)
+            #ser.write(str.encode(*args))
             try:
-                ser.write(*args)
+                ser.write(str.encode(*args))
             except Exception:
                 ser = None
                 SerialConnection1 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
         if SerialConnection2:
-            #ser2.write(*args)
+            #ser2.write(str.encode(*args))
             try:
-                ser2.write(*args)
+                ser2.write(str.encode(*args))
             except Exception:
                 ser2 = None
                 SerialConnection2 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
         if SerialConnection3:
-            #ser3.write(*args)
+            #ser3.write(str.encode(*args))
             try:
-                ser3.write(*args)
+                ser3.write(str.encode(*args))
             except Exception:
                 ser3 = None
                 SerialConnection3 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
         if SerialConnection4:
-            #ser4.write(*args)
+            #ser4.write(str.encode(*args))
             try:
-                ser4.write(*args)
+                ser4.write(str.encode(*args))
             except Exception:
                 ser4 = None
                 SerialConnection4 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
         if SerialConnection5:
-            #ser5.write(*args)
+            #ser5.write(str.encode(*args))
             try:
-                ser5.write(*args)
+                ser5.write(str.encode(*args))
             except Exception:
                 ser5 = None
                 SerialConnection5 = False
             #else:
-            #    ser.write(*args)
+            #    ser.write(str.encode(*args))
 
     def changeColors(self, *args):   #this function sets all labels on mimic screen to a certain color based on signal status
-        #the signalcolor is a kv property that will update all signal status dependant values to whatever color is received by this function 
+        #the signalcolor is a kv property that will update all signal status dependant values to whatever color is received by this function
         global ScreenList
-        
+
         for x in ScreenList:
-            getattr(self, x).signalcolor = args[0],args[1],args[2]
-    
+            getattr(self, x).signalcolor = args[0], args[1], args[2]
+
     def changeManualControlBoolean(self, *args):
         global manualcontrol
         manualcontrol = args[0]
-       
+
     def orbitUpdate(self, dt):
-        global overcountry, tle_rec, line1, line2, TLE_acquired, sgant_elevation, sgant_elevation_old, sgant_xelevation, aos, oldtdrs, tdrs
-        def scaleLatLon(latitude,longitude):
-            #converting lat lon to x,y for orbit map
+        global overcountry, tle_rec, line1, line2, TLE_acquired, sgant_elevation, sgant_elevation_old, sgant_xelevation, aos, oldtdrs, tdrs, logged
+        def scaleLatLon(latitude, longitude):
+            #converting lat lon to x, y for orbit map
             fromLatSpan = 180.0
             fromLonSpan = 360.0
             toLatSpan = 0.598
             toLonSpan = 0.716
             valueLatScaled = (float(latitude)+90.0)/float(fromLatSpan)
             valueLonScaled = (float(longitude)+180.0)/float(fromLonSpan)
-            newLat = (0.265) + (valueLatScaled * toLatSpan) 
-            newLon = (0.14) + (valueLonScaled * toLonSpan) 
+            newLat = (0.265) + (valueLatScaled * toLatSpan)
+            newLon = (0.14) + (valueLonScaled * toLonSpan)
             return {'newLat': newLat, 'newLon': newLon}
 
         def toYearFraction(date):
@@ -1547,23 +1520,27 @@ class MainApp(App):
             else:
                 current_epoch = str(date.year)[2:] + str(fraction*365.24)
             return current_epoch
-        
+
         #draw the TDRS satellite locations
-        self.orbit_screen.ids.TDRSe.pos_hint = {"center_x": scaleLatLon(0,-41)['newLon'], "center_y": scaleLatLon(0,-41)['newLat']}
-        self.orbit_screen.ids.TDRSw.pos_hint = {"center_x": scaleLatLon(0,-174)['newLon'], "center_y": scaleLatLon(0,-174)['newLat']}
-        self.orbit_screen.ids.TDRSz.pos_hint = {"center_x": scaleLatLon(0,85)['newLon'], "center_y": scaleLatLon(0,85)['newLat']}
-        self.orbit_screen.ids.ZOE.pos_hint = {"center_x": scaleLatLon(0,77)['newLon'], "center_y": scaleLatLon(0,77)['newLat']}
-        
+        self.orbit_screen.ids.TDRSe.pos_hint = {"center_x": scaleLatLon(0, -41)['newLon'], "center_y": scaleLatLon(0, -41)['newLat']}
+        self.orbit_screen.ids.TDRSeLabel.pos_hint = {"center_x": scaleLatLon(0, -41)['newLon']+0.06, "center_y": scaleLatLon(0, -41)['newLat']}
+        self.orbit_screen.ids.TDRSw.pos_hint = {"center_x": scaleLatLon(0, -174)['newLon'], "center_y": scaleLatLon(0, -174)['newLat']}
+        self.orbit_screen.ids.TDRSwLabel.pos_hint = {"center_x": scaleLatLon(0, -174)['newLon']+0.06, "center_y": scaleLatLon(0, -174)['newLat']}
+        self.orbit_screen.ids.TDRSz.pos_hint = {"center_x": scaleLatLon(0, 85)['newLon'], "center_y": scaleLatLon(0, 85)['newLat']}
+        self.orbit_screen.ids.TDRSzLabel.pos_hint = {"center_x": scaleLatLon(0, 85)['newLon']+0.05, "center_y": scaleLatLon(0, 85)['newLat']}
+        self.orbit_screen.ids.ZOE.pos_hint = {"center_x": scaleLatLon(0, 77)['newLon'], "center_y": scaleLatLon(0, 77)['newLat']}
+        self.orbit_screen.ids.ZOElabel.pos_hint = {"center_x": scaleLatLon(0, 77)['newLon'], "center_y": scaleLatLon(0, 77)['newLat']+0.1}
+
         if TLE_acquired:
             tle_rec.compute()
             #------------------Latitude/Longitude Stuff---------------------------
-            latitude = tle_rec.sublat 
+            latitude = tle_rec.sublat
             longitude = tle_rec.sublong
             latitude = float(str(latitude).split(':')[0]) + float(str(latitude).split(':')[1])/60 + float(str(latitude).split(':')[2])/3600
             longitude = float(str(longitude).split(':')[0]) + float(str(longitude).split(':')[1])/60 + float(str(longitude).split(':')[2])/3600
-            coordinates = ((latitude,longitude),(latitude,longitude))
-           
-            if aos == 0.00:
+            coordinates = ((latitude, longitude), (latitude, longitude))
+
+            if float(aos) == 0.00 and not logged:
                 sgantlog.write(str(datetime.utcnow()))
                 sgantlog.write(' ')
                 sgantlog.write(str(sgant_elevation))
@@ -1576,11 +1553,15 @@ class MainApp(App):
                 #sgantlog.write(' ')
                 #sgantlog.write(str(aos))
                 sgantlog.write('\n')
-            
-            self.orbit_screen.ids.OrbitISStiny.pos_hint = {"center_x": scaleLatLon(latitude,longitude)['newLon'], "center_y": scaleLatLon(latitude,longitude)['newLat']}
+                logged = True
+
+            if logged and aos == 1.00:
+                logged = False
+
+            self.orbit_screen.ids.OrbitISStiny.pos_hint = {"center_x": scaleLatLon(latitude, longitude)['newLon'], "center_y": scaleLatLon(latitude, longitude)['newLat']}
             self.orbit_screen.ids.latitude.text = str("{:.2f}".format(latitude))
             self.orbit_screen.ids.longitude.text = str("{:.2f}".format(longitude))
-            
+
             #need to determine which tdrs is being used based on longitude and sgant elevation
             #TDRSw = -174
             #TDRSe = -41
@@ -1589,7 +1570,7 @@ class MainApp(App):
             self.ct_sgant_screen.ids.tdrs_east.angle = (-1*longitude)-41
             self.ct_sgant_screen.ids.tdrs_z.angle = ((-1*longitude)-41)+126
             self.ct_sgant_screen.ids.tdrs_west.angle = ((-1*longitude)-41)-133
-            
+
             if longitude > 90 and sgant_elevation < -10 and float(aos) == 1.0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West"
                 tdrs = "west"
@@ -1612,24 +1593,66 @@ class MainApp(App):
                 self.ct_sgant_screen.ids.tdrs_label.text = ""
                 tdrs = "----"
 
-            if tdrs != oldtdrs and float(aos) == 1.0:
-                oldtdrs = tdrs
-                sgantlog.write(str(datetime.utcnow()))
-                sgantlog.write(' ')
-                sgantlog.write(str(sgant_elevation))
-                sgantlog.write(' ')
-                sgantlog.write(str(longitude))
-                sgantlog.write(' ')
-                sgantlog.write(str(tdrs))
-                sgantlog.write(' ')
-                sgantlog.write('\n')
+            if tdrs == "west":
+                self.orbit_screen.ids.TDRSwLabel.color = 1, 0, 1
+                self.orbit_screen.ids.TDRSeLabel.color = 1, 1, 1
+                self.orbit_screen.ids.TDRSzLabel.color = 1, 1, 1
+                self.orbit_screen.ids.TDRSw.col = (1, 0, 1)
+                self.orbit_screen.ids.TDRSe.col = (1, 1, 1)
+                self.orbit_screen.ids.TDRSz.col = (1, 1, 1)
+                self.orbit_screen.ids.ZOElabel.color = 1, 1, 1
+            elif tdrs == "east":
+                self.orbit_screen.ids.TDRSwLabel.color = 1, 1, 1
+                self.orbit_screen.ids.TDRSeLabel.color = 1, 0, 1
+                self.orbit_screen.ids.TDRSzLabel.color = 1, 1, 1
+                self.orbit_screen.ids.TDRSw.col = (1, 1, 1)
+                self.orbit_screen.ids.TDRSe.col = (1, 0, 1)
+                self.orbit_screen.ids.TDRSz.col = (1, 1, 1)
+                self.orbit_screen.ids.ZOElabel.color = 1, 1, 1
+            elif tdrs == "z":
+                self.orbit_screen.ids.TDRSwLabel.color = 1, 1, 1
+                self.orbit_screen.ids.TDRSeLabel.color = 1, 1, 1
+                self.orbit_screen.ids.TDRSzLabel.color = 1, 0, 1
+                self.orbit_screen.ids.TDRSw.col = (1, 1, 1)
+                self.orbit_screen.ids.TDRSe.col = (1, 1, 1)
+                self.orbit_screen.ids.TDRSz.col = (1, 0, 1)
+                self.orbit_screen.ids.ZOElabel.color = 1, 1, 1
+            else:
+                self.orbit_screen.ids.TDRSwLabel.color = 1, 1, 1
+                self.orbit_screen.ids.TDRSeLabel.color = 1, 1, 1
+                self.orbit_screen.ids.TDRSzLabel.color = 1, 1, 1
+                self.orbit_screen.ids.TDRSw.col = (1, 1, 1)
+                self.orbit_screen.ids.TDRSe.col = (1, 1, 1)
+                self.orbit_screen.ids.TDRSz.col = (1, 1, 1)
+                self.orbit_screen.ids.ZOElabel.color = 1, 1, 1
+
+            if aos == 0.00 and longitude > 60 and longitude < 100 and tdrs == "----":
+                self.orbit_screen.ids.TDRSwLabel.color = 1, 1, 1
+                self.orbit_screen.ids.TDRSeLabel.color = 1, 1, 1
+                self.orbit_screen.ids.TDRSzLabel.color = 1, 1, 1
+                self.orbit_screen.ids.TDRSw.col = (1, 1, 1)
+                self.orbit_screen.ids.TDRSe.col = (1, 1, 1)
+                self.orbit_screen.ids.TDRSz.col = (1, 1, 1)
+                self.orbit_screen.ids.ZOElabel.color = 1, 0, 0
+
+            #if tdrs != oldtdrs and float(aos) == 1.0:
+            #    oldtdrs = tdrs
+            #    sgantlog.write(str(datetime.utcnow()))
+            #    sgantlog.write(' ')
+            #    sgantlog.write(str(sgant_elevation))
+            #    sgantlog.write(' ')
+            #    sgantlog.write(str(longitude))
+            #    sgantlog.write(' ')
+            #    sgantlog.write(str(tdrs))
+            #    sgantlog.write(' ')
+            #    sgantlog.write('\n')
 
             #------------------Orbit Stuff---------------------------
-            now = datetime.utcnow() 
-            mins = (now - now.replace(hour=0,minute=0,second=0,microsecond=0)).total_seconds()
+            now = datetime.utcnow()
+            mins = (now - now.replace(hour=0, minute=0, second=0, microsecond=0)).total_seconds()
             orbits_today = math.floor((float(mins)/60)/90)
             self.orbit_screen.ids.dailyorbit.text = str(int(orbits_today)) #display number of orbits since utc midnight
-           
+
             time_since_epoch = float(toYearFraction(datetime.utcnow())) - float(line1[22:36])
             totalorbits = int(line2[68:72]) + 100000 + int(float(time_since_epoch)*24/1.5) #add number of orbits since the tle was generated
             self.orbit_screen.ids.totalorbits.text = str(totalorbits) #display number of orbits since utc midnight
@@ -1644,8 +1667,8 @@ class MainApp(App):
             #use location to draw dot on orbit map
             mylatitude = float(str(location.lat).split(':')[0]) + float(str(location.lat).split(':')[1])/60 + float(str(location.lat).split(':')[2])/3600
             mylongitude = float(str(location.lon).split(':')[0]) + float(str(location.lon).split(':')[1])/60 + float(str(location.lon).split(':')[2])/3600
-            self.orbit_screen.ids.mylocation.pos_hint = {"center_x": scaleLatLon(mylatitude,mylongitude)['newLon'], "center_y": scaleLatLon(mylatitude,mylongitude)['newLat']}
-            
+            self.orbit_screen.ids.mylocation.pos_hint = {"center_x": scaleLatLon(mylatitude, mylongitude)['newLon'], "center_y": scaleLatLon(mylatitude, mylongitude)['newLat']}
+
             tle_rec.compute(location) #compute tle propagation based on provided location
             nextpassinfo = location.next_pass(tle_rec)
             #print nextpassinfo #might need to add try block to next line
@@ -1654,7 +1677,7 @@ class MainApp(App):
                 self.orbit_screen.ids.iss_next_pass2.text = "n/a"
                 self.orbit_screen.ids.countdown.text = "n/a"
             else:
-                nextpassdatetime = datetime.strptime(str(nextpassinfo[0]),'%Y/%m/%d %H:%M:%S') #convert to datetime object for timezone conversion
+                nextpassdatetime = datetime.strptime(str(nextpassinfo[0]), '%Y/%m/%d %H:%M:%S') #convert to datetime object for timezone conversion
                 nextpassinfo_format = nextpassdatetime.replace(tzinfo=pytz.utc)
                 localtimezone = pytz.timezone('America/Chicago')
                 localnextpass = nextpassinfo_format.astimezone(localtimezone)
@@ -1668,22 +1691,24 @@ class MainApp(App):
                 self.orbit_screen.ids.countdown.text = str("{:.0f}".format(math.floor(nextpasshours))) + ":" + str("{:.0f}".format(math.floor(nextpassmins))) + ":" + str("{:.0f}".format(math.floor(nextpassseconds))) #display time until next pass
 
     def getTLE(self, *args):
-        #print "inside getTLE"
-        global tle_rec, line1, line2, TLE_acquired, internet
-        def process_tag_text(tag_text):
-            firstTLE = True
-            marker = 'TWO LINE MEAN ELEMENT SET'
-            text = iter(tag_text.split('\n'))
-            for line in text:
-                if (marker in line) and firstTLE:
-                    firstTLE = False
-                    next(text)
-                    results.append('\n'.join(
-                        (next(text), next(text), next(text))))
-            return results
-        if internet: 
-            req = urllib2.urlopen('http://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html')
-            soup = BeautifulSoup(req, 'html.parser')
+        global tle_rec, line1, line2, TLE_acquired
+        iss_tle_url =  'https://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html'
+        
+        def on_success(req, data): #if TLE data is successfully received, it is processed here
+            global tle_rec, line1, line2, TLE_acquired
+            def process_tag_text(tag_text): #this function splits up the data received into proper TLE format
+                firstTLE = True
+                marker = 'TWO LINE MEAN ELEMENT SET'
+                text = iter(tag_text.split('\n'))
+                for line in text:
+                    if (marker in line) and firstTLE:
+                        firstTLE = False
+                        next(text)
+                        results.append('\n'.join(
+                            (next(text), next(text), next(text))))
+                return results
+            logWrite("ISS TLE - Successfully fetched TLE page")
+            soup = BeautifulSoup(data, 'html.parser')
             body = soup.find_all("pre")
             results = []
             for tag in body:
@@ -1694,133 +1719,129 @@ class MainApp(App):
                 parsed = str(results[0]).split('\n')
                 line1 = parsed[1]
                 line2 = parsed[2]
-                print line1
-                print line2
-                tle_rec = ephem.readtle("ISS (ZARYA)",str(line1),str(line2))
+                print(line1)
+                print(line2)
+                tle_rec = ephem.readtle("ISS (ZARYA)", str(line1), str(line2))
                 TLE_acquired = True
-                print "TLE Success!"
+                print("TLE Success!")
             else:
-                print "TLE not acquired"
+                print("TLE not acquired")
                 TLE_acquired = False
-        else:
-            print "TLE not acquired"
-            TLE_acquired = False
 
-    def updateCrew(self, dt):
-        try:
-            self.checkCrew(self, *args)
-        except Exception:
-            logWrite("Warning - updateCrew failure")
-    
+        def on_redirect(req, result):
+            logWrite("Warning - Get TLE failure (redirect)")
+
+        def on_failure(req, result):
+            logWrite("Warning - Get TLE failure (url failure)")
+
+        def on_error(req, result):
+            logWrite("Warning - Get TLE failure (url error)")
+        
+        req = UrlRequest(iss_tle_url, on_success, on_redirect, on_failure, on_error, timeout=1)
+
     def checkCrew(self, dt):
-        #crew_response = urllib2.urlopen(crew_req)
-        global isscrew, crewmember, crewmemberbio, crewmembertitle, crewmemberdays, crewmemberpicture, crewmembercountry
-        global internet
+        iss_crew_url = 'http://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'
         urlsuccess = False
 
-        if internet:
-            iss_crew_url = 'http://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'        
-            req = urllib2.Request(iss_crew_url, headers={'User-Agent' : "Magic Browser"})
-            stuff = 0
-            try:
-                stuff = urllib2.urlopen(req, timeout = 2)
-            except Exception:
-                logWrite("Warning - checkCrew failure")
-                urlsuccess = False
-                print stuff
-            else:
-                stuff = urllib2.urlopen(req, timeout = 2)
-                urlsuccess = True
-           
+        def on_success(req, data):
+            logWrite("Successfully fetched crew JSON")
+            isscrew = 0
+            crewmember = ['', '', '', '', '', '', '', '', '', '', '', '']
+            crewmemberbio = ['', '', '', '', '', '', '', '', '', '', '', '']
+            crewmembertitle = ['', '', '', '', '', '', '', '', '', '', '', '']
+            crewmemberdays = ['', '', '', '', '', '', '', '', '', '', '', '']
+            crewmemberpicture = ['', '', '', '', '', '', '', '', '', '', '', '']
+            crewmembercountry = ['', '', '', '', '', '', '', '', '', '', '', '']
             now = datetime.utcnow()
-            if urlsuccess:
-            #stuff.info().getsubtype()=='json':
-                logWrite("Successfully fetched crew JSON")
-                crewjsonsuccess = True
-                data = json.load(stuff)
-                number_of_space = int(data['number'])
-                for num in range(1,number_of_space+1):
-                    if(str(data['people'][num-1]['location']) == str("International Space Station")):
-                        crewmember[isscrew] = (data['people'][num-1]['name']).encode('utf-8')
-                        crewmemberbio[isscrew] = (data['people'][num-1]['bio'])
-                        crewmembertitle[isscrew] = str(data['people'][num-1]['title'])
-                        datetime_object = datetime.strptime(str(data['people'][num-1]['launchdate']),'%Y-%m-%d')
-                        previousdays = int(data['people'][num-1]['careerdays'])
-                        totaldaysinspace = str(now-datetime_object)
-                        d_index = totaldaysinspace.index('d')
-                        crewmemberdays[isscrew] = str(int(totaldaysinspace[:d_index])+previousdays)+" days in space"
-                        crewmemberpicture[isscrew] = str(data['people'][num-1]['biophoto'])
-                        crewmembercountry[isscrew] = str(data['people'][num-1]['country']).title()
-                        if(str(data['people'][num-1]['country'])==str('usa')):
-                            crewmembercountry[isscrew] = str('USA')
-                        isscrew = isscrew+1  
-            else:
-                logWrite("Warning - checkCrew JSON failure")
-                crewjsonsuccess = False
+            number_of_space = int(data['number'])
+            for num in range(1, number_of_space+1):
+                if(str(data['people'][num-1]['location']) == str("International Space Station")):
+                    crewmember[isscrew] = str(data['people'][num-1]['name']) #.encode('utf-8')
+                    crewmemberbio[isscrew] = str(data['people'][num-1]['bio'])
+                    crewmembertitle[isscrew] = str(data['people'][num-1]['title'])
+                    datetime_object = datetime.strptime(str(data['people'][num-1]['launchdate']), '%Y-%m-%d')
+                    previousdays = int(data['people'][num-1]['careerdays'])
+                    totaldaysinspace = str(now-datetime_object)
+                    d_index = totaldaysinspace.index('d')
+                    crewmemberdays[isscrew] = str(int(totaldaysinspace[:d_index])+previousdays)+" days in space"
+                    crewmemberpicture[isscrew] = str(data['people'][num-1]['biophoto'])
+                    crewmembercountry[isscrew] = str(data['people'][num-1]['country']).title()
+                    if(str(data['people'][num-1]['country'])==str('usa')):
+                        crewmembercountry[isscrew] = str('USA')
+                    isscrew = isscrew+1
 
-        #print crewmemberpicture[0]
-        isscrew = 0
-        self.crew_screen.ids.crew1.text = crewmember[0]  
-        self.crew_screen.ids.crew1title.text = crewmembertitle[0]  
-        self.crew_screen.ids.crew1country.text = crewmembercountry[0]  
-        self.crew_screen.ids.crew1daysonISS.text = crewmemberdays[0]
-        #self.crew_screen.ids.crew1image.source = str(crewmemberpicture[0])
-        self.crew_screen.ids.crew2.text = crewmember[1]  
-        self.crew_screen.ids.crew2title.text = crewmembertitle[1]  
-        self.crew_screen.ids.crew2country.text = crewmembercountry[1]  
-        self.crew_screen.ids.crew2daysonISS.text = crewmemberdays[1]
-        #self.crew_screen.ids.crew2image.source = str(crewmemberpicture[1])
-        self.crew_screen.ids.crew3.text = crewmember[2]  
-        self.crew_screen.ids.crew3title.text = crewmembertitle[2]  
-        self.crew_screen.ids.crew3country.text = crewmembercountry[2]  
-        self.crew_screen.ids.crew3daysonISS.text = crewmemberdays[2]
-        #self.crew_screen.ids.crew3image.source = str(crewmemberpicture[2])
-        self.crew_screen.ids.crew4.text = crewmember[3]  
-        self.crew_screen.ids.crew4title.text = crewmembertitle[3]  
-        self.crew_screen.ids.crew4country.text = crewmembercountry[3]  
-        self.crew_screen.ids.crew4daysonISS.text = crewmemberdays[3]
-        #self.crew_screen.ids.crew4image.source = str(crewmemberpicture[3])
-        self.crew_screen.ids.crew5.text = crewmember[4]  
-        self.crew_screen.ids.crew5title.text = crewmembertitle[4]  
-        self.crew_screen.ids.crew5country.text = crewmembercountry[4]  
-        self.crew_screen.ids.crew5daysonISS.text = crewmemberdays[4]
-        #self.crew_screen.ids.crew5image.source = str(crewmemberpicture[4])
-        self.crew_screen.ids.crew6.text = crewmember[5]  
-        self.crew_screen.ids.crew6title.text = crewmembertitle[5]  
-        self.crew_screen.ids.crew6country.text = crewmembercountry[5]  
-        self.crew_screen.ids.crew6daysonISS.text = crewmemberdays[5]
-        #self.crew_screen.ids.crew6image.source = str(crewmemberpicture[5])
-        #self.crew_screen.ids.crew7.text = crewmember[6]  
-        #self.crew_screen.ids.crew7title.text = crewmembertitle[6]  
-        #self.crew_screen.ids.crew7country.text = crewmembercountry[6]  
-        #self.crew_screen.ids.crew7daysonISS.text = crewmemberdays[6]
-        #self.crew_screen.ids.crew7image.source = str(crewmemberpicture[6])
-        #self.crew_screen.ids.crew8.text = crewmember[7]  
-        #self.crew_screen.ids.crew8title.text = crewmembertitle[7]  
-        #self.crew_screen.ids.crew8country.text = crewmembercountry[7]  
-        #self.crew_screen.ids.crew8daysonISS.text = crewmemberdays[7]
-        #self.crew_screen.ids.crew8image.source = str(crewmemberpicture[7])
-        #self.crew_screen.ids.crew9.text = crewmember[8]  
-        #self.crew_screen.ids.crew9title.text = crewmembertitle[8]  
-        #self.crew_screen.ids.crew9country.text = crewmembercountry[8]  
-        #self.crew_screen.ids.crew9daysonISS.text = crewmemberdays[8]
-        #self.crew_screen.ids.crew9image.source = str(crewmemberpicture[8])
-        #self.crew_screen.ids.crew10.text = crewmember[9]  
-        #self.crew_screen.ids.crew10title.text = crewmembertitle[9]  
-        #self.crew_screen.ids.crew10country.text = crewmembercountry[9]  
-        #self.crew_screen.ids.crew10daysonISS.text = crewmemberdays[9]
-        #self.crew_screen.ids.crew10image.source = str(crewmemberpicture[9])
-        #self.crew_screen.ids.crew11.text = crewmember[10]  
-        #self.crew_screen.ids.crew11title.text = crewmembertitle[10]  
-        #self.crew_screen.ids.crew11country.text = crewmembercountry[10]  
-        #self.crew_screen.ids.crew11daysonISS.text = crewmemberdays[10]
-        #self.crew_screen.ids.crew11image.source = str(crewmemberpicture[10])
-        #self.crew_screen.ids.crew12.text = crewmember[11]  
-        #self.crew_screen.ids.crew12title.text = crewmembertitle[11]  
-        #self.crew_screen.ids.crew12country.text = crewmembercountry[11]  
-        #self.crew_screen.ids.crew12daysonISS.text = crewmemberdays[11]
-        #self.crew_screen.ids.crew12image.source = str(crewmemberpicture[11]) 
+            self.crew_screen.ids.crew1.text = str(crewmember[0])
+            self.crew_screen.ids.crew1title.text = str(crewmembertitle[0])
+            self.crew_screen.ids.crew1country.text = str(crewmembercountry[0])
+            self.crew_screen.ids.crew1daysonISS.text = str(crewmemberdays[0])
+            #self.crew_screen.ids.crew1image.source = str(crewmemberpicture[0])
+            self.crew_screen.ids.crew2.text = str(crewmember[1])
+            self.crew_screen.ids.crew2title.text = str(crewmembertitle[1])
+            self.crew_screen.ids.crew2country.text = str(crewmembercountry[1])
+            self.crew_screen.ids.crew2daysonISS.text = str(crewmemberdays[1])
+            #self.crew_screen.ids.crew2image.source = str(crewmemberpicture[1])
+            self.crew_screen.ids.crew3.text = str(crewmember[2])
+            self.crew_screen.ids.crew3title.text = str(crewmembertitle[2])
+            self.crew_screen.ids.crew3country.text = str(crewmembercountry[2])
+            self.crew_screen.ids.crew3daysonISS.text = str(crewmemberdays[2])
+            #self.crew_screen.ids.crew3image.source = str(crewmemberpicture[2])
+            self.crew_screen.ids.crew4.text = str(crewmember[3])
+            self.crew_screen.ids.crew4title.text = str(crewmembertitle[3])
+            self.crew_screen.ids.crew4country.text = str(crewmembercountry[3])
+            self.crew_screen.ids.crew4daysonISS.text = str(crewmemberdays[3])
+            #self.crew_screen.ids.crew4image.source = str(crewmemberpicture[3])
+            self.crew_screen.ids.crew5.text = str(crewmember[4])
+            self.crew_screen.ids.crew5title.text = str(crewmembertitle[4])
+            self.crew_screen.ids.crew5country.text = str(crewmembercountry[4])
+            self.crew_screen.ids.crew5daysonISS.text = str(crewmemberdays[4])
+            #self.crew_screen.ids.crew5image.source = str(crewmemberpicture[4])
+            self.crew_screen.ids.crew6.text = str(crewmember[5])
+            self.crew_screen.ids.crew6title.text = str(crewmembertitle[5])
+            self.crew_screen.ids.crew6country.text = str(crewmembercountry[5])
+            self.crew_screen.ids.crew6daysonISS.text = str(crewmemberdays[5])
+            #self.crew_screen.ids.crew6image.source = str(crewmemberpicture[5])
+            #self.crew_screen.ids.crew7.text = str(crewmember[6])
+            #self.crew_screen.ids.crew7title.text = str(crewmembertitle[6])
+            #self.crew_screen.ids.crew7country.text = str(crewmembercountry[6])
+            #self.crew_screen.ids.crew7daysonISS.text = str(crewmemberdays[6])
+            #self.crew_screen.ids.crew7image.source = str(crewmemberpicture[6])
+            #self.crew_screen.ids.crew8.text = str(crewmember[7])
+            #self.crew_screen.ids.crew8title.text = str(crewmembertitle[7])
+            #self.crew_screen.ids.crew8country.text = str(crewmembercountry[7])
+            #self.crew_screen.ids.crew8daysonISS.text = str(crewmemberdays[7])
+            #self.crew_screen.ids.crew8image.source = str(crewmemberpicture[7]))
+            #self.crew_screen.ids.crew9.text = str(crewmember[8])
+            #self.crew_screen.ids.crew9title.text = str(crewmembertitle[8])
+            #self.crew_screen.ids.crew9country.text = str(crewmembercountry[8])
+            #self.crew_screen.ids.crew9daysonISS.text = str(crewmemberdays[8])
+            #self.crew_screen.ids.crew9image.source = str(crewmemberpicture[8])
+            #self.crew_screen.ids.crew10.text = str(crewmember[9])
+            #self.crew_screen.ids.crew10title.text = str(crewmembertitle[9])
+            #self.crew_screen.ids.crew10country.text = str(crewmembercountry[9])
+            #self.crew_screen.ids.crew10daysonISS.text = str(crewmemberdays[9])
+            #self.crew_screen.ids.crew10image.source = str(crewmemberpicture[9])
+            #self.crew_screen.ids.crew11.text = str(crewmember[10])
+            #self.crew_screen.ids.crew11title.text = str(crewmembertitle[10])
+            #self.crew_screen.ids.crew11country.text = str(crewmembercountry[10])
+            #self.crew_screen.ids.crew11daysonISS.text = str(crewmemberdays[10])
+            #self.crew_screen.ids.crew11image.source = str(crewmemberpicture[10])
+            #self.crew_screen.ids.crew12.text = str(crewmember[11])
+            #self.crew_screen.ids.crew12title.text = str(crewmembertitle[11])
+            #self.crew_screen.ids.crew12country.text = str(crewmembercountry[11])
+            #self.crew_screen.ids.crew12daysonISS.text = str(crewmemberdays[11])
+            #self.crew_screen.ids.crew12image.source = str(crewmemberpicture[11])
+
+        def on_redirect(req, result):
+            logWrite("Warning - checkCrew JSON failure (redirect)")
+
+        def on_failure(req, result):
+            logWrite("Warning - checkCrew JSON failure (url failure)")
+
+        def on_error(req, result):
+            logWrite("Warning - checkCrew JSON failure (url error)")
         
+        req = UrlRequest(iss_crew_url, on_success, on_redirect, on_failure, on_error, timeout=1)
+
     def map_rotation(self, args):
         scalefactor = 0.083333
         scaledValue = float(args)/scalefactor
@@ -1830,12 +1851,12 @@ class MainApp(App):
         scalefactor = 0.015
         scaledValue = (float(args)*scalefactor)+0.72
         return scaledValue
-    
+
     def map_hold_bar(self, args):
         scalefactor = 0.0015
         scaledValue = (float(args)*scalefactor)+0.71
         return scaledValue
-    
+
     def hold_timer(self, dt):
         global seconds2, holdstartTime
         logWrite("Function Call - hold timer")
@@ -1851,30 +1872,30 @@ class MainApp(App):
 
     def signal_unsubscribed(self): #change images, used stale signal image
         global internet, ScreenList
-        
+
         if internet == False:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.changeColors(1,0,0)
+            self.changeColors(1, 0, 0)
         else:
             for x in ScreenList:
-                getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
-            self.changeColors(1,0.5,0)
-        
+                getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalClientLost.png'
+            self.changeColors(1, 0.5, 0)
+
         for x in ScreenList:
             getattr(self, x).ids.signal.size_hint_y = 0.112
-    
+
     def signal_lost(self):
         global internet, ScreenList
-        
+
         if internet == False:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.changeColors(1,0,0)
+            self.changeColors(1, 0, 0)
         else:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
-            self.changeColors(1,0,0)
+            self.changeColors(1, 0, 0)
 
         for x in ScreenList:
             getattr(self, x).ids.signal.anim_delay = 0.4
@@ -1883,32 +1904,49 @@ class MainApp(App):
 
     def signal_acquired(self):
         global internet, ScreenList
-        
+
         if internet == False:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.changeColors(1,0,0)
+            self.changeColors(1, 0, 0)
         else:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
-            self.changeColors(0,1,0)
-   
+            self.changeColors(0, 1, 0)
+
         for x in ScreenList:
             getattr(self, x).ids.signal.anim_delay = 0.05
         for x in ScreenList:
             getattr(self, x).ids.signal.size_hint_y = 0.15
-    
+
     def signal_stale(self):
         global internet, ScreenList
-        
+
         if internet == False:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.changeColors(1,0,0)
+            self.changeColors(1, 0, 0)
         else:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
-            self.changeColors(1,0.5,0)
+            self.changeColors(1, 0.5, 0)
+
+        for x in ScreenList:
+            getattr(self, x).ids.signal.anim_delay = 0.12
+        for x in ScreenList:
+            getattr(self, x).ids.signal.size_hint_y = 0.112
+
+    def signal_client_offline(self):
+        global internet, ScreenList
+
+        if internet == False:
+            for x in ScreenList:
+                getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
+            self.changeColors(1, 0, 0)
+        else:
+            for x in ScreenList:
+                getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalClientLost.png'
+            self.changeColors(1, 0.5, 0)
 
         for x in ScreenList:
             getattr(self, x).ids.signal.anim_delay = 0.12
@@ -1916,13 +1954,13 @@ class MainApp(App):
             getattr(self, x).ids.signal.size_hint_y = 0.112
 
     def update_labels(self, dt):
-        global mimicbutton,switchtofake,demoboolean,runningDemo,fakeorbitboolean,psarj2,ssarj2,manualcontrol,aos,los,oldLOS,psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1bmc,beta1amc,beta2bmc,beta2amc,beta3bmc,beta3amc,beta4bmc,beta4amc,US_EVAinProgress,position_x,position_y,position_z,velocity_x,velocity_y,velocity_z,altitude,velocity,iss_mass,testvalue,testfactor,airlock_pump,crewlockpres,leak_hold,firstcrossing,EVA_activities,repress,depress,oldAirlockPump,obtained_EVA_crew,EVAstartTime
+        global mimicbutton, switchtofake, demoboolean, runningDemo, fakeorbitboolean, psarj2, ssarj2, manualcontrol, aos, los, oldLOS, psarjmc, ssarjmc, ptrrjmc, strrjmc, beta1bmc, beta1amc, beta2bmc, beta2amc, beta3bmc, beta3amc, beta4bmc, beta4amc, US_EVAinProgress, position_x, position_y, position_z, velocity_x, velocity_y, velocity_z, altitude, velocity, iss_mass, testvalue, testfactor, airlock_pump, crewlockpres, leak_hold, firstcrossing, EVA_activities, repress, depress, oldAirlockPump, obtained_EVA_crew, EVAstartTime
         global holdstartTime, LS_Subscription, SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5
         global eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
         global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power
         global stationmode, sgant_elevation, sgant_xelevation
         global tdrs, module
-    
+
         arduino_count = 0
         if SerialConnection1:
             arduino_count+=1
@@ -1966,7 +2004,7 @@ class MainApp(App):
             self.control_screen.ids.set90.disabled = True
             self.control_screen.ids.set0.disabled = True
 
-        if runningDemo == True:
+        if runningDemo:
             self.fakeorbit_screen.ids.DemoStart.disabled = True
             self.fakeorbit_screen.ids.HTVDemoStart.disabled = True
             self.fakeorbit_screen.ids.DemoStop.disabled = False
@@ -1977,83 +2015,80 @@ class MainApp(App):
         values = c.fetchall()
         c.execute('select Timestamp from telemetry')
         timestamps = c.fetchall()
-         
+
         sub_status = str((values[255])[0]) #lightstreamer subscript checker
-        if sub_status == "Subscribed":
-            LS_Subscription = True
-        else:
-            LS_Subscription = False
-       
+        client_status = str((values[256])[0]) #lightstreamer client checker
+        
         psarj = "{:.2f}".format(float((values[0])[0]))
-        if switchtofake == False:
+        if not switchtofake:
             psarj2 = float(psarj)
-        if manualcontrol == False:
+        if not manualcontrol:
             psarjmc = float(psarj)
         ssarj = "{:.2f}".format(float((values[1])[0]))
-        if switchtofake == False:
+        if not switchtofake:
             ssarj2 = float(ssarj)
-        if manualcontrol == False:
+        if not manualcontrol:
             ssarjmc = float(ssarj)
         ptrrj = "{:.2f}".format(float((values[2])[0]))
-        if manualcontrol == False:
+        if not manualcontrol:
             ptrrjmc = float(ptrrj)
         strrj = "{:.2f}".format(float((values[3])[0]))
-        if manualcontrol == False:
+        if not manualcontrol:
             strrjmc = float(strrj)
         beta1b = "{:.2f}".format(float((values[4])[0]))
-        if switchtofake == False:
+        if not switchtofake:
             beta1b2 = float(beta1b)
-        if manualcontrol == False:
+        if not manualcontrol:
             beta1bmc = float(beta1b)
         beta1a = "{:.2f}".format(float((values[5])[0]))
-        if switchtofake == False:
+        if not switchtofake:
             beta1a2 = float(beta1a)
-        if manualcontrol == False:
+        if not manualcontrol:
             beta1amc = float(beta1a)
         beta2b = "{:.2f}".format(float((values[6])[0]))
-        if switchtofake == False:
+        if not switchtofake:
             beta2b2 = float(beta2b) #+ 20.00
-        if manualcontrol == False:
+        if not manualcontrol:
             beta2bmc = float(beta2b)
         beta2a = "{:.2f}".format(float((values[7])[0]))
-        if switchtofake == False:
+        if not switchtofake:
             beta2a2 = float(beta2a)
-        if manualcontrol == False:
+        if not manualcontrol:
             beta2amc = float(beta2a)
         beta3b = "{:.2f}".format(float((values[8])[0]))
-        if switchtofake == False:
+        if not switchtofake:
             beta3b2 = float(beta3b)
-        if manualcontrol == False:
+        if not manualcontrol:
             beta3bmc = float(beta3b)
         beta3a = "{:.2f}".format(float((values[9])[0]))
-        if switchtofake == False:
+        if not switchtofake:
             beta3a2 = float(beta3a)
-        if manualcontrol == False:
+        if not manualcontrol:
             beta3amc = float(beta3a)
         beta4b = "{:.2f}".format(float((values[10])[0]))
-        if switchtofake == False:
+        if not switchtofake:
             beta4b2 = float(beta4b)
-        if manualcontrol == False:
+        if not manualcontrol:
             beta4bmc = float(beta4b)
         beta4a = "{:.2f}".format(float((values[11])[0]))
-        if switchtofake == False:
+        if not switchtofake:
             beta4a2 = float(beta4a) #+ 20.00
-        if manualcontrol == False:
+        if not manualcontrol:
             beta4amc = float(beta4a)
-        
+
         aos = "{:.2f}".format(int((values[12])[0]))
-        los = "{:.2f}".format(int((values[13])[0]))      
+        los = "{:.2f}".format(int((values[13])[0]))
         sasa_el = "{:.2f}".format(float((values[14])[0]))
-        active_sasa = int((values[54])[0])      
-        sasa1_active = int((values[53])[0])      
-        sasa2_active = int((values[52])[0])      
+        active_sasa = int((values[54])[0])
+        sasa1_active = int((values[53])[0])
+        sasa2_active = int((values[52])[0])
         sgant_elevation = float((values[15])[0])
         sgant_xelevation = float((values[17])[0])
         sgant_transmit = float((values[41])[0])
         uhf1_power = int((values[233])[0]) #0 = off, 1 = on, 3 = failed
         uhf2_power = int((values[234])[0]) #0 = off, 1 = on, 3 = failed
         uhf_framesync = int((values[235])[0]) #1 or 0
-        
+
         v1a = "{:.2f}".format(float((values[25])[0]))
         channel1A_voltage[EPSstorageindex] = float(v1a)
         v1b = "{:.2f}".format(float((values[26])[0]))
@@ -2078,19 +2113,19 @@ class MainApp(App):
         c3b = "{:.2f}".format(float((values[38])[0]))
         c4a = "{:.2f}".format(float((values[39])[0]))
         c4b = "{:.2f}".format(float((values[40])[0]))
-        
+
         stationmode = float((values[46])[0]) #russian segment mode same as usos mode
-        
+
         #GNC Telemetry
-        rollerror = float((values[165])[0]) 
-        pitcherror = float((values[166])[0]) 
-        yawerror = float((values[167])[0]) 
+        rollerror = float((values[165])[0])
+        pitcherror = float((values[166])[0])
+        yawerror = float((values[167])[0])
 
         quaternion0 = float((values[171])[0])
         quaternion1 = float((values[172])[0])
         quaternion2 = float((values[173])[0])
         quaternion3 = float((values[174])[0])
-        
+
         iss_mass = "{:.2f}".format(float((values[48])[0]))
         position_x = "{:.2f}".format(float((values[55])[0]))
         position_y = "{:.2f}".format(float((values[56])[0]))
@@ -2098,11 +2133,11 @@ class MainApp(App):
         velocity_x = "{:.2f}".format(float((values[58])[0]))
         velocity_y = "{:.2f}".format(float((values[59])[0]))
         velocity_z = "{:.2f}".format(float((values[60])[0]))
-        
+
         altitude = "{:.2f}".format((math.sqrt( math.pow(float(position_x), 2) + math.pow(float(position_y), 2) + math.pow(float(position_z), 2) )-6371.00))
         velocity = "{:.2f}".format(((math.sqrt( math.pow(float(velocity_x), 2) + math.pow(float(velocity_y), 2) + math.pow(float(velocity_z), 2) ))/1.00))
-        
-        cmg1_active = int((values[145])[0]) 
+
+        cmg1_active = int((values[145])[0])
         cmg2_active = int((values[146])[0])
         cmg3_active = int((values[147])[0])
         cmg4_active = int((values[148])[0])
@@ -2133,19 +2168,19 @@ class MainApp(App):
         cmg2_wheelspeed = float((values[246])[0])
         cmg3_wheelspeed = float((values[247])[0])
         cmg4_wheelspeed = float((values[248])[0])
-        
+
         #EVA Telemetry
         airlock_pump_voltage = int((values[71])[0])
         airlock_pump_voltage_timestamp = float((timestamps[71])[0])
         airlock_pump_switch = int((values[72])[0])
         crewlockpres = float((values[16])[0])
         airlockpres = float((values[77])[0])
-        
-        
+
+
         ##US EPS Stuff---------------------------##
 
         solarbeta = "{:.2f}".format(float((values[176])[0]))
-        
+
         power_1a = float(v1a) * float(c1a)
         power_1b = float(v1b) * float(c1b)
         power_2a = float(v2a) * float(c2a)
@@ -2154,7 +2189,7 @@ class MainApp(App):
         power_3b = float(v3b) * float(c3b)
         power_4a = float(v4a) * float(c4a)
         power_4b = float(v4b) * float(c4b)
-        
+
         USOS_Power = power_1a + power_1b + power_2a + power_2b + power_3a + power_3b + power_4a + power_4b
         self.eps_screen.ids.usos_power.text = str("{:.0f}".format(USOS_Power*-1.0)) + " W"
         self.eps_screen.ids.solarbeta.text = str(solarbeta)
@@ -2181,7 +2216,7 @@ class MainApp(App):
         EPSstorageindex += 1
         if EPSstorageindex > 9:
             EPSstorageindex = 0
-        
+
 
         ## Station Mode ##
 
@@ -2201,7 +2236,7 @@ class MainApp(App):
             self.iss_screen.ids.stationmode_value.text = "Standard"
         else:
             self.iss_screen.ids.stationmode_value.text = "n/a"
-            
+
         ## ISS Potential Problems ##
         #ISS Leak - Check Pressure Levels
         #Number of CMGs online could reveal CMG failure
@@ -2210,21 +2245,21 @@ class MainApp(App):
         #Loss of attitude control, loss of cmg control
         #ISS altitude too low
         #Russion hook status - make sure all modules remain docked
-        
 
-        ##-------------------GNC Stuff---------------------------##    
-        
+
+        ##-------------------GNC Stuff---------------------------##
+
         roll = math.degrees(math.atan2(2.0 * (quaternion0 * quaternion1 + quaternion2 * quaternion3), 1.0 - 2.0 * (quaternion1 * quaternion1 + quaternion2 * quaternion2))) + rollerror
         pitch = math.degrees(math.asin(max(-1.0, min(1.0, 2.0 * (quaternion0 * quaternion2 - quaternion3 * quaternion1))))) + pitcherror
         yaw = math.degrees(math.atan2(2.0 * (quaternion0 * quaternion3 + quaternion1 * quaternion2), 1.0 - 2.0 * (quaternion2 * quaternion2 + quaternion3 * quaternion3))) + yawerror
-        
+
         self.gnc_screen.ids.yaw.text = str("{:.2f}".format(yaw))
         self.gnc_screen.ids.pitch.text = str("{:.2f}".format(pitch))
         self.gnc_screen.ids.roll.text = str("{:.2f}".format(roll))
-        
+
         self.gnc_screen.ids.cmgsaturation.value = CMGmompercent
         self.gnc_screen.ids.cmgsaturation_value.text = "CMG Saturation " + str("{:.1f}".format(CMGmompercent)) + "%"
-       
+
         if cmg1_active == 1:
             self.gnc_screen.ids.cmg1.source = "/home/pi/Mimic/Pi/imgs/gnc/cmg.png"
         else:
@@ -2234,143 +2269,143 @@ class MainApp(App):
             self.gnc_screen.ids.cmg2.source = "/home/pi/Mimic/Pi/imgs/gnc/cmg.png"
         else:
             self.gnc_screen.ids.cmg2.source = "/home/pi/Mimic/Pi/imgs/gnc/cmg_offline.png"
-        
+
         if cmg3_active == 1:
             self.gnc_screen.ids.cmg3.source = "/home/pi/Mimic/Pi/imgs/gnc/cmg.png"
         else:
             self.gnc_screen.ids.cmg3.source = "/home/pi/Mimic/Pi/imgs/gnc/cmg_offline.png"
-        
+
         if cmg4_active == 1:
             self.gnc_screen.ids.cmg4.source = "/home/pi/Mimic/Pi/imgs/gnc/cmg.png"
         else:
             self.gnc_screen.ids.cmg4.source = "/home/pi/Mimic/Pi/imgs/gnc/cmg_offline.png"
-        
+
         self.gnc_screen.ids.cmg1spintemp.text = "Spin Temp " + str("{:.1f}".format(cmg1_spintemp))
         self.gnc_screen.ids.cmg1halltemp.text = "Hall Temp " + str("{:.1f}".format(cmg1_halltemp))
         self.gnc_screen.ids.cmg1vibration.text = "Vibration " + str("{:.4f}".format(cmg1_vibration))
         self.gnc_screen.ids.cmg1current.text = "Current " + str("{:.1f}".format(cmg1_motorcurrent))
         self.gnc_screen.ids.cmg1speed.text = "Speed " + str("{:.1f}".format(cmg1_wheelspeed))
-        
+
         self.gnc_screen.ids.cmg2spintemp.text = "Spin Temp " + str("{:.1f}".format(cmg2_spintemp))
         self.gnc_screen.ids.cmg2halltemp.text = "Hall Temp " + str("{:.1f}".format(cmg2_halltemp))
         self.gnc_screen.ids.cmg2vibration.text = "Vibration " + str("{:.4f}".format(cmg2_vibration))
         self.gnc_screen.ids.cmg2current.text = "Current " + str("{:.1f}".format(cmg2_motorcurrent))
         self.gnc_screen.ids.cmg2speed.text = "Speed " + str("{:.1f}".format(cmg2_wheelspeed))
-        
+
         self.gnc_screen.ids.cmg3spintemp.text = "Spin Temp " + str("{:.1f}".format(cmg3_spintemp))
         self.gnc_screen.ids.cmg3halltemp.text = "Hall Temp " + str("{:.1f}".format(cmg3_halltemp))
         self.gnc_screen.ids.cmg3vibration.text = "Vibration " + str("{:.4f}".format(cmg3_vibration))
         self.gnc_screen.ids.cmg3current.text = "Current " + str("{:.1f}".format(cmg3_motorcurrent))
         self.gnc_screen.ids.cmg3speed.text = "Speed " + str("{:.1f}".format(cmg3_wheelspeed))
-        
+
         self.gnc_screen.ids.cmg4spintemp.text = "Spin Temp " + str("{:.1f}".format(cmg4_spintemp))
         self.gnc_screen.ids.cmg4halltemp.text = "Hall Temp " + str("{:.1f}".format(cmg4_halltemp))
         self.gnc_screen.ids.cmg4vibration.text = "Vibration " + str("{:.4f}".format(cmg4_vibration))
         self.gnc_screen.ids.cmg4current.text = "Current " + str("{:.1f}".format(cmg4_motorcurrent))
         self.gnc_screen.ids.cmg4speed.text = "Speed " + str("{:.1f}".format(cmg4_wheelspeed))
-        
+
         ##-------------------EPS Stuff---------------------------##
 
         if avg_total_voltage > 151.5:
-            self.eps_screen.ids.eps_sun.color = 1,1,1,1
+            self.eps_screen.ids.eps_sun.color = 1, 1, 1, 1
         else:
-            self.eps_screen.ids.eps_sun.color = 1,1,1,0.1
+            self.eps_screen.ids.eps_sun.color = 1, 1, 1, 0.1
 
         if halfavg_1a < 151.5: #discharging
             self.eps_screen.ids.array_1a.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
-            #self.eps_screen.ids.array_1a.color = 1,1,1,0.8
+            #self.eps_screen.ids.array_1a.color = 1, 1, 1, 0.8
         elif avg_1a > 160.0: #charged
             self.eps_screen.ids.array_1a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
         elif halfavg_1a >= 151.5:  #charging
             self.eps_screen.ids.array_1a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
-            self.eps_screen.ids.array_1a.color = 1,1,1,1.0
+            self.eps_screen.ids.array_1a.color = 1, 1, 1, 1.0
         if float(c1a) > 0.0:    #power channel offline!
             self.eps_screen.ids.array_1a.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
-        
+
         if halfavg_1b < 151.5: #discharging
             self.eps_screen.ids.array_1b.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
-            #self.eps_screen.ids.array_1b.color = 1,1,1,0.8
+            #self.eps_screen.ids.array_1b.color = 1, 1, 1, 0.8
         elif avg_1b > 160.0: #charged
             self.eps_screen.ids.array_1b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
         elif halfavg_1b >= 151.5:  #charging
             self.eps_screen.ids.array_1b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
-            self.eps_screen.ids.array_1b.color = 1,1,1,1.0
+            self.eps_screen.ids.array_1b.color = 1, 1, 1, 1.0
         if float(c1b) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_1b.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
-        
+
         if halfavg_2a < 151.5: #discharging
             self.eps_screen.ids.array_2a.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
-            #self.eps_screen.ids.array_2a.color = 1,1,1,0.8
+            #self.eps_screen.ids.array_2a.color = 1, 1, 1, 0.8
         elif avg_2a > 160.0: #charged
             self.eps_screen.ids.array_2a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
         elif halfavg_2a >= 151.5:  #charging
             self.eps_screen.ids.array_2a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
-            self.eps_screen.ids.array_2a.color = 1,1,1,1.0
+            self.eps_screen.ids.array_2a.color = 1, 1, 1, 1.0
         if float(c2a) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_2a.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
-        
+
         if halfavg_2b < 151.5: #discharging
             self.eps_screen.ids.array_2b.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
-            #self.eps_screen.ids.array_2b.color = 1,1,1,0.8
+            #self.eps_screen.ids.array_2b.color = 1, 1, 1, 0.8
         elif avg_2b > 160.0: #charged
             self.eps_screen.ids.array_2b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
         elif halfavg_2b >= 151.5:  #charging
             self.eps_screen.ids.array_2b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
-            self.eps_screen.ids.array_2b.color = 1,1,1,1.0
+            self.eps_screen.ids.array_2b.color = 1, 1, 1, 1.0
         if float(c2b) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_2b.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
-        
+
         if halfavg_3a < 151.5: #discharging
             self.eps_screen.ids.array_3a.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
-            #self.eps_screen.ids.array_3a.color = 1,1,1,0.8
+            #self.eps_screen.ids.array_3a.color = 1, 1, 1, 0.8
         elif avg_3a > 160.0: #charged
             self.eps_screen.ids.array_3a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
         elif halfavg_3a >= 151.5:  #charging
             self.eps_screen.ids.array_3a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
-            self.eps_screen.ids.array_3a.color = 1,1,1,1.0
+            self.eps_screen.ids.array_3a.color = 1, 1, 1, 1.0
         if float(c3a) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_3a.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
-        
+
         if halfavg_3b < 151.5: #discharging
             self.eps_screen.ids.array_3b.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
-            #self.eps_screen.ids.array_3b.color = 1,1,1,0.8
+            #self.eps_screen.ids.array_3b.color = 1, 1, 1, 0.8
         elif avg_3b > 160.0: #charged
             self.eps_screen.ids.array_3b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
         elif halfavg_3b >= 151.5:  #charging
             self.eps_screen.ids.array_3b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
-            self.eps_screen.ids.array_3b.color = 1,1,1,1.0
+            self.eps_screen.ids.array_3b.color = 1, 1, 1, 1.0
         if float(c3b) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_3b.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
-        
+
         if halfavg_4a < 151.5: #discharging
             self.eps_screen.ids.array_4a.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
-            #self.eps_screen.ids.array_4a.color = 1,1,1,0.8
+            #self.eps_screen.ids.array_4a.color = 1, 1, 1, 0.8
         elif avg_4a > 160.0: #charged
             self.eps_screen.ids.array_4a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
         elif halfavg_4a >= 151.5:  #charging
             self.eps_screen.ids.array_4a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
-            self.eps_screen.ids.array_4a.color = 1,1,1,1.0
+            self.eps_screen.ids.array_4a.color = 1, 1, 1, 1.0
         if float(c4a) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_4a.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
-        
+
         if halfavg_4b < 151.5: #discharging
             self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
-            #self.eps_screen.ids.array_4b.color = 1,1,1,0.8
+            #self.eps_screen.ids.array_4b.color = 1, 1, 1, 0.8
         elif avg_4b > 160.0: #charged
             self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
         elif halfavg_4b >= 151.5:  #charging
             self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
-            self.eps_screen.ids.array_4b.color = 1,1,1,1.0
+            self.eps_screen.ids.array_4b.color = 1, 1, 1, 1.0
         if float(c4b) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
-        
+
         ##-------------------C&T Functionality-------------------##
         self.ct_sgant_screen.ids.sgant_dish.angle = float(sgant_elevation)
         self.ct_sgant_screen.ids.sgant_elevation.text = "{:.2f}".format(float(sgant_elevation))
 
         #make sure radio animations turn off when no signal or no transmit
         if float(sgant_transmit) == 1.0 and float(aos) == 1.0:
-            self.ct_sgant_screen.ids.radio_up.color = 1,1,1,1
+            self.ct_sgant_screen.ids.radio_up.color = 1, 1, 1, 1
             if tdrs == "west":
                 self.ct_sgant_screen.ids.tdrs_west.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.zip"
                 self.ct_sgant_screen.ids.tdrs_east.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
@@ -2384,153 +2419,153 @@ class MainApp(App):
                 self.ct_sgant_screen.ids.tdrs_west.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
                 self.ct_sgant_screen.ids.tdrs_east.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
         elif float(sgant_transmit) == 1.0 and float(aos) == 0.0:
-            self.ct_sgant_screen.ids.radio_up.color = 0,0,0,0
+            self.ct_sgant_screen.ids.radio_up.color = 0, 0, 0, 0
             self.ct_sgant_screen.ids.tdrs_east.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
             self.ct_sgant_screen.ids.tdrs_west.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
             self.ct_sgant_screen.ids.tdrs_z.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
         elif float(sgant_transmit) == 0.0:
-            self.ct_sgant_screen.ids.radio_up.color = 0,0,0,0
+            self.ct_sgant_screen.ids.radio_up.color = 0, 0, 0, 0
             self.ct_sgant_screen.ids.tdrs_east.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
             self.ct_sgant_screen.ids.tdrs_west.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
             self.ct_sgant_screen.ids.tdrs_z.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
         elif float(aos) == 0.0:
-            self.ct_sgant_screen.ids.radio_up.color = 0,0,0,0
+            self.ct_sgant_screen.ids.radio_up.color = 0, 0, 0, 0
             self.ct_sgant_screen.ids.tdrs_east.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
             self.ct_sgant_screen.ids.tdrs_west.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
             self.ct_sgant_screen.ids.tdrs_z.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
-       
+
         #now check main CT screen radio signal
         if float(sgant_transmit) == 1.0 and float(aos) == 1.0:
-            self.ct_screen.ids.sgant1_radio.color = 1,1,1,1
-            self.ct_screen.ids.sgant2_radio.color = 1,1,1,1
+            self.ct_screen.ids.sgant1_radio.color = 1, 1, 1, 1
+            self.ct_screen.ids.sgant2_radio.color = 1, 1, 1, 1
         elif float(sgant_transmit) == 1.0 and float(aos) == 0.0:
-            self.ct_screen.ids.sgant1_radio.color = 0,0,0,0
-            self.ct_screen.ids.sgant2_radio.color = 0,0,0,0
+            self.ct_screen.ids.sgant1_radio.color = 0, 0, 0, 0
+            self.ct_screen.ids.sgant2_radio.color = 0, 0, 0, 0
         elif float(sgant_transmit) == 0.0:
-            self.ct_screen.ids.sgant1_radio.color = 0,0,0,0
-            self.ct_screen.ids.sgant2_radio.color = 0,0,0,0
+            self.ct_screen.ids.sgant1_radio.color = 0, 0, 0, 0
+            self.ct_screen.ids.sgant2_radio.color = 0, 0, 0, 0
         elif float(aos) == 0.0:
-            self.ct_screen.ids.sgant1_radio.color = 0,0,0,0
-            self.ct_screen.ids.sgant2_radio.color = 0,0,0,0
-            
+            self.ct_screen.ids.sgant1_radio.color = 0, 0, 0, 0
+            self.ct_screen.ids.sgant2_radio.color = 0, 0, 0, 0
+
         if float(sasa1_active) == 1.0 and float(aos) == 1.0:
-            self.ct_screen.ids.sasa1_radio.color = 1,1,1,1
+            self.ct_screen.ids.sasa1_radio.color = 1, 1, 1, 1
         elif float(sasa1_active) == 1.0 and float(aos) == 0.0:
-            self.ct_screen.ids.sasa1_radio.color = 0,0,0,0
+            self.ct_screen.ids.sasa1_radio.color = 0, 0, 0, 0
         elif float(sasa1_active) == 0.0:
-            self.ct_screen.ids.sasa1_radio.color = 0,0,0,0
+            self.ct_screen.ids.sasa1_radio.color = 0, 0, 0, 0
         elif float(aos) == 0.0:
-            self.ct_screen.ids.sasa1_radio.color = 0,0,0,0
-            
+            self.ct_screen.ids.sasa1_radio.color = 0, 0, 0, 0
+
 
         if float(sasa2_active) == 1.0 and float(aos) == 1.0:
-            self.ct_screen.ids.sasa2_radio.color = 1,1,1,1
+            self.ct_screen.ids.sasa2_radio.color = 1, 1, 1, 1
         elif float(sasa2_active) == 1.0 and float(aos) == 0.0:
-            self.ct_screen.ids.sasa2_radio.color = 0,0,0,0
+            self.ct_screen.ids.sasa2_radio.color = 0, 0, 0, 0
         elif float(sasa2_active) == 0.0:
-            self.ct_screen.ids.sasa2_radio.color = 0,0,0,0
+            self.ct_screen.ids.sasa2_radio.color = 0, 0, 0, 0
         elif float(aos) == 0.0:
-            self.ct_screen.ids.sasa2_radio.color = 0,0,0,0
+            self.ct_screen.ids.sasa2_radio.color = 0, 0, 0, 0
 
         if float(uhf1_power) == 1.0 and float(aos) == 1.0:
-            self.ct_screen.ids.uhf1_radio.color = 1,1,1,1
+            self.ct_screen.ids.uhf1_radio.color = 1, 1, 1, 1
         elif float(uhf1_power) == 1.0 and float(aos) == 0.0:
-            self.ct_screen.ids.uhf1_radio.color = 1,0,0,1
+            self.ct_screen.ids.uhf1_radio.color = 1, 0, 0, 1
         elif float(uhf1_power) == 0.0:
-            self.ct_screen.ids.uhf1_radio.color = 0,0,0,0
-        
+            self.ct_screen.ids.uhf1_radio.color = 0, 0, 0, 0
+
         if float(uhf2_power) == 1.0 and float(aos) == 1.0:
-            self.ct_screen.ids.uhf2_radio.color = 1,1,1,1
+            self.ct_screen.ids.uhf2_radio.color = 1, 1, 1, 1
         elif float(uhf2_power) == 1.0 and float(aos) == 0.0:
-            self.ct_screen.ids.uhf2_radio.color = 1,0,0,1
+            self.ct_screen.ids.uhf2_radio.color = 1, 0, 0, 1
         elif float(uhf2_power) == 0.0:
-            self.ct_screen.ids.uhf2_radio.color = 0,0,0,0
+            self.ct_screen.ids.uhf2_radio.color = 0, 0, 0, 0
 
         ##-------------------EVA Functionality-------------------##
         if stationmode == 5:
             evaflashevent = Clock.schedule_once(self.flashEVAbutton, 1)
-    
+
         ##-------------------US EVA Functionality-------------------##
-        
+
 
         if airlock_pump_voltage == 1:
             self.us_eva.ids.pumpvoltage.text = "Airlock Pump Power On!"
-            self.us_eva.ids.pumpvoltage.color = 0.33,0.7,0.18
+            self.us_eva.ids.pumpvoltage.color = 0.33, 0.7, 0.18
         else:
             self.us_eva.ids.pumpvoltage.text = "Airlock Pump Power Off"
-            self.us_eva.ids.pumpvoltage.color = 0,0,0
+            self.us_eva.ids.pumpvoltage.color = 0, 0, 0
 
         if airlock_pump_switch == 1:
             self.us_eva.ids.pumpswitch.text = "Airlock Pump Active!"
-            self.us_eva.ids.pumpswitch.color = 0.33,0.7,0.18
+            self.us_eva.ids.pumpswitch.color = 0.33, 0.7, 0.18
         else:
             self.us_eva.ids.pumpswitch.text = "Airlock Pump Inactive"
-            self.us_eva.ids.pumpswitch.color = 0,0,0
-       
+            self.us_eva.ids.pumpswitch.color = 0, 0, 0
+
         ##activate EVA button flash
         if (airlock_pump_voltage == 1 or crewlockpres < 734) and int(stationmode) == 5:
             usevaflashevent = Clock.schedule_once(self.flashUS_EVAbutton, 1)
 
         ##No EVA Currently
-        if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and crewlockpres > 740 and airlockpres > 740: 
-            eva = False   
+        if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and crewlockpres > 740 and airlockpres > 740:
+            eva = False
             self.us_eva.ids.leak_timer.text = ""
             self.us_eva.ids.Crewlock_Status_image.source = '/home/pi/Mimic/Pi/imgs/eva/BlankLights.png'
-            self.us_eva.ids.EVA_occuring.color = 1,0,0
+            self.us_eva.ids.EVA_occuring.color = 1, 0, 0
             self.us_eva.ids.EVA_occuring.text = "Currently No EVA"
 
         ##EVA Standby - NOT UNIQUE
-        if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres > 740 and airlockpres > 740 and int(stationmode) == 5: 
+        if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres > 740 and airlockpres > 740 and int(stationmode) == 5:
             standby = True
             self.us_eva.ids.leak_timer.text = "~160s Leak Check"
             self.us_eva.ids.Crewlock_Status_image.source = '/home/pi/Mimic/Pi/imgs/eva/StandbyLights.png'
-            self.us_eva.ids.EVA_occuring.color = 0,0,1
+            self.us_eva.ids.EVA_occuring.color = 0, 0, 1
             self.us_eva.ids.EVA_occuring.text = "EVA Standby"
         else:
             standby = False
 
         ##EVA Prebreath Pressure
-        if airlock_pump_voltage == 1 and crewlockpres > 740 and airlockpres > 740 and int(stationmode) == 5: 
+        if airlock_pump_voltage == 1 and crewlockpres > 740 and airlockpres > 740 and int(stationmode) == 5:
             prebreath1 = True
             self.us_eva.ids.Crewlock_Status_image.source = '/home/pi/Mimic/Pi/imgs/eva/PreBreatheLights.png'
             self.us_eva.ids.leak_timer.text = "~160s Leak Check"
-            self.us_eva.ids.EVA_occuring.color = 0,0,1
+            self.us_eva.ids.EVA_occuring.color = 0, 0, 1
             self.us_eva.ids.EVA_occuring.text = "Pre-EVA Nitrogen Purge"
-        
+
         ##EVA Depress1
-        if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres < 740 and airlockpres > 740 and int(stationmode) == 5: 
+        if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres < 740 and airlockpres > 740 and int(stationmode) == 5:
             depress1 = True
             self.us_eva.ids.leak_timer.text = "~160s Leak Check"
             self.us_eva.ids.EVA_occuring.text = "Crewlock Depressurizing"
-            self.us_eva.ids.EVA_occuring.color = 0,0,1
+            self.us_eva.ids.EVA_occuring.color = 0, 0, 1
             self.us_eva.ids.Crewlock_Status_image.source = '/home/pi/Mimic/Pi/imgs/eva/DepressLights.png'
 
         ##EVA Leakcheck
-        if airlock_pump_voltage == 1 and crewlockpres < 260 and crewlockpres > 250 and (depress1 or leakhold) and int(stationmode) == 5: 
+        if airlock_pump_voltage == 1 and crewlockpres < 260 and crewlockpres > 250 and (depress1 or leakhold) and int(stationmode) == 5:
             if depress1:
                 holdstartTime = float(unixconvert[7])*24+unixconvert[3]+float(unixconvert[4])/60+float(unixconvert[5])/3600
             leakhold = True
             depress1 = False
             self.us_eva.ids.EVA_occuring.text = "Leak Check in Progress!"
-            self.us_eva.ids.EVA_occuring.color = 0,0,1
+            self.us_eva.ids.EVA_occuring.color = 0, 0, 1
             Clock.schedule_once(self.hold_timer, 1)
             self.us_eva.ids.Crewlock_Status_image.source = '/home/pi/Mimic/Pi/imgs/eva/LeakCheckLights.png'
         else:
             leakhold = False
 
         ##EVA Depress2
-        if airlock_pump_voltage == 1 and crewlockpres <= 250 and crewlockpres > 3 and int(stationmode) == 5: 
+        if airlock_pump_voltage == 1 and crewlockpres <= 250 and crewlockpres > 3 and int(stationmode) == 5:
             leakhold = False
             self.us_eva.ids.leak_timer.text = "Complete"
             self.us_eva.ids.EVA_occuring.text = "Crewlock Depressurizing"
-            self.us_eva.ids.EVA_occuring.color = 0,0,1
+            self.us_eva.ids.EVA_occuring.color = 0, 0, 1
             self.us_eva.ids.Crewlock_Status_image.source = '/home/pi/Mimic/Pi/imgs/eva/DepressLights.png'
-        
+
         ##EVA in progress
-        if crewlockpres < 2.5 and int(stationmode) == 5: 
+        if crewlockpres < 2.5 and int(stationmode) == 5:
             eva = True
             self.us_eva.ids.EVA_occuring.text = "EVA In Progress!!!"
-            self.us_eva.ids.EVA_occuring.color = 0.33,0.7,0.18
+            self.us_eva.ids.EVA_occuring.color = 0.33, 0.7, 0.18
             self.us_eva.ids.leak_timer.text = "Complete"
             self.us_eva.ids.Crewlock_Status_image.source = '/home/pi/Mimic/Pi/imgs/eva/InProgressLights.png'
             evatimerevent = Clock.schedule_once(self.EVA_clock, 1)
@@ -2538,22 +2573,22 @@ class MainApp(App):
         ##Repress
         if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and crewlockpres >= 3 and crewlockpres < 734 and int(stationmode) == 5:
             eva = False
-            self.us_eva.ids.EVA_occuring.color = 0,0,1
+            self.us_eva.ids.EVA_occuring.color = 0, 0, 1
             self.us_eva.ids.EVA_occuring.text = "Crewlock Repressurizing"
             self.us_eva.ids.Crewlock_Status_image.source = '/home/pi/Mimic/Pi/imgs/eva/RepressLights.png'
-        
+
         ##-------------------RS EVA Functionality-------------------##
         ##if eva station mode and not us eva
         if airlock_pump_voltage == 0 and crewlockpres >= 734 and stationmode == 5:
             rsevaflashevent = Clock.schedule_once(self.flashRS_EVAbutton, 1)
-    
+
 
         ##-------------------EVA Functionality End-------------------##
 
 #        if (difference > -10) and (isinstance(App.get_running_app().root_window.children[0], Popup)==False):
-#            LOSpopup = Popup(title='Loss of Signal', content=Label(text='Possible LOS Soon'),size_hint=(0.3,0.2),auto_dismiss=True)
+#            LOSpopup = Popup(title='Loss of Signal', content=Label(text='Possible LOS Soon'), size_hint=(0.3, 0.2), auto_dismiss=True)
 #            LOSpopup.open()
-#            print "popup"    
+#            print "popup"
 
         ##-------------------Fake Orbit Simulator-------------------##
         self.fakeorbit_screen.ids.psarj.text = str(psarj)
@@ -2567,7 +2602,7 @@ class MainApp(App):
         self.fakeorbit_screen.ids.beta4a.text = str(beta4a)
         self.fakeorbit_screen.ids.beta4b.text = str(beta4b)
 
-        if demoboolean == True:
+        if demoboolean:
             self.serialWrite("PSARJ=" + str(psarj) + " ")
             self.serialWrite("SSARJ=" + str(ssarj) + " ")
             self.serialWrite("Beta1B=" + str(beta1b) + " ")
@@ -2578,8 +2613,8 @@ class MainApp(App):
             self.serialWrite("Beta3A=" + str(beta3a) + " ")
             self.serialWrite("Beta4B=" + str(beta4b) + " ")
             self.serialWrite("Beta4A=" + str(beta4a) + " ")
-       
-        self.eps_screen.ids.psarj_value.text = psarj + "deg" 
+
+        self.eps_screen.ids.psarj_value.text = psarj + "deg"
         self.eps_screen.ids.ssarj_value.text = ssarj + "deg"
         self.tcs_screen.ids.ptrrj_value.text = ptrrj + "deg"
         self.tcs_screen.ids.strrj_value.text = strrj + "deg"
@@ -2613,30 +2648,31 @@ class MainApp(App):
 
         self.us_eva.ids.EVA_needle.angle = float(self.map_rotation(0.0193368*float(crewlockpres)))
         self.us_eva.ids.crewlockpressure_value.text = "{:.2f}".format(0.0193368*float(crewlockpres))
-       
+
         psi_bar_x = self.map_psi_bar(0.0193368*float(crewlockpres)) #convert to torr
+
+        self.us_eva.ids.EVA_psi_bar.pos_hint = {"center_x": psi_bar_x, "center_y": 0.56}
+
         
-        self.us_eva.ids.EVA_psi_bar.pos_hint = {"center_x": psi_bar_x, "center_y": 0.56} 
-       
-        if float(aos) == 1.00:
-            if self.root.current == 'mimic':
-               fakeorbitboolean = False
-               if mimicbutton == True:
-                   switchtofake = False
-            if LS_Subscription == True:
-                self.signal_acquired()
+        ##-------------------Signal Status Check-------------------##
+
+        if client_status.split(":")[0] == "Connected": 
+            if sub_status == "Subscribed":
+                #client connected and subscibed to ISS telemetry
+                if float(aos) == 1.00:
+                    self.signal_acquired() #signal status 1 means acquired
+
+                elif float(aos) == 0.00:
+                    self.signal_lost() #signal status 0 means loss of signal
+                
+                elif float(aos) == 2.00:
+                    self.signal_stale() #signal status 2 means data is not being updated from server
             else:
                 self.signal_unsubscribed()
-        elif float(aos) == 0.00:
-            if self.root.current == 'mimic':
-               fakeorbitboolean = True
-            self.signal_lost()
-        elif float(aos) == 2.00:
-            if self.root.current == 'mimic':
-               fakeorbitboolean = True
-            self.signal_stale()
+        else:
+            self.signal_unsubscribed()
 
-        if mimicbutton: # and float(aos) == 1.00): 
+        if mimicbutton: # and float(aos) == 1.00):
             self.serialWrite("PSARJ=" + psarj + " ")
             self.serialWrite("SSARJ=" + ssarj + " ")
             self.serialWrite("PTRRJ=" + ptrrj + " ")
@@ -2658,9 +2694,9 @@ class MainApp(App):
             self.serialWrite("Voltage2B=" + v2b + " ")
             self.serialWrite("Voltage3B=" + v3b + " ")
             self.serialWrite("Voltage4B=" + v4b + " ")
-        
+
         #data to send regardless of signal status
-        if mimicbutton: 
+        if mimicbutton:
             self.serialWrite("Module=" + module + " ")
 
 #All GUI Screens are on separate kv files

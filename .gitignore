@@ -4,3 +4,4 @@
 *.db-wal
 Pi/teststuff/
 Pi/TwitterKeys.xml
+*.*~

@@ -9,12 +9,6 @@
             source: '/home/pi/Mimic/Pi/imgs/calibrate/CalibrateExample.png'
             allow_stretch: False
             keep_ratio: True
-        Label:
-            pos_hint: {"center_x": 0.5, "center_y": 0.95}
-            id: calibratestatus
-            text: 'Calibrate ISS Angles'
-            color: 0,0,0,1
-            font_size: 40
         Button:
             id: zerobutton
             size_hint: 0.4,0.1
@@ -23,7 +17,6 @@
             font_size: 30
             disabled: True
             on_press: root.zeroJoints()
-            on_release: calibratestatus.text = 'Angles Zero-ing!'
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}

@@ -27,24 +27,40 @@
                     size: self.size
         Widget:
             id: TDRSe
+            col: (1,1,1)
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
             size_hint: '0.01dp', '0.02dp'
             canvas:
                 Color:
-                    rgb: 1,1,1
+                    rgb: self.col
                 Ellipse:
                     pos: self.pos
                     size: self.size
+        Label:
+            id: TDRSeLabel
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            text: 'TDRS-East'
+            markup: True
+            color: 1,1,1
+            font_size: 15
         Widget:
             id: TDRSw
+            col: (1,1,1)
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
             size_hint: '0.01dp', '0.02dp'
             canvas:
                 Color:
-                    rgb: 1,1,1
+                    rgb: self.col
                 Ellipse:
                     pos: self.pos
                     size: self.size
+        Label:
+            id: TDRSwLabel
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            text: 'TDRS-West'
+            markup: True
+            color: 1,1,1
+            font_size: 15
         Widget:
             id: ZOE
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
@@ -56,18 +72,32 @@
                 Ellipse:
                     pos: self.pos
                     size: self.size
-        Widget:
+        Label:
+            id: ZOElabel
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            text: 'ZOE'
+            markup: True
+            color: 1,1,1
+            font_size: 15
         Widget:
             id: TDRSz
+            col: (1,1,1)
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
             size_hint: '0.01dp', '0.02dp'
             canvas:
                 Color:
-                    rgb: 1,1,1
+                    rgb: self.col
                 Ellipse:
                     id: TDRSz
                     pos: self.pos
                     size: self.size
+        Label:
+            id: TDRSzLabel
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            text: 'TDRS-Z'
+            markup: True
+            color: 1,1,1
+            font_size: 15
         Image:
             id: OrbitISStiny
             source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitYellowISSicon.png'
