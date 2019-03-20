@@ -27,6 +27,7 @@ double V2B = 0.00;
 double V4A = 0.00;
 double V4B = 0.00;
 String module = "unset module";
+boolean Disco = False;
 
 void setup()
 {
@@ -115,7 +116,6 @@ void loop()
     module_strip.show();
   }
   
-
   if(V2A < 151.5)
   {
     strip.setPixelColor(0, strip.Color(255,0,0));
@@ -239,6 +239,11 @@ void loop()
     strip.setPixelColor(23, strip.Color(0,0,255));
     strip.show();
   }
+  if(Disco)
+  {
+    theaterChaseRainbow_IEA(50);
+  }
+  Disco = False;
 }
 void checkSerial()
 {
@@ -263,8 +268,12 @@ void checkSerial()
   while((str = strtok_r(p," ",&p))!=NULL)
   {
     test2 = String(str);
-    delimeter = test2.indexOf('=');  
-    if(test2.substring(0,delimeter)=="PSARJ")
+    delimeter = test2.indexOf('=');
+    if(test2.substring(0,delimeter)=="Disco")
+    {
+      Disco = True; 
+    }
+    else if(test2.substring(0,delimeter)=="PSARJ")
     {
       PSARJ = (test2.substring(delimeter+1)).toFloat();
     }  
@@ -366,4 +375,66 @@ void allSet_module(uint32_t c, uint8_t wait) {
     module_strip.show();
     delay(wait);
   }
+}
+void theaterChaseRainbow_Module(uint8_t wait) {
+  for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
+    for (int q=0; q < 3; q++) {
+      for (uint16_t i=0; i < module_strip.numPixels(); i=i+3) {
+        module_strip.setPixelColor(i+q, Wheel_Module( (i+j) % 255));    //turn every third pixel on
+      }
+      module_strip.show();
+
+      delay(wait);
+
+      for (uint16_t i=0; i < module_strip.numPixels(); i=i+3) {
+        module_strip.setPixelColor(i+q, 0);        //turn every third pixel off
+      }
+    }
+  }
+}
+
+// Input a value 0 to 255 to get a color value.
+// The colours are a transition r - g - b - back to r.
+uint32_t Wheel_Module(byte WheelPos) {
+  WheelPos = 255 - WheelPos;
+  if(WheelPos < 85) {
+    return module_strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  }
+  if(WheelPos < 170) {
+    WheelPos -= 85;
+    return module_strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  }
+  WheelPos -= 170;
+  return module_strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+}
+void theaterChaseRainbow_IEA(uint8_t wait) {
+  for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
+    for (int q=0; q < 3; q++) {
+      for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
+        strip.setPixelColor(i+q, Wheel( (i+j) % 255));    //turn every third pixel on
+      }
+      strip.show();
+
+      delay(wait);
+
+      for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
+        strip.setPixelColor(i+q, 0);        //turn every third pixel off
+      }
+    }
+  }
+}
+
+// Input a value 0 to 255 to get a color value.
+// The colours are a transition r - g - b - back to r.
+uint32_t Wheel_IEA(byte WheelPos) {
+  WheelPos = 255 - WheelPos;
+  if(WheelPos < 85) {
+    return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  }
+  if(WheelPos < 170) {
+    WheelPos -= 85;
+    return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  }
+  WheelPos -= 170;
+  return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
