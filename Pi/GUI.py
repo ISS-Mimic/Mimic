@@ -107,7 +107,7 @@ c.execute("CREATE TABLE IF NOT EXISTS telemetry (`Label` TEXT PRIMARY KEY, `Time
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('psarj', '0', '0', 'S0000004', 0)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('ssarj', '0', '0', 'S0000003', 1)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('ptrrj', '0', '0', 'S0000002', 2)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('strrj', '0', '0', 'S0000001', 3)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('strrj', '0', '5', 'S0000001', 3)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta1b', '0', '0', 'S6000008', 4)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta1a', '0', '0', 'S4000007', 5)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta2b', '0', '0', 'P6000008', 6)");
@@ -402,6 +402,7 @@ stopAnimation = True
 startingAnim = True
 oldtdrs = "n/a"
 runningDemo = False
+Disco = False
 logged = False
 #-----------EPS Variables----------------------
 EPSstorageindex = 0
@@ -490,40 +491,6 @@ class MainScreen(Screen):
     def changeManualControlBoolean(self, *args):
         global manualcontrol
         manualcontrol = args[0]
-
-    def startDemo(*args):
-        global p2, runningDemo
-        if runningDemo == False:
-            p2 = subprocess.Popen("/home/pi/Mimic/Pi/demoOrbit.sh")
-            runningDemo = True
-            logWrite("Successfully started Demo Orbit script")
-
-    def stopDemo(*args):
-        global p2, runningDemo
-        try:
-            p2.kill()
-        except Exception:
-            pass
-        else:
-            logWrite("Successfully stopped Demo Orbit script")
-            runningDemo = False
-
-    def startHTVDemo(*args):
-        global p2, runningDemo
-        if runningDemo == False:
-            p2 = subprocess.Popen("/home/pi/Mimic/Pi/demoHTVOrbit.sh")
-            runningDemo = True
-            logWrite("Successfully started Demo HTV Orbit script")
-
-    def stopHTVDemo(*args):
-        global p2, runningDemo
-        try:
-            p2.kill()
-        except Exception:
-            pass
-        else:
-            logWrite("Successfully stopped Demo HTV Orbit script")
-            runningDemo = False
 
     def startproc(*args):
         global p
@@ -913,12 +880,21 @@ class FakeOrbitScreen(Screen):
         HTVpopup = Popup(title='HTV Berthing Orbit', content=Label(text='This will playback recorded data from when the Japanese HTV spacecraft berthed to the ISS. During berthing, the SARJs and nadir BGAs lock but the zenith BGAs autotrack'), text_size=self.size, size_hint=(0.5, 0.3), auto_dismiss=True)
         HTVpopup.text_size = self.size
         HTVpopup.open()
+    
+    def startDisco(*args):
+        global p2, runningDemo, Disco
+        if runningDemo == False:
+            p2 = subprocess.Popen("/home/pi/Mimic/Pi/disco.sh")
+            runningDemo = True
+            Disco = True
+            logWrite("Successfully started Disco script")
 
     def startDemo(*args):
         global p2, runningDemo
         if runningDemo == False:
             p2 = subprocess.Popen("/home/pi/Mimic/Pi/demoOrbit.sh")
             runningDemo = True
+            logWrite("Successfully started Demo Orbit script")
 
     def stopDemo(*args):
         global p2, runningDemo
@@ -1163,7 +1139,6 @@ class MainApp(App):
                 ser = serial.Serial('/dev/ttyACM0', 9600, timeout=0)
             except Exception as e:
                 #logWrite("Warning - Serial Connection ACM0 not found")
-                print(e)
                 SerialConnection1 = False
                 ser = None
             else:
@@ -1174,7 +1149,6 @@ class MainApp(App):
             try:
                 ser.write(str.encode("test"))
             except Exception as e:
-                print(e)
                 SerialConnection1 = False
                 ser = None
             else:
@@ -1956,7 +1930,7 @@ class MainApp(App):
     def update_labels(self, dt):
         global mimicbutton, switchtofake, demoboolean, runningDemo, fakeorbitboolean, psarj2, ssarj2, manualcontrol, aos, los, oldLOS, psarjmc, ssarjmc, ptrrjmc, strrjmc, beta1bmc, beta1amc, beta2bmc, beta2amc, beta3bmc, beta3amc, beta4bmc, beta4amc, US_EVAinProgress, position_x, position_y, position_z, velocity_x, velocity_y, velocity_z, altitude, velocity, iss_mass, testvalue, testfactor, airlock_pump, crewlockpres, leak_hold, firstcrossing, EVA_activities, repress, depress, oldAirlockPump, obtained_EVA_crew, EVAstartTime
         global holdstartTime, LS_Subscription, SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5
-        global eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
+        global Disco, eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
         global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power
         global stationmode, sgant_elevation, sgant_xelevation
         global tdrs, module
@@ -2603,6 +2577,9 @@ class MainApp(App):
         self.fakeorbit_screen.ids.beta4b.text = str(beta4b)
 
         if demoboolean:
+            if Disco:
+                self.serialWrite("Disco ")
+                Disco = False
             self.serialWrite("PSARJ=" + str(psarj) + " ")
             self.serialWrite("SSARJ=" + str(ssarj) + " ")
             self.serialWrite("Beta1B=" + str(beta1b) + " ")
@@ -2656,7 +2633,7 @@ class MainApp(App):
         
         ##-------------------Signal Status Check-------------------##
 
-        if client_status.split(":")[0] == "Connected": 
+        if client_status.split(":")[0] == "CONNECTED": 
             if sub_status == "Subscribed":
                 #client connected and subscibed to ISS telemetry
                 if float(aos) == 1.00:

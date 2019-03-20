@@ -134,6 +134,17 @@
             ##background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/InfoIcon.png'
             on_release: root.HTVpopup()
         Button:
+            id: Disco
+            allow_stretch: False
+            keep_ratio: True
+            size_hint: 0.14,0.115
+            text: "Disco!"
+            ##size_hint_y: 0.115
+            pos_hint: {"center_x": 0.22, "center_y": 0.225}
+            on_release: fakeorbitstatus.text = 'Transmitting Disco Orbit'
+            on_release: root.changeDemoBoolean(True)
+            on_release: root.startDisco()
+        Button:
             id: DemoStart
             allow_stretch: False
             keep_ratio: True
