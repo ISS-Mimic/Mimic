@@ -713,7 +713,7 @@ class ManualControlScreen(Screen):
         ssarjmc += args[0]
         self.serialWrite("SSARJ=" + str(ssarjmc) + " ")
 
-    def incrementPTTRJ(self, *args):
+    def incrementPTRRJ(self, *args):
         global ptrrjmc
         ptrrjmc += args[0]
         self.serialWrite("PTRRJ=" + str(ptrrjmc) + " ")
@@ -2582,6 +2582,8 @@ class MainApp(App):
                 Disco = False
             self.serialWrite("PSARJ=" + str(psarj) + " ")
             self.serialWrite("SSARJ=" + str(ssarj) + " ")
+            self.serialWrite("PTRRJ=" + str(ptrrj) + " ")
+            self.serialWrite("STRRJ=" + str(strrj) + " ")
             self.serialWrite("Beta1B=" + str(beta1b) + " ")
             self.serialWrite("Beta1A=" + str(beta1a) + " ")
             self.serialWrite("Beta2B=" + str(beta2b) + " ")
