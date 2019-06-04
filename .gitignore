@@ -5,3 +5,7 @@
 Pi/teststuff/
 Pi/TwitterKeys.xml
 *.*~
+errors.txt
+pylint3*
+test.js
+logtest.py

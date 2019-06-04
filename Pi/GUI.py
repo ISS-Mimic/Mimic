@@ -492,10 +492,11 @@ class MainScreen(Screen):
         global manualcontrol
         manualcontrol = args[0]
 
-    def startproc(*args):
+    def startproc(*args): #is this function even called???
         global p
-        p = subprocess.Popen(["node", "/home/pi/Mimic/Pi/ISS_Telemetry.js"])
-        logWrite("Successfully started ISS telemetry javascript")
+        #p = subprocess.Popen(["node", "/home/pi/Mimic/Pi/ISS_Telemetry.js"]) #commented until live telemetry is back up
+        p = subprocess.Popen("/home/pi/Mimic/Pi/RecordedData/playback.out")
+        logWrite("Successfully started ISS telemetry script")
 
     def killproc(*args):
         global p
@@ -1043,7 +1044,8 @@ class MimicScreen(Screen, EventDispatcher):
     def startproc(*args):
         global p
         print("mimic starting node")
-        p = subprocess.Popen(["node", "/home/pi/Mimic/Pi/ISS_Telemetry.js"])
+        #p = subprocess.Popen(["node", "/home/pi/Mimic/Pi/ISS_Telemetry.js"]) #uncomment if live data comes back
+        p = subprocess.Popen("/home/pi/Mimic/Pi/RecordedData/playback.out")
 
     def killproc(*args):
         global p

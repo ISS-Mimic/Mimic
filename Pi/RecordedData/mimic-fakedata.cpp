@@ -46,7 +46,7 @@ main(  )
 
   sqlite3 * database;
 
-  int result = sqlite3_open( "thedatabasefilename.sqlite", &database );
+  int result = sqlite3_open("/dev/shm/iss_telemetry.db", &database );
   if ( result != SQLITE_OK )
   {
     std::cerr << "Couldn't open database." << std::endl;
