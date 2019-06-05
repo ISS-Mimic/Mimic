@@ -9,3 +9,4 @@ errors.txt
 pylint3*
 test.js
 logtest.py
+Pi/__pycache__/
