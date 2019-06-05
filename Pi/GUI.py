@@ -783,7 +783,7 @@ class MimicScreen(Screen, EventDispatcher):
         global p
         print("Telemetry Subprocess start")
         #p = subprocess.Popen(["node", "/home/pi/Mimic/Pi/ISS_Telemetry.js"]) #uncomment if live data comes back
-        p = subprocess.Popen(["/home/pi/Mimic/Pi/RecordedData/playback.out","/home/pi/Mimic/Pi/RecordedData/"])
+        p = subprocess.Popen(["/home/pi/Mimic/Pi/RecordedData/playback.out","/home/pi/Mimic/Pi/RecordedData/Data"])
 
     def killproc(*args):
         global p
@@ -2020,94 +2020,181 @@ class MainApp(App):
 
         ##-------------------EPS Stuff---------------------------##
 
-        if avg_total_voltage > 151.5:
-            self.eps_screen.ids.eps_sun.color = 1, 1, 1, 1
-        else:
-            self.eps_screen.ids.eps_sun.color = 1, 1, 1, 0.1
+        #if halfavg_1a < 151.5: #discharging
+        #    self.eps_screen.ids.array_1a.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
+        #    #self.eps_screen.ids.array_1a.color = 1, 1, 1, 0.8
+        #elif avg_1a > 160.0: #charged
+        #    self.eps_screen.ids.array_1a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
+        #elif halfavg_1a >= 151.5:  #charging
+        #    self.eps_screen.ids.array_1a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
+        #    self.eps_screen.ids.array_1a.color = 1, 1, 1, 1.0
+        #if float(c1a) > 0.0:    #power channel offline!
+        #    self.eps_screen.ids.array_1a.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
 
-        if halfavg_1a < 151.5: #discharging
+        #if halfavg_1b < 151.5: #discharging
+        #    self.eps_screen.ids.array_1b.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
+        #    #self.eps_screen.ids.array_1b.color = 1, 1, 1, 0.8
+        #elif avg_1b > 160.0: #charged
+        #    self.eps_screen.ids.array_1b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
+        #elif halfavg_1b >= 151.5:  #charging
+        #    self.eps_screen.ids.array_1b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
+        #    self.eps_screen.ids.array_1b.color = 1, 1, 1, 1.0
+        #if float(c1b) > 0.0:                                  #power channel offline!
+        #    self.eps_screen.ids.array_1b.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
+
+        #if halfavg_2a < 151.5: #discharging
+        #    self.eps_screen.ids.array_2a.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
+        #    #self.eps_screen.ids.array_2a.color = 1, 1, 1, 0.8
+        #elif avg_2a > 160.0: #charged
+        #    self.eps_screen.ids.array_2a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
+        #elif halfavg_2a >= 151.5:  #charging
+        #    self.eps_screen.ids.array_2a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
+        #    self.eps_screen.ids.array_2a.color = 1, 1, 1, 1.0
+        #if float(c2a) > 0.0:                                  #power channel offline!
+        #    self.eps_screen.ids.array_2a.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
+
+        #if halfavg_2b < 151.5: #discharging
+        #    self.eps_screen.ids.array_2b.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
+        #    #self.eps_screen.ids.array_2b.color = 1, 1, 1, 0.8
+        #elif avg_2b > 160.0: #charged
+        #    self.eps_screen.ids.array_2b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
+        #elif halfavg_2b >= 151.5:  #charging
+        #    self.eps_screen.ids.array_2b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
+        #    self.eps_screen.ids.array_2b.color = 1, 1, 1, 1.0
+        #if float(c2b) > 0.0:                                  #power channel offline!
+        #    self.eps_screen.ids.array_2b.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
+
+        #if halfavg_3a < 151.5: #discharging
+        #    self.eps_screen.ids.array_3a.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
+            #self.eps_screen.ids.array_3a.color = 1, 1, 1, 0.8
+        #elif avg_3a > 160.0: #charged
+        #    self.eps_screen.ids.array_3a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
+        #elif halfavg_3a >= 151.5:  #charging
+        #    self.eps_screen.ids.array_3a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
+        #    self.eps_screen.ids.array_3a.color = 1, 1, 1, 1.0
+        #if float(c3a) > 0.0:                                  #power channel offline!
+        #    self.eps_screen.ids.array_3a.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
+
+        #if halfavg_3b < 151.5: #discharging
+        #    self.eps_screen.ids.array_3b.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
+            #self.eps_screen.ids.array_3b.color = 1, 1, 1, 0.8
+        #elif avg_3b > 160.0: #charged
+        #    self.eps_screen.ids.array_3b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
+        #elif halfavg_3b >= 151.5:  #charging
+        #    self.eps_screen.ids.array_3b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
+        #    self.eps_screen.ids.array_3b.color = 1, 1, 1, 1.0
+        #if float(c3b) > 0.0:                                  #power channel offline!
+        #    self.eps_screen.ids.array_3b.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
+
+        #if halfavg_4a < 151.5: #discharging
+        #    self.eps_screen.ids.array_4a.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
+        #    #self.eps_screen.ids.array_4a.color = 1, 1, 1, 0.8
+        #elif avg_4a > 160.0: #charged
+        #    self.eps_screen.ids.array_4a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
+        #elif halfavg_4a >= 151.5:  #charging
+        #    self.eps_screen.ids.array_4a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
+        #    self.eps_screen.ids.array_4a.color = 1, 1, 1, 1.0
+        #if float(c4a) > 0.0:                                  #power channel offline!
+        #    self.eps_screen.ids.array_4a.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
+
+        #if halfavg_4b < 151.5: #discharging
+        #    self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
+        #    #self.eps_screen.ids.array_4b.color = 1, 1, 1, 0.8
+        #elif avg_4b > 160.0: #charged
+        #    self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
+        #elif halfavg_4b >= 151.5:  #charging
+        #    self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
+        #    self.eps_screen.ids.array_4b.color = 1, 1, 1, 1.0
+        #if float(c4b) > 0.0:                                  #power channel offline!
+        #    self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
+        #if avg_total_voltage > 151.5:
+        #    self.eps_screen.ids.eps_sun.color = 1, 1, 1, 1
+        #else:
+        #    self.eps_screen.ids.eps_sun.color = 1, 1, 1, 0.1
+
+        if float(v1a) < 151.5: #discharging
             self.eps_screen.ids.array_1a.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
             #self.eps_screen.ids.array_1a.color = 1, 1, 1, 0.8
-        elif avg_1a > 160.0: #charged
+        elif float(v1a) > 160.0: #charged
             self.eps_screen.ids.array_1a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
-        elif halfavg_1a >= 151.5:  #charging
+        elif float(v1a) >= 151.5:  #charging
             self.eps_screen.ids.array_1a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_1a.color = 1, 1, 1, 1.0
         if float(c1a) > 0.0:    #power channel offline!
             self.eps_screen.ids.array_1a.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
 
-        if halfavg_1b < 151.5: #discharging
+        if float(v1b) < 151.5: #discharging
             self.eps_screen.ids.array_1b.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
             #self.eps_screen.ids.array_1b.color = 1, 1, 1, 0.8
-        elif avg_1b > 160.0: #charged
+        elif float(v1b) > 160.0: #charged
             self.eps_screen.ids.array_1b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
-        elif halfavg_1b >= 151.5:  #charging
+        elif float(v1b) >= 151.5:  #charging
             self.eps_screen.ids.array_1b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_1b.color = 1, 1, 1, 1.0
         if float(c1b) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_1b.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
 
-        if halfavg_2a < 151.5: #discharging
+        if float(v2a) < 151.5: #discharging
             self.eps_screen.ids.array_2a.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
             #self.eps_screen.ids.array_2a.color = 1, 1, 1, 0.8
-        elif avg_2a > 160.0: #charged
+        elif float(v2a) > 160.0: #charged
             self.eps_screen.ids.array_2a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
-        elif halfavg_2a >= 151.5:  #charging
+        elif float(v2a) >= 151.5:  #charging
             self.eps_screen.ids.array_2a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_2a.color = 1, 1, 1, 1.0
         if float(c2a) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_2a.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
 
-        if halfavg_2b < 151.5: #discharging
+        if float(v2b) < 151.5: #discharging
             self.eps_screen.ids.array_2b.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
             #self.eps_screen.ids.array_2b.color = 1, 1, 1, 0.8
-        elif avg_2b > 160.0: #charged
+        elif float(v2b) > 160.0: #charged
             self.eps_screen.ids.array_2b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
-        elif halfavg_2b >= 151.5:  #charging
+        elif float(v2b) >= 151.5:  #charging
             self.eps_screen.ids.array_2b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_2b.color = 1, 1, 1, 1.0
         if float(c2b) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_2b.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
 
-        if halfavg_3a < 151.5: #discharging
+        if float(v3a) < 151.5: #discharging
             self.eps_screen.ids.array_3a.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
             #self.eps_screen.ids.array_3a.color = 1, 1, 1, 0.8
-        elif avg_3a > 160.0: #charged
+        elif float(v3a) > 160.0: #charged
             self.eps_screen.ids.array_3a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
-        elif halfavg_3a >= 151.5:  #charging
+        elif float(v3a) >= 151.5:  #charging
             self.eps_screen.ids.array_3a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_3a.color = 1, 1, 1, 1.0
         if float(c3a) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_3a.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
 
-        if halfavg_3b < 151.5: #discharging
+        if float(v3b) < 151.5: #discharging
             self.eps_screen.ids.array_3b.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
             #self.eps_screen.ids.array_3b.color = 1, 1, 1, 0.8
-        elif avg_3b > 160.0: #charged
+        elif float(v3b) > 160.0: #charged
             self.eps_screen.ids.array_3b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
-        elif halfavg_3b >= 151.5:  #charging
+        elif float(v3b) >= 151.5:  #charging
             self.eps_screen.ids.array_3b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_3b.color = 1, 1, 1, 1.0
         if float(c3b) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_3b.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
 
-        if halfavg_4a < 151.5: #discharging
+        if float(v4a) < 151.5: #discharging
             self.eps_screen.ids.array_4a.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
             #self.eps_screen.ids.array_4a.color = 1, 1, 1, 0.8
-        elif avg_4a > 160.0: #charged
+        elif float(v4a) > 160.0: #charged
             self.eps_screen.ids.array_4a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
-        elif halfavg_4a >= 151.5:  #charging
+        elif float(v4a) >= 151.5:  #charging
             self.eps_screen.ids.array_4a.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_4a.color = 1, 1, 1, 1.0
         if float(c4a) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_4a.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
 
-        if halfavg_4b < 151.5: #discharging
+        if float(v4b) < 151.5: #discharging
             self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
             #self.eps_screen.ids.array_4b.color = 1, 1, 1, 0.8
-        elif avg_4b > 160.0: #charged
+        elif float(v4b) > 160.0: #charged
             self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
-        elif halfavg_4b >= 151.5:  #charging
+        elif float(v4b) >= 151.5:  #charging
             self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_4b.color = 1, 1, 1, 1.0
         if float(c4b) > 0.0:                                  #power channel offline!
