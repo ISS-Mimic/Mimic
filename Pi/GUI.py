@@ -781,9 +781,9 @@ class MimicScreen(Screen, EventDispatcher):
 
     def startproc(*args):
         global p
-        print("mimic starting node")
+        print("Telemetry Subprocess start")
         #p = subprocess.Popen(["node", "/home/pi/Mimic/Pi/ISS_Telemetry.js"]) #uncomment if live data comes back
-        p = subprocess.Popen("/home/pi/Mimic/Pi/RecordedData/playback.out")
+        p = subprocess.Popen(["/home/pi/Mimic/Pi/RecordedData/playback.out","/home/pi/Mimic/Pi/RecordedData/"])
 
     def killproc(*args):
         global p

@@ -10,15 +10,23 @@
 #include <sqlite3.h>
 
 int
-main(  )
+main( int argc, char *argv[] )
 {
-  const double factor = 1.0;
+  if ( argc != 2 )
+  {
+    std::cerr << "Usage: a.out path" << std::endl;
+    return 1;
+  }
+
+  std::string path = argv[1];
+
+  double factor = 1.0;
 
   std::deque< std::string > filesToRead;
 
   std::multimap< double, std::pair< std::string, double > > masterDataList;
 
-  filesToRead.push_back( "P0000001" );
+  filesToRead.push_back( "S0000003" );
   // TODO: fill this out
 
 
@@ -26,7 +34,7 @@ main(  )
   for ( const auto & file : filesToRead )
   {
     std::ifstream infile;
-    infile.open( file + ".txt" );
+    infile.open( path + "/" + file + ".txt" );
     while ( true )
     {
       double time;
@@ -78,9 +86,12 @@ main(  )
     while ( iter != masterDataList.end() && nowTimeStamp >= iter->first )
     {
       std::string statement = "UPDATE telemetry set Value = " + boost::lexical_cast< std::string > ( iter->second.second )
-                            + " where Label = " + boost::lexical_cast< std::string > ( iter->second.first );
+                            + " where ID = \"" + boost::lexical_cast< std::string > ( iter->second.first ) + "\"";
 
       char * message;
+#ifdef DEBUG
+      std::cout << statement << std::endl;
+#else      
       result = sqlite3_exec( database, statement.c_str(), NULL, NULL, &message );
 
       if ( result != SQLITE_OK )
@@ -88,6 +99,7 @@ main(  )
         std::cerr << "Sqlite3 error: " << message << std::endl;
         sqlite3_free( message );
       }
+#endif      
       ++iter;
     }
     std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) ); // or whatever
