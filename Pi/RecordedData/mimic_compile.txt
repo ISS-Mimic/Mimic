@@ -1,0 +1,9 @@
+g++ -std=c+11 -lsqlite3 mimic-fakedata.cpp
+
+add file names of all telemetry identifiers to code
+change time factor if desired
+change sql database path from dummy value
+
+once done with changes, recompile as directed above. 
+
+replace javascript telemetry in GUI.pi with call to a.out or whatever name is, no other call needed
