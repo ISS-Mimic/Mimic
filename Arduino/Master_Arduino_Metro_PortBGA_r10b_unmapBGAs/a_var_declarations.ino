@@ -168,7 +168,7 @@ double B2A = 30.0;
 double B4A = 30.0;
 
 double PSARJ = 30.0;
-double SSARJ = 30.0;
+double SSARJ = 0.0;
 double PTRRJ = -10.0;
-double STRRJ = -10.0;
+double STRRJ = 0.0;
 boolean AOS = false;

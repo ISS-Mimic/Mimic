@@ -58,7 +58,7 @@
 //Servo servo_STRRJ;
 
 // Create the motor shield object with the default I2C address
-Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x78);  // Check ID
+Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x60);  // Check ID
 //Adafruit_MotorShield AFMS2 = Adafruit_MotorShield(0x68); // Check ID
 
 // Or, create it with a different I2C address (say for stacking)
