@@ -106,9 +106,9 @@ int CmdSpeed_PSARJ = 0;
 
 //// ======== SSARJ PID Vals=====================
 ////  PID Constants
-float Kp_SSARJ = 50; // Proportional Gain of PID
-float Ki_SSARJ = 0; // Integral Gain of PID
-float Kd_SSARJ = 0; // Derivative Gain of PID
+float Kp_SSARJ = 10; //50; // Proportional Gain of PID
+float Ki_SSARJ = 1; //0; // Integral Gain of PID
+float Kd_SSARJ = 8; //0; // Derivative Gain of PID
 
 // SSARJ vars that change every iteration
 int Count_SSARJ = 0;

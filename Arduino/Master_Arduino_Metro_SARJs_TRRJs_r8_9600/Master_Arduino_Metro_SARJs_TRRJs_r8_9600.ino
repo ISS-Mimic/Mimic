@@ -5,7 +5,7 @@
 // This version is just for STBD BGAs, board 78
 // PSARJ is Motor 1, Encoder pins 2,5; Pin 3 not working properly on this Arduino Metro.  Updated 7/6/2019
 // SSARJ is Motor 2, Encoder pins 7,8
-/
+//
 //// for LCD  =============================================
 //
 //#include <SPI.h>
