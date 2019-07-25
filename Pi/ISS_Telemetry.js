@@ -12,7 +12,8 @@ var db = new sqlite3.Database("/dev/shm/iss_telemetry.db", sqlite3.OPEN_CREATE |
 var telemetry = require("/home/pi/Mimic/Pi/Telemetry_identifiers.js");
 var classes = ["TimeStamp", "Value"];
 
-var lsClient = new ls.LightstreamerClient("http://push.lightstreamer.com", "ISSLIVE");
+var lsClient = new ls.LightstreamerClient("http://push.lightstreamer.com", "ISSLIVE"); //actual telemetry server
+//var lsClient = new ls.LightstreamerClient("http://sl-iot-server-13.slsandbox.com:8080", "ISSLIVE_LS_SL"); //sl recorded data server
 
 lsClient.connectionOptions.setSlowingEnabled(false);
 

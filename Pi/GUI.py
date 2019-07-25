@@ -88,9 +88,9 @@ else:
     print(str(ser4))
 
 try:
-    ser5 = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
+    ser5 = serial.Serial('/dev/ttyACM3', 9600, timeout=0)
 except Exception:
-    #logWrite("Warning - Serial Connection USB0 not found")
+    #logWrite("Warning - Serial Connection ACM3 not found")
     SerialConnection5 = False
     ser5 = None
 else:
@@ -112,7 +112,6 @@ crew_mention= False
 mimicbutton = False
 fakeorbitboolean = False
 demoboolean = False
-zerocomplete = False
 switchtofake = False
 manualcontrol = False
 startup = True
@@ -248,13 +247,11 @@ class MainScreen(Screen):
         staleTelemetry()
         logWrite("Successfully stopped ISS telemetry javascript and removed database")
 
-class CalibrateScreen(Screen):
-
-    def zeroJoints(self):
-        self.changeBoolean(True)
-        self.serialWrite("ZERO ")
-
 class ManualControlScreen(Screen):
+    
+    def zeroJoints(self):
+        self.serialWrite("NULL ")
+    
     def setActive(*args):
         global Beta4Bcontrol, Beta3Bcontrol, Beta2Bcontrol, Beta1Bcontrol, Beta4Acontrol, Beta3Acontrol, Beta2Acontrol, Beta1Acontrol, PSARJcontrol, SSARJcontrol, PTRRJcontrol, STRRJcontrol
         if str(args[1])=="Beta4B":
@@ -807,7 +804,6 @@ class MainApp(App):
         self.main_screen = MainScreen(name = 'main')
         self.iss_screen = ISS_Screen(name = 'iss')
         self.eclss_screen = ECLSS_Screen(name = 'eclss')
-        self.calibrate_screen = CalibrateScreen(name = 'calibrate')
         self.control_screen = ManualControlScreen(name = 'manualcontrol')
         self.orbit_screen = Orbit_Screen(name = 'orbit')
         self.fakeorbit_screen = FakeOrbitScreen(name = 'fakeorbit')
@@ -833,7 +829,6 @@ class MainApp(App):
 
         root = MainScreenManager(transition=SwapTransition())
         root.add_widget(self.main_screen)
-        root.add_widget(self.calibrate_screen)
         root.add_widget(self.control_screen)
         root.add_widget(self.mimic_screen)
         root.add_widget(self.fakeorbit_screen)
@@ -956,9 +951,9 @@ class MainApp(App):
 
         if ser5 == None:
             try:
-                ser5 = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
+                ser5 = serial.Serial('/dev/ttyACM3', 9600, timeout=0)
             except Exception:
-                #logWrite("Warning - Serial Connection USB0 not found")
+                #logWrite("Warning - Serial Connection ACM3 not found")
                 SerialConnection5 = False
                 ser5 = None
             else:
@@ -2527,7 +2522,6 @@ Builder.load_file('/home/pi/Mimic/Pi/Screens/Crew_Screen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/RS_Screen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/ManualControlScreen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/MimicScreen.kv')
-Builder.load_file('/home/pi/Mimic/Pi/Screens/CalibrateScreen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/MainScreen.kv')
 
 Builder.load_string('''
@@ -2556,7 +2550,6 @@ ScreenManager:
     Crew_Screen:
     ManualControlScreen:
     MimicScreen:
-    CalibrateScreen:
     MainScreen:
 ''')
 
