@@ -176,6 +176,8 @@ bga_4A.Count = myEnc4A.read();
     Serial.print(bga_2B.Count);
     Serial.print(",Count_B4B: ");
     Serial.print(bga_4B.Count);
+    Serial.print(",SmartRolloverBGA");
+    Serial.print(SmartRolloverBGA);
 
 //    Serial.print(",Count_PSARJ: ");
 //    Serial.print(Count_PSARJ);

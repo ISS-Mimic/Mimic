@@ -95,9 +95,19 @@ void motorfnc(struct joints &myJoint) {
     }
   }  // end Added Aug 18, 2019
 
-  myJoint.PosErr = myJoint.PosCmd - myJoint.PosAct; // Compute myJoint.Position Error
-  
+  myJoint.PosErr = myJoint.PosCmd - myJoint.PosAct; // raw position error  
   myJoint.dPosErr = myJoint.PosErr - myJoint.PosErr_old;
+  
+// Added Aug 18, 2019 by BCM for "Smart Rollover"
+  if (SmartRolloverBGA == 1) {
+    if (myJoint.PosErr > 180) {
+      myJoint.PosErr =myJoint.PosErr-360;
+    }
+    if (myJoint.PosErr <-180) {
+      myJoint.PosErr = myJoint.PosErr+360;
+    }
+  }  // end Added Aug 18, 2019
+  
 
   if (abs(myJoint.PosErr) < 0.1) {
     myJoint.PosErr = 0;

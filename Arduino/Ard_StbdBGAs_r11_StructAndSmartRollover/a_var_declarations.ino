@@ -24,10 +24,10 @@ double B3A = 30.0;
 double B1B = 30.0;
 double B3B = 30.0;
 
-double B2B = 30.0;
-double B4B = 30.0;
-double B2A = 30.0;
-double B4A = 30.0;
+double B2B = 330.0;
+double B4B = 330.0;
+double B2A = 330.0;
+double B4A = 330.0;
 
 double PSARJ = 30.0;
 double SSARJ = 0.0;
