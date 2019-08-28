@@ -6,19 +6,24 @@ void loop() {
   bga_4B.PosCmd = B4B; // From RasPi telemetry stream
   bga_4A.PosCmd = B4A; // From RasPi telemetry stream
 
-
   if (NULLIFY == 1) {
+    digitalWrite(13, LOW);
+    delay(500);
+    motorNULL(bga_2B);    myEnc2B.write(0); B2B=0;
 
-Serial.println(" Now Nullifying the values...");
-    motorNULL(bga_2B);
-    motorNULL(bga_2A);
-    motorNULL(bga_4B);
-    motorNULL(bga_4A);
-Serial.println(" Nullifciation complete...");
+    motorNULL(bga_2A);     myEnc2A.write(0);B2A=0;
+
+    motorNULL(bga_4B);     myEnc4B.write(0); B4B=0;
+    
+    motorNULL(bga_4A);    myEnc4A.write(0); B4A=0;
+
+    digitalWrite(13, HIGH);
+    digitalWrite(6, LOW);
+    delay(500);
     NULLIFY = 0;
+    digitalWrite(6, HIGH);
+
   }
-
-
 
   // Can likely simplify this, but need to incorporate Adafruit motor shield library commands into my motor function/struct
 

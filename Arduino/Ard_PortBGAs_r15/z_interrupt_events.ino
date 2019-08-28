@@ -41,7 +41,6 @@ void checkSerial()
         else if (test2.substring(0, delimeter) == "NULLIFY")
     {
       NULLIFY = int((test2.substring(delimeter + 1)).toFloat());
-          Serial.println(" Got the NULL cmd over Serial...");
     }
 //    else if (test2.substring(0, delimeter) == "Kp_PSARJ")
 //    {

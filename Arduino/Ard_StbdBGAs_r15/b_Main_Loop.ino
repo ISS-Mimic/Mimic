@@ -1,64 +1,69 @@
 void loop() {
 
 
-  bga_2B.PosCmd = B2B; // From RasPi telemetry stream
-  bga_2A.PosCmd = B2A; // From RasPi telemetry stream
-  bga_4B.PosCmd = B4B; // From RasPi telemetry stream
-  bga_4A.PosCmd = B4A; // From RasPi telemetry stream
-
+  bga_3B.PosCmd = B3B; // From RasPi telemetry stream
+  bga_3A.PosCmd = B3A; // From RasPi telemetry stream
+  bga_1B.PosCmd = B1B; // From RasPi telemetry stream
+  bga_1A.PosCmd = B1A; // From RasPi telemetry stream
 
   if (NULLIFY == 1) {
+    digitalWrite(13, LOW);
+    delay(500);
+    motorNULL(bga_3B);    myEnc3B.write(0); B3B=0;
 
-Serial.println(" Now Nullifying the values...");
-    motorNULL(bga_2B);
-    motorNULL(bga_2A);
-    motorNULL(bga_4B);
-    motorNULL(bga_4A);
-Serial.println(" Nullifciation complete...");
+    motorNULL(bga_3A);     myEnc3A.write(0);B3A=0;
+
+    motorNULL(bga_1B);     myEnc1B.write(0); B1B=0;
+    
+    motorNULL(bga_1A);    myEnc1A.write(0); B1A=0;
+
+    digitalWrite(13, HIGH);
+    digitalWrite(6, LOW);
+    delay(500);
     NULLIFY = 0;
+    digitalWrite(6, HIGH);
+
   }
-
-
 
   // Can likely simplify this, but need to incorporate Adafruit motor shield library commands into my motor function/struct
 
-  motorfnc(bga_2B); // this is where it's called
-  if (bga_2B.tmpSpeed > 0) {
-    myMotorB2B->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
+  motorfnc(bga_3B); // this is where it's called
+  if (bga_3B.tmpSpeed > 0) {
+    myMotorB3B->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
   }
   else {
-    myMotorB2B->run(BACKWARD);
+    myMotorB3B->run(BACKWARD);
   }
-  myMotorB2B->setSpeed(bga_2B.CmdSpeed);// + 20);
+  myMotorB3B->setSpeed(bga_3B.CmdSpeed);// + 20);
 
-  motorfnc(bga_4B); // this is where it's called
-  if (bga_4B.tmpSpeed > 0) {
-    myMotorB4B->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
+  motorfnc(bga_1B); // this is where it's called
+  if (bga_1B.tmpSpeed > 0) {
+    myMotorB1B->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
   }
   else {
-    myMotorB4B->run(BACKWARD);
+    myMotorB1B->run(BACKWARD);
   }
-  myMotorB4B->setSpeed(bga_4B.CmdSpeed);// + 20);
+  myMotorB1B->setSpeed(bga_1B.CmdSpeed);// + 20);
 
 
-  motorfnc(bga_2A); // this is where it's called
-  if (bga_2A.tmpSpeed > 0) {
-    myMotorB2A->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
+  motorfnc(bga_3A); // this is where it's called
+  if (bga_3A.tmpSpeed > 0) {
+    myMotorB3A->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
   }
   else {
-    myMotorB2A->run(BACKWARD);
+    myMotorB3A->run(BACKWARD);
   }
-  myMotorB2A->setSpeed(bga_2A.CmdSpeed);// + 20);
+  myMotorB3A->setSpeed(bga_3A.CmdSpeed);// + 20);
 
 
-  motorfnc(bga_4A); // this is where it's called
-  if (bga_4A.tmpSpeed > 0) {
-    myMotorB4A->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
+  motorfnc(bga_1A); // this is where it's called
+  if (bga_1A.tmpSpeed > 0) {
+    myMotorB1A->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
   }
   else {
-    myMotorB4A->run(BACKWARD);
+    myMotorB1A->run(BACKWARD);
   }
-  myMotorB4A->setSpeed(bga_4A.CmdSpeed);// + 20);
+  myMotorB1A->setSpeed(bga_1A.CmdSpeed);// + 20);
 
 
 
@@ -90,10 +95,10 @@ Serial.println(" Nullifciation complete...");
   }
 
   int  debug_mode = 8;
-  //  B2A = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
-  //  B4A = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
-  //  B2B = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
-  //  B4B = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
+  //  B3A = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
+  //  B1A = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
+  //  B3B = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
+  //  B1B = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
   //  PTRRJ=104*sin(1*3.14159*0.01*millis()/1000.0);
 
 
@@ -120,45 +125,45 @@ Serial.println(" Nullifciation complete...");
   millisChPt1 = millis() - LoopStartMillis;
   // ================================================================================
 
-  bga_2B.Count = myEnc2B.read();
-  bga_4B.Count = myEnc4B.read();
-  bga_2A.Count = myEnc2A.read();
-  bga_4A.Count = myEnc4A.read();
+  bga_3B.Count = myEnc3B.read();
+  bga_1B.Count = myEnc1B.read();
+  bga_3A.Count = myEnc3A.read();
+  bga_1A.Count = myEnc1A.read();
 
   millisChPt2 = millis() - LoopStartMillis;
 
   //if (debug_mode==5){
   //Serial1.print("[Joint]:Cmd,Act,Err|  ");
-  //Serial1.print("2A:c");
-  //Serial1.print(B2A);
+  //Serial1.print("3A:c");
+  //Serial1.print(B3A);
   //Serial1.print(",a");
-  //Serial1.print(Pos_B2A);
+  //Serial1.print(Pos_B3A);
   //Serial1.print(",e");
-  //Serial1.print(PosErr_B2A);
+  //Serial1.print(PosErr_B3A);
   //
   //Serial1.print("|,  ");
-  //Serial1.print("4A:c");
-  //Serial1.print(B4A);
+  //Serial1.print("1A:c");
+  //Serial1.print(B1A);
   //Serial1.print(",a");
-  //Serial1.print(Pos_B4A);
+  //Serial1.print(Pos_B1A);
   //Serial1.print(",e");
-  //Serial1.print(PosErr_B4A);
+  //Serial1.print(PosErr_B1A);
   //
   //Serial1.print("|,  ");
-  //Serial1.print("2B:c");
-  //Serial1.print(B2B);
+  //Serial1.print("3B:c");
+  //Serial1.print(B3B);
   //Serial1.print(",a");
-  //Serial1.print(Pos_B2B);
+  //Serial1.print(Pos_B3B);
   //Serial1.print(",e");
-  //Serial1.print(PosErr_B2B);
+  //Serial1.print(PosErr_B3B);
   //
   //Serial1.print("|,  ");
-  //Serial1.print("4B:c");
-  //Serial1.print(B4B);
+  //Serial1.print("1B:c");
+  //Serial1.print(B1B);
   //Serial1.print(",a");
-  //Serial1.print(Pos_B4B);
+  //Serial1.print(Pos_B1B);
   //Serial1.print(",e");
-  //Serial1.print(PosErr_B4B);
+  //Serial1.print(PosErr_B1B);
   //Serial1.print("|,");
   //Serial1.println("");
   //}
@@ -166,30 +171,30 @@ Serial.println(" Nullifciation complete...");
   //
   //
   //if (debug_mode==6){
-  //Serial1.print(PosErr_B2A);
+  //Serial1.print(PosErr_B3A);
   //
   //Serial1.print(", ");
-  //Serial1.print(PosErr_B4A);
+  //Serial1.print(PosErr_B1A);
   //
   //Serial1.print(", ");
-  //Serial1.print(PosErr_B2B);
+  //Serial1.print(PosErr_B3B);
   //
   //Serial1.print(", ");
-  //Serial1.print(PosErr_B4B);
+  //Serial1.print(PosErr_B1B);
   //Serial1.println("");
   //}
 
   if (debug_mode == 8) {
     Serial.print("|  ");
 
-    Serial.print("Count_B2A: ");
-    Serial.print(bga_2B.Count);
-    Serial.print(",Count_B4A: ");
-    Serial.print(bga_4A.Count);
-    Serial.print("Count_B2B: ");
-    Serial.print(bga_2B.Count);
-    Serial.print(",Count_B4B: ");
-    Serial.print(bga_4B.Count);
+    Serial.print("Count_B3A: ");
+    Serial.print(bga_3B.Count);
+    Serial.print(",Count_B1A: ");
+    Serial.print(bga_1A.Count);
+    Serial.print("Count_B3B: ");
+    Serial.print(bga_3B.Count);
+    Serial.print(",Count_B1B: ");
+    Serial.print(bga_1B.Count);
     Serial.print(",SmartRolloverBGA");
     Serial.print(SmartRolloverBGA);
 
@@ -238,13 +243,13 @@ Serial.println(" Nullifciation complete...");
     Serial.print(D17);
 
     Serial.print("| PosErrs ");
-    Serial.print(bga_2B.PosErr);
+    Serial.print(bga_3B.PosErr);
     Serial.print(", ");
-    Serial.print(bga_4A.PosErr);
+    Serial.print(bga_1A.PosErr);
     Serial.print(", ");
-    Serial.print(bga_2B.PosErr);
+    Serial.print(bga_3B.PosErr);
     Serial.print(", ");
-    Serial.print(bga_4B.PosErr);
+    Serial.print(bga_1B.PosErr);
     //    Serial.print(", ");
     //    Serial.print(PosErr_PSARJ);
     //    Serial.print(", ");
@@ -275,57 +280,57 @@ Serial.println(" Nullifciation complete...");
     //
     //        //int sensorValue = analogRead(A0);
     //      //String stringThree = "I want " + sensorValue;
-    //    //  String temp="2A:" + PosErr_B2A + "|" + Count_B4B;
+    //    //  String temp="3A:" + PosErr_B3A + "|" + Count_B1B;
     //    //
-    //    //dtostrf(PosErr_B2A, 4, 1, dtostrfbuffer);
+    //    //dtostrf(PosErr_B3A, 4, 1, dtostrfbuffer);
     //    //sendBuffer
     //    //  sprintf(sendBuffer, "X%dY%dT", first, second);
-    //      //  display.print("2A:");
-    //      //  dtostrf(PosErr_B2A, 4, 1, dtostrfbuffer);
+    //      //  display.print("3A:");
+    //      //  dtostrf(PosErr_B3A, 4, 1, dtostrfbuffer);
     //
-    //      //Goal is "2A:[PosErr]|[PosCmd]|[ActPos]
+    //      //Goal is "3A:[PosErr]|[PosCmd]|[ActPos]
     //      display.setTextColor(WHITE, BLACK);
-    //    display.print("2A:");
-    //    dtostrf(PosErr_B2A, 5, 1, dtostrfbuffer);
+    //    display.print("3A:");
+    //    dtostrf(PosErr_B3A, 5, 1, dtostrfbuffer);
     //    display.print( dtostrfbuffer);
     //    display.print("|");
-    //    dtostrf(B2A, 5, 1, dtostrfbuffer); //Cmd Pos
+    //    dtostrf(B3A, 5, 1, dtostrfbuffer); //Cmd Pos
     //    display.print( dtostrfbuffer);
     //    display.print("|");
-    //    dtostrf(Pos_B2A, 5, 1, dtostrfbuffer);
+    //    dtostrf(Pos_B3A, 5, 1, dtostrfbuffer);
     //    display.println( dtostrfbuffer);
     //
     //     display.setTextColor(BLACK, WHITE); // 'inverted' text
-    //    display.print("4A:");
-    //    dtostrf(PosErr_B4A, 5, 1, dtostrfbuffer);
+    //    display.print("1A:");
+    //    dtostrf(PosErr_B1A, 5, 1, dtostrfbuffer);
     //    display.print( dtostrfbuffer);
     //    display.print("|");
-    //    dtostrf(B4A, 5, 1, dtostrfbuffer); //Cmd Pos
+    //    dtostrf(B1A, 5, 1, dtostrfbuffer); //Cmd Pos
     //    display.print( dtostrfbuffer);
     //    display.print("|");
-    //    dtostrf(Pos_B4A, 5, 1, dtostrfbuffer);
+    //    dtostrf(Pos_B1A, 5, 1, dtostrfbuffer);
     //    display.println( dtostrfbuffer);
     //
     //    display.setTextColor(WHITE, BLACK);
-    //    display.print("2B:");
-    //    dtostrf(PosErr_B2B, 5, 1, dtostrfbuffer);
+    //    display.print("3B:");
+    //    dtostrf(PosErr_B3B, 5, 1, dtostrfbuffer);
     //    display.print( dtostrfbuffer);
     //    display.print("|");
-    //    dtostrf(B2B, 5, 1, dtostrfbuffer); //Cmd Pos
+    //    dtostrf(B3B, 5, 1, dtostrfbuffer); //Cmd Pos
     //    display.print( dtostrfbuffer);
     //    display.print("|");
-    //    dtostrf(Pos_B2B, 5, 1, dtostrfbuffer);
+    //    dtostrf(Pos_B3B, 5, 1, dtostrfbuffer);
     //    display.println( dtostrfbuffer);
     //
     //     display.setTextColor(BLACK, WHITE); // 'inverted' text
-    //    display.print("4B:");
-    //    dtostrf(PosErr_B4B, 5, 1, dtostrfbuffer);
+    //    display.print("1B:");
+    //    dtostrf(PosErr_B1B, 5, 1, dtostrfbuffer);
     //    display.print( dtostrfbuffer);
     //    display.print("|");
-    //    dtostrf(B4B, 5, 1, dtostrfbuffer); //Cmd Pos
+    //    dtostrf(B1B, 5, 1, dtostrfbuffer); //Cmd Pos
     //    display.print( dtostrfbuffer);
     //    display.print("|");
-    //    dtostrf(Pos_B4B, 5, 1, dtostrfbuffer);
+    //    dtostrf(Pos_B1B, 5, 1, dtostrfbuffer);
     //    display.println( dtostrfbuffer);
     //
     //    display.setTextColor(WHITE, BLACK);

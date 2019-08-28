@@ -1,64 +1,39 @@
 void loop() {
 
 
-  bga_2B.PosCmd = B2B; // From RasPi telemetry stream
-  bga_2A.PosCmd = B2A; // From RasPi telemetry stream
-  bga_4B.PosCmd = B4B; // From RasPi telemetry stream
-  bga_4A.PosCmd = B4A; // From RasPi telemetry stream
+
+  sarj_port.PosCmd = PSARJ; // From RasPi telemetry stream
+  sarj_stbd.PosCmd = SSARJ; // From RasPi telemetry stream
 
 
   if (NULLIFY == 1) {
-
-Serial.println(" Now Nullifying the values...");
-    motorNULL(bga_2B);
-    motorNULL(bga_2A);
-    motorNULL(bga_4B);
-    motorNULL(bga_4A);
-Serial.println(" Nullifciation complete...");
+    motorNULL(sarj_port); myEncPSARJ.write(0); PSARJ=0;
+    motorNULL(sarj_stbd); myEncSSARJ.write(0); SSARJ=0;
     NULLIFY = 0;
   }
 
-
-
   // Can likely simplify this, but need to incorporate Adafruit motor shield library commands into my motor function/struct
 
-  motorfnc(bga_2B); // this is where it's called
-  if (bga_2B.tmpSpeed > 0) {
-    myMotorB2B->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
+  motorfnc(sarj_port); // this is where it's called
+  if (sarj_port.tmpSpeed > 0) {
+    myMotorPSARJ->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
   }
   else {
-    myMotorB2B->run(BACKWARD);
+    myMotorPSARJ->run(BACKWARD);
   }
-  myMotorB2B->setSpeed(bga_2B.CmdSpeed);// + 20);
+  myMotorPSARJ->setSpeed(sarj_port.CmdSpeed);// + 20);
 
-  motorfnc(bga_4B); // this is where it's called
-  if (bga_4B.tmpSpeed > 0) {
-    myMotorB4B->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
+  motorfnc(sarj_stbd); // this is where it's called
+  if (sarj_stbd.tmpSpeed > 0) {
+    myMotorSSARJ->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
   }
   else {
-    myMotorB4B->run(BACKWARD);
+    myMotorSSARJ->run(BACKWARD);
   }
-  myMotorB4B->setSpeed(bga_4B.CmdSpeed);// + 20);
+  myMotorSSARJ->setSpeed(sarj_stbd.CmdSpeed);// + 20);
 
 
-  motorfnc(bga_2A); // this is where it's called
-  if (bga_2A.tmpSpeed > 0) {
-    myMotorB2A->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
-  }
-  else {
-    myMotorB2A->run(BACKWARD);
-  }
-  myMotorB2A->setSpeed(bga_2A.CmdSpeed);// + 20);
 
-
-  motorfnc(bga_4A); // this is where it's called
-  if (bga_4A.tmpSpeed > 0) {
-    myMotorB4A->run(FORWARD); // This command is necessary for the AdaFruit boards, requiring conditionals (rather than signed speeds taking care of direction).
-  }
-  else {
-    myMotorB4A->run(BACKWARD);
-  }
-  myMotorB4A->setSpeed(bga_4A.CmdSpeed);// + 20);
 
 
 
@@ -66,17 +41,17 @@ Serial.println(" Nullifciation complete...");
   D1 = digitalRead(1);
   D2 = digitalRead(2);
   D3 = digitalRead(3);
-  //  D4 = digitalRead(4);
-  //  D5 = digitalRead(5);
-  //  D6 = digitalRead(6);
+  D4 = digitalRead(4);
+  D5 = digitalRead(5);
+  D6 = digitalRead(6);
   D7 = digitalRead(7);
   D8 = digitalRead(8);
-  //  D9= digitalRead(9);
-  //  D10= digitalRead(10);
+  D9 = digitalRead(9);
+  D10 = digitalRead(10);
   D11 = digitalRead(11);
   D12 = digitalRead(12);
-  //D13 = digitalRead(13);
-  ////D14 = digitalRead(14);
+  D13 = digitalRead(13);
+  D14 = digitalRead(14);
   D15 = digitalRead(15);
   D16 = digitalRead(16);
   D17 = digitalRead(17);
@@ -99,8 +74,8 @@ Serial.println(" Nullifciation complete...");
 
   // ========= Servo Stuff =============================
   //map(value, fromLow, fromHigh, toLow, toHigh)
-  //  servo_PTRRJ.write(map(PTRRJ, -115, 115, 0, 180)); // from +/- 115deg to servo command min and max.
-  //  servo_STRRJ.write(map(STRRJ, -115, 115, 0, 180)); // from +/- 115deg to servo command min and max.
+  servo_PTRRJ.write(map(PTRRJ, -115, 115, 0, 180)); // from +/- 115deg to servo command min and max.
+  servo_STRRJ.write(map(STRRJ, -115, 115, 0, 180)); // from +/- 115deg to servo command min and max.
   //servo_PTRRJ.write(PTRRJ+180);
   //servo_STRRJ.write(PTRRJ+180);
 
@@ -120,11 +95,15 @@ Serial.println(" Nullifciation complete...");
   millisChPt1 = millis() - LoopStartMillis;
   // ================================================================================
 
-  bga_2B.Count = myEnc2B.read();
-  bga_4B.Count = myEnc4B.read();
-  bga_2A.Count = myEnc2A.read();
-  bga_4A.Count = myEnc4A.read();
+  //  Count_B2B = myEnc2B.read(); // Feb08
+  //  Count_B4B = myEnc4B.read();
+  //  Count_B2A = myEnc2A.read();
+  //  Count_B4A = myEnc4A.read();
+  sarj_port.Count = myEncPSARJ.read();
+  sarj_stbd.Count = myEncSSARJ.read();
+  //   Serial.println(currentPosition); //shows you the current position in the serial monitor  // Feb08
 
+  //
   millisChPt2 = millis() - LoopStartMillis;
 
   //if (debug_mode==5){
@@ -181,22 +160,20 @@ Serial.println(" Nullifciation complete...");
 
   if (debug_mode == 8) {
     Serial.print("|  ");
+    //
+    //    Serial.print("Count_B2A: ");
+    //    Serial.print(Count_B2A);
+    //    Serial.print(",Count_B4A: ");
+    //    Serial.print(Count_B4A);
+    //    Serial.print("Count_B2B: ");
+    //    Serial.print(Count_B2B);
+    //    Serial.print(",Count_B4B: ");
+    //    Serial.print(Count_B4B);
 
-    Serial.print("Count_B2A: ");
-    Serial.print(bga_2B.Count);
-    Serial.print(",Count_B4A: ");
-    Serial.print(bga_4A.Count);
-    Serial.print("Count_B2B: ");
-    Serial.print(bga_2B.Count);
-    Serial.print(",Count_B4B: ");
-    Serial.print(bga_4B.Count);
-    Serial.print(",SmartRolloverBGA");
-    Serial.print(SmartRolloverBGA);
-
-    //    Serial.print(",Count_PSARJ: ");
-    //    Serial.print(Count_PSARJ);
-    //    Serial.print(",Count_SSARJ: ");
-    //    Serial.print(Count_SSARJ);
+    Serial.print(",Count_PSARJ: ");
+    Serial.print(sarj_port.Count);
+    Serial.print(",Count_SSARJ: ");
+    Serial.print(sarj_stbd.PosErr);
 
     Serial.print(",D0:");
     Serial.print(D0);
@@ -208,8 +185,8 @@ Serial.println(" Nullifciation complete...");
     Serial.print(D3);
     //    Serial.print(",D4:");
     //    Serial.print(D4);
-    //    Serial.print(",D5: ");
-    //    Serial.print(D5);
+    Serial.print(",D5: ");
+    Serial.print(D5);
     //    Serial.print(",D6:");
     //    Serial.print(D6);
     Serial.print(",D7: ");
@@ -238,17 +215,17 @@ Serial.println(" Nullifciation complete...");
     Serial.print(D17);
 
     Serial.print("| PosErrs ");
-    Serial.print(bga_2B.PosErr);
-    Serial.print(", ");
-    Serial.print(bga_4A.PosErr);
-    Serial.print(", ");
-    Serial.print(bga_2B.PosErr);
-    Serial.print(", ");
-    Serial.print(bga_4B.PosErr);
+    //    Serial.print(PosErr_B2A);
     //    Serial.print(", ");
-    //    Serial.print(PosErr_PSARJ);
+    //    Serial.print(PosErr_B4A);
     //    Serial.print(", ");
-    //    Serial.print(PosErr_SSARJ);
+    //    Serial.print(PosErr_B2B);
+    //    Serial.print(", ");
+    //    Serial.print(PosErr_B4B);
+    //    Serial.print(", ");
+    Serial.print(sarj_port.PosErr);
+    Serial.print(", ");
+    Serial.print(sarj_stbd.PosErr);
     //
     //    Serial.print(", ");
     //    Serial.print("Integer Mtr Spd Cmd to Shield(PortSrj):");

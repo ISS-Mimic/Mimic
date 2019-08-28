@@ -27,7 +27,8 @@ double V2B = 0.00;
 double V4A = 0.00;
 double V4B = 0.00;
 String module = "unset module";
-boolean Disco = False;
+boolean Disco = false;
+int NULLIFY = 0;
 
 void setup()
 {
@@ -243,7 +244,7 @@ void loop()
   {
     theaterChaseRainbow_IEA(50);
   }
-  Disco = False;
+  Disco = false;
 }
 void checkSerial()
 {
@@ -271,7 +272,12 @@ void checkSerial()
     delimeter = test2.indexOf('=');
     if(test2.substring(0,delimeter)=="Disco")
     {
-      Disco = True; 
+      Disco = true; 
+    }
+    else if (test2.substring(0, delimeter) == "NULLIFY")
+    {
+      NULLIFY = int((test2.substring(delimeter + 1)).toFloat());
+          Serial.println(" Got the NULL cmd over Serial...");
     }
     else if(test2.substring(0,delimeter)=="PSARJ")
     {
@@ -411,7 +417,7 @@ void theaterChaseRainbow_IEA(uint8_t wait) {
   for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
     for (int q=0; q < 3; q++) {
       for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
-        strip.setPixelColor(i+q, Wheel( (i+j) % 255));    //turn every third pixel on
+        strip.setPixelColor(i+q, Wheel_IEA( (i+j) % 255));    //turn every third pixel on
       }
       strip.show();
 
