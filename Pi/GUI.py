@@ -250,7 +250,7 @@ class MainScreen(Screen):
 class ManualControlScreen(Screen):
     
     def zeroJoints(self):
-        self.serialWrite("NULL ")
+        self.serialWrite("NULLIFY=1 ")
     
     def setActive(*args):
         global Beta4Bcontrol, Beta3Bcontrol, Beta2Bcontrol, Beta1Bcontrol, Beta4Acontrol, Beta3Acontrol, Beta2Acontrol, Beta1Acontrol, PSARJcontrol, SSARJcontrol, PTRRJcontrol, STRRJcontrol
