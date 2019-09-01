@@ -251,6 +251,16 @@ class ManualControlScreen(Screen):
     
     def zeroJoints(self):
         self.serialWrite("NULLIFY=1 ")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'psarj'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ssarj'");
     
     def setActive(*args):
         global Beta4Bcontrol, Beta3Bcontrol, Beta2Bcontrol, Beta1Bcontrol, Beta4Acontrol, Beta3Acontrol, Beta2Acontrol, Beta1Acontrol, PSARJcontrol, SSARJcontrol, PTRRJcontrol, STRRJcontrol
