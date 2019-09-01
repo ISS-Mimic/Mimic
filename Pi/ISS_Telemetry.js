@@ -55,8 +55,8 @@ sub.addListener({
   },
   onItemUpdate: function(update) 
   {
-    db.run("UPDATE telemetry set Value = ? where Label = ?", update.getValue("Value"), update.getItemName());
-    db.run("UPDATE telemetry set Timestamp = ? where Label = ?", update.getValue("TimeStamp"), update.getItemName());
+    db.run("UPDATE telemetry set Value = ? where ID = ?", update.getValue("Value"), update.getItemName());
+    db.run("UPDATE telemetry set Timestamp = ? where ID = ?", update.getValue("TimeStamp"), update.getItemName());
   }
 });
 
