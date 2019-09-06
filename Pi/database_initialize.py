@@ -1,6 +1,8 @@
 import sqlite3 #javascript stores telemetry in sqlite db
+import os
 
 #----------------Open SQLITE3 Database that holds the current ISS Telemetry--------------
+os.system('rm /dev/shm/iss_telemetry.db') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
 conn = sqlite3.connect('/dev/shm/iss_telemetry.db')
 conn.isolation_level = None
 c = conn.cursor()
@@ -295,12 +297,12 @@ c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS SPDM 2 WP Measured Jo
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS SPDM 2 WY Measured Joint Position', '0', '0', 'CSASPDM0016', 285)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS SPDM 2 WR Measured Joint Position', '0', '0', 'CSASPDM0017', 286)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS Payload Status OCS SPDM Arm 2 OTCM', '0', '0', 'CSASPDM0018', 287)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS Payload Status OCS SPDM Arm 2 OTCM', '0', '0', 'CSASPDM0019', 288)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS Payload Status OCS SPDM Arm 2 OTCM2', '0', '0', 'CSASPDM0019', 288)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS SPDM Body Roll Joint Position', '0', '0', 'CSASPDM0020', 289)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS Payload Status OCS SPDM Body', '0', '0', 'CSASPDM0021', 290)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS Payload Status OCS SPDM Body', '0', '0', 'CSASPDM0022', 291)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS Payload Status OCS SPDM Body2', '0', '0', 'CSASPDM0022', 291)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS Payload Status MBS MCAS', '0', '0', 'CSAMBS00001', 292)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS Payload Status MBS MCAS', '0', '0', 'CSAMBS00002', 293)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS Payload Status MBS MCAS2', '0', '0', 'CSAMBS00002', 293)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS Payload Status MBS POA', '0', '0', 'CSAMBS00003', 294)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS Payload Status MBS POA', '0', '0', 'CSAMBS00004', 295)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS Payload Status MBS POA2', '0', '0', 'CSAMBA00004', 295)");
 conn.close()
