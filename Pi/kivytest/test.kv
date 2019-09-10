@@ -1,0 +1,21 @@
+FloatLayout:
+    Button:
+        text: 'Exit'
+        size_hint: 0.1,0.1
+        pos_hint: {"center_x": 0.75, "center_y": 0.5}
+        on_release: app.stop(*args)
+    Button:
+        id: test
+        text: 'Test'
+        size_hint: 0.1,0.1
+        pos_hint: {"center_x": 0.25, "center_y": 0.5}
+        NumPad:
+            size_hint: (0.3,0.1)
+            pos: 0.5,0.5
+            BubbleButton:
+                text: '1'
+            BubbleButton:
+                text: '2'
+            BubbleButton:
+                text: '3'
+                
