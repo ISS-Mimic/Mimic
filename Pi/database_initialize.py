@@ -303,6 +303,6 @@ c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS Payload Status OCS SPDM B
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS Payload Status OCS SPDM Body2', '0', '0', 'CSASPDM0022', 291)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS Payload Status MBS MCAS', '0', '0', 'CSAMBS00001', 292)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS Payload Status MBS MCAS2', '0', '0', 'CSAMBS00002', 293)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS Payload Status MBS POA', '0', '0', 'CSAMBS00003', 294)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS Payload Status MBS POA', '0', '0', 'CSAMBA00003', 294)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS Payload Status MBS POA2', '0', '0', 'CSAMBA00004', 295)");
 conn.close()
