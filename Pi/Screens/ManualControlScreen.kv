@@ -1,182 +1,282 @@
-#:kivy 1.8
+#:kivy 1.11
 #:import kivy kivy
 #:import win kivy.core.window
+
 <ManualControlScreen>:
     name: 'manualcontrol'
     FloatLayout:
+        size_hint: 1,1
         Image:
-            id: MCbackground
-            source: '/home/pi/Mimic/Pi/imgs/control/MIMICstation_stretched.png'
-            allow_stretch: True
-            keep_ratio: False
+            id: signal
+            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+            size_hint: None, 0.15
+            anim_delay: 0.12
+            anim_loop: 0
+            keep_ratio: True
+            pos_hint: {"x": 0.0, "y": 0.0}
+        Button:
+            size_hint: None,0.15
+            keep_ratio: True
+            pos_hint: {"right": 1.0, "y": 0.0}
+            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
+            on_press: root.changeBoolean(False)
+            on_release: app.root.current = 'main'
+        Label:
+            id: statusbar
+            size_hint: 0.6, 0.15
+            pos_hint: {"center_x": 0.55, "y": 0.0}
+            text: "Test"
+            font_size: 55
+            canvas.before:
+                Color:
+                    rgba: 1,1,1,1
+                Line:
+                    rectangle: self.x, self.y+0.15*self.height, self.width, 0.7*self.height
+        Image:
+            id: arduino
+            source: "/home/pi/Mimic/Pi/imgs/signal/arduino_offline.png"
+            size_hint: None, 0.15
+            anim_delay: 0.2
+            anim_loop: 0
+            keep_ratio: True
+            pos_hint: {"x": 0.12, "y": 0.0}
+        Label:
+            id: arduino_count
+            size_hint: None, 0.15
+            pos_hint: {"x": 0.12, "y": 0.0}
+            text: ''
+            markup: True
+            color: 1,1,1
+            font_size: 55
+        #---------------------------------------------------------------------------------------------------------------
+        Label:
+            text: "Manual Control Screen"
+            font_size: 55
+            color: 1,0,1,1
+            pos_hint: {"center_x": 0.37, "center_y": 0.95}
         Button:
             id: Beta4B_Button
-            size_hint: 0.12,0.4
-            pos_hint: {"center_x": 0.0875, "center_y": 0.26}
+            size_hint: 0.08,0.3
+            pos_hint: {"center_x": 0.6, "center_y": 0.7}
+            text: "4B"
             font_size: 30
-            opacity: 0.0
             on_press: root.setActive("Beta4B")
-            on_press: MCbackground.source = '/home/pi/Mimic/Pi/imgs/control/1MIMICstationGlowFile4B.png'
-        Button:
-            id: Beta2A_Button
-            size_hint: 0.12,0.4
-            pos_hint: {"center_x": 0.217, "center_y": 0.26}
-            font_size: 30
-            opacity: 0.0
-            on_press: root.setActive("Beta2A")
-            on_press: MCbackground.source = '/home/pi/Mimic/Pi/imgs/control/1MIMICstationGlowFile2A.png'
-        Button:
-            id: Beta3A_Button
-            size_hint: 0.12,0.4
-            pos_hint: {"center_x": 0.7925, "center_y": 0.26}
-            font_size: 30
-            opacity: 0.0
-            on_press: root.setActive("Beta3A")
-            on_press: MCbackground.source = '/home/pi/Mimic/Pi/imgs/control/1MIMICstationGlowFile3A.png'
-        Button:
-            id: Beta1B_Button
-            size_hint: 0.12,0.4
-            pos_hint: {"center_x": 0.922, "center_y": 0.26}
-            font_size: 30
-            opacity: 0.0
-            on_press: root.setActive("Beta1B")
-            on_press: MCbackground.source = '/home/pi/Mimic/Pi/imgs/control/1MIMICstationGlowFile1B.png'
         Button:
             id: Beta2B_Button
-            size_hint: 0.12,0.4
-            pos_hint: {"center_x": 0.0975, "center_y": 0.742}
+            size_hint: 0.08,0.3
+            pos_hint: {"center_x": 0.6, "center_y": 0.3}
+            text: "2B"
             font_size: 30
-            opacity: 0.0
             on_press: root.setActive("Beta2B")
-            on_press: MCbackground.source = '/home/pi/Mimic/Pi/imgs/control/1MIMICstationGlowFile2B.png'
-        Button:
-            id: Beta4A_Button
-            size_hint: 0.12,0.4
-            pos_hint: {"center_x": 0.227, "center_y": 0.742}
-            font_size: 30
-            opacity: 0.0
-            on_press: root.setActive("Beta4A")
-            on_press: MCbackground.source = '/home/pi/Mimic/Pi/imgs/control/1MIMICstationGlowFile4A.png'
-        Button:
-            id: Beta1A_Button
-            size_hint: 0.12,0.4
-            pos_hint: {"center_x": 0.7825, "center_y": 0.742}
-            font_size: 30
-            opacity: 0.0
-            on_press: root.setActive("Beta1A")
-            on_press: MCbackground.source = '/home/pi/Mimic/Pi/imgs/control/1MIMICstationGlowFile1A.png'
-        Button:
-            id: Beta3B_Button
-            size_hint: 0.12,0.4
-            pos_hint: {"center_x": 0.912, "center_y": 0.742}
-            font_size: 30
-            opacity: 0.0
-            on_press: root.setActive("Beta3B")
-            on_press: MCbackground.source = '/home/pi/Mimic/Pi/imgs/control/1MIMICstationGlowFile3B.png'
-        Button:
-            id: PTRRJ_Button
-            size_hint: 0.12,0.3
-            pos_hint: {"center_x": 0.36, "center_y": 0.33}
-            font_size: 30
-            opacity: 0.0
-            on_press: root.setActive("PTRRJ")
-            on_press: MCbackground.source = '/home/pi/Mimic/Pi/imgs/control/1MIMICstationGlowFilePortTRRJ.png'
-        Button:
-            id: STRRJ_Button
-            size_hint: 0.12,0.3
-            pos_hint: {"center_x": 0.65, "center_y": 0.33}
-            font_size: 30
-            opacity: 0.0
-            on_press: root.setActive("STRRJ")
-            on_press: MCbackground.source = '/home/pi/Mimic/Pi/imgs/control/1MIMICstationGlowFileStbdTRRJ.png'
         Button:
             id: PSARJ_Button
-            size_hint: 0.25,0.08
-            pos_hint: {"center_x": 0.18, "center_y": 0.5}
+            size_hint: 0.2,0.1
+            pos_hint: {"center_x": 0.55, "center_y": 0.5}
+            text: "Port Truss"
             font_size: 30
-            opacity: 0.0
             on_press: root.setActive("PSARJ")
-            on_press: MCbackground.source = '/home/pi/Mimic/Pi/imgs/control/1MIMICstationGlowFilePortSARJ.png'
+        Button:
+            id: Beta2A_Button
+            size_hint: 0.08,0.3
+            pos_hint: {"center_x": 0.5, "center_y": 0.7}
+            text: "2A"
+            font_size: 30
+            on_press: root.setActive("Beta2A")
+        Button:
+            id: Beta4A_Button
+            size_hint: 0.08,0.3
+            pos_hint: {"center_x": 0.5, "center_y": 0.3}
+            text: "4A"
+            font_size: 30
+            on_press: root.setActive("Beta4A")
+        Button:
+            id: PTRRJ_Button
+            size_hint: 0.1,0.3
+            pos_hint: {"center_x": 0.4, "center_y": 0.5}
+            text: "Port\nHRS"
+            font_size: 30
+            on_press: root.setActive("PTRRJ")
+        Button:
+            id: STRRJ_Button
+            size_hint: 0.1,0.3
+            pos_hint: {"center_x": 0.3, "center_y": 0.5}
+            text: "Stbd\nHRS"
+            font_size: 30
+            on_press: root.setActive("STRRJ")
+        Button:
+            id: Beta3A_Button
+            size_hint: 0.08,0.3
+            pos_hint: {"center_x": 0.2, "center_y": 0.7}
+            text: "3A"
+            font_size: 30
+            on_press: root.setActive("Beta3A")
+        Button:
+            id: Beta1A_Button
+            size_hint: 0.08,0.3
+            pos_hint: {"center_x": 0.2, "center_y": 0.3}
+            text: "1A"
+            font_size: 30
+            on_press: root.setActive("Beta1A")
         Button:
             id: SSARJ_Button
-            size_hint: 0.25,0.08
-            pos_hint: {"center_x": 0.83, "center_y": 0.5}
+            size_hint: 0.2,0.1
+            pos_hint: {"center_x": 0.15, "center_y": 0.5}
+            text: "Stbd Truss"
             font_size: 30
-            opacity: 0.0
             on_press: root.setActive("SSARJ")
-            on_press: MCbackground.source = '/home/pi/Mimic/Pi/imgs/control/1MIMICstationGlowFileStbdSARJ.png'
         Button:
-            size_hint: 0.05,0.25
-            pos_hint: {"center_x": 0.5, "center_y": 0.75}
-            text: 'Zero'
-            font_size: 10
-            on_press: root.zeroJoints()
+            id: Beta1B_Button
+            size_hint: 0.08,0.3
+            pos_hint: {"center_x": 0.1, "center_y": 0.3}
+            text: "1A"
+            font_size: 30
+            on_press: root.setActive("Beta1B")
         Button:
-            size_hint: 0.1,0.1
-            pos_hint: {"center_x": 0.4, "center_y": 0.83}
-            text: '+1'
-            font_size: 20
-            on_press: root.incrementActive(1)
-        Button:
-            size_hint: 0.1,0.1
-            pos_hint: {"center_x": 0.6, "center_y": 0.83}
-            text: '-1'
-            font_size: 20
-            on_press: root.incrementActive(-1)
-        Button:
-            size_hint: 0.1,0.1
-            pos_hint: {"center_x": 0.4, "center_y": 0.73}
-            text: '+5'
-            font_size: 20
-            on_press: root.incrementActive(5)
-        Button:
-            size_hint: 0.1,0.1
-            pos_hint: {"center_x": 0.6, "center_y": 0.73}
-            text: '-5'
-            font_size: 20
-            on_press: root.incrementActive(-5)
-        Button:
-            size_hint: 0.1,0.1
-            pos_hint: {"center_x": 0.4, "center_y": 0.63}
-            text: '+20'
-            font_size: 20
-            on_press: root.incrementActive(20)
-        Button:
-            size_hint: 0.1,0.1
-            pos_hint: {"center_x": 0.6, "center_y": 0.63}
-            text: '-20'
-            font_size: 20
-            on_press: root.incrementActive(-20)
-        Button:
-            size_hint: 0.1,0.1
-            pos_hint: {"center_x": 0.4, "center_y": 0.53}
-            text: '+90'
-            font_size: 20
-            on_press: root.incrementActive(90)
-        Button:
-            size_hint: 0.1,0.1
-            pos_hint: {"center_x": 0.6, "center_y": 0.53}
-            text: '-90'
-            font_size: 20
-            on_press: root.incrementActive(-90)
+            id: Beta3B_Button
+            size_hint: 0.08,0.3
+            pos_hint: {"center_x": 0.1, "center_y": 0.7}
+            text: "3B"
+            font_size: 30
+            on_press: root.setActive("Beta3B")
         Button:
             id: set0
-            size_hint: 0.15,0.1
-            pos_hint: {"center_x": 0.45, "center_y": 0.25}
+            size_hint: 0.1,0.07
+            pos_hint: {"center_x": 0.8, "center_y": 0.93}
             text: 'Set 0'
             font_size: 20
             on_release: root.send0()
         Button:
             id: set90
-            size_hint: 0.15,0.1
-            pos_hint: {"center_x": 0.55, "center_y": 0.25}
+            size_hint: 0.1,0.07
+            pos_hint: {"center_x": 0.9, "center_y": 0.93}
             text: 'Set 90'
             font_size: 20
             on_release: root.send90()
         Button:
-            size_hint: 0.3,0.1
-            pos_hint: {"center_x": 0.5, "Bottom": 1}
-            text: 'Return'
-            font_size: 30
-            on_press: root.changeBoolean(False)
-            on_release: root.manager.current = 'main'
+            size_hint: 0.2,0.07
+            pos_hint: {"center_x": 0.85, "center_y": 0.86}
+            text: 'Calibrate Zero'
+            font_size: 20
+            on_press: root.zeroJoints()
+        Button:
+            size_hint: 0.1,0.07
+            pos_hint: {"center_x": 0.9, "center_y": 0.79}
+            text: '+5'
+            font_size: 20
+            on_press: root.incrementActive(5)
+        Button:
+            size_hint: 0.1,0.07
+            pos_hint: {"center_x": 0.8, "center_y": 0.79}
+            text: '-5'
+            font_size: 20
+            on_press: root.incrementActive(-5)
+        Button:
+            size_hint: 0.1,0.07
+            pos_hint: {"center_x": 0.9, "center_y": 0.72}
+            text: '+20'
+            font_size: 20
+            on_press: root.incrementActive(20)
+        Button:
+            size_hint: 0.1,0.07
+            pos_hint: {"center_x": 0.8, "center_y": 0.72}
+            text: '-20'
+            font_size: 20
+            on_press: root.incrementActive(-20)
+        Button:
+            size_hint: 0.1,0.07
+            pos_hint: {"center_x": 0.9, "center_y": 0.65}
+            text: '+90'
+            font_size: 20
+            on_press: root.incrementActive(90)
+        Button:
+            size_hint: 0.1,0.07
+            pos_hint: {"center_x": 0.8, "center_y": 0.65}
+            text: '-90'
+            font_size: 20
+            on_press: root.incrementActive(-90)
+    Widget:
+        size_hint: 0.22,0.4
+        pos_hint: {'center_x': 0.85, 'y': 0.21}
+        canvas.after:
+            Color:
+                rgba: 1,1,1,0.5
+            Rectangle:
+                size: self.size
+                pos: self.pos
+    Bubble:
+        size_hint: (0.2, 0.3)
+        pos_hint: {'center_x': 0.85, 'y': 0.3}
+
+        GridLayout:
+            cols: 3
+            BubbleButton:
+                text: '7'
+                #background_color: 0,0,1,0.8
+                on_release:
+                    text_input.text += self.text
+            BubbleButton:
+                text: '8'
+                #background_color: 0,0,1,0.8
+                on_release:
+                    text_input.text += self.text
+            BubbleButton:
+                text: '9'
+                #background_color: 0,0,1,0.8
+                on_release:
+                    text_input.text += self.text
+            BubbleButton:
+                text: '4'
+                #background_color: 0,0,1,0.8
+                on_release:
+                    text_input.text += self.text
+            BubbleButton:
+                text: '5'
+                #background_color: 0,0,1,0.8
+                on_release:
+                    text_input.text += self.text
+            BubbleButton:
+                text: '6'
+                #background_color: 0,0,1,0.8
+                on_release:
+                    text_input.text += self.text
+            BubbleButton:
+                text: '1'
+                #background_color: 0,0,1,0.8
+                on_release:
+                    text_input.text += self.text
+            BubbleButton:
+                text: '2'
+                #background_color: 0,0,1,0.8
+                on_release:
+                    text_input.text += self.text
+            BubbleButton:
+                text: '3'
+                #background_color: 0,0,1,0.8
+                on_release:
+                    text_input.text += self.text
+            BubbleButton:
+                text: '0'
+                #background_color: 0,0,1,0.8
+                on_release:
+                    text_input.text += self.text
+            BubbleButton:
+                text: "Clear"
+                background_color: 1,0,0,0.8
+                on_release:
+                    text_input.text = ""
+            BubbleButton:
+                text: "Send"
+                background_color: 0,1,0,0.8
+                on_release:
+                    root.sendAngle(text_input.text)
+    TextInput:
+        id: text_input
+        pos_hint: {'center_x': 0.85, 'y': 0.25}
+        size_hint: (0.2, 0.06)
+        cursor_blink: True
+        font_size: 20
+        multiline: False
+    Label:
+        size_hint: (0.2, 0.06)
+        pos_hint: {'center_x': 0.85, 'y': 0.2}
+        text: "Manual Angle Entry"
