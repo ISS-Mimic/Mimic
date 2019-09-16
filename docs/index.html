@@ -4,6 +4,11 @@
 		<style>
 			tr:nth-child(even) {background: lightgrey;}
 			tr:hover {background: lightblue;}
+			@keyframes hifade {
+				from { background: yellow; }
+				to { background: transparent; }
+			}
+			td.highlight { animation: hifade 0.5s; }
 		</style>
 	</head>
 <body>
@@ -1835,7 +1840,10 @@ require(["LightstreamerClient","Subscription"],function(LightstreamerClient,Subs
 	sub.addListener({
 		onItemUpdate: function(update) 
 		{
-			$("#"+update.getItemName()).text(update.getValue("Value"));
+			var selector = $("#"+update.getItemName());
+			selector.text(update.getValue("Value"));
+			selector.addClass('highlight');
+			selector.on('animationend', function() { selector.removeClass('highlight');});
 			switch (update.getItemName()){
 			  case "Z1000014":
 				SGANT_elevation = update.getValue("Value");
