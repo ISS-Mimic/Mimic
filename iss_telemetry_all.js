@@ -65,18 +65,6 @@ lsClient.subscribe(timeSub);
 
 var AOStimestamp = 0.00;
 var AOS;
-var PSARJ;
-var SSARJ;
-var PTRRJ;
-var STRRJ;
-var Beta1A;
-var Beta1B;
-var Beta2A;
-var Beta2B;
-var Beta3A;
-var Beta3B;
-var Beta4A;
-var Beta4B;
 var time;
 var difference = 0.00;
 var unixtime = (new Date).getTime();
@@ -93,21 +81,13 @@ var yearFirstDay = Math.floor(timestmp / 86400000);
 var today = Math.ceil((new Date().getTime()) / 86400000);
 var dayOfYear = today - yearFirstDay;
 
-if(hoursUTC<=6)
-{
-	//dayOfYear++;
-}
-
 console.log("day of the year" + timestmp);
 console.log("day of the year" + dayOfYear);
-
 
 var timestampnow = dayOfYear*24 + hoursUTC + minutes/60 + seconds/3600; 
 console.log("timestamp now: " + timestampnow);
 
 lsClient.connect();
-
-fs.writeFile("PSARJ.txt", "top \n");
 
 sub.addListener(
 {
