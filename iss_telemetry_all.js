@@ -56,7 +56,14 @@ var sub = new ls.Subscription("MERGE",["AIRLOCK000001","AIRLOCK000002","AIRLOCK0
 "Z1000006","Z1000007","Z1000008","Z1000009","Z1000010","Z1000011",
 "Z1000012","USLAB000010","USLAB000012","RUSSEG000025","USLAB000032","USLAB000033",
 "USLAB000034","USLAB000035","USLAB000036","USLAB000037","USLAB000082","USLAB000083",
-"USLAB000084","USLAB000085","USLAB000087","USLAB000086","USLAB000102"],["TimeStamp","Value"]);
+"USLAB000084","USLAB000085","USLAB000087","USLAB000086","USLAB000102","TIME_000001",
+"TIME_000002","CSAMT000001","CSAMT000002","CSASSRMS001","CSASSRMS002","CSASSRMS003",
+"CSASSRMS004","CSASSRMS005","CSASSRMS006","CSASSRMS007","CSASSRMS008","CSASSRMS009",
+"CSASSRMS010","CSASSRMS011","CSASPDM0001","CSASPDM0002","CSASPDM0003","CSASPDM0004",
+"CSASPDM0005","CSASPDM0006","CSASPDM0007","CSASPDM0008","CSASPDM0009","CSASPDM0010",
+"CSASPDM0011","CSASPDM0012","CSASPDM0013","CSASPDM0014","CSASPDM0015","CSASPDM0016",
+"CSASPDM0017","CSASPDM0018","CSASPDM0019","CSASPDM0020","CSASPDM0021","CSASPDM0022",
+"CSAMBS00001","CSAMBS00002","CSAMBA00003","CSAMBA00004"],["TimeStamp","Value"]);
 
 var timeSub = new ls.Subscription('MERGE', 'TIME_000001', ['TimeStamp','Value','Status.Class','Status.Indicator']);
 
@@ -65,7 +72,6 @@ lsClient.subscribe(timeSub);
 
 var AOStimestamp = 0.00;
 var AOS;
-var time;
 var difference = 0.00;
 var unixtime = (new Date).getTime();
 var date = new Date(unixtime);
@@ -80,9 +86,6 @@ var timestmp = new Date().setFullYear(new Date().getFullYear(), 0, 1);
 var yearFirstDay = Math.floor(timestmp / 86400000);
 var today = Math.ceil((new Date().getTime()) / 86400000);
 var dayOfYear = today - yearFirstDay;
-
-console.log("day of the year" + timestmp);
-console.log("day of the year" + dayOfYear);
 
 var timestampnow = dayOfYear*24 + hoursUTC + minutes/60 + seconds/3600; 
 console.log("timestamp now: " + timestampnow);
