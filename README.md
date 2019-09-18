@@ -11,3 +11,5 @@ That said, feel free to improve upon our caffeine-induced, late-night, insanity-
 Check out the wiki for more information.
 
 You can view a video showing some of our project here: https://www.youtube.com/watch?v=sbdHXjDQ-U8
+
+The software is pretty cool and provides even more in-depth functionality than isslive.com, we'll be adding videos and pictures soon to show off the software capabilities
