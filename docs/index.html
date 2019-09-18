@@ -22,18 +22,16 @@
 	</head>
 <body>
 <table>
-
-	<tr>
-		<th>Category</th>
-		<th>Telemetry Info</th>
-		<th>Value</th>
-		<th>Timestamp</th>
-	</tr>
-	
-	<tr>
-		<td align="center" >Signal Status?</td>
-		<td align="center"  id="AOS"></td>
-	</tr>
+<tr>
+  <th>Category</th>
+  <th>Telemetry Info</th>
+  <th>Value</th>
+  <th>Timestamp</th>
+</tr>
+<tr>
+  <td>Signal Status</td>
+  <td align="center"  id="AOS"></td>
+</tr>
 <tr>
   <td>EVA</td>
   <td>Supplies power through the Umbilical Interface Assembly (UIA) to the spacesuits (EMU 1), Voltage</td>
@@ -2056,11 +2054,6 @@
   <td id="CSAMBA00004"></td>
   <td id="CSAMBA00004t"></td>
 </tr>
-
-	<tr>
-		<td align="center" >Upcoming LOS</td>
-		<td align="center"  id="LOS"></td>
-	</tr>
 </table>
 
 <script src="https://demos.lightstreamer.com/commons/require.js"></script>
@@ -2131,27 +2124,9 @@ require(["LightstreamerClient","Subscription"],function(LightstreamerClient,Subs
 "CSAMBS00001","CSAMBS00002","CSAMBA00003","CSAMBA00004"],["Value","TimeStamp"]);
 
 var timeSub = new Subscription('MERGE', 'TIME_000001', ['TimeStamp','Status.Class']);
-	
+
 client.subscribe(sub);
-	
-var AOStimestamp = 0.00;
-var AOS;
-var LOS = ""; 
 
-var SGANT = [0.00, 0.00, 0.00, 0.00, 0.00];
-var avgSASA = [0.00, 0.00, 0.00, 0.00, 0.00];
-var avgTime = [0.00, 0.00, 0.00, 0.00, 0.00];
-var avgSlew = [0.00, 0.00, 0.00, 0.00, 0.00];	
-var angleDif = 0.00;
-var index = 0;
-var SGANT_elevation = 0.00;
-var SASA_elevation = 0.00
-var oldAngleDif = 0.00;
-var oldSGANT_el = 0.00;
-var oldAngleTime = 0.00;
-
-var time;
-var difference = 0.00;
 var unixtime = (new Date).getTime();
 var date = new Date(unixtime);
 var hours = date.getUTCHours();
@@ -2161,7 +2136,7 @@ var timestmp = new Date().setFullYear(new Date().getFullYear(), 0, 1);
 var yearFirstDay = Math.floor(timestmp / 86400000);
 var today = Math.ceil((new Date().getTime()) / 86400000);
 var dayOfYear = today - yearFirstDay;
-	
+
 var timestampnow = dayOfYear*24 + hours + minutes/60 + seconds/3600; 
 //console.log("timestamp now: " + timestampnow);
 	
@@ -2178,51 +2153,7 @@ sub.addListener({
 		var ts_seconds = ((((((ts/24)-ts_day)*24-ts_hour)*60) - ts_minute)*60).toFixed(2)
 		selector2.text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
 		selector.addClass('highlight');
-		selector.on('animationend', function() { selector.removeClass('highlight');});
-		switch (update.getItemName()){
-		  case "Z1000014":
-			SGANT_elevation = update.getValue("Value");
-			angleDif = (SGANT_elevation - SASA_elevation);
-//			console.log("Angle Difference!: " + angleDif);
-			var currentAngleTime = ((new Date).getTime())/1000;
-			var difSlewRate = (oldAngleDif-angleDif)/(oldAngleTime-currentAngleTime);
-			avgSlew[index] = difSlewRate;
-			SGANT[index] = (oldSGANT_el-SGANT_elevation)/(oldAngleTime-currentAngleTime);
-			index++;
-			if(index > 4)
-			{
-				index = 0;
-			}
-			var averageSlew = ((Number(avgSlew[0]) + Number(avgSlew[1]) + Number(avgSlew[2]) + Number(avgSlew[3]) + Number(avgSlew[4]))/5);
-			var avgSGANT_el_slew = ((Number(SGANT[0]) + Number(SGANT[1]) + Number(SGANT[2]) + Number(SGANT[3]) + Number(SGANT[4]))/5);
-//			console.log("Avg SGANT_el " + avgSGANT_el_slew);
-//			console.log("Avg dif Slew " + averageSlew);
-			oldAngleTime = currentAngleTime;
-			oldSGANT_el = SGANT_elevation;
-			oldAngleDif = angleDif;
-			var correction = 0;
-			
-			if (Math.abs(angleDif) < 10 && SGANT_elevation < 70)
-			{
-				correction = Number((70-SGANT_elevation))/Number(avgSGANT_el_slew);
-			}
-//			console.log("Correction: " + correction);
-//			console.log("Potential LOS in: " + Number(((Math.abs(angleDif)/Math.abs(averageSlew))+correction))/60 + "m");
-			
-			if (Math.abs(angleDif) < 10 && SGANT_elevation > 70)
-			{
-				LOS = "Upcoming LOS!";
-				document.getElementById("LOS").innerHTML = LOS;
-				document.getElementById("LOS").bgColor = '#FFFF00';
-			}
-			else
-			{
-				LOS = "";
-				document.getElementById("LOS").innerHTML = LOS;
-				document.getElementById("LOS").bgColor = '#FFFFFF';
-			}
-			break;
-		} 
+		selector.on('animationend', function() { selector.removeClass('highlight');}); 
 	}
 });
 
@@ -2231,24 +2162,22 @@ client.subscribe(timeSub);
 timeSub.addListener({
   onItemUpdate: function (update) {
 	var status = update.getValue('Status.Class');
-	AOStimestamp = parseFloat(update.getValue('TimeStamp'));
+	var AOStimestamp = parseFloat(update.getValue('TimeStamp'));
 	//console.log("Timestamp: " + update.getValue('TimeStamp'));
-	difference = timestampnow - AOStimestamp;
+	var difference = timestampnow - AOStimestamp;
 	//console.log("Difference " + difference);
 	if (status === '24') 
 	{
 	  if(difference > 0.00153680542553047)
 	  {
 //		console.log("Stale Signal")
-		AOS = "Stale Signal";
-		document.getElementById("AOS").innerHTML = AOS;
+		document.getElementById("AOS").innerHTML = "Stale Signal";
 		document.getElementById("AOS").bgColor = '#FF8000';
 	  }
 	  else
 	  {
 //		console.log("Signal Acquired!")
-		AOS = "Siqnal Acquired!!";
-		document.getElementById("AOS").innerHTML = AOS;
+		document.getElementById("AOS").innerHTML = "Signal Acquired!";
 		document.getElementById("AOS").bgColor = '#008000';
 	  }
 	  
@@ -2256,8 +2185,7 @@ timeSub.addListener({
 	else 
 	{
 //	    console.log("Signal Lost!")
-	    AOS = "Signal Lost";
-            document.getElementById("AOS").innerHTML = AOS;
+            document.getElementById("AOS").innerHTML = "Signal Lost";
 	    document.getElementById("AOS").bgColor = '#FF0000';
 	} 
     }
