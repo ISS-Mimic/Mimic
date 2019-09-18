@@ -2183,7 +2183,7 @@ sub.addListener({
 		  case "Z1000014":
 			SGANT_elevation = update.getValue("Value");
 			angleDif = (SGANT_elevation - SASA_elevation);
-			console.log("Angle Difference!: " + angleDif);
+//			console.log("Angle Difference!: " + angleDif);
 			var currentAngleTime = ((new Date).getTime())/1000;
 			var difSlewRate = (oldAngleDif-angleDif)/(oldAngleTime-currentAngleTime);
 			avgSlew[index] = difSlewRate;
@@ -2195,8 +2195,8 @@ sub.addListener({
 			}
 			var averageSlew = ((Number(avgSlew[0]) + Number(avgSlew[1]) + Number(avgSlew[2]) + Number(avgSlew[3]) + Number(avgSlew[4]))/5);
 			var avgSGANT_el_slew = ((Number(SGANT[0]) + Number(SGANT[1]) + Number(SGANT[2]) + Number(SGANT[3]) + Number(SGANT[4]))/5);
-			console.log("Avg SGANT_el " + avgSGANT_el_slew);
-			console.log("Avg dif Slew " + averageSlew);
+//			console.log("Avg SGANT_el " + avgSGANT_el_slew);
+//			console.log("Avg dif Slew " + averageSlew);
 			oldAngleTime = currentAngleTime;
 			oldSGANT_el = SGANT_elevation;
 			oldAngleDif = angleDif;
@@ -2206,8 +2206,8 @@ sub.addListener({
 			{
 				correction = Number((70-SGANT_elevation))/Number(avgSGANT_el_slew);
 			}
-			console.log("Correction: " + correction);
-			console.log("Potential LOS in: " + Number(((Math.abs(angleDif)/Math.abs(averageSlew))+correction))/60 + "m");
+//			console.log("Correction: " + correction);
+//			console.log("Potential LOS in: " + Number(((Math.abs(angleDif)/Math.abs(averageSlew))+correction))/60 + "m");
 			
 			if (Math.abs(angleDif) < 10 && SGANT_elevation > 70)
 			{
@@ -2239,14 +2239,14 @@ timeSub.addListener({
 	{
 	  if(difference > 0.00153680542553047)
 	  {
-		console.log("Stale Signal")
+//		console.log("Stale Signal")
 		AOS = "Stale Signal";
 		document.getElementById("AOS").innerHTML = AOS;
 		document.getElementById("AOS").bgColor = '#FF8000';
 	  }
 	  else
 	  {
-		console.log("Signal Acquired!")
+//		console.log("Signal Acquired!")
 		AOS = "Siqnal Acquired!!";
 		document.getElementById("AOS").innerHTML = AOS;
 		document.getElementById("AOS").bgColor = '#008000';
@@ -2255,7 +2255,7 @@ timeSub.addListener({
 	}
 	else 
 	{
-	    console.log("Signal Lost!")
+//	    console.log("Signal Lost!")
 	    AOS = "Signal Lost";
             document.getElementById("AOS").innerHTML = AOS;
 	    document.getElementById("AOS").bgColor = '#FF0000';
