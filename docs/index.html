@@ -2324,7 +2324,7 @@ sub.addListener({
 		var ts_seconds = ((((((ts/24)-ts_day)*24-ts_hour)*60) - ts_minute)*60).toFixed(2)
 		selector2.text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
 		selector.addClass('highlight');
-		selector.on('animationend', function() { selector.removeClass('highlight');}); 
+		selector.one('animationend', function() { selector.removeClass('highlight');}); 
 	}
 });
 
