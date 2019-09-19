@@ -262,9 +262,9 @@ class ManualControlScreen(Screen):
         c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'psarj'");
         c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ssarj'");
     
-    def setActive(*args):
+    def setActive(self, *args):
         global Beta4Bcontrol, Beta3Bcontrol, Beta2Bcontrol, Beta1Bcontrol, Beta4Acontrol, Beta3Acontrol, Beta2Acontrol, Beta1Acontrol, PSARJcontrol, SSARJcontrol, PTRRJcontrol, STRRJcontrol
-        if str(args[1])=="Beta4B":
+        if str(args[0])=="Beta4B":
             Beta4Bcontrol = True
             Beta4Acontrol = False
             Beta3Bcontrol = False
@@ -277,7 +277,19 @@ class ManualControlScreen(Screen):
             SSARJcontrol = False
             PTRRJcontrol = False
             STRRJcontrol = False
-        if str(args[1])=="Beta3B":
+            self.ids.Beta4B_Button.background_color = (0, 0, 1, 1)
+            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
+            self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
+        if str(args[0])=="Beta3B":
             Beta3Bcontrol = True
             Beta4Bcontrol = False
             Beta4Acontrol = False
@@ -290,7 +302,19 @@ class ManualControlScreen(Screen):
             SSARJcontrol = False
             PTRRJcontrol = False
             STRRJcontrol = False
-        if str(args[1])=="Beta2B":
+            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta3B_Button.background_color = (0, 0, 1, 1)
+            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
+            self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
+        if str(args[0])=="Beta2B":
             Beta2Bcontrol = True
             Beta4Bcontrol = False
             Beta4Acontrol = False
@@ -303,7 +327,19 @@ class ManualControlScreen(Screen):
             SSARJcontrol = False
             PTRRJcontrol = False
             STRRJcontrol = False
-        if str(args[1])=="Beta1B":
+            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta2B_Button.background_color = (0, 0, 1, 1)
+            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
+            self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
+        if str(args[0])=="Beta1B":
             Beta1Bcontrol = True
             Beta4Bcontrol = False
             Beta4Acontrol = False
@@ -316,7 +352,19 @@ class ManualControlScreen(Screen):
             SSARJcontrol = False
             PTRRJcontrol = False
             STRRJcontrol = False
-        if str(args[1])=="Beta4A":
+            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta1B_Button.background_color = (0, 0, 1, 1)
+            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
+            self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
+        if str(args[0])=="Beta4A":
             Beta4Acontrol = True
             Beta4Bcontrol = False
             Beta3Bcontrol = False
@@ -329,7 +377,19 @@ class ManualControlScreen(Screen):
             SSARJcontrol = False
             PTRRJcontrol = False
             STRRJcontrol = False
-        if str(args[1])=="Beta3A":
+            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta4A_Button.background_color = (0, 0, 1, 1)
+            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
+            self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
+        if str(args[0])=="Beta3A":
             Beta3Acontrol = True
             Beta4Bcontrol = False
             Beta4Acontrol = False
@@ -342,7 +402,19 @@ class ManualControlScreen(Screen):
             SSARJcontrol = False
             PTRRJcontrol = False
             STRRJcontrol = False
-        if str(args[1])=="Beta2A":
+            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta3A_Button.background_color = (0, 0, 1, 1)
+            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
+            self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
+        if str(args[0])=="Beta2A":
             Beta2Acontrol = True
             Beta4Bcontrol = False
             Beta4Acontrol = False
@@ -355,7 +427,19 @@ class ManualControlScreen(Screen):
             SSARJcontrol = False
             PTRRJcontrol = False
             STRRJcontrol = False
-        if str(args[1])=="Beta1A":
+            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta2A_Button.background_color = (0, 0, 1, 1)
+            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
+            self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
+        if str(args[0])=="Beta1A":
             Beta1Acontrol = True
             Beta4Bcontrol = False
             Beta4Acontrol = False
@@ -368,7 +452,19 @@ class ManualControlScreen(Screen):
             SSARJcontrol = False
             PTRRJcontrol = False
             STRRJcontrol = False
-        if str(args[1])=="PTRRJ":
+            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta1A_Button.background_color = (0, 0, 1, 1)
+            self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
+        if str(args[0])=="PTRRJ":
             PTRRJcontrol = True
             Beta4Bcontrol = False
             Beta4Acontrol = False
@@ -381,7 +477,19 @@ class ManualControlScreen(Screen):
             PSARJcontrol = False
             SSARJcontrol = False
             STRRJcontrol = False
-        if str(args[1])=="STRRJ":
+            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
+            self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.PTRRJ_Button.background_color = (0, 0, 1, 1)
+            self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
+        if str(args[0])=="STRRJ":
             STRRJcontrol = True
             Beta4Bcontrol = False
             Beta4Acontrol = False
@@ -394,7 +502,19 @@ class ManualControlScreen(Screen):
             PSARJcontrol = False
             SSARJcontrol = False
             PTRRJcontrol = False
-        if str(args[1])=="PSARJ":
+            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
+            self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.STRRJ_Button.background_color = (0, 0, 1, 1)
+        if str(args[0])=="PSARJ":
             PSARJcontrol = True
             Beta4Bcontrol = False
             Beta4Acontrol = False
@@ -407,7 +527,19 @@ class ManualControlScreen(Screen):
             SSARJcontrol = False
             PTRRJcontrol = False
             STRRJcontrol = False
-        if str(args[1])=="SSARJ":
+            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
+            self.ids.PSARJ_Button.background_color = (0, 0, 1, 1)
+            self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
+        if str(args[0])=="SSARJ":
             SSARJcontrol = True
             Beta4Bcontrol = False
             Beta4Acontrol = False
@@ -420,34 +552,46 @@ class ManualControlScreen(Screen):
             PSARJcontrol = False
             PTRRJcontrol = False
             STRRJcontrol = False
+            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
+            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
+            self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.SSARJ_Button.background_color = (0, 0, 1, 1)
+            self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
+            self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
 
     def incrementActive(self, *args):
         global Beta4Bcontrol, Beta3Bcontrol, Beta2Bcontrol, Beta1Bcontrol, Beta4Acontrol, Beta3Acontrol, Beta2Acontrol, Beta1Acontrol, PSARJcontrol, SSARJcontrol, PTRRJcontrol, STRRJcontrol
 
         if Beta4Bcontrol:
-            self.incrementBeta4B(args[0])
+            self.incrementBeta4B(float(args[0]))
         if Beta3Bcontrol:
-            self.incrementBeta3B(args[0])
+            self.incrementBeta3B(float(args[0]))
         if Beta2Bcontrol:
-            self.incrementBeta2B(args[0])
+            self.incrementBeta2B(float(args[0]))
         if Beta1Bcontrol:
-            self.incrementBeta1B(args[0])
+            self.incrementBeta1B(float(args[0]))
         if Beta4Acontrol:
-            self.incrementBeta4A(args[0])
+            self.incrementBeta4A(float(args[0]))
         if Beta3Acontrol:
-            self.incrementBeta3A(args[0])
+            self.incrementBeta3A(float(args[0]))
         if Beta2Acontrol:
-            self.incrementBeta2A(args[0])
+            self.incrementBeta2A(float(args[0]))
         if Beta1Acontrol:
-            self.incrementBeta1A(args[0])
+            self.incrementBeta1A(float(args[0]))
         if PTRRJcontrol:
-            self.incrementPTRRJ(args[0])
+            self.incrementPTRRJ(float(args[0]))
         if STRRJcontrol:
-            self.incrementSTRRJ(args[0])
+            self.incrementSTRRJ(float(args[0]))
         if PSARJcontrol:
-            self.incrementPSARJ(args[0])
+            self.incrementPSARJ(float(args[0]))
         if SSARJcontrol:
-            self.incrementSSARJ(args[0])
+            self.incrementSSARJ(float(args[0]))
 
     def incrementPSARJ(self, *args):
         global psarjmc

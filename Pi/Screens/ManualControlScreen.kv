@@ -125,19 +125,19 @@
             font_size: 30
             on_press: root.setActive("SSARJ")
         Button:
-            id: Beta1B_Button
-            size_hint: 0.08,0.3
-            pos_hint: {"center_x": 0.1, "center_y": 0.3}
-            text: "1A"
-            font_size: 30
-            on_press: root.setActive("Beta1B")
-        Button:
             id: Beta3B_Button
             size_hint: 0.08,0.3
-            pos_hint: {"center_x": 0.1, "center_y": 0.7}
+            pos_hint: {"center_x": 0.1, "center_y": 0.3}
             text: "3B"
             font_size: 30
             on_press: root.setActive("Beta3B")
+        Button:
+            id: Beta1B_Button
+            size_hint: 0.08,0.3
+            pos_hint: {"center_x": 0.1, "center_y": 0.7}
+            text: "1B"
+            font_size: 30
+            on_press: root.setActive("Beta1B")
         Button:
             id: set0
             size_hint: 0.1,0.07
@@ -262,19 +262,18 @@
             BubbleButton:
                 text: "Clear"
                 background_color: 1,0,0,0.8
-                on_release:
-                    text_input.text = ""
+                on_release: text_input.text = ""
             BubbleButton:
                 text: "Send"
                 background_color: 0,1,0,0.8
-                on_release:
-                    root.sendAngle(text_input.text)
+                on_press: root.incrementActive(text_input.text)
+                on_release: text_input.text = ""
     TextInput:
         id: text_input
         pos_hint: {'center_x': 0.85, 'y': 0.25}
         size_hint: (0.2, 0.06)
         cursor_blink: True
-        font_size: 20
+        font_size: 15
         multiline: False
     Label:
         size_hint: (0.2, 0.06)

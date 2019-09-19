@@ -267,9 +267,9 @@ c.execute("INSERT OR IGNORE INTO telemetry VALUES('last_rs_eva_duration', '0', '
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer', '0', 'Unsubscribed', '0', 255)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('ClientStatus', '0', '0', '0', 256)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS MT Position Float', '0', '0', 'CSAMT000001', 257)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS MT Utility Port ID', '0', '0', 'CSAMT000001', 258)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS MT Utility Port ID', '0', '0', 'CSAMT000002', 258)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS EDCD SSRMS Base Location', '0', '0', 'CSASSRMS001', 259)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS EDCD SSRMS Base Location', '0', '0', 'CSASSRMS002', 260)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS EDCD SSRMS Base Location2', '0', '0', 'CSASSRMS002', 260)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS EDCD SSRMS Operating Base', '0', '0', 'CSASSRMS003', 261)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('SSRMS SR Measured Joint Position', '0', '0', 'CSASSRMS004', 262)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('SSRMS SY Measured Joint Position', '0', '0', 'CSASSRMS005', 263)");
@@ -280,7 +280,7 @@ c.execute("INSERT OR IGNORE INTO telemetry VALUES('SSRMS WY Measured Joint Posit
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('SSRMS WR Measured Joint Position', '0', '0', 'CSASSRMS010', 268)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS Payload Status SSRMS Tip LEE', '0', '0', 'CSASSRMS011', 269)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS Base Location SPDM', '0', '0', 'CSASPDM0001', 270)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS Base Location SPDM', '0', '0', 'CSASPDM0002', 271)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS Base Location SPDM2', '0', '0', 'CSASPDM0002', 271)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS SPDM 1 SR Measured Joint Position', '0', '0', 'CSASPDM0003', 272)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS SPDM 1 SY Measured Joint Position', '0', '0', 'CSASPDM0004', 273)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS SPDM 1 SP Measured Joint Position', '0', '0', 'CSASPDM0005', 274)");
