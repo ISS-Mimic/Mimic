@@ -1246,9 +1246,24 @@
 </tr>
 <tr>
   <td>ADCO</td>
-  <td>US Attitude Roll Error (deg)</td>
-  <td class="val" id="USLAB000022"></td>
-  <td class="val" id="USLAB000022t"></td>
+  <td>US Attitude Yaw (deg)</td>
+  <td class="val" id="USLAB000YAW"></td>
+</tr>
+<tr>
+  <td>ADCO</td>
+  <td>US Attitude Pitch (deg)</td>
+  <td class="val" id="USLAB000PIT"></td>
+</tr>
+<tr>
+  <td>ADCO</td>
+  <td>US Attitude Roll (deg)</td>
+  <td class="val" id="USLAB000ROL"></td>
+</tr>
+<tr>
+  <td>ADCO</td>
+  <td>US Attitude Yaw Error (deg)</td>
+  <td class="val" id="USLAB000024"></td>
+  <td class="val" id="USLAB000024t"></td>
 </tr>
 <tr>
   <td>ADCO</td>
@@ -1258,9 +1273,9 @@
 </tr>
 <tr>
   <td>ADCO</td>
-  <td>US Attitude Yaw Error (deg)</td>
-  <td class="val" id="USLAB000024"></td>
-  <td class="val" id="USLAB000024t"></td>
+  <td>US Attitude Roll Error (deg)</td>
+  <td class="val" id="USLAB000022"></td>
+  <td class="val" id="USLAB000022t"></td>
 </tr>
 <tr>
   <td>ADCO</td>
@@ -2215,28 +2230,28 @@ var P4000006 = {0:"Not Enabled",1:"Enabled"}
 var P6000003 = {0:"Not Enabled",1:"Enabled"}
 var P6000006 = {0:"Not Enabled",1:"Enabled"}
 var RUSSEG000001 = {1:"Crew Rescue",2:"Survival",3:"Reboost",4:"Proximity Operations",5:"EVA",6:"Microgravity",7:"Standard"}
-var RUSSEG000002 = {0:"Undetermined State",1:"SM KURS Equipment Set1 Operating-RS"}
-var RUSSEG000003 = {0:"Undetermined State",1:"SM KURS Equipment Set2 Operating-RS"}
-var RUSSEG000004 = {0:"Undeterminated State",1:"SM KURS P1 P2 Failure-RS"}
-var RUSSEG000007 = {0:"Undetermined State",1:"SM KURS-P Test Mode-RS"}
-var RUSSEG000008 = {0:"Undetermined State",1:"SM KURS-P Capture Signal -RS"}
-var RUSSEG000009 = {0:"Undetermined State",1:"SM KURS-P Target Acquisition Signal-RS"}
-var RUSSEG000010 = {0:"Undetermined State",1:"SM KURS-P Functional Mode Signal-RS"}
-var RUSSEG000011 = {0:"Undetermined State",1:"SM KURS-P In Standby Mode-RS"}
-var RUSSEG000012 = {0:"Undetermined State",1:"SM Docking Flag-RS"}
-var RUSSEG000013 = {0:"Undetermined State",1:"SM Docking Port Engaged from Xfer Side-RS"}
-var RUSSEG000014 = {0:"Undetermined State",1:"SM Docking Port Engaged from Instr Compartment Side-RS"}
-var RUSSEG000015 = {0:"Undetermined State",1:"SM Docking Port Engaged Below (along SM -Y Axis)-RS"}
-var RUSSEG000016 = {0:"Undetermined State",1:"FGB Bottom Docking Port Engaged (along SM -Y Axis)-RS"}
-var RUSSEG000017 = {0:"Undetermined State",1:"SM Bottom UDM Docking Port Engaged (along SM -Y Axis)-RS"}
-var RUSSEG000018 = {0:"Undetermined State",1:"MRM1 Docking Port Engaged-RS"}
-var RUSSEG000019 = {0:"Undetermined State",1:"MRM2 Docking Port Engaged-RS"}
-var RUSSEG000020 = {0:"Undetermined State",1:"Docked Vehicle Hooks Closed-RS"}
+var RUSSEG000002 = {0:"Undetermined State",1:"SM KURS Equipment Set1 Operating"}
+var RUSSEG000003 = {0:"Undetermined State",1:"SM KURS Equipment Set2 Operating"}
+var RUSSEG000004 = {0:"Undetermined State",1:"SM KURS P1 P2 Failure"}
+var RUSSEG000007 = {0:"Undetermined State",1:"SM KURS-P Test Mode"}
+var RUSSEG000008 = {0:"Undetermined State",1:"SM KURS-P Capture Signal"}
+var RUSSEG000009 = {0:"Undetermined State",1:"SM KURS-P Target Acquisition Signal"}
+var RUSSEG000010 = {0:"Undetermined State",1:"SM KURS-P Functional Mode Signal"}
+var RUSSEG000011 = {0:"Undetermined State",1:"SM KURS-P In Standby Mode"}
+var RUSSEG000012 = {0:"Undetermined State",1:"SM Docking Flag"}
+var RUSSEG000013 = {0:"Undetermined State",1:"SM Docking Port Engaged from Xfer Side"}
+var RUSSEG000014 = {0:"Undetermined State",1:"SM Docking Port Engaged from Instr Compartment Side"}
+var RUSSEG000015 = {0:"Undetermined State",1:"SM Docking Port Engaged Below"}
+var RUSSEG000016 = {0:"Undetermined State",1:"FGB Bottom Docking Port Engaged"}
+var RUSSEG000017 = {0:"Undetermined State",1:"SM Bottom UDM Docking Port Engaged"}
+var RUSSEG000018 = {0:"Undetermined State",1:"MRM1 Docking Port Engaged"}
+var RUSSEG000019 = {0:"Undetermined State",1:"MRM2 Docking Port Engaged"}
+var RUSSEG000020 = {0:"Undetermined State",1:"Docked Vehicle Hooks Closed"}
 var RUSSEG000021 = {0:"Inertial Attitude",1:"LVLH SM",2:"Solar Orientation",3:"Current LVLH",4:"Current Inertial Attitude",5:"Damping",6:"TEA",7:"X-POP"}
-var RUSSEG000022 = {0:"Undetermined State",1:"SM SUDN Controls the Motion (RS master)-RS"}
-var RUSSEG000023 = {0:"Undetermined State",1:"SM SUDN Prepared to Free Drift Mode Transition-RS"}
+var RUSSEG000022 = {0:"Undetermined State",1:"SM SUDN Controls the Motion"}
+var RUSSEG000023 = {0:"Undetermined State",1:"SM SUDN Prepared to Free Drift Mode Transition"}
 var RUSSEG000024 = {0:"Pre-Starting Procedure Or Thruster Operation Readiness",1:"Thruster Operation Mode is Terminated"}
-var RUSSEG000025 = {0:"0 - Reserv",1:"1 - Thrusters",2:"2 - Gyrodines",3:"3 - Gyrodines with Desaturation on American Method",4:"4 - Gyrodines with Desaturation on Russian Method",5:"5 - Translational Thrusters Operating",6:"6 - Thrusters help CMG (desaturate CMG)",7:"7 - Free Drift Mode"}
+var RUSSEG000025 = {0:"Reserv",1:"Thrusters",2:"Gyrodines",3:"Gyrodines with Desaturation on American Method",4:"Gyrodines with Desaturation on Russian Method",5:"Translational Thrusters Operating",6:"Thrusters help CMG (desaturate CMG)",7:"Free Drift Mode"}
 var S0000006 = {1:"STANDBY",2:"RESTART",3:"CHECKOUT",4:"DIRECTED_POSITION",5:"AUTOTRACK",6:"BLIND",7:"SHUTDOWN",8:"SWITCHOVER"}
 var S0000007 = {1:"STANDBY",2:"RESTART",3:"CHECKOUT",4:"DIRECTED_POSITION",5:"AUTOTRACK",6:"BLIND",7:"SHUTDOWN",8:"SWITCHOVER"}
 var S0000008 = {1:"STANDBY",2:"RESTART",3:"CHECKOUT",4:"DIRECTED_POSITION",5:"AUTOTRACK",6:"BLIND",7:"SHUTDOWN",8:"SWITCHOVER"}
@@ -2308,7 +2323,7 @@ var USLAB000101 = {0:"Frame Sync unlocked",1:"Frame Sync locked"}
 var Z1000013 = {0:"RESET",1:"NORMAL"}
 var CSAMT000001 = {1:"WS1 ", 2:"WS2 ", 3:"WS3 ", 4:"WS4 ", 5:"WS5 ", 6:"WS6 ",7:"WS7 ",8:"WS8"}
 var CSASSRMS002 = {1:"Lab ", 2:"Node3 ", 4:"Node2 ", 7:"MBS PDGF 1 ", 8:"MBS PDGF 2 ", 11:"MBS PDGF 3 ", 13:"MBS PDGF 4 ", 14:"FGB ", 16:"POA ", 19:"SSRMS Tip LEE ", 63:"Undefined"}
-var CSASSRMS003 = {0:"Lee A ", 5:"Lee B"}
+var CSASSRMS003 = {0:"LEE A ", 5:"LEE B"}
 var CSASSRMS011 = {0:"Released",1:"Captive",2:"Captured"}
 var CSASPDM0002 = {1:"Lab ", 2:"Node3 ", 4:"Node2 ", 7:"MBS PDGF 1 ", 8:"MBS PDGF 2 ", 11:"MBS PDGF 3 ", 13:"MBS PDGF 4 ", 14:"FGB ", 16:"POA ", 19:"SSRMS Tip LEE ", 63:"Undefined"}
 var CSASPDM0010 = {0:"Released",1:"Captive",2:"Captured"}
@@ -2316,7 +2331,14 @@ var CSASPDM0019 = {0:"Released",1:"Captive",2:"Captured"}
 var CSASPDM0022 = {0:"Released",1:"Captive",2:"Captured"}
 var CSAMBS00002 = {0:"Released",1:"Captured"}
 var CSAMBA00004 = {0:"Released",1:"Captive",2:"Captured"}	
-	
+var yaw = null;
+var pitch = null;
+var roll = null;
+var Q0 = null;
+var Q1 = null;
+var Q2 = null;
+var Q3 = null;
+
 sub.addListener({
 	onItemUpdate: function(update) 
 	{
@@ -2329,12 +2351,66 @@ sub.addListener({
 			selector.text(eval(item)[update.getValue("Value")]);
 		}
 		
+		//attitude conversion
+		if(item === "USLAB000018")
+		{
+			Q0 = update.getValue("Value");
+		}
+		if(item === "USLAB000019")
+		{
+			Q1 = update.getValue("Value");
+		}
+		if(item === "USLAB000020")
+		{
+			Q2 = update.getValue("Value");
+		}
+		if(item === "USLAB000021")
+		{
+			Q3 = update.getValue("Value");
+		}
+		
+		if (Q0 != null && Q1 != null && Q2 != null && Q3 != null)
+		{
+			var c12 = 2 * (Q1 * Q2 + Q0 * Q3);
+			var c11 = Q0 * Q0 + Q1 * Q1 - Q2 * Q2 - Q3 * Q3;
+			var c13 = 2 * (Q1 * Q3 - Q0 * Q2);
+			var c23 = 2 * (Q2 * Q3 + Q0 * Q1);
+			var c33 = Q0 * Q0 - Q1 * Q1 - Q2 * Q2 + Q3 * Q3;
+			var c22 = Q0 * Q0 - Q1 * Q1 + Q2 * Q2 - Q3 * Q3;
+			var c21 = 2 * (Q1 * Q2 - Q0 * Q3);
+			var mag_c13 = Math.abs(c13); //all c's should be in radians
+
+			yaw = 0.0;
+			pitch = 0.0;
+			roll = 0.0;
+
+			if (mag_c13 < 1)
+			{
+				yaw = Math.atan2(c12, c11);
+				pitch = Math.atan2(-c13, Math.sqrt(1.0 - (c13 * c13)));
+				roll = Math.atan2(c23, c33);
+			}
+			else if (mag_c13 == 1)
+			{
+				yaw = Math.atan2(-c21, c22);
+				pitch = Math.asin(-c13);
+				roll = 0.0;
+			}
+			
+			//convert to degrees
+			yaw = yaw * 180 / Math.PI;
+			pitch = pitch * 180 / Math.PI;
+			roll = roll * 180 / Math.PI;
+			$("#"+"USLAB000YAW").text(yaw.toFixed(2));
+			$("#"+"USLAB000PIT").text(pitch.toFixed(2));
+			$("#"+"USLAB000ROL").text(roll.toFixed(2));
+		}
 		var selector2 = $("#"+update.getItemName()+"t")
 		var ts = update.getValue("TimeStamp")
 		var ts_day = Math.floor(ts/24)
 		var ts_hour = Math.floor(((ts/24)-ts_day)*24)
 		var ts_minute = Math.floor((((ts/24)-ts_day)*24-ts_hour)*60)
-		var ts_seconds = ((((((ts/24)-ts_day)*24-ts_hour)*60) - ts_minute)*60).toFixed(2)
+		var ts_seconds = ((((((ts/24)-ts_day)*24-ts_hour)*60) - ts_minute)*60).toFixed(0)
 		selector2.text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
 		selector.addClass('highlight');
 		selector.one('animationend', function() { selector.removeClass('highlight');}); 
@@ -2345,37 +2421,29 @@ client.subscribe(timeSub);
 
 timeSub.addListener({
   onItemUpdate: function (update) {
-	var status = update.getValue('Status.Class');
-	var AOStimestamp = parseFloat(update.getValue('TimeStamp'));
-	//console.log("Timestamp: " + update.getValue('TimeStamp'));
-	var difference = timestampnow - AOStimestamp;
-	//console.log("Difference " + difference);
-	if (status === '24') 
-	{
-	  if(difference > 0.00153680542553047)
-	  {
-//		console.log("Stale Signal")
-		document.getElementById("AOS").innerHTML = "Stale Signal";
-		document.getElementById("AOS").bgColor = '#FF8000';
-	  }
-	  else
-	  {
-//		console.log("Signal Acquired!")
-		document.getElementById("AOS").innerHTML = "Signal Acquired!";
-		document.getElementById("AOS").bgColor = '#008000';
-	  }
-	  
+		var status = update.getValue('Status.Class');
+		var AOStimestamp = parseFloat(update.getValue('TimeStamp'));
+		//console.log("Timestamp: " + update.getValue('TimeStamp'));
+		var difference = timestampnow - AOStimestamp;
+		//console.log("Difference " + difference);
+		if (status === '24') 
+		{
+			document.getElementById("AOS").innerHTML = "Signal Acquired!";
+			document.getElementById("AOS").bgColor = '#008000';
+		}
+		else 
+		{
+			document.getElementById("AOS").innerHTML = "Signal Lost";
+			document.getElementById("AOS").bgColor = '#FF0000';
+		}
+		if(difference > 0.00153680542553047)
+		{
+			document.getElementById("AOS").innerHTML = "Stale Signal";
+			document.getElementById("AOS").bgColor = '#FF8000';
+		}
 	}
-	else 
-	{
-//	    console.log("Signal Lost!")
-            document.getElementById("AOS").innerHTML = "Signal Lost";
-	    document.getElementById("AOS").bgColor = '#FF0000';
-	} 
-    }
   });
 });
 </script>
 </body>
 </html>
-
