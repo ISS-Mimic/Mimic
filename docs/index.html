@@ -2527,7 +2527,7 @@ sub.addListener({
 		
 		if (Decoder.hasOwnProperty(item))
 		{
-			Decoder[item](update.getValue("Value",update.getValue("TimeStamp")));
+			Decoder[item](update.getValue("Value"),update.getValue("TimeStamp"));
 		}
 		
 		//attitude conversion
