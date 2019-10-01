@@ -1849,9 +1849,9 @@
 </tr>
 <tr>
   <td>CSA</td>
-  <td>MSS EDCD SSRMS Base Location</td>
-  <td class="val" id="CSASSRMS001"></td>
-  <td class="val" id="CSASSRMS001t"></td>
+  <td>MSS EDCD SACS Operating Base</td>
+  <td class="val" id="CSASSRMS001-1"></td>
+  <td class="val" id="CSASSRMS001-1t"></td>
 </tr>
 <tr>
   <td>CSA</td>
@@ -1915,9 +1915,9 @@
 </tr>
 <tr>
   <td>CSA</td>
-  <td>MSS OCS Base Location SPDM</td>
-  <td class="val" id="CSASPDM0001"></td>
-  <td class="val" id="CSASPDM0001t"></td>
+  <td>SPDM Operating Base</td>
+  <td class="val" id="CSASPDM0001-1"></td>
+  <td class="val" id="CSASPDM0001-1t"></td>
 </tr>
 <tr>
   <td>CSA</td>
@@ -2017,9 +2017,15 @@
 </tr>
 <tr>
   <td>CSA</td>
-  <td>MSS Payload Status OCS SPDM Arm 2 OTCM?</td>
-  <td class="val" id="CSASPDM0018"></td>
-  <td class="val" id="CSASPDM0018t"></td>
+  <td>SPDM Arm 1 Hot</td>
+  <td class="val" id="CSASPDM0018-1"></td>
+  <td class="val" id="CSASPDM0018-1t"></td>
+</tr>
+<tr>
+  <td>CSA</td>
+  <td>SPDM Arm 2 Hot</td>
+  <td class="val" id="CSASPDM0018-2"></td>
+  <td class="val" id="CSASPDM0018-2t"></td>
 </tr>
 <tr>
   <td>CSA</td>
@@ -2035,9 +2041,21 @@
 </tr>
 <tr>
   <td>CSA</td>
-  <td>MSS Payload Status OCS SPDM Body?</td>
-  <td class="val" id="CSASPDM0021"></td>
-  <td class="val" id="CSASPDM0021t"></td>
+  <td>SPDM LEE Stop Condition</td>
+  <td class="val" id="CSASPDM0021-1"></td>
+  <td class="val" id="CSASPDM0021-1t"></td>
+</tr>
+<tr>
+  <td>CSA</td>
+  <td>SPDM LEE Run Speed</td>
+  <td class="val" id="CSASPDM0021-2"></td>
+  <td class="val" id="CSASPDM0021-2t"></td>
+</tr>
+<tr>
+  <td>CSA</td>
+  <td>SPDM LEE Hot</td>
+  <td class="val" id="CSASPDM0021-3"></td>
+  <td class="val" id="CSASPDM0021-3t"></td>
 </tr>
 <tr>
   <td>CSA</td>
@@ -2047,9 +2065,15 @@
 </tr>
 <tr>
   <td>CSA</td>
-  <td>MSS OCS Payload Status MBS MCAS?</td>
-  <td class="val" id="CSAMBS00001"></td>
-  <td class="val" id="CSAMBS00001t"></td>
+  <td>MBS Operating Base</td>
+  <td class="val" id="CSAMBS00001-1"></td>
+  <td class="val" id="CSAMBS00001-1t"></td>
+</tr>
+<tr>
+  <td>CSA</td>
+  <td>MBS Base Location</td>
+  <td class="val" id="CSAMBS00001-2"></td>
+  <td class="val" id="CSAMBS00001-2t"></td>
 </tr>
 <tr>
   <td>CSA</td>
@@ -2059,9 +2083,39 @@
 </tr>
 <tr>
   <td>CSA</td>
-  <td>MSS OCS Payload Status MBS POA?</td>
-  <td class="val" id="CSAMBA00003"></td>
-  <td class="val" id="CSAMBA00003t"></td>
+  <td>POA Stop Condition</td>
+  <td class="val" id="CSAMBA00003-1"></td>
+  <td class="val" id="CSAMBA00003-1t"></td>
+</tr>
+<tr>
+  <td>CSA</td>
+  <td>POA Run Speed</td>
+  <td class="val" id="CSAMBA00003-2"></td>
+  <td class="val" id="CSAMBA00003-2t"></td>
+</tr>
+<tr>
+  <td>CSA</td>
+  <td>POA hot</td>
+  <td class="val" id="CSAMBA00003-3"></td>
+  <td class="val" id="CSAMBA00003-3t"></td>
+</tr>
+<tr>
+  <td>CSA</td>
+  <td>SSRMS LEE Stop Condition</td>
+  <td class="val" id="CSAMBA00003-4"></td>
+  <td class="val" id="CSAMBA00003-4t"></td>
+</tr>
+<tr>
+  <td>CSA</td>
+  <td>SSRMS LEE Run Speed</td>
+  <td class="val" id="CSAMBA00003-5"></td>
+  <td class="val" id="CSAMBA00003-5t"></td>
+</tr>
+<tr>
+  <td>CSA</td>
+  <td>SSRMS LEE hot</td>
+  <td class="val" id="CSAMBA00003-6"></td>
+  <td class="val" id="CSAMBA00003-6t"></td>
 </tr>
 <tr>
   <td>CSA</td>
@@ -2338,6 +2392,126 @@ var Q0 = null;
 var Q1 = null;
 var Q2 = null;
 var Q3 = null;
+	
+var HOT = {0:"Null",1:"Hot"}
+var MBSOPBASE = {3:"Mtcl",4:"TUS"}
+var LEESPEED = {1:"Slow",2:"Fast"}
+var STOPCOND = {1:"Soft Stop",2:"Hard Stop"}
+var MBSBASELOC = {58:"MT",60:"TUS",63:"Undefined"}
+var SPDMLEE = {1:"SPDM Body LEE",2:"SPDM Body PDGF"}
+
+var Decoder = 
+{
+	CSASSRMS001:function(value, ts)
+	{
+		var SACS_operating_base = (value >>> 6) & 15;
+		$("#CSASSRMS001-1").text(CSASSRMS003[SACS_operating_base]);
+		$("#CSASSRMS001-1").addClass('highlight');
+		
+		var ts_day = Math.floor(ts/24)
+		var ts_hour = Math.floor(((ts/24)-ts_day)*24)
+		var ts_minute = Math.floor((((ts/24)-ts_day)*24-ts_hour)*60)
+		var ts_seconds = ((((((ts/24)-ts_day)*24-ts_hour)*60) - ts_minute)*60).toFixed(0)
+		$("#CSASSRMS001-1t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+	},
+	CSASPDM0001:function(value, ts)
+	{
+		var OCS_SPDM_operating_base = (value >>> 8) & 15;
+		$("#CSASPDM0001-1").text(SPDMLEE[OCS_SPDM_operating_base]);
+		$("#CSASPDM0001-1").addClass('highlight');
+		
+		var ts_day = Math.floor(ts/24)
+		var ts_hour = Math.floor(((ts/24)-ts_day)*24)
+		var ts_minute = Math.floor((((ts/24)-ts_day)*24-ts_hour)*60)
+		var ts_seconds = ((((((ts/24)-ts_day)*24-ts_hour)*60) - ts_minute)*60).toFixed(0)
+		$("#CSASPDM0001-1t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+	},
+	CSASPDM0018:function(value, ts)
+	{
+		var SPDM_Arm_1_Hot = (value >>> 3) & 1;
+		var SPDM_Arm_2_Hot = (value >>> 11) & 1;
+		$("#CSASPDM0018-1").text(HOT[SPDM_Arm_1_Hot]);
+		$("#CSASPDM0018-2").text(HOT[SPDM_Arm_2_Hot]);
+		$("#CSASPDM0018-1").addClass('highlight');
+		$("#CSASPDM0018-2").addClass('highlight');
+		
+		var ts_day = Math.floor(ts/24)
+		var ts_hour = Math.floor(((ts/24)-ts_day)*24)
+		var ts_minute = Math.floor((((ts/24)-ts_day)*24-ts_hour)*60)
+		var ts_seconds = ((((((ts/24)-ts_day)*24-ts_hour)*60) - ts_minute)*60).toFixed(0)
+		$("#CSASPDM0018-1t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+		$("#CSASPDM0018-2t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+	},
+	CSASPDM0021:function(value, ts)
+	{
+		var SPDM_LEE_Hot = (value >>> 3) & 1;
+		var SPDM_LEE_Speed = (value >>> 4) & 3;
+		var SPDM_LEE_Stop = (value >>> 6) & 3;
+		$("#CSASPDM0021-1").text(STOPCOND[SPDM_LEE_Stop]);
+		$("#CSASPDM0021-2").text(LEESPEED[SPDM_LEE_Speed]);
+		$("#CSASPDM0021-3").text(HOT[SPDM_LEE_Hot]);
+		$("#CSASPDM0021-1").addClass('highlight');
+		$("#CSASPDM0021-2").addClass('highlight');
+		$("#CSASPDM0021-3").addClass('highlight');
+		
+		var ts_day = Math.floor(ts/24)
+		var ts_hour = Math.floor(((ts/24)-ts_day)*24)
+		var ts_minute = Math.floor((((ts/24)-ts_day)*24-ts_hour)*60)
+		var ts_seconds = ((((((ts/24)-ts_day)*24-ts_hour)*60) - ts_minute)*60).toFixed(0)
+		$("#CSASPDM0021-1t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+		$("#CSASPDM0021-2t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+		$("#CSASPDM0021-3t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+	},
+	CSAMBS00001:function(value, ts)
+	{
+		var MBS_op_base = (value >>> 8) & 15;
+		var MBS_loc = value & 63;
+		$("#CSAMBS00001-1").text(MBSOPBASE[MBS_op_base]);
+		$("#CSAMBS00001-2").text(MBSBASELOC[MBS_loc]);
+		$("#CSAMBS00001-1").addClass('highlight');
+		$("#CSAMBS00001-2").addClass('highlight');
+		
+		var ts_day = Math.floor(ts/24)
+		var ts_hour = Math.floor(((ts/24)-ts_day)*24)
+		var ts_minute = Math.floor((((ts/24)-ts_day)*24-ts_hour)*60)
+		var ts_seconds = ((((((ts/24)-ts_day)*24-ts_hour)*60) - ts_minute)*60).toFixed(0)
+		$("#CSAMBS00001-1t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+		$("#CSAMBS00001-2t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+	},
+	CSAMBA00003:function(value, ts)
+	{
+		var POA_stop = value >>> 14;
+		var POA_speed = (value >>> 12) & 3;
+		var POA_hot = (value >>> 11) & 1;
+		var LEE_stop = (value >>> 6) & 3;
+		var LEE_speed = (value >>> 4) & 3;
+		var LEE_hot = (value >>> 3) & 1;
+		$("#CSAMBA00003-1").text(STOPCOND[POA_stop]);
+		$("#CSAMBA00003-2").text(LEESPEED[POA_speed]);
+		$("#CSAMBA00003-3").text(HOT[POA_hot]);
+		$("#CSAMBA00003-4").text(STOPCOND[LEE_stop]);
+		$("#CSAMBA00003-5").text(LEESPEED[LEE_speed]);
+		$("#CSAMBA00003-6").text(HOT[LEE_hot]);
+		$("#CSAMBA00003-1").addClass('highlight');
+		$("#CSAMBA00003-2").addClass('highlight');
+		$("#CSAMBA00003-3").addClass('highlight');
+		$("#CSAMBA00003-4").addClass('highlight');
+		$("#CSAMBA00003-5").addClass('highlight');
+		$("#CSAMBA00003-6").addClass('highlight');
+		
+		var ts_day = Math.floor(ts/24)
+		var ts_hour = Math.floor(((ts/24)-ts_day)*24)
+		var ts_minute = Math.floor((((ts/24)-ts_day)*24-ts_hour)*60)
+		var ts_seconds = ((((((ts/24)-ts_day)*24-ts_hour)*60) - ts_minute)*60).toFixed(0)
+		$("#CSAMBA00001-1t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+		$("#CSAMBA00001-2t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+		$("#CSAMBA00001-3t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+		$("#CSAMBA00001-4t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+		$("#CSAMBA00001-5t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+		$("#CSAMBA00001-6t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+	}
+};
+
 
 sub.addListener({
 	onItemUpdate: function(update) 
@@ -2349,6 +2523,11 @@ sub.addListener({
 		if (specialPUIs.includes(item))
 		{
 			selector.text(eval(item)[update.getValue("Value")]);
+		}
+		
+		if (Decoder.hasOwnProperty(item))
+		{
+			Decoder[item](update.getValue("Value",update.getValue("TimeStamp")));
 		}
 		
 		//attitude conversion
@@ -2413,7 +2592,6 @@ sub.addListener({
 		var ts_seconds = ((((((ts/24)-ts_day)*24-ts_hour)*60) - ts_minute)*60).toFixed(0)
 		selector2.text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
 		selector.addClass('highlight');
-		selector.one('animationend', function() { selector.removeClass('highlight');}); 
 	}
 });
 
