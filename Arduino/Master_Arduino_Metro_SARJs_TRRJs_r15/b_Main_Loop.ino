@@ -74,8 +74,12 @@ void loop() {
 
   // ========= Servo Stuff =============================
   //map(value, fromLow, fromHigh, toLow, toHigh)
-  servo_PTRRJ.write(map(PTRRJ, -115, 115, 0, 180)); // from +/- 115deg to servo command min and max.
-  servo_STRRJ.write(map(STRRJ, -115, 115, 0, 180)); // from +/- 115deg to servo command min and max.
+ // servo_PTRRJ.write(map(PTRRJ, -115, 115, 0, 180)); // from +/- 115deg to servo command min and max.
+ // servo_STRRJ.write(map(STRRJ, -115, 115, 0, 180)); // from +/- 115deg to servo command min and max.
+
+  servo_PTRRJ.write(map(PTRRJ, -115, 115, 10, 170)); // from +/- 115deg to servo command min and max.
+  servo_STRRJ.write(map(STRRJ, -115, 115, 10, 170)); // from +/- 115deg to servo command min and max.
+  
   //servo_PTRRJ.write(PTRRJ+180);
   //servo_STRRJ.write(PTRRJ+180);
 
