@@ -1,6 +1,8 @@
 import sqlite3 #javascript stores telemetry in sqlite db
+import os
 
 #----------------Open SQLITE3 Database that holds the current ISS Telemetry--------------
+os.system('rm /dev/shm/iss_telemetry.db') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
 conn = sqlite3.connect('/dev/shm/iss_telemetry.db')
 conn.isolation_level = None
 c = conn.cursor()
@@ -264,5 +266,43 @@ c.execute("INSERT OR IGNORE INTO telemetry VALUES('last_us_eva_duration', '0', '
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('last_rs_eva_duration', '0', '0', '0', 254)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer', '0', 'Unsubscribed', '0', 255)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('ClientStatus', '0', '0', '0', 256)");
-
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS MT Position Float', '0', '0', 'CSAMT000001', 257)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS MT Utility Port ID', '0', '0', 'CSAMT000002', 258)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS EDCD SSRMS Base Location', '0', '0', 'CSASSRMS001', 259)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS EDCD SSRMS Base Location2', '0', '0', 'CSASSRMS002', 260)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS EDCD SSRMS Operating Base', '0', '0', 'CSASSRMS003', 261)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('SSRMS SR Measured Joint Position', '0', '0', 'CSASSRMS004', 262)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('SSRMS SY Measured Joint Position', '0', '0', 'CSASSRMS005', 263)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('SSRMS SP Measured Joint Position', '0', '0', 'CSASSRMS006', 264)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('SSRMS EP Measured Joint Position', '0', '0', 'CSASSRMS007', 265)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('SSRMS WP Measured Joint Position', '0', '0', 'CSASSRMS008', 266)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('SSRMS WY Measured Joint Position', '0', '0', 'CSASSRMS009', 267)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('SSRMS WR Measured Joint Position', '0', '0', 'CSASSRMS010', 268)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS Payload Status SSRMS Tip LEE', '0', '0', 'CSASSRMS011', 269)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS Base Location SPDM', '0', '0', 'CSASPDM0001', 270)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS Base Location SPDM2', '0', '0', 'CSASPDM0002', 271)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS SPDM 1 SR Measured Joint Position', '0', '0', 'CSASPDM0003', 272)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS SPDM 1 SY Measured Joint Position', '0', '0', 'CSASPDM0004', 273)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS SPDM 1 SP Measured Joint Position', '0', '0', 'CSASPDM0005', 274)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS SPDM 1 EP Measured Joint Position', '0', '0', 'CSASPDM0006', 275)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS SPDM 1 WP Measured Joint Position', '0', '0', 'CSASPDM0007', 276)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS SPDM 1 WY Measured Joint Position', '0', '0', 'CSASPDM0008', 277)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS SPDM 1 WR Measured Joint Position', '0', '0', 'CSASPDM0009', 278)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS Payload Status OCS SPDM Arm 1 OTCM', '0', '0', 'CSASPDM0010', 279)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS SPDM 2 SR Measured Joint Position', '0', '0', 'CSASPDM0011', 280)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS SPDM 2 SY Measured Joint Position', '0', '0', 'CSASPDM0012', 281)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS SPDM 2 SP Measured Joint Position', '0', '0', 'CSASPDM0013', 282)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS SPDM 2 EP Measured Joint Position', '0', '0', 'CSASPDM0014', 283)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS SPDM 2 WP Measured Joint Position', '0', '0', 'CSASPDM0015', 284)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS SPDM 2 WY Measured Joint Position', '0', '0', 'CSASPDM0016', 285)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS SPDM 2 WR Measured Joint Position', '0', '0', 'CSASPDM0017', 286)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS Payload Status OCS SPDM Arm 2 OTCM', '0', '0', 'CSASPDM0018', 287)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS Payload Status OCS SPDM Arm 2 OTCM2', '0', '0', 'CSASPDM0019', 288)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS SPDM Body Roll Joint Position', '0', '0', 'CSASPDM0020', 289)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS Payload Status OCS SPDM Body', '0', '0', 'CSASPDM0021', 290)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS Payload Status OCS SPDM Body2', '0', '0', 'CSASPDM0022', 291)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS Payload Status MBS MCAS', '0', '0', 'CSAMBS00001', 292)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS Payload Status MBS MCAS2', '0', '0', 'CSAMBS00002', 293)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS Payload Status MBS POA', '0', '0', 'CSAMBA00003', 294)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('MSS OCS Payload Status MBS POA2', '0', '0', 'CSAMBA00004', 295)");
 conn.close()

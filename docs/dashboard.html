@@ -1,0 +1,1944 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+		<style>
+			tr:nth-child(even) {background: lightgrey;}
+			div:hover {background: lightblue;}
+			@keyframes hifade {
+				from { background: yellow; }
+				to { background: transparent; }
+			}
+
+			@keyframes losfade {
+				from { background: white; }
+				to { background: darkgray; }
+			}
+
+			@keyframes aosfade {
+				from { background: darkgray; }
+				to { background: white; }
+			}
+
+			body { background: darkgray; }
+			body.LOS{ animation: losfade 1.0s; background: darkgray; }
+			body.AOS{ animation: aosfade 1.0s; background: white;}
+
+			div.highlight { animation: hifade 0.5s; }
+			div { display:block; width:120px;float:left; font-size:small; font-family:arial narrow; }
+			div.pui { margin: 2px; text-align: center;}
+			div.val { border-top: 1px solid white; text-align: center; }
+			div.EVA { background: lightblue;}
+			div.ETHOS { background: lightgreen; }
+			div.CDH { background: wheat; }
+			div.SPARTAN { background: pink; }
+			div.CATO { background: lightcyan; }
+			div.VVO { background: powderblue; }
+			div.SPARTAN-VVO{ background: thistle; }
+			div.CATO-VVO{ background: lightsteelblue; }
+			div.ADCO{ background: tan; }
+			div.ADCO-VVO{ background: antiquewhite; }
+			div.TOPO{ background: papayawhip; }
+			div.ADCO-TOPO{ background: seashell; }
+			div.ODIN{ background: gainsboro; }
+			div.CSA{ background: lightcoral; }
+			div.ODIN-VVO{ background: lavender; }
+
+		</style>
+</head>
+<body onload="setevents()">
+<table>
+
+<div class="EVA pui" title="Supplies power through the Umbilical Interface Assembly (UIA) to the spacesuits (EMU 1), Voltage">
+  <div class="desc">PSA EMU1 VOLTS</div>
+  <div class="val" id="AIRLOCK000001">NO DATA</div>
+</div>
+<div class="EVA pui" title="Supplies power through the Umbilical Interface Assembly (UIA) to the spacesuits (EMU 1), Current">
+  <div class="desc">PSA EMU1 AMPS</div>
+  <div class="val" id="AIRLOCK000002">NO DATA</div>
+</div>
+<div class="EVA pui" title="Supplies power through the Umbilical Interface Assembly (UIA) to the spacesuits (EMU 2), Voltage">
+  <div class="desc">PSA EMU2 VOLTS</div>
+  <div class="val" id="AIRLOCK000003">NO DATA</div>
+</div>
+<div class="EVA pui" title="Supplies power through the Umbilical Interface Assembly (UIA) to the spacesuits (EMU 2), Current">
+  <div class="desc">PSA EMU2 AMPS</div>
+  <div class="val" id="AIRLOCK000004">NO DATA</div>
+</div>
+<div class="EVA pui" title="In-flight Refill Unit (IRU), Voltage">
+  <div class="desc">PSA IRU VOLTS</div>
+  <div class="val" id="AIRLOCK000005">NO DATA</div>
+</div>
+<div class="EVA pui" title="In-flight Refill Unit (IRU), Current">
+  <div class="desc">PSA IRU AMPS</div>
+  <div class="val" id="AIRLOCK000006">NO DATA</div>
+</div>
+<div class="EVA pui" title="Supplies power to the spacesuits (EVA Mobility Unit, EMU 1), Voltage">
+  <div class="desc">UIA EV 1 VOLTS</div>
+  <div class="val" id="AIRLOCK000007">NO DATA</div>
+</div>
+<div class="EVA pui" title="Supplies power to the spacesuits (EVA Mobility Unit, EMU 1), Current">
+  <div class="desc">UIA EV 1 AMPS</div>
+  <div class="val" id="AIRLOCK000008">NO DATA</div>
+</div>
+<div class="EVA pui" title="Supplies power to the spacesuits (EVA Mobility Unit, EMU 2), Voltage">
+  <div class="desc">UIA EV 2 VOLTS</div>
+  <div class="val" id="AIRLOCK000009">NO DATA</div>
+</div>
+<div class="EVA pui" title="Supplies power to the spacesuits (EVA Mobility Unit, EMU 2), Current">
+  <div class="desc">UIA EV 2 AMPS</div>
+  <div class="val" id="AIRLOCK000010">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 1 Voltage">
+  <div class="desc">BCA 1 VOLTS</div>
+  <div class="val" id="AIRLOCK000011">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 1 Current">
+  <div class="desc">BCA 1 AMPS</div>
+  <div class="val" id="AIRLOCK000012">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 2 Voltage">
+  <div class="desc">BCA 2 VOLTS</div>
+  <div class="val" id="AIRLOCK000013">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 2 Current">
+  <div class="desc">BCA 2 AMPS</div>
+  <div class="val" id="AIRLOCK000014">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 3 Voltage">
+  <div class="desc">BCA 3 VOLTS</div>
+  <div class="val" id="AIRLOCK000015">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 3 Current">
+  <div class="desc">BCA 3 AMPS</div>
+  <div class="val" id="AIRLOCK000016">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 4 Voltage">
+  <div class="desc">BCA 4 VOLTS</div>
+  <div class="val" id="AIRLOCK000017">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 4 Current">
+  <div class="desc">BCA 4 AMPS</div>
+  <div class="val" id="AIRLOCK000018">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 1 Status">
+  <div class="desc">BCA 1 STATUS</div>
+  <div class="val" id="AIRLOCK000019">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 2 Status">
+  <div class="desc">BCA 2 STATUS</div>
+  <div class="val" id="AIRLOCK000020">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 3 Status">
+  <div class="desc">BCA 3 STATUS</div>
+  <div class="val" id="AIRLOCK000021">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 4 Status">
+  <div class="desc">BCA 4 STATUS</div>
+  <div class="val" id="AIRLOCK000022">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 1 Channel 1 Status">
+  <div class="desc">BCA 1 CH1 STATUS</div>
+  <div class="val" id="AIRLOCK000023">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 1 Channel 2 Status">
+  <div class="desc">BCA 1 CH2 STATUS</div>
+  <div class="val" id="AIRLOCK000024">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 1 Channel 3 Status">
+  <div class="desc">BCA 1 CH3 STATUS</div>
+  <div class="val" id="AIRLOCK000025">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 1 Channel 4 Status">
+  <div class="desc">BCA 1 CH4 STATUS</div>
+  <div class="val" id="AIRLOCK000026">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 1 Channel 5 Status">
+  <div class="desc">BCA 1 CH5 STATUS</div>
+  <div class="val" id="AIRLOCK000027">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 1 Channel 6 Status">
+  <div class="desc">BCA 1 CH6 STATUS</div>
+  <div class="val" id="AIRLOCK000028">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 2 Channel 1 Status">
+  <div class="desc">BCA 2 CH1 STATUS</div>
+  <div class="val" id="AIRLOCK000029">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 2 Channel 2 Status">
+  <div class="desc">BCA 2 CH2 STATUS</div>
+  <div class="val" id="AIRLOCK000030">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 2 Channel 3 Status">
+  <div class="desc">BCA 2 CH3 STATUS</div>
+  <div class="val" id="AIRLOCK000031">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 2 Channel 4 Status">
+  <div class="desc">BCA 2 CH4 STATUS</div>
+  <div class="val" id="AIRLOCK000032">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 2 Channel 5 Status">
+  <div class="desc">BCA 2 CH5 STATUS</div>
+  <div class="val" id="AIRLOCK000033">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 2 Channel 6 Status">
+  <div class="desc">BCA 2 CH6 STATUS</div>
+  <div class="val" id="AIRLOCK000034">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 3 Channel 1 Status">
+  <div class="desc">BCA 3 CH1 STATUS</div>
+  <div class="val" id="AIRLOCK000035">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 3 Channel 2 Status">
+  <div class="desc">BCA 3 CH2 STATUS</div>
+  <div class="val" id="AIRLOCK000036">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 3 Channel 3 Status">
+  <div class="desc">BCA 3 CH3 STATUS</div>
+  <div class="val" id="AIRLOCK000037">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 3 Channel 4 Status">
+  <div class="desc">BCA 3 CH4 STATUS</div>
+  <div class="val" id="AIRLOCK000038">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 3 Channel 5 Status">
+  <div class="desc">BCA 3 CH5 STATUS</div>
+  <div class="val" id="AIRLOCK000039">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 3 Channel 6 Status">
+  <div class="desc">BCA 3 CH6 STATUS</div>
+  <div class="val" id="AIRLOCK000040">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 4 Channel 1 Status">
+  <div class="desc">BCA 4 CH1 STATUS</div>
+  <div class="val" id="AIRLOCK000041">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 4 Channel 2 Status">
+  <div class="desc">BCA 4 CH2 STATUS</div>
+  <div class="val" id="AIRLOCK000042">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 4 Channel 3 Status">
+  <div class="desc">BCA 4 CH3 STATUS</div>
+  <div class="val" id="AIRLOCK000043">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 4 Channel 4 Status">
+  <div class="desc">BCA 4 CH4 STATUS</div>
+  <div class="val" id="AIRLOCK000044">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 4 Channel 5 Status">
+  <div class="desc">BCA 4 CH5 STATUS</div>
+  <div class="val" id="AIRLOCK000045">NO DATA</div>
+</div>
+<div class="EVA pui" title="Battery Charger Assembly (BCA) 4 Channel 6 Status">
+  <div class="desc">BCA 4 CH6 STATUS</div>
+  <div class="val" id="AIRLOCK000046">NO DATA</div>
+</div>
+<div class="EVA pui" title="Pumps atmosphere from Airlock into Node one during depress, voltage status.">
+  <div class="desc">DP VOLT STATUS</div>
+  <div class="val" id="AIRLOCK000047">NO DATA</div>
+</div>
+<div class="EVA pui" title="Pumps atmosphere from Airlock into Node one during depress, switch status.">
+  <div class="desc">DP SW STATUS</div>
+  <div class="val" id="AIRLOCK000048">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Crewlock Pressure">
+  <div class="desc">CREWLOCK PRESS</div>
+  <div class="val" id="AIRLOCK000049">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Hi P O2 Supply valve position">
+  <div class="desc">A/L HI P O2 VLV POS</div>
+  <div class="val" id="AIRLOCK000050">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Lo P O2 Supply Valve position">
+  <div class="desc">A/L LO P O2 VLV POS</div>
+  <div class="val" id="AIRLOCK000051">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="N2 Supply Valve position">
+  <div class="desc">A/L N2 VLV POS</div>
+  <div class="val" id="AIRLOCK000052">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Airlock Air Conditioner State">
+  <div class="desc">A/L A/C STATE</div>
+  <div class="val" id="AIRLOCK000053">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Airlock Pressure">
+  <div class="desc">AIRLOCK PRESS</div>
+  <div class="val" id="AIRLOCK000054">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Airlock Hi P O2 Tank Pressure">
+  <div class="desc">A/L HI P O2 PRESS</div>
+  <div class="val" id="AIRLOCK000055">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Airlock Lo P O2 Tank Pressure">
+  <div class="desc">A/L LO P O2 PRESS</div>
+  <div class="val" id="AIRLOCK000056">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Airlock N2 Tank Pressure">
+  <div class="desc">A/L N2 PRESS</div>
+  <div class="val" id="AIRLOCK000057">NO DATA</div>
+</div>
+<div class="CDH pui" title="Airlock Multiplexer/Demultiplexer (MDM) on-off status">
+  <div class="desc">A/L MDM STATUS</div>
+  <div class="val" id="AIRLOCK000058">NO DATA</div>
+</div>
+<div class="CDH pui" title="Node 1 Multiplexer/Demultiplexer (MDM) 1 on-off status">
+  <div class="desc">N1 MDM 1 STATUS</div>
+  <div class="val" id="NODE1000001">NO DATA</div>
+</div>
+<div class="CDH pui" title="Node 1 Multiplexer/Demultiplexer (MDM) 2 on-off status">
+  <div class="desc">N1 MDM 2 STATUS</div>
+  <div class="val" id="NODE1000002">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Coolant water quantity (Node 2), Medium Temperature Loop">
+  <div class="desc">N2 MTL H2O QTY</div>
+  <div class="val" id="NODE2000001">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Coolant water quantity (Node 2), Low Temperature Loop">
+  <div class="desc">N2 LTL H2O QTY</div>
+  <div class="val" id="NODE2000002">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Node 2 Air Conditioner State">
+  <div class="desc">N2 A/C STATE</div>
+  <div class="val" id="NODE2000003">NO DATA</div>
+</div>
+<div class="CDH pui" title="Node 2 Multiplexer/Demultiplexer (MDM) 2 on-off status">
+  <div class="desc">N2 MDM 2 STATUS</div>
+  <div class="val" id="NODE2000004">NO DATA</div>
+</div>
+<div class="CDH pui" title="Node 2 Multiplexer/Demultiplexer (MDM) 1 on-off status">
+  <div class="desc">N2 MDM 1 STATUS</div>
+  <div class="val" id="NODE2000005">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Node 2 Air Cooling Fluid Temp">
+  <div class="desc">N2 AIR COOL TEMP</div>
+  <div class="val" id="NODE2000006">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Node 2 Avionics Cooling Fluid Temp">
+  <div class="desc">N2 AV COOL TEMP</div>
+  <div class="val" id="NODE2000007">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Node 3 ppO2">
+  <div class="desc">N3 PPO2</div>
+  <div class="val" id="NODE3000001">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Node 3 ppN2">
+  <div class="desc">N3 PPN2</div>
+  <div class="val" id="NODE3000002">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Node 3 ppCO2">
+  <div class="desc">N3 PPCO2</div>
+  <div class="val" id="NODE3000003">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Urine Processor State">
+  <div class="desc">UPA STATE</div>
+  <div class="val" id="NODE3000004">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Urine Tank Qty">
+  <div class="desc">URINE TANK QTY</div>
+  <div class="val" id="NODE3000005">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Water Processor State">
+  <div class="desc">WPA STATE</div>
+  <div class="val" id="NODE3000006">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Water Processor Step">
+  <div class="desc">WPA PROC STEP</div>
+  <div class="val" id="NODE3000007">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Waste Water Tank Qty">
+  <div class="desc">WW TANK QTY</div>
+  <div class="val" id="NODE3000008">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Clean Water Tank Qty">
+  <div class="desc">CW TANK QTY</div>
+  <div class="val" id="NODE3000009">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Oxygen Generator State">
+  <div class="desc">OGA STATE</div>
+  <div class="val" id="NODE3000010">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="O2 Production rate">
+  <div class="desc">OGA PROD RATE</div>
+  <div class="val" id="NODE3000011">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Avionics Cooling Fluid Temp (Node 3)">
+  <div class="desc">N3 AV COOL TEMP</div>
+  <div class="val" id="NODE3000012">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Air Cooling Fluid Temp (Node 3)">
+  <div class="desc">N3 AC COOL TEMP</div>
+  <div class="val" id="NODE3000013">NO DATA</div>
+</div>
+<div class="CDH pui" title="Hub Control Zone (HCZ) Multiplexer/Demultiplexer 2 (MDM) on-off status">
+  <div class="desc">HCZ MDM 2 STATUS</div>
+  <div class="val" id="NODE3000014">NO DATA</div>
+</div>
+<div class="CDH pui" title="Node 3 Multiplexer/Demultiplexer (MDM) 2 on-off status">
+  <div class="desc">N3 MDM 2 STATUS</div>
+  <div class="val" id="NODE3000015">NO DATA</div>
+</div>
+<div class="CDH pui" title="Hub Control Zone (HCZ) Multiplexer/Demultiplexer 1 (MDM) on-off status">
+  <div class="desc">HCZ MDM 1 STATUS</div>
+  <div class="val" id="NODE3000016">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Coolant water quantity (Node 3)">
+  <div class="desc">N3 MTL H2O QTY</div>
+  <div class="val" id="NODE3000017">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Node 3 Air Conditioner State">
+  <div class="desc">N3 A/C STATE</div>
+  <div class="val" id="NODE3000018">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Coolant water quantity (Node 3)">
+  <div class="desc">N3 LTL H2O QTY</div>
+  <div class="val" id="NODE3000019">NO DATA</div>
+</div>
+<div class="CDH pui" title="Node 3 Multiplexer/Demultiplexer (MDM) 1 on-off status">
+  <div class="desc">N3 MDM 1 STATUS</div>
+  <div class="val" id="NODE3000020">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Loop B Pump Flowrate (kg/hr)">
+  <div class="desc">LP B PM FLOWRATE</div>
+  <div class="val" id="P1000001">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Loop B PM Out Press (kPa)">
+  <div class="desc">LP B PM OUT PRESS</div>
+  <div class="val" id="P1000002">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Loop B PM Out Temp (deg C)">
+  <div class="desc">LP B PM OUT TEMP</div>
+  <div class="val" id="P1000003">NO DATA</div>
+</div>
+<div class="CATO pui" title="S-Band Radio Frequency Group (RFG 2) Azimuth Gimbal Position">
+  <div class="desc">SASA 2 AZ</div>
+  <div class="val" id="P1000004">NO DATA</div>
+</div>
+<div class="CATO pui" title="S-Band Radio Frequency Group (RFG 2) Elevation Gimbal Position">
+  <div class="desc">SASA 2 EL</div>
+  <div class="val" id="P1000005">NO DATA</div>
+</div>
+<div class="CDH pui" title="P1 Truss Multiplexer/Demultiplexer (MDM) 1 on-off status">
+  <div class="desc">P1 MDM 1 STATUS</div>
+  <div class="val" id="P1000006">NO DATA</div>
+</div>
+<div class="CATO pui" title="S-Band Radio Frequency Group (RFG 2), on-off status">
+  <div class="desc">SASA 2 STATUS</div>
+  <div class="val" id="P1000007">NO DATA</div>
+</div>
+<div class="CDH pui" title="Port Thermal Radiator (PTR) Multiplexer/Demultiplexer (MDM) on-off status">
+  <div class="desc">PTR MDM STATUS</div>
+  <div class="val" id="P1000008">NO DATA</div>
+</div>
+<div class="CDH pui" title="P1 Truss Multiplexer/Demultiplexer (MDM) 2 on-off status">
+  <div class="desc">P1 MDM 2 STATUS</div>
+  <div class="val" id="P1000009">NO DATA</div>
+</div>
+<div class="CDH pui" title="P3 Truss Multiplexer/Demultiplexer (MDM) 1 on-off status">
+  <div class="desc">P3 MDM 1 STATUS</div>
+  <div class="val" id="P3000001">NO DATA</div>
+</div>
+<div class="CDH pui" title="P3 Truss Multiplexer/Demultiplexer (MDM) 2 on-off status">
+  <div class="desc">P3 MDM 2 STATUS</div>
+  <div class="val" id="P3000002">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 2A - Drive Voltage">
+  <div class="desc">PVCU 2A VOLTS</div>
+  <div class="val" id="P4000001">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 2A - Drive Current">
+  <div class="desc">PVCU 2A AMPS</div>
+  <div class="val" id="P4000002">NO DATA</div>
+</div>
+<div class="CDH pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 2A Multiplexer/Demultiplexer (MDM) 120 Volt On-Off Status">
+  <div class="desc">PVCU 2A MDM STAT</div>
+  <div class="val" id="P4000003">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 4A - Drive Voltage">
+  <div class="desc">PVCU 4A VOLTS</div>
+  <div class="val" id="P4000004">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 4A - Drive Current">
+  <div class="desc">PVCU 4A AMPS</div>
+  <div class="val" id="P4000005">NO DATA</div>
+</div>
+<div class="CDH pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 4A Multiplexer/Demultiplexer (MDM) 120 Volt On-Off Status">
+  <div class="desc">PVCU 4A MDM STAT</div>
+  <div class="val" id="P4000006">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 2A - Beta Gimble Assembly (BGA) Position (degrees)">
+  <div class="desc">PVCU 2A BGA POS</div>
+  <div class="val" id="P4000007">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 4A - Beta Gimble Assembly (BGA) Position (degrees)">
+  <div class="desc">PVCU 4A BGA POS</div>
+  <div class="val" id="P4000008">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 4B - Drive Voltage">
+  <div class="desc">PVCU 4B VOLTS</div>
+  <div class="val" id="P6000001">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 4B - Drive Current">
+  <div class="desc">PVCU 4B AMPS</div>
+  <div class="val" id="P6000002">NO DATA</div>
+</div>
+<div class="CDH pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 4B Multiplexer/Demultiplexer (MDM) 120 Volt On-Off Status">
+  <div class="desc">PVCU 4B MDM STAT</div>
+  <div class="val" id="P6000003">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 2B - Drive Voltage">
+  <div class="desc">PVCU 2B VOLTS</div>
+  <div class="val" id="P6000004">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 2B - Drive Current">
+  <div class="desc">PVCU 2B AMPS</div>
+  <div class="val" id="P6000005">NO DATA</div>
+</div>
+<div class="CDH pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 2B Multiplexer/Demultiplexer (MDM) 120 Volt On-Off Status">
+  <div class="desc">PVCU 2B MDM STAT</div>
+  <div class="val" id="P6000006">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 4B - Beta Gimble Assembly (BGA) Position (degrees)">
+  <div class="desc">PVCU 4B BGA POS</div>
+  <div class="val" id="P6000007">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 2B - Beta Gimble Assembly (BGA) Position (degrees)">
+  <div class="desc">PVCU 2B BGA POS</div>
+  <div class="val" id="P6000008">NO DATA</div>
+</div>
+<div class="VVO pui" title="Russian Segment Station Mode - Service Module (SM)">
+  <div class="desc">RS SM MODE</div>
+  <div class="val" id="RUSSEG000001">NO DATA</div>
+</div>
+<div class="VVO pui" title="First Kurs Equipment Kit Operating">
+  <div class="desc">KURS 1 OPER</div>
+  <div class="val" id="RUSSEG000002">NO DATA</div>
+</div>
+<div class="VVO pui" title="Second Kurs Equipment Kit Operating">
+  <div class="desc">KURS 2 OPER</div>
+  <div class="val" id="RUSSEG000003">NO DATA</div>
+</div>
+<div class="VVO pui" title="Service Module Kurs P1, P2 Failure - Russian Segment">
+  <div class="desc">RS SM KURS FAIL</div>
+  <div class="val" id="RUSSEG000004">NO DATA</div>
+</div>
+<div class="VVO pui" title="Distance from Service Module (SM) Kurs (Range)">
+  <div class="desc">SM KURS RANGE</div>
+  <div class="val" id="RUSSEG000005">NO DATA</div>
+</div>
+<div class="VVO pui" title="Rate from Service Module (SM) Kurs (Range Rate)">
+  <div class="desc">SM KURS RATE</div>
+  <div class="val" id="RUSSEG000006">NO DATA</div>
+</div>
+<div class="VVO pui" title="Service Module (SM) Kurs-P Test Mode - Russian Segment">
+  <div class="desc">SM KURS TEST</div>
+  <div class="val" id="RUSSEG000007">NO DATA</div>
+</div>
+<div class="VVO pui" title="Service Module (SM) Kurs-P 'Capture' Signal Availability">
+  <div class="desc">SM KURS CAPTURE</div>
+  <div class="val" id="RUSSEG000008">NO DATA</div>
+</div>
+<div class="VVO pui" title="Service Module (SM) Kurs-P Target Acquisition Signal - Russian Segment">
+  <div class="desc">SM KURS TGT ACQ</div>
+  <div class="val" id="RUSSEG000009">NO DATA</div>
+</div>
+<div class="VVO pui" title="Service Module (SM) Kurs-P Functional Mode Signal - Russian Segment">
+  <div class="desc">SM KURS MODE</div>
+  <div class="val" id="RUSSEG000010">NO DATA</div>
+</div>
+<div class="VVO pui" title="Service Module (SM) Kurs-P Standby Mode - Russian Segment">
+  <div class="desc">SM KURS STBY</div>
+  <div class="val" id="RUSSEG000011">NO DATA</div>
+</div>
+<div class="VVO pui" title="Service Module Docking Flag">
+  <div class="desc">SM DOCKING</div>
+  <div class="val" id="RUSSEG000012">NO DATA</div>
+</div>
+<div class="VVO pui" title="Service Module (SM) Forward Docking Port Engaged">
+  <div class="desc">SM FWD DOCK ENG</div>
+  <div class="val" id="RUSSEG000013">NO DATA</div>
+</div>
+<div class="VVO pui" title="Service Module (SM) Aft Docking Port Engaged">
+  <div class="desc">SM AFT DOCK ENG</div>
+  <div class="val" id="RUSSEG000014">NO DATA</div>
+</div>
+<div class="VVO pui" title="Service Module (SM) Nadir (Down-looking) Docking Port Engaged - Along Y-Axis">
+  <div class="desc">SM NAD DOCK ENG</div>
+  <div class="val" id="RUSSEG000015">NO DATA</div>
+</div>
+<div class="VVO pui" title="Functional Cargo Block (FGB) Nadir (Down-looking) Docking Port Engaged - Along Y-Axis">
+  <div class="desc">FGB NAD DOCK ENG</div>
+  <div class="val" id="RUSSEG000016">NO DATA</div>
+</div>
+<div class="VVO pui" title="Service Module (SM) Nadir (Down-looking) Universal Docking Module (UDM) Docking Port Engaged - Along Y-Axis">
+  <div class="desc">SM NAD UDM ENG</div>
+  <div class="val" id="RUSSEG000017">NO DATA</div>
+</div>
+<div class="VVO pui" title="Mini Research Module (MRM) 1 Docking Port Engaged - Russian Segment">
+  <div class="desc">MRM 1 DOCK ENGA</div>
+  <div class="val" id="RUSSEG000018">NO DATA</div>
+</div>
+<div class="VVO pui" title="Mini Research Module (MRM) 2 Docking Port Engaged - Russian Segment">
+  <div class="desc">MRM 2 DOCK ENGA</div>
+  <div class="val" id="RUSSEG000019">NO DATA</div>
+</div>
+<div class="VVO pui" title="Service Module - Docked Vehicle Hooks Closed - Russian Segment">
+  <div class="desc">SM DOCK HKS CLSD</div>
+  <div class="val" id="RUSSEG000020">NO DATA</div>
+</div>
+<div class="VVO pui" title="Service Module - Russian Guidance, Navigation, and Control - Active Attitude Mode - Russian Segment">
+  <div class="desc">RS GNC ATT MODE</div>
+  <div class="val" id="RUSSEG000021">NO DATA</div>
+</div>
+<div class="VVO pui" title="Service Module - Russian Guidance, Navigation, and Control - Motion Control - Russian Segment">
+  <div class="desc">RS GNC CONTROL</div>
+  <div class="val" id="RUSSEG000022">NO DATA</div>
+</div>
+<div class="VVO pui" title="Service Module - Russian Guidance, Navigation, and Control - Prepared to Free Drift Mode Transition - Russian Segment">
+  <div class="desc">RS GNC FR DFT</div>
+  <div class="val" id="RUSSEG000023">NO DATA</div>
+</div>
+<div class="VVO pui" title="Service Module - Russian Guidance, Navigation, and Control - Thruster Operation Mode Terminated - Russian Segment">
+  <div class="desc">RS GNC TSTR TERM</div>
+  <div class="val" id="RUSSEG000024">NO DATA</div>
+</div>
+<div class="ADCO-VVO pui" title="Service Module - Russian Guidance, Navigation, and Control - Current Dynamic Mode - Russian Segment">
+  <div class="desc">RS GNC DYN MODE</div>
+  <div class="val" id="RUSSEG000025">NO DATA</div>
+</div>
+<div class="SPARTAN-VVO pui" title="Starboard Thermal Radiator Rotating Joint (TRRJ) Position (degrees)">
+  <div class="desc">STBD TRRJ POS</div>
+  <div class="val" id="S0000001">NO DATA</div>
+</div>
+<div class="SPARTAN-VVO pui" title="Port Thermal Radiator Rotating Joint (TRRJ) Position (degrees)">
+  <div class="desc">PORT TRRJ POS</div>
+  <div class="val" id="S0000002">NO DATA</div>
+</div>
+<div class="SPARTAN-VVO pui" title="Solar Alpha Rotary Joint (SARJ) Starboard Joint Angle Position (degrees)">
+  <div class="desc">STBD SARJ POS</div>
+  <div class="val" id="S0000003">NO DATA</div>
+</div>
+<div class="SPARTAN-VVO pui" title="Solar Alpha Rotary Joint (SARJ) Port Joint Angle Position (degrees)">
+  <div class="desc">PORT SARJ POS</div>
+  <div class="val" id="S0000004">NO DATA</div>
+</div>
+<div class="VVO pui" title="Solar Alpha Rotary Joint (SARJ) Port Joint Angle Commanded Position (degrees)">
+  <div class="desc">PT SARJ CMD POS</div>
+  <div class="val" id="S0000005">NO DATA</div>
+</div>
+<div class="VVO pui" title="External Thermal Control System (ETCS) - Thermal Radiator Rotating Joint (TRRJ) - Loop B - Software mode">
+  <div class="desc">TRRJ LP B MODE</div>
+  <div class="val" id="S0000006">NO DATA</div>
+</div>
+<div class="VVO pui" title="External Thermal Control System (ETCS) - Thermal Radiator Rotating Joint (TRRJ) - Loop A - Software mode">
+  <div class="desc">TRRJ LP A MODE</div>
+  <div class="val" id="S0000007">NO DATA</div>
+</div>
+<div class="VVO pui" title="External Primary Solar Alpha Rotary Joint (SARJ) Port Mode">
+  <div class="desc">PORT SARJ MODE</div>
+  <div class="val" id="S0000008">NO DATA</div>
+</div>
+<div class="VVO pui" title="External Primary Solar Alpha Rotary Joint (SARJ) Starboard Mode">
+  <div class="desc">STBD SARJ MODE</div>
+  <div class="val" id="S0000009">NO DATA</div>
+</div>
+<div class="CDH pui" title="External Control Zone Multiplexer/Demultiplexer (MDM) 1 on-off status">
+  <div class="desc">ECZ MDM 1 STATUS</div>
+  <div class="val" id="S0000010">NO DATA</div>
+</div>
+<div class="CDH pui" title="S0 Truss Multiplexer/Demultiplexer (MDM) 1 on-off status">
+  <div class="desc">S0 MDM 1 STATUS</div>
+  <div class="val" id="S0000011">NO DATA</div>
+</div>
+<div class="CDH pui" title="External Control Zone Multiplexer/Demultiplexer (MDM) 2 on-off status">
+  <div class="desc">ECZ MDM 2 STATUS</div>
+  <div class="val" id="S0000012">NO DATA</div>
+</div>
+<div class="CDH pui" title="S0 Truss Multiplexer/Demultiplexer (MDM) 2 on-off status">
+  <div class="desc">S0 MDM 2 STATUS</div>
+  <div class="val" id="S0000013">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Loop A Pump Flowrate (kg/hr)">
+  <div class="desc">LP A PM FLOWRATE</div>
+  <div class="val" id="S1000001">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Loop A PM Out Press (kPa)">
+  <div class="desc">LP A PM OUT PRESS</div>
+  <div class="val" id="S1000002">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Loop A PM Out Temp (deg C)">
+  <div class="desc">LP A PM OUT TEMP</div>
+  <div class="val" id="S1000003">NO DATA</div>
+</div>
+<div class="CATO pui" title="S-Band Radio Frequency Group (RFG 1) Azimuth Gimbal Position">
+  <div class="desc">SASA 1 AZ</div>
+  <div class="val" id="S1000004">NO DATA</div>
+</div>
+<div class="CATO-VVO pui" title="S-Band Radio Frequency Group (RFG 1) Elevation Gimbal Position">
+  <div class="desc">SASA 1 EL</div>
+  <div class="val" id="S1000005">NO DATA</div>
+</div>
+<div class="CDH pui" title="Starboard Thermal Radiator (STR) Multiplexer/Demultiplexer (MDM) on-off status">
+  <div class="desc">STR MDM STATUS</div>
+  <div class="val" id="S1000006">NO DATA</div>
+</div>
+<div class="CDH pui" title="S1 Truss Multiplexer/Demultiplexer (MDM) 1 on-off status">
+  <div class="desc">S1 MDM 1 STATUS</div>
+  <div class="val" id="S1000007">NO DATA</div>
+</div>
+<div class="CDH pui" title="S1 Truss Multiplexer/Demultiplexer (MDM) 2 on-off status">
+  <div class="desc">S1 MDM 2 STATUS</div>
+  <div class="val" id="S1000008">NO DATA</div>
+</div>
+<div class="CATO pui" title="S-Band Radio Frequency Group (RFG 1), on-off status">
+  <div class="desc">SASA 1 STATUS</div>
+  <div class="val" id="S1000009">NO DATA</div>
+</div>
+<div class="CDH pui" title="S3 Truss Multiplexer/Demultiplexer (MDM) 1 on-off status">
+  <div class="desc">S3 MDM 1 STATUS</div>
+  <div class="val" id="S3000001">NO DATA</div>
+</div>
+<div class="CDH pui" title="S3 Truss Multiplexer/Demultiplexer (MDM) 2 on-off status">
+  <div class="desc">S2 MDM 2 STATUS</div>
+  <div class="val" id="S3000002">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 1A - Drive Voltage">
+  <div class="desc">PVCU 1A VOLTS</div>
+  <div class="val" id="S4000001">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 1A - Drive Current">
+  <div class="desc">PVCU 1A AMPS</div>
+  <div class="val" id="S4000002">NO DATA</div>
+</div>
+<div class="CDH pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 1A Multiplexer/Demultiplexer (MDM) 120 Volt On-Off Status">
+  <div class="desc">PVCU 1A MDM STAT</div>
+  <div class="val" id="S4000003">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 3A - Drive Voltage">
+  <div class="desc">PVCU 3A VOLTS</div>
+  <div class="val" id="S4000004">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 3A - Drive Current">
+  <div class="desc">PVCU 3A AMPS</div>
+  <div class="val" id="S4000005">NO DATA</div>
+</div>
+<div class="CDH pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 3A Multiplexer/Demultiplexer (MDM) 120 Volt On-Off Status">
+  <div class="desc">PVCU 3A MDM STAT</div>
+  <div class="val" id="S4000006">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 1A - Beta Gimble Assembly (BGA) Position (degrees)">
+  <div class="desc">PVCU 1A BGA POS</div>
+  <div class="val" id="S4000007">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 3A - Beta Gimble Assembly (BGA) Position (degrees)">
+  <div class="desc">PVCU 2A BGA POS</div>
+  <div class="val" id="S4000008">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 3B - Drive Voltage">
+  <div class="desc">PVCU 3B VOLTS</div>
+  <div class="val" id="S6000001">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 3B - Drive Current">
+  <div class="desc">PVCU 3B AMPS</div>
+  <div class="val" id="S6000002">NO DATA</div>
+</div>
+<div class="CDH pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 3B Multiplexer/Demultiplexer (MDM) 120 Volt On-Off Status">
+  <div class="desc">PVCU 3B MDM STAT</div>
+  <div class="val" id="S6000003">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 1B - Drive Voltage">
+  <div class="desc">PVCU 1B VOLTS</div>
+  <div class="val" id="S6000004">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 1B - Drive Current">
+  <div class="desc">PVCU 1B AMPS</div>
+  <div class="val" id="S6000005">NO DATA</div>
+</div>
+<div class="CDH pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 1B Multiplexer/Demultiplexer (MDM) 120 Volt On-Off Status">
+  <div class="desc">PVCU 1B MDM STAT</div>
+  <div class="val" id="S6000006">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 3B - Beta Gimble Assembly (BGA) Position (degrees)">
+  <div class="desc">PVCU 3B BGA POS</div>
+  <div class="val" id="S6000007">NO DATA</div>
+</div>
+<div class="SPARTAN pui" title="Photovolatic Control Unit (PVCU) - Solar Array - 1B - Beta Gimble Assembly (BGA) Position (degrees)">
+  <div class="desc">PVCU 1B BGA POS</div>
+  <div class="val" id="S6000008">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Control Moment Gyroscope (CMG)-1 On-Line">
+  <div class="desc">CMG 1 STATUS</div>
+  <div class="val" id="USLAB000001">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Control Moment Gyroscope (CMG)-2 On-Line">
+  <div class="desc">CMG 2 STATUS</div>
+  <div class="val" id="USLAB000002">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Control Moment Gyroscope (CMG)-3 On-Line">
+  <div class="desc">CMG 3 STATUS</div>
+  <div class="val" id="USLAB000003">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Control Moment Gyroscope (CMG)-4 On-Line">
+  <div class="desc">CMG 4 STATUS</div>
+  <div class="val" id="USLAB000004">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Number of Control Moment Gyroscope (CMG)s Online">
+  <div class="desc">CMGS ONLINE</div>
+  <div class="val" id="USLAB000005">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Control Moment Gyroscope (CMG) Control Torque - Roll (N-m)">
+  <div class="desc">CMG ROLL TORQUE</div>
+  <div class="val" id="USLAB000006">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Control Moment Gyroscope (CMG) Control Torque - Pitch (N-m)">
+  <div class="desc">CMG PITCH TORQUE</div>
+  <div class="val" id="USLAB000007">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Control Moment Gyroscope (CMG) Control Torque - Yaw (N-m)">
+  <div class="desc">CMG YAW TORQUE</div>
+  <div class="val" id="USLAB000008">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Active Control Moment Gyroscope (CMG) Momentum (Nms)">
+  <div class="desc">ACT CMG MOM</div>
+  <div class="val" id="USLAB000009">NO DATA</div>
+</div>
+<div class="ADCO-VVO pui" title="Control Moment Gyroscope (CMG) Momentum Percentage (%)">
+  <div class="desc">CMG MOM PCT</div>
+  <div class="val" id="USLAB000010">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Desaturation Request (Enabled/Inhibited)">
+  <div class="desc">DESAT REQ</div>
+  <div class="val" id="USLAB000011">NO DATA</div>
+</div>
+<div class="ADCO-VVO pui" title="US Guidance, Navigation and Control (GNC) Mode">
+  <div class="desc">USOS GNC MODE</div>
+  <div class="val" id="USLAB000012">NO DATA</div>
+</div>
+<div class="ADCO pui" title="US Attitude Source">
+  <div class="desc">USOS ATT SRC</div>
+  <div class="val" id="USLAB000013">NO DATA</div>
+</div>
+<div class="ADCO pui" title="US Rate Source">
+  <div class="desc">USOS RATE SRC</div>
+  <div class="val" id="USLAB000014">NO DATA</div>
+</div>
+<div class="ADCO pui" title="US State Vector Source">
+  <div class="desc">USOS SV SRC</div>
+  <div class="val" id="USLAB000015">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Attitude Controller Type">
+  <div class="desc">ATT CTRLR TYP</div>
+  <div class="val" id="USLAB000016">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Attitude Control Reference Frame">
+  <div class="desc">ATT CTRL REF</div>
+  <div class="val" id="USLAB000017">NO DATA</div>
+</div>
+<div class="ADCO pui" title="US Current Local Vertical Local Horizontal (LVLH) Attitude Quaternion Component 0">
+  <div class="desc">LVLH QTRN 0</div>
+  <div class="val" id="USLAB000018">NO DATA</div>
+</div>
+<div class="ADCO pui" title="US Current Local Vertical Local Horizontal (LVLH) Attitude Quaternion Component 1">
+  <div class="desc">LVLH QTRN 1</div>
+  <div class="val" id="USLAB000019">NO DATA</div>
+</div>
+<div class="ADCO pui" title="US Current Local Vertical Local Horizontal (LVLH) Attitude Quaternion Component 2">
+  <div class="desc">LVLH QTRN 2</div>
+  <div class="val" id="USLAB000020">NO DATA</div>
+</div>
+<div class="ADCO pui" title="US Current Local Vertical Local Horizontal (LVLH) Attitude Quaternion Component 3">
+  <div class="desc">LVLH QTRN 3</div>
+  <div class="val" id="USLAB000021">NO DATA</div>
+</div>
+<div class="ADCO pui" title="US Attitude Roll Error (deg)">
+  <div class="desc">ROLL ERROR</div>
+  <div class="val" id="USLAB000022">NO DATA</div>
+</div>
+<div class="ADCO pui" title="US Attitude Pitch Error (deg)">
+  <div class="desc">PITCH ERROR</div>
+  <div class="val" id="USLAB000023">NO DATA</div>
+</div>
+<div class="ADCO pui" title="US Attitude Yaw Error (deg)">
+  <div class="desc">YAW ERROR</div>
+  <div class="val" id="USLAB000024">NO DATA</div>
+</div>
+<div class="ADCO pui" title="US Inertial Attitude Rate X (deg/s)">
+  <div class="desc">INERTL ROLL RATE</div>
+  <div class="val" id="USLAB000025">NO DATA</div>
+</div>
+<div class="ADCO pui" title="US Inertial Attitude Rate Y (deg/s)">
+  <div class="desc">INERTL PITCH RATE</div>
+  <div class="val" id="USLAB000026">NO DATA</div>
+</div>
+<div class="ADCO pui" title="US Inertial Attitude Rate Z (deg/s)">
+  <div class="desc">INERTL YAW RATE</div>
+  <div class="val" id="USLAB000027">NO DATA</div>
+</div>
+<div class="ADCO pui" title="US Commanded Attitude Quaternion Component 0">
+  <div class="desc">CMD QTRN 0</div>
+  <div class="val" id="USLAB000028">NO DATA</div>
+</div>
+<div class="ADCO pui" title="US Commanded Attitude Quaternion Component 1">
+  <div class="desc">CMD QTRN 1</div>
+  <div class="val" id="USLAB000029">NO DATA</div>
+</div>
+<div class="ADCO pui" title="US Commanded Attitude Quaternion Component 2">
+  <div class="desc">CMD QTRN 2</div>
+  <div class="val" id="USLAB000030">NO DATA</div>
+</div>
+<div class="ADCO pui" title="US Commanded Attitude Quaternion Component 3">
+  <div class="desc">CMD QTRN 3</div>
+  <div class="val" id="USLAB000031">NO DATA</div>
+</div>
+<div class="ADCO-TOPO pui" title="US Guidance, Navigation and Control (GNC) J2000 Propagated State Vector - X (km)">
+  <div class="desc">GNC J2K SV RX</div>
+  <div class="val" id="USLAB000032">NO DATA</div>
+</div>
+<div class="ADCO-TOPO pui" title="US Guidance, Navigation and Control (GNC) J2000 Propagated State Vector - Y (km)">
+  <div class="desc">GNC J2K SV RY</div>
+  <div class="val" id="USLAB000033">NO DATA</div>
+</div>
+<div class="ADCO-TOPO pui" title="US Guidance, Navigation and Control (GNC) J2000 Propagated State Vector - Z (km)">
+  <div class="desc">GNC J2K SV RZ</div>
+  <div class="val" id="USLAB000034">NO DATA</div>
+</div>
+<div class="ADCO-TOPO pui" title="US Guidance, Navigation and Control (GNC) J2000 Propagated State Vector - X (m/s)">
+  <div class="desc">GNC J2K SV VX</div>
+  <div class="val" id="USLAB000035">NO DATA</div>
+</div>
+<div class="ADCO-TOPO pui" title="US Guidance, Navigation and Control (GNC) J2000 Propagated State Vector - Y (m/s)">
+  <div class="desc">GNC J2K SV VY</div>
+  <div class="val" id="USLAB000036">NO DATA</div>
+</div>
+<div class="ADCO-TOPO pui" title="US Guidance, Navigation and Control (GNC) J2000 Propagated State Vector - Z (m/s)">
+  <div class="desc">GNC J2K SV VZ</div>
+  <div class="val" id="USLAB000037">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Active Control Moment Gyroscope (CMG) Momentum Capacity (Nms)">
+  <div class="desc">CMG CAPACITY</div>
+  <div class="val" id="USLAB000038">NO DATA</div>
+</div>
+<div class="ADCO pui" title="ISS Total Mass (kg)">
+  <div class="desc">ISS TOTAL MASS</div>
+  <div class="val" id="USLAB000039">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Solar Beta Angle (degrees)">
+  <div class="desc">SOLAR BETA</div>
+  <div class="val" id="USLAB000040">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Loss of CMG Attitude Control (LOAC) Caution Message In Alarm">
+  <div class="desc">CMG LOAC ALARM</div>
+  <div class="val" id="USLAB000041">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Loss of ISS Attitude Control (LOAC) Caution Message In Alarm">
+  <div class="desc">ISS LOAC ALARM</div>
+  <div class="val" id="USLAB000042">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Global Positioning System (GPS-1) Ops Status">
+  <div class="desc">GPS 1 STATUS</div>
+  <div class="val" id="USLAB000043">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Global Positioning System (GPS-2) Ops Status">
+  <div class="desc">GPS 2 STATUS</div>
+  <div class="val" id="USLAB000044">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Spin Motor Spin Bearing Temperature - Control Moment Gyroscope (CMG) 1 (deg C)">
+  <div class="desc">CMG 1 MT BG TEMP</div>
+  <div class="val" id="USLAB000045">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Spin Motor Spin Bearing Temperature - Control Moment Gyroscope (CMG) 2 (deg C)">
+  <div class="desc">CMG 2 MT BG TEMP</div>
+  <div class="val" id="USLAB000046">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Spin Motor Spin Bearing Temperature - Control Moment Gyroscope (CMG) 3 (deg C)">
+  <div class="desc">CMG 3 MT BG TEMP</div>
+  <div class="val" id="USLAB000047">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Spin Motor Spin Bearing Temperature - Control Moment Gyroscope (CMG) 4 (deg C)">
+  <div class="desc">CMG 4 MR BG TEMP</div>
+  <div class="val" id="USLAB000048">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Hall Resolver Spin Bearing Temperature - Control Moment Gyroscope (CMG) 1 (deg C)">
+  <div class="desc">CMG 1 RS BG TEMP</div>
+  <div class="val" id="USLAB000049">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Hall Resolver Spin Bearing Temperature - Control Moment Gyroscope (CMG) 2 (deg C)">
+  <div class="desc">CMG 2 RS BG TEMP</div>
+  <div class="val" id="USLAB000050">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Hall Resolver Spin Bearing Temperature - Control Moment Gyroscope (CMG) 3 (deg C)">
+  <div class="desc">CMG 3 RS BG TEMP</div>
+  <div class="val" id="USLAB000051">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Hall Resolver Spin Bearing Temperature - Control Moment Gyroscope (CMG) 4 (deg C)">
+  <div class="desc">CMG 4 RS BG TEMP</div>
+  <div class="val" id="USLAB000052">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Lab ppO2">
+  <div class="desc">LAB PPO2</div>
+  <div class="val" id="USLAB000053">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Lab ppN2">
+  <div class="desc">LAB PPN2</div>
+  <div class="val" id="USLAB000054">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Lab ppCO2">
+  <div class="desc">LAB PPCO2</div>
+  <div class="val" id="USLAB000055">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Coolant water quantity, LT (Lab)">
+  <div class="desc">LAB LTL H2O QTY</div>
+  <div class="val" id="USLAB000056">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Coolant water quantity, MT (Lab)">
+  <div class="desc">LAB MTL H2O QTY</div>
+  <div class="val" id="USLAB000057">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Cabin pressure">
+  <div class="desc">LAB PRESS</div>
+  <div class="val" id="USLAB000058">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Cabin temperature">
+  <div class="desc">LAB TEMP</div>
+  <div class="val" id="USLAB000059">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Avionics Cooling Fluid Temp (Lab)">
+  <div class="desc">LAB AV COOL TEMP</div>
+  <div class="val" id="USLAB000060">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Air Cooling Fluid Temp (Lab)">
+  <div class="desc">LAB AC COOL TEMP</div>
+  <div class="val" id="USLAB000061">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Vacuum Resource System Valve Position">
+  <div class="desc">VRS VLV POS</div>
+  <div class="val" id="USLAB000062">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Vacuum Exhaust System Valve Position">
+  <div class="desc">VES VLV POS</div>
+  <div class="val" id="USLAB000063">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Lab Port Air Conditioner State">
+  <div class="desc">LAB PORT A/C STATE</div>
+  <div class="val" id="USLAB000064">NO DATA</div>
+</div>
+<div class="ETHOS pui" title="Lab Starboard Air Conditioner State">
+  <div class="desc">LAB STBD A/C STATE</div>
+  <div class="val" id="USLAB000065">NO DATA</div>
+</div>
+<div class="CDH pui" title="Command and Control (C&C) Multiplexer/Demultiplexer (MDM) 1 on-off status">
+  <div class="desc">CC MDM 1 STATUS</div>
+  <div class="val" id="USLAB000066">NO DATA</div>
+</div>
+<div class="CDH pui" title="Command and Control (C&C) Multiplexer/Demultiplexer (MDM) 2 on-off status">
+  <div class="desc">CC MDM 2 STATUS</div>
+  <div class="val" id="USLAB000067">NO DATA</div>
+</div>
+<div class="CDH pui" title="Command and Control (C&C) Multiplexer/Demultiplexer (MDM) 3 on-off status">
+  <div class="desc">CC MDM 3 STATUS</div>
+  <div class="val" id="USLAB000068">NO DATA</div>
+</div>
+<div class="CDH pui" title="Internal Control Zone Multiplexer/Demultiplexer (MDM) 1 on-off status">
+  <div class="desc">ICZ MDM 1 STATUS</div>
+  <div class="val" id="USLAB000069">NO DATA</div>
+</div>
+<div class="CDH pui" title="Internal Control Zone Multiplexer/Demultiplexer (MDM) 2 on-off status">
+  <div class="desc">ICZ MDM 2 STATUS</div>
+  <div class="val" id="USLAB000070">NO DATA</div>
+</div>
+<div class="CDH pui" title="Payload (PL) Multiplexer/Demultiplexer (MDM) 1 on-off status">
+  <div class="desc">PL MDM 1 STATUS</div>
+  <div class="val" id="USLAB000071">NO DATA</div>
+</div>
+<div class="CDH pui" title="Payload (PL) Multiplexer/Demultiplexer (MDM) 2 on-off status">
+  <div class="desc">PL MDM 2 STATUS</div>
+  <div class="val" id="USLAB000072">NO DATA</div>
+</div>
+<div class="CDH pui" title="Guidance, Navigation and Control (GNC) Multiplexer/Demultiplexer 1 on-off status">
+  <div class="desc">GNC MDM 1 STATUS</div>
+  <div class="val" id="USLAB000073">NO DATA</div>
+</div>
+<div class="CDH pui" title="Guidance, Navigation and Control (GNC) Multiplexer/Demultiplexer 2 on-off status">
+  <div class="desc">GNC MDM 2 STATUS</div>
+  <div class="val" id="USLAB000074">NO DATA</div>
+</div>
+<div class="CDH pui" title="Power Mangement Controller Unit (PMCU) 1 Multiplexer/Demultiplexer 1 on-off status">
+  <div class="desc">PMCU 1 MDM 1 STAT</div>
+  <div class="val" id="USLAB000075">NO DATA</div>
+</div>
+<div class="CDH pui" title="Power Mangement Controller Unit (PMCU) 2 Multiplexer/Demultiplexer 1 on-off status">
+  <div class="desc">PMCU 2 MDM 1 STAT</div>
+  <div class="val" id="USLAB000076">NO DATA</div>
+</div>
+<div class="CDH pui" title="US Lab Multiplexer/Demultiplexer (MDM) 1 on-off status">
+  <div class="desc">LAB MDM 1 STATUS</div>
+  <div class="val" id="USLAB000077">NO DATA</div>
+</div>
+<div class="CDH pui" title="US Lab Multiplexer/Demultiplexer (MDM) 2 on-off status">
+  <div class="desc">LAB MDM 2 STATUS</div>
+  <div class="val" id="USLAB000078">NO DATA</div>
+</div>
+<div class="CDH pui" title="US Lab Multiplexer/Demultiplexer (MDM) 3 on-off status">
+  <div class="desc">LAB MDM 3 STATUS</div>
+  <div class="val" id="USLAB000079">NO DATA</div>
+</div>
+<div class="CDH pui" title="Permanent Multipurpose Module - System Power voltage status">
+  <div class="desc">PMM SYS PWR STAT</div>
+  <div class="val" id="USLAB000080">NO DATA</div>
+</div>
+<div class="VVO pui" title="Attitude Maneuver In Progress status">
+  <div class="desc">ATT MNVR IN PROG</div>
+  <div class="val" id="USLAB000081">NO DATA</div>
+</div>
+<div class="ODIN pui" title="Standard Command Counter - Count of standard commands received by the ISS Command and Control Computer">
+  <div class="desc">SCC COUNT</div>
+  <div class="val" id="USLAB000082">NO DATA</div>
+</div>
+<div class="ODIN pui" title="Data Load Command Counter - Count of data load commands received by the ISS Command and Control Computer">
+  <div class="desc">DLCC COUNT</div>
+  <div class="val" id="USLAB000083">NO DATA</div>
+</div>
+<div class="ODIN pui" title="ISS Command and Control Multiplexer/Demultiplexer Onboard Time (course)">
+  <div class="desc">ISS TIME</div>
+  <div class="val" id="USLAB000084">NO DATA</div>
+</div>
+<div class="ODIN-VVO pui" title="ISS Station Mode">
+  <div class="desc">STATION MODE</div>
+  <div class="val" id="USLAB000086">NO DATA</div>
+</div>
+<div class="ODIN pui" title="# Laptops active and connected to the Primary Command and Control (C&C) Multiplexer/Demultiplexer (MDM)">
+  <div class="desc">LAPTOPS CONN</div>
+  <div class="val" id="USLAB000087">NO DATA</div>
+</div>
+<div class="CATO pui" title="Ku-Band Video Downlink Channel 1 Activity">
+  <div class="desc">KU VID 1 ACT</div>
+  <div class="val" id="USLAB000088">NO DATA</div>
+</div>
+<div class="CATO pui" title="Ku-Band Video Downlink Channel 2 Activity">
+  <div class="desc">KU VID 2 ACT</div>
+  <div class="val" id="USLAB000089">NO DATA</div>
+</div>
+<div class="CATO pui" title="Ku-Band Video Downlink Channel 3 Activity">
+  <div class="desc">KU VID 3 ACT</div>
+  <div class="val" id="USLAB000090">NO DATA</div>
+</div>
+<div class="CATO pui" title="Ku-Band Video Downlink Channel 4 Activity">
+  <div class="desc">KU VID 4 ACT</div>
+  <div class="val" id="USLAB000091">NO DATA</div>
+</div>
+<div class="CATO pui" title="Active String of S-Band">
+  <div class="desc">SBAND STRING</div>
+  <div class="val" id="USLAB000092">NO DATA</div>
+</div>
+<div class="CATO pui" title="Internal Audio Controller (IAC) - IAC-1 Active/Backup Indication">
+  <div class="desc">IAC 1 STATUS</div>
+  <div class="val" id="USLAB000093">NO DATA</div>
+</div>
+<div class="CATO pui" title="Internal Audio Controller (IAC) - IAC-2 Active/Backup Indication">
+  <div class="desc">IAC 2 STATUS</div>
+  <div class="val" id="USLAB000094">NO DATA</div>
+</div>
+<div class="CATO pui" title="Video Source Routed to Downlink 1">
+  <div class="desc">DL 1 SRC</div>
+  <div class="val" id="USLAB000095">NO DATA</div>
+</div>
+<div class="CATO pui" title="Video Source Routed to Downlink 2">
+  <div class="desc">DL 2 SRC</div>
+  <div class="val" id="USLAB000096">NO DATA</div>
+</div>
+<div class="CATO pui" title="Video Source Routed to Downlink 3">
+  <div class="desc">DL3 SRC</div>
+  <div class="val" id="USLAB000097">NO DATA</div>
+</div>
+<div class="CATO pui" title="Video Source Routed to Downlink 4">
+  <div class="desc">DL 4 SRC</div>
+  <div class="val" id="USLAB000098">NO DATA</div>
+</div>
+<div class="CATO pui" title="Space-To-Space Radio (UHF) 1 Power">
+  <div class="desc">UHF 1 PWR</div>
+  <div class="val" id="USLAB000099">NO DATA</div>
+</div>
+<div class="CATO pui" title="Space-To-Space Radio (UHF) 2 Power">
+  <div class="desc">UHF 2 PWR</div>
+  <div class="val" id="USLAB000100">NO DATA</div>
+</div>
+<div class="CATO pui" title="Space-To-Space Radio Frame Sync Lock">
+  <div class="desc">UHF FRAME SYNC</div>
+  <div class="val" id="USLAB000101">NO DATA</div>
+</div>
+<div class="TOPO pui" title="State vector time tag">
+  <div class="desc">SV TIME TAG</div>
+  <div class="val" id="USLAB000102">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Control Moment Gyroscope (CMG)-1 Vibration (g)">
+  <div class="desc">CMG 1 VIB</div>
+  <div class="val" id="Z1000001">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Control Moment Gyroscope (CMG)-2 Vibration (g)">
+  <div class="desc">CMG 2 VIB</div>
+  <div class="val" id="Z1000002">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Control Moment Gyroscope (CMG)-3 Vibration (g)">
+  <div class="desc">CMG 3 VIBE</div>
+  <div class="val" id="Z1000003">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Control Moment Gyroscope (CMG)-4 Vibration (g)">
+  <div class="desc">CMG 4 VIBE</div>
+  <div class="val" id="Z1000004">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Control Moment Gyroscope (CMG)-1 Spin Motor Current (amps)">
+  <div class="desc">CMG 1 MTR AMPS</div>
+  <div class="val" id="Z1000005">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Control Moment Gyroscope (CMG)-2 Spin Motor Current (amps)">
+  <div class="desc">CMG 2 MTR AMPS</div>
+  <div class="val" id="Z1000006">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Control Moment Gyroscope (CMG)-3 Spin Motor Current (amps)">
+  <div class="desc">CMG 3 MTR AMPS</div>
+  <div class="val" id="Z1000007">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Control Moment Gyroscope (CMG)-4 Spin Motor Current (amps)">
+  <div class="desc">CMG 4 MTR AMPS</div>
+  <div class="val" id="Z1000008">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Control Moment Gyroscope (CMG) 1 Wheel Speed (rpm)">
+  <div class="desc">CMG 1 RPM</div>
+  <div class="val" id="Z1000009">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Control Moment Gyroscope (CMG) 2 Wheel Speed (rpm)">
+  <div class="desc">CMG 2 RPM</div>
+  <div class="val" id="Z1000010">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Control Moment Gyroscope (CMG) 3 Wheel Speed (rpm)">
+  <div class="desc">CMG 3 RPM</div>
+  <div class="val" id="Z1000011">NO DATA</div>
+</div>
+<div class="ADCO pui" title="Control Moment Gyroscope (CMG) 4 Wheel Speed (rpm)">
+  <div class="desc">CMG 4 RPM</div>
+  <div class="val" id="Z1000012">NO DATA</div>
+</div>
+<div class="CATO pui" title="Ku-Band Transmit">
+  <div class="desc">KU XMIT</div>
+  <div class="val" id="Z1000013">NO DATA</div>
+</div>
+<div class="CATO pui" title="Ku-Band SGANT Elevation Position">
+  <div class="desc">SGANT EL</div>
+  <div class="val" id="Z1000014">NO DATA</div>
+</div>
+<div class="CATO pui" title="Ku-Band SGANT Cross-Elevation Position">
+  <div class="desc">SGANT XEL</div>
+  <div class="val" id="Z1000015">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS MT Position Float">
+  <div class="desc">MT POS</div>
+  <div class="val" id="CSAMT000001">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS MT Utility Port ID (which Worksite MT is connected to, WS1 though WS8)">
+  <div class="desc">MT WORKSITE</div>
+  <div class="val" id="CSAMT000002">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS EDCD SACS Operating Base">
+  <div class="desc">SACS BASE</div>
+  <div class="val" id="CSASSRMS001-1">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS EDCD SSRMS Base Location">
+  <div class="desc">SSRMS BASE LOC</div>
+  <div class="val" id="CSASSRMS002">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS EDCD SSRMS Operating Base (Which LEE is Base)">
+  <div class="desc">SSRMS OPER BASE</div>
+  <div class="val" id="CSASSRMS003">NO DATA</div>
+</div>
+<div class="CSA pui" title="SSRMS SR Measured Joint Position">
+  <div class="desc">SSRMS SR POS</div>
+  <div class="val" id="CSASSRMS004">NO DATA</div>
+</div>
+<div class="CSA pui" title="SSRMS SY Measured Joint Position">
+  <div class="desc">SSRMS SY POS</div>
+  <div class="val" id="CSASSRMS005">NO DATA</div>
+</div>
+<div class="CSA pui" title="SSRMS SP Measured Joint Position">
+  <div class="desc">SSRMS SP POS</div>
+  <div class="val" id="CSASSRMS006">NO DATA</div>
+</div>
+<div class="CSA pui" title="SSRMS EP Measured Joint Position">
+  <div class="desc">SSRMS EP POS</div>
+  <div class="val" id="CSASSRMS007">NO DATA</div>
+</div>
+<div class="CSA pui" title="SSRMS WP Measured Joint Position">
+  <div class="desc">SSRMS WP POS</div>
+  <div class="val" id="CSASSRMS008">NO DATA</div>
+</div>
+<div class="CSA pui" title="SSRMS WY Measured Joint Position">
+  <div class="desc">SSRMS WY POS</div>
+  <div class="val" id="CSASSRMS009">NO DATA</div>
+</div>
+<div class="CSA pui" title="SSRMS WR Measured Joint Position">
+  <div class="desc">SSRMS WR POS</div>
+  <div class="val" id="CSASSRMS010">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS OCS Payload Status SSRMS Tip LEE">
+  <div class="desc">SSRMS TIP LEE STAT</div>
+  <div class="val" id="CSASSRMS011">NO DATA</div>
+</div>
+<div class="CSA pui" title="SPDM Operating Base">
+  <div class="desc">SPDM BASE</div>
+  <div class="val" id="CSASPDM0001-1">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS OCS Base Location SPDM">
+  <div class="desc">SPDM BASE LOC</div>
+  <div class="val" id="CSASPDM0002">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS OCS SPDM 1 SR Measured Joint Position">
+  <div class="desc">SPDM 1 SR POS</div>
+  <div class="val" id="CSASPDM0003">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS OCS SPDM 1 SY Measured Joint Position">
+  <div class="desc">SPDM 1 SY POS</div>
+  <div class="val" id="CSASPDM0004">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS OCS SPDM 1 SP Measured Joint Position">
+  <div class="desc">SPDM 1 SP POS</div>
+  <div class="val" id="CSASPDM0005">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS OCS SPDM 1 EP Measured Joint Position">
+  <div class="desc">SPDM 1 EP POS</div>
+  <div class="val" id="CSASPDM0006">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS OCS SPDM 1 WP Measured Joint Position">
+  <div class="desc">SPDM 1 WP POS</div>
+  <div class="val" id="CSASPDM0007">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS OCS SPDM 1 WY Measured Joint Position">
+  <div class="desc">SPDM 1 WY POS</div>
+  <div class="val" id="CSASPDM0008">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS OCS SPDM 1 WR Measured Joint Position">
+  <div class="desc">SPDM 1 WR POS</div>
+  <div class="val" id="CSASPDM0009">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS Payload Status OCS SPDM Arm 1 OTCM">
+  <div class="desc">SPDM 1 OTCM STAT</div>
+  <div class="val" id="CSASPDM0010">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS OCS SPDM 2 SR Measured Joint Position">
+  <div class="desc">SPDM 2 SR POS</div>
+  <div class="val" id="CSASPDM0011">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS OCS SPDM 2 SY Measured Joint Position">
+  <div class="desc">SPDM 2 SY POS</div>
+  <div class="val" id="CSASPDM0012">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS OCS SPDM 2 SP Measured Joint Position">
+  <div class="desc">SPDM 2 SP POS</div>
+  <div class="val" id="CSASPDM0013">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS OCS SPDM 2 EP Measured Joint Position">
+  <div class="desc">SPDM 2 EP POS</div>
+  <div class="val" id="CSASPDM0014">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS OCS SPDM 2 WP Measured Joint Position">
+  <div class="desc">SPDM 2 WP POS</div>
+  <div class="val" id="CSASPDM0015">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS OCS SPDM 2 WY Measured Joint Position">
+  <div class="desc">SPDM 2 WY POS</div>
+  <div class="val" id="CSASPDM0016">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS OCS SPDM 2 WR Measured Joint Position">
+  <div class="desc">SPDM 2 WR POS</div>
+  <div class="val" id="CSASPDM0017">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS SPDM Arm 1 Hot">
+  <div class="desc">SPDM 1 HOT</div>
+  <div class="val" id="CSASPDM0018-1">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS SPDM Arm 2 Hot">
+  <div class="desc">SPDM 2 HOT</div>
+  <div class="val" id="CSASPDM0018-2">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS Payload Status OCS SPDM Arm 2 OTCM">
+  <div class="desc">SPDM 2 OTCM STAT</div>
+  <div class="val" id="CSASPDM0019">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS OCS SPDM Body Roll Joint Position">
+  <div class="desc">SPDM BR POS</div>
+  <div class="val" id="CSASPDM0020">NO DATA</div>
+</div>
+<div class="CSA pui" title="SPDM Lee Stop Condition">
+  <div class="desc">SPDM LEE STP CND</div>
+  <div class="val" id="CSASPDM0021-1">NO DATA</div>
+</div>
+<div class="CSA pui" title="SPDM Lee Run Speed">
+  <div class="desc">SPDM LEE RUN SPD</div>
+  <div class="val" id="CSASPDM0021-2">NO DATA</div>
+</div>
+<div class="CSA pui" title="SPDM Lee Hot">
+  <div class="desc">SPDM LEE HOT</div>
+  <div class="val" id="CSASPDM0021-3">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS Payload Status OCS SPDM Body">
+  <div class="desc">SPDM BODY PL STAT</div>
+  <div class="val" id="CSASPDM0022">NO DATA</div>
+</div>
+<div class="CSA pui" title="MBS Operating Base">
+  <div class="desc">MBS OPER BASE</div>
+  <div class="val" id="CSAMBS00001-1">NO DATA</div>
+</div>
+<div class="CSA pui" title="MBS Base Location">
+  <div class="desc">MBS BASE LOC</div>
+  <div class="val" id="CSAMBS00001-2">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS OCS Payload Status MBS MCAS">
+  <div class="desc">MCAS PL STATUS</div>
+  <div class="val" id="CSAMBS00002">NO DATA</div>
+</div>
+<div class="CSA pui" title="POA Stop Condition">
+  <div class="desc">MBS POA STP CND</div>
+  <div class="val" id="CSAMBA00003-1">NO DATA</div>
+</div>
+<div class="CSA pui" title="POA LEE Speed">
+  <div class="desc">MBS POA LEE SPD</div>
+  <div class="val" id="CSAMBA00003-2">NO DATA</div>
+</div>
+<div class="CSA pui" title="POA Hot">
+  <div class="desc">MBS POA HOT</div>
+  <div class="val" id="CSAMBA00003-3">NO DATA</div>
+</div>
+<div class="CSA pui" title="SSRMS LEE Stop Condition">
+  <div class="desc">SSRMS LEE STP</div>
+  <div class="val" id="CSAMBA00003-4">NO DATA</div>
+</div>
+<div class="CSA pui" title="POA LEE Speed">
+  <div class="desc">SSRMS LEE SPD</div>
+  <div class="val" id="CSAMBA00003-5">NO DATA</div>
+</div>
+<div class="CSA pui" title="POA Hot">
+  <div class="desc">SSRMS LEE HOT</div>
+  <div class="val" id="CSAMBA00003-6">NO DATA</div>
+</div>
+<div class="CSA pui" title="MSS OCS Payload Status MBS POA">
+  <div class="desc">POA PL STATUS</div>
+  <div class="val" id="CSAMBA00004">NO DATA</div>
+</div>
+
+
+	<div>
+		<div align="center" >Signal Status?</div>
+		<div align="center"  id="AOS"></div>
+	</div>
+	<div>
+		<div align="center" >Upcoming LOS</div>
+		<div align="center"  id="LOS"></div>
+	</div>
+</table>
+
+<script src="https://demos.lightstreamer.com/commons/require.js"></script>
+<script src="https://demos.lightstreamer.com/commons/lightstreamer.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+
+<script>
+var setevents = function()
+{
+	$(".val").each(function() { $(this).on('animationend', function() { $(this).removeClass('highlight');})});
+};
+
+require(["LightstreamerClient","Subscription"],function(LightstreamerClient,Subscription) 
+{
+	var client = new LightstreamerClient("https://push.lightstreamer.com","ISSLIVE");
+	client.connect();
+ 
+	var sub = new Subscription("MERGE",["AIRLOCK000001","AIRLOCK000002","AIRLOCK000003","AIRLOCK000004","AIRLOCK000005","AIRLOCK000006",
+"AIRLOCK000007","AIRLOCK000008","AIRLOCK000009","AIRLOCK000010","AIRLOCK000011","AIRLOCK000012",
+"AIRLOCK000013","AIRLOCK000014","AIRLOCK000015","AIRLOCK000016","AIRLOCK000017","AIRLOCK000018",
+"AIRLOCK000019","AIRLOCK000020","AIRLOCK000021","AIRLOCK000022","AIRLOCK000023","AIRLOCK000024",
+"AIRLOCK000025","AIRLOCK000026","AIRLOCK000027","AIRLOCK000028","AIRLOCK000029","AIRLOCK000030",
+"AIRLOCK000031","AIRLOCK000032","AIRLOCK000033","AIRLOCK000034","AIRLOCK000035","AIRLOCK000036",
+"AIRLOCK000037","AIRLOCK000038","AIRLOCK000039","AIRLOCK000040","AIRLOCK000041","AIRLOCK000042",
+"AIRLOCK000043","AIRLOCK000044","AIRLOCK000045","AIRLOCK000046","AIRLOCK000047","AIRLOCK000048",
+"AIRLOCK000049","AIRLOCK000050","AIRLOCK000051","AIRLOCK000052","AIRLOCK000053","AIRLOCK000054",
+"AIRLOCK000055","AIRLOCK000056","AIRLOCK000057","NODE2000001","NODE2000002","NODE2000003",
+"NODE2000006","NODE2000007","NODE3000001","NODE3000002","NODE3000003","NODE3000004",
+"NODE3000005","NODE3000006","NODE3000007","NODE3000008","NODE3000009","NODE3000010",
+"NODE3000011","NODE3000012","NODE3000013","NODE3000017","NODE3000018","NODE3000019",
+"USLAB000053","USLAB000054","USLAB000055","USLAB000056","USLAB000057","USLAB000058",
+"USLAB000059","USLAB000060","USLAB000061","USLAB000062","USLAB000063","USLAB000064",
+"USLAB000065","AIRLOCK000058","NODE1000001","NODE1000002","NODE2000004","NODE2000005",
+"NODE3000014","NODE3000015","NODE3000016","NODE3000020","P1000006","P1000008",
+"P1000009","P3000001","P3000002","P4000003","P4000006","P6000003","P6000006",
+"S0000010","S0000011","S0000012","S0000013","S1000006","S1000007","S1000008",
+"S3000001","S3000002","S4000003","S4000006","S6000003","S6000006","USLAB000066",
+"USLAB000067","USLAB000068","USLAB000069","USLAB000070","USLAB000071","USLAB000072",
+"USLAB000073","USLAB000074","USLAB000075","USLAB000076","USLAB000077","USLAB000078",
+"USLAB000079","USLAB000080","P1000001","P1000002","P1000003","P4000001",
+"P4000002","P4000004","P4000005","P4000007","P4000008","P6000001",
+"P6000002","P6000004","P6000005","P6000007","P6000008","S1000001",
+"S1000002","S1000003","S4000001","S4000002","S4000004","S4000005",
+"S4000007","S4000008","S6000001","S6000002","S6000004","S6000005",
+"S6000007","S6000008","P1000004","P1000005","P1000007","S1000004",
+"S1000009","USLAB000088","USLAB000089","USLAB000090","USLAB000091","USLAB000092",
+"USLAB000093","USLAB000094","USLAB000095","USLAB000096","USLAB000097","USLAB000098",
+"USLAB000099","USLAB000100","USLAB000101","Z1000013","Z1000014","Z1000015",
+"S0000001","S0000002","S0000003","S0000004","S0000005","S0000006",
+"S0000007","S0000008","S0000009","USLAB000081","RUSSEG000001","RUSSEG000002",
+"RUSSEG000003","RUSSEG000004","RUSSEG000005","RUSSEG000006","RUSSEG000007","RUSSEG000008",
+"RUSSEG000009","RUSSEG000010","RUSSEG000011","RUSSEG000012","RUSSEG000013","RUSSEG000014",
+"RUSSEG000015","RUSSEG000016","RUSSEG000017","RUSSEG000018","RUSSEG000019","RUSSEG000020",
+"RUSSEG000021","RUSSEG000022","RUSSEG000023","RUSSEG000024","S1000005","USLAB000001",
+"USLAB000002","USLAB000003","USLAB000004","USLAB000005","USLAB000006","USLAB000007",
+"USLAB000008","USLAB000009","USLAB000011","USLAB000013","USLAB000014","USLAB000015",
+"USLAB000016","USLAB000017","USLAB000018","USLAB000019","USLAB000020","USLAB000021",
+"USLAB000022","USLAB000023","USLAB000024","USLAB000025","USLAB000026","USLAB000027",
+"USLAB000028","USLAB000029","USLAB000030","USLAB000031","USLAB000038","USLAB000039",
+"USLAB000040","USLAB000041","USLAB000042","USLAB000043","USLAB000044","USLAB000045",
+"USLAB000046","USLAB000047","USLAB000048","USLAB000049","USLAB000050","USLAB000051",
+"USLAB000052","Z1000001","Z1000002","Z1000003","Z1000004","Z1000005",
+"Z1000006","Z1000007","Z1000008","Z1000009","Z1000010","Z1000011",
+"Z1000012","USLAB000010","USLAB000012","RUSSEG000025","USLAB000032","USLAB000033",
+"USLAB000034","USLAB000035","USLAB000036","USLAB000037","USLAB000082","USLAB000083",
+"USLAB000084","USLAB000085","USLAB000087","USLAB000086","USLAB000102","TIME_000001",
+"TIME_000002","CSAMT000001","CSAMT000002","CSASSRMS001","CSASSRMS002","CSASSRMS003",
+"CSASSRMS004","CSASSRMS005","CSASSRMS006","CSASSRMS007","CSASSRMS008","CSASSRMS009",
+"CSASSRMS010","CSASSRMS011","CSASPDM0001","CSASPDM0002","CSASPDM0003","CSASPDM0004",
+"CSASPDM0005","CSASPDM0006","CSASPDM0007","CSASPDM0008","CSASPDM0009","CSASPDM0010",
+"CSASPDM0011","CSASPDM0012","CSASPDM0013","CSASPDM0014","CSASPDM0015","CSASPDM0016",
+"CSASPDM0017","CSASPDM0018","CSASPDM0019","CSASPDM0020","CSASPDM0021","CSASPDM0022",
+"CSAMBS00001","CSAMBS00002","CSAMBA00003","CSAMBA00004"],["Value","TimeStamp","Status"]);
+	
+	var timeSub = new Subscription('MERGE', 'TIME_000001', ['Value','TimeStamp','Status.Class']);
+	
+	client.subscribe(sub);
+	
+	var AOStimestamp = 0.00;
+	var AOS;
+	var LOS = ""; 
+	var PSARJ;
+	var SSARJ;
+	var PTRRJ;
+	var STRRJ;
+	var Beta1A;
+	var Beta1B;
+	
+	var Beta2A;
+	var Beta2B;
+	var Beta3A;
+	var Beta3B;
+	var Beta4A;
+	var Beta4B;
+
+	var SGANT = [0.00, 0.00, 0.00, 0.00, 0.00];
+	var avgSASA = [0.00, 0.00, 0.00, 0.00, 0.00];
+	var avgTime = [0.00, 0.00, 0.00, 0.00, 0.00];
+	var avgSlew = [0.00, 0.00, 0.00, 0.00, 0.00];	
+	var angleDif = 0.00;
+	var index = 0;
+	var SGANT_elevation = 0.00;
+	var SASA_elevation = 0.00
+	var oldAngleDif = 0.00;
+	var oldSGANT_el = 0.00;
+	var oldAngleTime = 0.00;
+	
+	var time;
+	var difference = 0.00;
+    var unixtime = (new Date).getTime();
+	var date = new Date(unixtime);
+	var hours = date.getUTCHours();
+	var minutes = "0" + date.getMinutes();
+	var seconds = "0" + date.getSeconds();
+	var timestmp = new Date().setFullYear(new Date().getFullYear(), 0, 1);
+	var yearFirstDay = Math.floor(timestmp / 86400000);
+	var today = Math.ceil((new Date().getTime()) / 86400000);
+	var dayOfYear = today - yearFirstDay;
+	
+	var timestampnow = dayOfYear*24 + hours + minutes/60 + seconds/3600; 
+	
+var specialPUIs = ["AIRLOCK000019","AIRLOCK000020","AIRLOCK000021","AIRLOCK000022","AIRLOCK000023","AIRLOCK000024",
+                   "AIRLOCK000025","AIRLOCK000026","AIRLOCK000027","AIRLOCK000028","AIRLOCK000029","AIRLOCK000030",
+                   "AIRLOCK000031","AIRLOCK000032","AIRLOCK000033","AIRLOCK000034","AIRLOCK000035","AIRLOCK000036",
+                   "AIRLOCK000037","AIRLOCK000038","AIRLOCK000039","AIRLOCK000040","AIRLOCK000041","AIRLOCK000042",
+                   "AIRLOCK000043","AIRLOCK000044","AIRLOCK000045","AIRLOCK000046","AIRLOCK000047","AIRLOCK000048",
+                   "AIRLOCK000050","AIRLOCK000051","AIRLOCK000052","AIRLOCK000053","AIRLOCK000058",
+                   "NODE1000001","NODE1000002","NODE2000003","NODE2000004","NODE2000005",
+                   "NODE3000004","NODE3000006","NODE3000007","NODE3000010","NODE3000014","NODE3000015",
+                   "NODE3000016","NODE3000018","NODE3000020",
+                   "P1000006","P1000007","P1000008","P1000009",
+                   "P3000001","P3000002","P4000003","P4000006","P6000003","P6000006",
+                   "RUSSEG000001","RUSSEG000002","RUSSEG000003","RUSSEG000004","RUSSEG000007",
+                   "RUSSEG000008","RUSSEG000009","RUSSEG000010","RUSSEG000011","RUSSEG000012",
+                   "RUSSEG000013","RUSSEG000014","RUSSEG000015","RUSSEG000016","RUSSEG000017",
+                   "RUSSEG000018","RUSSEG000019","RUSSEG000020","RUSSEG000021","RUSSEG000022",
+                   "RUSSEG000023","RUSSEG000024","RUSSEG000025",
+                   "S0000006","S0000007","S0000008","S0000009","S0000010","S0000011","S0000012","S0000013",
+                   "S1000006","S1000007","S1000008","S1000009",
+                   "S3000001","S3000002","S4000003","S4000006","S6000003","S6000006",
+                   "USLAB000001","USLAB000002","USLAB000003","USLAB000004","USLAB000011","USLAB000012",
+                   "USLAB000013","USLAB000014","USLAB000015","USLAB000016","USLAB000017","USLAB000041",
+                   "USLAB000042","USLAB000043","USLAB000044","USLAB000062","USLAB000063","USLAB000064",
+                   "USLAB000065","USLAB000066","USLAB000067","USLAB000068","USLAB000069","USLAB000070",
+                   "USLAB000071","USLAB000072","USLAB000073","USLAB000074","USLAB000075","USLAB000076",
+                   "USLAB000077","USLAB000078","USLAB000079","USLAB000080","USLAB000081","USLAB000086",
+                   "USLAB000088","USLAB000089","USLAB000090","USLAB000091","USLAB000092","USLAB000093",
+                   "USLAB000094","USLAB000095","USLAB000096","USLAB000097","USLAB000098","USLAB000099",
+                   "USLAB000100","USLAB000101",
+                   "Z1000013",
+                   "CSAMT000002","CSASSRMS002","CSASSRMS003","CSASSRMS011","CSASPDM0002","CSASPDM0010",
+                   "CSASPDM0019","CSASPDM0022","CSAMBS00002","CSAMBA00004"];
+
+var AIRLOCK000019 = {0:"NORMAL",1:"NO DATA",2:"MISSING  DATA",3:"EXTRA DATA"};
+var AIRLOCK000020 = AIRLOCK000019;
+var AIRLOCK000021 = AIRLOCK000019;
+var AIRLOCK000022 = AIRLOCK000019;
+var AIRLOCK000023 = {0:"NO HISTORY",
+                     1:"CHARGING",
+                     2:"TASK COMPLETE",
+                     3:"STOP SWITCH",
+                     4:"OPEN CIRCUIT",
+                     5:"WRONG BATT",
+                     6:"OVERTEMP",
+                     7:"CAPACITY TEST OK",
+                     8:"CAPACITY TEST ERROR",
+                     9:"LOW CHARGE SLOPE",
+                     10:"POWER ERROR",
+                     11:"REVERSE-POLARITY",
+                     12:"SHORT-CIRCUIT",
+                     13:"TIME-OUT",
+                     14:"EXT TEMP ERROR",
+                     15:"DISCHARGE",
+                     16:"WAIT DISCHARGE",
+                     17:"WAIT CHARGE"};
+var AIRLOCK000024 = AIRLOCK000023;
+var AIRLOCK000025 = AIRLOCK000023;
+var AIRLOCK000026 = AIRLOCK000023;
+var AIRLOCK000027 = AIRLOCK000023;
+var AIRLOCK000028 = AIRLOCK000023;
+var AIRLOCK000029 = AIRLOCK000023;
+var AIRLOCK000030 = AIRLOCK000023;
+var AIRLOCK000031 = AIRLOCK000023;
+var AIRLOCK000032 = AIRLOCK000023;
+var AIRLOCK000033 = AIRLOCK000023;
+var AIRLOCK000034 = AIRLOCK000023;
+var AIRLOCK000035 = AIRLOCK000023;
+var AIRLOCK000036 = AIRLOCK000023;
+var AIRLOCK000037 = AIRLOCK000023;
+var AIRLOCK000038 = AIRLOCK000023;
+var AIRLOCK000039 = AIRLOCK000023;
+var AIRLOCK000040 = AIRLOCK000023;
+var AIRLOCK000041 = AIRLOCK000023;
+var AIRLOCK000042 = AIRLOCK000023;
+var AIRLOCK000043 = AIRLOCK000023;
+var AIRLOCK000044 = AIRLOCK000023;
+var AIRLOCK000045 = AIRLOCK000023;
+var AIRLOCK000046 = AIRLOCK000023;
+var RPCMSTATUS = {0:"OFF-OK",1:"NOT-OFF OK",3:"NOT-OFF FAILED"};
+var AIRLOCK000047 = RPCMSTATUS;
+var AIRLOCK000048 = {0:"PUMP OFF CMD",1:"PUMP ON CMD"};
+var AIRLOCK000050 = {0:"CLOSED",1:"OPEN",2:"IN-TRANSIT",3:"FAILED"};
+var AIRLOCK000051 = AIRLOCK000050;
+var AIRLOCK000052 = AIRLOCK000050;
+var ACSTATE = {0:"RESET",1:"DRAIN",2:"DRYOUT",3:"EIB OFF",4:"OFF",5:"ON",6:"STARTUP",7:"TEST"};
+var AIRLOCK000053 = ACSTATE;
+var AIRLOCK000058 = RPCMSTATUS;
+var NODE1000001 = RPCMSTATUS;
+var NODE1000002 = RPCMSTATUS;
+var NODE2000003 = ACSTATE;
+var NODE2000004 = RPCMSTATUS;
+var NODE2000005 = RPCMSTATUS;
+var NODE3000004 = {2:"STOP",4:"SHUTDOWN",8:"MAINTENANCE",16:"NORMAL",32:"STANDBY",64:"IDLE",128:"SYSTEM INITIALIZED"}
+var NODE3000006 = {1:"STOP",2:"SHUTDOWN",3:"STANDBY",4:"PROCESS",5:"HOT SERVICE",6:"FLUSH",7:"WARM SHUTDOWN"}
+var NODE3000007 = {0:"NONE",1:"VENT",2:"HEATUP",3:"PURGE",4:"FLOW",5:"TEST",6:"TEST_SV_1",7:"TEST_SV_2",8:"SERVICE"}
+var NODE3000010 = {1:"PROCESS",2:"STANDBY",3:"SHUTDOWN",4:"STOP",5:"VENT_DOME",6:"INERT_DOME",7:"FAST_SHUTDOWN",8:"N2_PURGE_SHUTDOWN"}
+var NODE3000014 = RPCMSTATUS;
+var NODE3000015 = RPCMSTATUS;
+var NODE3000016 = RPCMSTATUS;
+var NODE3000018 = ACSTATE;
+var NODE3000020 = RPCMSTATUS;
+var P1000006 = RPCMSTATUS;
+var P1000007 = RPCMSTATUS;
+var P1000008 = RPCMSTATUS;
+var P1000009 = RPCMSTATUS;
+var P3000001 = RPCMSTATUS;
+var P3000002 = RPCMSTATUS;
+var P4000003 = {0:"NOT ENABLED",1:"ENABLED"}
+var P4000006 = {0:"NOT ENABLED",1:"ENABLED"}
+var P6000003 = {0:"NOT ENABLED",1:"ENABLED"}
+var P6000006 = {0:"NOT ENABLED",1:"ENABLED"}
+var RUSSEG000001 = {1:"CREW RESCUE",2:"SURVIVAL",3:"REBOOST",4:"PROXIMITY OPERATIONS",5:"EVA",6:"MICROGRAVITY",7:"STANDARD"}
+var RUSFLAG = {0:"-",1:"XXXXXXXX"};
+var RUSSEG000002 = RUSFLAG;
+var RUSSEG000003 = RUSFLAG;
+var RUSSEG000004 = RUSFLAG;
+var RUSSEG000007 = RUSFLAG;
+var RUSSEG000008 = RUSFLAG;
+var RUSSEG000009 = RUSFLAG;
+var RUSSEG000010 = RUSFLAG;
+var RUSSEG000011 = RUSFLAG;
+var RUSSEG000012 = RUSFLAG;
+var RUSSEG000013 = RUSFLAG;
+var RUSSEG000014 = RUSFLAG;
+var RUSSEG000015 = RUSFLAG;
+var RUSSEG000016 = RUSFLAG;
+var RUSSEG000017 = RUSFLAG;
+var RUSSEG000018 = RUSFLAG;
+var RUSSEG000019 = RUSFLAG;
+var RUSSEG000020 = RUSFLAG;
+var RUSSEG000021 = {0:"INERTIAL",1:"LVLH SM",2:"SOLAR",3:"CURRENT LVLH",4:"CURRENT INERTIAL",5:"DAMPING",6:"TEA",7:"X-POP"}
+var RUSSEG000022 = RUSFLAG;
+var RUSSEG000023 = RUSFLAG;
+var RUSSEG000024 = RUSFLAG;
+var RUSSEG000025 = {0:"RESERVED",1:"THRUSTERS",2:"GYRODINES",3:"GYRO AMER DESAT",4:"GYRO RUS DESAT",5:"XLAT THRUST",6:"CMG/THRUST ASST",7:"FREE DRIFT"}
+var S0000006 = {1:"STANDBY",2:"RESTART",3:"CHECKOUT",4:"DIRECTED POSITION",5:"AUTOTRACK",6:"BLIND",7:"SHUTDOWN",8:"SWITCHOVER"}
+var S0000007 = {1:"STANDBY",2:"RESTART",3:"CHECKOUT",4:"DIRECTED POSITION",5:"AUTOTRACK",6:"BLIND",7:"SHUTDOWN",8:"SWITCHOVER"}
+var S0000008 = {1:"STANDBY",2:"RESTART",3:"CHECKOUT",4:"DIRECTED POSITION",5:"AUTOTRACK",6:"BLIND",7:"SHUTDOWN",8:"SWITCHOVER"}
+var S0000009 = {1:"STANDBY",2:"RESTART",3:"CHECKOUT",4:"DIRECTED POSITION",5:"AUTOTRACK",6:"BLIND",7:"SHUTDOWN",8:"SWITCHOVER"}
+var S0000010 = RPCMSTATUS;
+var S0000011 = RPCMSTATUS;
+var S0000012 = RPCMSTATUS;
+var S0000013 = RPCMSTATUS;
+var S1000006 = RPCMSTATUS;
+var S1000007 = RPCMSTATUS;
+var S1000008 = RPCMSTATUS;
+var S1000009 = RPCMSTATUS;
+var S3000001 = RPCMSTATUS;
+var S3000002 = RPCMSTATUS;
+var S4000003 = {0:"NOT ENABLED",1:"ENABLED"}
+var S4000006 = {0:"NOT ENABLED",1:"ENABLED"}
+var S6000003 = {0:"NOT ENABLED",1:"ENABLED"}
+var S6000006 = {0:"NOT ENABLED",1:"ENABLED"}
+var USLAB000001 = {0:"NOT IN USE",1:"IN USE"}
+var USLAB000002 = {0:"NOT IN USE",1:"IN USE"}
+var USLAB000003 = {0:"NOT IN USE",1:"IN USE"}
+var USLAB000004 = {0:"NOT IN USE",1:"IN USE"}
+var USLAB000011 = {0:"ENABLED",1:"INHIBITED"}
+var USLAB000012 = {0:"Default",1:"WAIT",2:"RESERVED",3:"STANDBY",4:"CMG ATT CTRL",5:"CMG/THRUST ASST",6:"USER DATA GEN",7:"FREE DRIFT"}
+var USLAB000013 = {0:"NONE",1:"GPS1",2:"GPS2",3:"RUSSIAN ATT",4:"KU BAND"}
+var USLAB000014 = {0:"NONE",1:"RGA1",2:"RGA2",3:"RUSSIAN"}
+var USLAB000015 = {0:"NO_SOURCE",1:"UNUSED",2:"UNUSED",3:"RUSSIAN",4:"GPS1_DETERMINISTIC",5:"GPS2_DETERMINISTIC",6:"GROUND"}
+var USLAB000016 = {0:"ATTITUDE HOLD",1:"TEA"}
+var USLAB000017 = {0:"LVLH",1:"Inertial",2:"XPOP"}
+var USLAB000041 = {0:"FALSE",1:"TRUE"}
+var USLAB000042 = {0:"FALSE",1:"TRUE"}
+var USLAB000043 = {0:"DOING POS FIXES",1:"SV TIMING",2:"APRX TIMING",3:"GPS TIME",4:"NEED INIT",5:"GDOP NEEDED",6:"BAD TIMING",7:"NO USABLE SV",8:"ONLY 1 USABLE SVs",9:"ONLY 2 USABLE SVs",10:"ONLY 3 USABLE SVs",11:"BAD INTEGRITY",12:"NO VEL AVAIL",13:"UNUSABLE FIX"}
+var USLAB000044 = {0:"DOING POS FIXES",1:"SV TIMING",2:"APRX TIMING",3:"GPS TIME",4:"NEED INIT",5:"GDOP NEEDED",6:"BAD TIMING",7:"NO USABLE SV",8:"ONLY 1 USABLE SVs",9:"ONLY 2 USABLE SVs",10:"ONLY 3 USABLE SVs",11:"BAD INTEGRITY",12:"NO VEL AVAIL",13:"UNUSABLE FIX"}
+var USLAB000062 = {0:"FAIL",1:"OPEN",2:"CLSD",3:"TRNS"}
+var USLAB000063 = {0:"FAIL",1:"OPEN",2:"CLSD",3:"TRNS"}
+var USLAB000064 = ACSTATE;
+var USLAB000065 = ACSTATE;
+var USLAB000066 = RPCMSTATUS;
+var USLAB000067 = RPCMSTATUS;
+var USLAB000068 = RPCMSTATUS;
+var USLAB000069 = RPCMSTATUS;
+var USLAB000070 = RPCMSTATUS;
+var USLAB000071 = RPCMSTATUS;
+var USLAB000072 = RPCMSTATUS;
+var USLAB000073 = RPCMSTATUS;
+var USLAB000074 = RPCMSTATUS;
+var USLAB000075 = RPCMSTATUS;
+var USLAB000076 = RPCMSTATUS;
+var USLAB000077 = RPCMSTATUS;
+var USLAB000078 = RPCMSTATUS;
+var USLAB000079 = RPCMSTATUS;
+var USLAB000080 = RPCMSTATUS;
+var USLAB000081 = {0:"FALSE",1:"TRUE"}
+var USLAB000086 = {1:"STANDARD",2:"MICROGRAVITY",4:"REBOOST",8:"PROXIMITY_OPS",16:"EXTERNAL_OPS",32:"SURVIVAL",64:"ASCR",127:"ALL_MODES"}
+var USLAB000088 = {0:"INACTIVE",1:"ACTIVE"}
+var USLAB000089 = {0:"INACTIVE",1:"ACTIVE"}
+var USLAB000090 = {0:"INACTIVE",1:"ACTIVE"}
+var USLAB000091 = {0:"INACTIVE",1:"ACTIVE"}
+var USLAB000092 = {1:"STRING 1",2:"STRING 2"}
+var USLAB000093 = {0:"BACKUP",1:"ACTIVE"}
+var USLAB000094 = {0:"BACKUP",1:"ACTIVE"}
+var USLAB000095 = {0:" -",1:"S3AFT",2:"S1UPOB",3:"SCU1 MUX",4:"S1LOOB",5:"JPM A",6:"JPM B",7:"S1UPIB",8:"S1LOIB",9:"COL 1",10:"COL 2",11:"P1UPIB",12:"SCU2 MUX",13:"NOD3S",14:"P1LOIB",15:"SCU1 TEST",16:"WETA112",17:"ORB1",18:"ORB2",19:"P1LOOB",20:"SCU2 TEST",21:"P3AFT",22:"PAYLOAD RACK",23:"VTR1",24:"VTR2",25:"NOD2LO",26:"WETA115",28:"LAB S",31:"POA PL3",32:"POA",33:"SPDMS1",34:"SPDMS2",35:"MBS CLPA",36:"SPDMLEE",37:"MAST",40:"BLEE",43:"BELB",48:"TELB",50:"MSS PL3",51:"TLEE",52:"LAB AVU1",53:"LAB AVU2",54:"CUP AVU1",55:"CUP AVU2",56:"OTCM1",57:"BODY1",58:"OTCM2",59:"BODY2",60:"SSRMS PL1",61:"SSRMS PL2",62:"SSRMS PL3",63:"MSS PL1",64:"MSS PL2",65:"LAB1D3",66:"LAB1P2",67:"LAB1P4",68:"LABCAM",69:"LAB1O5",70:"LAB1O4",71:"LAB1O3",72:"LAB1O2",73:"LAB1O1",74:"LAB1S1",75:"LAB1S2",76:"LAB1S3",77:"A/L CAM",78:"LAB1S4",79:"N1 CAM",80:"N3 CAM"}
+var USLAB000096 = {0:" -",1:"S3AFT",2:"S1UPOB",3:"SCU1 MUX",4:"S1LOOB",5:"JPM A",6:"JPM B",7:"S1UPIB",8:"S1LOIB",9:"COL 1",10:"COL 2",11:"P1UPIB",12:"SCU2 MUX",13:"NOD3S",14:"P1LOIB",15:"SCU1 TEST",16:"WETA112",17:"ORB1",18:"ORB2",19:"P1LOOB",20:"SCU2 TEST",21:"P3AFT",22:"PAYLOAD RACK",23:"VTR1",24:"VTR2",25:"NOD2LO",26:"WETA115",28:"LAB S",31:"POA PL3",32:"POA",33:"SPDMS1",34:"SPDMS2",35:"MBS CLPA",36:"SPDMLEE",37:"MAST",40:"BLEE",43:"BELB",48:"TELB",50:"MSS PL3",51:"TLEE",52:"LAB AVU1",53:"LAB AVU2",54:"CUP AVU1",55:"CUP AVU2",56:"OTCM1",57:"BODY1",58:"OTCM2",59:"BODY2",60:"SSRMS PL1",61:"SSRMS PL2",62:"SSRMS PL3",63:"MSS PL1",64:"MSS PL2",65:"LAB1D3",66:"LAB1P2",67:"LAB1P4",68:"LABCAM",69:"LAB1O5",70:"LAB1O4",71:"LAB1O3",72:"LAB1O2",73:"LAB1O1",74:"LAB1S1",75:"LAB1S2",76:"LAB1S3",77:"A/L CAM",78:"LAB1S4",79:"N1 CAM",80:"N3 CAM"}
+var USLAB000097 = {0:" -",1:"S3AFT",2:"S1UPOB",3:"SCU1 MUX",4:"S1LOOB",5:"JPM A",6:"JPM B",7:"S1UPIB",8:"S1LOIB",9:"COL 1",10:"COL 2",11:"P1UPIB",12:"SCU2 MUX",13:"NOD3S",14:"P1LOIB",15:"SCU1 TEST",16:"WETA112",17:"ORB1",18:"ORB2",19:"P1LOOB",20:"SCU2 TEST",21:"P3AFT",22:"PAYLOAD RACK",23:"VTR1",24:"VTR2",25:"NOD2LO",26:"WETA115",28:"LAB S",31:"POA PL3",32:"POA",33:"SPDMS1",34:"SPDMS2",35:"MBS CLPA",36:"SPDMLEE",37:"MAST",40:"BLEE",43:"BELB",48:"TELB",50:"MSS PL3",51:"TLEE",52:"LAB AVU1",53:"LAB AVU2",54:"CUP AVU1",55:"CUP AVU2",56:"OTCM1",57:"BODY1",58:"OTCM2",59:"BODY2",60:"SSRMS PL1",61:"SSRMS PL2",62:"SSRMS PL3",63:"MSS PL1",64:"MSS PL2",65:"LAB1D3",66:"LAB1P2",67:"LAB1P4",68:"LABCAM",69:"LAB1O5",70:"LAB1O4",71:"LAB1O3",72:"LAB1O2",73:"LAB1O1",74:"LAB1S1",75:"LAB1S2",76:"LAB1S3",77:"A/L CAM",78:"LAB1S4",79:"N1 CAM",80:"N3 CAM"}
+var USLAB000098 = {0:" -",1:"S3AFT",2:"S1UPOB",3:"SCU1 MUX",4:"S1LOOB",5:"JPM A",6:"JPM B",7:"S1UPIB",8:"S1LOIB",9:"COL 1",10:"COL 2",11:"P1UPIB",12:"SCU2 MUX",13:"NOD3S",14:"P1LOIB",15:"SCU1 TEST",16:"WETA112",17:"ORB1",18:"ORB2",19:"P1LOOB",20:"SCU2 TEST",21:"P3AFT",22:"PAYLOAD RACK",23:"VTR1",24:"VTR2",25:"NOD2LO",26:"WETA115",28:"LAB S",31:"POA PL3",32:"POA",33:"SPDMS1",34:"SPDMS2",35:"MBS CLPA",36:"SPDMLEE",37:"MAST",40:"BLEE",43:"BELB",48:"TELB",50:"MSS PL3",51:"TLEE",52:"LAB AVU1",53:"LAB AVU2",54:"CUP AVU1",55:"CUP AVU2",56:"OTCM1",57:"BODY1",58:"OTCM2",59:"BODY2",60:"SSRMS PL1",61:"SSRMS PL2",62:"SSRMS PL3",63:"MSS PL1",64:"MSS PL2",65:"LAB1D3",66:"LAB1P2",67:"LAB1P4",68:"LABCAM",69:"LAB1O5",70:"LAB1O4",71:"LAB1O3",72:"LAB1O2",73:"LAB1O1",74:"LAB1S1",75:"LAB1S2",76:"LAB1S3",77:"A/L CAM",78:"LAB1S4",79:"N1 CAM",80:"N3 CAM"}
+var USLAB000099 = RPCMSTATUS;
+var USLAB000100 = RPCMSTATUS;
+var USLAB000101 = {0:"UNLOCKED",1:"LOCKED"}
+var Z1000013 = {0:"RESET",1:"NORMAL"}
+var CSAMT000002 = {1:"WS1 ", 2:"WS2 ", 3:"WS3 ", 4:"WS4 ", 5:"WS5 ", 6:"WS6 ",7:"WS7 ",8:"WS8"}
+var CSASSRMS002 = {1:"LAB ", 2:"NODE3 ", 4:"NODE2 ", 7:"MBS PDGF 1 ", 8:"MBS PDGF 2 ", 11:"MBS PDGF 3 ", 13:"MBS PDGF 4 ", 14:"FGB ", 16:"POA ", 19:"SSRMS TIP LEE ", 63:"UNDEFINED"}
+var CSASSRMS003 = {0:"LEE A ", 5:"LEE B"}
+var CSASSRMS011 = {0:"RELEASED",1:"CAPTIVE",2:"CAPTURED"}
+var CSASPDM0002 = {1:"LAB ", 2:"NODE3 ", 4:"NODE2 ", 7:"MBS PDGF 1 ", 8:"MBS PDGF 2 ", 11:"MBS PDGF 3 ", 13:"MBS PDGF 4 ", 14:"FGB ", 16:"POA ", 19:"SSRMS TIP LEE ", 63:"UNDEFINED"}
+var CSASPDM0010 = {0:"RELEASED",1:"CAPTIVE",2:"CAPTURED"}
+var CSASPDM0019 = {0:"RELEASED",1:"CAPTIVE",2:"CAPTURED"}
+var CSASPDM0022 = {0:"RELEASED",1:"CAPTIVE",2:"CAPTURED"}
+var CSAMBS00002 = {0:"RELEASED",1:"CAPTURED"}
+var CSAMBA00004 = {0:"RELEASED",1:"CAPTIVE",2:"CAPTURED"}
+	
+var HOT = {0:"Null",1:"Hot"}
+var MBSOPBASE = {3:"Mtcl",4:"TUS"}
+var LEESPEED = {1:"Slow",2:"Fast"}
+var STOPCOND = {1:"Soft Stop",2:"Hard Stop"}
+var MBSBASELOC = {58:"MT",60:"TUS",63:"Undefined"}
+var SPDMLEE = {1:"SPDM Body LEE",2:"SPDM Body PDGF"}
+
+var Decoder = 
+{
+	CSASSRMS001:function(value)
+	{
+		var SACS_operating_base = (value >>> 6) & 15;
+		$("#CSASSRMS001-1").text(CSASSRMS003[SACS_operating_base]);
+		$("#CSASSRMS001-1").addClass('highlight');
+	},
+	CSASPDM0001:function(value)
+	{
+		var OCS_SPDM_operating_base = (value >>> 8) & 15;
+		$("#CSASPDM0001-1").text(SPDMLEE[OCS_SPDM_operating_base]);
+		$("#CSASPDM0001-1").addClass('highlight');
+	},
+	CSASPDM0018:function(value)
+	{
+		var SPDM_Arm_1_Hot = (value >>> 3) & 1;
+		var SPDM_Arm_2_Hot = (value >>> 11) & 1;
+		$("#CSASPDM0018-1").text(HOT[SPDM_Arm_1_Hot]);
+		$("#CSASPDM0018-2").text(HOT[SPDM_Arm_2_Hot]);
+		$("#CSASPDM0018-1").addClass('highlight');
+		$("#CSASPDM0018-2").addClass('highlight');
+	},
+	CSASPDM0021:function(value)
+	{
+		var SPDM_LEE_Hot = (value >>> 3) & 1;
+		var SPDM_LEE_Speed = (value >>> 4) & 3;
+		var SPDM_LEE_Stop = (value >>> 6) & 3;
+		$("#CSASPDM0021-1").text(STOPCOND[SPDM_LEE_Stop]);
+		$("#CSASPDM0021-2").text(LEESPEED[SPDM_LEE_Speed]);
+		$("#CSASPDM0021-3").text(HOT[SPDM_LEE_Hot]);
+		$("#CSASPDM0021-1").addClass('highlight');
+		$("#CSASPDM0021-2").addClass('highlight');
+		$("#CSASPDM0021-3").addClass('highlight');
+	},
+	CSAMBS00001:function(value)
+	{
+		var MBS_op_base = (value >>> 8) & 15;
+		var MBS_loc = value & 63;
+		$("#CSAMBS00001-1").text(MBSOPBASE[MBS_op_base]);
+		$("#CSAMBS00001-2").text(MBSBASELOC[MBS_loc]);
+		$("#CSAMBS00001-1").addClass('highlight');
+		$("#CSAMBS00001-2").addClass('highlight');
+	},
+	CSAMBA00003:function(value)
+	{
+		var POA_stop = value >>> 14;
+		var POA_speed = (value >>> 12) & 3;
+		var POA_hot = (value >>> 11) & 1;
+		var LEE_stop = (value >>> 6) & 3;
+		var LEE_speed = (value >>> 4) & 3;
+		var LEE_hot = (value >>> 3) & 1;
+		$("#CSAMBA00003-1").text(STOPCOND[POA_stop]);
+		$("#CSAMBA00003-2").text(LEESPEED[POA_speed]);
+		$("#CSAMBA00003-3").text(HOT[POA_hot]);
+		$("#CSAMBA00003-4").text(STOPCOND[LEE_stop]);
+		$("#CSAMBA00003-5").text(LEESPEED[LEE_speed]);
+		$("#CSAMBA00003-6").text(HOT[LEE_hot]);
+		$("#CSAMBA00003-1").addClass('highlight');
+		$("#CSAMBA00003-2").addClass('highlight');
+		$("#CSAMBA00003-3").addClass('highlight');
+		$("#CSAMBA00003-4").addClass('highlight');
+		$("#CSAMBA00003-5").addClass('highlight');
+		$("#CSAMBA00003-6").addClass('highlight');
+	}
+};
+
+
+	sub.addListener({
+		onItemUpdate: function(update) 
+		{
+			var item = update.getItemName();
+			var selector = $("#"+item);
+
+			if (Decoder.hasOwnProperty(item))
+			{
+				Decoder[item](update.getValue("Value"));
+			}
+			else if (specialPUIs.includes(item))
+			{
+				selector.text(eval(item)[update.getValue("Value")]);
+//				selector.text(update.getValue("Status.Class"));
+			}
+			else
+			{
+				selector.text(+Math.round(update.getValue("Value")*1000000)/1000000);
+//				selector.text(update.getValue("Status.Class"));
+			}
+			selector.addClass('highlight');
+//			selector.one('animationend', function() { selector.removeClass('highlight');});
+			switch (update.getItemName()){
+			  case "Z1000014":
+				SGANT_elevation = update.getValue("Value");
+				angleDif = (SGANT_elevation - SASA_elevation);
+				var currentAngleTime = ((new Date).getTime())/1000;
+				var difSlewRate = (oldAngleDif-angleDif)/(oldAngleTime-currentAngleTime);
+				avgSlew[index] = difSlewRate;
+				SGANT[index] = (oldSGANT_el-SGANT_elevation)/(oldAngleTime-currentAngleTime);
+				index++;
+				if(index > 4)
+				{
+					index = 0;
+				}
+				var averageSlew = ((Number(avgSlew[0]) + Number(avgSlew[1]) + Number(avgSlew[2]) + Number(avgSlew[3]) + Number(avgSlew[4]))/5);
+				var avgSGANT_el_slew = ((Number(SGANT[0]) + Number(SGANT[1]) + Number(SGANT[2]) + Number(SGANT[3]) + Number(SGANT[4]))/5);
+				oldAngleTime = currentAngleTime;
+				oldSGANT_el = SGANT_elevation;
+				oldAngleDif = angleDif;
+				var correction = 0;
+				
+				if (Math.abs(angleDif) < 10 && SGANT_elevation < 70)
+				{
+					correction = Number((70-SGANT_elevation))/Number(avgSGANT_el_slew);
+				}
+				
+				if (Math.abs(angleDif) < 10 && SGANT_elevation > 70)
+				{
+					LOS = "Upcoming LOS!";
+					document.getElementById("LOS").innerHTML = LOS;
+					document.getElementById("LOS").bgColor = '#FFFF00';
+				}
+				else
+				{
+					LOS = "";
+					document.getElementById("LOS").innerHTML = LOS;
+					document.getElementById("LOS").bgColor = '#FFFFFF';
+				}
+				break;
+			} 
+		}
+	});
+	
+	client.subscribe(timeSub);
+	
+	timeSub.addListener({
+	  onItemUpdate: function (update) {
+		var status = update.getValue('Status.Class');
+		AOStimestamp = parseFloat(update.getValue('TimeStamp'));
+		difference = timestampnow - AOStimestamp;
+		if (status === '24') 
+		{
+		  if(difference > 0.00153680542553047)
+		  {
+			AOS = "Stale Signal";
+			$('body').removeClass('AOS').addClass('LOS');
+			document.getElementById("AOS").innerHTML = AOS;
+			document.getElementById("AOS").bgColor = '#FF8000';
+		  }
+		  else
+		  {
+			AOS = "Siqnal Acquired!!";
+			$('body').removeClass('LOS').addClass('AOS');
+			document.getElementById("AOS").innerHTML = AOS;
+			document.getElementById("AOS").bgColor = '#008000';
+		  }
+		  
+		}
+		else 
+		{
+		  AOS = "Signal Lost";
+		$('body').removeClass('AOS').addClass('LOS');
+	      document.getElementById("AOS").innerHTML = AOS+" "+status;
+		  document.getElementById("AOS").bgColor = '#FF0000';
+		} 
+	  }
+	});
+});
+</script>
+</body>
+</html>
