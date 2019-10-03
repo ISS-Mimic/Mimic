@@ -32,6 +32,6 @@ double B4A = 330.0;
 
 double PSARJ = 330.0;
 double SSARJ = 330.0;
-double PTRRJ = -10.0;
+double PTRRJ = 0.0;
 double STRRJ = 0.0;
 boolean AOS = false;
