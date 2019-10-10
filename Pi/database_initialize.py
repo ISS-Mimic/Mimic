@@ -12,7 +12,7 @@ c.execute("CREATE TABLE IF NOT EXISTS telemetry (`Label` TEXT PRIMARY KEY, `Time
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('psarj', '0', '0', 'S0000004', 0)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('ssarj', '0', '0', 'S0000003', 1)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('ptrrj', '0', '0', 'S0000002', 2)");
-c.execute("INSERT OR IGNORE INTO telemetry VALUES('strrj', '0', '5', 'S0000001', 3)");
+c.execute("INSERT OR IGNORE INTO telemetry VALUES('strrj', '0', '0', 'S0000001', 3)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta1b', '0', '0', 'S6000008', 4)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta1a', '0', '0', 'S4000007', 5)");
 c.execute("INSERT OR IGNORE INTO telemetry VALUES('beta2b', '0', '0', 'P6000008', 6)");

@@ -4,6 +4,7 @@
 
 <ManualControlScreen>:
     name: 'manualcontrol'
+    on_pre_enter: root.callback()
     FloatLayout:
         size_hint: 1,1
         Image:
@@ -61,6 +62,7 @@
             text: "4B"
             font_size: 30
             on_press: root.setActive("Beta4B")
+            halign: "center"
         Button:
             id: Beta2B_Button
             size_hint: 0.08,0.3
@@ -68,6 +70,7 @@
             text: "2B"
             font_size: 30
             on_press: root.setActive("Beta2B")
+            halign: "center"
         Button:
             id: PSARJ_Button
             size_hint: 0.2,0.1
@@ -75,6 +78,7 @@
             text: "Port Truss"
             font_size: 30
             on_press: root.setActive("PSARJ")
+            halign: "center"
         Button:
             id: Beta2A_Button
             size_hint: 0.08,0.3
@@ -82,6 +86,7 @@
             text: "2A"
             font_size: 30
             on_press: root.setActive("Beta2A")
+            halign: "center"
         Button:
             id: Beta4A_Button
             size_hint: 0.08,0.3
@@ -89,6 +94,7 @@
             text: "4A"
             font_size: 30
             on_press: root.setActive("Beta4A")
+            halign: "center"
         Button:
             id: PTRRJ_Button
             size_hint: 0.1,0.3
@@ -96,6 +102,7 @@
             text: "Port\nHRS"
             font_size: 30
             on_press: root.setActive("PTRRJ")
+            halign: "center"
         Button:
             id: STRRJ_Button
             size_hint: 0.1,0.3
@@ -103,6 +110,7 @@
             text: "Stbd\nHRS"
             font_size: 30
             on_press: root.setActive("STRRJ")
+            halign: "center"
         Button:
             id: Beta3A_Button
             size_hint: 0.08,0.3
@@ -110,6 +118,7 @@
             text: "3A"
             font_size: 30
             on_press: root.setActive("Beta3A")
+            halign: "center"
         Button:
             id: Beta1A_Button
             size_hint: 0.08,0.3
@@ -117,6 +126,7 @@
             text: "1A"
             font_size: 30
             on_press: root.setActive("Beta1A")
+            halign: "center"
         Button:
             id: SSARJ_Button
             size_hint: 0.2,0.1
@@ -124,6 +134,7 @@
             text: "Stbd Truss"
             font_size: 30
             on_press: root.setActive("SSARJ")
+            halign: "center"
         Button:
             id: Beta3B_Button
             size_hint: 0.08,0.3
@@ -131,6 +142,7 @@
             text: "3B"
             font_size: 30
             on_press: root.setActive("Beta3B")
+            halign: "center"
         Button:
             id: Beta1B_Button
             size_hint: 0.08,0.3
@@ -138,6 +150,7 @@
             text: "1B"
             font_size: 30
             on_press: root.setActive("Beta1B")
+            halign: "center"
         Button:
             id: set0
             size_hint: 0.1,0.07
@@ -266,7 +279,7 @@
             BubbleButton:
                 text: "Send"
                 background_color: 0,1,0,0.8
-                on_press: root.incrementActive(text_input.text)
+                on_press: root.sendActive(text_input.text)
                 on_release: text_input.text = ""
     TextInput:
         id: text_input
