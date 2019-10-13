@@ -254,18 +254,18 @@ class ManualControlScreen(Screen):
 
     def callback(self):
         global psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1amc,beta1bmc,beta2amc,beta2bmc,beta3amc,beta3bmc,beta4amc,beta4bmc
-        self.ids.Beta4B_Button.text = "4B\n" + str(beta4bmc)
-        self.ids.Beta4A_Button.text = "4A\n" + str(beta4amc)
-        self.ids.Beta3B_Button.text = "3B\n" + str(beta3bmc)
-        self.ids.Beta3A_Button.text = "3A\n" + str(beta3amc)
-        self.ids.Beta2B_Button.text = "2B\n" + str(beta2bmc)
-        self.ids.Beta2A_Button.text = "2A\n" + str(beta2amc)
-        self.ids.Beta1B_Button.text = "1B\n" + str(beta1bmc)
-        self.ids.Beta1A_Button.text = "1A\n" + str(beta1amc)
-        self.ids.PSARJ_Button.text = "PSARJ " + str(psarjmc)
-        self.ids.SSARJ_Button.text = "SSARJ " + str(ssarjmc)
-        self.ids.PTRRJ_Button.text = "PTRRJ\n" + str(ptrrjmc)
-        self.ids.STRRJ_Button.text = "STRRJ\n" + str(strrjmc)
+        self.ids.Beta4B_Button.text = "4B\n" + str(math.trunc(beta4bmc))
+        self.ids.Beta4A_Button.text = "4A\n" + str(math.trunc(beta4amc))
+        self.ids.Beta3B_Button.text = "3B\n" + str(math.trunc(beta3bmc))
+        self.ids.Beta3A_Button.text = "3A\n" + str(math.trunc(beta3amc))
+        self.ids.Beta2B_Button.text = "2B\n" + str(math.trunc(beta2bmc))
+        self.ids.Beta2A_Button.text = "2A\n" + str(math.trunc(beta2amc))
+        self.ids.Beta1B_Button.text = "1B\n" + str(math.trunc(beta1bmc))
+        self.ids.Beta1A_Button.text = "1A\n" + str(math.trunc(beta1amc))
+        self.ids.PSARJ_Button.text = "PSARJ " + str(math.trunc(psarjmc))
+        self.ids.SSARJ_Button.text = "SSARJ " + str(math.trunc(ssarjmc))
+        self.ids.PTRRJ_Button.text = "PTRRJ\n" + str(math.trunc(ptrrjmc))
+        self.ids.STRRJ_Button.text = "STRRJ\n" + str(math.trunc(strrjmc))
 
     def zeroJoints(self):
         global psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1amc,beta1bmc,beta2amc,beta2bmc,beta3amc,beta3bmc,beta4amc,beta4bmc
@@ -290,6 +290,7 @@ class ManualControlScreen(Screen):
         psarjmc = 0.00
         c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ssarj'");
         ssarjmc = 0.00
+        self.callback()
     
     def setActive(self, *args):
         global Beta4Bcontrol, Beta3Bcontrol, Beta2Bcontrol, Beta1Bcontrol, Beta4Acontrol, Beta3Acontrol, Beta2Acontrol, Beta1Acontrol, PSARJcontrol, SSARJcontrol, PTRRJcontrol, STRRJcontrol
