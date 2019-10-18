@@ -2599,6 +2599,8 @@ sub.addListener({
 
 client.subscribe(timeSub);
 
+var statuses = {0:"Overridden",1:"Missing",2:"Dead",3:"Off-Scale High",4:"Off-Scale Low",5:"Out of Limit High",6:"Out of Limit Low",7:"Out of Calibration",8:"Overscaling",9:"Static",10:"SSME Controller",11:"SSME EIU",12:"Flight Critical MDM",13:"Payload MDM",14:"OI MDM",15:"OI DSC",16:"Lower Limit",17:"Upper Limit",18:"Event Limit",19:"Selmon Aggregate Measure",20:"Truncated",21:"User-Defined",22:"User-Defined",23:"User-Defined",24:"Default"}
+
 timeSub.addListener({
   onItemUpdate: function (update) {
 		var status = update.getValue('Status.Class');
@@ -2613,12 +2615,12 @@ timeSub.addListener({
 		}
 		else 
 		{
-			document.getElementById("AOS").innerHTML = "Signal Lost";
+			document.getElementById("AOS").innerHTML = "Signal Lost " + status + " " + statuses[status];
 			document.getElementById("AOS").bgColor = '#FF0000';
 		}
 		if(difference > 0.00153680542553047)
 		{
-			document.getElementById("AOS").innerHTML = "Stale Signal";
+			document.getElementById("AOS").innerHTML = "Stale Signal " + status + " " + statuses[status];
 			document.getElementById("AOS").bgColor = '#FF8000';
 		}
 	}
