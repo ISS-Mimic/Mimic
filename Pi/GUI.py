@@ -229,12 +229,6 @@ class MainScreen(Screen):
         global manualcontrol
         manualcontrol = args[0]
 
-    def startproc(*args): #is this function even called???
-        global p
-        #p = subprocess.Popen(["node", "/home/pi/Mimic/Pi/ISS_Telemetry.js"]) #commented until live telemetry is back up
-        p = subprocess.Popen("/home/pi/Mimic/Pi/RecordedData/playback.out")
-        logWrite("Successfully started ISS telemetry script")
-
     def killproc(*args):
         global p
         global p2
@@ -1211,6 +1205,7 @@ class MainApp(App):
             startup = False
 
         Clock.schedule_once(self.checkCrew, 30)
+#        Clock.schedule_once(self.checkBlogforEVA, 30)
         Clock.schedule_once(self.getTLE, 40) #uncomment when internet works again
         Clock.schedule_interval(self.getTLE, 300)
         Clock.schedule_interval(self.check_internet, 1)
@@ -1366,7 +1361,7 @@ class MainApp(App):
             urlindex = 0
 
     def check_EVA_stats(self, lastname1, firstname1, lastname2, firstname2):
-        global numEVAs1, EVAtime_hours1, EVAtime_minutes1, numEVAs2, EVAtime_hours2, EVAtime_minutes2, EV1, EV2
+        global numEVAs1, EVAtime_hours1, EVAtime_minutes1, numEVAs2, EVAtime_hours2, EVAtime_minutes2
         logWrite("Function call - check EVA stats")
         eva_url = 'http://www.spacefacts.de/eva/e_eva_az.htm'
 
@@ -1407,8 +1402,9 @@ class MainApp(App):
             EV1_hours = int(EV1_EVA_time/60)
             EV2_hours = int(EV2_EVA_time/60)
 
-            self.us_eva.ids.EV1.text = str(EV1) + " (EV1):"
-            self.us_eva.ids.EV2.text = str(EV2) + " (EV2):"
+            self.us_eva.ids.EV1.text = " (EV): " + str(firstname1) + " " + str(lastname1)
+            self.us_eva.ids.EV2.text = " (EV): " + str(firstname2) + " " + str(lastname2)
+
             self.us_eva.ids.EV1_EVAnum.text = "Number of EVAs = " + str(EV1_EVA_number)
             self.us_eva.ids.EV2_EVAnum.text = "Number of EVAs = " + str(EV2_EVA_number)
             self.us_eva.ids.EV1_EVAtime.text = "Total EVA Time = " + str(EV1_hours) + "h " + str(EV1_minutes) + "m"
@@ -1425,6 +1421,68 @@ class MainApp(App):
         
         #obtain eva statistics web page for parsing
         req = UrlRequest(eva_url, on_success, on_redirect, on_failure, on_error, timeout=1)
+
+        iss_blog_url =  'https://blogs.nasa.gov/spacestation/tag/spacewalk/'
+        def on_success(req, data): #if blog data is successfully received, it is processed here
+            print("Blog Success")
+            soup = BeautifulSoup(data, "lxml")
+            blog_entries = soup.find("div", {"class": "entry-content"})
+            astros = blog_entries.find_all('a')
+            potential_ev = []
+            for link in astros:
+                potential_ev.append(link.contents[0])
+            
+            iss_EVcrew_url = 'https://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'
+            
+            def on_success2(req2, data2):
+                print("Successfully fetched EV crew JSON")
+                number_of_space = int(data2['number'])
+                names = []
+                for num in range(0, number_of_space):
+                    names.append(str(data2['people'][num]['name']))
+                #print(names)
+                #print(potential_ev)
+
+                EV = 0
+                ev1_surname = ''
+                ev1_firstname = ''
+                ev2_surname = ''
+                ev2_firstname = ''
+
+                for index in range(0, len(potential_ev)-1):
+                    for crew in names:
+                        if potential_ev[index] == crew and EV < 2:
+                            if EV == 0:
+                                ev1_surname = crew.split()[-1]
+                                ev1_firstname = crew.split()[0]
+                            if EV == 1:
+                                ev2_surname = crew.split()[-1]
+                                ev2_firstname = crew.split()[0]
+                            EV+=1
+                self.check_EVA_stats(ev1_surname,ev1_firstname,ev2_surname,ev2_firstname) 
+            
+            def on_redirect2(req, result):
+                print("Warning - Get EVA crew failure (redirect)")
+                print(result)
+
+            def on_failure2(req, result):
+                print("Warning - Get EVA crew failure (url failure)")
+
+            def on_error2(req, result):
+                print("Warning - Get EVA crew failure (url error)")
+            
+            req2 = UrlRequest(iss_EVcrew_url, on_success2, on_redirect2, on_failure2, on_error2, timeout=1)
+
+        def on_redirect(req, result):
+            print("Warning - Get nasa blog failure (redirect)")
+
+        def on_failure(req, result):
+            print("Warning - Get nasa blog failure (url failure)")
+
+        def on_error(req, result):
+            print("Warning - Get nasa blog failure (url error)")
+
+        req = UrlRequest(iss_blog_url, on_success, on_redirect, on_failure, on_error, timeout=1)
 
     def flashUS_EVAbutton(self, instance):
         logWrite("Function call - flashUS_EVA")

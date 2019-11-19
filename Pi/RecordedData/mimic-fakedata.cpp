@@ -20,7 +20,7 @@ main( int argc, char *argv[] )
 
   std::string path = argv[1];
 
-  double factor = 1.0;
+  double factor = 30.0;
 
   std::deque< std::string > filesToRead;
 
