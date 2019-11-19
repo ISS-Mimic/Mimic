@@ -78,8 +78,8 @@ joints sarj_stbd = {10, 1, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 void motorfnc(struct joints &myJoint) {
   
   // 150 motor shaft rotations / gearbox output shaft rotation * 12 encoder counts / motor rotation  /(360 deg per /output rotation) = 150*12/360 = 5 encoder counts per output shaft degree
-  myJoint.PosAct = float(myJoint.Count) / (5 * 40 / 12); // / 25; // 150:1 gear ratio, 6 encoder counts per motor shaft rotation 150/6=25;  42 teeth on bull gear. T12 pinion for SARJ
-
+ // myJoint.PosAct = float(myJoint.Count) / (5 * 42 / 12); // / 25; // 150:1 gear ratio, 6 encoder counts per motor shaft rotation 150/6=25;  42 teeth on bull gear. T12 pinion for SARJ
+ myJoint.PosAct = float(myJoint.Count) / (150.694*12/360 * 42 / 12);
   // Added Aug 18, 2019 by BCM for "Smart Rollover"
   if (SmartRolloverSARJ == 1) {
     if (abs(myJoint.PosAct) > 360) {

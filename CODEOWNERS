@@ -1,0 +1,9 @@
+# These owners will be the default owners for everything in the repo.
+*       @streadgold @juggler2000
+
+# All pull requests affecting arduino files
+*.ino    @juggler2000
+
+#All pull requests affecting python/js files
+*.py     @streadgold
+*.js     @streadgold
