@@ -1205,7 +1205,7 @@ class MainApp(App):
             startup = False
 
         Clock.schedule_once(self.checkCrew, 30)
-#        Clock.schedule_once(self.checkBlogforEVA, 30)
+        Clock.schedule_once(self.checkBlogforEVA, 30)
         Clock.schedule_once(self.getTLE, 40) #uncomment when internet works again
         Clock.schedule_interval(self.getTLE, 300)
         Clock.schedule_interval(self.check_internet, 1)
@@ -1421,16 +1421,14 @@ class MainApp(App):
         
         #obtain eva statistics web page for parsing
         req = UrlRequest(eva_url, on_success, on_redirect, on_failure, on_error, timeout=1)
-
+    
+    def checkBlogforEVA(self, dt):
         iss_blog_url =  'https://blogs.nasa.gov/spacestation/tag/spacewalk/'
         def on_success(req, data): #if blog data is successfully received, it is processed here
             print("Blog Success")
             soup = BeautifulSoup(data, "lxml")
             blog_entries = soup.find("div", {"class": "entry-content"})
-            astros = blog_entries.find_all('a')
-            potential_ev = []
-            for link in astros:
-                potential_ev.append(link.contents[0])
+            blog_text = blog_entries.get_text()
             
             iss_EVcrew_url = 'https://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'
             
@@ -1440,27 +1438,13 @@ class MainApp(App):
                 names = []
                 for num in range(0, number_of_space):
                     names.append(str(data2['people'][num]['name']))
-                #print(names)
-                #print(potential_ev)
 
-                EV = 0
-                ev1_surname = ''
-                ev1_firstname = ''
-                ev2_surname = ''
-                ev2_firstname = ''
+                try:
+                    self.checkBlog(names,blog_text)
+                except Exception as e:
+                    print("Error checking blog: " + str(e))
+               
 
-                for index in range(0, len(potential_ev)-1):
-                    for crew in names:
-                        if potential_ev[index] == crew and EV < 2:
-                            if EV == 0:
-                                ev1_surname = crew.split()[-1]
-                                ev1_firstname = crew.split()[0]
-                            if EV == 1:
-                                ev2_surname = crew.split()[-1]
-                                ev2_firstname = crew.split()[0]
-                            EV+=1
-                self.check_EVA_stats(ev1_surname,ev1_firstname,ev2_surname,ev2_firstname) 
-            
             def on_redirect2(req, result):
                 print("Warning - Get EVA crew failure (redirect)")
                 print(result)
@@ -1484,6 +1468,42 @@ class MainApp(App):
 
         req = UrlRequest(iss_blog_url, on_success, on_redirect, on_failure, on_error, timeout=1)
 
+    def checkBlog(self, names, blog_text): #takes the nasa blog and compares it to people in space
+        ev1_surname = ''
+        ev1_firstname = ''
+        ev2_surname = ''
+        ev2_firstname = ''
+        ev1name = ''
+        ev2name = ''
+        
+        name_position = 1000000
+        for name in names: #search for text in blog that matchs people in space list, choose 1st result as likely EV1
+            if name in blog_text:
+                if blog_text.find(name) < name_position: 
+                    name_position = blog_text.find(name)
+                    ev1name = name
+        
+        name_position = 1000000
+        
+        for name in names: #search for text in blog that matchs people in space list, choose 2nd result as likely EV2
+            if name in blog_text and name != ev1name:
+                if blog_text.find(name) < name_position: 
+                    name_position = blog_text.find(name)
+                    ev2name = name
+        
+        print("Likely EV1: "+ev1name)
+        print("Likely EV2: "+ev2name)
+
+        ev1_surname = ev1name.split()[-1]
+        ev1_firstname = ev1name.split()[0]
+        ev2_surname = ev2name.split()[-1]
+        ev2_firstname = ev2name.split()[0]
+        
+        try:
+            self.check_EVA_stats(ev1_surname,ev1_firstname,ev2_surname,ev2_firstname) 
+        except Exception as e:
+            print("Error retrieving EVA stats: " + str(e))
+    
     def flashUS_EVAbutton(self, instance):
         logWrite("Function call - flashUS_EVA")
 
