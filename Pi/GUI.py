@@ -223,6 +223,8 @@ EVA_picture_urls = []
 urlindex = 0
 module = ""
 internet = False
+old_mt_timestamp = 0.00
+old_mt_position = 0.00
 
 class MainScreen(Screen):
     def changeManualControlBoolean(self, *args):
@@ -1062,7 +1064,7 @@ class Orbit_Screen(Screen, EventDispatcher):
 
 class ISS_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1, 1, 1])
-    def selectModule(*args):
+    def selectModule(*args): #used for choosing a module on screen to light up
         global module
         module = str(args[1])
 
@@ -1092,15 +1094,12 @@ class GNC_Screen(Screen, EventDispatcher):
 
 class EVA_Main_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1, 1, 1])
-    pass
 
 class EVA_US_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1, 1, 1])
-    pass
 
 class EVA_RS_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1, 1, 1])
-    pass
 
 class EVA_Pictures(Screen, EventDispatcher):
     pass
@@ -1110,10 +1109,12 @@ class TCS_Screen(Screen, EventDispatcher):
 
 class RS_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1, 1, 1])
-    pass
 
 class Crew_Screen(Screen, EventDispatcher):
     pass
+
+class MSS_MT_Screen(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1, 1, 1])
 
 class MimicScreen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1, 1, 1])
@@ -1147,12 +1148,12 @@ class MainApp(App):
         global startup, ScreenList, stopAnimation
 
         self.main_screen = MainScreen(name = 'main')
+        self.mimic_screen = MimicScreen(name = 'mimic')
         self.iss_screen = ISS_Screen(name = 'iss')
         self.eclss_screen = ECLSS_Screen(name = 'eclss')
         self.control_screen = ManualControlScreen(name = 'manualcontrol')
         self.orbit_screen = Orbit_Screen(name = 'orbit')
         self.fakeorbit_screen = FakeOrbitScreen(name = 'fakeorbit')
-        self.mimic_screen = MimicScreen(name = 'mimic')
         self.eps_screen = EPS_Screen(name = 'eps')
         self.ct_screen = CT_Screen(name = 'ct')
         self.ct_sasa_screen = CT_SASA_Screen(name = 'ct_sasa')
@@ -1166,11 +1167,12 @@ class MainApp(App):
         self.us_eva = EVA_US_Screen(name='us_eva')
         self.rs_eva = EVA_RS_Screen(name='rs_eva')
         self.rs_screen = RS_Screen(name='rs')
+        self.mss_mt_screen = MSS_MT_Screen(name='mt')
         self.eva_main = EVA_Main_Screen(name='eva_main')
         self.eva_pictures = EVA_Pictures(name='eva_pictures')
 
         #Add all new telemetry screens to this list, this is used for the signal status icon and telemetry value colors
-        ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen', 'ct_screen', 'ct_sasa_screen', 'ct_sgant_screen', 'ct_uhf_screen', 'ct_camera_screen', 'gnc_screen', 'orbit_screen', 'us_eva', 'rs_eva', 'eva_main', 'mimic_screen']
+        ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen', 'ct_screen', 'ct_sasa_screen', 'ct_sgant_screen', 'ct_uhf_screen', 'ct_camera_screen', 'gnc_screen', 'orbit_screen', 'us_eva', 'rs_eva', 'eva_main', 'mimic_screen', 'mss_mt_screen']
 
         root = MainScreenManager(transition=SwapTransition())
         root.add_widget(self.main_screen)
@@ -1190,6 +1192,7 @@ class MainApp(App):
         root.add_widget(self.us_eva)
         root.add_widget(self.rs_eva)
         root.add_widget(self.rs_screen)
+        root.add_widget(self.mss_mt_screen)
         root.add_widget(self.eva_main)
         root.add_widget(self.eva_pictures)
         root.add_widget(self.tcs_screen)
@@ -1197,7 +1200,7 @@ class MainApp(App):
         root.add_widget(self.settings_screen)
         root.current = 'main' #change this back to main when done with eva setup
 
-        Clock.schedule_interval(self.update_labels, 1)
+        Clock.schedule_interval(self.update_labels, 0.5) #all telemetry wil refresh and get pushed to arduinos every half second!
         Clock.schedule_interval(self.animate3, 0.1)
         Clock.schedule_interval(self.orbitUpdate, 1)
         Clock.schedule_interval(self.checkCrew, 600)
@@ -2098,6 +2101,7 @@ class MainApp(App):
         global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power
         global stationmode, sgant_elevation, sgant_xelevation
         global tdrs, module
+        global old_mt_timestamp, old_mt_position
 
         arduino_count = 0
         if SerialConnection1:
@@ -2313,10 +2317,25 @@ class MainApp(App):
         airlock_pump_switch = int((values[72])[0])
         crewlockpres = float((values[16])[0])
         airlockpres = float((values[77])[0])
+        
+        #MSS Robotics Stuff
+        mt_worksite = int((values[258])[0])
+        self.mss_mt_screen.ids.mt_ws_value.text = str(mt_worksite)
+        mt_position = float((values[257])[0])
+        mt_position_timestamp = float((timestamps[257])[0])
+        
+        self.mss_mt_screen.ids.mt_position_value.text = str(mt_position)
 
+        if (mt_position_timestamp - old_mt_timestamp) > 0:
+            mt_speed = (mt_position - old_mt_position) / (mt_position_timestamp - old_mt_timestamp)
+        else:
+            mt_speed = 0.00
+        self.mss_mt_screen.ids.mt_speed_value.text = str(mt_speed) + " cm/s"
+        old_mt_timestamp = mt_position_timestamp
+        old_mt_position = mt_position
+        
 
         ##US EPS Stuff---------------------------##
-
         solarbeta = "{:.2f}".format(float((values[176])[0]))
 
         power_1a = float(v1a) * float(c1a)
@@ -2950,6 +2969,7 @@ Builder.load_file('/home/pi/Mimic/Pi/Screens/EVA_Pictures.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/Crew_Screen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/RS_Screen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/ManualControlScreen.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/MSS_MT_Screen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/MimicScreen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/MainScreen.kv')
 
@@ -2978,6 +2998,7 @@ ScreenManager:
     RS_Screen:
     Crew_Screen:
     ManualControlScreen:
+    MSS_MT_Screen:
     MimicScreen:
     MainScreen:
 ''')
