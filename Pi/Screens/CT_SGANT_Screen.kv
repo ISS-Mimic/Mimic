@@ -55,7 +55,7 @@
             size_hint_x: 0.15
             keep_ratio: True
         Image:
-            id: tdrs_east
+            id: tdrs_east41
             source: "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
             color: 1,1,1,1
             size_hint: 0.15,0.15
@@ -79,7 +79,55 @@
             canvas.after:
                 PopMatrix
         Image:
-            id: tdrs_west
+            id: tdrs_east46
+            source: "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            color: 1,1,1,1
+            size_hint: 0.15,0.15
+            anim_delay: 0.12
+            anim_loop: 0
+            keep_ratio: False
+            pos_hint: {"center_x": 0.5, "center_y": 0.8}
+            angle: 0
+            angle2: 180
+            canvas.before:
+                PushMatrix
+                Rotate:
+                    angle: self.angle
+                    axis: 0,0,-1
+                    ##origin: sgant_dish.center
+                    origin: 400,0
+                Rotate:
+                    angle: self.angle2
+                    axis: 0,0,1
+                    origin: self.center
+            canvas.after:
+                PopMatrix
+        Image:
+            id: tdrs_west171
+            source: "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            color: 1,1,1,1
+            size_hint: 0.15,0.15
+            anim_delay: 0.12
+            anim_loop: 0
+            keep_ratio: False
+            pos_hint: {"center_x": 0.5, "center_y": 0.8}
+            angle: 0
+            angle2: 180
+            canvas.before:
+                PushMatrix
+                Rotate:
+                    angle: self.angle
+                    axis: 0,0,-1
+                    ##origin: sgant_dish.center
+                    origin: 400,0
+                Rotate:
+                    angle: self.angle2
+                    axis: 0,0,1
+                    origin: self.center
+            canvas.after:
+                PopMatrix
+        Image:
+            id: tdrs_west174
             source: "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
             color: 1,1,1,1
             size_hint: 0.15,0.15
@@ -105,7 +153,7 @@
         Image:
             id: tdrs_z
             source: "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
-            color: 1,1,1,1
+            color: 1,1,1,0.2
             size_hint: 0.15,0.15
             anim_delay: 0.12
             anim_loop: 0

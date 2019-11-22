@@ -1704,13 +1704,15 @@ class MainApp(App):
             self.orbit_screen.ids.longitude.text = str("{:.2f}".format(longitude))
 
             #need to determine which tdrs is being used based on longitude and sgant elevation
-            #TDRSw = -174
-            #TDRSe = -41
-            #TDRSz = 85
+            #TDRSw = -174W
+            #TDRSe = -41W
+            #TDRSz = 85E
             tdrs = "n/a"
-            self.ct_sgant_screen.ids.tdrs_east.angle = (-1*longitude)-41
+            self.ct_sgant_screen.ids.tdrs_east41.angle = (-1*longitude)-41
+            self.ct_sgant_screen.ids.tdrs_east46.angle = (-1*longitude)-46
             self.ct_sgant_screen.ids.tdrs_z.angle = ((-1*longitude)-41)+126
-            self.ct_sgant_screen.ids.tdrs_west.angle = ((-1*longitude)-41)-133
+            self.ct_sgant_screen.ids.tdrs_west174.angle = ((-1*longitude)-41)-133
+            self.ct_sgant_screen.ids.tdrs_west171.angle = ((-1*longitude)-41)-130
 
             if longitude > 90 and sgant_elevation < -10 and float(aos) == 1.0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West"
@@ -1743,6 +1745,7 @@ class MainApp(App):
                 self.orbit_screen.ids.TDRSz.col = (1, 1, 1)
                 self.orbit_screen.ids.ZOElabel.color = 1, 1, 1
             elif tdrs == "east":
+                self.ct_sgant_screen.ids.tdrs_z.color = 1, 1, 1, 0
                 self.orbit_screen.ids.TDRSwLabel.color = 1, 1, 1
                 self.orbit_screen.ids.TDRSeLabel.color = 1, 0, 1
                 self.orbit_screen.ids.TDRSzLabel.color = 1, 1, 1
@@ -1751,6 +1754,7 @@ class MainApp(App):
                 self.orbit_screen.ids.TDRSz.col = (1, 1, 1)
                 self.orbit_screen.ids.ZOElabel.color = 1, 1, 1
             elif tdrs == "z":
+                self.ct_sgant_screen.ids.tdrs_z.color = 1, 1, 1, 1
                 self.orbit_screen.ids.TDRSwLabel.color = 1, 1, 1
                 self.orbit_screen.ids.TDRSeLabel.color = 1, 1, 1
                 self.orbit_screen.ids.TDRSzLabel.color = 1, 0, 1
@@ -1759,6 +1763,7 @@ class MainApp(App):
                 self.orbit_screen.ids.TDRSz.col = (1, 0, 1)
                 self.orbit_screen.ids.ZOElabel.color = 1, 1, 1
             else:
+                self.ct_sgant_screen.ids.tdrs_z.color = 1, 1, 1, 0
                 self.orbit_screen.ids.TDRSwLabel.color = 1, 1, 1
                 self.orbit_screen.ids.TDRSeLabel.color = 1, 1, 1
                 self.orbit_screen.ids.TDRSzLabel.color = 1, 1, 1
@@ -2551,10 +2556,13 @@ class MainApp(App):
         #if float(c4b) > 0.0:                                  #power channel offline!
         #    self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
         #if avg_total_voltage > 151.5:
-        #    self.eps_screen.ids.eps_sun.color = 1, 1, 1, 1
         #else:
-        #    self.eps_screen.ids.eps_sun.color = 1, 1, 1, 0.1
 
+        if float(v1a) >= 151.5 or float(v1b) >= 151.5 or float(v2a) >= 151.5 or float(v2b) >= 151.5 or float(v3a) >= 151.5 or float(v3b) >= 151.5 or float(v4a) >= 151.5 or float(v4b) >= 151.5:
+            self.eps_screen.ids.eps_sun.color = 1, 1, 1, 1
+        else:
+            self.eps_screen.ids.eps_sun.color = 1, 1, 1, 0.1
+            
         if float(v1a) < 151.5: #discharging
             self.eps_screen.ids.array_1a.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
             #self.eps_screen.ids.array_1a.color = 1, 1, 1, 0.8
@@ -2631,13 +2639,13 @@ class MainApp(App):
             self.eps_screen.ids.array_4a.color = 1, 1, 1, 1.0
         if float(c4a) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_4a.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
-
-        if float(v4b) < 151.5: #discharging
+        #4b has a lower setpoint voltage for now
+        if float(v4b) < 141.5: #discharging
             self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
             #self.eps_screen.ids.array_4b.color = 1, 1, 1, 0.8
-        elif float(v4b) > 160.0: #charged
+        elif float(v4b) > 150.0: #charged
             self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
-        elif float(v4b) >= 151.5:  #charging
+        elif float(v4b) >= 141.5:  #charging
             self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_4b.color = 1, 1, 1, 1.0
         if float(c4b) > 0.0:                                  #power channel offline!
@@ -2651,31 +2659,31 @@ class MainApp(App):
         if float(sgant_transmit) == 1.0 and float(aos) == 1.0:
             self.ct_sgant_screen.ids.radio_up.color = 1, 1, 1, 1
             if tdrs == "west":
-                self.ct_sgant_screen.ids.tdrs_west.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.zip"
-                self.ct_sgant_screen.ids.tdrs_east.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+                self.ct_sgant_screen.ids.tdrs_west174.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.zip"
+                self.ct_sgant_screen.ids.tdrs_east41.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
                 self.ct_sgant_screen.ids.tdrs_z.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
             elif tdrs == "east":
-                self.ct_sgant_screen.ids.tdrs_east.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.zip"
-                self.ct_sgant_screen.ids.tdrs_west.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+                self.ct_sgant_screen.ids.tdrs_east41.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.zip"
+                self.ct_sgant_screen.ids.tdrs_west174.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
                 self.ct_sgant_screen.ids.tdrs_z.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
             elif tdrs == "z":
                 self.ct_sgant_screen.ids.tdrs_z.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.zip"
-                self.ct_sgant_screen.ids.tdrs_west.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
-                self.ct_sgant_screen.ids.tdrs_east.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+                self.ct_sgant_screen.ids.tdrs_west174.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+                self.ct_sgant_screen.ids.tdrs_east41.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
         elif float(sgant_transmit) == 1.0 and float(aos) == 0.0:
             self.ct_sgant_screen.ids.radio_up.color = 0, 0, 0, 0
-            self.ct_sgant_screen.ids.tdrs_east.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
-            self.ct_sgant_screen.ids.tdrs_west.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            self.ct_sgant_screen.ids.tdrs_east41.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            self.ct_sgant_screen.ids.tdrs_west174.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
             self.ct_sgant_screen.ids.tdrs_z.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
         elif float(sgant_transmit) == 0.0:
             self.ct_sgant_screen.ids.radio_up.color = 0, 0, 0, 0
-            self.ct_sgant_screen.ids.tdrs_east.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
-            self.ct_sgant_screen.ids.tdrs_west.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            self.ct_sgant_screen.ids.tdrs_east41.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            self.ct_sgant_screen.ids.tdrs_west174.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
             self.ct_sgant_screen.ids.tdrs_z.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
         elif float(aos) == 0.0:
             self.ct_sgant_screen.ids.radio_up.color = 0, 0, 0, 0
-            self.ct_sgant_screen.ids.tdrs_east.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
-            self.ct_sgant_screen.ids.tdrs_west.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            self.ct_sgant_screen.ids.tdrs_east41.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            self.ct_sgant_screen.ids.tdrs_west174.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
             self.ct_sgant_screen.ids.tdrs_z.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
 
         #now check main CT screen radio signal
