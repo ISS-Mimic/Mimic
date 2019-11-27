@@ -2,7 +2,14 @@
 <html>
 <head>
 		<style>
-			@import url('https://fonts.googleapis.com/css?family=Abel&display=swap');
+			@font-face {
+			  font-family: 'Abel-FixedKern';
+			  font-style: normal;
+			  font-weight: 400;
+			  font-display: swap;
+			  src: url(https://iss-mimic.github.io/Mimic/Abel-FixedKern.woff2) format('woff2');
+			  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+			}
 			tr:nth-child(even) {background: lightgrey;}
 			div:hover {background: lightblue;}
 			@keyframes hifade {
@@ -25,7 +32,7 @@
 			body.AOS{ animation: aosfade 1.0s; background: white;}
 
 			div.highlight { animation: hifade 0.5s; }
-			div { display:block; width:120px;float:left; font-size:small; font-family:'Abel', 'arial narrow'; }
+			div { display:block; width:120px;float:left; font-size:small; font-family:'Abel-FixedKern', 'arial narrow'; }
 			div.pui { margin: 2px; text-align: center;}
 			div.val { border-top: 1px solid white; text-align: center; }
 			div.EVA { background: lightblue;}
