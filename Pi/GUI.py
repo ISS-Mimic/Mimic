@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from datetime import datetime #used for time conversions and logging timestamps
+from datetime import datetime, timedelta #used for time conversions and logging timestamps
 import os #used to remove database on program exit
 os.environ['KIVY_GL_BACKEND'] = 'gl' #need this to fix a kivy segfault that occurs with python3 for some reason
 import subprocess #used to start/stop Javascript telemetry program
@@ -1646,22 +1646,6 @@ class MainApp(App):
             newLon = (0.14) + (valueLonScaled * toLonSpan)
             return {'newLat': newLat, 'newLon': newLon}
 
-        def toYearFraction(date):
-            def sinceEpoch(date): # returns seconds since epoch
-                return time.mktime(date.timetuple())
-            s = sinceEpoch
-            year = date.year
-            startOfThisYear = datetime(year=year, month=1, day=1)
-            startOfNextYear = datetime(year=year+1, month=1, day=1)
-            yearElapsed = s(date) - s(startOfThisYear)
-            yearDuration = s(startOfNextYear) - s(startOfThisYear)
-            fraction = yearElapsed/yearDuration
-            if float(fraction*365.24) < 100:
-                current_epoch = str(date.year)[2:] + "0" + str(fraction*365.24)
-            else:
-                current_epoch = str(date.year)[2:] + str(fraction*365.24)
-            return current_epoch
-
         #draw the TDRS satellite locations
         self.orbit_screen.ids.TDRSe.pos_hint = {"center_x": scaleLatLon(0, -41)['newLon'], "center_y": scaleLatLon(0, -41)['newLat']}
         self.orbit_screen.ids.TDRSeLabel.pos_hint = {"center_x": scaleLatLon(0, -41)['newLon']+0.06, "center_y": scaleLatLon(0, -41)['newLat']}
@@ -1798,9 +1782,12 @@ class MainApp(App):
             mins = (now - now.replace(hour=0, minute=0, second=0, microsecond=0)).total_seconds()
             orbits_today = math.floor((float(mins)/60)/90)
             self.orbit_screen.ids.dailyorbit.text = str(int(orbits_today)) #display number of orbits since utc midnight
-
-            time_since_epoch = float(toYearFraction(datetime.utcnow())) - float(line1[22:36])
-            totalorbits = int(line2[68:72]) + 100000 + int(float(time_since_epoch)*24/1.5) #add number of orbits since the tle was generated
+            
+            year = int('20' + str(line1[18:20]))
+            decimal_days = float(line1[20:32])
+            converted_time = datetime(year, 1 ,1) + timedelta(decimal_days - 1)
+            time_since_epoch = ((now - converted_time).total_seconds()) #convert time difference to hours
+            totalorbits = int(line2[63:68]) + 100000 + int(float(time_since_epoch)/(90*60)) #add number of orbits since the tle was generated
             self.orbit_screen.ids.totalorbits.text = str(totalorbits) #display number of orbits since utc midnight
             #------------------ISS Pass Detection---------------------------
             location = ephem.Observer()
@@ -1838,33 +1825,25 @@ class MainApp(App):
 
     def getTLE(self, *args):
         global tle_rec, line1, line2, TLE_acquired
-        iss_tle_url =  'https://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html'
+        #iss_tle_url =  'https://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html' #the rev counter on this page is wrong
+        iss_tle_url =  'https://www.celestrak.com/NORAD/elements/stations.txt'
         
         def on_success(req, data): #if TLE data is successfully received, it is processed here
             global tle_rec, line1, line2, TLE_acquired
-            def process_tag_text(tag_text): #this function splits up the data received into proper TLE format
-                firstTLE = True
-                marker = 'TWO LINE MEAN ELEMENT SET'
-                text = iter(tag_text.split('\n'))
-                for line in text:
-                    if (marker in line) and firstTLE:
-                        firstTLE = False
-                        next(text)
-                        results.append('\n'.join(
-                            (next(text), next(text), next(text))))
-                return results
-            logWrite("ISS TLE - Successfully fetched TLE page")
-            soup = BeautifulSoup(data, 'html.parser')
-            body = soup.find_all("pre")
+            soup = BeautifulSoup(data, "lxml")
+            body = iter(soup.get_text().split('\n'))
             results = []
-            for tag in body:
-                if "ISS" in tag.text:
-                    results.extend(process_tag_text(tag.text))
+            for line in body:
+                if "ISS (ZARYA)" in line:
+                    results.append(line)
+                    results.append(next(body))
+                    results.append(next(body))
+                    break
+            results = [i.strip() for i in results]
 
             if len(results) > 0:
-                parsed = str(results[0]).split('\n')
-                line1 = parsed[1]
-                line2 = parsed[2]
+                line1 = results[1]
+                line2 = results[2]
                 print(line1)
                 print(line2)
                 tle_rec = ephem.readtle("ISS (ZARYA)", str(line1), str(line2))
