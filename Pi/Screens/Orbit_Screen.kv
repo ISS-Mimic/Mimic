@@ -17,22 +17,34 @@
             keep_ratio: True
         Widget:
             id: mylocation
+            col: (0,0,1,1)
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
             size_hint: '0.01dp', '0.02dp'
             canvas:
                 Color:
-                    rgb: 0,0,1
+                    rgba: self.col
                 Ellipse:
                     pos: self.pos
                     size: self.size
         Widget:
-            id: TDRSe
-            col: (1,1,1)
+            id: TDRS12
+            col: (0,0,0,0)
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
             size_hint: '0.01dp', '0.02dp'
             canvas:
                 Color:
-                    rgb: self.col
+                    rgba: self.col
+                Ellipse:
+                    pos: self.pos
+                    size: self.size
+        Widget:
+            id: TDRS6
+            col: (0,0,0,0)
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            size_hint: '0.01dp', '0.02dp'
+            canvas:
+                Color:
+                    rgba: self.col
                 Ellipse:
                     pos: self.pos
                     size: self.size
@@ -44,13 +56,24 @@
             color: 1,1,1
             font_size: 15
         Widget:
-            id: TDRSw
-            col: (1,1,1)
+            id: TDRS11
+            col: (0,0,0,0)
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
             size_hint: '0.01dp', '0.02dp'
             canvas:
                 Color:
-                    rgb: self.col
+                    rgba: self.col
+                Ellipse:
+                    pos: self.pos
+                    size: self.size
+        Widget:
+            id: TDRS10
+            col: (0,0,0,0)
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            size_hint: '0.01dp', '0.02dp'
+            canvas:
+                Color:
+                    rgba: self.col
                 Ellipse:
                     pos: self.pos
                     size: self.size
@@ -63,12 +86,13 @@
             font_size: 15
         Widget:
             id: ZOE
+            col: (0,0,0,0)
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
             size_hint: '0.06dp', '0.38dp'
             opacity: 0.2
             canvas:
                 Color:
-                    rgb: 1,0.5,0
+                    rgba: self.col
                 Ellipse:
                     pos: self.pos
                     size: self.size
@@ -80,13 +104,13 @@
             color: 1,1,1
             font_size: 15
         Widget:
-            id: TDRSz
-            col: (1,1,1)
+            id: TDRS7
+            col: (0,0,0,0)
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
             size_hint: '0.01dp', '0.02dp'
             canvas:
                 Color:
-                    rgb: self.col
+                    rgba: self.col
                 Ellipse:
                     id: TDRSz
                     pos: self.pos
@@ -108,14 +132,14 @@
         Label:
             id: dailyorbit
             pos_hint: {"center_x": 0.08, "center_y": 0.7}
-            text: '0'
+            text: ''
             markup: True
             color: 1,1,1
             font_size: 50
         Label:
             id: totalorbits
             pos_hint: {"center_x": 0.08, "center_y": 0.5}
-            text: '0'
+            text: ''
             markup: True
             color: 1,1,1
             font_size: 26
