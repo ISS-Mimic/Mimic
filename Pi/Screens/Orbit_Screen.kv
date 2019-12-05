@@ -4,6 +4,9 @@
 <Orbit_Screen>:
     name: 'orbit'
     FloatLayout:
+        id: orbit_layout
+        size: (100,100)
+        size_hint: (None,None)
         Image:
             id: Orbit_background
             source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitBase.png'
@@ -12,7 +15,9 @@
             id: OrbitMap
             source: '/home/pi/Mimic/Pi/imgs/orbit/map.jpg'
             pos_hint: {"center_x": 0.5, "center_y": 0.56}
-            size_hint_y: 0.598
+            size: (window 500,300)
+            #size_hint_y: 0.598
+            size_hint: (None,None)
             allow_stretch: False
             keep_ratio: True
         Widget:
@@ -68,7 +73,7 @@
                     size: self.size
         Widget:
             id: TDRS10
-            col: (0,0,0,0)
+            col: (1,1,1,1)
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
             size_hint: '0.01dp', '0.02dp'
             canvas:
@@ -77,6 +82,10 @@
                 Ellipse:
                     pos: self.pos
                     size: self.size
+                SmoothLine:
+                    points: (OrbitMap.x,OrbitMap.y,OrbitMap.width,OrbitMap.height)
+                    joint: "round"
+                    
         Label:
             id: TDRSwLabel
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}

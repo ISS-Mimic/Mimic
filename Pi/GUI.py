@@ -18,6 +18,8 @@ from kivy.clock import Clock
 from kivy.event import EventDispatcher
 from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
+from kivy.core.window import Window
+
 import database_initialize
 
 # Create Program Logs
