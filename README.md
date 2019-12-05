@@ -21,3 +21,15 @@ Check out the wiki for more information.
 You can view a video showing some of our project here: https://www.youtube.com/watch?v=sbdHXjDQ-U8
 
 The software is pretty cool and provides even more in-depth functionality than isslive.com, we'll be adding videos and pictures soon to show off the software capabilities
+
+
+# Status/Priorities
+We are currently focused on refining the CAD model and splitting out all the STL files for printing. All of the STL files currently in this repo are likely outdated or currently changing. We will also release the raw CAD once finished.
+
+We are also working on finishing the software.
+
+Currently working on:
+1. Solar Array CAD Redesign 4-Dec-19 (est completion by 12-Dec-2019)
+1. Split out all ISS models from Blender model for refinement 4-Dec-19 (est completion by 1-Jan-2020)
+1. Improve all software screens/functionality
+   1. Orbit Screen Improvements 4-Dec-19 (est completion by 1-Jan-2020)
