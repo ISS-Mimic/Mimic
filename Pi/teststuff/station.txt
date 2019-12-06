@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>CelesTrak: Current NORAD Two-Line Element Sets</title>
+
+<link rel="stylesheet" type="text/css" href="/site.css">
+
+<link rel="stylesheet" href="/web/fontawesome/css/all.css">
+
+</head>
+
+<body>
+
+<h1 class=center>NORAD Two-Line Element Sets<br>Current Data</h1>
+
+<p class=center><i>Today from <br>The Center for Space Standards & Innovation<br></i></p>
+
+<!-- <h2 class=center>Data Updated: 2019 Dec 3 (Day 337)</h2> -->
+
+<h3 class=center>Current as of 2019 Dec 03 04:06:40 UTC (Day 337)</h3>
+
+<p class=center>
+<a class=notice href="notice.php" title="Important information about recent changes">System Notices<br>
+Future Availability of TLE Data</a><br>
+<a href="notice.php#Update16">Updated 2007 May 16</a>
+</p>
+
+<h3 class=center><a href="/SpaceTrack/">Space Track Data Access</a></h3>
+
+<h3 class=center><a href="/NORAD/elements/supplemental/">Supplemental TLE Data</a></h3>
+
+<h3 class=center><a href="/SpaceTrack/TLERetriever3Help.php" STYLE="color: red"><i>Space Track TLE Retriever 3</i></a></h3>
+<!-- <p class=center><i>Version 3 is needed to use the web services API on the new Space Track since <b>2013 February 20</b></i></p> -->
+
+<table class="center outline"><tr><td>
+<table class=striped-odd cellpadding=2 width=600>
+  <tr class=header><th align=center>Special-Interest Satellites</th></tr>
+  <tr><td align=center><a href="tle-new.txt">Last 30 Days' Launches</a> <a title="Table" href="table.php?tleFile=tle-new&title=Last 30 Days' Launches&orbits=25&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/tle-new.txt&satcat=/pub/satcat.txt&orbits=25&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td align=center><a href="stations.txt">Space Stations</a> <a title="Table" href="table.php?tleFile=stations&title=Space Stations&orbits=1&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/stations.txt&satcat=/pub/satcat.txt&orbits=1&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td align=center><a href="visual.txt">100 (or so) Brightest</a> <a title="Table" href="table.php?tleFile=visual&title=100 (or so) Brightest&orbits=0&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/visual.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td align=center><a href="active.txt">Active Satellites</a> <a title="Table" href="table.php?tleFile=active&title=Active Satellites&orbits=0&pointsPerRev=16&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/active.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=16&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td align=center><a href="analyst.txt">Analyst Satellites</a> <a title="Table" href="/satcat/analyst-catalog.php"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/analyst.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td align=center><a href="2019-006.txt">Indian ASAT Test Debris</a> <a title="Table" href="table.php?tleFile=2019-006&title=Indian ASAT Test Debris&orbits=0&pointsPerRev=60&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/2019-006.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=60&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td align=center><a href="1999-025.txt">FENGYUN 1C Debris</a> <a title="Table" href="table.php?tleFile=1999-025&title=FENGYUN 1C Debris&orbits=0&pointsPerRev=16&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/1999-025.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=16&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td align=center><a href="iridium-33-debris.txt">IRIDIUM 33 Debris</a> <a title="Table" href="table.php?tleFile=iridium-33-debris&title=IRIDIUM 33 Debris&orbits=0&pointsPerRev=30&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/iridium-33-debris.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=30&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td align=center><a href="cosmos-2251-debris.txt">COSMOS 2251 Debris</a> <a title="Table" href="table.php?tleFile=cosmos-2251-debris&title=COSMOS 2251 Debris&orbits=0&pointsPerRev=30&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/cosmos-2251-debris.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=30&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+<!--  <tr><td align=center><a href="2012-044.txt">BREEZE-M R/B Breakup (2012-044C)</a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/2012-044.txt&satcat=/pub/satcat.txt&orbits=15&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr> -->
+</table>
+
+<table class=striped-odd cellpadding=2 width=600>
+  <tr class=header><th colspan=2 align=center>Weather & Earth Resources Satellites</th></tr>
+  <tr><td colspan=2 align=center><a href="weather.txt">Weather</a> <a title="Table" href="table.php?tleFile=weather&title=Weather Satellites&orbits=0&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/weather.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td align=center width=300><a href="noaa.txt">NOAA</a> <a title="Table" href="table.php?tleFile=noaa&title=NOAA Satellites&orbits=25&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/noaa.txt&satcat=/pub/satcat.txt&orbits=25&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td>
+  	  <td align=center width=300><a href="goes.txt">GOES</a> <a title="Table" href="table.php?tleFile=goes&title=GOES Satellites&orbits=20&pointsPerRev=90&frame=0"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/goes.txt&satcat=/pub/satcat.txt&orbits=20&pixelSize=3&samplesPerPeriod=90&referenceFrame=0"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td colspan=2 align=center><a href="resource.txt">Earth Resources</a> <a title="Table" href="table.php?tleFile=resource&title=Earth Resources Satellites&orbits=0&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/resource.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td align=center><a href="sarsat.txt">Search & Rescue (SARSAT)</a> <a title="Table" href="table.php?tleFile=sarsat&title=Search %26 Rescue (SARSAT) Satellites&orbits=0&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/sarsat.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td>
+    	<td align=center><a href="dmc.txt">Disaster Monitoring</a> <a title="Table" href="table.php?tleFile=dmc&title=Disaster Monitoring Satellites&orbits=20&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/dmc.txt&satcat=/pub/satcat.txt&orbits=15&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td colspan=2 align=center><a href="tdrss.txt">Tracking and Data Relay Satellite System (TDRSS)</a> <a title="Table" href="table.php?tleFile=tdrss&title=Tracking and Data Relay Satellite System (TDRSS) Satellites&orbits=0&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/tdrss.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td colspan=2 align=center><a href="argos.txt">ARGOS Data Collection System</a> <a title="Table" href="table.php?tleFile=argos&title=ARGOS Data Collection System Satellites&orbits=10&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/argos.txt&satcat=/pub/satcat.txt&orbits=10&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td align=center><a href="planet.txt">Planet</a> <a title="Table" href="table.php?tleFile=planet&title=Planet Satellites&orbits=0&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/planet.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td>
+    	<td align=center><a href="spire.txt">Spire</a> <a title="Table" href="table.php?tleFile=spire&title=Spire Satellites&orbits=0&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/spire.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+</table>
+
+<table class=striped-odd cellpadding=2 width=600>
+  <tr class=header><th colspan=2 align=center>Communications Satellites</th></tr>
+  <tr><td colspan=2 align=center><a href="geo.txt">Active Geosynchronous</a> <a title="Table" href="geo.php"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/geo.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=90&referenceFrame=0"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td align=center width=300><a href="/satcat/gpz.php">GEO Protected Zone</a> <a title="Table" href="gpz.php"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/satcat/gpz2.php&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=30&referenceFrame=0"><i class="fal fa-globe"></i></a></td>
+  	  <td align=center width=300><a href="/satcat/gpz-plus.php">GEO Protected Zone Plus</a> <a title="Table" href="gpz-plus.php"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/satcat/gpz-plus2.php&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=30&referenceFrame=0"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td align=center width=300><a href="intelsat.txt">Intelsat</a> <a title="Table" href="table.php?tleFile=intelsat&title=Intelsat Satellites&orbits=0&pointsPerRev=90&frame=0"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/intelsat.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=90&referenceFrame=0"><i class="fal fa-globe"></i></a></td>
+  	  <td align=center width=300><a href="ses.txt">SES</a> <a title="Table" href="table.php?tleFile=ses&title=SES Satellites&orbits=0&pointsPerRev=90&frame=0"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/ses.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=90&referenceFrame=0"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td align=center><a href="iridium.txt">Iridium</a> <a title="Table" href="table.php?tleFile=iridium&title=Iridium Satellites&orbits=40&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/iridium.txt&satcat=/pub/satcat.txt&orbits=40&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td>
+    	<td align=center><a href="iridium-NEXT.txt">Iridium NEXT</a> <a title="Table" href="table.php?tleFile=iridium-NEXT&title=Iridium NEXT Satellites&orbits=0&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/iridium-NEXT.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td colspan=2 align=center><a href="starlink.txt">Starlink</a> <a title="Table" href="table.php?tleFile=starlink&title=Starlink Satellites&orbits=0&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/starlink.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td align=center><a href="orbcomm.txt">Orbcomm</a> <a title="Table" href="table.php?tleFile=orbcomm&title=Orbcomm Satellites&orbits=0&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/orbcomm.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td>
+  	  <td align=center><a href="globalstar.txt">Globalstar</a> <a title="Table" href="table.php?tleFile=globalstar&title=Globalstar Satellites&orbits=0&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/globalstar.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+</table>
+<table class=striped cellpadding=2 width=600>
+  <tr><td align=center width=200><a href="amateur.txt">Amateur Radio</a> <a title="Table" href="table.php?tleFile=amateur&title=Amateur Radio Satellites&orbits=0&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/amateur.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td>
+    	<td align=center width=200><a href="x-comm.txt">Experimental</a> <a title="Table" href="table.php?tleFile=x-comm&title=Experimental Satellites&orbits=20&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/x-comm.txt&satcat=/pub/satcat.txt&orbits=20&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td>
+    	<td align=center width=200><a href="other-comm.txt">Other Comm</a> <a title="Table" href="table.php?tleFile=other-comm&title=Other Communications Satellites&orbits=25&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/other-comm.txt&satcat=/pub/satcat.txt&orbits=25&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td colspan=3 align=center><a href="satnogs.txt">SatNOGS</a> <a title="Table" href="table.php?tleFile=satnogs&title=SatNOGS Satellites&orbits=0&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/satnogs.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td align=center><a href="gorizont.txt">Gorizont</a> <a title="Table" href="table.php?tleFile=gorizont&title=Gorizont Satellites&orbits=0&pointsPerRev=90&frame=0"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/gorizont.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=90&referenceFrame=0"><i class="fal fa-globe"></i></a></td>
+	    <td align=center><a href="raduga.txt">Raduga</a> <a title="Table" href="table.php?tleFile=raduga&title=Raduga Satellites&orbits=0&pointsPerRev=90&frame=0"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/raduga.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=90&referenceFrame=0"><i class="fal fa-globe"></i></a></td>
+  	  <td align=center><a href="molniya.txt">Molniya</a> <a title="Table" href="table.php?tleFile=molniya&title=Molniya Satellites&orbits=0&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/molniya.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+</table>
+
+<table class=striped-odd cellpadding=2 width=600>
+  <tr class=header><th colspan=2 align=center>Navigation Satellites</th></tr>
+  <tr><td align=center width=300><a href="gps-ops.txt">GPS Operational</a> <a title="Table" href="table.php?tleFile=gps-ops&title=GPS Operational Satellites&orbits=32&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/gps-ops.txt&satcat=/pub/satcat.txt&orbits=32&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td>
+    	<td align=center width=300><a href="glo-ops.txt">GLONASS Operational</a> <a title="Table" href="table.php?tleFile=glo-ops&title=GLONASS Operational Satellites&orbits=24&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/glo-ops.txt&satcat=/pub/satcat.txt&orbits=24&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td align=center><a href="galileo.txt">Galileo</a> <a title="Table" href="table.php?tleFile=galileo&title=Galileo Satellites&orbits=30&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/galileo.txt&satcat=/pub/satcat.txt&orbits=30&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td>
+	    <td align=center><a href="beidou.txt">Beidou</a> <a title="Table" href="table.php?tleFile=beidou&title=Beidou Satellites&orbits=0&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/beidou.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td colspan=2 align=center><a href="sbas.txt">Satellite-Based Augmentation System (WAAS/EGNOS/MSAS)</a> <a title="Table" href="table.php?tleFile=sbas&title=Satellite-Based Augmentation System (WAAS/EGNOS/MSAS) Satellites&orbits=20&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/sbas.txt&satcat=/pub/satcat.txt&orbits=20&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td colspan=2 align=center><a href="nnss.txt">Navy Navigation Satellite System (NNSS)</a> <a title="Table" href="table.php?tleFile=nnss&title=Navy Navigation Satellite System (NNSS) Satellites&orbits=20&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/nnss.txt&satcat=/pub/satcat.txt&orbits=20&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td colspan=2 align=center><a href="musson.txt">Russian LEO Navigation</a> <a title="Table" href="table.php?tleFile=musson&title=Russian LEO Navigation Satellites&orbits=10&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/musson.txt&satcat=/pub/satcat.txt&orbits=10&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+</table>
+
+<table class=striped-odd cellpadding=2 width=600>
+  <tr class=header><th colspan=2 align=center>Scientific Satellites</th></tr>
+  <tr><td colspan=2 align=center><a href="science.txt">Space & Earth Science</a> <a title="Table" href="table.php?tleFile=science&title=Space %26 Earth Science Satellites&orbits=0&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/science.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td align=center width=300><a href="geodetic.txt">Geodetic</a> <a title="Table" href="table.php?tleFile=geodetic&title=Geodetic Satellites&orbits=10&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/geodetic.txt&satcat=/pub/satcat.txt&orbits=10&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td>
+    	<td align=center width=300><a href="engineering.txt">Engineering</a> <a title="Table" href="table.php?tleFile=engineering&title=Engineering Satellites&orbits=30&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/engineering.txt&satcat=/pub/satcat.txt&orbits=30&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td colspan=2 align=center><a href="education.txt">Education</a> <a title="Table" href="table.php?tleFile=education&title=Education Satellites&orbits=15&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/education.txt&satcat=/pub/satcat.txt&orbits=15&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+</table>
+
+<table class=striped-odd cellpadding=2 width=600>
+  <tr class=header><th colspan=2 align=center>Miscellaneous Satellites</th></tr>
+  <tr><td align=center width=300><a href="military.txt">Miscellaneous Military</a> <a title="Table" href="table.php?tleFile=military&title=Miscellaneous Military Satellites&orbits=10&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/military.txt&satcat=/pub/satcat.txt&orbits=10&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td>
+    	<td align=center width=300><a href="radar.txt">Radar Calibration</a> <a title="Table" href="table.php?tleFile=radar&title=Radar Calibration Satellites&orbits=10&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/radar.txt&satcat=/pub/satcat.txt&orbits=10&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+  <tr><td align=center><a href="cubesat.txt">CubeSats</a> <a title="Table" href="table.php?tleFile=cubesat&title=CubeSats&orbits=0&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/cubesat.txt&satcat=/pub/satcat.txt&orbits=0&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td>
+    	<td align=center><a href="other.txt">Other</a> <a title="Table" href="table.php?tleFile=other&title=Other Satellites&orbits=10&pointsPerRev=90&frame=1"><i class="fal fa-table"></i></a> <a target=cesium title="Orbits" href="https://celestrak.com/cesium/orbit-viz.php?tle=/NORAD/elements/other.txt&satcat=/pub/satcat.txt&orbits=10&pixelSize=3&samplesPerPeriod=90&referenceFrame=1"><i class="fal fa-globe"></i></a></td></tr>
+</table>
+</td></tr>
+</table>
+
+<div class=center style="width: 600px; margin: auto;">
+<p class=center><i class="fal fa-table"></i> Link to interactive table with additional information</p><p class=center><i class="fal fa-globe"></i> Link to interactive orbit visualization, using <a target=AGI href="https://www.agi.com">AGI's</a> open-source <a href="https://www.cesiumjs.org" target=cesium>Cesium</a> JavaScript library, developed and provided by our partners at <a target=DA href="https://digitalarsenal.io">Digital Arsenal</a></p>
+<p class=center>For more info on how to use our new orbit visualization capability, check out our <a target=YouTube href="https://youtu.be/wC90GyHMabk">5-minute YouTube demo/tutorial</a>.</p>
+<p class=center>If you're having problems with our new capability, please be sure to send us <a target=feedback href="https://celestrak.com/cesium/orbit-viz-support.php">feedback</a> so that we can look into what might be causing them.</p>
+</div>
+
+<table class="center outline"><tr><td>
+<table class=striped-odd cellpadding=2 width=600>
+  <tr class=header><th><a href="master.php">Master Two-Line Element Set Index</a></th></tr>
+  <tr><td align=center>An index showing the composition of each two-line element 
+	    set data file (all data is contained in the files above)&mdash;use it to 
+	    find which file(s) you need to download. This index also includes links 
+	    describing many satellite payloads. The index includes information on age of 
+	    each element set.</td></tr>
+</table>
+</td></tr>
+</table>
+
+<hr width=50%>
+
+<table class="center outline striped-odd">
+<tr class=header>
+	<th rowspan=7 width=140><a href="https://celestrak.com" title="CelesTrak Home Page"><img border=0 src="/images/CT-icon-064-t.png" valign=middle></a></th>
+	<th width=120>TLE Data</th>
+	<th width=120>Space Data</th>
+  <th rowspan=7 width=140><a href="http://www.centerforspace.com" title="Center for Space Standards & Innovation"><img border=0 src="/images/cssi-65b.gif" valign=middle></a></th></tr>
+<tr>
+	<th><a href="/NORAD/elements/" title="Current Two-Line Element Sets">Current</a></th>
+	<th><a href="/GPS/" title="GPS Status Messages, NANUs, and Almanacs">GPS</a></th></tr>
+<tr>
+	<th><a href="/NORAD/archives/" title="Historical Two-Line Element Sets">Archives</a></th>
+	<th><a href="/SpaceData/" title="Earth Orientation Parameters">EOP</a></th></tr>
+<tr>
+	<th><a href="/NORAD/documentation/" title="Documentation on NORAD Orbital Models">Documentation</a></th>
+	<th><a href="/SpaceData/" title="Space Weather">Space Weather</a></th></tr>
+<tr>
+	<th><a href="/satcat/search.php" title="Search the Satellite Catalog">SATCAT</a></th>
+  <th><a href="/columns/" title="Computers & Satellites Columns">Columns</a></th></tr>
+<tr>
+	<th><a href="/satcat/boxscore.php" title="SATCAT Boxscore">Boxscore</a></th>
+  <th><a href="/software/" title="Software Repository">Software</a></th></tr>
+<tr><th colspan=2><a href="/SOCRATES/" title="Satellite Orbital Conjunction Reports Assessing Threatening Encounters in Space">SOCRATES</a></th></tr>
+<tr><td class=center colspan=4 width=520><i>We do not use cookies on CelesTrak and we do not collect any personal information, other than IP addresses, 
+  	which are used to detect and block malicious activity and to assess system performance. We do not use IP addresses for tracking or any other purposes.
+  	No personal data is shared with third parties.
+  	For further details, see <a target=agi href="/web/AGI-Privacy-Policy.pdf">AGI's privacy policy.</a></i></td></tr>
+</table>
+<br>
+<address class=center>
+  <a href="/webmaster.php" title="About the Webmaster">Dr. T.S. Kelso</a> 
+  <a href="mailto:TS.Kelso@celestrak.com">[TS.Kelso@celestrak.com]</a><br>
+	Follow CelesTrak on Twitter <a href="https://twitter.com/TSKelso">@TSKelso</a><br>
+	  Last updated: 2019 Dec 03 04:06:40 UTC<br>
+  Accessed 10,520,549 times since 2000 December 16<br>
+  Current system time: 2019 Dec 03 04:58:38 UTC
+</address>
+
+</body>
+
+</html>
