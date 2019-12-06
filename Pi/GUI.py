@@ -1706,6 +1706,20 @@ class MainApp(App):
                 TDRS10lon = float(str(TDRS10_TLE.sublong).split(':')[0]) + float(str(TDRS10_TLE.sublong).split(':')[1])/60 + float(str(TDRS10_TLE.sublong).split(':')[2])/3600
                 TDRS10lat = float(str(TDRS10_TLE.sublat).split(':')[0]) + float(str(TDRS10_TLE.sublat).split(':')[1])/60 + float(str(TDRS10_TLE.sublat).split(':')[2])/3600
             
+            TDRS10_groundtrack = []
+
+            date_i = datetime.now()
+            print(date_i)
+
+            #while date_i < datetime.now() + timedelta(days=1):
+            #    TDRS10.compute(date_i)
+            #    groundtrack.append({
+            #        'timestamp': date_i,
+            #        'latitude': self.degrees_2_decimal(str(self._body.sublat)),
+            #        'longitude': self.degrees_2_decimal(str(self._body.sublong))
+            #    })
+            #    date_i += timedelta(minutes=5)
+            
             #ZOE TDRS-Z 
             try:
                 TDRS7_TLE.compute() #275 West
