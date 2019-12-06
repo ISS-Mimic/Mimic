@@ -74,18 +74,25 @@
         Widget:
             id: TDRS10
             col: (1,1,1,1)
-            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            #pos_hint: {'center_x': 0.5, 'center_y': 0.5}
             size_hint: '0.01dp', '0.02dp'
             canvas:
+                PushMatrix:
+                Translate:
+                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
+                Scale:
+                    origin: 0,0
+                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
+                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
                 Color:
                     rgba: self.col
                 Ellipse:
                     pos: self.pos
                     size: self.size
-                SmoothLine:
-                    points: (OrbitMap.x,OrbitMap.y,OrbitMap.width,OrbitMap.height)
+                Line:    # test diagonal line 2
+                    points: (0, OrbitMap.texture_size[1], OrbitMap.texture_size[0], 0)
                     joint: "round"
-                    
+                PopMatrix:
         Label:
             id: TDRSwLabel
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
