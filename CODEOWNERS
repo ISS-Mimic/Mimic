@@ -4,6 +4,9 @@
 # All pull requests affecting arduino files
 *.ino    @juggler2000
 
-#All pull requests affecting python/js files
+# All pull requests affecting python/js files
 *.py     @streadgold
 *.js     @streadgold
+
+#A pull requests affecting c++ files
+*.cpp    @SWGlassPit
