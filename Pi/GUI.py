@@ -1649,7 +1649,6 @@ class MainApp(App):
             newLon = (0.14) + (valueLonScaled * toLonSpan)
             return {'newLat': newLat, 'newLon': newLon}
 
-
         def scaleLatLon2(in_latitude,in_longitude):
             MAP_HEIGHT = self.orbit_screen.ids.OrbitMap.texture_size[1]
             MAP_WIDTH = self.orbit_screen.ids.OrbitMap.texture_size[0]
@@ -1667,16 +1666,15 @@ class MainApp(App):
             normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
             normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
 
-            #self.orbit_screen.ids.OrbitISStiny.pos = (scaleLatLon2(latitude, longitude)['new_x'],scaleLatLon2(latitude, longitude)['new_y'])
-
-            self.orbit_screen.ids.OrbitISStiny.pos = (scaleLatLon2(latitude, longitude)['new_x'] - 10
-                                                    ,scaleLatLon2(latitude, longitude)['new_y'] - 10)
+            self.orbit_screen.ids.OrbitISStiny.pos = (
+                    scaleLatLon2(latitude, longitude)['new_x'] - ((self.orbit_screen.ids.OrbitISStiny.width / 2) * normalizedX * 3.6), #had to fudge a little not sure why
+                    scaleLatLon2(latitude, longitude)['new_y'] - ((self.orbit_screen.ids.OrbitISStiny.height / 2) * normalizedY * 3)) #had to fudge a little not sure why
 
             ISS_groundtrack = []
             ISS_groundtrack2 = []
             date_i = datetime.utcnow()
             groundtrackdate = datetime.utcnow()
-            while date_i < groundtrackdate + timedelta(hours=1.5):
+            while date_i < groundtrackdate + timedelta(minutes=95):
                 ISS_TLE.compute(date_i)
 
                 ISSlon_gt = float(str(ISS_TLE.sublong).split(':')[0]) + float(
@@ -1684,14 +1682,14 @@ class MainApp(App):
                 ISSlat_gt = float(str(ISS_TLE.sublat).split(':')[0]) + float(
                     str(ISS_TLE.sublat).split(':')[1]) / 60 + float(str(ISS_TLE.sublat).split(':')[2]) / 3600
 
-                if ISSlon_gt < longitude: #if the propagated groundtrack is behind the iss (i.e. wraps around the screen) add to new groundtrack line
+                if ISSlon_gt < longitude-1: #if the propagated groundtrack is behind the iss (i.e. wraps around the screen) add to new groundtrack line
                     ISS_groundtrack2.append(scaleLatLon2(ISSlat_gt, ISSlon_gt)['new_x'])
                     ISS_groundtrack2.append(scaleLatLon2(ISSlat_gt, ISSlon_gt)['new_y'])
                 else:
                     ISS_groundtrack.append(scaleLatLon2(ISSlat_gt, ISSlon_gt)['new_x'])
                     ISS_groundtrack.append(scaleLatLon2(ISSlat_gt, ISSlon_gt)['new_y'])
 
-                date_i += timedelta(minutes=5)
+                date_i += timedelta(minutes=1)
 
             self.orbit_screen.ids.ISSgroundtrack.width = 1
             self.orbit_screen.ids.ISSgroundtrack.col = (1, 0, 1, 1)
@@ -1761,31 +1759,35 @@ class MainApp(App):
                 TDRS10_groundtrack.append(scaleLatLon2(TDRS10lat_gt, TDRS10lon_gt)['new_x'])
                 TDRS10_groundtrack.append(scaleLatLon2(TDRS10lat_gt, TDRS10lon_gt)['new_y'])
 
-                date_i += timedelta(minutes=10)
+                date_i += timedelta(minutes=1)
 
             self.orbit_screen.ids.TDRS10groundtrack.width = 1
             self.orbit_screen.ids.TDRS10groundtrack.col = (1,0,1,1)
             self.orbit_screen.ids.TDRS10groundtrack.points = TDRS10_groundtrack
-            
-            #ZOE TDRS-Z 
+
+            #ZOE TDRS-Z
             try:
-                TDRS7_TLE.compute() #275 West
-            except NameError:    
+                TDRS7_TLE.compute(datetime.utcnow()) #275 West
+            except NameError:
                 TDRS7lon = -275
                 TDRS7lat = 0
             else:
                 TDRS7lon = float(str(TDRS7_TLE.sublong).split(':')[0]) + float(str(TDRS7_TLE.sublong).split(':')[1])/60 + float(str(TDRS7_TLE.sublong).split(':')[2])/3600
                 TDRS7lat = float(str(TDRS7_TLE.sublat).split(':')[0]) + float(str(TDRS7_TLE.sublat).split(':')[1])/60 + float(str(TDRS7_TLE.sublat).split(':')[2])/3600
-            
-            #TDRS6_TLE.compute() #46 West
-            #TDRS11_TLE.compute() #171 West
-            #TDRS10_TLE.compute() #174 West
-            
+
+            #TDRS6_TLE.compute(datetime.utcnow()) #46 West
+            #TDRS11_TLE.compute(datetime.utcnow()) #171 West
+            #TDRS10_TLE.compute(datetime.utcnow()) #174 West
+
             #draw the TDRS satellite locations
             self.orbit_screen.ids.TDRS12.pos_hint = {"center_x": scaleLatLon(TDRS12lat, TDRS12lon)['newLon'], "center_y": scaleLatLon(TDRS12lat, TDRS12lon)['newLat']}
             self.orbit_screen.ids.TDRS6.pos_hint = {"center_x": scaleLatLon(TDRS6lat, TDRS6lon)['newLon'], "center_y": scaleLatLon(TDRS6lat, TDRS6lon)['newLat']}
             self.orbit_screen.ids.TDRS11.pos_hint = {"center_x": scaleLatLon(TDRS11lat, TDRS11lon)['newLon'], "center_y": scaleLatLon(TDRS11lat, TDRS11lon)['newLat']}
-            self.orbit_screen.ids.TDRS10.pos_hint = {"center_x": scaleLatLon(TDRS10lat, TDRS10lon)['newLon'], "center_y": scaleLatLon(TDRS10lat, TDRS10lon)['newLat']}
+            #self.orbit_screen.ids.TDRS10.pos_hint = {"center_x": scaleLatLon(TDRS10lat, TDRS10lon)['newLon'], "center_y": scaleLatLon(TDRS10lat, TDRS10lon)['newLat']}
+
+            #self.orbit_screen.ids.TDRS10.pos = (scaleLatLon2(TDRS10lat, TDRS10lon)['new_x'],scaleLatLon2(TDRS10lat, TDRS10lon)['new_y'])
+            self.orbit_screen.ids.TDRS10.pos = (scaleLatLon2(TDRS10lat, TDRS10lon)['new_x']-((self.orbit_screen.ids.TDRS10.width/2)*normalizedX),scaleLatLon2(TDRS10lat, TDRS10lon)['new_y']-((self.orbit_screen.ids.TDRS10.height/2)*normalizedY))
+
             self.orbit_screen.ids.TDRS7.pos_hint = {"center_x": scaleLatLon(TDRS7lat, TDRS7lon)['newLon'], "center_y": scaleLatLon(TDRS7lat, TDRS7lon)['newLat']}
             self.orbit_screen.ids.TDRSeLabel.pos_hint = {"center_x": scaleLatLon(0, -41)['newLon']+0.06, "center_y": scaleLatLon(0, -41)['newLat']}
             self.orbit_screen.ids.TDRSwLabel.pos_hint = {"center_x": scaleLatLon(0, -174)['newLon']+0.06, "center_y": scaleLatLon(0, -174)['newLat']}
@@ -1793,6 +1795,7 @@ class MainApp(App):
             self.orbit_screen.ids.ZOE.pos_hint = {"center_x": scaleLatLon(0, 77)['newLon'], "center_y": scaleLatLon(0, 77)['newLat']}
             self.orbit_screen.ids.ZOElabel.pos_hint = {"center_x": scaleLatLon(0, 77)['newLon'], "center_y": scaleLatLon(0, 77)['newLat']+0.1}
 
+            # THIS SECTION NEEDS IMPROVEMENT
             tdrs = "n/a"
             self.ct_sgant_screen.ids.tdrs_east41.angle = (-1*longitude)-41
             self.ct_sgant_screen.ids.tdrs_east46.angle = (-1*longitude)-46
@@ -1827,7 +1830,7 @@ class MainApp(App):
                 self.orbit_screen.ids.TDRSeLabel.color = 1, 1, 1
                 self.orbit_screen.ids.TDRSzLabel.color = 1, 1, 1
                 self.orbit_screen.ids.TDRS11.col = (1,0,1,1)
-                self.orbit_screen.ids.TDRS10.col = (1,0,1,1)
+                self.orbit_screen.ids.TDRS10.col = (1,0,0,1)
                 self.orbit_screen.ids.TDRS12.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS6.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
@@ -1839,7 +1842,7 @@ class MainApp(App):
                 self.orbit_screen.ids.TDRSeLabel.color = 1, 0, 1
                 self.orbit_screen.ids.TDRSzLabel.color = 1, 1, 1
                 self.orbit_screen.ids.TDRS11.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS10.col = (1,1,1,1)
+                self.orbit_screen.ids.TDRS10.col = (1,0,0,1)
                 self.orbit_screen.ids.TDRS12.col = (1,0,1,1)
                 self.orbit_screen.ids.TDRS6.col = (1,0,1,1)
                 self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
@@ -1851,7 +1854,7 @@ class MainApp(App):
                 self.orbit_screen.ids.TDRSeLabel.color = 1, 1, 1
                 self.orbit_screen.ids.TDRSzLabel.color = 1, 0, 1
                 self.orbit_screen.ids.TDRS11.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS10.col = (1,1,1,1)
+                self.orbit_screen.ids.TDRS10.col = (1,0,0,1)
                 self.orbit_screen.ids.TDRS12.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS6.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS7.col = (1,0,1,1)
@@ -1863,7 +1866,7 @@ class MainApp(App):
                 self.orbit_screen.ids.TDRSeLabel.color = 1, 1, 1
                 self.orbit_screen.ids.TDRSzLabel.color = 1, 1, 1
                 self.orbit_screen.ids.TDRS11.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS10.col = (1,1,1,1)
+                self.orbit_screen.ids.TDRS10.col = (1,0,0,1)
                 self.orbit_screen.ids.TDRS12.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS6.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
@@ -1875,7 +1878,7 @@ class MainApp(App):
                 self.orbit_screen.ids.TDRSeLabel.color = 1, 1, 1
                 self.orbit_screen.ids.TDRSzLabel.color = 1, 1, 1
                 self.orbit_screen.ids.TDRS11.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS10.col = (1,1,1,1)
+                self.orbit_screen.ids.TDRS10.col = (1,0,0,1)
                 self.orbit_screen.ids.TDRS12.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS6.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
@@ -1884,22 +1887,22 @@ class MainApp(App):
 
             #if tdrs != oldtdrs and float(aos) == 1.0:
             #    oldtdrs = tdrs
-            #    sgantlog.write(str(datetime.utcnow()))
-            #    sgantlog.write(' ')
-            #    sgantlog.write(str(sgant_elevation))
-            #    sgantlog.write(' ')
-            #    sgantlog.write(str(longitude))
-            #    sgantlog.write(' ')
-            #    sgantlog.write(str(tdrs))
-            #    sgantlog.write(' ')
-            #    sgantlog.write('\n')
+            #    #sgantlog.write(str(datetime.utcnow()))
+            #    #sgantlog.write(' ')
+            #    #sgantlog.write(str(sgant_elevation))
+            #    #sgantlog.write(' ')
+            #    #sgantlog.write(str(longitude))
+            #    #sgantlog.write(' ')
+            #    #sgantlog.write(str(tdrs))
+            #    #sgantlog.write(' ')
+            #    #sgantlog.write('\n')
 
             #------------------Orbit Stuff---------------------------
             now = datetime.utcnow()
             mins = (now - now.replace(hour=0,minute=0,second=0,microsecond=0)).total_seconds()
             orbits_today = math.floor((float(mins)/60)/90)
             self.orbit_screen.ids.dailyorbit.text = str(int(orbits_today)) #display number of orbits since utc midnight
-            
+
             year = int('20' + str(ISS_TLE_Line1[18:20]))
             decimal_days = float(ISS_TLE_Line1[20:32])
             converted_time = datetime(year, 1 ,1) + timedelta(decimal_days - 1)
@@ -1913,14 +1916,43 @@ class MainApp(App):
             location.elevation   = 10
             location.name        = 'location'
             location.horizon    = '10'
+            location.pressure = 0
             location.date = datetime.utcnow()
+
             #use location to draw dot on orbit map
             mylatitude = float(str(location.lat).split(':')[0]) + float(str(location.lat).split(':')[1])/60 + float(str(location.lat).split(':')[2])/3600
             mylongitude = float(str(location.lon).split(':')[0]) + float(str(location.lon).split(':')[1])/60 + float(str(location.lon).split(':')[2])/3600
             self.orbit_screen.ids.mylocation.pos_hint = {"center_x": scaleLatLon(mylatitude, mylongitude)['newLon'], "center_y": scaleLatLon(mylatitude, mylongitude)['newLat']}
 
+            def isVisible(pass_info):
+                def seconds_between(d1, d2):
+                    return abs((d2 - d1).seconds)
+
+                def datetime_from_time(tr):
+                    year, month, day, hour, minute, second = tr.tuple()
+                    dt = dtime.datetime(year, month, day, hour, minute, int(second))
+                    return dt
+
+                tr, azr, tt, altt, ts, azs = pass_info
+                max_time = datetime_from_time(tt)
+
+                location.date = max_time
+
+                sun = ephem.Sun()
+                sun.compute(location)
+                ISS_TLE.compute(location)
+
+                sun_alt = math.degrees(sun.alt)
+
+                visible = False
+                if ISS_TLE.eclipsed is False and -18 < math.degrees(sun_alt) < -6:
+                    visible = True
+
+                return visible
+
             ISS_TLE.compute(location) #compute tle propagation based on provided location
             nextpassinfo = location.next_pass(ISS_TLE)
+
             #print nextpassinfo #might need to add try block to next line
             if nextpassinfo[0] == None:
                 self.orbit_screen.ids.iss_next_pass1.text = "n/a"
@@ -1938,6 +1970,10 @@ class MainApp(App):
                 nextpasshours = timeuntilnextpass*24.0
                 nextpassmins = (nextpasshours-math.floor(nextpasshours))*60
                 nextpassseconds = (nextpassmins-math.floor(nextpassmins))*60
+                if isVisible(nextpassinfo):
+                    self.orbit_screen.ids.ISSvisible.text = "Visible Pass!"
+                else:
+                    self.orbit_screen.ids.ISSvisible.text = "Not Visible"
                 self.orbit_screen.ids.countdown.text = str("{:.0f}".format(math.floor(nextpasshours))) + ":" + str("{:.0f}".format(math.floor(nextpassmins))) + ":" + str("{:.0f}".format(math.floor(nextpassseconds))) #display time until next pass
 
     def getTLE(self, *args):
