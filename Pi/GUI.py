@@ -1650,16 +1650,57 @@ class MainApp(App):
             return {'newLat': newLat, 'newLon': newLon}
 
 
-        if ISS_TLE_Acquired:
-            ISS_TLE.compute()
-            #------------------Latitude/Longitude Stuff---------------------------
-            latitude = ISS_TLE.sublat
-            longitude = ISS_TLE.sublong
-            latitude = float(str(latitude).split(':')[0]) + float(str(latitude).split(':')[1])/60 + float(str(latitude).split(':')[2])/3600
-            longitude = float(str(longitude).split(':')[0]) + float(str(longitude).split(':')[1])/60 + float(str(longitude).split(':')[2])/3600
-            coordinates = ((latitude, longitude), (latitude, longitude))
+        def scaleLatLon2(in_latitude,in_longitude):
+            MAP_HEIGHT = self.orbit_screen.ids.OrbitMap.texture_size[1]
+            MAP_WIDTH = self.orbit_screen.ids.OrbitMap.texture_size[0]
 
-            self.orbit_screen.ids.OrbitISStiny.pos_hint = {"center_x": scaleLatLon(latitude, longitude)['newLon'], "center_y": scaleLatLon(latitude, longitude)['newLat']}
+            new_x = ((MAP_WIDTH / 360.0) * (180 + in_longitude))
+            new_y = ((MAP_HEIGHT / 180.0) * (90 + in_latitude))
+            return {'new_y': new_y, 'new_x': new_x}
+
+        if ISS_TLE_Acquired:
+            ISS_TLE.compute(datetime.utcnow())
+            #------------------Latitude/Longitude Stuff---------------------------
+            latitude = float(str(ISS_TLE.sublat).split(':')[0]) + float(str(ISS_TLE.sublat).split(':')[1])/60 + float(str(ISS_TLE.sublat).split(':')[2])/3600
+            longitude = float(str(ISS_TLE.sublong).split(':')[0]) + float(str(ISS_TLE.sublong).split(':')[1])/60 + float(str(ISS_TLE.sublong).split(':')[2])/3600
+
+            normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
+            normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
+
+            #self.orbit_screen.ids.OrbitISStiny.pos = (scaleLatLon2(latitude, longitude)['new_x'],scaleLatLon2(latitude, longitude)['new_y'])
+
+            self.orbit_screen.ids.OrbitISStiny.pos = (scaleLatLon2(latitude, longitude)['new_x'] - 10
+                                                    ,scaleLatLon2(latitude, longitude)['new_y'] - 10)
+
+            ISS_groundtrack = []
+            ISS_groundtrack2 = []
+            date_i = datetime.utcnow()
+            groundtrackdate = datetime.utcnow()
+            while date_i < groundtrackdate + timedelta(hours=1.5):
+                ISS_TLE.compute(date_i)
+
+                ISSlon_gt = float(str(ISS_TLE.sublong).split(':')[0]) + float(
+                    str(ISS_TLE.sublong).split(':')[1]) / 60 + float(str(ISS_TLE.sublong).split(':')[2]) / 3600
+                ISSlat_gt = float(str(ISS_TLE.sublat).split(':')[0]) + float(
+                    str(ISS_TLE.sublat).split(':')[1]) / 60 + float(str(ISS_TLE.sublat).split(':')[2]) / 3600
+
+                if ISSlon_gt < longitude: #if the propagated groundtrack is behind the iss (i.e. wraps around the screen) add to new groundtrack line
+                    ISS_groundtrack2.append(scaleLatLon2(ISSlat_gt, ISSlon_gt)['new_x'])
+                    ISS_groundtrack2.append(scaleLatLon2(ISSlat_gt, ISSlon_gt)['new_y'])
+                else:
+                    ISS_groundtrack.append(scaleLatLon2(ISSlat_gt, ISSlon_gt)['new_x'])
+                    ISS_groundtrack.append(scaleLatLon2(ISSlat_gt, ISSlon_gt)['new_y'])
+
+                date_i += timedelta(minutes=5)
+
+            self.orbit_screen.ids.ISSgroundtrack.width = 1
+            self.orbit_screen.ids.ISSgroundtrack.col = (1, 0, 1, 1)
+            self.orbit_screen.ids.ISSgroundtrack.points = ISS_groundtrack
+
+            self.orbit_screen.ids.ISSgroundtrack2.width = 1
+            self.orbit_screen.ids.ISSgroundtrack2.col = (1, 0, 1, 1)
+            self.orbit_screen.ids.ISSgroundtrack2.points = ISS_groundtrack2
+
             self.orbit_screen.ids.latitude.text = str("{:.2f}".format(latitude))
             self.orbit_screen.ids.longitude.text = str("{:.2f}".format(longitude))
 
@@ -1670,55 +1711,61 @@ class MainApp(App):
 
             #TDRS East 2 sats
             try:
-                TDRS12_TLE.compute() #41 West
-            except NameError:    
+                TDRS12_TLE.compute(datetime.utcnow()) #41 West
+            except NameError:
                 TDRS12lon = -41
                 TDRS12lat = 0
             else:
                 TDRS12lon = float(str(TDRS12_TLE.sublong).split(':')[0]) + float(str(TDRS12_TLE.sublong).split(':')[1])/60 + float(str(TDRS12_TLE.sublong).split(':')[2])/3600
                 TDRS12lat = float(str(TDRS12_TLE.sublat).split(':')[0]) + float(str(TDRS12_TLE.sublat).split(':')[1])/60 + float(str(TDRS12_TLE.sublat).split(':')[2])/3600
-            
+
             try:
-                TDRS6_TLE.compute() #46 West
-            except NameError:    
+                TDRS6_TLE.compute(datetime.utcnow()) #46 West
+            except NameError:
                 TDRS6lon = -46
                 TDRS6lat = 0
             else:
                 TDRS6lon = float(str(TDRS6_TLE.sublong).split(':')[0]) + float(str(TDRS6_TLE.sublong).split(':')[1])/60 + float(str(TDRS6_TLE.sublong).split(':')[2])/3600
                 TDRS6lat = float(str(TDRS6_TLE.sublat).split(':')[0]) + float(str(TDRS6_TLE.sublat).split(':')[1])/60 + float(str(TDRS6_TLE.sublat).split(':')[2])/3600
-            
+
             #TDRS West 2 sats
             try:
-                TDRS11_TLE.compute() #171 West
-            except NameError:    
+                TDRS11_TLE.compute(datetime.utcnow()) #171 West
+            except NameError:
                 TDRS11lon = -171
                 TDRS11lat = 0
             else:
                 TDRS11lon = float(str(TDRS11_TLE.sublong).split(':')[0]) + float(str(TDRS11_TLE.sublong).split(':')[1])/60 + float(str(TDRS11_TLE.sublong).split(':')[2])/3600
                 TDRS11lat = float(str(TDRS11_TLE.sublat).split(':')[0]) + float(str(TDRS11_TLE.sublat).split(':')[1])/60 + float(str(TDRS11_TLE.sublat).split(':')[2])/3600
-            
+
             try:
-                TDRS10_TLE.compute() #174 West
-            except NameError:    
+                TDRS10_TLE.compute(datetime.utcnow()) #174 West
+            except NameError:
                 TDRS10lon = -174
                 TDRS10lat = 0
             else:
                 TDRS10lon = float(str(TDRS10_TLE.sublong).split(':')[0]) + float(str(TDRS10_TLE.sublong).split(':')[1])/60 + float(str(TDRS10_TLE.sublong).split(':')[2])/3600
                 TDRS10lat = float(str(TDRS10_TLE.sublat).split(':')[0]) + float(str(TDRS10_TLE.sublat).split(':')[1])/60 + float(str(TDRS10_TLE.sublat).split(':')[2])/3600
-            
+
             TDRS10_groundtrack = []
+            date_i = datetime.utcnow()
+            groundtrackdate = datetime.utcnow()
+            while date_i < groundtrackdate + timedelta(days=1):
+                TDRS10_TLE.compute(date_i)
+                
+                TDRS10lon_gt = float(str(TDRS10_TLE.sublong).split(':')[0]) + float(
+                    str(TDRS10_TLE.sublong).split(':')[1]) / 60 + float(str(TDRS10_TLE.sublong).split(':')[2]) / 3600
+                TDRS10lat_gt = float(str(TDRS10_TLE.sublat).split(':')[0]) + float(
+                    str(TDRS10_TLE.sublat).split(':')[1]) / 60 + float(str(TDRS10_TLE.sublat).split(':')[2]) / 3600
 
-            date_i = datetime.now()
-            print(date_i)
+                TDRS10_groundtrack.append(scaleLatLon2(TDRS10lat_gt, TDRS10lon_gt)['new_x'])
+                TDRS10_groundtrack.append(scaleLatLon2(TDRS10lat_gt, TDRS10lon_gt)['new_y'])
 
-            #while date_i < datetime.now() + timedelta(days=1):
-            #    TDRS10.compute(date_i)
-            #    groundtrack.append({
-            #        'timestamp': date_i,
-            #        'latitude': self.degrees_2_decimal(str(self._body.sublat)),
-            #        'longitude': self.degrees_2_decimal(str(self._body.sublong))
-            #    })
-            #    date_i += timedelta(minutes=5)
+                date_i += timedelta(minutes=10)
+
+            self.orbit_screen.ids.TDRS10groundtrack.width = 1
+            self.orbit_screen.ids.TDRS10groundtrack.col = (1,0,1,1)
+            self.orbit_screen.ids.TDRS10groundtrack.points = TDRS10_groundtrack
             
             #ZOE TDRS-Z 
             try:
