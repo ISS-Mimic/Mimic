@@ -138,13 +138,74 @@
             markup: True
             color: 1,1,1
             font_size: 15
-        Image:
+        Widget:
             id: OrbitISStiny
-            source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitYellowISSicon.png'
-            keep_ratio: False
-            allow_stretch: True
-            size_hint: 0.07,0.07
-            pos_hint: {"center_x": 0.888, "center_y": 0.888}
+            pos: (0-(self.width/2),0-(self.height/2))
+            size_hint: (None, None)
+            size: (150,150)
+            canvas:
+                PushMatrix:
+                Translate:
+                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
+                Scale:
+                    origin: 0,0
+                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
+                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
+                Rectangle:
+                    source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitYellowISSicon.png'
+                    size: self.size
+                    pos: self.pos
+                PopMatrix:
+        Widget:
+            id: ISSgroundtrack
+            col: (0,0,0,0)
+            points: (0,0,100,100,200,150)
+            #points: (0, OrbitMap.texture_size[1], OrbitMap.texture_size[0], 0)
+            canvas:
+                PushMatrix:
+                Translate:
+                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
+                Scale:
+                    origin: 0,0
+                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
+                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
+                Color:
+                    rgba: self.col
+                SmoothLine:    # test diagonal line
+                    points: self.points
+                    joint: "round"
+                    width: 3
+                #Bezier:    # test diagonal line
+                #    points: self.points
+                #    #joint: "round"
+                #    #width: 1
+                #    segments: 250
+                PopMatrix:
+        Widget:
+            id: ISSgroundtrack2
+            col: (0,0,0,0)
+            points: (0,0,100,100,200,150)
+            #points: (0, OrbitMap.texture_size[1], OrbitMap.texture_size[0], 0)
+            canvas:
+                PushMatrix:
+                Translate:
+                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
+                Scale:
+                    origin: 0,0
+                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
+                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
+                Color:
+                    rgba: self.col
+                SmoothLine:    # test diagonal line
+                    points: self.points
+                    joint: "round"
+                    width: 3
+                #Bezier:    # test diagonal line
+                #    points: self.points
+                #    #joint: "round"
+                #    #width: 1
+                #    segments: 250
+                PopMatrix:
         Label:
             id: dailyorbit
             pos_hint: {"center_x": 0.08, "center_y": 0.7}
