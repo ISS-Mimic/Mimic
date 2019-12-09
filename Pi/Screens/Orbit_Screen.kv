@@ -5,19 +5,17 @@
     name: 'orbit'
     FloatLayout:
         id: orbit_layout
-        #size: (100,100)
-        #size_hint: (None,None)
         Image:
             id: Orbit_background
             source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitBase.png'
             allow_stretch: False
-        AsyncImage:
+        Image:
             id: OrbitMap
             source: '/home/pi/Mimic/Pi/imgs/orbit/map.jpg'
             pos_hint: {"center_x": 0.5, "center_y": 0.56}
-            size: (500,300)
-            #size_hint_y: 0.598
-            size_hint: (None,None)
+            #size: (500,300)
+            size_hint_y: 0.598
+            #size_hint: (None,None)
             allow_stretch: False
             keep_ratio: True
         Widget:
@@ -73,9 +71,12 @@
                     size: self.size
         Widget:
             id: TDRS10
-            col: (1,1,1,1)
+            col: (1,1,0.5,1)
+            pos: (0-(self.width/2),0-(self.height/2))
             #pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-            size_hint: '0.01dp', '0.02dp'
+            #size_hint: '0.025dp', '0.05dp'
+            size_hint: (None, None)
+            size: (25,25)
             canvas:
                 PushMatrix:
                 Translate:
@@ -89,9 +90,26 @@
                 Ellipse:
                     pos: self.pos
                     size: self.size
-                Line:    # test diagonal line 2
-                    points: (0, OrbitMap.texture_size[1], OrbitMap.texture_size[0], 0)
+                PopMatrix:
+        Widget:
+            id: TDRS10groundtrack
+            col: (0,0,0,0)
+            points: (0,0,100,100,200,150)
+            #points: (0, OrbitMap.texture_size[1], OrbitMap.texture_size[0], 0)
+            canvas:
+                PushMatrix:
+                Translate:
+                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
+                Scale:
+                    origin: 0,0
+                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
+                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
+                Color:
+                    rgba: self.col
+                Line:    # test diagonal line
+                    points: self.points
                     joint: "round"
+                    width: 1
                 PopMatrix:
         Label:
             id: TDRSwLabel
@@ -138,24 +156,6 @@
             markup: True
             color: 1,1,1
             font_size: 15
-        Widget:
-            id: OrbitISStiny
-            pos: (0-(self.width/2),0-(self.height/2))
-            size_hint: (None, None)
-            size: (150,150)
-            canvas:
-                PushMatrix:
-                Translate:
-                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
-                Scale:
-                    origin: 0,0
-                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
-                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
-                Rectangle:
-                    source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitYellowISSicon.png'
-                    size: self.size
-                    pos: self.pos
-                PopMatrix:
         Widget:
             id: ISSgroundtrack
             col: (0,0,0,0)
@@ -206,6 +206,24 @@
                 #    #width: 1
                 #    segments: 250
                 PopMatrix:
+        Widget:
+            id: OrbitISStiny
+            pos: (0-(self.width/2),0-(self.height/2))
+            size_hint: (None, None)
+            size: (150,150)
+            canvas:
+                PushMatrix:
+                Translate:
+                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
+                Scale:
+                    origin: 0,0
+                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
+                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
+                Rectangle:
+                    source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitYellowISSicon.png'
+                    size: self.size
+                    pos: self.pos
+                PopMatrix:
         Label:
             id: dailyorbit
             pos_hint: {"center_x": 0.08, "center_y": 0.7}
@@ -246,6 +264,17 @@
             id: countdown
             pos_hint: {"center_x": 0.92, "center_y": 0.5}
             text: '-----'
+            size_hint_y: None
+            size_hint_x: 0.1
+            halign: 'center'
+            text_size: self.width, None
+            markup: True
+            color: 1,1,1
+            font_size: 16
+        Label:
+            id: ISSvisible
+            pos_hint: {"center_x": 0.92, "center_y": 0.45}
+            text: '---'
             size_hint_y: None
             size_hint_x: 0.1
             halign: 'center'
