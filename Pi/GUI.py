@@ -1,5 +1,6 @@
 #!/usr/bin/python
 from datetime import datetime, timedelta #used for time conversions and logging timestamps
+import datetime as dtime #this is different from above for... reasons?
 import os #used to remove database on program exit
 os.environ['KIVY_GL_BACKEND'] = 'gl' #need this to fix a kivy segfault that occurs with python3 for some reason
 import subprocess #used to start/stop Javascript telemetry program
@@ -143,6 +144,7 @@ oldtdrs = "n/a"
 runningDemo = False
 Disco = False
 logged = False
+mt_speed = 0.00
 #-----------EPS Variables----------------------
 EPSstorageindex = 0
 channel1A_voltage = [154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1]
@@ -1127,7 +1129,7 @@ class MimicScreen(Screen, EventDispatcher):
     def startproc(*args):
         global p
         print("Telemetry Subprocess start")
-        p = subprocess.Popen(["node", "/home/pi/Mimic/Pi/ISS_Telemetry.js"]) #uncomment if live data comes back
+        p = subprocess.Popen(["node", "/home/pi/Mimic/Pi/ISS_Telemetry.js"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
         #p = subprocess.Popen(["/home/pi/Mimic/Pi/RecordedData/playback.out","/home/pi/Mimic/Pi/RecordedData/Data"])
 
     def killproc(*args):
@@ -1211,8 +1213,11 @@ class MainApp(App):
 
         Clock.schedule_once(self.checkCrew, 30)
         Clock.schedule_once(self.checkBlogforEVA, 30)
-        Clock.schedule_once(self.getTLE, 40) #uncomment when internet works again
+        Clock.schedule_once(self.getTLE, 15) #uncomment when internet works again
+        Clock.schedule_once(self.TDRSupdate, 10) #uncomment when internet works again
+        
         Clock.schedule_interval(self.getTLE, 300)
+        Clock.schedule_interval(self.TDRSupdate, 600)
         Clock.schedule_interval(self.check_internet, 1)
         Clock.schedule_interval(self.check_serial, 1)
         return root
@@ -1634,6 +1639,187 @@ class MainApp(App):
         global manualcontrol
         manualcontrol = args[0]
 
+    def TDRSupdate(self, dt):
+        global TDRS12_TLE, TDRS6_TLE, TDRS10_TLE, TDRS11_TLE, TDRS7_TLE
+        normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
+        normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
+        
+        def scaleLatLon(latitude, longitude):
+            #converting lat lon to x, y for orbit map
+            fromLatSpan = 180.0
+            fromLonSpan = 360.0
+            toLatSpan = 0.598
+            toLonSpan = 0.716
+            valueLatScaled = (float(latitude)+90.0)/float(fromLatSpan)
+            valueLonScaled = (float(longitude)+180.0)/float(fromLonSpan)
+            newLat = (0.265) + (valueLatScaled * toLatSpan)
+            newLon = (0.14) + (valueLonScaled * toLonSpan)
+            return {'newLat': newLat, 'newLon': newLon}
+        
+        def scaleLatLon2(in_latitude,in_longitude):
+            MAP_HEIGHT = self.orbit_screen.ids.OrbitMap.texture_size[1]
+            MAP_WIDTH = self.orbit_screen.ids.OrbitMap.texture_size[0]
+
+            new_x = ((MAP_WIDTH / 360.0) * (180 + in_longitude))
+            new_y = ((MAP_HEIGHT / 180.0) * (90 + in_latitude))
+            return {'new_y': new_y, 'new_x': new_x}
+        
+        #TDRS East 2 sats
+        try:
+            TDRS12_TLE.compute(datetime.utcnow()) #41 West
+        except NameError:
+            TDRS12lon = -41
+            TDRS12lat = 0
+        else:
+            TDRS12lon = float(str(TDRS12_TLE.sublong).split(':')[0]) + float(str(TDRS12_TLE.sublong).split(':')[1])/60 + float(str(TDRS12_TLE.sublong).split(':')[2])/3600
+            TDRS12lat = float(str(TDRS12_TLE.sublat).split(':')[0]) + float(str(TDRS12_TLE.sublat).split(':')[1])/60 + float(str(TDRS12_TLE.sublat).split(':')[2])/3600
+            TDRS12_groundtrack = []
+            date_i = datetime.utcnow()
+            groundtrackdate = datetime.utcnow()
+            while date_i < groundtrackdate + timedelta(days=1):
+                TDRS12_TLE.compute(date_i)
+                
+                TDRS12lon_gt = float(str(TDRS12_TLE.sublong).split(':')[0]) + float(
+                    str(TDRS12_TLE.sublong).split(':')[1]) / 60 + float(str(TDRS12_TLE.sublong).split(':')[2]) / 3600
+                TDRS12lat_gt = float(str(TDRS12_TLE.sublat).split(':')[0]) + float(
+                    str(TDRS12_TLE.sublat).split(':')[1]) / 60 + float(str(TDRS12_TLE.sublat).split(':')[2]) / 3600
+
+                TDRS12_groundtrack.append(scaleLatLon2(TDRS12lat_gt, TDRS12lon_gt)['new_x'])
+                TDRS12_groundtrack.append(scaleLatLon2(TDRS12lat_gt, TDRS12lon_gt)['new_y'])
+
+                date_i += timedelta(minutes=10)
+
+            self.orbit_screen.ids.TDRS12groundtrack.width = 1
+            self.orbit_screen.ids.TDRS12groundtrack.col = (1,1,0,1)
+            self.orbit_screen.ids.TDRS12groundtrack.points = TDRS12_groundtrack
+
+        try:
+            TDRS6_TLE.compute(datetime.utcnow()) #46 West
+        except NameError:
+            TDRS6lon = -46
+            TDRS6lat = 0
+        else:
+            TDRS6lon = float(str(TDRS6_TLE.sublong).split(':')[0]) + float(str(TDRS6_TLE.sublong).split(':')[1])/60 + float(str(TDRS6_TLE.sublong).split(':')[2])/3600
+            TDRS6lat = float(str(TDRS6_TLE.sublat).split(':')[0]) + float(str(TDRS6_TLE.sublat).split(':')[1])/60 + float(str(TDRS6_TLE.sublat).split(':')[2])/3600
+            TDRS6_groundtrack = []
+            date_i = datetime.utcnow()
+            groundtrackdate = datetime.utcnow()
+            while date_i < groundtrackdate + timedelta(days=1):
+                TDRS6_TLE.compute(date_i)
+                
+                TDRS6lon_gt = float(str(TDRS6_TLE.sublong).split(':')[0]) + float(
+                    str(TDRS6_TLE.sublong).split(':')[1]) / 60 + float(str(TDRS6_TLE.sublong).split(':')[2]) / 3600
+                TDRS6lat_gt = float(str(TDRS6_TLE.sublat).split(':')[0]) + float(
+                    str(TDRS6_TLE.sublat).split(':')[1]) / 60 + float(str(TDRS6_TLE.sublat).split(':')[2]) / 3600
+
+                TDRS6_groundtrack.append(scaleLatLon2(TDRS6lat_gt, TDRS6lon_gt)['new_x'])
+                TDRS6_groundtrack.append(scaleLatLon2(TDRS6lat_gt, TDRS6lon_gt)['new_y'])
+
+                date_i += timedelta(minutes=10)
+
+            self.orbit_screen.ids.TDRS6groundtrack.width = 1
+            self.orbit_screen.ids.TDRS6groundtrack.col = (1,1,0,1)
+            self.orbit_screen.ids.TDRS6groundtrack.points = TDRS6_groundtrack
+
+        #TDRS West 2 sats
+        try:
+            TDRS11_TLE.compute(datetime.utcnow()) #171 West
+        except NameError:
+            TDRS11lon = -171
+            TDRS11lat = 0
+        else:
+            TDRS11lon = float(str(TDRS11_TLE.sublong).split(':')[0]) + float(str(TDRS11_TLE.sublong).split(':')[1])/60 + float(str(TDRS11_TLE.sublong).split(':')[2])/3600
+            TDRS11lat = float(str(TDRS11_TLE.sublat).split(':')[0]) + float(str(TDRS11_TLE.sublat).split(':')[1])/60 + float(str(TDRS11_TLE.sublat).split(':')[2])/3600
+            TDRS11_groundtrack = []
+            date_i = datetime.utcnow()
+            groundtrackdate = datetime.utcnow()
+            while date_i < groundtrackdate + timedelta(days=1):
+                TDRS11_TLE.compute(date_i)
+                
+                TDRS11lon_gt = float(str(TDRS11_TLE.sublong).split(':')[0]) + float(
+                    str(TDRS11_TLE.sublong).split(':')[1]) / 60 + float(str(TDRS11_TLE.sublong).split(':')[2]) / 3600
+                TDRS11lat_gt = float(str(TDRS11_TLE.sublat).split(':')[0]) + float(
+                    str(TDRS11_TLE.sublat).split(':')[1]) / 60 + float(str(TDRS11_TLE.sublat).split(':')[2]) / 3600
+
+                TDRS11_groundtrack.append(scaleLatLon2(TDRS11lat_gt, TDRS11lon_gt)['new_x'])
+                TDRS11_groundtrack.append(scaleLatLon2(TDRS11lat_gt, TDRS11lon_gt)['new_y'])
+
+                date_i += timedelta(minutes=10)
+
+            self.orbit_screen.ids.TDRS11groundtrack.width = 1
+            self.orbit_screen.ids.TDRS11groundtrack.col = (1,1,0,1)
+            self.orbit_screen.ids.TDRS11groundtrack.points = TDRS11_groundtrack
+
+        try:
+            TDRS10_TLE.compute(datetime.utcnow()) #174 West
+        except NameError:
+            TDRS10lon = -174
+            TDRS10lat = 0
+        else:
+            TDRS10lon = float(str(TDRS10_TLE.sublong).split(':')[0]) + float(str(TDRS10_TLE.sublong).split(':')[1])/60 + float(str(TDRS10_TLE.sublong).split(':')[2])/3600
+            TDRS10lat = float(str(TDRS10_TLE.sublat).split(':')[0]) + float(str(TDRS10_TLE.sublat).split(':')[1])/60 + float(str(TDRS10_TLE.sublat).split(':')[2])/3600
+            TDRS10_groundtrack = []
+            date_i = datetime.utcnow()
+            groundtrackdate = datetime.utcnow()
+            while date_i < groundtrackdate + timedelta(days=1):
+                TDRS10_TLE.compute(date_i)
+                
+                TDRS10lon_gt = float(str(TDRS10_TLE.sublong).split(':')[0]) + float(
+                    str(TDRS10_TLE.sublong).split(':')[1]) / 60 + float(str(TDRS10_TLE.sublong).split(':')[2]) / 3600
+                TDRS10lat_gt = float(str(TDRS10_TLE.sublat).split(':')[0]) + float(
+                    str(TDRS10_TLE.sublat).split(':')[1]) / 60 + float(str(TDRS10_TLE.sublat).split(':')[2]) / 3600
+
+                TDRS10_groundtrack.append(scaleLatLon2(TDRS10lat_gt, TDRS10lon_gt)['new_x'])
+                TDRS10_groundtrack.append(scaleLatLon2(TDRS10lat_gt, TDRS10lon_gt)['new_y'])
+
+                date_i += timedelta(minutes=10)
+
+            self.orbit_screen.ids.TDRS10groundtrack.width = 1
+            self.orbit_screen.ids.TDRS10groundtrack.col = (1,1,0,1)
+            self.orbit_screen.ids.TDRS10groundtrack.points = TDRS10_groundtrack
+
+        #ZOE TDRS-Z
+        try:
+            TDRS7_TLE.compute(datetime.utcnow()) #275 West
+        except NameError:
+            TDRS7lon = 85
+            TDRS7lat = 0
+        else:
+            TDRS7lon = float(str(TDRS7_TLE.sublong).split(':')[0]) + float(str(TDRS7_TLE.sublong).split(':')[1])/60 + float(str(TDRS7_TLE.sublong).split(':')[2])/3600
+            TDRS7lat = float(str(TDRS7_TLE.sublat).split(':')[0]) + float(str(TDRS7_TLE.sublat).split(':')[1])/60 + float(str(TDRS7_TLE.sublat).split(':')[2])/3600
+            TDRS7_groundtrack = []
+            date_i = datetime.utcnow()
+            groundtrackdate = datetime.utcnow()
+            while date_i < groundtrackdate + timedelta(days=1):
+                TDRS7_TLE.compute(date_i)
+                
+                TDRS7lon_gt = float(str(TDRS7_TLE.sublong).split(':')[0]) + float(
+                    str(TDRS7_TLE.sublong).split(':')[1]) / 60 + float(str(TDRS7_TLE.sublong).split(':')[2]) / 3600
+                TDRS7lat_gt = float(str(TDRS7_TLE.sublat).split(':')[0]) + float(
+                    str(TDRS7_TLE.sublat).split(':')[1]) / 60 + float(str(TDRS7_TLE.sublat).split(':')[2]) / 3600
+
+                TDRS7_groundtrack.append(scaleLatLon2(TDRS7lat_gt, TDRS7lon_gt)['new_x'])
+                TDRS7_groundtrack.append(scaleLatLon2(TDRS7lat_gt, TDRS7lon_gt)['new_y'])
+
+                date_i += timedelta(minutes=10)
+
+            self.orbit_screen.ids.TDRS7groundtrack.width = 1
+            self.orbit_screen.ids.TDRS7groundtrack.col = (1,1,0,1)
+            self.orbit_screen.ids.TDRS7groundtrack.points = TDRS7_groundtrack
+            
+        #draw the TDRS satellite locations
+        self.orbit_screen.ids.TDRS12.pos = (scaleLatLon2(TDRS12lat, TDRS12lon)['new_x']-((self.orbit_screen.ids.TDRS12.width/2)*normalizedX),scaleLatLon2(TDRS12lat, TDRS12lon)['new_y']-((self.orbit_screen.ids.TDRS12.height/2)*normalizedY))
+        self.orbit_screen.ids.TDRS6.pos = (scaleLatLon2(TDRS6lat, TDRS6lon)['new_x']-((self.orbit_screen.ids.TDRS6.width/2)*normalizedX),scaleLatLon2(TDRS6lat, TDRS6lon)['new_y']-((self.orbit_screen.ids.TDRS6.height/2)*normalizedY))
+        self.orbit_screen.ids.TDRS11.pos = (scaleLatLon2(TDRS11lat, TDRS11lon)['new_x']-((self.orbit_screen.ids.TDRS11.width/2)*normalizedX),scaleLatLon2(TDRS11lat, TDRS11lon)['new_y']-((self.orbit_screen.ids.TDRS11.height/2)*normalizedY))
+        self.orbit_screen.ids.TDRS10.pos = (scaleLatLon2(TDRS10lat, TDRS10lon)['new_x']-((self.orbit_screen.ids.TDRS10.width/2)*normalizedX),scaleLatLon2(TDRS10lat, TDRS10lon)['new_y']-((self.orbit_screen.ids.TDRS10.height/2)*normalizedY))
+        self.orbit_screen.ids.TDRS7.pos = (scaleLatLon2(TDRS7lat, TDRS7lon)['new_x']-((self.orbit_screen.ids.TDRS7.width/2)*normalizedX),scaleLatLon2(TDRS7lat, TDRS7lon)['new_y']-((self.orbit_screen.ids.TDRS7.height/2)*normalizedY))
+        #add labels and ZOE
+        self.orbit_screen.ids.TDRSeLabel.pos_hint = {"center_x": scaleLatLon(0, -41)['newLon']+0.06, "center_y": scaleLatLon(0, -41)['newLat']}
+        self.orbit_screen.ids.TDRSwLabel.pos_hint = {"center_x": scaleLatLon(0, -174)['newLon']+0.06, "center_y": scaleLatLon(0, -174)['newLat']}
+        self.orbit_screen.ids.TDRSzLabel.pos_hint = {"center_x": scaleLatLon(0, 85)['newLon']+0.05, "center_y": scaleLatLon(0, 85)['newLat']}
+        self.orbit_screen.ids.ZOE.pos_hint = {"center_x": scaleLatLon(0, 77)['newLon'], "center_y": scaleLatLon(0, 77)['newLat']}
+        self.orbit_screen.ids.ZOElabel.pos_hint = {"center_x": scaleLatLon(0, 77)['newLon'], "center_y": scaleLatLon(0, 77)['newLat']+0.1}
+
     def orbitUpdate(self, dt):
         global overcountry, ISS_TLE, ISS_TLE_Line1, ISS_TLE_Line2, ISS_TLE_Acquired, sgant_elevation, sgant_elevation_old, sgant_xelevation, aos, oldtdrs, tdrs, logged
         global TDRS12_TLE, TDRS6_TLE, TDRS7_TLE, TDRS10_TLE, TDRS11_TLE
@@ -1668,7 +1854,7 @@ class MainApp(App):
 
             self.orbit_screen.ids.OrbitISStiny.pos = (
                     scaleLatLon2(latitude, longitude)['new_x'] - ((self.orbit_screen.ids.OrbitISStiny.width / 2) * normalizedX * 3.6), #had to fudge a little not sure why
-                    scaleLatLon2(latitude, longitude)['new_y'] - ((self.orbit_screen.ids.OrbitISStiny.height / 2) * normalizedY * 3)) #had to fudge a little not sure why
+                    scaleLatLon2(latitude, longitude)['new_y'] - ((self.orbit_screen.ids.OrbitISStiny.height / 2) * normalizedY * 3.3)) #had to fudge a little not sure why
 
             ISS_groundtrack = []
             ISS_groundtrack2 = []
@@ -1689,111 +1875,18 @@ class MainApp(App):
                     ISS_groundtrack.append(scaleLatLon2(ISSlat_gt, ISSlon_gt)['new_x'])
                     ISS_groundtrack.append(scaleLatLon2(ISSlat_gt, ISSlon_gt)['new_y'])
 
-                date_i += timedelta(minutes=1)
+                date_i += timedelta(seconds=60)
 
             self.orbit_screen.ids.ISSgroundtrack.width = 1
-            self.orbit_screen.ids.ISSgroundtrack.col = (1, 0, 1, 1)
+            self.orbit_screen.ids.ISSgroundtrack.col = (1, 1, 0, 1)
             self.orbit_screen.ids.ISSgroundtrack.points = ISS_groundtrack
 
             self.orbit_screen.ids.ISSgroundtrack2.width = 1
-            self.orbit_screen.ids.ISSgroundtrack2.col = (1, 0, 1, 1)
+            self.orbit_screen.ids.ISSgroundtrack2.col = (1, 1, 0, 1)
             self.orbit_screen.ids.ISSgroundtrack2.points = ISS_groundtrack2
 
             self.orbit_screen.ids.latitude.text = str("{:.2f}".format(latitude))
             self.orbit_screen.ids.longitude.text = str("{:.2f}".format(longitude))
-
-            #need to determine which tdrs is being used based on longitude and sgant elevation
-            #TDRSw = -174W
-            #TDRSe = -41W
-            #TDRSz = 85E
-
-            #TDRS East 2 sats
-            try:
-                TDRS12_TLE.compute(datetime.utcnow()) #41 West
-            except NameError:
-                TDRS12lon = -41
-                TDRS12lat = 0
-            else:
-                TDRS12lon = float(str(TDRS12_TLE.sublong).split(':')[0]) + float(str(TDRS12_TLE.sublong).split(':')[1])/60 + float(str(TDRS12_TLE.sublong).split(':')[2])/3600
-                TDRS12lat = float(str(TDRS12_TLE.sublat).split(':')[0]) + float(str(TDRS12_TLE.sublat).split(':')[1])/60 + float(str(TDRS12_TLE.sublat).split(':')[2])/3600
-
-            try:
-                TDRS6_TLE.compute(datetime.utcnow()) #46 West
-            except NameError:
-                TDRS6lon = -46
-                TDRS6lat = 0
-            else:
-                TDRS6lon = float(str(TDRS6_TLE.sublong).split(':')[0]) + float(str(TDRS6_TLE.sublong).split(':')[1])/60 + float(str(TDRS6_TLE.sublong).split(':')[2])/3600
-                TDRS6lat = float(str(TDRS6_TLE.sublat).split(':')[0]) + float(str(TDRS6_TLE.sublat).split(':')[1])/60 + float(str(TDRS6_TLE.sublat).split(':')[2])/3600
-
-            #TDRS West 2 sats
-            try:
-                TDRS11_TLE.compute(datetime.utcnow()) #171 West
-            except NameError:
-                TDRS11lon = -171
-                TDRS11lat = 0
-            else:
-                TDRS11lon = float(str(TDRS11_TLE.sublong).split(':')[0]) + float(str(TDRS11_TLE.sublong).split(':')[1])/60 + float(str(TDRS11_TLE.sublong).split(':')[2])/3600
-                TDRS11lat = float(str(TDRS11_TLE.sublat).split(':')[0]) + float(str(TDRS11_TLE.sublat).split(':')[1])/60 + float(str(TDRS11_TLE.sublat).split(':')[2])/3600
-
-            try:
-                TDRS10_TLE.compute(datetime.utcnow()) #174 West
-            except NameError:
-                TDRS10lon = -174
-                TDRS10lat = 0
-            else:
-                TDRS10lon = float(str(TDRS10_TLE.sublong).split(':')[0]) + float(str(TDRS10_TLE.sublong).split(':')[1])/60 + float(str(TDRS10_TLE.sublong).split(':')[2])/3600
-                TDRS10lat = float(str(TDRS10_TLE.sublat).split(':')[0]) + float(str(TDRS10_TLE.sublat).split(':')[1])/60 + float(str(TDRS10_TLE.sublat).split(':')[2])/3600
-
-            TDRS10_groundtrack = []
-            date_i = datetime.utcnow()
-            groundtrackdate = datetime.utcnow()
-            while date_i < groundtrackdate + timedelta(days=1):
-                TDRS10_TLE.compute(date_i)
-                
-                TDRS10lon_gt = float(str(TDRS10_TLE.sublong).split(':')[0]) + float(
-                    str(TDRS10_TLE.sublong).split(':')[1]) / 60 + float(str(TDRS10_TLE.sublong).split(':')[2]) / 3600
-                TDRS10lat_gt = float(str(TDRS10_TLE.sublat).split(':')[0]) + float(
-                    str(TDRS10_TLE.sublat).split(':')[1]) / 60 + float(str(TDRS10_TLE.sublat).split(':')[2]) / 3600
-
-                TDRS10_groundtrack.append(scaleLatLon2(TDRS10lat_gt, TDRS10lon_gt)['new_x'])
-                TDRS10_groundtrack.append(scaleLatLon2(TDRS10lat_gt, TDRS10lon_gt)['new_y'])
-
-                date_i += timedelta(minutes=1)
-
-            self.orbit_screen.ids.TDRS10groundtrack.width = 1
-            self.orbit_screen.ids.TDRS10groundtrack.col = (1,0,1,1)
-            self.orbit_screen.ids.TDRS10groundtrack.points = TDRS10_groundtrack
-
-            #ZOE TDRS-Z
-            try:
-                TDRS7_TLE.compute(datetime.utcnow()) #275 West
-            except NameError:
-                TDRS7lon = -275
-                TDRS7lat = 0
-            else:
-                TDRS7lon = float(str(TDRS7_TLE.sublong).split(':')[0]) + float(str(TDRS7_TLE.sublong).split(':')[1])/60 + float(str(TDRS7_TLE.sublong).split(':')[2])/3600
-                TDRS7lat = float(str(TDRS7_TLE.sublat).split(':')[0]) + float(str(TDRS7_TLE.sublat).split(':')[1])/60 + float(str(TDRS7_TLE.sublat).split(':')[2])/3600
-
-            #TDRS6_TLE.compute(datetime.utcnow()) #46 West
-            #TDRS11_TLE.compute(datetime.utcnow()) #171 West
-            #TDRS10_TLE.compute(datetime.utcnow()) #174 West
-
-            #draw the TDRS satellite locations
-            self.orbit_screen.ids.TDRS12.pos_hint = {"center_x": scaleLatLon(TDRS12lat, TDRS12lon)['newLon'], "center_y": scaleLatLon(TDRS12lat, TDRS12lon)['newLat']}
-            self.orbit_screen.ids.TDRS6.pos_hint = {"center_x": scaleLatLon(TDRS6lat, TDRS6lon)['newLon'], "center_y": scaleLatLon(TDRS6lat, TDRS6lon)['newLat']}
-            self.orbit_screen.ids.TDRS11.pos_hint = {"center_x": scaleLatLon(TDRS11lat, TDRS11lon)['newLon'], "center_y": scaleLatLon(TDRS11lat, TDRS11lon)['newLat']}
-            #self.orbit_screen.ids.TDRS10.pos_hint = {"center_x": scaleLatLon(TDRS10lat, TDRS10lon)['newLon'], "center_y": scaleLatLon(TDRS10lat, TDRS10lon)['newLat']}
-
-            #self.orbit_screen.ids.TDRS10.pos = (scaleLatLon2(TDRS10lat, TDRS10lon)['new_x'],scaleLatLon2(TDRS10lat, TDRS10lon)['new_y'])
-            self.orbit_screen.ids.TDRS10.pos = (scaleLatLon2(TDRS10lat, TDRS10lon)['new_x']-((self.orbit_screen.ids.TDRS10.width/2)*normalizedX),scaleLatLon2(TDRS10lat, TDRS10lon)['new_y']-((self.orbit_screen.ids.TDRS10.height/2)*normalizedY))
-
-            self.orbit_screen.ids.TDRS7.pos_hint = {"center_x": scaleLatLon(TDRS7lat, TDRS7lon)['newLon'], "center_y": scaleLatLon(TDRS7lat, TDRS7lon)['newLat']}
-            self.orbit_screen.ids.TDRSeLabel.pos_hint = {"center_x": scaleLatLon(0, -41)['newLon']+0.06, "center_y": scaleLatLon(0, -41)['newLat']}
-            self.orbit_screen.ids.TDRSwLabel.pos_hint = {"center_x": scaleLatLon(0, -174)['newLon']+0.06, "center_y": scaleLatLon(0, -174)['newLat']}
-            self.orbit_screen.ids.TDRSzLabel.pos_hint = {"center_x": scaleLatLon(0, 85)['newLon']+0.05, "center_y": scaleLatLon(0, 85)['newLat']}
-            self.orbit_screen.ids.ZOE.pos_hint = {"center_x": scaleLatLon(0, 77)['newLon'], "center_y": scaleLatLon(0, 77)['newLat']}
-            self.orbit_screen.ids.ZOElabel.pos_hint = {"center_x": scaleLatLon(0, 77)['newLon'], "center_y": scaleLatLon(0, 77)['newLat']+0.1}
 
             # THIS SECTION NEEDS IMPROVEMENT
             tdrs = "n/a"
@@ -1825,36 +1918,36 @@ class MainApp(App):
                 self.ct_sgant_screen.ids.tdrs_label.text = ""
                 tdrs = "----"
 
-            if tdrs == "west":
-                self.orbit_screen.ids.TDRSwLabel.color = 1, 0, 1
-                self.orbit_screen.ids.TDRSeLabel.color = 1, 1, 1
-                self.orbit_screen.ids.TDRSzLabel.color = 1, 1, 1
+            if tdrs == "west": #tdrs10 and 11
+                self.orbit_screen.ids.TDRSwLabel.color = (1,0,1,1)
+                self.orbit_screen.ids.TDRSeLabel.color = (1,1,1,1)
+                self.orbit_screen.ids.TDRSzLabel.color = (1,1,1,1)
                 self.orbit_screen.ids.TDRS11.col = (1,0,1,1)
-                self.orbit_screen.ids.TDRS10.col = (1,0,0,1)
+                self.orbit_screen.ids.TDRS10.col = (1,0,1,1)
                 self.orbit_screen.ids.TDRS12.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS6.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
-                self.orbit_screen.ids.ZOElabel.color = 1, 1, 1
+                self.orbit_screen.ids.ZOElabel.color = (1,1,1,1)
                 self.orbit_screen.ids.ZOE.col = (1,0.5,0,0.5)
-            elif tdrs == "east":
+            elif tdrs == "east": #tdrs6 and 12
                 self.ct_sgant_screen.ids.tdrs_z.color = 1, 1, 1, 0
-                self.orbit_screen.ids.TDRSwLabel.color = 1, 1, 1
-                self.orbit_screen.ids.TDRSeLabel.color = 1, 0, 1
-                self.orbit_screen.ids.TDRSzLabel.color = 1, 1, 1
+                self.orbit_screen.ids.TDRSwLabel.color = (1,1,1,1)
+                self.orbit_screen.ids.TDRSeLabel.color = (1,0,1,1)
+                self.orbit_screen.ids.TDRSzLabel.color = (1,1,1,1)
                 self.orbit_screen.ids.TDRS11.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS10.col = (1,0,0,1)
+                self.orbit_screen.ids.TDRS10.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS12.col = (1,0,1,1)
                 self.orbit_screen.ids.TDRS6.col = (1,0,1,1)
                 self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
-                self.orbit_screen.ids.ZOElabel.color = 1, 1, 1
+                self.orbit_screen.ids.ZOElabel.color = (1,1,1,1)
                 self.orbit_screen.ids.ZOE.col = (1,0.5,0,0.5)
-            elif tdrs == "z":
+            elif tdrs == "z": #tdrs7
                 self.ct_sgant_screen.ids.tdrs_z.color = 1, 1, 1, 1
-                self.orbit_screen.ids.TDRSwLabel.color = 1, 1, 1
-                self.orbit_screen.ids.TDRSeLabel.color = 1, 1, 1
-                self.orbit_screen.ids.TDRSzLabel.color = 1, 0, 1
+                self.orbit_screen.ids.TDRSwLabel.color = (1,1,1,1)
+                self.orbit_screen.ids.TDRSeLabel.color = (1,1,1,1)
+                self.orbit_screen.ids.TDRSzLabel.color = (1,0,1,1)
                 self.orbit_screen.ids.TDRS11.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS10.col = (1,0,0,1)
+                self.orbit_screen.ids.TDRS10.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS12.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS6.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS7.col = (1,0,1,1)
@@ -1862,27 +1955,27 @@ class MainApp(App):
                 self.orbit_screen.ids.ZOE.col = (0,0,0,0)
             else:
                 self.ct_sgant_screen.ids.tdrs_z.color = 1, 1, 1, 0
-                self.orbit_screen.ids.TDRSwLabel.color = 1, 1, 1
-                self.orbit_screen.ids.TDRSeLabel.color = 1, 1, 1
-                self.orbit_screen.ids.TDRSzLabel.color = 1, 1, 1
+                self.orbit_screen.ids.TDRSwLabel.color = (1,1,1,1)
+                self.orbit_screen.ids.TDRSeLabel.color = (1,1,1,1)
+                self.orbit_screen.ids.TDRSzLabel.color = (1,1,1,1)
                 self.orbit_screen.ids.TDRS11.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS10.col = (1,0,0,1)
+                self.orbit_screen.ids.TDRS10.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS12.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS6.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
-                self.orbit_screen.ids.ZOElabel.color = 1, 1, 1
+                self.orbit_screen.ids.ZOElabel.color = (1,1,1,1)
                 self.orbit_screen.ids.ZOE.col = (1,0.5,0,0.5)
 
             if aos == 0.00 and longitude > 60 and longitude < 100 and tdrs == "----":
-                self.orbit_screen.ids.TDRSwLabel.color = 1, 1, 1
-                self.orbit_screen.ids.TDRSeLabel.color = 1, 1, 1
-                self.orbit_screen.ids.TDRSzLabel.color = 1, 1, 1
+                self.orbit_screen.ids.TDRSwLabel.color = (1,1,1,1)
+                self.orbit_screen.ids.TDRSeLabel.color = (1,1,1,1)
+                self.orbit_screen.ids.TDRSzLabel.color = (1,1,1,1)
                 self.orbit_screen.ids.TDRS11.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS10.col = (1,0,0,1)
                 self.orbit_screen.ids.TDRS12.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS6.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
-                self.orbit_screen.ids.ZOElabel.color = 1, 0, 0
+                self.orbit_screen.ids.ZOElabel.color = (1,0,0,1)
                 self.orbit_screen.ids.ZOE.col = (1,0.5,0,0.5)
 
             #if tdrs != oldtdrs and float(aos) == 1.0:
@@ -1922,7 +2015,8 @@ class MainApp(App):
             #use location to draw dot on orbit map
             mylatitude = float(str(location.lat).split(':')[0]) + float(str(location.lat).split(':')[1])/60 + float(str(location.lat).split(':')[2])/3600
             mylongitude = float(str(location.lon).split(':')[0]) + float(str(location.lon).split(':')[1])/60 + float(str(location.lon).split(':')[2])/3600
-            self.orbit_screen.ids.mylocation.pos_hint = {"center_x": scaleLatLon(mylatitude, mylongitude)['newLon'], "center_y": scaleLatLon(mylatitude, mylongitude)['newLat']}
+            self.orbit_screen.ids.mylocation.col = (0,0,1,1)
+            self.orbit_screen.ids.mylocation.pos = (scaleLatLon2(mylatitude, mylongitude)['new_x']-((self.orbit_screen.ids.mylocation.width/2)*normalizedX),scaleLatLon2(mylatitude, mylongitude)['new_y']-((self.orbit_screen.ids.mylocation.height/2)*normalizedY))
 
             def isVisible(pass_info):
                 def seconds_between(d1, d2):
@@ -1935,17 +2029,22 @@ class MainApp(App):
 
                 tr, azr, tt, altt, ts, azs = pass_info
                 max_time = datetime_from_time(tt)
+                #print(tr) #time rise
+                #print(azr) #rise azimuth
+                #print(tt) #max height time
+                #print(altt) #max elevation
+                #print(ts) #set time
+                #print(azs) #set azimuth
 
                 location.date = max_time
 
                 sun = ephem.Sun()
                 sun.compute(location)
                 ISS_TLE.compute(location)
-
-                sun_alt = math.degrees(sun.alt)
+                sun_alt = float(str(sun.alt).split(':')[0]) + float(str(sun.alt).split(':')[1])/60 + float(str(sun.alt).split(':')[2])/3600
 
                 visible = False
-                if ISS_TLE.eclipsed is False and -18 < math.degrees(sun_alt) < -6:
+                if ISS_TLE.eclipsed is False and -18 < sun_alt < -6:
                     visible = True
 
                 return visible
@@ -1998,13 +2097,13 @@ class MainApp(App):
             if len(results) > 0:
                 ISS_TLE_Line1 = results[1]
                 ISS_TLE_Line2 = results[2]
-                print(ISS_TLE_Line1)
-                print(ISS_TLE_Line2)
+                #print(ISS_TLE_Line1)
+                #print(ISS_TLE_Line2)
                 ISS_TLE = ephem.readtle("ISS (ZARYA)", str(ISS_TLE_Line1), str(ISS_TLE_Line2))
                 ISS_TLE_Acquired = True
-                print("TLE Success!")
+                print("ISS TLE Acquired!")
             else:
-                print("TLE not acquired")
+                print("TLE Not Acquired")
                 ISS_TLE_Acquired = False
 
         def on_redirect(req, result):
@@ -2031,8 +2130,8 @@ class MainApp(App):
                     break
 
             if len(results[1]) > 0:
-                print(results[1])
-                print(results[2])
+                #print(results[1])
+                #print(results[2])
                 TDRS12_TLE = ephem.readtle("TDRS 12", str(results[1]), str(results[2]))
                 print("TDRS 12 TLE Success!")
             else:
@@ -2049,8 +2148,8 @@ class MainApp(App):
                     break
 
             if len(results[1]) > 0:
-                print(results[1])
-                print(results[2])
+                #print(results[1])
+                #print(results[2])
                 TDRS6_TLE = ephem.readtle("TDRS 6", str(results[1]), str(results[2]))
                 print("TDRS 6 TLE Success!")
             else:
@@ -2067,8 +2166,8 @@ class MainApp(App):
                     break
 
             if len(results[1]) > 0:
-                print(results[1])
-                print(results[2])
+                #print(results[1])
+                #print(results[2])
                 TDRS11_TLE = ephem.readtle("TDRS 11", str(results[1]), str(results[2]))
                 print("TDRS 11 TLE Success!")
             else:
@@ -2085,8 +2184,8 @@ class MainApp(App):
                     break
 
             if len(results[1]) > 0:
-                print(results[1])
-                print(results[2])
+                #print(results[1])
+                #print(results[2])
                 TDRS10_TLE = ephem.readtle("TDRS 10", str(results[1]), str(results[2]))
                 print("TDRS 10 TLE Success!")
             else:
@@ -2103,8 +2202,8 @@ class MainApp(App):
                     break
 
             if len(results[1]) > 0:
-                print(results[1])
-                print(results[2])
+                #print(results[1])
+                #print(results[2])
                 TDRS7_TLE = ephem.readtle("TDRS 7", str(results[1]), str(results[2]))
                 print("TDRS 7 TLE Success!")
             else:
@@ -2343,7 +2442,7 @@ class MainApp(App):
         global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power
         global stationmode, sgant_elevation, sgant_xelevation
         global tdrs, module
-        global old_mt_timestamp, old_mt_position
+        global old_mt_timestamp, old_mt_position, mt_speed
 
         arduino_count = 0
         if SerialConnection1:
@@ -2570,11 +2669,9 @@ class MainApp(App):
 
         if (mt_position_timestamp - old_mt_timestamp) > 0:
             mt_speed = (mt_position - old_mt_position) / (mt_position_timestamp - old_mt_timestamp)
-        else:
-            mt_speed = 0.00
-        self.mss_mt_screen.ids.mt_speed_value.text = str(mt_speed) + " cm/s"
-        old_mt_timestamp = mt_position_timestamp
-        old_mt_position = mt_position
+            old_mt_timestamp = mt_position_timestamp
+            old_mt_position = mt_position
+        self.mss_mt_screen.ids.mt_speed_value.text = "{:2.2f}".format(float(mt_speed)) + " cm/s"
         
 
         ##US EPS Stuff---------------------------##
