@@ -18,7 +18,7 @@
             col: (0,0,0,0)
             pos: (0-(self.width/2),0-(self.height/2))
             size_hint: (None, None)
-            size: (25,25)
+            size: (10,10)
             canvas:
                 PushMatrix:
                 Translate:
@@ -38,7 +38,7 @@
             col: (0,0,0,0)
             pos: (0-(self.width/2),0-(self.height/2))
             size_hint: (None, None)
-            size: (25,25)
+            size: (10,10)
             canvas:
                 PushMatrix:
                 Translate:
@@ -77,7 +77,7 @@
             col: (0,0,0,0)
             pos: (0-(self.width/2),0-(self.height/2))
             size_hint: (None, None)
-            size: (25,25)
+            size: (10,10)
             canvas:
                 PushMatrix:
                 Translate:
@@ -123,7 +123,7 @@
             col: (0,0,0,0)
             pos: (0-(self.width/2),0-(self.height/2))
             size_hint: (None, None)
-            size: (25,25)
+            size: (10,10)
             canvas:
                 PushMatrix:
                 Translate:
@@ -162,7 +162,7 @@
             col: (0,0,0,0)
             pos: (0-(self.width/2),0-(self.height/2))
             size_hint: (None, None)
-            size: (25,25)
+            size: (10,10)
             canvas:
                 PushMatrix:
                 Translate:
@@ -227,7 +227,7 @@
             col: (1,1,1,1)
             pos: (0-(self.width/2),0-(self.height/2))
             size_hint: (None, None)
-            size: (25,25)
+            size: (10,10)
             canvas:
                 PushMatrix:
                 Translate:
@@ -285,7 +285,7 @@
                 Line:    #Bezier looks better but is pretty slow and slightly wrong
                     points: self.points
                     joint: "round"
-                    width: 3
+                    width: 1
                 PopMatrix:
         Widget:
             id: ISSgroundtrack2
@@ -304,13 +304,13 @@
                 Line:    #Bezier looks better but is pretty slow and slightly wrong
                     points: self.points
                     joint: "round"
-                    width: 3
+                    width: 1
                 PopMatrix:
         Widget:
             id: OrbitISStiny
             pos: (0-(self.width/2),0-(self.height/2))
             size_hint: (None, None)
-            size: (150,150)
+            size: (50,50)
             color: (0,1,1,1)
             canvas:
                 PushMatrix:
@@ -327,7 +327,7 @@
                     size: self.size
                     pos: self.pos
                 Line:
-                    width: 2
+                    width: 1
                     circle: (self.center_x, self.center_y, min(self.width, self.height)/2, 0, 360, 20)
                 PopMatrix:
         Label:

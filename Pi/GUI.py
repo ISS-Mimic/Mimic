@@ -11,6 +11,7 @@ import sqlite3
 import ephem #used for TLE orbit information on orbit screen
 import pytz #used for timezone conversion in orbit pass predictions
 from bs4 import BeautifulSoup #used to parse webpages for data (EVA stats, ISS TLE)
+import threading #need to send time intensive basemap stuff to background thread
 import kivy
 from kivy.app import App
 from kivy.lang import Builder
@@ -21,6 +22,13 @@ from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
 from kivy.core.window import Window
 
+#these are for plotting day/night time
+import matplotlib.pyplot as plt
+from mpl_toolkits.basemap import Basemap
+from matplotlib import path
+import numpy as np
+
+#create and populate database script
 import database_initialize
 
 # Create Program Logs
@@ -1220,6 +1228,10 @@ class MainApp(App):
         Clock.schedule_interval(self.TDRSupdate, 600)
         Clock.schedule_interval(self.check_internet, 1)
         Clock.schedule_interval(self.check_serial, 1)
+        
+        #schedule the orbitmap to update with shadow every 5 mins
+        Clock.schedule_interval(self.updateNightShade, 30)
+        Clock.schedule_interval(self.updateOrbitMap, 10)
         return root
 
     def check_serial(self, dt):
@@ -1369,6 +1381,12 @@ class MainApp(App):
         urlindex = urlindex + 1
         if urlindex > urlsize-1:
             urlindex = 0
+    def updateOrbitMap(self, dt):
+        self.orbit_screen.ids.OrbitMap.source = '/home/pi/Mimic/Pi/imgs/orbit/map.jpg'
+        self.orbit_screen.ids.OrbitMap.reload()
+    
+    def updateNightShade(self, dt):
+        proc = subprocess.Popen(["python3", "/home/pi/Mimic/Pi/NightShade.py"])
 
     def check_EVA_stats(self, lastname1, firstname1, lastname2, firstname2):
         global numEVAs1, EVAtime_hours1, EVAtime_minutes1, numEVAs2, EVAtime_hours2, EVAtime_minutes2
@@ -2042,11 +2060,16 @@ class MainApp(App):
                 sun.compute(location)
                 ISS_TLE.compute(location)
                 sun_alt = float(str(sun.alt).split(':')[0]) + float(str(sun.alt).split(':')[1])/60 + float(str(sun.alt).split(':')[2])/3600
-
                 visible = False
                 if ISS_TLE.eclipsed is False and -18 < sun_alt < -6:
                     visible = True
-
+                #on the pass screen add info for why not visible
+                if ISS_TLE.eclipsed:
+                    print("Not visible because ISS wil be in the Earth's shadow")
+                if sun_alt > -6:
+                    print("Not visible because the sun is not low enough")
+                if sun_alt < -18:
+                    print("Not visible because the sun is too low")
                 return visible
 
             ISS_TLE.compute(location) #compute tle propagation based on provided location
