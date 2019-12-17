@@ -2073,18 +2073,16 @@ class MainApp(App):
                 sun.compute(location)
                 ISS_TLE.compute(location)
                 sun_alt = float(str(sun.alt).split(':')[0]) + float(str(sun.alt).split(':')[1])/60 + float(str(sun.alt).split(':')[2])/3600
-                print(ISS_TLE.eclipsed)
-                print(sun_alt)
                 visible = False
                 if ISS_TLE.eclipsed is False and -18 < sun_alt < -6:
                     visible = True
                 #on the pass screen add info for why not visible
-                if ISS_TLE.eclipsed:
-                    print("Not visible because ISS wil be in the Earth's shadow")
-                if sun_alt > -6:
-                    print("Not visible because the sun is not low enough")
-                if sun_alt < -18:
-                    print("Not visible because the sun is too low")
+                #if ISS_TLE.eclipsed:
+                    #print("Not visible because ISS wil be in the Earth's shadow")
+                #if sun_alt > -6:
+                    #print("Not visible because the sun is not low enough")
+                #if sun_alt < -18:
+                    #print("Not visible because the sun is too low")
                 return visible
 
             ISS_TLE.compute(location) #compute tle propagation based on provided location
@@ -2706,7 +2704,7 @@ class MainApp(App):
         self.mss_mt_screen.ids.mt_position_value.text = str(mt_position)
 
         if (mt_position_timestamp - old_mt_timestamp) > 0:
-            mt_speed = (mt_position - old_mt_position) / (mt_position_timestamp - old_mt_timestamp)
+            mt_speed = (mt_position - old_mt_position) / ((mt_position_timestamp - old_mt_timestamp)*3600)
             old_mt_timestamp = mt_position_timestamp
             old_mt_position = mt_position
         self.mss_mt_screen.ids.mt_speed_value.text = "{:2.2f}".format(float(mt_speed)) + " cm/s"
