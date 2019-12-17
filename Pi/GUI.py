@@ -1072,7 +1072,13 @@ class Settings_Screen(Screen, EventDispatcher):
     pass
 
 class Orbit_Screen(Screen, EventDispatcher):
-    pass
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class Orbit_Pass(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class Orbit_Data(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1, 1, 1])
 
 class ISS_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1, 1, 1])
@@ -1165,6 +1171,8 @@ class MainApp(App):
         self.eclss_screen = ECLSS_Screen(name = 'eclss')
         self.control_screen = ManualControlScreen(name = 'manualcontrol')
         self.orbit_screen = Orbit_Screen(name = 'orbit')
+        self.orbit_pass = Orbit_Pass(name = 'orbit_pass')
+        self.orbit_data = Orbit_Data(name = 'orbit_data')
         self.fakeorbit_screen = FakeOrbitScreen(name = 'fakeorbit')
         self.eps_screen = EPS_Screen(name = 'eps')
         self.ct_screen = CT_Screen(name = 'ct')
@@ -1184,7 +1192,10 @@ class MainApp(App):
         self.eva_pictures = EVA_Pictures(name='eva_pictures')
 
         #Add all new telemetry screens to this list, this is used for the signal status icon and telemetry value colors
-        ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen', 'ct_screen', 'ct_sasa_screen', 'ct_sgant_screen', 'ct_uhf_screen', 'ct_camera_screen', 'gnc_screen', 'orbit_screen', 'us_eva', 'rs_eva', 'eva_main', 'mimic_screen', 'mss_mt_screen']
+        ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen', 
+                    'ct_screen', 'ct_sasa_screen', 'ct_sgant_screen', 'ct_uhf_screen', 
+                    'ct_camera_screen', 'gnc_screen', 'orbit_screen', 'us_eva', 'rs_eva', 
+                    'eva_main', 'mimic_screen', 'mss_mt_screen','orbit_pass','orbit_data']
 
         root = MainScreenManager(transition=SwapTransition())
         root.add_widget(self.main_screen)
@@ -1192,6 +1203,8 @@ class MainApp(App):
         root.add_widget(self.mimic_screen)
         root.add_widget(self.fakeorbit_screen)
         root.add_widget(self.orbit_screen)
+        root.add_widget(self.orbit_pass)
+        root.add_widget(self.orbit_data)
         root.add_widget(self.iss_screen)
         root.add_widget(self.eclss_screen)
         root.add_widget(self.eps_screen)
@@ -1222,7 +1235,7 @@ class MainApp(App):
         Clock.schedule_once(self.checkCrew, 30)
         Clock.schedule_once(self.checkBlogforEVA, 30)
         Clock.schedule_once(self.getTLE, 15) #uncomment when internet works again
-        Clock.schedule_once(self.TDRSupdate, 10) #uncomment when internet works again
+        Clock.schedule_once(self.TDRSupdate, 30) #uncomment when internet works again
         
         Clock.schedule_interval(self.getTLE, 300)
         Clock.schedule_interval(self.TDRSupdate, 600)
@@ -1230,7 +1243,7 @@ class MainApp(App):
         Clock.schedule_interval(self.check_serial, 1)
         
         #schedule the orbitmap to update with shadow every 5 mins
-        Clock.schedule_interval(self.updateNightShade, 30)
+        Clock.schedule_interval(self.updateNightShade, 120)
         Clock.schedule_interval(self.updateOrbitMap, 10)
         return root
 
@@ -1871,8 +1884,8 @@ class MainApp(App):
             normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
 
             self.orbit_screen.ids.OrbitISStiny.pos = (
-                    scaleLatLon2(latitude, longitude)['new_x'] - ((self.orbit_screen.ids.OrbitISStiny.width / 2) * normalizedX * 3.6), #had to fudge a little not sure why
-                    scaleLatLon2(latitude, longitude)['new_y'] - ((self.orbit_screen.ids.OrbitISStiny.height / 2) * normalizedY * 3.3)) #had to fudge a little not sure why
+                    scaleLatLon2(latitude, longitude)['new_x'] - ((self.orbit_screen.ids.OrbitISStiny.width / 2) * normalizedX * 2), #had to fudge a little not sure why
+                    scaleLatLon2(latitude, longitude)['new_y'] - ((self.orbit_screen.ids.OrbitISStiny.height / 2) * normalizedY * 2)) #had to fudge a little not sure why
 
             ISS_groundtrack = []
             ISS_groundtrack2 = []
@@ -1896,11 +1909,11 @@ class MainApp(App):
                 date_i += timedelta(seconds=60)
 
             self.orbit_screen.ids.ISSgroundtrack.width = 1
-            self.orbit_screen.ids.ISSgroundtrack.col = (1, 1, 0, 1)
+            self.orbit_screen.ids.ISSgroundtrack.col = (1, 0, 0, 1)
             self.orbit_screen.ids.ISSgroundtrack.points = ISS_groundtrack
 
             self.orbit_screen.ids.ISSgroundtrack2.width = 1
-            self.orbit_screen.ids.ISSgroundtrack2.col = (1, 1, 0, 1)
+            self.orbit_screen.ids.ISSgroundtrack2.col = (1, 0, 0, 1)
             self.orbit_screen.ids.ISSgroundtrack2.points = ISS_groundtrack2
 
             self.orbit_screen.ids.latitude.text = str("{:.2f}".format(latitude))
@@ -2060,6 +2073,8 @@ class MainApp(App):
                 sun.compute(location)
                 ISS_TLE.compute(location)
                 sun_alt = float(str(sun.alt).split(':')[0]) + float(str(sun.alt).split(':')[1])/60 + float(str(sun.alt).split(':')[2])/3600
+                print(ISS_TLE.eclipsed)
+                print(sun_alt)
                 visible = False
                 if ISS_TLE.eclipsed is False and -18 < sun_alt < -6:
                     visible = True
@@ -3317,6 +3332,8 @@ class MainApp(App):
 Builder.load_file('/home/pi/Mimic/Pi/Screens/Settings_Screen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/FakeOrbitScreen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/Orbit_Screen.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/Orbit_Pass.kv')
+Builder.load_file('/home/pi/Mimic/Pi/Screens/Orbit_Data.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/ISS_Screen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/ECLSS_Screen.kv')
 Builder.load_file('/home/pi/Mimic/Pi/Screens/EPS_Screen.kv')
@@ -3346,6 +3363,8 @@ ScreenManager:
     Settings_Screen:
     FakeOrbitScreen:
     Orbit_Screen:
+    Orbit_Pass:
+    Orbit_Data:
     EPS_Screen:
     CT_Screen:
     CT_SASA_Screen:

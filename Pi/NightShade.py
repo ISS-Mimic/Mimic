@@ -68,4 +68,4 @@ def bluemarble_daynight(date,scale):
     plt.savefig('/home/pi/Mimic/Pi/imgs/orbit/map.jpg', bbox_inches='tight', pad_inches=0)
 
 date = datetime.utcnow()
-bluemarble_daynight(date,0.2)
+bluemarble_daynight(date,0.3)

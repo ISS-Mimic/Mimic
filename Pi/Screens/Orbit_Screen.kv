@@ -344,6 +344,20 @@
             markup: True
             color: 1,1,1
             font_size: 26
+        Button:
+            id: iss_pass_button
+            size_hint: 0.1,0.2
+            pos_hint: {"center_x": 0.92, "center_y": 0.8}
+            text: 'ISS \n Pass'
+            font_size: 30
+            on_release: app.root.current = 'orbit_pass'
+        Button:
+            id: orbit_data_button
+            size_hint: 0.1,0.1
+            pos_hint: {"center_x": 0.7, "center_y": 0.2}
+            text: 'Orbit Data'
+            font_size: 30
+            on_release: app.root.current = 'orbit_data'
         Label:
             id: iss_next_pass1
             pos_hint: {"center_x": 0.92, "center_y": 0.6}
