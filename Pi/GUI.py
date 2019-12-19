@@ -109,6 +109,9 @@ else:
     logWrite("Successful connection to Serial on USBO")
     print(str(ser5))
 
+TDRSconn = sqlite3.connect('/dev/shm/tdrs.db')
+TDRSconn.isolation_level = None
+TDRScursor = TDRSconn.cursor()
 conn = sqlite3.connect('/dev/shm/iss_telemetry.db')
 conn.isolation_level = None
 c = conn.cursor()
@@ -128,6 +131,9 @@ manualcontrol = False
 startup = True
 isscrew = 0
 val = ""
+tdrs1 = 0
+tdrs2 = 0
+tdrs_timestamp = 0
 lastsignal = 0
 testvalue = 0
 obtained_EVA_crew = False
@@ -251,6 +257,7 @@ class MainScreen(Screen):
         except Exception:
             pass
         os.system('rm /dev/shm/iss_telemetry.db') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
+        os.system('rm /dev/shm/tdrs.db') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
         staleTelemetry()
         logWrite("Successfully stopped ISS telemetry javascript and removed database")
 
@@ -1140,9 +1147,10 @@ class MimicScreen(Screen, EventDispatcher):
         mimicbutton = args[0]
 
     def startproc(*args):
-        global p
+        global p,TDRSproc
         print("Telemetry Subprocess start")
         p = Popen(["node", "/home/pi/Mimic/Pi/ISS_Telemetry.js"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
+        TDRSproc = Popen(["python3", "/home/pi/Mimic/Pi/TDRScheck.py"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
         #p = Popen(["/home/pi/Mimic/Pi/RecordedData/playback.out","/home/pi/Mimic/Pi/RecordedData/Data"])
 
     def killproc(*args):
@@ -1151,6 +1159,7 @@ class MimicScreen(Screen, EventDispatcher):
         try:
             p.kill()
             p2.kill()
+            TDRSproc.kill()
         except Exception:
             pass
         else:
@@ -1858,7 +1867,7 @@ class MainApp(App):
 
     def orbitUpdate(self, dt):
         global overcountry, ISS_TLE, ISS_TLE_Line1, ISS_TLE_Line2, ISS_TLE_Acquired, sgant_elevation, sgant_elevation_old, sgant_xelevation, aos, oldtdrs, tdrs, logged
-        global TDRS12_TLE, TDRS6_TLE, TDRS7_TLE, TDRS10_TLE, TDRS11_TLE
+        global TDRS12_TLE, TDRS6_TLE, TDRS7_TLE, TDRS10_TLE, TDRS11_TLE, tdrs1, tdrs2, tdrs_timestamp
         def scaleLatLon(latitude, longitude):
             #converting lat lon to x, y for orbit map
             fromLatSpan = 180.0
@@ -1924,61 +1933,96 @@ class MainApp(App):
             self.orbit_screen.ids.latitude.text = str("{:.2f}".format(latitude))
             self.orbit_screen.ids.longitude.text = str("{:.2f}".format(longitude))
 
+            TDRScursor.execute('select TDRS1 from tdrs')
+            tdrs1 = int(TDRScursor.fetchone()[0])
+            TDRScursor.execute('select TDRS2 from tdrs')
+            tdrs2 = int(TDRScursor.fetchone()[0])
+            TDRScursor.execute('select Timestamp from tdrs')
+            tdrs_timestamp = TDRScursor.fetchone()[0]
+            print(tdrs1)
+            print(tdrs2)
+            #print(tdrs_timestamp)
+            
             # THIS SECTION NEEDS IMPROVEMENT
             tdrs = "n/a"
-            self.ct_sgant_screen.ids.tdrs_east41.angle = (-1*longitude)-41
-            self.ct_sgant_screen.ids.tdrs_east46.angle = (-1*longitude)-46
-            self.ct_sgant_screen.ids.tdrs_z.angle = ((-1*longitude)-41)+126
-            self.ct_sgant_screen.ids.tdrs_west174.angle = ((-1*longitude)-41)-133
-            self.ct_sgant_screen.ids.tdrs_west171.angle = ((-1*longitude)-41)-130
-
-            if longitude > 90 and sgant_elevation < -10 and float(aos) == 1.0:
-                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West"
-                tdrs = "west"
-            elif longitude > 60 and longitude < 140 and sgant_elevation > -10 and float(aos) == 1.0:
-                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-Z"
-                tdrs = "z"
-            elif longitude > 0 and longitude <= 90 and sgant_elevation < -10 and float(aos) == 1.0:
-                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-Z"
-                tdrs = "z"
-            elif longitude > -80 and longitude <= 60 and sgant_elevation > -10 and float(aos) == 1.0:
-                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East"
-                tdrs = "east"
-            elif longitude > -160 and longitude <= 0 and sgant_elevation < -10 and float(aos) == 1.0:
-                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East"
-                tdrs = "east"
-            elif ((longitude >= -180 and longitude <= -80) or (longitude > 140)) and sgant_elevation > -40 and float(aos) == 1.0:
-                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West"
-                tdrs = "west"
-            else:
-                self.ct_sgant_screen.ids.tdrs_label.text = ""
+            self.ct_sgant_screen.ids.tdrs_east12.angle = (-1*longitude)-41
+            self.ct_sgant_screen.ids.tdrs_east6.angle = (-1*longitude)-46
+            self.ct_sgant_screen.ids.tdrs_z7.angle = ((-1*longitude)-41)+126
+            self.ct_sgant_screen.ids.tdrs_west11.angle = ((-1*longitude)-41)-133
+            self.ct_sgant_screen.ids.tdrs_west10.angle = ((-1*longitude)-41)-130
+            
+            if ((tdrs1 or tdrs2) == 12) and float(aos) == 1.0:
+                #print("12")
+                tdrs = "east-12"
+                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East-12"
+            if ((tdrs1 or tdrs2) == 6) and float(aos) == 1.0:
+                #print("6")
+                tdrs = "east-6"
+                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East-6"
+            if ((tdrs1 or tdrs2) == 10) and float(aos) == 1.0:
+                #print("10")
+                tdrs = "west-10"
+                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West-10"
+            if ((tdrs1 or tdrs2) == 11) and float(aos) == 1.0:
+                #print("11")
+                tdrs = "west-11"
+                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West-11"
+            if ((tdrs1 or tdrs2) == 7) and float(aos) == 1.0:
+                #print("7")
+                tdrs = "z-7"
+                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-Z-7"
+            elif tdrs1 == 0 and tdrs2 == 0:
+                #print("-")
+                self.ct_sgant_screen.ids.tdrs_label.text = "-"
                 tdrs = "----"
-
-            if tdrs == "west": #tdrs10 and 11
+            print(tdrs)
+            if "10" in tdrs: #tdrs10 and 11
                 self.orbit_screen.ids.TDRSwLabel.color = (1,0,1,1)
                 self.orbit_screen.ids.TDRSeLabel.color = (1,1,1,1)
                 self.orbit_screen.ids.TDRSzLabel.color = (1,1,1,1)
-                self.orbit_screen.ids.TDRS11.col = (1,0,1,1)
+                self.orbit_screen.ids.TDRS11.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS10.col = (1,0,1,1)
                 self.orbit_screen.ids.TDRS12.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS6.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
                 self.orbit_screen.ids.ZOElabel.color = (1,1,1,1)
                 self.orbit_screen.ids.ZOE.col = (1,0.5,0,0.5)
-            elif tdrs == "east": #tdrs6 and 12
-                self.ct_sgant_screen.ids.tdrs_z.color = 1, 1, 1, 0
+            if "11" in tdrs: #tdrs10 and 11
+                self.orbit_screen.ids.TDRSwLabel.color = (1,0,1,1)
+                self.orbit_screen.ids.TDRSeLabel.color = (1,1,1,1)
+                self.orbit_screen.ids.TDRSzLabel.color = (1,1,1,1)
+                self.orbit_screen.ids.TDRS11.col = (1,0,1,1)
+                self.orbit_screen.ids.TDRS10.col = (1,1,1,1)
+                self.orbit_screen.ids.TDRS12.col = (1,1,1,1)
+                self.orbit_screen.ids.TDRS6.col = (1,1,1,1)
+                self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
+                self.orbit_screen.ids.ZOElabel.color = (1,1,1,1)
+                self.orbit_screen.ids.ZOE.col = (1,0.5,0,0.5)
+            if "6" in tdrs: #tdrs6 and 12
+                self.ct_sgant_screen.ids.tdrs_z7.color = 1, 1, 1, 0
+                self.orbit_screen.ids.TDRSwLabel.color = (1,1,1,1)
+                self.orbit_screen.ids.TDRSeLabel.color = (1,0,1,1)
+                self.orbit_screen.ids.TDRSzLabel.color = (1,1,1,1)
+                self.orbit_screen.ids.TDRS11.col = (1,1,1,1)
+                self.orbit_screen.ids.TDRS10.col = (1,1,1,1)
+                self.orbit_screen.ids.TDRS12.col = (1,1,1,1)
+                self.orbit_screen.ids.TDRS6.col = (1,0,1,1)
+                self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
+                self.orbit_screen.ids.ZOElabel.color = (1,1,1,1)
+                self.orbit_screen.ids.ZOE.col = (1,0.5,0,0.5)
+            if "12" in tdrs: #tdrs6 and 12
+                self.ct_sgant_screen.ids.tdrs_z7.color = 1, 1, 1, 0
                 self.orbit_screen.ids.TDRSwLabel.color = (1,1,1,1)
                 self.orbit_screen.ids.TDRSeLabel.color = (1,0,1,1)
                 self.orbit_screen.ids.TDRSzLabel.color = (1,1,1,1)
                 self.orbit_screen.ids.TDRS11.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS10.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS12.col = (1,0,1,1)
-                self.orbit_screen.ids.TDRS6.col = (1,0,1,1)
+                self.orbit_screen.ids.TDRS6.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
                 self.orbit_screen.ids.ZOElabel.color = (1,1,1,1)
-                self.orbit_screen.ids.ZOE.col = (1,0.5,0,0.5)
-            elif tdrs == "z": #tdrs7
-                self.ct_sgant_screen.ids.tdrs_z.color = 1, 1, 1, 1
+            if "7" in tdrs: #tdrs7
+                self.ct_sgant_screen.ids.tdrs_z7.color = 1, 1, 1, 1
                 self.orbit_screen.ids.TDRSwLabel.color = (1,1,1,1)
                 self.orbit_screen.ids.TDRSeLabel.color = (1,1,1,1)
                 self.orbit_screen.ids.TDRSzLabel.color = (1,0,1,1)
@@ -1990,7 +2034,7 @@ class MainApp(App):
                 self.orbit_screen.ids.ZOElabel.color = 0, 0, 0, 0
                 self.orbit_screen.ids.ZOE.col = (0,0,0,0)
             else:
-                self.ct_sgant_screen.ids.tdrs_z.color = 1, 1, 1, 0
+                self.ct_sgant_screen.ids.tdrs_z7.color = 1, 1, 1, 0
                 self.orbit_screen.ids.TDRSwLabel.color = (1,1,1,1)
                 self.orbit_screen.ids.TDRSeLabel.color = (1,1,1,1)
                 self.orbit_screen.ids.TDRSzLabel.color = (1,1,1,1)
@@ -2000,18 +2044,6 @@ class MainApp(App):
                 self.orbit_screen.ids.TDRS6.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
                 self.orbit_screen.ids.ZOElabel.color = (1,1,1,1)
-                self.orbit_screen.ids.ZOE.col = (1,0.5,0,0.5)
-
-            if aos == 0.00 and longitude > 60 and longitude < 100 and tdrs == "----":
-                self.orbit_screen.ids.TDRSwLabel.color = (1,1,1,1)
-                self.orbit_screen.ids.TDRSeLabel.color = (1,1,1,1)
-                self.orbit_screen.ids.TDRSzLabel.color = (1,1,1,1)
-                self.orbit_screen.ids.TDRS11.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS10.col = (1,0,0,1)
-                self.orbit_screen.ids.TDRS12.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS6.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
-                self.orbit_screen.ids.ZOElabel.color = (1,0,0,1)
                 self.orbit_screen.ids.ZOE.col = (1,0.5,0,0.5)
 
             #------------------Orbit Stuff---------------------------
@@ -3021,33 +3053,44 @@ class MainApp(App):
         #make sure radio animations turn off when no signal or no transmit
         if float(sgant_transmit) == 1.0 and float(aos) == 1.0:
             self.ct_sgant_screen.ids.radio_up.color = 1, 1, 1, 1
-            if tdrs == "west":
-                self.ct_sgant_screen.ids.tdrs_west174.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.zip"
-                self.ct_sgant_screen.ids.tdrs_east41.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
-                self.ct_sgant_screen.ids.tdrs_z.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
-            elif tdrs == "east":
-                self.ct_sgant_screen.ids.tdrs_east41.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.zip"
-                self.ct_sgant_screen.ids.tdrs_west174.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
-                self.ct_sgant_screen.ids.tdrs_z.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
-            elif tdrs == "z":
-                self.ct_sgant_screen.ids.tdrs_z.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.zip"
-                self.ct_sgant_screen.ids.tdrs_west174.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
-                self.ct_sgant_screen.ids.tdrs_east41.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
-        elif float(sgant_transmit) == 1.0 and float(aos) == 0.0:
+            if "10" in tdrs:
+                self.ct_sgant_screen.ids.tdrs_west10.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.zip"
+                self.ct_sgant_screen.ids.tdrs_west11.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+                self.ct_sgant_screen.ids.tdrs_east12.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+                self.ct_sgant_screen.ids.tdrs_east6.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+                self.ct_sgant_screen.ids.tdrs_z7.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            if "11" in tdrs:
+                self.ct_sgant_screen.ids.tdrs_west11.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.zip"
+                self.ct_sgant_screen.ids.tdrs_west10.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+                self.ct_sgant_screen.ids.tdrs_east12.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+                self.ct_sgant_screen.ids.tdrs_east6.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+                self.ct_sgant_screen.ids.tdrs_z7.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            if "12" in tdrs:
+                self.ct_sgant_screen.ids.tdrs_west11.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+                self.ct_sgant_screen.ids.tdrs_west10.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+                self.ct_sgant_screen.ids.tdrs_east12.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.zip"
+                self.ct_sgant_screen.ids.tdrs_east6.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+                self.ct_sgant_screen.ids.tdrs_z7.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            if "6" in tdrs:
+                self.ct_sgant_screen.ids.tdrs_west11.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+                self.ct_sgant_screen.ids.tdrs_west10.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+                self.ct_sgant_screen.ids.tdrs_east6.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.zip"
+                self.ct_sgant_screen.ids.tdrs_east12.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+                self.ct_sgant_screen.ids.tdrs_z7.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            if "7" in tdrs:
+                self.ct_sgant_screen.ids.tdrs_west11.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+                self.ct_sgant_screen.ids.tdrs_west10.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+                self.ct_sgant_screen.ids.tdrs_east6.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+                self.ct_sgant_screen.ids.tdrs_east12.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+                self.ct_sgant_screen.ids.tdrs_z7.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.zip"
+        
+        elif float(aos) == 0.0 and (float(sgant_transmit) == 0.0 or float(sgant_transmit) == 1.0):
             self.ct_sgant_screen.ids.radio_up.color = 0, 0, 0, 0
-            self.ct_sgant_screen.ids.tdrs_east41.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
-            self.ct_sgant_screen.ids.tdrs_west174.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
-            self.ct_sgant_screen.ids.tdrs_z.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
-        elif float(sgant_transmit) == 0.0:
-            self.ct_sgant_screen.ids.radio_up.color = 0, 0, 0, 0
-            self.ct_sgant_screen.ids.tdrs_east41.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
-            self.ct_sgant_screen.ids.tdrs_west174.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
-            self.ct_sgant_screen.ids.tdrs_z.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
-        elif float(aos) == 0.0:
-            self.ct_sgant_screen.ids.radio_up.color = 0, 0, 0, 0
-            self.ct_sgant_screen.ids.tdrs_east41.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
-            self.ct_sgant_screen.ids.tdrs_west174.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
-            self.ct_sgant_screen.ids.tdrs_z.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            self.ct_sgant_screen.ids.tdrs_east12.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            self.ct_sgant_screen.ids.tdrs_east6.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            self.ct_sgant_screen.ids.tdrs_west11.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            self.ct_sgant_screen.ids.tdrs_west10.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            self.ct_sgant_screen.ids.tdrs_z7.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
 
         #now check main CT screen radio signal
         if float(sgant_transmit) == 1.0 and float(aos) == 1.0:
