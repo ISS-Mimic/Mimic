@@ -3,9 +3,17 @@ import os
 
 #----------------Open SQLITE3 Database that holds the current ISS Telemetry--------------
 os.system('rm /dev/shm/iss_telemetry.db') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
+os.system('rm /dev/shm/tdrs.db') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
 conn = sqlite3.connect('/dev/shm/iss_telemetry.db')
 conn.isolation_level = None
 c = conn.cursor()
+conn2 = sqlite3.connect('/dev/shm/tdrs.db')
+conn2.isolation_level = None
+c2 = conn2.cursor()
+#populate a database for TDRS
+c2.execute("pragma journal_mode=wal");
+c2.execute("CREATE TABLE IF NOT EXISTS tdrs (`TDRS1` TEXT, `TDRS2` TEXT, `TimeStamp` TEXT)");
+c2.execute("INSERT OR IGNORE INTO tdrs VALUES('11', '0', '1000')");
 #now we populate the blank database, this prevents locked database issues
 c.execute("pragma journal_mode=wal");
 c.execute("CREATE TABLE IF NOT EXISTS telemetry (`Label` TEXT PRIMARY KEY, `Timestamp` TEXT, `Value` TEXT, `ID` TEXT, `dbID` NUMERIC )");

@@ -3,7 +3,7 @@ from datetime import datetime, timedelta #used for time conversions and logging 
 import datetime as dtime #this is different from above for... reasons?
 import os #used to remove database on program exit
 os.environ['KIVY_GL_BACKEND'] = 'gl' #need this to fix a kivy segfault that occurs with python3 for some reason
-import subprocess #used to start/stop Javascript telemetry program
+from subprocess import Popen, PIPE, STDOUT #used to start/stop Javascript telemetry program and TDRS script and orbitmap
 import time #used for time
 import math #used for math
 import serial #used to send data over serial to arduino
@@ -244,8 +244,7 @@ class MainScreen(Screen):
         manualcontrol = args[0]
 
     def killproc(*args):
-        global p
-        global p2
+        global p,p2
         try:
             p.kill()
             p2.kill()
@@ -979,7 +978,7 @@ class FakeOrbitScreen(Screen):
     def startDisco(*args):
         global p2, runningDemo, Disco
         if runningDemo == False:
-            p2 = subprocess.Popen("/home/pi/Mimic/Pi/disco.sh")
+            p2 = Popen("/home/pi/Mimic/Pi/disco.sh")
             runningDemo = True
             Disco = True
             logWrite("Successfully started Disco script")
@@ -987,7 +986,7 @@ class FakeOrbitScreen(Screen):
     def startDemo(*args):
         global p2, runningDemo
         if runningDemo == False:
-            p2 = subprocess.Popen("/home/pi/Mimic/Pi/demoOrbit.sh")
+            p2 = Popen("/home/pi/Mimic/Pi/demoOrbit.sh")
             runningDemo = True
             logWrite("Successfully started Demo Orbit script")
 
@@ -1003,7 +1002,7 @@ class FakeOrbitScreen(Screen):
     def startHTVDemo(*args):
         global p2, runningDemo
         if runningDemo == False:
-            p2 = subprocess.Popen("/home/pi/Mimic/Pi/demoHTVOrbit.sh")
+            p2 = Popen("/home/pi/Mimic/Pi/demoHTVOrbit.sh")
             runningDemo = True
             logWrite("Successfully started Demo HTV Orbit script")
 
@@ -1143,19 +1142,19 @@ class MimicScreen(Screen, EventDispatcher):
     def startproc(*args):
         global p
         print("Telemetry Subprocess start")
-        p = subprocess.Popen(["node", "/home/pi/Mimic/Pi/ISS_Telemetry.js"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
-        #p = subprocess.Popen(["/home/pi/Mimic/Pi/RecordedData/playback.out","/home/pi/Mimic/Pi/RecordedData/Data"])
+        p = Popen(["node", "/home/pi/Mimic/Pi/ISS_Telemetry.js"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
+        #p = Popen(["/home/pi/Mimic/Pi/RecordedData/playback.out","/home/pi/Mimic/Pi/RecordedData/Data"])
 
     def killproc(*args):
-        global p
-        global p2
-        global c
+        global p,p2,c
         c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer', '0', 'Unsubscribed', '0', 0)");
         try:
             p.kill()
             p2.kill()
         except Exception:
             pass
+        else:
+            print("in that one fnction")
 
 class MainScreenManager(ScreenManager):
     pass
@@ -1245,6 +1244,7 @@ class MainApp(App):
         #schedule the orbitmap to update with shadow every 5 mins
         Clock.schedule_interval(self.updateNightShade, 120)
         Clock.schedule_interval(self.updateOrbitMap, 10)
+        Clock.schedule_interval(self.checkTDRS, 5)
         return root
 
     def check_serial(self, dt):
@@ -1399,7 +1399,12 @@ class MainApp(App):
         self.orbit_screen.ids.OrbitMap.reload()
     
     def updateNightShade(self, dt):
-        proc = subprocess.Popen(["python3", "/home/pi/Mimic/Pi/NightShade.py"])
+        proc = Popen(["python3", "/home/pi/Mimic/Pi/NightShade.py"])
+
+    def checkTDRS(self, dt):
+        global activeTDRS1
+        global activeTDRS2
+        pass
 
     def check_EVA_stats(self, lastname1, firstname1, lastname2, firstname2):
         global numEVAs1, EVAtime_hours1, EVAtime_minutes1, numEVAs2, EVAtime_hours2, EVAtime_minutes2
@@ -2008,18 +2013,6 @@ class MainApp(App):
                 self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
                 self.orbit_screen.ids.ZOElabel.color = (1,0,0,1)
                 self.orbit_screen.ids.ZOE.col = (1,0.5,0,0.5)
-
-            #if tdrs != oldtdrs and float(aos) == 1.0:
-            #    oldtdrs = tdrs
-            #    #sgantlog.write(str(datetime.utcnow()))
-            #    #sgantlog.write(' ')
-            #    #sgantlog.write(str(sgant_elevation))
-            #    #sgantlog.write(' ')
-            #    #sgantlog.write(str(longitude))
-            #    #sgantlog.write(' ')
-            #    #sgantlog.write(str(tdrs))
-            #    #sgantlog.write(' ')
-            #    #sgantlog.write('\n')
 
             #------------------Orbit Stuff---------------------------
             now = datetime.utcnow()
