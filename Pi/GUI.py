@@ -1939,9 +1939,6 @@ class MainApp(App):
             tdrs2 = int(TDRScursor.fetchone()[0])
             TDRScursor.execute('select Timestamp from tdrs')
             tdrs_timestamp = TDRScursor.fetchone()[0]
-            print(tdrs1)
-            print(tdrs2)
-            #print(tdrs_timestamp)
             
             # THIS SECTION NEEDS IMPROVEMENT
             tdrs = "n/a"
@@ -1975,76 +1972,38 @@ class MainApp(App):
                 #print("-")
                 self.ct_sgant_screen.ids.tdrs_label.text = "-"
                 tdrs = "----"
-            print(tdrs)
-            if "10" in tdrs: #tdrs10 and 11
+            
+            self.ct_sgant_screen.ids.tdrs_z7.color = 1, 1, 1, 1
+            self.orbit_screen.ids.TDRSwLabel.color = (1,1,1,1)
+            self.orbit_screen.ids.TDRSeLabel.color = (1,1,1,1)
+            self.orbit_screen.ids.TDRSzLabel.color = (1,1,1,1)
+            self.orbit_screen.ids.TDRS11.col = (1,1,1,1)
+            self.orbit_screen.ids.TDRS10.col = (1,1,1,1)
+            self.orbit_screen.ids.TDRS12.col = (1,1,1,1)
+            self.orbit_screen.ids.TDRS6.col = (1,1,1,1)
+            self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
+            self.orbit_screen.ids.ZOElabel.color = (1,1,1,1)
+            self.orbit_screen.ids.ZOE.col = (1,0.5,0,0.5)
+            
+            if "10" in tdrs: #tdrs10 and 11 west
                 self.orbit_screen.ids.TDRSwLabel.color = (1,0,1,1)
-                self.orbit_screen.ids.TDRSeLabel.color = (1,1,1,1)
-                self.orbit_screen.ids.TDRSzLabel.color = (1,1,1,1)
-                self.orbit_screen.ids.TDRS11.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS10.col = (1,0,1,1)
-                self.orbit_screen.ids.TDRS12.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS6.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
-                self.orbit_screen.ids.ZOElabel.color = (1,1,1,1)
-                self.orbit_screen.ids.ZOE.col = (1,0.5,0,0.5)
-            if "11" in tdrs: #tdrs10 and 11
+            if "11" in tdrs: #tdrs10 and 11 west
                 self.orbit_screen.ids.TDRSwLabel.color = (1,0,1,1)
-                self.orbit_screen.ids.TDRSeLabel.color = (1,1,1,1)
-                self.orbit_screen.ids.TDRSzLabel.color = (1,1,1,1)
                 self.orbit_screen.ids.TDRS11.col = (1,0,1,1)
                 self.orbit_screen.ids.TDRS10.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS12.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS6.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
-                self.orbit_screen.ids.ZOElabel.color = (1,1,1,1)
-                self.orbit_screen.ids.ZOE.col = (1,0.5,0,0.5)
-            if "6" in tdrs: #tdrs6 and 12
-                self.ct_sgant_screen.ids.tdrs_z7.color = 1, 1, 1, 0
-                self.orbit_screen.ids.TDRSwLabel.color = (1,1,1,1)
+            if "6" in tdrs: #tdrs6 and 12 east
                 self.orbit_screen.ids.TDRSeLabel.color = (1,0,1,1)
-                self.orbit_screen.ids.TDRSzLabel.color = (1,1,1,1)
-                self.orbit_screen.ids.TDRS11.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS10.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS12.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS6.col = (1,0,1,1)
-                self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
-                self.orbit_screen.ids.ZOElabel.color = (1,1,1,1)
-                self.orbit_screen.ids.ZOE.col = (1,0.5,0,0.5)
-            if "12" in tdrs: #tdrs6 and 12
-                self.ct_sgant_screen.ids.tdrs_z7.color = 1, 1, 1, 0
-                self.orbit_screen.ids.TDRSwLabel.color = (1,1,1,1)
+            if "12" in tdrs: #tdrs6 and 12 east
                 self.orbit_screen.ids.TDRSeLabel.color = (1,0,1,1)
-                self.orbit_screen.ids.TDRSzLabel.color = (1,1,1,1)
-                self.orbit_screen.ids.TDRS11.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS10.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS12.col = (1,0,1,1)
-                self.orbit_screen.ids.TDRS6.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
-                self.orbit_screen.ids.ZOElabel.color = (1,1,1,1)
-            if "7" in tdrs: #tdrs7
+            if "7" in tdrs: #tdrs7 z
                 self.ct_sgant_screen.ids.tdrs_z7.color = 1, 1, 1, 1
-                self.orbit_screen.ids.TDRSwLabel.color = (1,1,1,1)
-                self.orbit_screen.ids.TDRSeLabel.color = (1,1,1,1)
                 self.orbit_screen.ids.TDRSzLabel.color = (1,0,1,1)
-                self.orbit_screen.ids.TDRS11.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS10.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS12.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS6.col = (1,1,1,1)
                 self.orbit_screen.ids.TDRS7.col = (1,0,1,1)
                 self.orbit_screen.ids.ZOElabel.color = 0, 0, 0, 0
                 self.orbit_screen.ids.ZOE.col = (0,0,0,0)
-            else:
-                self.ct_sgant_screen.ids.tdrs_z7.color = 1, 1, 1, 0
-                self.orbit_screen.ids.TDRSwLabel.color = (1,1,1,1)
-                self.orbit_screen.ids.TDRSeLabel.color = (1,1,1,1)
-                self.orbit_screen.ids.TDRSzLabel.color = (1,1,1,1)
-                self.orbit_screen.ids.TDRS11.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS10.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS12.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS6.col = (1,1,1,1)
-                self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
-                self.orbit_screen.ids.ZOElabel.color = (1,1,1,1)
-                self.orbit_screen.ids.ZOE.col = (1,0.5,0,0.5)
 
             #------------------Orbit Stuff---------------------------
             now = datetime.utcnow()
@@ -2419,7 +2378,7 @@ class MainApp(App):
         if internet == False:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.changeColors(1, 0, 0)
+            self.changeColors(0.5, 0.5, 0.5)
         else:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalClientLost.png'
@@ -2434,7 +2393,7 @@ class MainApp(App):
         if internet == False:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.changeColors(1, 0, 0)
+            self.changeColors(0.5, 0.5, 0.5)
         else:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/signalred.zip'
@@ -2451,7 +2410,7 @@ class MainApp(App):
         if internet == False:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.changeColors(1, 0, 0)
+            self.changeColors(0.5, 0.5, 0.5)
         else:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip'
@@ -2468,7 +2427,7 @@ class MainApp(App):
         if internet == False:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.changeColors(1, 0, 0)
+            self.changeColors(0.5, 0.5, 0.5)
         else:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
@@ -2485,7 +2444,7 @@ class MainApp(App):
         if internet == False:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
-            self.changeColors(1, 0, 0)
+            self.changeColors(0.5, 0.5, 0.5)
         else:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/SignalClientLost.png'
@@ -3034,7 +2993,7 @@ class MainApp(App):
             self.eps_screen.ids.array_4a.color = 1, 1, 1, 1.0
         if float(c4a) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_4a.source = "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
-        #4b has a lower setpoint voltage for now
+        #4b has a lower setpoint voltage for now - reverted back as of US EVA 63
         if float(v4b) < 141.5: #discharging
             self.eps_screen.ids.array_4b.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
             #self.eps_screen.ids.array_4b.color = 1, 1, 1, 0.8
@@ -3357,6 +3316,9 @@ class MainApp(App):
             self.serialWrite("Voltage2B=" + v2b + " ")
             self.serialWrite("Voltage3B=" + v3b + " ")
             self.serialWrite("Voltage4B=" + v4b + " ")
+            self.serialWrite("SGANT_El_deg=" + str(sgant_elevation) + " ")
+            self.serialWrite("SGANT_xEl_deg=" + str(sgant_xelevation) + " ")
+            self.serialWrite("SGANT_Transmit=" + str(sgant_transmit) + " ")
 
         #data to send regardless of signal status
         if mimicbutton:
