@@ -1,14 +1,12 @@
-#:kivy 1.8
-#:import kivy kivy
-#:import win kivy.core.window
 <Orbit_Screen>:
     name: 'orbit'
     FloatLayout:
+        id: orbit_layout
         Image:
             id: Orbit_background
             source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitBase.png'
             allow_stretch: False
-        AsyncImage:
+        Image:
             id: OrbitMap
             source: '/home/pi/Mimic/Pi/imgs/orbit/map.jpg'
             pos_hint: {"center_x": 0.5, "center_y": 0.56}
@@ -17,58 +15,203 @@
             keep_ratio: True
         Widget:
             id: mylocation
-            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-            size_hint: '0.01dp', '0.02dp'
+            col: (0,0,0,0)
+            pos: (0-(self.width/2),0-(self.height/2))
+            size_hint: (None, None)
+            size: (10,10)
             canvas:
+                PushMatrix:
+                Translate:
+                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
+                Scale:
+                    origin: 0,0
+                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
+                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
                 Color:
-                    rgb: 0,0,1
+                    rgba: self.col
                 Ellipse:
                     pos: self.pos
                     size: self.size
+                PopMatrix:
         Widget:
-            id: TDRSe
-            col: (1,1,1)
-            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-            size_hint: '0.01dp', '0.02dp'
+            id: TDRS12
+            col: (0,0,0,0)
+            pos: (0-(self.width/2),0-(self.height/2))
+            size_hint: (None, None)
+            size: (10,10)
             canvas:
+                PushMatrix:
+                Translate:
+                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
+                Scale:
+                    origin: 0,0
+                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
+                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
                 Color:
-                    rgb: self.col
+                    rgba: self.col
                 Ellipse:
                     pos: self.pos
                     size: self.size
+                PopMatrix:
+        Widget:
+            id: TDRS12groundtrack
+            col: (0,0,0,0)
+            points: (0,0,100,100,200,150)
+            canvas:
+                PushMatrix:
+                Translate:
+                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
+                Scale:
+                    origin: 0,0
+                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
+                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
+                Color:
+                    rgba: self.col
+                Line:    # test diagonal line
+                    points: self.points
+                    joint: "round"
+                    width: 1
+                PopMatrix:
+        Widget:
+            id: TDRS6
+            col: (0,0,0,0)
+            pos: (0-(self.width/2),0-(self.height/2))
+            size_hint: (None, None)
+            size: (10,10)
+            canvas:
+                PushMatrix:
+                Translate:
+                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
+                Scale:
+                    origin: 0,0
+                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
+                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
+                Color:
+                    rgba: self.col
+                Ellipse:
+                    pos: self.pos
+                    size: self.size
+                PopMatrix:
+        Widget:
+            id: TDRS6groundtrack
+            col: (0,0,0,0)
+            points: (0,0,100,100,200,150)
+            canvas:
+                PushMatrix:
+                Translate:
+                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
+                Scale:
+                    origin: 0,0
+                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
+                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
+                Color:
+                    rgba: self.col
+                Line:    # test diagonal line
+                    points: self.points
+                    joint: "round"
+                    width: 1
+                PopMatrix:
         Label:
             id: TDRSeLabel
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
             text: 'TDRS-East'
             markup: True
-            color: 1,1,1
+            color: (0,0,0,0)
             font_size: 15
         Widget:
-            id: TDRSw
-            col: (1,1,1)
-            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-            size_hint: '0.01dp', '0.02dp'
+            id: TDRS11
+            col: (0,0,0,0)
+            pos: (0-(self.width/2),0-(self.height/2))
+            size_hint: (None, None)
+            size: (10,10)
             canvas:
+                PushMatrix:
+                Translate:
+                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
+                Scale:
+                    origin: 0,0
+                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
+                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
                 Color:
-                    rgb: self.col
+                    rgba: self.col
                 Ellipse:
                     pos: self.pos
                     size: self.size
+                PopMatrix:
+        Widget:
+            id: TDRS11groundtrack
+            col: (0,0,0,0)
+            points: (0,0,100,100,200,150)
+            canvas:
+                PushMatrix:
+                Translate:
+                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
+                Scale:
+                    origin: 0,0
+                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
+                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
+                Color:
+                    rgba: self.col
+                Line:    # test diagonal line
+                    points: self.points
+                    joint: "round"
+                    width: 1
+                PopMatrix:
+        Widget:
+            id: TDRS10
+            col: (0,0,0,0)
+            pos: (0-(self.width/2),0-(self.height/2))
+            size_hint: (None, None)
+            size: (10,10)
+            canvas:
+                PushMatrix:
+                Translate:
+                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
+                Scale:
+                    origin: 0,0
+                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
+                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
+                Color:
+                    rgba: self.col
+                Ellipse:
+                    pos: self.pos
+                    size: self.size
+                PopMatrix:
+        Widget:
+            id: TDRS10groundtrack
+            col: (0,0,0,0)
+            points: (0,0,100,100,200,150)
+            canvas:
+                PushMatrix:
+                Translate:
+                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
+                Scale:
+                    origin: 0,0
+                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
+                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
+                Color:
+                    rgba: self.col
+                Line:    # test diagonal line
+                    points: self.points
+                    joint: "round"
+                    width: 1
+                PopMatrix:
         Label:
             id: TDRSwLabel
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
             text: 'TDRS-West'
             markup: True
-            color: 1,1,1
+            color: (0,0,0,0)
             font_size: 15
         Widget:
             id: ZOE
+            col: (0,0,0,0)
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
             size_hint: '0.06dp', '0.38dp'
             opacity: 0.2
             canvas:
                 Color:
-                    rgb: 1,0.5,0
+                    rgba: self.col
                 Ellipse:
                     pos: self.pos
                     size: self.size
@@ -77,48 +220,144 @@
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
             text: 'ZOE'
             markup: True
-            color: 1,1,1
+            color: (0,0,0,0)
             font_size: 15
         Widget:
-            id: TDRSz
-            col: (1,1,1)
-            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-            size_hint: '0.01dp', '0.02dp'
+            id: TDRS7
+            col: (1,1,1,1)
+            pos: (0-(self.width/2),0-(self.height/2))
+            size_hint: (None, None)
+            size: (10,10)
             canvas:
+                PushMatrix:
+                Translate:
+                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
+                Scale:
+                    origin: 0,0
+                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
+                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
                 Color:
-                    rgb: self.col
+                    rgba: self.col
                 Ellipse:
-                    id: TDRSz
                     pos: self.pos
                     size: self.size
+                PopMatrix:
+        Widget:
+            id: TDRS7groundtrack
+            col: (0,0,0,0)
+            points: (0,0,100,100,200,150)
+            canvas:
+                PushMatrix:
+                Translate:
+                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
+                Scale:
+                    origin: 0,0
+                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
+                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
+                Color:
+                    rgba: self.col
+                Line:    # test diagonal line
+                    points: self.points
+                    joint: "round"
+                    width: 1
+                PopMatrix:
         Label:
             id: TDRSzLabel
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
             text: 'TDRS-Z'
             markup: True
-            color: 1,1,1
+            color: (0,0,0,0)
             font_size: 15
-        Image:
+        Widget:
+            id: ISSgroundtrack
+            col: (0,0,0,0)
+            points: (0,0,100,100,200,150)
+            canvas:
+                PushMatrix:
+                Translate:
+                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
+                Scale:
+                    origin: 0,0
+                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
+                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
+                Color:
+                    rgba: self.col
+                Line:    #Bezier looks better but is pretty slow and slightly wrong
+                    points: self.points
+                    joint: "round"
+                    width: 1
+                PopMatrix:
+        Widget:
+            id: ISSgroundtrack2
+            col: (0,0,0,0)
+            points: (0,0,100,100,200,150)
+            canvas:
+                PushMatrix:
+                Translate:
+                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
+                Scale:
+                    origin: 0,0
+                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
+                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
+                Color:
+                    rgba: self.col
+                Line:    #Bezier looks better but is pretty slow and slightly wrong
+                    points: self.points
+                    joint: "round"
+                    width: 1
+                PopMatrix:
+        Widget:
             id: OrbitISStiny
-            source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitYellowISSicon.png'
-            keep_ratio: False
-            allow_stretch: True
-            size_hint: 0.07,0.07
-            pos_hint: {"center_x": 0.888, "center_y": 0.888}
+            pos: (0-(self.width/2),0-(self.height/2))
+            size_hint: (None, None)
+            size: (50,50)
+            color: (0,1,1,1)
+            canvas:
+                PushMatrix:
+                Color:
+                    rgba: (1,1,1,1)
+                Translate:
+                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
+                Scale:
+                    origin: 0,0
+                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
+                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
+                Rectangle:
+                    source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitYellowISSicon.png'
+                    size: self.size
+                    pos: self.pos
+                Line:
+                    width: 1
+                    circle: (self.center_x, self.center_y, min(self.width, self.height)/2, 0, 360, 20)
+                PopMatrix:
         Label:
             id: dailyorbit
             pos_hint: {"center_x": 0.08, "center_y": 0.7}
-            text: '0'
+            text: ''
             markup: True
             color: 1,1,1
             font_size: 50
         Label:
             id: totalorbits
             pos_hint: {"center_x": 0.08, "center_y": 0.5}
-            text: '0'
+            text: ''
             markup: True
             color: 1,1,1
             font_size: 26
+        Button:
+            id: iss_pass_button
+            size_hint: 0.1,0.2
+            pos_hint: {"center_x": 0.92, "center_y": 0.8}
+            text: 'ISS \n Pass'
+            font_size: 30
+            on_release: app.root.current = 'orbit_pass'
+        Button:
+            id: orbit_data_button
+            size_hint: 0.1,0.1
+            pos_hint: {"center_x": 0.7, "center_y": 0.2}
+            text: 'Orbit Data'
+            font_size: 30
+            on_release: app.root.current = 'orbit_data'
         Label:
             id: iss_next_pass1
             pos_hint: {"center_x": 0.92, "center_y": 0.6}
@@ -145,6 +384,17 @@
             id: countdown
             pos_hint: {"center_x": 0.92, "center_y": 0.5}
             text: '-----'
+            size_hint_y: None
+            size_hint_x: 0.1
+            halign: 'center'
+            text_size: self.width, None
+            markup: True
+            color: 1,1,1
+            font_size: 16
+        Label:
+            id: ISSvisible
+            pos_hint: {"center_x": 0.92, "center_y": 0.45}
+            text: '---'
             size_hint_y: None
             size_hint_x: 0.1
             halign: 'center'

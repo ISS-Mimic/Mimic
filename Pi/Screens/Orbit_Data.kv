@@ -1,0 +1,20 @@
+<Orbit_Data>:
+    name: 'orbit_data'
+    FloatLayout:
+        Label:
+            id: rawTLE 
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            text: "TLE"
+        Button:
+            size_hint: 0.2,0.1
+            pos_hint: {"Left": 1, "Bottom": 1}
+            text: 'Return'
+            font_size: 30
+            on_release: app.root.current = 'orbit'
+        Image:
+            id: signal
+            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+            size_hint_y: 0.15
+            anim_delay: 0.12
+            anim_loop: 0
+            keep_ratio: True
