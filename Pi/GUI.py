@@ -1893,6 +1893,8 @@ class MainApp(App):
             #------------------Latitude/Longitude Stuff---------------------------
             latitude = float(str(ISS_TLE.sublat).split(':')[0]) + float(str(ISS_TLE.sublat).split(':')[1])/60 + float(str(ISS_TLE.sublat).split(':')[2])/3600
             longitude = float(str(ISS_TLE.sublong).split(':')[0]) + float(str(ISS_TLE.sublong).split(':')[1])/60 + float(str(ISS_TLE.sublong).split(':')[2])/3600
+            
+            #inclination = ISS_TLE.inc
 
             normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
             normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
@@ -2628,17 +2630,86 @@ class MainApp(App):
         quaternion1 = float((values[172])[0])
         quaternion2 = float((values[173])[0])
         quaternion3 = float((values[174])[0])
+   
+        def dot(a,b):
+            c = (a[0]*b[0])+(a[1]*b[1])+(a[2]*b[2])
+            return c
+
+        def cross(a,b):
+            c = [a[1]*b[2] - a[2]*b[1],
+                a[2]*b[0] - a[0]*b[2],
+                a[0]*b[1] - a[1]*b[0]]
+            return c
 
         iss_mass = "{:.2f}".format(float((values[48])[0]))
-        position_x = "{:.2f}".format(float((values[55])[0]))
-        position_y = "{:.2f}".format(float((values[56])[0]))
-        position_z = "{:.2f}".format(float((values[57])[0]))
-        velocity_x = "{:.2f}".format(float((values[58])[0]))
-        velocity_y = "{:.2f}".format(float((values[59])[0]))
-        velocity_z = "{:.2f}".format(float((values[60])[0]))
+        
+        #ISS state vectors
+        position_x = float((values[55])[0]) #km
+        position_y = float((values[56])[0]) #km
+        position_z = float((values[57])[0]) #km
+        velocity_x = float((values[58])[0])/1000.00 #convert to km/s
+        velocity_y = float((values[59])[0])/1000.00 #convert to km/s
+        velocity_z = float((values[60])[0])/1000.00 #convert to km/s
+        
+        #test values from orbital mechanics book
+        #position_x = (-6045.00)
+        #position_y = (-3490.00)
+        #position_z = (2500.00)
+        #velocity_x = (-3.457)
+        #velocity_y = (6.618)
+        #velocity_z = (2.533)
+       
+        pos_vec = [position_x, position_y, position_z]
+        vel_vec = [velocity_x, velocity_y, velocity_z]
+        
+        altitude = "{:.2f}".format(math.sqrt(dot(pos_vec,pos_vec))-6371.00)
+        velocity = "{:.2f}".format(math.sqrt(dot(vel_vec,vel_vec)))
+        mu = 398600
 
-        altitude = "{:.2f}".format((math.sqrt( math.pow(float(position_x), 2) + math.pow(float(position_y), 2) + math.pow(float(position_z), 2) )-6371.00))
-        velocity = "{:.2f}".format(((math.sqrt( math.pow(float(velocity_x), 2) + math.pow(float(velocity_y), 2) + math.pow(float(velocity_z), 2) ))/1.00))
+        if (float(altitude) > 0):
+            pos_mag = math.sqrt(dot(pos_vec,pos_vec))
+            vel_mag = math.sqrt(dot(vel_vec,vel_vec))
+
+            v_radial = dot(vel_vec, pos_vec)/pos_mag
+
+            h_mom = cross(pos_vec,vel_vec)
+            h_mom_mag = math.sqrt(dot(h_mom,h_mom))
+
+            inc = math.acos(h_mom[2]/h_mom_mag)
+            self.orbit_data.ids.inc.text = "{:.2f}".format(math.degrees(inc))
+            
+            node_vec = cross([0,0,1],h_mom)
+            node_mag = math.sqrt(dot(node_vec,node_vec))
+            
+            raan = math.acos(node_vec[0]/node_mag)
+            if(node_vec[1] < 0):
+                raan = math.radians(360) - raan
+            self.orbit_data.ids.raan.text = "{:.2f}".format(math.degrees(raan))
+
+            pvnew = [x * (math.pow(vel_mag,2)-(mu/pos_mag)) for x in pos_vec]
+            vvnew = [x * (pos_mag*v_radial) for x in vel_vec]
+            e_vec1 = [(1/mu) * x for x in pvnew] 
+            e_vec2 = [(1/mu) * x for x in vvnew]
+            e_vec = [e_vec1[0] - e_vec2[0],e_vec1[1] - e_vec2[1],e_vec1[2] - e_vec2[2] ]
+            e_mag = math.sqrt(dot(e_vec,e_vec))
+            self.orbit_data.ids.e.text = "{:.4f}".format(e_mag)
+
+            arg_per = math.acos(dot(node_vec,e_vec)/(node_mag*e_mag))
+            if e_vec[2] <= 0:
+                arg_per = math.radians(360) - arg_per
+            self.orbit_data.ids.arg_per.text = "{:.2f}".format(math.degrees(arg_per))
+
+            ta = math.acos(dot(e_vec,pos_vec)/(e_mag*pos_mag))
+            if v_radial <= 0:
+                ta = math.radians(360) - ta
+            self.orbit_data.ids.true_anomaly.text = "{:.2f}".format(math.degrees(ta))
+            
+            apogee = (math.pow(h_mom_mag,2)/mu)*(1/(1+e_mag*math.cos(math.radians(180))))
+            perigee = (math.pow(h_mom_mag,2)/mu)*(1/(1+e_mag*math.cos(0)))
+            apogee_height = apogee - 6371.00
+            perigee_height = perigee - 6371.00
+            sma = 0.5*(apogee+perigee) #km
+            period = (2*math.pi/math.sqrt(mu))*math.pow(sma,3/2) #seconds
 
         cmg1_active = int((values[145])[0])
         cmg2_active = int((values[146])[0])
