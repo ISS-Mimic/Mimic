@@ -1214,6 +1214,11 @@
   <td class="val" id="USLAB000037t"></td>
 </tr>
 <tr>
+  <td align="center">TOPO</td>
+  <td>US Altitude (km)</td>
+  <td class="val" id="USLAB000ALT"></td>
+</tr>
+<tr>
   <td align="center">ADCO</td>
   <td>ISS Total Mass (kg)</td>
   <td class="val" id="USLAB000039"></td>
@@ -2394,6 +2399,9 @@ var Q0 = null;
 var Q1 = null;
 var Q2 = null;
 var Q3 = null;
+var xState = null;
+var yState = null;
+var zState = null;
 	
 var HOT = {0:"Null",1:"Hot"}
 var MBSOPBASE = {3:"MTCL",4:"TUS"}
@@ -2531,6 +2539,22 @@ sub.addListener({
 		{
 			Decoder[item](update.getValue("Value"),update.getValue("TimeStamp"));
 		}
+		//altitude
+		if(item === "USLAB000032")
+		{
+			xState = update.getValue("Value");
+		}
+		if(item === "USLAB000033")
+		{
+			yState = update.getValue("Value");
+		}
+		if(item === "USLAB000034")
+		{
+			zState = update.getValue("Value");
+		}
+		
+		var altitude = Math.sqrt(Math.pow(xState,2)+Math.pow(yState,2)+Math.pow(zState,2))-6371.00;
+		$("#"+"USLAB000ALT").text(altitude.toFixed(2));
 		
 		//attitude conversion
 		if(item === "USLAB000018")
