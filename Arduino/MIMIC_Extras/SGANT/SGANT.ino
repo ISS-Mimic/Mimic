@@ -21,6 +21,12 @@ void setup()
   Serial.begin(9600);
   Serial.setTimeout(50);
   strip.begin();
+  EL_servo.attach(10);
+  XEL_servo.attach(9);
+  EL_servo.write(0);
+  XEL_servo.write(0);
+  EL_servo.detach();
+  XEL_servo.detach();
 }
 
 void loop()
@@ -45,6 +51,10 @@ void loop()
   
   EL_servo.attach(10);
   XEL_servo.attach(9);
+  
+  EL_servo.write(EL);
+  XEL_servo.write(XEL);
+  /*
   for (int x = pos; x <= EL; x += 1) 
   {
     EL_servo.write(x);
@@ -54,7 +64,7 @@ void loop()
   {
     XEL_servo.write(y);
     delay(15);
-  }
+  }*/
   pos = EL;
   pos2 = XEL;
   EL_servo.detach();
