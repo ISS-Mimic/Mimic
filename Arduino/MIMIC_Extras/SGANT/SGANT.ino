@@ -27,7 +27,7 @@ void setup()
   EL_servo.attach(10);
   XEL_servo.attach(9);
 
-  EL_servo.write(map(0, -90, 90, 25, 155)); //custom mapping the servo motion to the sgant elevation motion
+  EL_servo.write(map(0, -90, 90, 152, 30)); //custom mapping the servo motion to the sgant elevation motion
   XEL_servo.write(map(0, -90, 90, 28, 160)); //custom mapping the servo motion to the sgant cross elevation motion
   
   EL_servo.detach();
@@ -69,7 +69,7 @@ void loop()
     XEL_servo.attach(9);
     
     
-    int newEL = map(EL, -90, 90, 25, 155);
+    int newEL = map(EL, -90, 90, 152, 30);
     int newXEL = map(XEL, -90, 90, 28, 160);
     
     EL_servo.write(newEL);
