@@ -55,7 +55,7 @@ SerialConnection4 = False
 SerialConnection5 = False
 
 try:
-    ser = serial.Serial('/dev/ttyACM0', 9600, timeout=0)
+    ser = serial.Serial('/dev/ttyACM0', 9600, write_timeout=0)
 except Exception:
     logWrite("Warning - Serial Connection ACM0 not found")
     SerialConnection1 = False
@@ -66,7 +66,7 @@ else:
     print(str(ser))
 
 try:
-    ser2 = serial.Serial('/dev/ttyACM1', 9600, timeout=0)
+    ser2 = serial.Serial('/dev/ttyACM1', 9600, write_timeout=0)
 except Exception:
     #logWrite("Warning - Serial Connection ACM1 not found")
     SerialConnection2 = False
@@ -77,7 +77,7 @@ else:
     print(str(ser2))
 
 try:
-    ser3 = serial.Serial('/dev/ttyACM2', 9600, timeout=0)
+    ser3 = serial.Serial('/dev/ttyACM2', 9600, write_timeout=0)
 except Exception:
     #logWrite("Warning - Serial Connection ACM2 not found")
     SerialConnection3 = False
@@ -88,7 +88,7 @@ else:
     print(str(ser3))
 
 try:
-    ser4 = serial.Serial('/dev/ttyAMA00', 9600, timeout=0)
+    ser4 = serial.Serial('/dev/ttyAMA00', 9600, write_timeout=0)
 except Exception:
     #logWrite("Warning - Serial Connection AMA00 not found")
     SerialConnection4 = False
@@ -99,7 +99,7 @@ else:
     print(str(ser4))
 
 try:
-    ser5 = serial.Serial('/dev/ttyACM3', 9600, timeout=0)
+    ser5 = serial.Serial('/dev/ttyACM3', 9600, write_timeout=0)
 except Exception:
     #logWrite("Warning - Serial Connection ACM3 not found")
     SerialConnection5 = False
@@ -1233,7 +1233,7 @@ class MainApp(App):
         root.add_widget(self.settings_screen)
         root.current = 'main' #change this back to main when done with eva setup
 
-        Clock.schedule_interval(self.update_labels, 0.5) #all telemetry wil refresh and get pushed to arduinos every half second!
+        Clock.schedule_interval(self.update_labels, 1) #all telemetry wil refresh and get pushed to arduinos every half second!
         Clock.schedule_interval(self.animate3, 0.1)
         Clock.schedule_interval(self.orbitUpdate, 1)
         Clock.schedule_interval(self.checkCrew, 600)
@@ -1261,7 +1261,7 @@ class MainApp(App):
 
         if ser == None:
             try:
-                ser = serial.Serial('/dev/ttyACM0', 9600, timeout=0)
+                ser = serial.Serial('/dev/ttyACM0', 9600, write_timeout=0)
             except Exception as e:
                 #logWrite("Warning - Serial Connection ACM0 not found")
                 SerialConnection1 = False
@@ -1281,7 +1281,7 @@ class MainApp(App):
 
         if ser2 == None:
             try:
-                ser2 = serial.Serial('/dev/ttyACM1', 9600, timeout=0)
+                ser2 = serial.Serial('/dev/ttyACM1', 9600, write_timeout=0)
             except Exception:
                 #logWrite("Warning - Serial Connection ACM1 not found")
                 SerialConnection2 = False
@@ -1301,7 +1301,7 @@ class MainApp(App):
 
         if ser3 == None:
             try:
-                ser3 = serial.Serial('/dev/ttyACM2', 9600, timeout=0)
+                ser3 = serial.Serial('/dev/ttyACM2', 9600, write_timeout=0)
             except Exception:
                 #logWrite("Warning - Serial Connection ACM2 not found")
                 SerialConnection3 = False
@@ -1321,7 +1321,7 @@ class MainApp(App):
 
         if ser4 == None:
             try:
-                ser4 = serial.Serial('/dev/ttyAMA00', 9600, timeout=0)
+                ser4 = serial.Serial('/dev/ttyAMA00', 9600, write_timeout=0)
             except Exception:
                 #logWrite("Warning - Serial Connection AMA00 not found")
                 SerialConnection4 = False
@@ -1341,7 +1341,7 @@ class MainApp(App):
 
         if ser5 == None:
             try:
-                ser5 = serial.Serial('/dev/ttyACM3', 9600, timeout=0)
+                ser5 = serial.Serial('/dev/ttyACM3', 9600, write_timeout=0)
             except Exception:
                 #logWrite("Warning - Serial Connection ACM3 not found")
                 SerialConnection5 = False
@@ -3387,9 +3387,9 @@ class MainApp(App):
             self.serialWrite("Voltage2B=" + v2b + " ")
             self.serialWrite("Voltage3B=" + v3b + " ")
             self.serialWrite("Voltage4B=" + v4b + " ")
-            self.serialWrite("SGANT_El_deg=" + str(sgant_elevation) + " ")
-            self.serialWrite("SGANT_xEl_deg=" + str(sgant_xelevation) + " ")
-            self.serialWrite("SGANT_Transmit=" + str(sgant_transmit) + " ")
+            self.serialWrite("SGANT_El_deg=" + str(int(sgant_elevation)) + " ")
+            self.serialWrite("SGANT_xEl_deg=" + str(int(sgant_xelevation)) + " ")
+            self.serialWrite("SGANT_Transmit=" + str(int(sgant_transmit)) + " ")
 
         #data to send regardless of signal status
         if mimicbutton:
