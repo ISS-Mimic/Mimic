@@ -16,6 +16,8 @@ int pos = 0;
 int pos2 = 0;
 int oldEL = 0;
 int oldXEL = 0;
+int oldnewEL = 0;
+int oldnewXEL = 0;
 
 void setup()
 {
@@ -38,8 +40,8 @@ void loop()
 {
   
   digitalWrite(ledBluePin, LOW);
-  Serial.print("El ");
-  Serial.println(EL);
+  //Serial.print("El ");
+  //Serial.println(EL);
   if(Serial.available())
   {
     checkSerial();
@@ -65,19 +67,64 @@ void loop()
 
   if(EL != oldEL || XEL != oldXEL)
   {
+    if(EL > 120)
+    {
+      EL = 120;
+    }
+    else if(EL < -120)
+    {
+      EL = -120;
+    }
+    if(XEL > 65)
+    {
+      XEL = 65;
+    }
+    else if(XEL < -65)
+    {
+      XEL = -65;
+    }
+    Serial.print("Sending EL ");
+    Serial.println(EL);
+    Serial.print("Sending XEL ");
+    Serial.println(XEL);
     EL_servo.attach(10);
     XEL_servo.attach(9);
     
-    
     int newEL = map(EL, -90, 90, 152, 30);
     int newXEL = map(XEL, -90, 90, 28, 160);
+
+    if(newEL - oldnewEL > 10)
+    {
+      for (pos = oldnewEL; pos <= newEL; pos += 1) 
+      {
+        EL_servo.write(pos);
+        delay(15);
+      }
+    }
+    else
+    {
+      EL_servo.write(newEL);
+    }
     
-    EL_servo.write(newEL);
-    XEL_servo.write(newXEL);
+    if(newXEL - oldnewXEL > 10)
+    {
+      for (pos = oldnewXEL; pos <= newXEL; pos += 1) 
+      {
+        XEL_servo.write(pos);
+        delay(15);
+      }
+    }
+    else
+    {
+      XEL_servo.write(newXEL);
+    }
+    
     delay(1000);
     
     EL_servo.detach();
     XEL_servo.detach();
+    oldnewEL = newEL;
+    oldnewXEL = newXEL;
     oldEL = EL;
     oldXEL = XEL;
   }
