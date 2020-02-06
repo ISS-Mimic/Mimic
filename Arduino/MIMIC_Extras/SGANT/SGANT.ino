@@ -1,12 +1,19 @@
-#include <Adafruit_NeoPixel.h>
+#include <FastLED.h>
 #include <Servo.h>
 #include <string.h>
 
+#define NUM_LEDS 32
+#define DATA_PIN 6
+#define BRIGHTNESS  200
+#define FRAMES_PER_SECOND 60
+CRGBPalette16 gPal;
+CRGB leds[NUM_LEDS];
 //Connect USB port to Pi USB Port
 
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(16, 6, NEO_GRB + NEO_KHZ800);
+//Adafruit_NeoPixel strip = Adafruit_NeoPixel(32, 6, NEO_GRB + NEO_KHZ800);
 Servo XEL_servo;
 Servo EL_servo;
+bool gReverseDirection = false;
 const int ledBluePin = 13;
 String test;
 int EL = 0;
@@ -18,13 +25,25 @@ int oldEL = 0;
 int oldXEL = 0;
 int oldnewEL = 0;
 int oldnewXEL = 0;
+int index = 0;
+
+uint32_t stickone[] = {0,1,2,3,4,5,6,7};
+uint32_t sticktwo[] = {15,14,13,12,11,10,9,8};
+uint32_t stickthree[] = {16,17,18,19,20,21,22,23};
+uint32_t stickfour[] = {31,30,29,28,27,26,25,24};
+
+int fadeAmount = 255;  // Set the amount to fade I usually do 5, 10, 15, 20, 25 etc even up to 255.
+int brightness = 0;
 
 void setup()
 {
   pinMode(ledBluePin, OUTPUT);
   Serial.begin(9600);
   Serial.setTimeout(50);
-  strip.begin();
+  FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
+  gPal = CRGBPalette16( CRGB::Black, CRGB::Red, CRGB::Yellow, CRGB::White);
+  allSet(CRGB::Black);
+  //strip.begin();
 
   EL_servo.attach(10);
   XEL_servo.attach(9);
@@ -38,8 +57,8 @@ void setup()
 
 void loop()
 {
-  
   digitalWrite(ledBluePin, LOW);
+  random16_add_entropy( random());
   //Serial.print("El ");
   //Serial.println(EL);
   if(Serial.available())
@@ -49,19 +68,45 @@ void loop()
 
   if(EL == 0 && XEL == 0)
   {
-    Fire(55,120,5);
+    Fire2012WithPalette(); // run simulation frame, using palette colors
+    FastLED.show(); // display this frame
+    FastLED.delay(1000 / FRAMES_PER_SECOND);
   }
   else
   {
     if(Transmit)
     {
-      allSet(strip.Color(50,50,50),10);
-      strip.show();
+      //allSet(CRGB::Black);
+      leds[stickone[index]] = CRGB::White;
+      leds[sticktwo[index]] = CRGB::White;
+      leds[stickthree[index]] = CRGB::White;
+      leds[stickfour[index]] = CRGB::White;
+      leds[stickone[index]].fadeLightBy(brightness);
+      leds[sticktwo[index]].fadeLightBy(brightness);
+      leds[stickthree[index]].fadeLightBy(brightness);
+      leds[stickfour[index]].fadeLightBy(brightness);
+      
+      //allSet(strip.Color(50,50,50),10);
+      FastLED.show();
+      delay(100);
+      index++;
+      if(index >= 8)
+      {
+        index = 0;
+        brightness = brightness + fadeAmount;
+        // reverse the direction of the fading at the ends of the fade: 
+        if(brightness == 0 || brightness == 255)
+        {
+          fadeAmount = -fadeAmount ; 
+        } 
+      }
+      Serial.println("Transmitting");
     }
     else
     {
-      allSet(strip.Color(50,0,0),10);
-      strip.show();
+      allSet(CRGB::Black);
+      //allSet(strip.Color(50,0,0),10);
+      FastLED.show();
     }
   }
 
@@ -166,65 +211,59 @@ void checkSerial()
     }
   }
 }
-void allSet(uint32_t c, uint8_t wait) 
+void allSet(uint32_t c)
 {
-  for(uint16_t i=0; i<strip.numPixels(); i++) 
+  for(int dot=0; dot<NUM_LEDS; dot++)
   {
-    strip.setPixelColor(i, c);
-    strip.show();
-    delay(wait);
+    leds[dot] = CRGB::Black;
+    //pixels.setPixelColor(i,c);
   }
+  FastLED.show();
 }
-void Fire(int Cooling, int Sparking, int SpeedDelay) {
-  static byte heat[60];
-  int cooldown;
-  
+// COOLING: How much does the air cool as it rises?
+// Less cooling = taller flames.  More cooling = shorter flames.
+// Default 55, suggested range 20-100 
+#define COOLING  55
+
+// SPARKING: What chance (out of 255) is there that a new spark will be lit?
+// Higher chance = more roaring fire.  Lower chance = more flickery fire.
+// Default 120, suggested range 50-200.
+#define SPARKING 120
+
+
+void Fire2012WithPalette()
+{
+// Array of temperature readings at each simulation cell
+  static byte heat[NUM_LEDS];
+
   // Step 1.  Cool down every cell a little
-  for( int i = 0; i < strip.numPixels(); i++) {
-    cooldown = random(0, ((Cooling * 10) / strip.numPixels()) + 2);
-    
-    if(cooldown>heat[i]) {
-      heat[i]=0;
-    } else {
-      heat[i]=heat[i]-cooldown;
+    for( int i = 0; i < NUM_LEDS; i++) {
+      heat[i] = qsub8( heat[i],  random8(0, ((COOLING * 10) / NUM_LEDS) + 2));
     }
-  }
   
-  // Step 2.  Heat from each cell drifts 'up' and diffuses a little
-  for( int k= strip.numPixels() - 1; k >= 2; k--) {
-    heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2]) / 3;
-  }
+    // Step 2.  Heat from each cell drifts 'up' and diffuses a little
+    for( int k= NUM_LEDS - 1; k >= 2; k--) {
+      heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2] ) / 3;
+    }
     
-  // Step 3.  Randomly ignite new 'sparks' near the bottom
-  if( random(255) < Sparking ) {
-    int y = random(7);
-    heat[y] = heat[y] + random(160,255);
-    //heat[y] = random(160,255);
-  }
+    // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
+    if( random8() < SPARKING ) {
+      int y = random8(7);
+      heat[y] = qadd8( heat[y], random8(160,255) );
+    }
 
-  // Step 4.  Convert heat to LED colors
-  for( int j = 0; j < strip.numPixels(); j++) {
-    setPixelHeatColor(j, heat[j] );
-  }
-
-  strip.show();
-  delay(SpeedDelay);
-}
-
-void setPixelHeatColor (int Pixel, byte temperature) {
-  // Scale 'heat' down from 0-255 to 0-191
-  byte t192 = round((temperature/255.0)*191);
- 
-  // calculate ramp up from
-  byte heatramp = t192 & 0x3F; // 0..63
-  heatramp <<= 2; // scale up to 0..252
- 
-  // figure out which third of the spectrum we're in:
-  if( t192 > 0x80) {                     // hottest
-    strip.setPixelColor(Pixel, random(0,256), random(0,256), random(0,256));
-  } else if( t192 > 0x40 ) {             // middle
-    strip.setPixelColor(Pixel, random(0,256), random(0,256), 0);
-  } else {                               // coolest
-    strip.setPixelColor(Pixel, heatramp, 0, 0);
-  }
+    // Step 4.  Map from heat cells to LED colors
+    for( int j = 0; j < NUM_LEDS; j++) {
+      // Scale the heat value from 0-255 down to 0-240
+      // for best results with color palettes.
+      byte colorindex = scale8( heat[j], 240);
+      CRGB color = ColorFromPalette( gPal, colorindex);
+      int pixelnumber;
+      if( gReverseDirection ) {
+        pixelnumber = (NUM_LEDS-1) - j;
+      } else {
+        pixelnumber = j;
+      }
+      leds[pixelnumber] = color;
+    }
 }
