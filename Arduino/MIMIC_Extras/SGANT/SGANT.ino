@@ -1,18 +1,19 @@
+#include <Adafruit_TiCoServo.h>
+#include <known_16bit_timers.h>
 #include <FastLED.h>
-#include <Servo.h>
 #include <string.h>
 
 #define NUM_LEDS 32
 #define DATA_PIN 6
 #define BRIGHTNESS  200
 #define FRAMES_PER_SECOND 60
+
 CRGBPalette16 gPal;
 CRGB leds[NUM_LEDS];
 //Connect USB port to Pi USB Port
 
-//Adafruit_NeoPixel strip = Adafruit_NeoPixel(32, 6, NEO_GRB + NEO_KHZ800);
-Servo XEL_servo;
-Servo EL_servo;
+Adafruit_TiCoServo XEL_servo;
+Adafruit_TiCoServo EL_servo;
 bool gReverseDirection = false;
 const int ledBluePin = 13;
 String test;
@@ -21,10 +22,10 @@ int XEL = 0;
 boolean Transmit = false;
 int pos = 0;
 int pos2 = 0;
-int oldEL = 0;
-int oldXEL = 0;
-int oldnewEL = 0;
-int oldnewXEL = 0;
+int oldEL = 5;
+int oldXEL = 5;
+int oldnewEL = 91;
+int oldnewXEL = 84;
 int index = 0;
 
 uint32_t stickone[] = {0,1,2,3,4,5,6,7};
@@ -37,30 +38,22 @@ int brightness = 0;
 
 void setup()
 {
-  pinMode(ledBluePin, OUTPUT);
   Serial.begin(9600);
   Serial.setTimeout(50);
+  
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
   gPal = CRGBPalette16( CRGB::Black, CRGB::Red, CRGB::Yellow, CRGB::White);
   allSet(CRGB::Black);
-  //strip.begin();
 
   EL_servo.attach(10);
   XEL_servo.attach(9);
-
-  EL_servo.write(map(0, -90, 90, 152, 30)); //custom mapping the servo motion to the sgant elevation motion
-  XEL_servo.write(map(0, -90, 90, 28, 160)); //custom mapping the servo motion to the sgant cross elevation motion
-  
-  EL_servo.detach();
-  XEL_servo.detach();
 }
 
 void loop()
 {
   digitalWrite(ledBluePin, LOW);
   random16_add_entropy( random());
-  //Serial.print("El ");
-  //Serial.println(EL);
+  
   if(Serial.available())
   {
     checkSerial();
@@ -76,7 +69,6 @@ void loop()
   {
     if(Transmit)
     {
-      //allSet(CRGB::Black);
       leds[stickone[index]] = CRGB::White;
       leds[sticktwo[index]] = CRGB::White;
       leds[stickthree[index]] = CRGB::White;
@@ -86,7 +78,6 @@ void loop()
       leds[stickthree[index]].fadeLightBy(brightness);
       leds[stickfour[index]].fadeLightBy(brightness);
       
-      //allSet(strip.Color(50,50,50),10);
       FastLED.show();
       delay(100);
       index++;
@@ -100,13 +91,10 @@ void loop()
           fadeAmount = -fadeAmount ; 
         } 
       }
-      //Serial.println("Transmitting");
     }
     else
     {
-      //Serial.println("Not Transmitting");
       allSet(CRGB::Red);
-      //allSet(strip.Color(50,0,0),10);
       FastLED.show();
     }
   }
@@ -129,15 +117,9 @@ void loop()
     {
       XEL = -65;
     }
-    Serial.print("Sending EL ");
-    Serial.println(EL);
-    Serial.print("Sending XEL ");
-    Serial.println(XEL);
-    EL_servo.attach(10);
-    XEL_servo.attach(9);
     
     int newEL = map(EL, -90, 90, 152, 30);
-    int newXEL = map(XEL, -90, 90, 28, 160);
+    int newXEL = map(XEL, -90, 90, 22, 147);
 
     if(newEL - oldnewEL > 10)
     {
@@ -165,10 +147,6 @@ void loop()
       XEL_servo.write(newXEL);
     }
     
-    delay(1000);
-    
-    EL_servo.detach();
-    XEL_servo.detach();
     oldnewEL = newEL;
     oldnewXEL = newXEL;
     oldEL = EL;
@@ -178,7 +156,6 @@ void loop()
 
 void checkSerial()
 {
-  digitalWrite(ledBluePin, HIGH);
   test = "";
   
   while(Serial.available())  
