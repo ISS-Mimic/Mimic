@@ -100,11 +100,12 @@ void loop()
           fadeAmount = -fadeAmount ; 
         } 
       }
-      Serial.println("Transmitting");
+      //Serial.println("Transmitting");
     }
     else
     {
-      allSet(CRGB::Black);
+      //Serial.println("Not Transmitting");
+      allSet(CRGB::Red);
       //allSet(strip.Color(50,0,0),10);
       FastLED.show();
     }
@@ -215,7 +216,7 @@ void allSet(uint32_t c)
 {
   for(int dot=0; dot<NUM_LEDS; dot++)
   {
-    leds[dot] = CRGB::Black;
+    leds[dot] = c;
     //pixels.setPixelColor(i,c);
   }
   FastLED.show();
