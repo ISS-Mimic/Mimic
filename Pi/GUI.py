@@ -46,57 +46,42 @@ def logWrite(string):
 
 mimiclog.write("test")
 logWrite("Initialized Mimic Program Log")
-def serialWrite(*args):
+
+def serialWrite(*args): #
     #logWrite("Function call - serial write")
     print(*args)
     global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
     print("writing: " + str(args[0]))
     if SerialConnection1:
-        #ser.write(str.encode(*args))
         try:
             ser.write(str.encode(*args))
         except Exception:
             ser = None
             SerialConnection1 = False
-        #else:
-        #    ser.write(str.encode(*args))
     if SerialConnection2:
-        #ser2.write(str.encode(*args))
         try:
             ser2.write(str.encode(*args))
         except Exception:
             ser2 = None
             SerialConnection2 = False
-        #else:
-        #    ser.write(str.encode(*args))
     if SerialConnection3:
-        #ser3.write(str.encode(*args))
         try:
             ser3.write(str.encode(*args))
         except Exception:
             ser3 = None
             SerialConnection3 = False
-        #else:
-        #    ser.write(str.encode(*args))
     if SerialConnection4:
-        #ser4.write(str.encode(*args))
         try:
             ser4.write(str.encode(*args))
         except Exception:
             ser4 = None
             SerialConnection4 = False
-        #else:
-        #    ser.write(str.encode(*args))
     if SerialConnection5:
-        #ser5.write(str.encode(*args))
         try:
             ser5.write(str.encode(*args))
         except Exception:
             ser5 = None
             SerialConnection5 = False
-        #else:
-        #    ser.write(str.encode(*args))
-
 
 #-------------------------Look for a connected arduino-----------------------------------
 SerialConnection1 = False
@@ -334,7 +319,7 @@ class ManualControlScreen(Screen):
 
     def zeroJoints(self):
         global psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1amc,beta1bmc,beta2amc,beta2bmc,beta3amc,beta3bmc,beta4amc,beta4bmc
-        self.serialWrite("NULLIFY=1 ")
+        serialWrite("NULLIFY=1 ")
         c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1a'");
         beta1amc = 0.00
         c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1b'");
@@ -687,88 +672,89 @@ class ManualControlScreen(Screen):
             self.incrementPSARJ(float(args[0]))
         if SSARJcontrol:
             self.incrementSSARJ(float(args[0]))
+        self.callback()
 
     def incrementPSARJ(self, *args):
         global psarjmc
         psarjmc += args[0]
-        self.serialWrite("PSARJ=" + str(psarjmc) + " ")
+        serialWrite("PSARJ=" + str(psarjmc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'psarj'",(psarjmc,));
         self.ids.statusbar.text = "PSARJ Value Sent: " + str(psarjmc) 
 
     def incrementSSARJ(self, *args):
         global ssarjmc
         ssarjmc += args[0]
-        self.serialWrite("SSARJ=" + str(ssarjmc) + " ")
+        serialWrite("SSARJ=" + str(ssarjmc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'ssarj'",(ssarjmc,));
         self.ids.statusbar.text = "SSARJ Value Sent: " + str(ssarjmc)
 
     def incrementPTRRJ(self, *args):
         global ptrrjmc
         ptrrjmc += args[0]
-        self.serialWrite("PTRRJ=" + str(ptrrjmc) + " ")
+        serialWrite("PTRRJ=" + str(ptrrjmc) + " ")
         c.execute("UPDATE telemetry  SET Value = ? WHERE Label = 'ptrrj'",(ptrrjmc,));
         self.ids.statusbar.text = "PTRRJ Value Sent: " + str(ptrrjmc)
 
     def incrementSTRRJ(self, *args):
         global strrjmc
         strrjmc += args[0]
-        self.serialWrite("STRRJ=" + str(strrjmc) + " ")
+        serialWrite("STRRJ=" + str(strrjmc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'strrj'",(strrjmc,));
         self.ids.statusbar.text = "STRRJ Value Sent: " + str(strrjmc)
 
     def incrementBeta1B(self, *args):
         global beta1bmc
         beta1bmc += args[0]
-        self.serialWrite("Beta1B=" + str(beta1bmc) + " ")
+        serialWrite("Beta1B=" + str(beta1bmc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1b'",(beta1bmc,));
         self.ids.statusbar.text = "Beta1B Value Sent: " + str(beta1bmc)
 
     def incrementBeta1A(self, *args):
         global beta1amc
         beta1amc += args[0]
-        self.serialWrite("Beta1A=" + str(beta1amc) + " ")
+        serialWrite("Beta1A=" + str(beta1amc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1a'",(beta1amc,));
         self.ids.statusbar.text = "Beta1A Value Sent: " + str(beta1amc)
 
     def incrementBeta2B(self, *args):
         global beta2bmc
         beta2bmc += args[0]
-        self.serialWrite("Beta2B=" + str(beta2bmc) + " ")
+        serialWrite("Beta2B=" + str(beta2bmc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2b'",(beta2bmc,));
         self.ids.statusbar.text = "Beta2B Value Sent: " + str(beta2bmc)
 
     def incrementBeta2A(self, *args):
         global beta2amc
         beta2amc += args[0]
-        self.serialWrite("Beta2A=" + str(beta2amc) + " ")
+        serialWrite("Beta2A=" + str(beta2amc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2a'",(beta2amc,));
         self.ids.statusbar.text = "Beta2A Value Sent: " + str(beta2amc)
 
     def incrementBeta3B(self, *args):
         global beta3bmc
         beta3bmc += args[0]
-        self.serialWrite("Beta3B=" + str(beta3bmc) + " ")
+        serialWrite("Beta3B=" + str(beta3bmc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3b'",(beta3bmc,));
         self.ids.statusbar.text = "Beta3B Value Sent: " + str(beta3bmc)
 
     def incrementBeta3A(self, *args):
         global beta3amc
         beta3amc += args[0]
-        self.serialWrite("Beta3A=" + str(beta3amc) + " ")
+        serialWrite("Beta3A=" + str(beta3amc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3a'",(beta3amc,));
         self.ids.statusbar.text = "Beta3A Value Sent: " + str(beta3amc)
 
     def incrementBeta4B(self, *args):
         global beta4bmc
         beta4bmc += args[0]
-        self.serialWrite("Beta4B=" + str(beta4bmc) + " ")
+        serialWrite("Beta4B=" + str(beta4bmc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4b'",(beta4bmc,));
         self.ids.statusbar.text = "Beta4B Value Sent: " + str(beta4bmc)
 
     def incrementBeta4A(self, *args):
         global beta4amc
         beta4amc += args[0]
-        self.serialWrite("Beta4A=" + str(beta4amc) + " ")
+        serialWrite("Beta4A=" + str(beta4amc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4a'",(beta4amc,));
         self.ids.statusbar.text = "Beta4A Value Sent: " + str(beta4amc)
 
@@ -805,84 +791,84 @@ class ManualControlScreen(Screen):
     def sendPSARJ(self, *args):
         global psarjmc
         psarjmc = args[0]
-        self.serialWrite("PSARJ=" + str(args[0]) + " ")
+        serialWrite("PSARJ=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'psarj'",(args[0],));
         self.ids.statusbar.text = "PSARJ Value Sent: " + str(args[0]) 
 
     def sendSSARJ(self, *args):
         global ssarjmc
         ssarjmc = args[0]
-        self.serialWrite("SSARJ=" + str(args[0]) + " ")
+        serialWrite("SSARJ=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'ssarj'",(args[0],));
         self.ids.statusbar.text = "SSARJ Value Sent: " + str(args[0])
 
     def sendPTRRJ(self, *args):
         global ptrrjmc
         ptrrjmc = args[0]
-        self.serialWrite("PTRRJ=" + str(args[0]) + " ")
+        serialWrite("PTRRJ=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry  SET Value = ? WHERE Label = 'ptrrj'",(args[0],));
         self.ids.statusbar.text = "PTRRJ Value Sent: " + str(args[0])
 
     def sendSTRRJ(self, *args):
         global strrjmc
         strrjmc = args[0]
-        self.serialWrite("STRRJ=" + str(args[0]) + " ")
+        serialWrite("STRRJ=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'strrj'",(args[0],));
         self.ids.statusbar.text = "STRRJ Value Sent: " + str(args[0])
 
     def sendBeta1B(self, *args):
         global beta1bmc
         beta1bmc = args[0]
-        self.serialWrite("Beta1B=" + str(args[0]) + " ")
+        serialWrite("Beta1B=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1b'",(args[0],));
         self.ids.statusbar.text = "Beta1B Value Sent: " + str(args[0])
 
     def sendBeta1A(self, *args):
         global beta1amc
         beta1amc = args[0]
-        self.serialWrite("Beta1A=" + str(args[0]) + " ")
+        serialWrite("Beta1A=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1a'",(args[0],));
         self.ids.statusbar.text = "Beta1A Value Sent: " + str(args[0])
 
     def sendBeta2B(self, *args):
         global beta2bmc
         beta2bmc = args[0]
-        self.serialWrite("Beta2B=" + str(args[0]) + " ")
+        serialWrite("Beta2B=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2b'",(args[0],));
         self.ids.statusbar.text = "Beta2B Value Sent: " + str(args[0])
 
     def sendBeta2A(self, *args):
         global beta2amc
         beta2amc = args[0]
-        self.serialWrite("Beta2A=" + str(args[0]) + " ")
+        serialWrite("Beta2A=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2a'",(args[0],));
         self.ids.statusbar.text = "Beta2A Value Sent: " + str(args[0])
 
     def sendBeta3B(self, *args):
         global beta3bmc
         beta3bmc = args[0]
-        self.serialWrite("Beta3B=" + str(args[0]) + " ")
+        serialWrite("Beta3B=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3b'",(args[0],));
         self.ids.statusbar.text = "Beta3B Value Sent: " + str(args[0])
 
     def sendBeta3A(self, *args):
         global beta3amc
         beta3amc = args[0]
-        self.serialWrite("Beta3A=" + str(args[0]) + " ")
+        serialWrite("Beta3A=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3a'",(args[0],));
         self.ids.statusbar.text = "Beta3A Value Sent: " + str(args[0])
 
     def sendBeta4B(self, *args):
         global beta4bmc
         beta4bmc = args[0]
-        self.serialWrite("Beta4B=" + str(args[0]) + " ")
+        serialWrite("Beta4B=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4b'",(args[0],));
         self.ids.statusbar.text = "Beta4B Value Sent: " + str(args[0])
 
     def sendBeta4A(self, *args):
         global beta4amc
         beta4amc = args[0]
-        self.serialWrite("Beta4A=" + str(args[0]) + " ")
+        serialWrite("Beta4A=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4a'",(args[0],));
         self.ids.statusbar.text = "Beta4A Value Sent: " + str(args[0])
 
@@ -907,120 +893,15 @@ class ManualControlScreen(Screen):
         beta1bmc = 90
         beta1amc = 90
         beta2bmc = 90
-        beta2amc = 90
-        beta3bmc = 90
-        beta3amc = 90
-        beta4bmc = 90
-        beta4amc = 90
-        self.ids.statusbar.text = "90 sent to all motors"
-        self.serialWrite("Beta1A=90 ")
-        self.serialWrite("Beta1B=90 ")
-        self.serialWrite("Beta2A=90 ")
-        self.serialWrite("Beta2B=90 ")
-        self.serialWrite("Beta3A=90 ")
-        self.serialWrite("Beta3B=90 ")
-        self.serialWrite("Beta4A=90 ")
-        self.serialWrite("Beta4B=90 ")
-        self.serialWrite("PSARJ=90 ")
-        self.serialWrite("SSARJ=90 ")
-        self.serialWrite("PTRRJ=90 ")
-        self.serialWrite("STRRJ=90 ")
-
-    def send0(self, *args):
-        global psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1amc,beta1bmc,beta2amc,beta2bmc,beta3amc,beta3bmc,beta4amc,beta4bmc
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1a'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1b'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2a'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2b'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3a'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3b'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4a'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4b'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'psarj'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ssarj'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ptrrj'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'strrj'");
-        strrjmc = 0
-        ptrrjmc = 0
-        ssarjmc = 0
-        psarjmc = 0
-        beta1bmc = 0
-        beta1amc = 0
-        beta2bmc = 0
-        beta2amc = 0
-        beta3bmc = 0
-        beta3amc = 0
-        beta4bmc = 0
-        beta4amc = 0
-        self.ids.statusbar.text = "0 sent to all motors"
-        self.serialWrite("Beta1A=0 ")
-        self.serialWrite("Beta1B=0 ")
-        self.serialWrite("Beta2A=0 ")
-        self.serialWrite("Beta2B=0 ")
-        self.serialWrite("Beta3A=0 ")
-        self.serialWrite("Beta3B=0 ")
-        self.serialWrite("Beta4A=0 ")
-        self.serialWrite("Beta4B=0 ")
-        self.serialWrite("PSARJ=0 ")
-        self.serialWrite("SSARJ=0 ")
-        self.serialWrite("PTRRJ=0 ")
-        self.serialWrite("STRRJ=0 ")
-
-    def serialWrite(self, *args):
-        #logWrite("Function call - serial write")
-        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
-        #print str(*args)
-        if SerialConnection1:
-            #ser.write(str.encode(*args))
-            try:
-                ser.write(str.encode(*args))
-            except Exception:
-                ser = None
-                SerialConnection1 = False
-            else:
-                self.callback()
-            #    ser.write(str.encode(*args))
-        if SerialConnection2:
-            #ser2.write(str.encode(*args))
-            try:
-                ser2.write(str.encode(*args))
-            except Exception:
-                ser2 = None
-                SerialConnection2 = False
-            else:
-                self.callback()
-            #    ser.write(str.encode(*args))
-        if SerialConnection3:
-            #ser3.write(str.encode(*args))
-            try:
-                ser3.write(str.encode(*args))
-            except Exception:
-                ser3 = None
-                SerialConnection3 = False
-            else:
-                self.callback()
-            #    ser.write(str.encode(*args))
-        if SerialConnection4:
-            #ser4.write(str.encode(*args))
-            try:
-                ser4.write(str.encode(*args))
-            except Exception:
-                ser4 = None
-                SerialConnection4 = False
-            else:
-                self.callback()
-            #    ser.write(str.encode(*args))
-        if SerialConnection5:
-            #ser5.write(str.encode(*args))
-            try:
-                ser5.write(str.encode(*args))
-            except Exception:
-                ser5 = None
-                SerialConnection5 = False
-            else:
-                self.callback()
-            #    ser.write(str.encode(*args))
-
+        serialWrite("Beta2B=0 ")
+        serialWrite("Beta3A=0 ")
+        serialWrite("Beta3B=0 ")
+        serialWrite("Beta4A=0 ")
+        serialWrite("Beta4B=0 ")
+        serialWrite("PSARJ=0 ")
+        serialWrite("SSARJ=0 ")
+        serialWrite("PTRRJ=0 ")
+        serialWrite("STRRJ=0 ")
 
 class FakeOrbitScreen(Screen):
 
@@ -1073,57 +954,6 @@ class FakeOrbitScreen(Screen):
         else:
             logWrite("Successfully stopped Demo HTV Orbit script")
             runningDemo = False
-
-
-    def serialWrite(self, *args):
-        #logWrite("Function call - serial write")
-        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
-
-        if SerialConnection1:
-            #ser.write(str.encode(*args))
-            try:
-                ser.write(str.encode(*args))
-            except Exception:
-                ser = None
-                SerialConnection1 = False
-            #else:
-            #    ser.write(str.encode(*args))
-        if SerialConnection2:
-            #ser2.write(str.encode(*args))
-            try:
-                ser2.write(str.encode(*args))
-            except Exception:
-                ser2 = None
-                SerialConnection2 = False
-            #else:
-            #    ser.write(str.encode(*args))
-        if SerialConnection3:
-            #ser3.write(str.encode(*args))
-            try:
-                ser3.write(str.encode(*args))
-            except Exception:
-                ser3 = None
-                SerialConnection3 = False
-            #else:
-            #    ser.write(str.encode(*args))
-        if SerialConnection4:
-            #ser4.write(str.encode(*args))
-            try:
-                ser4.write(str.encode(*args))
-            except Exception:
-                ser4 = None
-                SerialConnection4 = False
-            #else:
-            #    ser.write(str.encode(*args))
-        if SerialConnection5:
-            #ser5.write(str.encode(*args))
-            try:
-                ser5.write(str.encode(*args))
-            except Exception:
-                ser5 = None
-                SerialConnection5 = False
-            #else:
-            #    ser.write(str.encode(*args))
 
 class Settings_Screen(Screen, EventDispatcher):
     def checkbox_clicked(*args):
@@ -1677,56 +1507,6 @@ class MainApp(App):
                 if startingAnim:
                     Clock.schedule_interval(self.animate, 0.1)
                     startingAnim = False
-
-    def serialWrite(self, *args):
-        #logWrite("Function call - serial write")
-        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
-
-        if SerialConnection1:
-            #ser.write(str.encode(*args))
-            try:
-                ser.write(str.encode(*args))
-            except Exception:
-                ser = None
-                SerialConnection1 = False
-            #else:
-            #    ser.write(str.encode(*args))
-        if SerialConnection2:
-            #ser2.write(str.encode(*args))
-            try:
-                ser2.write(str.encode(*args))
-            except Exception:
-                ser2 = None
-                SerialConnection2 = False
-            #else:
-            #    ser.write(str.encode(*args))
-        if SerialConnection3:
-            #ser3.write(str.encode(*args))
-            try:
-                ser3.write(str.encode(*args))
-            except Exception:
-                ser3 = None
-                SerialConnection3 = False
-            #else:
-            #    ser.write(str.encode(*args))
-        if SerialConnection4:
-            #ser4.write(str.encode(*args))
-            try:
-                ser4.write(str.encode(*args))
-            except Exception:
-                ser4 = None
-                SerialConnection4 = False
-            #else:
-            #    ser.write(str.encode(*args))
-        if SerialConnection5:
-            #ser5.write(str.encode(*args))
-            try:
-                ser5.write(str.encode(*args))
-            except Exception:
-                ser5 = None
-                SerialConnection5 = False
-            #else:
-            #    ser.write(str.encode(*args))
 
     def changeColors(self, *args):   #this function sets all labels on mimic screen to a certain color based on signal status
         #the signalcolor is a kv property that will update all signal status dependant values to whatever color is received by this function
@@ -3347,20 +3127,20 @@ class MainApp(App):
 
         if demoboolean:
             if Disco:
-                self.serialWrite("Disco ")
+                serialWrite("Disco ")
                 Disco = False
-            self.serialWrite("PSARJ=" + str(psarj) + " ")
-            self.serialWrite("SSARJ=" + str(ssarj) + " ")
-            self.serialWrite("PTRRJ=" + str(ptrrj) + " ")
-            self.serialWrite("STRRJ=" + str(strrj) + " ")
-            self.serialWrite("Beta1B=" + str(beta1b) + " ")
-            self.serialWrite("Beta1A=" + str(beta1a) + " ")
-            self.serialWrite("Beta2B=" + str(beta2b) + " ")
-            self.serialWrite("Beta2A=" + str(beta2a) + " ")
-            self.serialWrite("Beta3B=" + str(beta3b) + " ")
-            self.serialWrite("Beta3A=" + str(beta3a) + " ")
-            self.serialWrite("Beta4B=" + str(beta4b) + " ")
-            self.serialWrite("Beta4A=" + str(beta4a) + " ")
+            serialWrite("PSARJ=" + str(psarj) + " ")
+            serialWrite("SSARJ=" + str(ssarj) + " ")
+            serialWrite("PTRRJ=" + str(ptrrj) + " ")
+            serialWrite("STRRJ=" + str(strrj) + " ")
+            serialWrite("Beta1B=" + str(beta1b) + " ")
+            serialWrite("Beta1A=" + str(beta1a) + " ")
+            serialWrite("Beta2B=" + str(beta2b) + " ")
+            serialWrite("Beta2A=" + str(beta2a) + " ")
+            serialWrite("Beta3B=" + str(beta3b) + " ")
+            serialWrite("Beta3A=" + str(beta3a) + " ")
+            serialWrite("Beta4B=" + str(beta4b) + " ")
+            serialWrite("Beta4A=" + str(beta4a) + " ")
 
         self.eps_screen.ids.psarj_value.text = psarj + "deg"
         self.eps_screen.ids.ssarj_value.text = ssarj + "deg"
@@ -3421,34 +3201,34 @@ class MainApp(App):
             self.signal_unsubscribed()
 
         if mimicbutton: # and float(aos) == 1.00):
-            self.serialWrite("PSARJ=" + psarj + " ")
-            self.serialWrite("SSARJ=" + ssarj + " ")
-            self.serialWrite("PTRRJ=" + ptrrj + " ")
-            self.serialWrite("STRRJ=" + strrj + " ")
-            self.serialWrite("Beta1B=" + beta1b + " ")
-            self.serialWrite("Beta1A=" + beta1a + " ")
-            self.serialWrite("Beta2B=" + beta2b + " ")
-            self.serialWrite("Beta2A=" + beta2a + " ")
-            self.serialWrite("Beta3B=" + beta3b + " ")
-            self.serialWrite("Beta3A=" + beta3a + " ")
-            self.serialWrite("Beta4B=" + beta4b + " ")
-            self.serialWrite("Beta4A=" + beta4a + " ")
-            self.serialWrite("AOS=" + aos + " ")
-            self.serialWrite("Voltage1A=" + v1a + " ")
-            self.serialWrite("Voltage2A=" + v2a + " ")
-            self.serialWrite("Voltage3A=" + v3a + " ")
-            self.serialWrite("Voltage4A=" + v4a + " ")
-            self.serialWrite("Voltage1B=" + v1b + " ")
-            self.serialWrite("Voltage2B=" + v2b + " ")
-            self.serialWrite("Voltage3B=" + v3b + " ")
-            self.serialWrite("Voltage4B=" + v4b + " ")
-            self.serialWrite("SGANT_El_deg=" + str(int(sgant_elevation)) + " ")
-            self.serialWrite("SGANT_xEl_deg=" + str(int(sgant_xelevation)) + " ")
-            self.serialWrite("SGANT_Transmit=" + str(int(sgant_transmit)) + " ")
+            serialWrite("PSARJ=" + psarj + " ")
+            serialWrite("SSARJ=" + ssarj + " ")
+            serialWrite("PTRRJ=" + ptrrj + " ")
+            serialWrite("STRRJ=" + strrj + " ")
+            serialWrite("Beta1B=" + beta1b + " ")
+            serialWrite("Beta1A=" + beta1a + " ")
+            serialWrite("Beta2B=" + beta2b + " ")
+            serialWrite("Beta2A=" + beta2a + " ")
+            serialWrite("Beta3B=" + beta3b + " ")
+            serialWrite("Beta3A=" + beta3a + " ")
+            serialWrite("Beta4B=" + beta4b + " ")
+            serialWrite("Beta4A=" + beta4a + " ")
+            serialWrite("AOS=" + aos + " ")
+            serialWrite("Voltage1A=" + v1a + " ")
+            serialWrite("Voltage2A=" + v2a + " ")
+            serialWrite("Voltage3A=" + v3a + " ")
+            serialWrite("Voltage4A=" + v4a + " ")
+            serialWrite("Voltage1B=" + v1b + " ")
+            serialWrite("Voltage2B=" + v2b + " ")
+            serialWrite("Voltage3B=" + v3b + " ")
+            serialWrite("Voltage4B=" + v4b + " ")
+            serialWrite("SGANT_El_deg=" + str(int(sgant_elevation)) + " ")
+            serialWrite("SGANT_xEl_deg=" + str(int(sgant_xelevation)) + " ")
+            serialWrite("SGANT_Transmit=" + str(int(sgant_transmit)) + " ")
 
         #data to send regardless of signal status
         if mimicbutton:
-            self.serialWrite("Module=" + module + " ")
+            serialWrite("Module=" + module + " ")
 
 #All GUI Screens are on separate kv files
 Builder.load_file('/home/pi/Mimic/Pi/Screens/Settings_Screen.kv')
