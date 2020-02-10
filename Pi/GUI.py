@@ -46,6 +46,57 @@ def logWrite(string):
 
 mimiclog.write("test")
 logWrite("Initialized Mimic Program Log")
+def serialWrite(*args):
+    #logWrite("Function call - serial write")
+    print(*args)
+    global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
+    print("writing: " + str(args[0]))
+    if SerialConnection1:
+        #ser.write(str.encode(*args))
+        try:
+            ser.write(str.encode(*args))
+        except Exception:
+            ser = None
+            SerialConnection1 = False
+        #else:
+        #    ser.write(str.encode(*args))
+    if SerialConnection2:
+        #ser2.write(str.encode(*args))
+        try:
+            ser2.write(str.encode(*args))
+        except Exception:
+            ser2 = None
+            SerialConnection2 = False
+        #else:
+        #    ser.write(str.encode(*args))
+    if SerialConnection3:
+        #ser3.write(str.encode(*args))
+        try:
+            ser3.write(str.encode(*args))
+        except Exception:
+            ser3 = None
+            SerialConnection3 = False
+        #else:
+        #    ser.write(str.encode(*args))
+    if SerialConnection4:
+        #ser4.write(str.encode(*args))
+        try:
+            ser4.write(str.encode(*args))
+        except Exception:
+            ser4 = None
+            SerialConnection4 = False
+        #else:
+        #    ser.write(str.encode(*args))
+    if SerialConnection5:
+        #ser5.write(str.encode(*args))
+        try:
+            ser5.write(str.encode(*args))
+        except Exception:
+            ser5 = None
+            SerialConnection5 = False
+        #else:
+        #    ser.write(str.encode(*args))
+
 
 #-------------------------Look for a connected arduino-----------------------------------
 SerialConnection1 = False
@@ -55,7 +106,7 @@ SerialConnection4 = False
 SerialConnection5 = False
 
 try:
-    ser = serial.Serial('/dev/ttyACM0', 9600, write_timeout=0)
+    ser = serial.Serial('/dev/ttyACM0', 9600, write_timeout=0, timeout=0)
 except Exception:
     logWrite("Warning - Serial Connection ACM0 not found")
     SerialConnection1 = False
@@ -66,7 +117,7 @@ else:
     print(str(ser))
 
 try:
-    ser2 = serial.Serial('/dev/ttyACM1', 9600, write_timeout=0)
+    ser2 = serial.Serial('/dev/ttyACM1', 9600, write_timeout=0, timeout=0)
 except Exception:
     #logWrite("Warning - Serial Connection ACM1 not found")
     SerialConnection2 = False
@@ -77,7 +128,7 @@ else:
     print(str(ser2))
 
 try:
-    ser3 = serial.Serial('/dev/ttyACM2', 9600, write_timeout=0)
+    ser3 = serial.Serial('/dev/ttyACM2', 9600, write_timeout=0, timeout=0)
 except Exception:
     #logWrite("Warning - Serial Connection ACM2 not found")
     SerialConnection3 = False
@@ -88,7 +139,7 @@ else:
     print(str(ser3))
 
 try:
-    ser4 = serial.Serial('/dev/ttyAMA00', 9600, write_timeout=0)
+    ser4 = serial.Serial('/dev/ttyAMA00', 9600, write_timeout=0, timeout=0)
 except Exception:
     #logWrite("Warning - Serial Connection AMA00 not found")
     SerialConnection4 = False
@@ -99,7 +150,7 @@ else:
     print(str(ser4))
 
 try:
-    ser5 = serial.Serial('/dev/ttyACM3', 9600, write_timeout=0)
+    ser5 = serial.Serial('/dev/ttyACM3', 9600, write_timeout=0, timeout=0)
 except Exception:
     #logWrite("Warning - Serial Connection ACM3 not found")
     SerialConnection5 = False
@@ -1075,7 +1126,11 @@ class FakeOrbitScreen(Screen):
             #    ser.write(str.encode(*args))
 
 class Settings_Screen(Screen, EventDispatcher):
-    pass
+    def checkbox_clicked(*args):
+        if args[2] == True:
+            serialWrite("smartflip=1 ")
+        else:
+            serialWrite("smartflip=0 ")
 
 class Orbit_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1, 1, 1])
@@ -1261,7 +1316,7 @@ class MainApp(App):
 
         if ser == None:
             try:
-                ser = serial.Serial('/dev/ttyACM0', 9600, write_timeout=0)
+                ser = serial.Serial('/dev/ttyACM0', 9600, write_timeout=0, timeout=0)
             except Exception as e:
                 #logWrite("Warning - Serial Connection ACM0 not found")
                 SerialConnection1 = False
@@ -1281,7 +1336,7 @@ class MainApp(App):
 
         if ser2 == None:
             try:
-                ser2 = serial.Serial('/dev/ttyACM1', 9600, write_timeout=0)
+                ser2 = serial.Serial('/dev/ttyACM1', 9600, write_timeout=0, timeout=0)
             except Exception:
                 #logWrite("Warning - Serial Connection ACM1 not found")
                 SerialConnection2 = False
@@ -1301,7 +1356,7 @@ class MainApp(App):
 
         if ser3 == None:
             try:
-                ser3 = serial.Serial('/dev/ttyACM2', 9600, write_timeout=0)
+                ser3 = serial.Serial('/dev/ttyACM2', 9600, write_timeout=0, timeout=0)
             except Exception:
                 #logWrite("Warning - Serial Connection ACM2 not found")
                 SerialConnection3 = False
@@ -1321,7 +1376,7 @@ class MainApp(App):
 
         if ser4 == None:
             try:
-                ser4 = serial.Serial('/dev/ttyAMA00', 9600, write_timeout=0)
+                ser4 = serial.Serial('/dev/ttyAMA00', 9600, write_timeout=0, timeout=0)
             except Exception:
                 #logWrite("Warning - Serial Connection AMA00 not found")
                 SerialConnection4 = False
@@ -1341,7 +1396,7 @@ class MainApp(App):
 
         if ser5 == None:
             try:
-                ser5 = serial.Serial('/dev/ttyACM3', 9600, write_timeout=0)
+                ser5 = serial.Serial('/dev/ttyACM3', 9600, write_timeout=0, timeout=0)
             except Exception:
                 #logWrite("Warning - Serial Connection ACM3 not found")
                 SerialConnection5 = False
@@ -2457,7 +2512,7 @@ class MainApp(App):
         for x in ScreenList:
             getattr(self, x).ids.signal.size_hint_y = 0.112
 
-    def update_labels(self, dt):
+    def update_labels(self, dt): #THIS IS THE IMPORTANT FUNCTION
         global mimicbutton, switchtofake, demoboolean, runningDemo, fakeorbitboolean, psarj2, ssarj2, manualcontrol, aos, los, oldLOS, psarjmc, ssarjmc, ptrrjmc, strrjmc, beta1bmc, beta1amc, beta2bmc, beta2amc, beta3bmc, beta3amc, beta4bmc, beta4amc, US_EVAinProgress, position_x, position_y, position_z, velocity_x, velocity_y, velocity_z, altitude, velocity, iss_mass, testvalue, testfactor, airlock_pump, crewlockpres, leak_hold, firstcrossing, EVA_activities, repress, depress, oldAirlockPump, obtained_EVA_crew, EVAstartTime
         global holdstartTime, LS_Subscription, SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5
         global Disco, eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress

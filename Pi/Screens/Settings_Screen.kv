@@ -12,12 +12,22 @@
             ##keep_ratio: True
         Label:
             text: 'Settings'
+            pos_hint: {"center_x": 0.5,"center_y":0.8}
             bold: True
             font_size: 120
             markup: True
             height: "20dp"
             color: 1,0,1
             width: "100dp"
+        Label:
+            text: "Smartflip (check to enable smooth 0 crossing)"
+            pos_hint: {"center_x": 0.35,"center_y":0.5}
+        CheckBox:
+            id: smartflip
+            pos_hint: {"center_x": 0.1,"center_y": 0.5}
+            size_hint_y: None
+            height: '64dp'
+            on_active: root.checkbox_clicked(self,self.active)
         Button:
             size_hint: 0.3,0.1
             pos_hint: {"Left": 1, "Bottom": 1}
