@@ -33,25 +33,32 @@ import database_initialize
 
 # Create Program Logs
 mimiclog = open('/home/pi/Mimic/Pi/Logs/mimiclog.txt', 'w')
-sgantlog = open('/home/pi/Mimic/Pi/Logs/sgantlog.txt', 'a+')
-locationlog = open('/home/pi/Mimic/Pi/Logs/locationlog.txt', 'a')
-testlog = open('/home/pi/Mimic/Pi/Logs/testlog.txt', 'w')
-testlog.write('test')
 
-def logWrite(string):
+def logWrite(*args):
+    print("logwrite")
     mimiclog.write(str(datetime.utcnow()))
     mimiclog.write(' ')
-    mimiclog.write(str(string))
+    mimiclog.write(str(args[0]))
     mimiclog.write('\n')
+    mimiclog.flush()
 
-mimiclog.write("test")
 logWrite("Initialized Mimic Program Log")
 
+#-------------------------Look for a connected arduino-----------------------------------
+SerialConnection1 = False
+SerialConnection2 = False
+SerialConnection3 = False
+SerialConnection4 = False
+SerialConnection5 = False
+ser = None
+ser2 = None
+ser3 = None
+ser4 = None
+ser5 = None
+
 def serialWrite(*args): #
-    #logWrite("Function call - serial write")
-    print(*args)
+    logWrite("Function call - serial write: " + str(*args))
     global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
-    print("writing: " + str(args[0]))
     if SerialConnection1:
         try:
             ser.write(str.encode(*args))
@@ -83,68 +90,8 @@ def serialWrite(*args): #
             ser5 = None
             SerialConnection5 = False
 
-#-------------------------Look for a connected arduino-----------------------------------
-SerialConnection1 = False
-SerialConnection2 = False
-SerialConnection3 = False
-SerialConnection4 = False
-SerialConnection5 = False
 
-try:
-    ser = serial.Serial('/dev/ttyACM0', 9600, write_timeout=0, timeout=0)
-except Exception:
-    logWrite("Warning - Serial Connection ACM0 not found")
-    SerialConnection1 = False
-    ser = None
-else:
-    SerialConnection1 = True
-    logWrite("Successful connection to Serial on ACMO")
-    print(str(ser))
-
-try:
-    ser2 = serial.Serial('/dev/ttyACM1', 9600, write_timeout=0, timeout=0)
-except Exception:
-    #logWrite("Warning - Serial Connection ACM1 not found")
-    SerialConnection2 = False
-    ser2 = None
-else:
-    SerialConnection2 = True
-    logWrite("Successful connection to Serial on ACM1")
-    print(str(ser2))
-
-try:
-    ser3 = serial.Serial('/dev/ttyACM2', 9600, write_timeout=0, timeout=0)
-except Exception:
-    #logWrite("Warning - Serial Connection ACM2 not found")
-    SerialConnection3 = False
-    ser3 = None
-else:
-    SerialConnection3 = True
-    logWrite("Successful connection to Serial on ACM2")
-    print(str(ser3))
-
-try:
-    ser4 = serial.Serial('/dev/ttyAMA00', 9600, write_timeout=0, timeout=0)
-except Exception:
-    #logWrite("Warning - Serial Connection AMA00 not found")
-    SerialConnection4 = False
-    ser4 = None
-else:
-    SerialConnection4 = True
-    logWrite("Successful connection to Serial on AMA0O")
-    print(str(ser4))
-
-try:
-    ser5 = serial.Serial('/dev/ttyACM3', 9600, write_timeout=0, timeout=0)
-except Exception:
-    #logWrite("Warning - Serial Connection ACM3 not found")
-    SerialConnection5 = False
-    ser5 = None
-else:
-    SerialConnection5 = True
-    logWrite("Successful connection to Serial on USBO")
-    print(str(ser5))
-
+#-------------------------TDRS Checking Database-----------------------------------------
 TDRSconn = sqlite3.connect('/dev/shm/tdrs.db')
 TDRSconn.isolation_level = None
 TDRScursor = TDRSconn.cursor()
