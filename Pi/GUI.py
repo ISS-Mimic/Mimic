@@ -35,7 +35,6 @@ import database_initialize
 mimiclog = open('/home/pi/Mimic/Pi/Logs/mimiclog.txt', 'w')
 
 def logWrite(*args):
-    print("logwrite")
     mimiclog.write(str(datetime.utcnow()))
     mimiclog.write(' ')
     mimiclog.write(str(args[0]))
