@@ -121,30 +121,16 @@ void loop()
     int newEL = map(EL, -90, 90, 152, 30);
     int newXEL = map(XEL, -90, 90, 22, 147);
 
-    if(newEL - oldnewEL > 10)
+    for (pos = oldnewEL; pos <= newEL; pos += 1) 
     {
-      for (pos = oldnewEL; pos <= newEL; pos += 1) 
-      {
-        EL_servo.write(pos);
-        delay(15);
-      }
-    }
-    else
-    {
-      EL_servo.write(newEL);
+      EL_servo.write(pos);
+      delay(200);
     }
     
-    if(newXEL - oldnewXEL > 10)
+    for (pos = oldnewXEL; pos <= newXEL; pos += 1) 
     {
-      for (pos = oldnewXEL; pos <= newXEL; pos += 1) 
-      {
-        XEL_servo.write(pos);
-        delay(15);
-      }
-    }
-    else
-    {
-      XEL_servo.write(newXEL);
+      XEL_servo.write(pos);
+      delay(200);
     }
     
     oldnewEL = newEL;

@@ -1901,6 +1901,7 @@ class MainApp(App):
                     scaleLatLon2(latitude, longitude)['new_x'] - ((self.orbit_screen.ids.OrbitISStiny.width / 2) * normalizedX * 2), #had to fudge a little not sure why
                     scaleLatLon2(latitude, longitude)['new_y'] - ((self.orbit_screen.ids.OrbitISStiny.height / 2) * normalizedY * 2)) #had to fudge a little not sure why
 
+        
             ISS_groundtrack = []
             ISS_groundtrack2 = []
             date_i = datetime.utcnow()
@@ -2057,6 +2058,7 @@ class MainApp(App):
                 sun.compute(location)
                 ISS_TLE.compute(location)
                 sun_alt = float(str(sun.alt).split(':')[0]) + float(str(sun.alt).split(':')[1])/60 + float(str(sun.alt).split(':')[2])/3600
+                
                 visible = False
                 if ISS_TLE.eclipsed is False and -18 < sun_alt < -6:
                     visible = True
