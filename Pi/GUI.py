@@ -979,7 +979,7 @@ class MimicScreen(Screen, EventDispatcher):
 
     def startproc(*args):
         global p,TDRSproc
-        print("Telemetry Subprocess start")
+        logWrite("Telemetry Subprocess start")
         p = Popen(["node", "/home/pi/Mimic/Pi/ISS_Telemetry.js"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
         TDRSproc = Popen(["python3", "/home/pi/Mimic/Pi/TDRScheck.py"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
         #p = Popen(["/home/pi/Mimic/Pi/RecordedData/playback.out","/home/pi/Mimic/Pi/RecordedData/Data"])
@@ -993,8 +993,6 @@ class MimicScreen(Screen, EventDispatcher):
             TDRSproc.kill()
         except Exception:
             pass
-        else:
-            print("in that one fnction")
 
 class MainScreenManager(ScreenManager):
     pass
@@ -1094,7 +1092,6 @@ class MainApp(App):
             try:
                 ser = serial.Serial('/dev/ttyACM0', 9600, write_timeout=0, timeout=0)
             except Exception as e:
-                #logWrite("Warning - Serial Connection ACM0 not found")
                 SerialConnection1 = False
                 ser = None
             else:
@@ -1195,22 +1192,18 @@ class MainApp(App):
 
         def on_success(req, result):
             global internet
-            #print "internet success"
             internet = True
 
         def on_redirect(req, result):
             global internet
-            #print "internet redirect"
             internet = True
 
         def on_failure(req, result):
             global internet
-            #print "internet failure"
             internet = False
 
         def on_error(req, result):
             global internet
-            #print "internet error"
             internet = False
 
         req = UrlRequest("http://google.com", on_success, on_redirect, on_failure, on_error, timeout=1)
@@ -1311,7 +1304,7 @@ class MainApp(App):
     def checkBlogforEVA(self, dt):
         iss_blog_url =  'https://blogs.nasa.gov/spacestation/tag/spacewalk/'
         def on_success(req, data): #if blog data is successfully received, it is processed here
-            print("Blog Success")
+            logWrite("Blog Success")
             soup = BeautifulSoup(data, "lxml")
             blog_entries = soup.find("div", {"class": "entry-content"})
             blog_text = blog_entries.get_text()
@@ -1319,7 +1312,7 @@ class MainApp(App):
             iss_EVcrew_url = 'https://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'
             
             def on_success2(req2, data2):
-                print("Successfully fetched EV crew JSON")
+                logWrite("Successfully fetched EV crew JSON")
                 number_of_space = int(data2['number'])
                 names = []
                 for num in range(0, number_of_space):
@@ -1328,29 +1321,28 @@ class MainApp(App):
                 try:
                     self.checkBlog(names,blog_text)
                 except Exception as e:
-                    print("Error checking blog: " + str(e))
+                    logWrite("Error checking blog: " + str(e))
                
-
             def on_redirect2(req, result):
-                print("Warning - Get EVA crew failure (redirect)")
-                print(result)
+                logWrite("Warning - Get EVA crew failure (redirect)")
+                logWrite(result)
 
             def on_failure2(req, result):
-                print("Warning - Get EVA crew failure (url failure)")
+                logWrite("Warning - Get EVA crew failure (url failure)")
 
             def on_error2(req, result):
-                print("Warning - Get EVA crew failure (url error)")
+                logWrite("Warning - Get EVA crew failure (url error)")
             
             req2 = UrlRequest(iss_EVcrew_url, on_success2, on_redirect2, on_failure2, on_error2, timeout=1)
 
         def on_redirect(req, result):
-            print("Warning - Get nasa blog failure (redirect)")
+            logWrite("Warning - Get nasa blog failure (redirect)")
 
         def on_failure(req, result):
-            print("Warning - Get nasa blog failure (url failure)")
+            logWrite("Warning - Get nasa blog failure (url failure)")
 
         def on_error(req, result):
-            print("Warning - Get nasa blog failure (url error)")
+            logWrite("Warning - Get nasa blog failure (url error)")
 
         req = UrlRequest(iss_blog_url, on_success, on_redirect, on_failure, on_error, timeout=1)
 
@@ -1377,8 +1369,8 @@ class MainApp(App):
                     name_position = blog_text.find(name)
                     ev2name = name
         
-        print("Likely EV1: "+ev1name)
-        print("Likely EV2: "+ev2name)
+        logWrite("Likely EV1: "+ev1name)
+        logWrite("Likely EV2: "+ev2name)
 
         ev1_surname = ev1name.split()[-1]
         ev1_firstname = ev1name.split()[0]
@@ -1388,7 +1380,7 @@ class MainApp(App):
         try:
             self.check_EVA_stats(ev1_surname,ev1_firstname,ev2_surname,ev2_firstname) 
         except Exception as e:
-            print("Error retrieving EVA stats: " + str(e))
+            logWrite("Error retrieving EVA stats: " + str(e))
     
     def flashUS_EVAbutton(self, instance):
         logWrite("Function call - flashUS_EVA")
@@ -1516,7 +1508,7 @@ class MainApp(App):
                 date_i += timedelta(minutes=10)
 
             self.orbit_screen.ids.TDRS12groundtrack.width = 1
-            self.orbit_screen.ids.TDRS12groundtrack.col = (1,1,0,1)
+            self.orbit_screen.ids.TDRS12groundtrack.col = (0,0,1,1)
             self.orbit_screen.ids.TDRS12groundtrack.points = TDRS12_groundtrack
 
         try:
@@ -1544,7 +1536,7 @@ class MainApp(App):
                 date_i += timedelta(minutes=10)
 
             self.orbit_screen.ids.TDRS6groundtrack.width = 1
-            self.orbit_screen.ids.TDRS6groundtrack.col = (1,1,0,1)
+            self.orbit_screen.ids.TDRS6groundtrack.col = (0,0,1,1)
             self.orbit_screen.ids.TDRS6groundtrack.points = TDRS6_groundtrack
 
         #TDRS West 2 sats
@@ -1573,7 +1565,7 @@ class MainApp(App):
                 date_i += timedelta(minutes=10)
 
             self.orbit_screen.ids.TDRS11groundtrack.width = 1
-            self.orbit_screen.ids.TDRS11groundtrack.col = (1,1,0,1)
+            self.orbit_screen.ids.TDRS11groundtrack.col = (0,0,1,1)
             self.orbit_screen.ids.TDRS11groundtrack.points = TDRS11_groundtrack
 
         try:
@@ -1601,7 +1593,7 @@ class MainApp(App):
                 date_i += timedelta(minutes=10)
 
             self.orbit_screen.ids.TDRS10groundtrack.width = 1
-            self.orbit_screen.ids.TDRS10groundtrack.col = (1,1,0,1)
+            self.orbit_screen.ids.TDRS10groundtrack.col = (0,0,1,1)
             self.orbit_screen.ids.TDRS10groundtrack.points = TDRS10_groundtrack
 
         #ZOE TDRS-Z
@@ -1630,7 +1622,7 @@ class MainApp(App):
                 date_i += timedelta(minutes=10)
 
             self.orbit_screen.ids.TDRS7groundtrack.width = 1
-            self.orbit_screen.ids.TDRS7groundtrack.col = (1,1,0,1)
+            self.orbit_screen.ids.TDRS7groundtrack.col = (0,0,1,1)
             self.orbit_screen.ids.TDRS7groundtrack.points = TDRS7_groundtrack
             
         #draw the TDRS satellite locations
@@ -1669,7 +1661,7 @@ class MainApp(App):
             new_y = ((MAP_HEIGHT / 180.0) * (90 + in_latitude))
             return {'new_y': new_y, 'new_x': new_x}
         
-        #copied from apexpy
+        #copied from apexpy - copyright 2015 Christer van der Meeren MIT license
         def subsolar(datetime):
             
             year = datetime.year
@@ -1740,7 +1732,15 @@ class MainApp(App):
             self.orbit_screen.ids.OrbitISStiny.pos = (
                     scaleLatLon2(latitude, longitude)['new_x'] - ((self.orbit_screen.ids.OrbitISStiny.width / 2) * normalizedX * 2), #had to fudge a little not sure why
                     scaleLatLon2(latitude, longitude)['new_y'] - ((self.orbit_screen.ids.OrbitISStiny.height / 2) * normalizedY * 2)) #had to fudge a little not sure why
+            
+            #get the position of the sub solar point to add the sun icon to the map
+            sunlatitude, sunlongitude = subsolar(datetime.utcnow())
 
+            self.orbit_screen.ids.OrbitSun.pos = (
+                    scaleLatLon2(int(sunlatitude), int(sunlongitude))['new_x'] - ((self.orbit_screen.ids.OrbitSun.width / 2) * normalizedX * 2), #had to fudge a little not sure why
+                    scaleLatLon2(int(sunlatitude), int(sunlongitude))['new_y'] - ((self.orbit_screen.ids.OrbitSun.height / 2) * normalizedY * 2)) #had to fudge a little not sure why
+
+            #draw the ISS groundtrack behind and ahead of the 180 longitude cutoff
             ISS_groundtrack = []
             ISS_groundtrack2 = []
             date_i = datetime.utcnow()
@@ -1789,27 +1789,21 @@ class MainApp(App):
             self.ct_sgant_screen.ids.tdrs_west10.angle = ((-1*longitude)-41)-130
             
             if ((tdrs1 or tdrs2) == 12) and float(aos) == 1.0:
-                #print("12")
                 tdrs = "east-12"
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East-12"
             if ((tdrs1 or tdrs2) == 6) and float(aos) == 1.0:
-                #print("6")
                 tdrs = "east-6"
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East-6"
             if ((tdrs1 or tdrs2) == 10) and float(aos) == 1.0:
-                #print("10")
                 tdrs = "west-10"
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West-10"
             if ((tdrs1 or tdrs2) == 11) and float(aos) == 1.0:
-                #print("11")
                 tdrs = "west-11"
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West-11"
             if ((tdrs1 or tdrs2) == 7) and float(aos) == 1.0:
-                #print("7")
                 tdrs = "z-7"
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-Z-7"
             elif tdrs1 == 0 and tdrs2 == 0:
-                #print("-")
                 self.ct_sgant_screen.ids.tdrs_label.text = "-"
                 tdrs = "----"
             
@@ -1884,12 +1878,6 @@ class MainApp(App):
 
                 tr, azr, tt, altt, ts, azs = pass_info
                 max_time = datetime_from_time(tt)
-                #print(tr) #time rise
-                #print(azr) #rise azimuth
-                #print(tt) #max height time
-                #print(altt) #max elevation
-                #print(ts) #set time
-                #print(azs) #set azimuth
 
                 location.date = max_time
 
@@ -1901,18 +1889,11 @@ class MainApp(App):
                 if ISS_TLE.eclipsed is False and -18 < sun_alt < -6:
                     visible = True
                 #on the pass screen add info for why not visible
-                #if ISS_TLE.eclipsed:
-                    #print("Not visible because ISS wil be in the Earth's shadow")
-                #if sun_alt > -6:
-                    #print("Not visible because the sun is not low enough")
-                #if sun_alt < -18:
-                    #print("Not visible because the sun is too low")
                 return visible
 
             ISS_TLE.compute(location) #compute tle propagation based on provided location
             nextpassinfo = location.next_pass(ISS_TLE)
 
-            #print nextpassinfo #might need to add try block to next line
             if nextpassinfo[0] == None:
                 self.orbit_screen.ids.iss_next_pass1.text = "n/a"
                 self.orbit_screen.ids.iss_next_pass2.text = "n/a"
@@ -1925,7 +1906,6 @@ class MainApp(App):
                 self.orbit_screen.ids.iss_next_pass1.text = str(localnextpass).split()[0] #display next pass time
                 self.orbit_screen.ids.iss_next_pass2.text = str(localnextpass).split()[1].split('-')[0] #display next pass time
                 timeuntilnextpass = nextpassinfo[0] - location.date
-                #print timeuntilnextpass
                 nextpasshours = timeuntilnextpass*24.0
                 nextpassmins = (nextpasshours-math.floor(nextpasshours))*60
                 nextpassseconds = (nextpassmins-math.floor(nextpassmins))*60
@@ -1957,13 +1937,11 @@ class MainApp(App):
             if len(results) > 0:
                 ISS_TLE_Line1 = results[1]
                 ISS_TLE_Line2 = results[2]
-                #print(ISS_TLE_Line1)
-                #print(ISS_TLE_Line2)
                 ISS_TLE = ephem.readtle("ISS (ZARYA)", str(ISS_TLE_Line1), str(ISS_TLE_Line2))
                 ISS_TLE_Acquired = True
-                print("ISS TLE Acquired!")
+                logWrite("ISS TLE Acquired!")
             else:
-                print("TLE Not Acquired")
+                logWrite("ISS TLE Not Acquired")
                 ISS_TLE_Acquired = False
 
         def on_redirect(req, result):
@@ -1990,12 +1968,10 @@ class MainApp(App):
                     break
 
             if len(results[1]) > 0:
-                #print(results[1])
-                #print(results[2])
                 TDRS12_TLE = ephem.readtle("TDRS 12", str(results[1]), str(results[2]))
-                print("TDRS 12 TLE Success!")
+                logWrite("TDRS 12 TLE Success!")
             else:
-                print("TDRS 12 TLE not acquired")
+                logWrite("TDRS 12 TLE not acquired")
             
             results = ['','','']
             body = iter(soup.get_text().split('\n'))
@@ -2008,12 +1984,10 @@ class MainApp(App):
                     break
 
             if len(results[1]) > 0:
-                #print(results[1])
-                #print(results[2])
                 TDRS6_TLE = ephem.readtle("TDRS 6", str(results[1]), str(results[2]))
-                print("TDRS 6 TLE Success!")
+                logWrite("TDRS 6 TLE Success!")
             else:
-                print("TDRS 6 TLE not acquired")
+                logWrite("TDRS 6 TLE not acquired")
             
             results = ['','','']
             body = iter(soup.get_text().split('\n'))
@@ -2026,12 +2000,10 @@ class MainApp(App):
                     break
 
             if len(results[1]) > 0:
-                #print(results[1])
-                #print(results[2])
                 TDRS11_TLE = ephem.readtle("TDRS 11", str(results[1]), str(results[2]))
-                print("TDRS 11 TLE Success!")
+                logWrite("TDRS 11 TLE Success!")
             else:
-                print("TDRS 11 TLE not acquired")
+                logWrite("TDRS 11 TLE not acquired")
             
             results = ['','','']
             body = iter(soup.get_text().split('\n'))
@@ -2044,12 +2016,10 @@ class MainApp(App):
                     break
 
             if len(results[1]) > 0:
-                #print(results[1])
-                #print(results[2])
                 TDRS10_TLE = ephem.readtle("TDRS 10", str(results[1]), str(results[2]))
-                print("TDRS 10 TLE Success!")
+                logWrite("TDRS 10 TLE Success!")
             else:
-                print("TDRS 10 TLE not acquired")
+                logWrite("TDRS 10 TLE not acquired")
             
             results = ['','','']
             body = iter(soup.get_text().split('\n'))
@@ -2062,12 +2032,10 @@ class MainApp(App):
                     break
 
             if len(results[1]) > 0:
-                #print(results[1])
-                #print(results[2])
                 TDRS7_TLE = ephem.readtle("TDRS 7", str(results[1]), str(results[2]))
-                print("TDRS 7 TLE Success!")
+                logWrite("TDRS 7 TLE Success!")
             else:
-                print("TDRS 7 TLE not acquired")
+                logWrite("TDRS 7 TLE not acquired")
 
         def on_redirect2(req2, result):
             logWrite("Warning - Get ISS TLE failure (redirect)")
@@ -3114,7 +3082,6 @@ class MainApp(App):
 #        if (difference > -10) and (isinstance(App.get_running_app().root_window.children[0], Popup)==False):
 #            LOSpopup = Popup(title='Loss of Signal', content=Label(text='Possible LOS Soon'), size_hint=(0.3, 0.2), auto_dismiss=True)
 #            LOSpopup.open()
-#            print "popup"
 
         ##-------------------Fake Orbit Simulator-------------------##
         self.fakeorbit_screen.ids.psarj.text = str(psarj)

@@ -14,6 +14,25 @@
             allow_stretch: False
             keep_ratio: True
         Widget:
+            id: OrbitSun
+            pos: (0-(self.width/2),0-(self.height/2))
+            size_hint: (None, None)
+            size: (50,50)
+            color: (0,1,1,1)
+            canvas:
+                PushMatrix:
+                Translate:
+                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
+                Scale:
+                    origin: 0,0
+                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
+                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
+                Rectangle:
+                    source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitSun.png'
+                    size: self.size
+                    pos: self.pos
+                PopMatrix:
+        Widget:
             id: mylocation
             col: (0,0,0,0)
             pos: (0-(self.width/2),0-(self.height/2))

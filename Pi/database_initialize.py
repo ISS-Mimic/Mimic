@@ -2,8 +2,7 @@ import sqlite3 #javascript stores telemetry in sqlite db
 import os
 
 #----------------Open SQLITE3 Database that holds the current ISS Telemetry--------------
-os.system('rm /dev/shm/iss_telemetry.db') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
-os.system('rm /dev/shm/tdrs.db') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
+os.system('rm /dev/shm/*') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
 
 conn = sqlite3.connect('/dev/shm/iss_telemetry.db')
 conn.isolation_level = None
