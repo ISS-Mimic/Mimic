@@ -817,6 +817,46 @@ class ManualControlScreen(Screen):
         serialWrite("Beta4A=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4a'",(args[0],));
         self.ids.statusbar.text = "Beta4A Value Sent: " + str(args[0])
+    
+    def send0(self, *args):
+        global psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1amc,beta1bmc,beta2amc,beta2bmc,beta3amc,beta3bmc,beta4amc,beta4bmc
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'psarj'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ssarj'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ptrrj'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'strrj'");
+        strrjmc = 0
+        ptrrjmc = 0
+        ssarjmc = 0
+        psarjmc = 0
+        beta1bmc = 0
+        beta1amc = 0
+        beta2bmc = 0
+        beta2amc = 0
+        beta3bmc = 0
+        beta3amc = 0
+        beta4bmc = 0
+        beta4amc = 0
+        self.ids.statusbar.text = "0 sent to all"
+        serialWrite("Beta1A=0 ")
+        serialWrite("Beta1B=0 ")
+        serialWrite("Beta2A=0 ")
+        serialWrite("Beta2B=0 ")
+        serialWrite("Beta3A=0 ")
+        serialWrite("Beta3B=0 ")
+        serialWrite("Beta4A=0 ")
+        serialWrite("Beta4B=0 ")
+        serialWrite("PSARJ=0 ")
+        serialWrite("SSARJ=0 ")
+        serialWrite("PTRRJ=0 ")
+        serialWrite("STRRJ=0 ")
 
     def send90(self, *args):
         global psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1amc,beta1bmc,beta2amc,beta2bmc,beta3amc,beta3bmc,beta4amc,beta4bmc
@@ -839,15 +879,24 @@ class ManualControlScreen(Screen):
         beta1bmc = 90
         beta1amc = 90
         beta2bmc = 90
-        serialWrite("Beta2B=0 ")
-        serialWrite("Beta3A=0 ")
-        serialWrite("Beta3B=0 ")
-        serialWrite("Beta4A=0 ")
-        serialWrite("Beta4B=0 ")
-        serialWrite("PSARJ=0 ")
-        serialWrite("SSARJ=0 ")
-        serialWrite("PTRRJ=0 ")
-        serialWrite("STRRJ=0 ")
+        beta2amc = 90
+        beta3bmc = 90
+        beta3amc = 90
+        beta4bmc = 90
+        beta4amc = 90
+        self.ids.statusbar.text = "90 sent to all"
+        serialWrite("Beta1A=90 ")
+        serialWrite("Beta1B=90 ")
+        serialWrite("Beta2A=90 ")
+        serialWrite("Beta2B=90 ")
+        serialWrite("Beta3A=90 ")
+        serialWrite("Beta3B=90 ")
+        serialWrite("Beta4A=90 ")
+        serialWrite("Beta4B=90 ")
+        serialWrite("PSARJ=90 ")
+        serialWrite("SSARJ=90 ")
+        serialWrite("PTRRJ=90 ")
+        serialWrite("STRRJ=90 ")
 
 class FakeOrbitScreen(Screen):
 
