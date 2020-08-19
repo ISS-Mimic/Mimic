@@ -7,6 +7,7 @@ from subprocess import Popen, PIPE, STDOUT #used to start/stop Javascript teleme
 import time #used for time
 import math #used for math
 import serial #used to send data over serial to arduino
+import serial.tools.list_ports
 import sqlite3
 import ephem #used for TLE orbit information on orbit screen
 import pytz #used for timezone conversion in orbit pass predictions
