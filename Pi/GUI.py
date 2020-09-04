@@ -53,6 +53,7 @@ SerialConnection2 = False
 SerialConnection3 = False
 SerialConnection4 = False
 SerialConnection5 = False
+SerialConnection6 = False
 
 try:
     ser = serial.Serial('/dev/ttyACM0', 9600, timeout=0)
@@ -106,8 +107,19 @@ except Exception:
     ser5 = None
 else:
     SerialConnection5 = True
-    logWrite("Successful connection to Serial on USBO")
+    logWrite("Successful connection to Serial on ACM3")
     print(str(ser5))
+    
+try:
+    ser6 = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
+except Exception:
+    #logWrite("Warning - Serial Connection USB0 not found")
+    SerialConnection6 = False
+    ser6 = None
+else:
+    SerialConnection6 = True
+    logWrite("Successful connection to Serial on USB0")
+    print(str(ser6))
 
 TDRSconn = sqlite3.connect('/dev/shm/tdrs.db')
 TDRSconn.isolation_level = None
@@ -917,7 +929,7 @@ class ManualControlScreen(Screen):
 
     def serialWrite(self, *args):
         #logWrite("Function call - serial write")
-        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
+        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, SerialConnection6, ser, ser2, ser3, ser4, ser5, ser6
         #print str(*args)
         if SerialConnection1:
             #ser.write(str.encode(*args))
@@ -966,6 +978,16 @@ class ManualControlScreen(Screen):
             except Exception:
                 ser5 = None
                 SerialConnection5 = False
+            else:
+                self.callback()
+            #    ser.write(str.encode(*args))
+        if SerialConnection6:
+            #ser6.write(str.encode(*args))
+            try:
+                ser6.write(str.encode(*args))
+            except Exception:
+                ser6 = None
+                SerialConnection6 = False
             else:
                 self.callback()
             #    ser.write(str.encode(*args))
@@ -1026,7 +1048,7 @@ class FakeOrbitScreen(Screen):
 
     def serialWrite(self, *args):
         #logWrite("Function call - serial write")
-        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
+        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, SerialConnection6, ser, ser2, ser3, ser4, ser5, ser6
 
         if SerialConnection1:
             #ser.write(str.encode(*args))
@@ -1071,6 +1093,15 @@ class FakeOrbitScreen(Screen):
             except Exception:
                 ser5 = None
                 SerialConnection5 = False
+            #else:
+            #    ser.write(str.encode(*args))
+        if SerialConnection6:
+            #ser6.write(str.encode(*args))
+            try:
+                ser6.write(str.encode(*args))
+            except Exception:
+                ser6 = None
+                SerialConnection6 = False
             #else:
             #    ser.write(str.encode(*args))
 
@@ -1257,7 +1288,7 @@ class MainApp(App):
         return root
 
     def check_serial(self, dt):
-        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
+        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, SerialConnection6, ser, ser2, ser3, ser4, ser5, ser6
 
         if ser == None:
             try:
@@ -1348,7 +1379,7 @@ class MainApp(App):
                 ser5 = None
             else:
                 SerialConnection5 = True
-                logWrite("Successful connection to Serial on USBO")
+                logWrite("Successful connection to Serial on ACM3")
                 print(str(ser5))
         else:
             try:
@@ -1359,6 +1390,27 @@ class MainApp(App):
             else:
                 SerialConnection5 = True
 
+        if ser6 == None:
+            try:
+                ser6 = serial.Serial('/dev/ttyUSB0', 9600, timeout=0)
+            except Exception:
+                #logWrite("Warning - Serial Connection USB0 not found")
+                SerialConnection6 = False
+                ser6 = None
+            else:
+                SerialConnection6 = True
+                logWrite("Successful connection to Serial on USB0")
+                print(str(ser6))
+        else:
+            try:
+                ser6.write(str.encode("test"))
+            except Exception:
+                SerialConnection6 = False
+                ser6 = None
+            else:
+                SerialConnection6 = True
+                
+                
     def check_internet(self, dt):
         global internet
 
@@ -1625,7 +1677,7 @@ class MainApp(App):
 
     def serialWrite(self, *args):
         #logWrite("Function call - serial write")
-        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
+        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, SerialConnection6, ser, ser2, ser3, ser4, ser5, ser6
 
         if SerialConnection1:
             #ser.write(str.encode(*args))
@@ -1670,6 +1722,15 @@ class MainApp(App):
             except Exception:
                 ser5 = None
                 SerialConnection5 = False
+            #else:
+            #    ser.write(str.encode(*args))
+        if SerialConnection6:
+            #ser6.write(str.encode(*args))
+            try:
+                ser6.write(str.encode(*args))
+            except Exception:
+                ser6 = None
+                SerialConnection6 = False
             #else:
             #    ser.write(str.encode(*args))
 
@@ -2459,7 +2520,7 @@ class MainApp(App):
 
     def update_labels(self, dt):
         global mimicbutton, switchtofake, demoboolean, runningDemo, fakeorbitboolean, psarj2, ssarj2, manualcontrol, aos, los, oldLOS, psarjmc, ssarjmc, ptrrjmc, strrjmc, beta1bmc, beta1amc, beta2bmc, beta2amc, beta3bmc, beta3amc, beta4bmc, beta4amc, US_EVAinProgress, position_x, position_y, position_z, velocity_x, velocity_y, velocity_z, altitude, velocity, iss_mass, testvalue, testfactor, airlock_pump, crewlockpres, leak_hold, firstcrossing, EVA_activities, repress, depress, oldAirlockPump, obtained_EVA_crew, EVAstartTime
-        global holdstartTime, LS_Subscription, SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5
+        global holdstartTime, LS_Subscription, SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, SerialConnection6
         global Disco, eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
         global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power
         global stationmode, sgant_elevation, sgant_xelevation
@@ -2477,6 +2538,8 @@ class MainApp(App):
             arduino_count+=1
         if SerialConnection5:
             arduino_count+=1
+        if SerialConnection6:
+            arduino_count+=1
 
         if arduino_count > 0:
             self.mimic_screen.ids.arduino_count.text = str(arduino_count)
@@ -2490,7 +2553,7 @@ class MainApp(App):
             self.fakeorbit_screen.ids.arduino.source = "/home/pi/Mimic/Pi/imgs/signal/arduino_offline.png"
             runningDemo = False
 
-        if SerialConnection1 or SerialConnection2 or SerialConnection3 or SerialConnection4 or SerialConnection5:
+        if SerialConnection1 or SerialConnection2 or SerialConnection3 or SerialConnection4 or SerialConnection5 or SerialConnection6:
             self.mimic_screen.ids.mimicstartbutton.disabled = False
             self.fakeorbit_screen.ids.DemoStart.disabled = False
             self.fakeorbit_screen.ids.HTVDemoStart.disabled = False
