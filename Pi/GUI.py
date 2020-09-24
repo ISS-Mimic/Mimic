@@ -7,8 +7,9 @@ from subprocess import Popen, PIPE, STDOUT #used to start/stop Javascript teleme
 import time #used for time
 import math #used for math
 import serial #used to send data over serial to arduino
-import serial.tools.list_ports
-import sqlite3
+import sys #used to get active serial ports
+import glob #used to parse serial port names
+import sqlite3 #used to access ISS telemetry database
 import ephem #used for TLE orbit information on orbit screen
 import pytz #used for timezone conversion in orbit pass predictions
 from bs4 import BeautifulSoup #used to parse webpages for data (EVA stats, ISS TLE)
@@ -45,51 +46,27 @@ def logWrite(*args):
 logWrite("Initialized Mimic Program Log")
 
 #-------------------------Look for a connected arduino-----------------------------------
-SerialConnection1 = False
-SerialConnection2 = False
-SerialConnection3 = False
-SerialConnection4 = False
-SerialConnection5 = False
-ser = None
-ser2 = None
-ser3 = None
-ser4 = None
-ser5 = None
+def serial_ports():
+    ports = glob.glob('/dev/tty[A-Za-z]*')
+    result = []
+    for port in ports:
+        try:
+            s = serial.Serial(port)
+            result.append(port)
+            #s.close() #do I need to close the port each time
+        except (OSError, serial.SerialException) as e:
+            pass
+    return result
 
 def serialWrite(*args): #
     logWrite("Function call - serial write: " + str(*args))
-    global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
-    if SerialConnection1:
+    for port in serial_ports():
         try:
+            ser = serial.Serial(port, 9600, write_timeout=0, timeout=0)
             ser.write(str.encode(*args))
-        except Exception:
-            ser = None
-            SerialConnection1 = False
-    if SerialConnection2:
-        try:
-            ser2.write(str.encode(*args))
-        except Exception:
-            ser2 = None
-            SerialConnection2 = False
-    if SerialConnection3:
-        try:
-            ser3.write(str.encode(*args))
-        except Exception:
-            ser3 = None
-            SerialConnection3 = False
-    if SerialConnection4:
-        try:
-            ser4.write(str.encode(*args))
-        except Exception:
-            ser4 = None
-            SerialConnection4 = False
-    if SerialConnection5:
-        try:
-            ser5.write(str.encode(*args))
-        except Exception:
-            ser5 = None
-            SerialConnection5 = False
-
+        except (OSError, serial.SerialException) as e:
+            print(e)
+            pass
 
 #-------------------------TDRS Checking Database-----------------------------------------
 TDRSconn = sqlite3.connect('/dev/shm/tdrs.db')
@@ -1127,115 +1104,12 @@ class MainApp(App):
         Clock.schedule_interval(self.getTLE, 300)
         Clock.schedule_interval(self.TDRSupdate, 600)
         Clock.schedule_interval(self.check_internet, 1)
-        Clock.schedule_interval(self.check_serial, 1)
         
         #schedule the orbitmap to update with shadow every 5 mins
         Clock.schedule_interval(self.updateNightShade, 120)
         Clock.schedule_interval(self.updateOrbitMap, 10)
         Clock.schedule_interval(self.checkTDRS, 5)
         return root
-
-    def check_serial(self, dt):
-        global SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5, ser, ser2, ser3, ser4, ser5
-
-        if ser == None:
-            try:
-                ser = serial.Serial('/dev/ttyACM0', 9600, write_timeout=0, timeout=0)
-            except Exception as e:
-                SerialConnection1 = False
-                ser = None
-            else:
-                SerialConnection1 = True
-                logWrite("Successful connection to Serial on ACMO")
-                print(str(ser))
-        else:
-            try:
-                ser.write(str.encode("test"))
-            except Exception as e:
-                SerialConnection1 = False
-                ser = None
-            else:
-                SerialConnection1 = True
-
-        if ser2 == None:
-            try:
-                ser2 = serial.Serial('/dev/ttyACM1', 9600, write_timeout=0, timeout=0)
-            except Exception:
-                #logWrite("Warning - Serial Connection ACM1 not found")
-                SerialConnection2 = False
-                ser2 = None
-            else:
-                SerialConnection2 = True
-                logWrite("Successful connection to Serial on ACM1")
-                print(str(ser2))
-        else:
-            try:
-                ser2.write(str.encode("test"))
-            except Exception:
-                SerialConnection2 = False
-                ser2 = None
-            else:
-                SerialConnection2 = True
-
-        if ser3 == None:
-            try:
-                ser3 = serial.Serial('/dev/ttyACM2', 9600, write_timeout=0, timeout=0)
-            except Exception:
-                #logWrite("Warning - Serial Connection ACM2 not found")
-                SerialConnection3 = False
-                ser3 = None
-            else:
-                SerialConnection3 = True
-                logWrite("Successful connection to Serial on ACM2")
-                print(str(ser3))
-        else:
-            try:
-                ser3.write(str.encode("test"))
-            except Exception:
-                SerialConnection3 = False
-                ser3 = None
-            else:
-                SerialConnection3 = True
-
-        if ser4 == None:
-            try:
-                ser4 = serial.Serial('/dev/ttyAMA00', 9600, write_timeout=0, timeout=0)
-            except Exception:
-                #logWrite("Warning - Serial Connection AMA00 not found")
-                SerialConnection4 = False
-                ser4 = None
-            else:
-                SerialConnection4 = True
-                logWrite("Successful connection to Serial on AMA0O")
-                print(str(ser4))
-        else:
-            try:
-                ser4.write(str.encode("test"))
-            except Exception:
-                SerialConnection4 = False
-                ser4 = None
-            else:
-                SerialConnection4 = True
-
-        if ser5 == None:
-            try:
-                ser5 = serial.Serial('/dev/ttyACM3', 9600, write_timeout=0, timeout=0)
-            except Exception:
-                #logWrite("Warning - Serial Connection ACM3 not found")
-                SerialConnection5 = False
-                ser5 = None
-            else:
-                SerialConnection5 = True
-                logWrite("Successful connection to Serial on USBO")
-                print(str(ser5))
-        else:
-            try:
-                ser5.write(str.encode("test"))
-            except Exception:
-                SerialConnection5 = False
-                ser5 = None
-            else:
-                SerialConnection5 = True
 
     def check_internet(self, dt):
         global internet
@@ -2315,24 +2189,14 @@ class MainApp(App):
 
     def update_labels(self, dt): #THIS IS THE IMPORTANT FUNCTION
         global mimicbutton, switchtofake, demoboolean, runningDemo, fakeorbitboolean, psarj2, ssarj2, manualcontrol, aos, los, oldLOS, psarjmc, ssarjmc, ptrrjmc, strrjmc, beta1bmc, beta1amc, beta2bmc, beta2amc, beta3bmc, beta3amc, beta4bmc, beta4amc, US_EVAinProgress, position_x, position_y, position_z, velocity_x, velocity_y, velocity_z, altitude, velocity, iss_mass, testvalue, testfactor, airlock_pump, crewlockpres, leak_hold, firstcrossing, EVA_activities, repress, depress, oldAirlockPump, obtained_EVA_crew, EVAstartTime
-        global holdstartTime, LS_Subscription, SerialConnection1, SerialConnection2, SerialConnection3, SerialConnection4, SerialConnection5
+        global holdstartTime, LS_Subscription
         global Disco, eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
         global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power
         global stationmode, sgant_elevation, sgant_xelevation
         global tdrs, module
         global old_mt_timestamp, old_mt_position, mt_speed
 
-        arduino_count = 0
-        if SerialConnection1:
-            arduino_count+=1
-        if SerialConnection2:
-            arduino_count+=1
-        if SerialConnection3:
-            arduino_count+=1
-        if SerialConnection4:
-            arduino_count+=1
-        if SerialConnection5:
-            arduino_count+=1
+        arduino_count = len(serial_ports())-1
 
         if arduino_count > 0:
             self.mimic_screen.ids.arduino_count.text = str(arduino_count)
@@ -2346,7 +2210,7 @@ class MainApp(App):
             self.fakeorbit_screen.ids.arduino.source = "/home/pi/Mimic/Pi/imgs/signal/arduino_offline.png"
             runningDemo = False
 
-        if SerialConnection1 or SerialConnection2 or SerialConnection3 or SerialConnection4 or SerialConnection5:
+        if arduino_count > 0:
             self.mimic_screen.ids.mimicstartbutton.disabled = False
             self.fakeorbit_screen.ids.DemoStart.disabled = False
             self.fakeorbit_screen.ids.HTVDemoStart.disabled = False
