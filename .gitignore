@@ -8,3 +8,4 @@ pylint3*
 test.js
 logtest.py
 Pi/__pycache__/
+Pi/imgs/orbit/map.jpg
