@@ -27,12 +27,14 @@ void setup()
   pinMode(ledRedPin, OUTPUT);
   pinMode(ledBluePin, OUTPUT);
   pinMode(ledGreenPin, OUTPUT);
-  Serial1.begin(9600);
+//  Serial1.begin(9600);
   Serial.begin(9600);
   Serial.setTimeout(50);
   portIEA.begin();
+  stbdIEA.begin();
   moduleLED.begin();
   portIEA.show();
+  stbdIEA.show();
   moduleLED.show();
   allSet_module(moduleLED.Color(255,0,0),5);
 }
@@ -372,7 +374,7 @@ void checkSerial()
     test = Serial.readStringUntil('\n');
     //test = Serial.readString();
   }
-  Serial1.println(test);
+//  Serial1.println(test);
   
   char sz[test.length() + 1];
   char copy[test.length() + 1];
@@ -434,7 +436,7 @@ void checkSerial()
       module = (test2.substring(delimeter+1));
     }
   }
-  Serial1.println();
+//  Serial1.println();
 }
 
 //module led functions
