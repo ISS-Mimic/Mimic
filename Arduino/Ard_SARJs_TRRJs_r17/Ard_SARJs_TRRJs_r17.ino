@@ -131,7 +131,8 @@ void motorfnc(struct joints &myJoint) {
   if ((myJoint.CmdSpeed < 40) && (myJoint.CmdSpeed > 5)) { // We want a dead space at 5 counts, but want it to move for larger vals.
     myJoint.CmdSpeed = 40;
   }
-  myJoint.CmdSpeed = max(min(myJoint.CmdSpeed, 250), 0); // At least 10, at most 250.  Update as needed per motor.
+//  myJoint.CmdSpeed = max(min(myJoint.CmdSpeed, 250), 0); // At least 10, at most 250.  Update as needed per motor.
+  myJoint.CmdSpeed = max(min(myJoint.CmdSpeed, 200), 0); // At least 10, at most 250.  Dialing down the max umph
 }
 void motorNULL(struct joints &myJoint) {
     myJoint.PosErr = 0;

@@ -218,7 +218,7 @@ void loop() {
     Serial.print(",D17: ");
     Serial.print(D17);
 
-    Serial.print("| PosErrs ");
+    Serial.print("| PosErrs Prt;Stbd: ");
     //    Serial.print(PosErr_B2A);
     //    Serial.print(", ");
     //    Serial.print(PosErr_B4A);
@@ -230,7 +230,13 @@ void loop() {
     Serial.print(sarj_port.PosErr);
     Serial.print(", ");
     Serial.print(sarj_stbd.PosErr);
-    //
+   //    Serial.print(", ");
+     Serial.print("| CmdSpd Prt;Stbd: ");
+    Serial.print(sarj_port.CmdSpeed);
+    Serial.print(", ");
+    Serial.print(sarj_stbd.CmdSpeed);
+
+     //
     //    Serial.print(", ");
     //    Serial.print("Integer Mtr Spd Cmd to Shield(PortSrj):");
     //    Serial.print(CmdSpeed_PSARJ);
