@@ -62,7 +62,7 @@ def serialWrite(*args): #
     logWrite("Function call - serial write: " + str(*args))
     for port in serial_ports():
         try:
-            ser = serial.Serial(port, 9600, write_timeout=0, timeout=0)
+            ser = serial.Serial(port, 57600, write_timeout=0, timeout=0)
             ser.write(str.encode(*args))
         except (OSError, serial.SerialException) as e:
             print(e)
@@ -100,14 +100,14 @@ obtained_EVA_crew = False
 unixconvert = time.gmtime(time.time())
 EVAstartTime = float(unixconvert[7])*24+unixconvert[3]+float(unixconvert[4])/60+float(unixconvert[5])/3600
 alternate = True
-Beta4Bcontrol = False
-Beta3Bcontrol = False
-Beta2Bcontrol = False
-Beta1Bcontrol = False
-Beta4Acontrol = False
-Beta3Acontrol = False
-Beta2Acontrol = False
-Beta1Acontrol = False
+B4Bcontrol = False
+B3Bcontrol = False
+B2Bcontrol = False
+B1Bcontrol = False
+B4Acontrol = False
+B3Acontrol = False
+B2Acontrol = False
+B1Acontrol = False
 PSARJcontrol = False
 SSARJcontrol = False
 PTRRJcontrol = False
@@ -228,14 +228,14 @@ class ManualControlScreen(Screen):
 
     def callback(self):
         global psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1amc,beta1bmc,beta2amc,beta2bmc,beta3amc,beta3bmc,beta4amc,beta4bmc
-        self.ids.Beta4B_Button.text = "4B\n" + str(math.trunc(beta4bmc))
-        self.ids.Beta4A_Button.text = "4A\n" + str(math.trunc(beta4amc))
-        self.ids.Beta3B_Button.text = "3B\n" + str(math.trunc(beta3bmc))
-        self.ids.Beta3A_Button.text = "3A\n" + str(math.trunc(beta3amc))
-        self.ids.Beta2B_Button.text = "2B\n" + str(math.trunc(beta2bmc))
-        self.ids.Beta2A_Button.text = "2A\n" + str(math.trunc(beta2amc))
-        self.ids.Beta1B_Button.text = "1B\n" + str(math.trunc(beta1bmc))
-        self.ids.Beta1A_Button.text = "1A\n" + str(math.trunc(beta1amc))
+        self.ids.B4B_Button.text = "4B\n" + str(math.trunc(beta4bmc))
+        self.ids.B4A_Button.text = "4A\n" + str(math.trunc(beta4amc))
+        self.ids.B3B_Button.text = "3B\n" + str(math.trunc(beta3bmc))
+        self.ids.B3A_Button.text = "3A\n" + str(math.trunc(beta3amc))
+        self.ids.B2B_Button.text = "2B\n" + str(math.trunc(beta2bmc))
+        self.ids.B2A_Button.text = "2A\n" + str(math.trunc(beta2amc))
+        self.ids.B1B_Button.text = "1B\n" + str(math.trunc(beta1bmc))
+        self.ids.B1A_Button.text = "1A\n" + str(math.trunc(beta1amc))
         self.ids.PSARJ_Button.text = "PSARJ " + str(math.trunc(psarjmc))
         self.ids.SSARJ_Button.text = "SSARJ " + str(math.trunc(ssarjmc))
         self.ids.PTRRJ_Button.text = "PTRRJ\n" + str(math.trunc(ptrrjmc))
@@ -267,327 +267,327 @@ class ManualControlScreen(Screen):
         self.callback()
     
     def setActive(self, *args):
-        global Beta4Bcontrol, Beta3Bcontrol, Beta2Bcontrol, Beta1Bcontrol, Beta4Acontrol, Beta3Acontrol, Beta2Acontrol, Beta1Acontrol, PSARJcontrol, SSARJcontrol, PTRRJcontrol, STRRJcontrol
-        if str(args[0])=="Beta4B":
-            Beta4Bcontrol = True
-            Beta4Acontrol = False
-            Beta3Bcontrol = False
-            Beta3Acontrol = False
-            Beta2Bcontrol = False
-            Beta2Acontrol = False
-            Beta1Bcontrol = False
-            Beta1Acontrol = False
+        global B4Bcontrol, B3Bcontrol, B2Bcontrol, B1Bcontrol, B4Acontrol, B3Acontrol, B2Acontrol, B1Acontrol, PSARJcontrol, SSARJcontrol, PTRRJcontrol, STRRJcontrol
+        if str(args[0])=="B4B":
+            B4Bcontrol = True
+            B4Acontrol = False
+            B3Bcontrol = False
+            B3Acontrol = False
+            B2Bcontrol = False
+            B2Acontrol = False
+            B1Bcontrol = False
+            B1Acontrol = False
             PSARJcontrol = False
             SSARJcontrol = False
             PTRRJcontrol = False
             STRRJcontrol = False
-            self.ids.Beta4B_Button.background_color = (0, 0, 1, 1)
-            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B4B_Button.background_color = (0, 0, 1, 1)
+            self.ids.B4A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B3B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B3A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B2B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B2A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B1B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B1A_Button.background_color = (1, 1, 1, 1)
             self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
             self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
             self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
             self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
-        if str(args[0])=="Beta3B":
-            Beta3Bcontrol = True
-            Beta4Bcontrol = False
-            Beta4Acontrol = False
-            Beta3Acontrol = False
-            Beta2Bcontrol = False
-            Beta2Acontrol = False
-            Beta1Bcontrol = False
-            Beta1Acontrol = False
+        if str(args[0])=="B3B":
+            B3Bcontrol = True
+            B4Bcontrol = False
+            B4Acontrol = False
+            B3Acontrol = False
+            B2Bcontrol = False
+            B2Acontrol = False
+            B1Bcontrol = False
+            B1Acontrol = False
             PSARJcontrol = False
             SSARJcontrol = False
             PTRRJcontrol = False
             STRRJcontrol = False
-            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3B_Button.background_color = (0, 0, 1, 1)
-            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B4B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B4A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B3B_Button.background_color = (0, 0, 1, 1)
+            self.ids.B3A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B2B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B2A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B1B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B1A_Button.background_color = (1, 1, 1, 1)
             self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
             self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
             self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
             self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
-        if str(args[0])=="Beta2B":
-            Beta2Bcontrol = True
-            Beta4Bcontrol = False
-            Beta4Acontrol = False
-            Beta3Bcontrol = False
-            Beta3Acontrol = False
-            Beta2Acontrol = False
-            Beta1Bcontrol = False
-            Beta1Acontrol = False
+        if str(args[0])=="B2B":
+            B2Bcontrol = True
+            B4Bcontrol = False
+            B4Acontrol = False
+            B3Bcontrol = False
+            B3Acontrol = False
+            B2Acontrol = False
+            B1Bcontrol = False
+            B1Acontrol = False
             PSARJcontrol = False
             SSARJcontrol = False
             PTRRJcontrol = False
             STRRJcontrol = False
-            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2B_Button.background_color = (0, 0, 1, 1)
-            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B4B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B4A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B3B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B3A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B2B_Button.background_color = (0, 0, 1, 1)
+            self.ids.B2A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B1B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B1A_Button.background_color = (1, 1, 1, 1)
             self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
             self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
             self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
             self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
-        if str(args[0])=="Beta1B":
-            Beta1Bcontrol = True
-            Beta4Bcontrol = False
-            Beta4Acontrol = False
-            Beta3Bcontrol = False
-            Beta3Acontrol = False
-            Beta2Bcontrol = False
-            Beta2Acontrol = False
-            Beta1Acontrol = False
+        if str(args[0])=="B1B":
+            B1Bcontrol = True
+            B4Bcontrol = False
+            B4Acontrol = False
+            B3Bcontrol = False
+            B3Acontrol = False
+            B2Bcontrol = False
+            B2Acontrol = False
+            B1Acontrol = False
             PSARJcontrol = False
             SSARJcontrol = False
             PTRRJcontrol = False
             STRRJcontrol = False
-            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1B_Button.background_color = (0, 0, 1, 1)
-            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B4B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B4A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B3B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B3A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B2B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B2A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B1B_Button.background_color = (0, 0, 1, 1)
+            self.ids.B1A_Button.background_color = (1, 1, 1, 1)
             self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
             self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
             self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
             self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
-        if str(args[0])=="Beta4A":
-            Beta4Acontrol = True
-            Beta4Bcontrol = False
-            Beta3Bcontrol = False
-            Beta3Acontrol = False
-            Beta2Bcontrol = False
-            Beta2Acontrol = False
-            Beta1Bcontrol = False
-            Beta1Acontrol = False
+        if str(args[0])=="B4A":
+            B4Acontrol = True
+            B4Bcontrol = False
+            B3Bcontrol = False
+            B3Acontrol = False
+            B2Bcontrol = False
+            B2Acontrol = False
+            B1Bcontrol = False
+            B1Acontrol = False
             PSARJcontrol = False
             SSARJcontrol = False
             PTRRJcontrol = False
             STRRJcontrol = False
-            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta4A_Button.background_color = (0, 0, 1, 1)
-            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B4B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B4A_Button.background_color = (0, 0, 1, 1)
+            self.ids.B3B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B3A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B2B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B2A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B1B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B1A_Button.background_color = (1, 1, 1, 1)
             self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
             self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
             self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
             self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
-        if str(args[0])=="Beta3A":
-            Beta3Acontrol = True
-            Beta4Bcontrol = False
-            Beta4Acontrol = False
-            Beta3Bcontrol = False
-            Beta2Bcontrol = False
-            Beta2Acontrol = False
-            Beta1Bcontrol = False
-            Beta1Acontrol = False
+        if str(args[0])=="B3A":
+            B3Acontrol = True
+            B4Bcontrol = False
+            B4Acontrol = False
+            B3Bcontrol = False
+            B2Bcontrol = False
+            B2Acontrol = False
+            B1Bcontrol = False
+            B1Acontrol = False
             PSARJcontrol = False
             SSARJcontrol = False
             PTRRJcontrol = False
             STRRJcontrol = False
-            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3A_Button.background_color = (0, 0, 1, 1)
-            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B4B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B4A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B3B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B3A_Button.background_color = (0, 0, 1, 1)
+            self.ids.B2B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B2A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B1B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B1A_Button.background_color = (1, 1, 1, 1)
             self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
             self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
             self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
             self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
-        if str(args[0])=="Beta2A":
-            Beta2Acontrol = True
-            Beta4Bcontrol = False
-            Beta4Acontrol = False
-            Beta3Bcontrol = False
-            Beta3Acontrol = False
-            Beta2Bcontrol = False
-            Beta1Bcontrol = False
-            Beta1Acontrol = False
+        if str(args[0])=="B2A":
+            B2Acontrol = True
+            B4Bcontrol = False
+            B4Acontrol = False
+            B3Bcontrol = False
+            B3Acontrol = False
+            B2Bcontrol = False
+            B1Bcontrol = False
+            B1Acontrol = False
             PSARJcontrol = False
             SSARJcontrol = False
             PTRRJcontrol = False
             STRRJcontrol = False
-            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2A_Button.background_color = (0, 0, 1, 1)
-            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B4B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B4A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B3B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B3A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B2B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B2A_Button.background_color = (0, 0, 1, 1)
+            self.ids.B1B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B1A_Button.background_color = (1, 1, 1, 1)
             self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
             self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
             self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
             self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
-        if str(args[0])=="Beta1A":
-            Beta1Acontrol = True
-            Beta4Bcontrol = False
-            Beta4Acontrol = False
-            Beta3Bcontrol = False
-            Beta3Acontrol = False
-            Beta2Bcontrol = False
-            Beta2Acontrol = False
-            Beta1Bcontrol = False
+        if str(args[0])=="B1A":
+            B1Acontrol = True
+            B4Bcontrol = False
+            B4Acontrol = False
+            B3Bcontrol = False
+            B3Acontrol = False
+            B2Bcontrol = False
+            B2Acontrol = False
+            B1Bcontrol = False
             PSARJcontrol = False
             SSARJcontrol = False
             PTRRJcontrol = False
             STRRJcontrol = False
-            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1A_Button.background_color = (0, 0, 1, 1)
+            self.ids.B4B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B4A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B3B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B3A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B2B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B2A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B1B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B1A_Button.background_color = (0, 0, 1, 1)
             self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
             self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
             self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
             self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
         if str(args[0])=="PTRRJ":
             PTRRJcontrol = True
-            Beta4Bcontrol = False
-            Beta4Acontrol = False
-            Beta3Bcontrol = False
-            Beta3Acontrol = False
-            Beta2Bcontrol = False
-            Beta2Acontrol = False
-            Beta1Bcontrol = False
-            Beta1Acontrol = False
+            B4Bcontrol = False
+            B4Acontrol = False
+            B3Bcontrol = False
+            B3Acontrol = False
+            B2Bcontrol = False
+            B2Acontrol = False
+            B1Bcontrol = False
+            B1Acontrol = False
             PSARJcontrol = False
             SSARJcontrol = False
             STRRJcontrol = False
-            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B4B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B4A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B3B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B3A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B2B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B2A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B1B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B1A_Button.background_color = (1, 1, 1, 1)
             self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
             self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
             self.ids.PTRRJ_Button.background_color = (0, 0, 1, 1)
             self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
         if str(args[0])=="STRRJ":
             STRRJcontrol = True
-            Beta4Bcontrol = False
-            Beta4Acontrol = False
-            Beta3Bcontrol = False
-            Beta3Acontrol = False
-            Beta2Bcontrol = False
-            Beta2Acontrol = False
-            Beta1Bcontrol = False
-            Beta1Acontrol = False
+            B4Bcontrol = False
+            B4Acontrol = False
+            B3Bcontrol = False
+            B3Acontrol = False
+            B2Bcontrol = False
+            B2Acontrol = False
+            B1Bcontrol = False
+            B1Acontrol = False
             PSARJcontrol = False
             SSARJcontrol = False
             PTRRJcontrol = False
-            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B4B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B4A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B3B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B3A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B2B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B2A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B1B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B1A_Button.background_color = (1, 1, 1, 1)
             self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
             self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
             self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
             self.ids.STRRJ_Button.background_color = (0, 0, 1, 1)
         if str(args[0])=="PSARJ":
             PSARJcontrol = True
-            Beta4Bcontrol = False
-            Beta4Acontrol = False
-            Beta3Bcontrol = False
-            Beta3Acontrol = False
-            Beta2Bcontrol = False
-            Beta2Acontrol = False
-            Beta1Bcontrol = False
-            Beta1Acontrol = False
+            B4Bcontrol = False
+            B4Acontrol = False
+            B3Bcontrol = False
+            B3Acontrol = False
+            B2Bcontrol = False
+            B2Acontrol = False
+            B1Bcontrol = False
+            B1Acontrol = False
             SSARJcontrol = False
             PTRRJcontrol = False
             STRRJcontrol = False
-            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B4B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B4A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B3B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B3A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B2B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B2A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B1B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B1A_Button.background_color = (1, 1, 1, 1)
             self.ids.PSARJ_Button.background_color = (0, 0, 1, 1)
             self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
             self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
             self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
         if str(args[0])=="SSARJ":
             SSARJcontrol = True
-            Beta4Bcontrol = False
-            Beta4Acontrol = False
-            Beta3Bcontrol = False
-            Beta3Acontrol = False
-            Beta2Bcontrol = False
-            Beta2Acontrol = False
-            Beta1Bcontrol = False
-            Beta1Acontrol = False
+            B4Bcontrol = False
+            B4Acontrol = False
+            B3Bcontrol = False
+            B3Acontrol = False
+            B2Bcontrol = False
+            B2Acontrol = False
+            B1Bcontrol = False
+            B1Acontrol = False
             PSARJcontrol = False
             PTRRJcontrol = False
             STRRJcontrol = False
-            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B4B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B4A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B3B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B3A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B2B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B2A_Button.background_color = (1, 1, 1, 1)
+            self.ids.B1B_Button.background_color = (1, 1, 1, 1)
+            self.ids.B1A_Button.background_color = (1, 1, 1, 1)
             self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
             self.ids.SSARJ_Button.background_color = (0, 0, 1, 1)
             self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
             self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
 
     def incrementActive(self, *args):
-        global Beta4Bcontrol, Beta3Bcontrol, Beta2Bcontrol, Beta1Bcontrol, Beta4Acontrol, Beta3Acontrol, Beta2Acontrol, Beta1Acontrol, PSARJcontrol, SSARJcontrol, PTRRJcontrol, STRRJcontrol
+        global B4Bcontrol, B3Bcontrol, B2Bcontrol, B1Bcontrol, B4Acontrol, B3Acontrol, B2Acontrol, B1Acontrol, PSARJcontrol, SSARJcontrol, PTRRJcontrol, STRRJcontrol
 
-        if Beta4Bcontrol:
-            self.incrementBeta4B(float(args[0]))
-        if Beta3Bcontrol:
-            self.incrementBeta3B(float(args[0]))
-        if Beta2Bcontrol:
-            self.incrementBeta2B(float(args[0]))
-        if Beta1Bcontrol:
-            self.incrementBeta1B(float(args[0]))
-        if Beta4Acontrol:
-            self.incrementBeta4A(float(args[0]))
-        if Beta3Acontrol:
-            self.incrementBeta3A(float(args[0]))
-        if Beta2Acontrol:
-            self.incrementBeta2A(float(args[0]))
-        if Beta1Acontrol:
-            self.incrementBeta1A(float(args[0]))
+        if B4Bcontrol:
+            self.incrementB4B(float(args[0]))
+        if B3Bcontrol:
+            self.incrementB3B(float(args[0]))
+        if B2Bcontrol:
+            self.incrementB2B(float(args[0]))
+        if B1Bcontrol:
+            self.incrementB1B(float(args[0]))
+        if B4Acontrol:
+            self.incrementB4A(float(args[0]))
+        if B3Acontrol:
+            self.incrementB3A(float(args[0]))
+        if B2Acontrol:
+            self.incrementB2A(float(args[0]))
+        if B1Acontrol:
+            self.incrementB1A(float(args[0]))
         if PTRRJcontrol:
             self.incrementPTRRJ(float(args[0]))
         if STRRJcontrol:
@@ -626,83 +626,83 @@ class ManualControlScreen(Screen):
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'strrj'",(strrjmc,));
         self.ids.statusbar.text = "STRRJ Value Sent: " + str(strrjmc)
 
-    def incrementBeta1B(self, *args):
+    def incrementB1B(self, *args):
         global beta1bmc
         beta1bmc += args[0]
-        serialWrite("Beta1B=" + str(beta1bmc) + " ")
+        serialWrite("B1B=" + str(beta1bmc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1b'",(beta1bmc,));
-        self.ids.statusbar.text = "Beta1B Value Sent: " + str(beta1bmc)
+        self.ids.statusbar.text = "B1B Value Sent: " + str(beta1bmc)
 
-    def incrementBeta1A(self, *args):
+    def incrementB1A(self, *args):
         global beta1amc
         beta1amc += args[0]
-        serialWrite("Beta1A=" + str(beta1amc) + " ")
+        serialWrite("B1A=" + str(beta1amc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1a'",(beta1amc,));
-        self.ids.statusbar.text = "Beta1A Value Sent: " + str(beta1amc)
+        self.ids.statusbar.text = "B1A Value Sent: " + str(beta1amc)
 
-    def incrementBeta2B(self, *args):
+    def incrementB2B(self, *args):
         global beta2bmc
         beta2bmc += args[0]
-        serialWrite("Beta2B=" + str(beta2bmc) + " ")
+        serialWrite("B2B=" + str(beta2bmc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2b'",(beta2bmc,));
-        self.ids.statusbar.text = "Beta2B Value Sent: " + str(beta2bmc)
+        self.ids.statusbar.text = "B2B Value Sent: " + str(beta2bmc)
 
-    def incrementBeta2A(self, *args):
+    def incrementB2A(self, *args):
         global beta2amc
         beta2amc += args[0]
-        serialWrite("Beta2A=" + str(beta2amc) + " ")
+        serialWrite("B2A=" + str(beta2amc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2a'",(beta2amc,));
-        self.ids.statusbar.text = "Beta2A Value Sent: " + str(beta2amc)
+        self.ids.statusbar.text = "B2A Value Sent: " + str(beta2amc)
 
-    def incrementBeta3B(self, *args):
+    def incrementB3B(self, *args):
         global beta3bmc
         beta3bmc += args[0]
-        serialWrite("Beta3B=" + str(beta3bmc) + " ")
+        serialWrite("B3B=" + str(beta3bmc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3b'",(beta3bmc,));
-        self.ids.statusbar.text = "Beta3B Value Sent: " + str(beta3bmc)
+        self.ids.statusbar.text = "B3B Value Sent: " + str(beta3bmc)
 
-    def incrementBeta3A(self, *args):
+    def incrementB3A(self, *args):
         global beta3amc
         beta3amc += args[0]
-        serialWrite("Beta3A=" + str(beta3amc) + " ")
+        serialWrite("B3A=" + str(beta3amc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3a'",(beta3amc,));
-        self.ids.statusbar.text = "Beta3A Value Sent: " + str(beta3amc)
+        self.ids.statusbar.text = "B3A Value Sent: " + str(beta3amc)
 
-    def incrementBeta4B(self, *args):
+    def incrementB4B(self, *args):
         global beta4bmc
         beta4bmc += args[0]
-        serialWrite("Beta4B=" + str(beta4bmc) + " ")
+        serialWrite("B4B=" + str(beta4bmc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4b'",(beta4bmc,));
-        self.ids.statusbar.text = "Beta4B Value Sent: " + str(beta4bmc)
+        self.ids.statusbar.text = "B4B Value Sent: " + str(beta4bmc)
 
-    def incrementBeta4A(self, *args):
+    def incrementB4A(self, *args):
         global beta4amc
         beta4amc += args[0]
-        serialWrite("Beta4A=" + str(beta4amc) + " ")
+        serialWrite("B4A=" + str(beta4amc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4a'",(beta4amc,));
-        self.ids.statusbar.text = "Beta4A Value Sent: " + str(beta4amc)
+        self.ids.statusbar.text = "B4A Value Sent: " + str(beta4amc)
 
     def changeBoolean(self, *args):
         global manualcontrol
         manualcontrol = args[0]
     
     def sendActive(self, *args):
-        if Beta4Bcontrol:
-            self.sendBeta4B(float(args[0]))
-        if Beta3Bcontrol:
-            self.sendBeta3B(float(args[0]))
-        if Beta2Bcontrol:
-            self.sendBeta2B(float(args[0]))
-        if Beta1Bcontrol:
-            self.sendBeta1B(float(args[0]))
-        if Beta4Acontrol:
-            self.sendBeta4A(float(args[0]))
-        if Beta3Acontrol:
-            self.sendBeta3A(float(args[0]))
-        if Beta2Acontrol:
-            self.sendBeta2A(float(args[0]))
-        if Beta1Acontrol:
-            self.sendBeta1A(float(args[0]))
+        if B4Bcontrol:
+            self.sendB4B(float(args[0]))
+        if B3Bcontrol:
+            self.sendB3B(float(args[0]))
+        if B2Bcontrol:
+            self.sendB2B(float(args[0]))
+        if B1Bcontrol:
+            self.sendB1B(float(args[0]))
+        if B4Acontrol:
+            self.sendB4A(float(args[0]))
+        if B3Acontrol:
+            self.sendB3A(float(args[0]))
+        if B2Acontrol:
+            self.sendB2A(float(args[0]))
+        if B1Acontrol:
+            self.sendB1A(float(args[0]))
         if PTRRJcontrol:
             self.sendPTRRJ(float(args[0]))
         if STRRJcontrol:
@@ -740,61 +740,61 @@ class ManualControlScreen(Screen):
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'strrj'",(args[0],));
         self.ids.statusbar.text = "STRRJ Value Sent: " + str(args[0])
 
-    def sendBeta1B(self, *args):
+    def sendB1B(self, *args):
         global beta1bmc
         beta1bmc = args[0]
-        serialWrite("Beta1B=" + str(args[0]) + " ")
+        serialWrite("B1B=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1b'",(args[0],));
-        self.ids.statusbar.text = "Beta1B Value Sent: " + str(args[0])
+        self.ids.statusbar.text = "B1B Value Sent: " + str(args[0])
 
-    def sendBeta1A(self, *args):
+    def sendB1A(self, *args):
         global beta1amc
         beta1amc = args[0]
-        serialWrite("Beta1A=" + str(args[0]) + " ")
+        serialWrite("B1A=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1a'",(args[0],));
-        self.ids.statusbar.text = "Beta1A Value Sent: " + str(args[0])
+        self.ids.statusbar.text = "B1A Value Sent: " + str(args[0])
 
-    def sendBeta2B(self, *args):
+    def sendB2B(self, *args):
         global beta2bmc
         beta2bmc = args[0]
-        serialWrite("Beta2B=" + str(args[0]) + " ")
+        serialWrite("B2B=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2b'",(args[0],));
-        self.ids.statusbar.text = "Beta2B Value Sent: " + str(args[0])
+        self.ids.statusbar.text = "B2B Value Sent: " + str(args[0])
 
-    def sendBeta2A(self, *args):
+    def sendB2A(self, *args):
         global beta2amc
         beta2amc = args[0]
-        serialWrite("Beta2A=" + str(args[0]) + " ")
+        serialWrite("B2A=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2a'",(args[0],));
-        self.ids.statusbar.text = "Beta2A Value Sent: " + str(args[0])
+        self.ids.statusbar.text = "B2A Value Sent: " + str(args[0])
 
-    def sendBeta3B(self, *args):
+    def sendB3B(self, *args):
         global beta3bmc
         beta3bmc = args[0]
-        serialWrite("Beta3B=" + str(args[0]) + " ")
+        serialWrite("B3B=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3b'",(args[0],));
-        self.ids.statusbar.text = "Beta3B Value Sent: " + str(args[0])
+        self.ids.statusbar.text = "B3B Value Sent: " + str(args[0])
 
-    def sendBeta3A(self, *args):
+    def sendB3A(self, *args):
         global beta3amc
         beta3amc = args[0]
-        serialWrite("Beta3A=" + str(args[0]) + " ")
+        serialWrite("B3A=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3a'",(args[0],));
-        self.ids.statusbar.text = "Beta3A Value Sent: " + str(args[0])
+        self.ids.statusbar.text = "B3A Value Sent: " + str(args[0])
 
-    def sendBeta4B(self, *args):
+    def sendB4B(self, *args):
         global beta4bmc
         beta4bmc = args[0]
-        serialWrite("Beta4B=" + str(args[0]) + " ")
+        serialWrite("B4B=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4b'",(args[0],));
-        self.ids.statusbar.text = "Beta4B Value Sent: " + str(args[0])
+        self.ids.statusbar.text = "B4B Value Sent: " + str(args[0])
 
-    def sendBeta4A(self, *args):
+    def sendB4A(self, *args):
         global beta4amc
         beta4amc = args[0]
-        serialWrite("Beta4A=" + str(args[0]) + " ")
+        serialWrite("B4A=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4a'",(args[0],));
-        self.ids.statusbar.text = "Beta4A Value Sent: " + str(args[0])
+        self.ids.statusbar.text = "B4A Value Sent: " + str(args[0])
     
     def send0(self, *args):
         global psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1amc,beta1bmc,beta2amc,beta2bmc,beta3amc,beta3bmc,beta4amc,beta4bmc
@@ -823,14 +823,14 @@ class ManualControlScreen(Screen):
         beta4bmc = 0
         beta4amc = 0
         self.ids.statusbar.text = "0 sent to all"
-        serialWrite("Beta1A=0 ")
-        serialWrite("Beta1B=0 ")
-        serialWrite("Beta2A=0 ")
-        serialWrite("Beta2B=0 ")
-        serialWrite("Beta3A=0 ")
-        serialWrite("Beta3B=0 ")
-        serialWrite("Beta4A=0 ")
-        serialWrite("Beta4B=0 ")
+        serialWrite("B1A=0 ")
+        serialWrite("B1B=0 ")
+        serialWrite("B2A=0 ")
+        serialWrite("B2B=0 ")
+        serialWrite("B3A=0 ")
+        serialWrite("B3B=0 ")
+        serialWrite("B4A=0 ")
+        serialWrite("B4B=0 ")
         serialWrite("PSARJ=0 ")
         serialWrite("SSARJ=0 ")
         serialWrite("PTRRJ=0 ")
@@ -863,14 +863,14 @@ class ManualControlScreen(Screen):
         beta4bmc = 90
         beta4amc = 90
         self.ids.statusbar.text = "90 sent to all"
-        serialWrite("Beta1A=90 ")
-        serialWrite("Beta1B=90 ")
-        serialWrite("Beta2A=90 ")
-        serialWrite("Beta2B=90 ")
-        serialWrite("Beta3A=90 ")
-        serialWrite("Beta3B=90 ")
-        serialWrite("Beta4A=90 ")
-        serialWrite("Beta4B=90 ")
+        serialWrite("B1A=90 ")
+        serialWrite("B1B=90 ")
+        serialWrite("B2A=90 ")
+        serialWrite("B2B=90 ")
+        serialWrite("B3A=90 ")
+        serialWrite("B3B=90 ")
+        serialWrite("B4A=90 ")
+        serialWrite("B4B=90 ")
         serialWrite("PSARJ=90 ")
         serialWrite("SSARJ=90 ")
         serialWrite("PTRRJ=90 ")
@@ -3017,14 +3017,14 @@ class MainApp(App):
             serialWrite("SSARJ=" + str(ssarj) + " ")
             serialWrite("PTRRJ=" + str(ptrrj) + " ")
             serialWrite("STRRJ=" + str(strrj) + " ")
-            serialWrite("Beta1B=" + str(beta1b) + " ")
-            serialWrite("Beta1A=" + str(beta1a) + " ")
-            serialWrite("Beta2B=" + str(beta2b) + " ")
-            serialWrite("Beta2A=" + str(beta2a) + " ")
-            serialWrite("Beta3B=" + str(beta3b) + " ")
-            serialWrite("Beta3A=" + str(beta3a) + " ")
-            serialWrite("Beta4B=" + str(beta4b) + " ")
-            serialWrite("Beta4A=" + str(beta4a) + " ")
+            serialWrite("B1B=" + str(beta1b) + " ")
+            serialWrite("B1A=" + str(beta1a) + " ")
+            serialWrite("B2B=" + str(beta2b) + " ")
+            serialWrite("B2A=" + str(beta2a) + " ")
+            serialWrite("B3B=" + str(beta3b) + " ")
+            serialWrite("B3A=" + str(beta3a) + " ")
+            serialWrite("B4B=" + str(beta4b) + " ")
+            serialWrite("B4A=" + str(beta4a) + " ")
 
         self.eps_screen.ids.psarj_value.text = psarj + "deg"
         self.eps_screen.ids.ssarj_value.text = ssarj + "deg"
@@ -3089,30 +3089,30 @@ class MainApp(App):
             serialWrite("SSARJ=" + ssarj + " ")
             serialWrite("PTRRJ=" + ptrrj + " ")
             serialWrite("STRRJ=" + strrj + " ")
-            serialWrite("Beta1B=" + beta1b + " ")
-            serialWrite("Beta1A=" + beta1a + " ")
-            serialWrite("Beta2B=" + beta2b + " ")
-            serialWrite("Beta2A=" + beta2a + " ")
-            serialWrite("Beta3B=" + beta3b + " ")
-            serialWrite("Beta3A=" + beta3a + " ")
-            serialWrite("Beta4B=" + beta4b + " ")
-            serialWrite("Beta4A=" + beta4a + " ")
+            serialWrite("B1B=" + beta1b + " ")
+            serialWrite("B1A=" + beta1a + " ")
+            serialWrite("B2B=" + beta2b + " ")
+            serialWrite("B2A=" + beta2a + " ")
+            serialWrite("B3B=" + beta3b + " ")
+            serialWrite("B3A=" + beta3a + " ")
+            serialWrite("B4B=" + beta4b + " ")
+            serialWrite("B4A=" + beta4a + " ")
             serialWrite("AOS=" + aos + " ")
-            serialWrite("Voltage1A=" + v1a + " ")
-            serialWrite("Voltage2A=" + v2a + " ")
-            serialWrite("Voltage3A=" + v3a + " ")
-            serialWrite("Voltage4A=" + v4a + " ")
-            serialWrite("Voltage1B=" + v1b + " ")
-            serialWrite("Voltage2B=" + v2b + " ")
-            serialWrite("Voltage3B=" + v3b + " ")
-            serialWrite("Voltage4B=" + v4b + " ")
-            serialWrite("SGANT_El_deg=" + str(int(sgant_elevation)) + " ")
-            serialWrite("SGANT_xEl_deg=" + str(int(sgant_xelevation)) + " ")
-            serialWrite("SGANT_Transmit=" + str(int(sgant_transmit)) + " ")
+            serialWrite("V1A=" + v1a + " ")
+            serialWrite("V2A=" + v2a + " ")
+            serialWrite("V3A=" + v3a + " ")
+            serialWrite("V4A=" + v4a + " ")
+            serialWrite("V1B=" + v1b + " ")
+            serialWrite("V2B=" + v2b + " ")
+            serialWrite("V3B=" + v3b + " ")
+            serialWrite("V4B=" + v4b + " ")
+            serialWrite("Sgnt_el=" + str(int(sgant_elevation)) + " ")
+            serialWrite("Sgnt_xel=" + str(int(sgant_xelevation)) + " ")
+            serialWrite("Sgnt_xmit=" + str(int(sgant_transmit)) + " ")
 
         #data to send regardless of signal status
         if mimicbutton:
-            serialWrite("Module=" + module + " ")
+            serialWrite("iss=" + module + " ")
 
 #All GUI Screens are on separate kv files
 Builder.load_file('/home/pi/Mimic/Pi/Screens/Settings_Screen.kv')
