@@ -1,0 +1,11 @@
+File -> Import (select PNG image)
+
+png bitmap image import options -> change image rendering mode to "smooth", click ok
+
+top menu, click path -> "trace bitmap"
+
+select "brightness cutoff" and set to 0.990, click ok (dialogue box doesnt go away, have to close it)
+
+now delete the PNG imported image (the one which looks pixelated when you zoom in)
+
+save as SVG? might set the stroke to off (under fill/stroke options)
