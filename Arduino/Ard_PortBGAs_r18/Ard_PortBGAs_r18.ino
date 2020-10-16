@@ -255,7 +255,7 @@ void setup() {
   AFMS.begin(200);  // I set this at 200 previously to reduce audible buzz.
 //  AFMS2.begin(200);  // I set this at 200 previously to reduce audible buzz.
 
-  Serial.begin(57600);
+  Serial.begin(9600);
   //Serial3.begin(115200);          //Serial1 is connected to the RasPi
   Serial.setTimeout(50);
 
