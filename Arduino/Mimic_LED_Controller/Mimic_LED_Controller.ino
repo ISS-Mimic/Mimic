@@ -402,8 +402,7 @@ void loop()
   }
   if(Disco)
   {
-    theaterChaseRainbow_portIEA(50);
-    theaterChaseRainbow_stbdIEA(50);
+    theaterChaseRainbow_disco(50);
   }
   Disco = false;
 }
@@ -518,7 +517,25 @@ void theaterChaseRainbow_stbdIEA(uint8_t wait) {
     }
   }
 }
+void theaterChaseRainbow_disco(uint8_t wait) {
+  for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
+    for (int q=0; q < 3; q++) {
+      for (uint16_t i=0; i < stbdIEA.numPixels(); i=i+3) {
+        stbdIEA.setPixelColor(i+q, Wheel_stbdIEA( (i+j) % 255));    //turn every third pixel on
+        portIEA.setPixelColor(i+q, Wheel_portIEA( (i+j) % 255));    //turn every third pixel on
+      }
+      stbdIEA.show();
+      portIEA.show();
 
+      delay(wait);
+
+      for (uint16_t i=0; i < stbdIEA.numPixels(); i=i+3) {
+        stbdIEA.setPixelColor(i+q, 0);        //turn every third pixel off
+        portIEA.setPixelColor(i+q, 0);        //turn every third pixel off
+      }
+    }
+  }
+}
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
 uint32_t Wheel_stbdIEA(byte WheelPos) {
