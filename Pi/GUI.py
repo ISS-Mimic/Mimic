@@ -71,6 +71,7 @@ def serialWrite(*args): #
 
     try:
         ser1.write(str.encode(*args))
+        #print("serial")
     except (OSError, serial.SerialException) as e:
         print(e)
         pass
@@ -2010,7 +2011,7 @@ class MainApp(App):
         req2 = UrlRequest(tdrs_tle_url, on_success2, on_redirect2, on_failure2, on_error2, timeout=1)
 
     def checkCrew(self, dt):
-        iss_crew_url = 'http://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'
+        iss_crew_url = 'https://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'
         urlsuccess = False
 
         def on_success(req, data):
@@ -2103,6 +2104,8 @@ class MainApp(App):
 
         def on_redirect(req, result):
             logWrite("Warning - checkCrew JSON failure (redirect)")
+            logWrite(result)
+            print(result)
 
         def on_failure(req, result):
             logWrite("Warning - checkCrew JSON failure (url failure)")
