@@ -3053,18 +3053,7 @@ class MainApp(App):
             if Disco:
                 serialWrite("Disco ")
                 Disco = False
-            serialWrite("PSARJ=" + str(psarj) + " ")
-            serialWrite("SSARJ=" + str(ssarj) + " ")
-            serialWrite("PTRRJ=" + str(ptrrj) + " ")
-            serialWrite("STRRJ=" + str(strrj) + " ")
-            serialWrite("B1B=" + str(beta1b) + " ")
-            serialWrite("B1A=" + str(beta1a) + " ")
-            serialWrite("B2B=" + str(beta2b) + " ")
-            serialWrite("B2A=" + str(beta2a) + " ")
-            serialWrite("B3B=" + str(beta3b) + " ")
-            serialWrite("B3A=" + str(beta3a) + " ")
-            serialWrite("B4B=" + str(beta4b) + " ")
-            serialWrite("B4A=" + str(beta4a) + " ")
+            serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "V1A=" + v1a + " " + "V2A=" + v2a + " " + "V3A=" + v3a + " " + "V4A=" + v4a + " " + "V1B=" + v1b + " " + "V2B=" + v2b + " " + "V3B=" + v3b + " " + "V4B=" + v4b + " ")
 
         self.eps_screen.ids.psarj_value.text = psarj + "deg"
         self.eps_screen.ids.ssarj_value.text = ssarj + "deg"
