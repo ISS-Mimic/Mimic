@@ -75,7 +75,7 @@ struct joints
 //joints sarj_stbd = {10, 1, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 joints sarj_port = {5, 1, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-joints sarj_stbd = {5, 1, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+joints sarj_stbd = {2, 1, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};  // Starboard side is more peppy than Port, for some reason (gear box friction?) so dialing down the Proportional Gain (Kp) for it.
 
 void motorfnc(struct joints &myJoint) {
   
@@ -129,8 +129,8 @@ void motorfnc(struct joints &myJoint) {
   myJoint.tmpSpeed = myJoint.Kp * myJoint.PosErr + myJoint.Kd * (myJoint.dErrDt) + myJoint.Ki * myJoint.IntNow;
   // Deadband seems to be about 40 (for 5V input to motor board);
   myJoint.CmdSpeed = abs(myJoint.tmpSpeed);
-  if ((myJoint.CmdSpeed < 40) && (myJoint.CmdSpeed > 5)) { // We want a dead space at 5 counts, but want it to move for larger vals.
-    myJoint.CmdSpeed = 40;
+  if ((myJoint.CmdSpeed < 20) && (myJoint.CmdSpeed > 5)) { // We want a dead space at 5 counts, but want it to move for larger vals. \\ changed from 40 to 20
+    myJoint.CmdSpeed = 20;
   }
 //  myJoint.CmdSpeed = max(min(myJoint.CmdSpeed, 250), 0); // At least 10, at most 250.  Update as needed per motor.
 //  myJoint.CmdSpeed = max(min(myJoint.CmdSpeed, 200), 0); // At least 10, at most 250.  Dialing down the max umph

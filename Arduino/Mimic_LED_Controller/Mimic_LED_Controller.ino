@@ -5,10 +5,8 @@
 Adafruit_NeoPixel stbdIEA = Adafruit_NeoPixel(24, 5, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel portIEA = Adafruit_NeoPixel(24, 6, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel moduleLED = Adafruit_NeoPixel(16, 7, NEO_GRB + NEO_KHZ800);
-const int ledRedPin = 13;
-const int ledBluePin = 52;
-const int ledGreenPin = 53;
-String test;
+
+String readData;
 
 double V1A = 0.00;
 double V1B = 0.00;
@@ -18,16 +16,13 @@ double V2A = 0.00;
 double V2B = 0.00;
 double V4A = 0.00;
 double V4B = 0.00;
+  
 String module = "unset module";
 boolean Disco = false;
 int NULLIFY = 0;
 
 void setup()
 {
-  pinMode(ledRedPin, OUTPUT);
-  pinMode(ledBluePin, OUTPUT);
-  pinMode(ledGreenPin, OUTPUT);
-//  Serial1.begin(9600);
   Serial.begin(9600);
   Serial.setTimeout(50);
   portIEA.begin();
@@ -43,75 +38,121 @@ void setup()
 
 void loop()
 {
-  digitalWrite(ledRedPin, LOW);
-  digitalWrite(ledGreenPin, LOW);
-  digitalWrite(ledBluePin, LOW);
-  //wSerial1.println("-------");
-  if(Serial.available())
+  //Process any incoming serial data
+  readData = "";
+  if(Serial.available() > 0)
   {
-    checkSerial();
+    readData = Serial.readString();
   }
-  allSet_module(moduleLED.Color(0,0,0),0);
-  //Serial1.println(module);
+  delay(100);
+  Serial.flush();
+  
+  char sz[readData.length() + 1];
+  char copy[readData.length() + 1];
+  strcpy(sz, readData.c_str());  
+  char *p = sz;
+  char *str;
+  int delimeter = 0;
+  String readData2 = ""; 
+  Serial2.println(readData);
+  
+  //Split up string into substrings separated by spaces
+  //Go through each substring and extract data
+  while((str = strtok_r(p," ",&p))!=NULL)
+  {
+    readData2 = String(str);
+    //Serial.println(readData2);
+    delimeter = readData2.indexOf('=');
+    if(readData2.substring(0,delimeter)=="Disco")
+    {
+      Disco = true; 
+    }
+    else if (readData2.substring(0, delimeter) == "NULLIFY")
+    {
+      NULLIFY = int((readData2.substring(delimeter + 1)).toFloat());
+    }
+    if(readData2.substring(0,delimeter)=="V2A")
+    {
+      V2A = (readData2.substring(delimeter+1)).toFloat();
+    }
+    else if(readData2.substring(0,delimeter)=="V2B")
+    {
+      V2B = (readData2.substring(delimeter+1)).toFloat();
+    }
+    else if(readData2.substring(0,delimeter)=="V4A")
+    {
+      V4A = (readData2.substring(delimeter+1)).toFloat();
+    }
+    else if(readData2.substring(0,delimeter)=="V4B")
+    {
+      V4B = (readData2.substring(delimeter+1)).toFloat();
+    }
+    else if(readData2.substring(0,delimeter)=="V1A")
+    {
+      V1A = (readData2.substring(delimeter+1)).toFloat();
+    }
+    else if(readData2.substring(0,delimeter)=="V1B")
+    {
+      V1B = (readData2.substring(delimeter+1)).toFloat();
+    }
+    else if(readData2.substring(0,delimeter)=="V3A")
+    {
+      V3A = (readData2.substring(delimeter+1)).toFloat();
+    }
+    else if(readData2.substring(0,delimeter)=="V3B")
+    {
+      V3B = (readData2.substring(delimeter+1)).toFloat();
+    }
+    //module Selection
+    else if(readData2.substring(0,delimeter)=="ISS")
+    {
+      module = String((readData2.substring(delimeter+1)));
+    }
+  }
+
+  module.trim(); //trim whitespace off serial data
+
   if(module == "SM")
   {
     moduleLED.setPixelColor(0, moduleLED.Color(255,255,255));
-    moduleLED.show();
-    //Serial1.println("SM");
   }
   else if(module == "FGB")
   {
     moduleLED.setPixelColor(1, moduleLED.Color(255,255,255));
-    moduleLED.show();
-    //Serial1.println("FGB");
   }
   else if(module == "Node1")
   {
     moduleLED.setPixelColor(2, moduleLED.Color(255,255,255));
-    moduleLED.show();
-    //Serial1.println("Node1");
   }
   else if(module == "Node2")
   {
     moduleLED.setPixelColor(6, moduleLED.Color(255,255,255));
-    moduleLED.show();
-    //Serial1.println("Node2");
   }
   else if(module == "Node3")
   {
     moduleLED.setPixelColor(4, moduleLED.Color(255,255,255));
-    moduleLED.show();
-    //Serial1.println("Node3");
   }
   else if(module == "AL")
   {
     moduleLED.setPixelColor(3, moduleLED.Color(255,255,255));
-    moduleLED.show();
-    //Serial1.println("AL");
   }
   else if(module == "USL")
   {
     moduleLED.setPixelColor(5, moduleLED.Color(255,255,255));
-    moduleLED.show();
-    //Serial1.println("USL");
   }
   else if(module == "Col")
   {
     moduleLED.setPixelColor(7, moduleLED.Color(255,255,255));
-    moduleLED.show();
-    //Serial1.println("Col");
   }
   else if(module == "JEM")
   {
     moduleLED.setPixelColor(8, moduleLED.Color(255,255,255));
-    moduleLED.show();
-    //Serial1.println("JEM");
   }
   else
   {
     allSet_module(moduleLED.Color(0,0,0),0);
-    moduleLED.show();
   }
+  moduleLED.show();
   
   if(V2A < 151.5)
   {
@@ -361,84 +402,9 @@ void loop()
   }
   if(Disco)
   {
-    theaterChaseRainbow_portIEA(50);
-    theaterChaseRainbow_stbdIEA(50);
+    theaterChaseRainbow_disco(50);
   }
   Disco = false;
-}
-void checkSerial()
-{
-  digitalWrite(ledBluePin, HIGH);
-  test = "";
-  
-  while(Serial.available() > 0)  
-  {
-    test = Serial.readStringUntil('\n');
-    //test = Serial.readString();
-  }
-  //Serial.println(test);
-  
-  char sz[test.length() + 1];
-  char copy[test.length() + 1];
-  strcpy(sz, test.c_str());  
-  char *p = sz;
-  char *str;
-  int delimeter = 0;
-  String test2 = ""; 
-  
-  while((str = strtok_r(p," ",&p))!=NULL)
-  {
-    test2 = String(str);
-    delimeter = test2.indexOf('=');
-    if(test2.substring(0,delimeter)=="Disco")
-    {
-      Disco = true; 
-    }
-    else if (test2.substring(0, delimeter) == "NULLIFY")
-    {
-      NULLIFY = int((test2.substring(delimeter + 1)).toFloat());
-      //Serial.println(" Got the NULL cmd over Serial...");
-    }
-    if(test2.substring(0,delimeter)=="V2A")
-    {
-      V2A = (test2.substring(delimeter+1)).toFloat();
-    }
-    else if(test2.substring(0,delimeter)=="V2B")
-    {
-      V2B = (test2.substring(delimeter+1)).toFloat();
-    }
-    else if(test2.substring(0,delimeter)=="V4A")
-    {
-      V4A = (test2.substring(delimeter+1)).toFloat();
-    }
-    else if(test2.substring(0,delimeter)=="V4B")
-    {
-      V4B = (test2.substring(delimeter+1)).toFloat();
-    }
-    else if(test2.substring(0,delimeter)=="V1A")
-    {
-      V1A = (test2.substring(delimeter+1)).toFloat();
-    }
-    else if(test2.substring(0,delimeter)=="V1B")
-    {
-      V1B = (test2.substring(delimeter+1)).toFloat();
-    }
-    else if(test2.substring(0,delimeter)=="V3A")
-    {
-      V3A = (test2.substring(delimeter+1)).toFloat();
-    }
-    else if(test2.substring(0,delimeter)=="V3B")
-    {
-      V3B = (test2.substring(delimeter+1)).toFloat();
-    }
-    //module Selection
-    else if(test2.substring(0,delimeter)=="ISS")
-    {
-      //Serial1.println("----Module!------");
-      module = (test2.substring(delimeter+1));
-    }
-  }
-//  Serial1.println();
 }
 
 //module led functions
@@ -551,7 +517,25 @@ void theaterChaseRainbow_stbdIEA(uint8_t wait) {
     }
   }
 }
+void theaterChaseRainbow_disco(uint8_t wait) {
+  for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
+    for (int q=0; q < 3; q++) {
+      for (uint16_t i=0; i < stbdIEA.numPixels(); i=i+3) {
+        stbdIEA.setPixelColor(i+q, Wheel_stbdIEA( (i+j) % 255));    //turn every third pixel on
+        portIEA.setPixelColor(i+q, Wheel_portIEA( (i+j) % 255));    //turn every third pixel on
+      }
+      stbdIEA.show();
+      portIEA.show();
 
+      delay(wait);
+
+      for (uint16_t i=0; i < stbdIEA.numPixels(); i=i+3) {
+        stbdIEA.setPixelColor(i+q, 0);        //turn every third pixel off
+        portIEA.setPixelColor(i+q, 0);        //turn every third pixel off
+      }
+    }
+  }
+}
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
 uint32_t Wheel_stbdIEA(byte WheelPos) {
