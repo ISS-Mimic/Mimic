@@ -13,7 +13,7 @@ import sqlite3 #used to access ISS telemetry database
 import ephem #used for TLE orbit information on orbit screen
 import pytz #used for timezone conversion in orbit pass predictions
 from bs4 import BeautifulSoup #used to parse webpages for data (EVA stats, ISS TLE)
-import threading #need to send time intensive basemap stuff to background thread
+import threading #trying to send serial write to other thread
 import kivy
 from kivy.app import App
 from kivy.lang import Builder
@@ -77,18 +77,21 @@ def serialWrite(*args): #
 
     try:
         ser2.write(str.encode(*args))
+        #print("serial")
     except (OSError, serial.SerialException) as e:
         print(e)
         pass
 
     try:
         ser3.write(str.encode(*args))
+        #print("serial")
     except (OSError, serial.SerialException) as e:
         print(e)
         pass
     
     try:
         ser4.write(str.encode(*args))
+        #print("serial")
     except (OSError, serial.SerialException) as e:
         print(e)
         pass
