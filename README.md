@@ -12,7 +12,7 @@ The telemetry is awesome in and of itself. But we wanted to do something more wi
 
 The project is still a work in progress. We have a "finished" model that works, with all 12 motors turning correctly and able to sync with live data. However we want to increase the fidelity and when it is more mature we will provide all the STL files and original CAD files to everyone to do whatever they want with. The software is still a work in progress to, but from the standpoint of receiving telemetry and transmitting it to the arduinos, the basic functionality is finished. The finishing touches on the software are all for visualizing the telemetry.
 
-![Functional but not pretty model!](https://i.imgur.com/oBrJCd2.jpg)
+![Functional but not pretty model!](https://i.imgur.com/OlkpRSA.jpg)
 
 DISCLAIMER - We are not professional programmers. We are just a group of dedicated ISS program employees and enthusiasts trying to share our love of the space program through this awesome project. All the code maintained here was created to work toward our specific goal, and much of it was using languages that none of us had used before. You may find the structure, style, and lack of comments to be completely novice and infuriating. You may scream out in frustration, laugh in disgust, or even weep at the obfuscated nonsense appearing before your eyes. 
 
