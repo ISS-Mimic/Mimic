@@ -4,7 +4,7 @@ add file names of all telemetry identifiers to code
 change time factor if desired
 change sql database path from dummy value
 
-might need to instal boost and sqlite cpp libraries via sudo
+might need to install boost and sqlite cpp libraries via sudo
 
 once done with changes, recompile as directed above. 
 
