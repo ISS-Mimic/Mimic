@@ -114,7 +114,7 @@ conn.isolation_level = None
 c = conn.cursor()
 
 def staleTelemetry():
-    c.execute("UPDATE telemetry SET Value = 'Unsubscribed' where Label = 'Lightstreamer'");
+    c.execute("UPDATE telemetry SET Value = 'Unsubscribed' where Label = 'Lightstreamer'")
 #----------------------------------Variables---------------------------------------------
 LS_Subscription = False
 isslocationsuccess = False
@@ -280,25 +280,25 @@ class ManualControlScreen(Screen):
     def zeroJoints(self):
         global psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1amc,beta1bmc,beta2amc,beta2bmc,beta3amc,beta3bmc,beta4amc,beta4bmc
         serialWrite("NULLIFY=1 ")
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1a'")
         beta1amc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1b'")
         beta1bmc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2a'")
         beta2amc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2b'")
         beta2bmc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3a'")
         beta3amc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3b'")
         beta3bmc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4a'")
         beta4amc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4b'")
         beta4bmc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'psarj'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'psarj'")
         psarjmc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ssarj'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ssarj'")
         ssarjmc = 0.00
         self.callback()
 
@@ -638,84 +638,84 @@ class ManualControlScreen(Screen):
         global psarjmc
         psarjmc += args[0]
         serialWrite("PSARJ=" + str(psarjmc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'psarj'",(psarjmc,));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'psarj'",(psarjmc,))
         self.ids.statusbar.text = "PSARJ Value Sent: " + str(psarjmc)
 
     def incrementSSARJ(self, *args):
         global ssarjmc
         ssarjmc += args[0]
         serialWrite("SSARJ=" + str(ssarjmc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'ssarj'",(ssarjmc,));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'ssarj'",(ssarjmc,))
         self.ids.statusbar.text = "SSARJ Value Sent: " + str(ssarjmc)
 
     def incrementPTRRJ(self, *args):
         global ptrrjmc
         ptrrjmc += args[0]
         serialWrite("PTRRJ=" + str(ptrrjmc) + " ")
-        c.execute("UPDATE telemetry  SET Value = ? WHERE Label = 'ptrrj'",(ptrrjmc,));
+        c.execute("UPDATE telemetry  SET Value = ? WHERE Label = 'ptrrj'",(ptrrjmc,))
         self.ids.statusbar.text = "PTRRJ Value Sent: " + str(ptrrjmc)
 
     def incrementSTRRJ(self, *args):
         global strrjmc
         strrjmc += args[0]
         serialWrite("STRRJ=" + str(strrjmc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'strrj'",(strrjmc,));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'strrj'",(strrjmc,))
         self.ids.statusbar.text = "STRRJ Value Sent: " + str(strrjmc)
 
     def incrementBeta1B(self, *args):
         global beta1bmc
         beta1bmc += args[0]
         serialWrite("B1B=" + str(beta1bmc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1b'",(beta1bmc,));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1b'",(beta1bmc,))
         self.ids.statusbar.text = "Beta1B Value Sent: " + str(beta1bmc)
 
     def incrementBeta1A(self, *args):
         global beta1amc
         beta1amc += args[0]
         serialWrite("B1A=" + str(beta1amc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1a'",(beta1amc,));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1a'",(beta1amc,))
         self.ids.statusbar.text = "Beta1A Value Sent: " + str(beta1amc)
 
     def incrementBeta2B(self, *args):
         global beta2bmc
         beta2bmc += args[0]
         serialWrite("B2B=" + str(beta2bmc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2b'",(beta2bmc,));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2b'",(beta2bmc,))
         self.ids.statusbar.text = "Beta2B Value Sent: " + str(beta2bmc)
 
     def incrementBeta2A(self, *args):
         global beta2amc
         beta2amc += args[0]
         serialWrite("B2A=" + str(beta2amc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2a'",(beta2amc,));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2a'",(beta2amc,))
         self.ids.statusbar.text = "Beta2A Value Sent: " + str(beta2amc)
 
     def incrementBeta3B(self, *args):
         global beta3bmc
         beta3bmc += args[0]
         serialWrite("B3B=" + str(beta3bmc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3b'",(beta3bmc,));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3b'",(beta3bmc,))
         self.ids.statusbar.text = "Beta3B Value Sent: " + str(beta3bmc)
 
     def incrementBeta3A(self, *args):
         global beta3amc
         beta3amc += args[0]
         serialWrite("B3A=" + str(beta3amc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3a'",(beta3amc,));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3a'",(beta3amc,))
         self.ids.statusbar.text = "Beta3A Value Sent: " + str(beta3amc)
 
     def incrementBeta4B(self, *args):
         global beta4bmc
         beta4bmc += args[0]
         serialWrite("B4B=" + str(beta4bmc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4b'",(beta4bmc,));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4b'",(beta4bmc,))
         self.ids.statusbar.text = "Beta4B Value Sent: " + str(beta4bmc)
 
     def incrementBeta4A(self, *args):
         global beta4amc
         beta4amc += args[0]
         serialWrite("B4A=" + str(beta4amc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4a'",(beta4amc,));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4a'",(beta4amc,))
         self.ids.statusbar.text = "Beta4A Value Sent: " + str(beta4amc)
 
     def changeBoolean(self, *args):
@@ -752,100 +752,100 @@ class ManualControlScreen(Screen):
         global psarjmc
         psarjmc = args[0]
         serialWrite("PSARJ=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'psarj'",(args[0],));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'psarj'",(args[0],))
         self.ids.statusbar.text = "PSARJ Value Sent: " + str(args[0])
 
     def sendSSARJ(self, *args):
         global ssarjmc
         ssarjmc = args[0]
         serialWrite("SSARJ=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'ssarj'",(args[0],));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'ssarj'",(args[0],))
         self.ids.statusbar.text = "SSARJ Value Sent: " + str(args[0])
 
     def sendPTRRJ(self, *args):
         global ptrrjmc
         ptrrjmc = args[0]
         serialWrite("PTRRJ=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry  SET Value = ? WHERE Label = 'ptrrj'",(args[0],));
+        c.execute("UPDATE telemetry  SET Value = ? WHERE Label = 'ptrrj'",(args[0],))
         self.ids.statusbar.text = "PTRRJ Value Sent: " + str(args[0])
 
     def sendSTRRJ(self, *args):
         global strrjmc
         strrjmc = args[0]
         serialWrite("STRRJ=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'strrj'",(args[0],));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'strrj'",(args[0],))
         self.ids.statusbar.text = "STRRJ Value Sent: " + str(args[0])
 
     def sendBeta1B(self, *args):
         global beta1bmc
         beta1bmc = args[0]
         serialWrite("B1B=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1b'",(args[0],));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1b'",(args[0],))
         self.ids.statusbar.text = "Beta1B Value Sent: " + str(args[0])
 
     def sendBeta1A(self, *args):
         global beta1amc
         beta1amc = args[0]
         serialWrite("B1A=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1a'",(args[0],));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1a'",(args[0],))
         self.ids.statusbar.text = "Beta1A Value Sent: " + str(args[0])
 
     def sendBeta2B(self, *args):
         global beta2bmc
         beta2bmc = args[0]
         serialWrite("B2B=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2b'",(args[0],));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2b'",(args[0],))
         self.ids.statusbar.text = "Beta2B Value Sent: " + str(args[0])
 
     def sendBeta2A(self, *args):
         global beta2amc
         beta2amc = args[0]
         serialWrite("B2A=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2a'",(args[0],));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2a'",(args[0],))
         self.ids.statusbar.text = "Beta2A Value Sent: " + str(args[0])
 
     def sendBeta3B(self, *args):
         global beta3bmc
         beta3bmc = args[0]
         serialWrite("B3B=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3b'",(args[0],));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3b'",(args[0],))
         self.ids.statusbar.text = "Beta3B Value Sent: " + str(args[0])
 
     def sendBeta3A(self, *args):
         global beta3amc
         beta3amc = args[0]
         serialWrite("B3A=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3a'",(args[0],));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3a'",(args[0],))
         self.ids.statusbar.text = "Beta3A Value Sent: " + str(args[0])
 
     def sendBeta4B(self, *args):
         global beta4bmc
         beta4bmc = args[0]
         serialWrite("B4B=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4b'",(args[0],));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4b'",(args[0],))
         self.ids.statusbar.text = "Beta4B Value Sent: " + str(args[0])
 
     def sendBeta4A(self, *args):
         global beta4amc
         beta4amc = args[0]
         serialWrite("B4A=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4a'",(args[0],));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4a'",(args[0],))
         self.ids.statusbar.text = "Beta4A Value Sent: " + str(args[0])
 
     def send0(self, *args):
         global psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1amc,beta1bmc,beta2amc,beta2bmc,beta3amc,beta3bmc,beta4amc,beta4bmc
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1a'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1b'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2a'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2b'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3a'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3b'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4a'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4b'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'psarj'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ssarj'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ptrrj'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'strrj'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1a'")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1b'")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2a'")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2b'")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3a'")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3b'")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4a'")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4b'")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'psarj'")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ssarj'")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ptrrj'")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'strrj'")
         strrjmc = 0
         ptrrjmc = 0
         ssarjmc = 0
@@ -874,18 +874,18 @@ class ManualControlScreen(Screen):
 
     def send90(self, *args):
         global psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1amc,beta1bmc,beta2amc,beta2bmc,beta3amc,beta3bmc,beta4amc,beta4bmc
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta1a'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta1b'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta2a'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta2b'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta3a'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta3b'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta4a'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta4b'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'psarj'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'ssarj'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'ptrrj'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'strrj'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta1a'")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta1b'")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta2a'")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta2b'")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta3a'")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta3b'")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta4a'")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta4b'")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'psarj'")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'ssarj'")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'ptrrj'")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'strrj'")
         strrjmc = 90
         ptrrjmc = 90
         ssarjmc = 90
@@ -1049,7 +1049,7 @@ class MimicScreen(Screen, EventDispatcher):
 
     def killproc(*args):
         global p,p2,c
-        c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer', '0', 'Unsubscribed', '0', 0)");
+        c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer', '0', 'Unsubscribed', '0', 0)")
         try:
             p.kill()
             p2.kill()
