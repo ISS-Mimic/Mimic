@@ -1,20 +1,19 @@
 #!/usr/bin/python
+
 from datetime import datetime, timedelta #used for time conversions and logging timestamps
 import datetime as dtime #this is different from above for... reasons?
 import os #used to remove database on program exit
-os.environ['KIVY_GL_BACKEND'] = 'gl' #need this to fix a kivy segfault that occurs with python3 for some reason
-from subprocess import Popen, PIPE, STDOUT #used to start/stop Javascript telemetry program and TDRS script and orbitmap
+from subprocess import Popen #, PIPE, STDOUT #used to start/stop Javascript telemetry program and TDRS script and orbitmap
 import time #used for time
 import math #used for math
-import serial #used to send data over serial to arduino
-import sys #used to get active serial ports
 import glob #used to parse serial port names
 import sqlite3 #used to access ISS telemetry database
-import ephem #used for TLE orbit information on orbit screen
 import pytz #used for timezone conversion in orbit pass predictions
 from bs4 import BeautifulSoup #used to parse webpages for data (EVA stats, ISS TLE)
-import threading #trying to send serial write to other thread
-import kivy
+import numpy as np
+import ephem #used for TLE orbit information on orbit screen
+import serial #used to send data over serial to arduino
+
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.network.urlrequest import UrlRequest #using this to request webpages
@@ -22,16 +21,23 @@ from kivy.clock import Clock
 from kivy.event import EventDispatcher
 from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
+from kivy.uix.popup import Popup
+from kivy.uix.label import Label
+
+import database_initialize # create and populate database script
+
+""" Unused imports
+import kivy
 from kivy.core.window import Window
-
-#these are for plotting day/night time
+import sys #used to get active serial ports
+import threading #trying to send serial write to other thread
+matplotlib for plotting day/night time
 import matplotlib.pyplot as plt
-from mpl_toolkits.basemap import Basemap
 from matplotlib import path
-import numpy as np
+from mpl_toolkits.basemap import Basemap
+"""
 
-#create and populate database script
-import database_initialize
+os.environ['KIVY_GL_BACKEND'] = 'gl' #need this to fix a kivy segfault that occurs with python3 for some reason
 
 # Create Program Logs
 mimiclog = open('/home/pi/Mimic/Pi/Logs/mimiclog.txt', 'w')
