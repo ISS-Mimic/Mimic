@@ -74,28 +74,24 @@ def serialWrite(*args): #
         #print("serial")
     except (OSError, serial.SerialException) as e:
         print(e)
-        pass
 
     try:
         ser2.write(str.encode(*args))
         #print("serial")
     except (OSError, serial.SerialException) as e:
         print(e)
-        pass
 
     try:
         ser3.write(str.encode(*args))
         #print("serial")
     except (OSError, serial.SerialException) as e:
         print(e)
-        pass
 
     try:
         ser4.write(str.encode(*args))
         #print("serial")
     except (OSError, serial.SerialException) as e:
         print(e)
-        pass
 
 #for port in ports:
     #    try:
@@ -925,7 +921,7 @@ class FakeOrbitScreen(Screen):
 
     def startDisco(*args):
         global p2, runningDemo, Disco
-        if runningDemo == False:
+        if not runningDemo:
             p2 = Popen("/home/pi/Mimic/Pi/disco.sh")
             runningDemo = True
             Disco = True
@@ -933,7 +929,7 @@ class FakeOrbitScreen(Screen):
 
     def startDemo(*args):
         global p2, runningDemo
-        if runningDemo == False:
+        if not runningDemo:
             p2 = Popen("/home/pi/Mimic/Pi/demoOrbit.sh")
             runningDemo = True
             logWrite("Successfully started Demo Orbit script")
@@ -949,7 +945,7 @@ class FakeOrbitScreen(Screen):
 
     def startHTVDemo(*args):
         global p2, runningDemo
-        if runningDemo == False:
+        if not runningDemo:
             p2 = Popen("/home/pi/Mimic/Pi/demoHTVOrbit.sh")
             runningDemo = True
             logWrite("Successfully started Demo HTV Orbit script")
@@ -966,7 +962,7 @@ class FakeOrbitScreen(Screen):
 
 class Settings_Screen(Screen, EventDispatcher):
     def checkbox_clicked(*args):
-        if args[2] == True:
+        if args[2]:
             serialWrite("SmartRolloverBGA=1 ")
         else:
             serialWrite("SmartRolloverBGA=0 ")
@@ -1093,9 +1089,9 @@ class MainApp(App):
 
         #Add all new telemetry screens to this list, this is used for the signal status icon and telemetry value colors
         ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen',
-                    'ct_screen', 'ct_sasa_screen', 'ct_sgant_screen', 'ct_uhf_screen',
-                    'ct_camera_screen', 'gnc_screen', 'orbit_screen', 'us_eva', 'rs_eva',
-                    'eva_main', 'mimic_screen', 'mss_mt_screen','orbit_pass','orbit_data']
+                      'ct_screen', 'ct_sasa_screen', 'ct_sgant_screen', 'ct_uhf_screen',
+                      'ct_camera_screen', 'gnc_screen', 'orbit_screen', 'us_eva', 'rs_eva',
+                      'eva_main', 'mimic_screen', 'mss_mt_screen','orbit_pass','orbit_data']
 
         root = MainScreenManager(transition=SwapTransition())
         root.add_widget(self.main_screen)
@@ -1197,7 +1193,6 @@ class MainApp(App):
     def checkTDRS(self, dt):
         global activeTDRS1
         global activeTDRS2
-        pass
 
     def check_EVA_stats(self, lastname1, firstname1, lastname2, firstname2):
         global numEVAs1, EVAtime_hours1, EVAtime_minutes1, numEVAs2, EVAtime_hours2, EVAtime_minutes2
@@ -1854,7 +1849,7 @@ class MainApp(App):
             ISS_TLE.compute(location) #compute tle propagation based on provided location
             nextpassinfo = location.next_pass(ISS_TLE)
 
-            if nextpassinfo[0] == None:
+            if nextpassinfo[0] is None:
                 self.orbit_screen.ids.iss_next_pass1.text = "n/a"
                 self.orbit_screen.ids.iss_next_pass2.text = "n/a"
                 self.orbit_screen.ids.countdown.text = "n/a"
@@ -2025,7 +2020,7 @@ class MainApp(App):
             now = datetime.utcnow()
             number_of_space = int(data['number'])
             for num in range(1, number_of_space+1):
-                if(str(data['people'][num-1]['location']) == str("International Space Station")):
+                if str(data['people'][num-1]['location']) == str("International Space Station"):
                     crewmember[isscrew] = str(data['people'][num-1]['name']) #.encode('utf-8')
                     crewmemberbio[isscrew] = str(data['people'][num-1]['bio'])
                     crewmembertitle[isscrew] = str(data['people'][num-1]['title'])
@@ -2036,7 +2031,7 @@ class MainApp(App):
                     crewmemberdays[isscrew] = str(int(totaldaysinspace[:d_index])+previousdays)+" days in space"
                     crewmemberpicture[isscrew] = str(data['people'][num-1]['biophoto'])
                     crewmembercountry[isscrew] = str(data['people'][num-1]['country']).title()
-                    if(str(data['people'][num-1]['country'])==str('usa')):
+                    if str(data['people'][num-1]['country'])==str('usa'):
                         crewmembercountry[isscrew] = str('USA')
                     isscrew = isscrew+1
 
@@ -2145,7 +2140,7 @@ class MainApp(App):
     def signal_unsubscribed(self): #change images, used stale signal image
         global internet, ScreenList
 
-        if internet == False:
+        if not internet:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.changeColors(0.5, 0.5, 0.5)
@@ -2160,7 +2155,7 @@ class MainApp(App):
     def signal_lost(self):
         global internet, ScreenList
 
-        if internet == False:
+        if not internet:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.changeColors(0.5, 0.5, 0.5)
@@ -2177,7 +2172,7 @@ class MainApp(App):
     def signal_acquired(self):
         global internet, ScreenList
 
-        if internet == False:
+        if not internet:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.changeColors(0.5, 0.5, 0.5)
@@ -2194,7 +2189,7 @@ class MainApp(App):
     def signal_stale(self):
         global internet, ScreenList
 
-        if internet == False:
+        if not internet:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.changeColors(0.5, 0.5, 0.5)
@@ -2211,7 +2206,7 @@ class MainApp(App):
     def signal_client_offline(self):
         global internet, ScreenList
 
-        if internet == False:
+        if not internet:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.changeColors(0.5, 0.5, 0.5)
@@ -2396,8 +2391,8 @@ class MainApp(App):
 
         def cross(a,b):
             c = [a[1]*b[2] - a[2]*b[1],
-                a[2]*b[0] - a[0]*b[2],
-                a[0]*b[1] - a[1]*b[0]]
+                 a[2]*b[0] - a[0]*b[2],
+                 a[0]*b[1] - a[1]*b[0]]
             return c
 
         iss_mass = "{:.2f}".format(float((values[48])[0]))
@@ -2425,7 +2420,7 @@ class MainApp(App):
         velocity = "{:.2f}".format(math.sqrt(dot(vel_vec,vel_vec)))
         mu = 398600
 
-        if (float(altitude) > 0):
+        if float(altitude) > 0:
             pos_mag = math.sqrt(dot(pos_vec,pos_vec))
             vel_mag = math.sqrt(dot(vel_vec,vel_vec))
 
@@ -2441,7 +2436,7 @@ class MainApp(App):
             node_mag = math.sqrt(dot(node_vec,node_vec))
 
             raan = math.acos(node_vec[0]/node_mag)
-            if(node_vec[1] < 0):
+            if node_vec[1] < 0:
                 raan = math.radians(360) - raan
             self.orbit_data.ids.raan.text = "{:.2f}".format(math.degrees(raan))
 
