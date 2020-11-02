@@ -1,4 +1,4 @@
-Welcome to the ISS Mimic project repository! 
+Welcome to the ISS Mimic project repository! Join our discord to provide feedback, ask questions, or get involved! https://discord.gg/zPKyE6hBSe
 
 ![ISS MIMIC!](https://github.com/ISS-Mimic/Mimic/blob/master/Pi/imgs/main/ISSmimicLogoPartsGroundtrack.png)
 
