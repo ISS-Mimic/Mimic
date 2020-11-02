@@ -1,20 +1,19 @@
 #!/usr/bin/python
+
 from datetime import datetime, timedelta #used for time conversions and logging timestamps
 import datetime as dtime #this is different from above for... reasons?
 import os #used to remove database on program exit
-os.environ['KIVY_GL_BACKEND'] = 'gl' #need this to fix a kivy segfault that occurs with python3 for some reason
-from subprocess import Popen, PIPE, STDOUT #used to start/stop Javascript telemetry program and TDRS script and orbitmap
+from subprocess import Popen #, PIPE, STDOUT #used to start/stop Javascript telemetry program and TDRS script and orbitmap
 import time #used for time
 import math #used for math
-import serial #used to send data over serial to arduino
-import sys #used to get active serial ports
 import glob #used to parse serial port names
 import sqlite3 #used to access ISS telemetry database
-import ephem #used for TLE orbit information on orbit screen
 import pytz #used for timezone conversion in orbit pass predictions
 from bs4 import BeautifulSoup #used to parse webpages for data (EVA stats, ISS TLE)
-import threading #trying to send serial write to other thread
-import kivy
+import numpy as np
+import ephem #used for TLE orbit information on orbit screen
+import serial #used to send data over serial to arduino
+
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.network.urlrequest import UrlRequest #using this to request webpages
@@ -22,16 +21,23 @@ from kivy.clock import Clock
 from kivy.event import EventDispatcher
 from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
+from kivy.uix.popup import Popup
+from kivy.uix.label import Label
+
+import database_initialize # create and populate database script
+
+""" Unused imports
+import kivy
 from kivy.core.window import Window
-
-#these are for plotting day/night time
+import sys #used to get active serial ports
+import threading #trying to send serial write to other thread
+matplotlib for plotting day/night time
 import matplotlib.pyplot as plt
-from mpl_toolkits.basemap import Basemap
 from matplotlib import path
-import numpy as np
+from mpl_toolkits.basemap import Basemap
+"""
 
-#create and populate database script
-import database_initialize
+os.environ['KIVY_GL_BACKEND'] = 'gl' #need this to fix a kivy segfault that occurs with python3 for some reason
 
 # Create Program Logs
 mimiclog = open('/home/pi/Mimic/Pi/Logs/mimiclog.txt', 'w')
@@ -74,28 +80,24 @@ def serialWrite(*args): #
         #print("serial")
     except (OSError, serial.SerialException) as e:
         print(e)
-        pass
 
     try:
         ser2.write(str.encode(*args))
         #print("serial")
     except (OSError, serial.SerialException) as e:
         print(e)
-        pass
 
     try:
         ser3.write(str.encode(*args))
         #print("serial")
     except (OSError, serial.SerialException) as e:
         print(e)
-        pass
-    
+
     try:
         ser4.write(str.encode(*args))
         #print("serial")
     except (OSError, serial.SerialException) as e:
         print(e)
-        pass
 
 #for port in ports:
     #    try:
@@ -114,7 +116,7 @@ conn.isolation_level = None
 c = conn.cursor()
 
 def staleTelemetry():
-    c.execute("UPDATE telemetry SET Value = 'Unsubscribed' where Label = 'Lightstreamer'");
+    c.execute("UPDATE telemetry SET Value = 'Unsubscribed' where Label = 'Lightstreamer'")
 #----------------------------------Variables---------------------------------------------
 LS_Subscription = False
 isslocationsuccess = False
@@ -259,7 +261,6 @@ class MainScreen(Screen):
         logWrite("Successfully stopped ISS telemetry javascript and removed database")
 
 class ManualControlScreen(Screen):
-   
     def on_pre_enter(self): #call the callback funcion when activating this screen, to update all angles
         self.callback()
 
@@ -281,28 +282,28 @@ class ManualControlScreen(Screen):
     def zeroJoints(self):
         global psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1amc,beta1bmc,beta2amc,beta2bmc,beta3amc,beta3bmc,beta4amc,beta4bmc
         serialWrite("NULLIFY=1 ")
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1a'")
         beta1amc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1b'")
         beta1bmc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2a'")
         beta2amc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2b'")
         beta2bmc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3a'")
         beta3amc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3b'")
         beta3bmc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4a'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4a'")
         beta4amc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4b'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4b'")
         beta4bmc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'psarj'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'psarj'")
         psarjmc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ssarj'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ssarj'")
         ssarjmc = 0.00
         self.callback()
-    
+
     def setActive(self, *args):
         global Beta4Bcontrol, Beta3Bcontrol, Beta2Bcontrol, Beta1Bcontrol, Beta4Acontrol, Beta3Acontrol, Beta2Acontrol, Beta1Acontrol, PSARJcontrol, SSARJcontrol, PTRRJcontrol, STRRJcontrol
         if str(args[0])=="Beta4B":
@@ -639,90 +640,90 @@ class ManualControlScreen(Screen):
         global psarjmc
         psarjmc += args[0]
         serialWrite("PSARJ=" + str(psarjmc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'psarj'",(psarjmc,));
-        self.ids.statusbar.text = "PSARJ Value Sent: " + str(psarjmc) 
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'psarj'",(psarjmc,))
+        self.ids.statusbar.text = "PSARJ Value Sent: " + str(psarjmc)
 
     def incrementSSARJ(self, *args):
         global ssarjmc
         ssarjmc += args[0]
         serialWrite("SSARJ=" + str(ssarjmc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'ssarj'",(ssarjmc,));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'ssarj'",(ssarjmc,))
         self.ids.statusbar.text = "SSARJ Value Sent: " + str(ssarjmc)
 
     def incrementPTRRJ(self, *args):
         global ptrrjmc
         ptrrjmc += args[0]
         serialWrite("PTRRJ=" + str(ptrrjmc) + " ")
-        c.execute("UPDATE telemetry  SET Value = ? WHERE Label = 'ptrrj'",(ptrrjmc,));
+        c.execute("UPDATE telemetry  SET Value = ? WHERE Label = 'ptrrj'",(ptrrjmc,))
         self.ids.statusbar.text = "PTRRJ Value Sent: " + str(ptrrjmc)
 
     def incrementSTRRJ(self, *args):
         global strrjmc
         strrjmc += args[0]
         serialWrite("STRRJ=" + str(strrjmc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'strrj'",(strrjmc,));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'strrj'",(strrjmc,))
         self.ids.statusbar.text = "STRRJ Value Sent: " + str(strrjmc)
 
     def incrementBeta1B(self, *args):
         global beta1bmc
         beta1bmc += args[0]
         serialWrite("B1B=" + str(beta1bmc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1b'",(beta1bmc,));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1b'",(beta1bmc,))
         self.ids.statusbar.text = "Beta1B Value Sent: " + str(beta1bmc)
 
     def incrementBeta1A(self, *args):
         global beta1amc
         beta1amc += args[0]
         serialWrite("B1A=" + str(beta1amc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1a'",(beta1amc,));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1a'",(beta1amc,))
         self.ids.statusbar.text = "Beta1A Value Sent: " + str(beta1amc)
 
     def incrementBeta2B(self, *args):
         global beta2bmc
         beta2bmc += args[0]
         serialWrite("B2B=" + str(beta2bmc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2b'",(beta2bmc,));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2b'",(beta2bmc,))
         self.ids.statusbar.text = "Beta2B Value Sent: " + str(beta2bmc)
 
     def incrementBeta2A(self, *args):
         global beta2amc
         beta2amc += args[0]
         serialWrite("B2A=" + str(beta2amc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2a'",(beta2amc,));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2a'",(beta2amc,))
         self.ids.statusbar.text = "Beta2A Value Sent: " + str(beta2amc)
 
     def incrementBeta3B(self, *args):
         global beta3bmc
         beta3bmc += args[0]
         serialWrite("B3B=" + str(beta3bmc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3b'",(beta3bmc,));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3b'",(beta3bmc,))
         self.ids.statusbar.text = "Beta3B Value Sent: " + str(beta3bmc)
 
     def incrementBeta3A(self, *args):
         global beta3amc
         beta3amc += args[0]
         serialWrite("B3A=" + str(beta3amc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3a'",(beta3amc,));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3a'",(beta3amc,))
         self.ids.statusbar.text = "Beta3A Value Sent: " + str(beta3amc)
 
     def incrementBeta4B(self, *args):
         global beta4bmc
         beta4bmc += args[0]
         serialWrite("B4B=" + str(beta4bmc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4b'",(beta4bmc,));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4b'",(beta4bmc,))
         self.ids.statusbar.text = "Beta4B Value Sent: " + str(beta4bmc)
 
     def incrementBeta4A(self, *args):
         global beta4amc
         beta4amc += args[0]
         serialWrite("B4A=" + str(beta4amc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4a'",(beta4amc,));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4a'",(beta4amc,))
         self.ids.statusbar.text = "Beta4A Value Sent: " + str(beta4amc)
 
     def changeBoolean(self, *args):
         global manualcontrol
         manualcontrol = args[0]
-    
+
     def sendActive(self, *args):
         if Beta4Bcontrol:
             self.sendBeta4B(float(args[0]))
@@ -748,105 +749,105 @@ class ManualControlScreen(Screen):
             self.sendPSARJ(float(args[0]))
         if SSARJcontrol:
             self.sendSSARJ(float(args[0]))
-    
+
     def sendPSARJ(self, *args):
         global psarjmc
         psarjmc = args[0]
         serialWrite("PSARJ=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'psarj'",(args[0],));
-        self.ids.statusbar.text = "PSARJ Value Sent: " + str(args[0]) 
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'psarj'",(args[0],))
+        self.ids.statusbar.text = "PSARJ Value Sent: " + str(args[0])
 
     def sendSSARJ(self, *args):
         global ssarjmc
         ssarjmc = args[0]
         serialWrite("SSARJ=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'ssarj'",(args[0],));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'ssarj'",(args[0],))
         self.ids.statusbar.text = "SSARJ Value Sent: " + str(args[0])
 
     def sendPTRRJ(self, *args):
         global ptrrjmc
         ptrrjmc = args[0]
         serialWrite("PTRRJ=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry  SET Value = ? WHERE Label = 'ptrrj'",(args[0],));
+        c.execute("UPDATE telemetry  SET Value = ? WHERE Label = 'ptrrj'",(args[0],))
         self.ids.statusbar.text = "PTRRJ Value Sent: " + str(args[0])
 
     def sendSTRRJ(self, *args):
         global strrjmc
         strrjmc = args[0]
         serialWrite("STRRJ=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'strrj'",(args[0],));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'strrj'",(args[0],))
         self.ids.statusbar.text = "STRRJ Value Sent: " + str(args[0])
 
     def sendBeta1B(self, *args):
         global beta1bmc
         beta1bmc = args[0]
         serialWrite("B1B=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1b'",(args[0],));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1b'",(args[0],))
         self.ids.statusbar.text = "Beta1B Value Sent: " + str(args[0])
 
     def sendBeta1A(self, *args):
         global beta1amc
         beta1amc = args[0]
         serialWrite("B1A=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1a'",(args[0],));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1a'",(args[0],))
         self.ids.statusbar.text = "Beta1A Value Sent: " + str(args[0])
 
     def sendBeta2B(self, *args):
         global beta2bmc
         beta2bmc = args[0]
         serialWrite("B2B=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2b'",(args[0],));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2b'",(args[0],))
         self.ids.statusbar.text = "Beta2B Value Sent: " + str(args[0])
 
     def sendBeta2A(self, *args):
         global beta2amc
         beta2amc = args[0]
         serialWrite("B2A=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2a'",(args[0],));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2a'",(args[0],))
         self.ids.statusbar.text = "Beta2A Value Sent: " + str(args[0])
 
     def sendBeta3B(self, *args):
         global beta3bmc
         beta3bmc = args[0]
         serialWrite("B3B=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3b'",(args[0],));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3b'",(args[0],))
         self.ids.statusbar.text = "Beta3B Value Sent: " + str(args[0])
 
     def sendBeta3A(self, *args):
         global beta3amc
         beta3amc = args[0]
         serialWrite("B3A=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3a'",(args[0],));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3a'",(args[0],))
         self.ids.statusbar.text = "Beta3A Value Sent: " + str(args[0])
 
     def sendBeta4B(self, *args):
         global beta4bmc
         beta4bmc = args[0]
         serialWrite("B4B=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4b'",(args[0],));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4b'",(args[0],))
         self.ids.statusbar.text = "Beta4B Value Sent: " + str(args[0])
 
     def sendBeta4A(self, *args):
         global beta4amc
         beta4amc = args[0]
         serialWrite("B4A=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4a'",(args[0],));
+        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4a'",(args[0],))
         self.ids.statusbar.text = "Beta4A Value Sent: " + str(args[0])
-    
+
     def send0(self, *args):
         global psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1amc,beta1bmc,beta2amc,beta2bmc,beta3amc,beta3bmc,beta4amc,beta4bmc
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1a'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1b'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2a'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2b'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3a'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3b'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4a'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4b'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'psarj'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ssarj'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ptrrj'");
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'strrj'");
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1a'")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1b'")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2a'")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2b'")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3a'")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3b'")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4a'")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4b'")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'psarj'")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ssarj'")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ptrrj'")
+        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'strrj'")
         strrjmc = 0
         ptrrjmc = 0
         ssarjmc = 0
@@ -875,18 +876,18 @@ class ManualControlScreen(Screen):
 
     def send90(self, *args):
         global psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1amc,beta1bmc,beta2amc,beta2bmc,beta3amc,beta3bmc,beta4amc,beta4bmc
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta1a'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta1b'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta2a'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta2b'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta3a'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta3b'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta4a'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta4b'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'psarj'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'ssarj'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'ptrrj'");
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'strrj'");
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta1a'")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta1b'")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta2a'")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta2b'")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta3a'")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta3b'")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta4a'")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta4b'")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'psarj'")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'ssarj'")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'ptrrj'")
+        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'strrj'")
         strrjmc = 90
         ptrrjmc = 90
         ssarjmc = 90
@@ -923,10 +924,10 @@ class FakeOrbitScreen(Screen):
         HTVpopup = Popup(title='HTV Berthing Orbit', content=Label(text='This will playback recorded data from when the Japanese HTV spacecraft berthed to the ISS. During berthing, the SARJs and nadir BGAs lock but the zenith BGAs autotrack'), text_size=self.size, size_hint=(0.5, 0.3), auto_dismiss=True)
         HTVpopup.text_size = self.size
         HTVpopup.open()
-    
+
     def startDisco(*args):
         global p2, runningDemo, Disco
-        if runningDemo == False:
+        if not runningDemo:
             p2 = Popen("/home/pi/Mimic/Pi/disco.sh")
             runningDemo = True
             Disco = True
@@ -934,7 +935,7 @@ class FakeOrbitScreen(Screen):
 
     def startDemo(*args):
         global p2, runningDemo
-        if runningDemo == False:
+        if not runningDemo:
             p2 = Popen("/home/pi/Mimic/Pi/demoOrbit.sh")
             runningDemo = True
             logWrite("Successfully started Demo Orbit script")
@@ -950,7 +951,7 @@ class FakeOrbitScreen(Screen):
 
     def startHTVDemo(*args):
         global p2, runningDemo
-        if runningDemo == False:
+        if not runningDemo:
             p2 = Popen("/home/pi/Mimic/Pi/demoHTVOrbit.sh")
             runningDemo = True
             logWrite("Successfully started Demo HTV Orbit script")
@@ -967,7 +968,7 @@ class FakeOrbitScreen(Screen):
 
 class Settings_Screen(Screen, EventDispatcher):
     def checkbox_clicked(*args):
-        if args[2] == True:
+        if args[2]:
             serialWrite("SmartRolloverBGA=1 ")
         else:
             serialWrite("SmartRolloverBGA=0 ")
@@ -1050,7 +1051,7 @@ class MimicScreen(Screen, EventDispatcher):
 
     def killproc(*args):
         global p,p2,c
-        c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer', '0', 'Unsubscribed', '0', 0)");
+        c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer', '0', 'Unsubscribed', '0', 0)")
         try:
             p.kill()
             p2.kill()
@@ -1093,10 +1094,10 @@ class MainApp(App):
         self.eva_pictures = EVA_Pictures(name='eva_pictures')
 
         #Add all new telemetry screens to this list, this is used for the signal status icon and telemetry value colors
-        ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen', 
-                    'ct_screen', 'ct_sasa_screen', 'ct_sgant_screen', 'ct_uhf_screen', 
-                    'ct_camera_screen', 'gnc_screen', 'orbit_screen', 'us_eva', 'rs_eva', 
-                    'eva_main', 'mimic_screen', 'mss_mt_screen','orbit_pass','orbit_data']
+        ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen',
+                      'ct_screen', 'ct_sasa_screen', 'ct_sgant_screen', 'ct_uhf_screen',
+                      'ct_camera_screen', 'gnc_screen', 'orbit_screen', 'us_eva', 'rs_eva',
+                      'eva_main', 'mimic_screen', 'mss_mt_screen','orbit_pass','orbit_data']
 
         root = MainScreenManager(transition=SwapTransition())
         root.add_widget(self.main_screen)
@@ -1137,11 +1138,11 @@ class MainApp(App):
         Clock.schedule_once(self.checkBlogforEVA, 30)
         Clock.schedule_once(self.getTLE, 15) #uncomment when internet works again
         Clock.schedule_once(self.TDRSupdate, 30) #uncomment when internet works again
-        
+
         Clock.schedule_interval(self.getTLE, 300)
         Clock.schedule_interval(self.TDRSupdate, 600)
         Clock.schedule_interval(self.check_internet, 1)
-        
+
         #schedule the orbitmap to update with shadow every 5 mins
         Clock.schedule_interval(self.updateNightShade, 120)
         Clock.schedule_interval(self.updateOrbitMap, 10)
@@ -1191,14 +1192,13 @@ class MainApp(App):
     def updateOrbitMap(self, dt):
         self.orbit_screen.ids.OrbitMap.source = '/home/pi/Mimic/Pi/imgs/orbit/map.jpg'
         self.orbit_screen.ids.OrbitMap.reload()
-    
+
     def updateNightShade(self, dt):
         proc = Popen(["python3", "/home/pi/Mimic/Pi/NightShade.py"])
 
     def checkTDRS(self, dt):
         global activeTDRS1
         global activeTDRS2
-        pass
 
     def check_EVA_stats(self, lastname1, firstname1, lastname2, firstname2):
         global numEVAs1, EVAtime_hours1, EVAtime_minutes1, numEVAs2, EVAtime_hours2, EVAtime_minutes2
@@ -1258,10 +1258,10 @@ class MainApp(App):
 
         def on_error(req, result):
             logWrite("Warning - EVA stats failure (url error)")
-        
+
         #obtain eva statistics web page for parsing
         req = UrlRequest(eva_url, on_success, on_redirect, on_failure, on_error, timeout=1)
-    
+
     def checkBlogforEVA(self, dt):
         iss_blog_url =  'https://blogs.nasa.gov/spacestation/tag/spacewalk/'
         def on_success(req, data): #if blog data is successfully received, it is processed here
@@ -1269,9 +1269,9 @@ class MainApp(App):
             soup = BeautifulSoup(data, "lxml")
             blog_entries = soup.find("div", {"class": "entry-content"})
             blog_text = blog_entries.get_text()
-            
+
             iss_EVcrew_url = 'https://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'
-            
+
             def on_success2(req2, data2):
                 logWrite("Successfully fetched EV crew JSON")
                 number_of_space = int(data2['number'])
@@ -1283,7 +1283,7 @@ class MainApp(App):
                     self.checkBlog(names,blog_text)
                 except Exception as e:
                     logWrite("Error checking blog: " + str(e))
-               
+
             def on_redirect2(req, result):
                 logWrite("Warning - Get EVA crew failure (redirect)")
                 logWrite(result)
@@ -1293,7 +1293,7 @@ class MainApp(App):
 
             def on_error2(req, result):
                 logWrite("Warning - Get EVA crew failure (url error)")
-            
+
             req2 = UrlRequest(iss_EVcrew_url, on_success2, on_redirect2, on_failure2, on_error2, timeout=1)
 
         def on_redirect(req, result):
@@ -1314,22 +1314,22 @@ class MainApp(App):
         ev2_firstname = ''
         ev1name = ''
         ev2name = ''
-        
+
         name_position = 1000000
         for name in names: #search for text in blog that matchs people in space list, choose 1st result as likely EV1
             if name in blog_text:
-                if blog_text.find(name) < name_position: 
+                if blog_text.find(name) < name_position:
                     name_position = blog_text.find(name)
                     ev1name = name
-        
+
         name_position = 1000000
-        
+
         for name in names: #search for text in blog that matchs people in space list, choose 2nd result as likely EV2
             if name in blog_text and name != ev1name:
-                if blog_text.find(name) < name_position: 
+                if blog_text.find(name) < name_position:
                     name_position = blog_text.find(name)
                     ev2name = name
-        
+
         logWrite("Likely EV1: "+ev1name)
         logWrite("Likely EV2: "+ev2name)
 
@@ -1337,12 +1337,12 @@ class MainApp(App):
         ev1_firstname = ev1name.split()[0]
         ev2_surname = ev2name.split()[-1]
         ev2_firstname = ev2name.split()[0]
-        
+
         try:
-            self.check_EVA_stats(ev1_surname,ev1_firstname,ev2_surname,ev2_firstname) 
+            self.check_EVA_stats(ev1_surname,ev1_firstname,ev2_surname,ev2_firstname)
         except Exception as e:
             logWrite("Error retrieving EVA stats: " + str(e))
-    
+
     def flashUS_EVAbutton(self, instance):
         logWrite("Function call - flashUS_EVA")
 
@@ -1422,7 +1422,7 @@ class MainApp(App):
         global TDRS12_TLE, TDRS6_TLE, TDRS10_TLE, TDRS11_TLE, TDRS7_TLE
         normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
         normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
-        
+
         def scaleLatLon(latitude, longitude):
             #converting lat lon to x, y for orbit map
             fromLatSpan = 180.0
@@ -1434,7 +1434,7 @@ class MainApp(App):
             newLat = (0.265) + (valueLatScaled * toLatSpan)
             newLon = (0.14) + (valueLonScaled * toLonSpan)
             return {'newLat': newLat, 'newLon': newLon}
-        
+
         def scaleLatLon2(in_latitude,in_longitude):
             MAP_HEIGHT = self.orbit_screen.ids.OrbitMap.texture_size[1]
             MAP_WIDTH = self.orbit_screen.ids.OrbitMap.texture_size[0]
@@ -1442,7 +1442,7 @@ class MainApp(App):
             new_x = ((MAP_WIDTH / 360.0) * (180 + in_longitude))
             new_y = ((MAP_HEIGHT / 180.0) * (90 + in_latitude))
             return {'new_y': new_y, 'new_x': new_x}
-        
+
         #TDRS East 2 sats
         try:
             TDRS12_TLE.compute(datetime.utcnow()) #41 West
@@ -1457,7 +1457,7 @@ class MainApp(App):
             groundtrackdate = datetime.utcnow()
             while date_i < groundtrackdate + timedelta(days=1):
                 TDRS12_TLE.compute(date_i)
-                
+
                 TDRS12lon_gt = float(str(TDRS12_TLE.sublong).split(':')[0]) + float(
                     str(TDRS12_TLE.sublong).split(':')[1]) / 60 + float(str(TDRS12_TLE.sublong).split(':')[2]) / 3600
                 TDRS12lat_gt = float(str(TDRS12_TLE.sublat).split(':')[0]) + float(
@@ -1485,7 +1485,7 @@ class MainApp(App):
             groundtrackdate = datetime.utcnow()
             while date_i < groundtrackdate + timedelta(days=1):
                 TDRS6_TLE.compute(date_i)
-                
+
                 TDRS6lon_gt = float(str(TDRS6_TLE.sublong).split(':')[0]) + float(
                     str(TDRS6_TLE.sublong).split(':')[1]) / 60 + float(str(TDRS6_TLE.sublong).split(':')[2]) / 3600
                 TDRS6lat_gt = float(str(TDRS6_TLE.sublat).split(':')[0]) + float(
@@ -1514,7 +1514,7 @@ class MainApp(App):
             groundtrackdate = datetime.utcnow()
             while date_i < groundtrackdate + timedelta(days=1):
                 TDRS11_TLE.compute(date_i)
-                
+
                 TDRS11lon_gt = float(str(TDRS11_TLE.sublong).split(':')[0]) + float(
                     str(TDRS11_TLE.sublong).split(':')[1]) / 60 + float(str(TDRS11_TLE.sublong).split(':')[2]) / 3600
                 TDRS11lat_gt = float(str(TDRS11_TLE.sublat).split(':')[0]) + float(
@@ -1542,7 +1542,7 @@ class MainApp(App):
             groundtrackdate = datetime.utcnow()
             while date_i < groundtrackdate + timedelta(days=1):
                 TDRS10_TLE.compute(date_i)
-                
+
                 TDRS10lon_gt = float(str(TDRS10_TLE.sublong).split(':')[0]) + float(
                     str(TDRS10_TLE.sublong).split(':')[1]) / 60 + float(str(TDRS10_TLE.sublong).split(':')[2]) / 3600
                 TDRS10lat_gt = float(str(TDRS10_TLE.sublat).split(':')[0]) + float(
@@ -1571,7 +1571,7 @@ class MainApp(App):
             groundtrackdate = datetime.utcnow()
             while date_i < groundtrackdate + timedelta(days=1):
                 TDRS7_TLE.compute(date_i)
-                
+
                 TDRS7lon_gt = float(str(TDRS7_TLE.sublong).split(':')[0]) + float(
                     str(TDRS7_TLE.sublong).split(':')[1]) / 60 + float(str(TDRS7_TLE.sublong).split(':')[2]) / 3600
                 TDRS7lat_gt = float(str(TDRS7_TLE.sublat).split(':')[0]) + float(
@@ -1585,7 +1585,7 @@ class MainApp(App):
             self.orbit_screen.ids.TDRS7groundtrack.width = 1
             self.orbit_screen.ids.TDRS7groundtrack.col = (0,0,1,1)
             self.orbit_screen.ids.TDRS7groundtrack.points = TDRS7_groundtrack
-            
+
         #draw the TDRS satellite locations
         self.orbit_screen.ids.TDRS12.pos = (scaleLatLon2(TDRS12lat, TDRS12lon)['new_x']-((self.orbit_screen.ids.TDRS12.width/2)*normalizedX),scaleLatLon2(TDRS12lat, TDRS12lon)['new_y']-((self.orbit_screen.ids.TDRS12.height/2)*normalizedY))
         self.orbit_screen.ids.TDRS6.pos = (scaleLatLon2(TDRS6lat, TDRS6lon)['new_x']-((self.orbit_screen.ids.TDRS6.width/2)*normalizedX),scaleLatLon2(TDRS6lat, TDRS6lon)['new_y']-((self.orbit_screen.ids.TDRS6.height/2)*normalizedY))
@@ -1621,10 +1621,10 @@ class MainApp(App):
             new_x = ((MAP_WIDTH / 360.0) * (180 + in_longitude))
             new_y = ((MAP_HEIGHT / 180.0) * (90 + in_latitude))
             return {'new_y': new_y, 'new_x': new_x}
-        
+
         #copied from apexpy - copyright 2015 Christer van der Meeren MIT license
         def subsolar(datetime):
-            
+
             year = datetime.year
             doy = datetime.timetuple().tm_yday
             ut = datetime.hour * 3600 + datetime.minute * 60 + datetime.second
@@ -1678,13 +1678,13 @@ class MainApp(App):
             sslon = sslon - 360.0 * nrot
 
             return sslat, sslon
-       
+
         if ISS_TLE_Acquired:
             ISS_TLE.compute(datetime.utcnow())
             #------------------Latitude/Longitude Stuff---------------------------
             latitude = float(str(ISS_TLE.sublat).split(':')[0]) + float(str(ISS_TLE.sublat).split(':')[1])/60 + float(str(ISS_TLE.sublat).split(':')[2])/3600
             longitude = float(str(ISS_TLE.sublong).split(':')[0]) + float(str(ISS_TLE.sublong).split(':')[1])/60 + float(str(ISS_TLE.sublong).split(':')[2])/3600
-            
+
             #inclination = ISS_TLE.inc
 
             normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
@@ -1693,7 +1693,7 @@ class MainApp(App):
             self.orbit_screen.ids.OrbitISStiny.pos = (
                     scaleLatLon2(latitude, longitude)['new_x'] - ((self.orbit_screen.ids.OrbitISStiny.width / 2) * normalizedX * 2), #had to fudge a little not sure why
                     scaleLatLon2(latitude, longitude)['new_y'] - ((self.orbit_screen.ids.OrbitISStiny.height / 2) * normalizedY * 2)) #had to fudge a little not sure why
-            
+
             #get the position of the sub solar point to add the sun icon to the map
             sunlatitude, sunlongitude = subsolar(datetime.utcnow())
 
@@ -1740,7 +1740,7 @@ class MainApp(App):
             tdrs2 = int(TDRScursor.fetchone()[0])
             TDRScursor.execute('select Timestamp from tdrs')
             tdrs_timestamp = TDRScursor.fetchone()[0]
-            
+
             # THIS SECTION NEEDS IMPROVEMENT
             tdrs = "n/a"
             self.ct_sgant_screen.ids.tdrs_east12.angle = (-1*longitude)-41
@@ -1748,7 +1748,7 @@ class MainApp(App):
             self.ct_sgant_screen.ids.tdrs_z7.angle = ((-1*longitude)-41)+126
             self.ct_sgant_screen.ids.tdrs_west11.angle = ((-1*longitude)-41)-133
             self.ct_sgant_screen.ids.tdrs_west10.angle = ((-1*longitude)-41)-130
-            
+
             if ((tdrs1 or tdrs2) == 12) and float(aos) == 1.0:
                 tdrs = "east-12"
                 self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East-12"
@@ -1767,7 +1767,7 @@ class MainApp(App):
             elif tdrs1 == 0 and tdrs2 == 0:
                 self.ct_sgant_screen.ids.tdrs_label.text = "-"
                 tdrs = "----"
-            
+
             self.ct_sgant_screen.ids.tdrs_z7.color = 1, 1, 1, 1
             self.orbit_screen.ids.TDRSwLabel.color = (1,1,1,1)
             self.orbit_screen.ids.TDRSeLabel.color = (1,1,1,1)
@@ -1779,7 +1779,7 @@ class MainApp(App):
             self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
             self.orbit_screen.ids.ZOElabel.color = (1,1,1,1)
             self.orbit_screen.ids.ZOE.col = (1,0.5,0,0.5)
-            
+
             if "10" in tdrs: #tdrs10 and 11 west
                 self.orbit_screen.ids.TDRSwLabel.color = (1,0,1,1)
                 self.orbit_screen.ids.TDRS10.col = (1,0,1,1)
@@ -1855,7 +1855,7 @@ class MainApp(App):
             ISS_TLE.compute(location) #compute tle propagation based on provided location
             nextpassinfo = location.next_pass(ISS_TLE)
 
-            if nextpassinfo[0] == None:
+            if nextpassinfo[0] is None:
                 self.orbit_screen.ids.iss_next_pass1.text = "n/a"
                 self.orbit_screen.ids.iss_next_pass2.text = "n/a"
                 self.orbit_screen.ids.countdown.text = "n/a"
@@ -1881,7 +1881,7 @@ class MainApp(App):
         #iss_tle_url =  'https://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html' #the rev counter on this page is wrong
         iss_tle_url =  'https://www.celestrak.com/NORAD/elements/stations.txt'
         tdrs_tle_url =  'https://www.celestrak.com/NORAD/elements/tdrss.txt'
-        
+
         def on_success(req, data): #if TLE data is successfully received, it is processed here
             global ISS_TLE, ISS_TLE_Line1, ISS_TLE_Line2, ISS_TLE_Acquired
             soup = BeautifulSoup(data, "lxml")
@@ -1913,7 +1913,7 @@ class MainApp(App):
 
         def on_error(req, result):
             logWrite("Warning - Get ISS TLE failure (url error)")
-        
+
         def on_success2(req2, data2): #if TLE data is successfully received, it is processed here
             #retrieve the TLEs for every TDRS that ISS talks too
             global TDRS12_TLE,TDRS6_TLE,TDRS11_TLE,TDRS10_TLE,TDRS7_TLE
@@ -1933,7 +1933,7 @@ class MainApp(App):
                 logWrite("TDRS 12 TLE Success!")
             else:
                 logWrite("TDRS 12 TLE not acquired")
-            
+
             results = ['','','']
             body = iter(soup.get_text().split('\n'))
             #TDRS 6 TLE
@@ -1949,7 +1949,7 @@ class MainApp(App):
                 logWrite("TDRS 6 TLE Success!")
             else:
                 logWrite("TDRS 6 TLE not acquired")
-            
+
             results = ['','','']
             body = iter(soup.get_text().split('\n'))
             #TDRS 11 TLE
@@ -1965,7 +1965,7 @@ class MainApp(App):
                 logWrite("TDRS 11 TLE Success!")
             else:
                 logWrite("TDRS 11 TLE not acquired")
-            
+
             results = ['','','']
             body = iter(soup.get_text().split('\n'))
             #TDRS 10 TLE
@@ -1981,7 +1981,7 @@ class MainApp(App):
                 logWrite("TDRS 10 TLE Success!")
             else:
                 logWrite("TDRS 10 TLE not acquired")
-            
+
             results = ['','','']
             body = iter(soup.get_text().split('\n'))
             #TDRS 7 TLE
@@ -2026,7 +2026,7 @@ class MainApp(App):
             now = datetime.utcnow()
             number_of_space = int(data['number'])
             for num in range(1, number_of_space+1):
-                if(str(data['people'][num-1]['location']) == str("International Space Station")):
+                if str(data['people'][num-1]['location']) == str("International Space Station"):
                     crewmember[isscrew] = str(data['people'][num-1]['name']) #.encode('utf-8')
                     crewmemberbio[isscrew] = str(data['people'][num-1]['bio'])
                     crewmembertitle[isscrew] = str(data['people'][num-1]['title'])
@@ -2037,7 +2037,7 @@ class MainApp(App):
                     crewmemberdays[isscrew] = str(int(totaldaysinspace[:d_index])+previousdays)+" days in space"
                     crewmemberpicture[isscrew] = str(data['people'][num-1]['biophoto'])
                     crewmembercountry[isscrew] = str(data['people'][num-1]['country']).title()
-                    if(str(data['people'][num-1]['country'])==str('usa')):
+                    if str(data['people'][num-1]['country'])==str('usa'):
                         crewmembercountry[isscrew] = str('USA')
                     isscrew = isscrew+1
 
@@ -2112,7 +2112,7 @@ class MainApp(App):
 
         def on_error(req, result):
             logWrite("Warning - checkCrew JSON failure (url error)")
-        
+
         req = UrlRequest(iss_crew_url, on_success, on_redirect, on_failure, on_error, timeout=1)
 
     def map_rotation(self, args):
@@ -2146,7 +2146,7 @@ class MainApp(App):
     def signal_unsubscribed(self): #change images, used stale signal image
         global internet, ScreenList
 
-        if internet == False:
+        if not internet:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.changeColors(0.5, 0.5, 0.5)
@@ -2161,7 +2161,7 @@ class MainApp(App):
     def signal_lost(self):
         global internet, ScreenList
 
-        if internet == False:
+        if not internet:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.changeColors(0.5, 0.5, 0.5)
@@ -2178,7 +2178,7 @@ class MainApp(App):
     def signal_acquired(self):
         global internet, ScreenList
 
-        if internet == False:
+        if not internet:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.changeColors(0.5, 0.5, 0.5)
@@ -2195,7 +2195,7 @@ class MainApp(App):
     def signal_stale(self):
         global internet, ScreenList
 
-        if internet == False:
+        if not internet:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.changeColors(0.5, 0.5, 0.5)
@@ -2212,7 +2212,7 @@ class MainApp(App):
     def signal_client_offline(self):
         global internet, ScreenList
 
-        if internet == False:
+        if not internet:
             for x in ScreenList:
                 getattr(self, x).ids.signal.source = '/home/pi/Mimic/Pi/imgs/signal/offline.png'
             self.changeColors(0.5, 0.5, 0.5)
@@ -2283,7 +2283,7 @@ class MainApp(App):
 
         sub_status = str((values[255])[0]) #lightstreamer subscript checker
         client_status = str((values[256])[0]) #lightstreamer client checker
-        
+
         psarj = "{:.2f}".format(float((values[0])[0]))
         if not switchtofake:
             psarj2 = float(psarj)
@@ -2390,19 +2390,19 @@ class MainApp(App):
         quaternion1 = float((values[172])[0])
         quaternion2 = float((values[173])[0])
         quaternion3 = float((values[174])[0])
-   
+
         def dot(a,b):
             c = (a[0]*b[0])+(a[1]*b[1])+(a[2]*b[2])
             return c
 
         def cross(a,b):
             c = [a[1]*b[2] - a[2]*b[1],
-                a[2]*b[0] - a[0]*b[2],
-                a[0]*b[1] - a[1]*b[0]]
+                 a[2]*b[0] - a[0]*b[2],
+                 a[0]*b[1] - a[1]*b[0]]
             return c
 
         iss_mass = "{:.2f}".format(float((values[48])[0]))
-        
+
         #ISS state vectors
         position_x = float((values[55])[0]) #km
         position_y = float((values[56])[0]) #km
@@ -2410,7 +2410,7 @@ class MainApp(App):
         velocity_x = float((values[58])[0])/1000.00 #convert to km/s
         velocity_y = float((values[59])[0])/1000.00 #convert to km/s
         velocity_z = float((values[60])[0])/1000.00 #convert to km/s
-        
+
         #test values from orbital mechanics book
         #position_x = (-6045.00)
         #position_y = (-3490.00)
@@ -2418,15 +2418,15 @@ class MainApp(App):
         #velocity_x = (-3.457)
         #velocity_y = (6.618)
         #velocity_z = (2.533)
-       
+
         pos_vec = [position_x, position_y, position_z]
         vel_vec = [velocity_x, velocity_y, velocity_z]
-        
+
         altitude = "{:.2f}".format(math.sqrt(dot(pos_vec,pos_vec))-6371.00)
         velocity = "{:.2f}".format(math.sqrt(dot(vel_vec,vel_vec)))
         mu = 398600
 
-        if (float(altitude) > 0):
+        if float(altitude) > 0:
             pos_mag = math.sqrt(dot(pos_vec,pos_vec))
             vel_mag = math.sqrt(dot(vel_vec,vel_vec))
 
@@ -2437,18 +2437,18 @@ class MainApp(App):
 
             inc = math.acos(h_mom[2]/h_mom_mag)
             self.orbit_data.ids.inc.text = "{:.2f}".format(math.degrees(inc))
-            
+
             node_vec = cross([0,0,1],h_mom)
             node_mag = math.sqrt(dot(node_vec,node_vec))
-            
+
             raan = math.acos(node_vec[0]/node_mag)
-            if(node_vec[1] < 0):
+            if node_vec[1] < 0:
                 raan = math.radians(360) - raan
             self.orbit_data.ids.raan.text = "{:.2f}".format(math.degrees(raan))
 
             pvnew = [x * (math.pow(vel_mag,2)-(mu/pos_mag)) for x in pos_vec]
             vvnew = [x * (pos_mag*v_radial) for x in vel_vec]
-            e_vec1 = [(1/mu) * x for x in pvnew] 
+            e_vec1 = [(1/mu) * x for x in pvnew]
             e_vec2 = [(1/mu) * x for x in vvnew]
             e_vec = [e_vec1[0] - e_vec2[0],e_vec1[1] - e_vec2[1],e_vec1[2] - e_vec2[2] ]
             e_mag = math.sqrt(dot(e_vec,e_vec))
@@ -2463,7 +2463,7 @@ class MainApp(App):
             if v_radial <= 0:
                 ta = math.radians(360) - ta
             self.orbit_data.ids.true_anomaly.text = "{:.2f}".format(math.degrees(ta))
-            
+
             apogee = (math.pow(h_mom_mag,2)/mu)*(1/(1+e_mag*math.cos(math.radians(180))))
             perigee = (math.pow(h_mom_mag,2)/mu)*(1/(1+e_mag*math.cos(0)))
             apogee_height = apogee - 6371.00
@@ -2509,13 +2509,13 @@ class MainApp(App):
         airlock_pump_switch = int((values[72])[0])
         crewlockpres = float((values[16])[0])
         airlockpres = float((values[77])[0])
-        
+
         #MSS Robotics Stuff
         mt_worksite = int((values[258])[0])
         self.mss_mt_screen.ids.mt_ws_value.text = str(mt_worksite)
         mt_position = float((values[257])[0])
         mt_position_timestamp = float((timestamps[257])[0])
-        
+
         self.mss_mt_screen.ids.mt_position_value.text = str(mt_position)
 
         if (mt_position_timestamp - old_mt_timestamp) > 0:
@@ -2523,7 +2523,7 @@ class MainApp(App):
             old_mt_timestamp = mt_position_timestamp
             old_mt_position = mt_position
         self.mss_mt_screen.ids.mt_speed_value.text = "{:2.2f}".format(float(mt_speed)) + " cm/s"
-        
+
 
         ##US EPS Stuff---------------------------##
         solarbeta = "{:.2f}".format(float((values[176])[0]))
@@ -2747,7 +2747,7 @@ class MainApp(App):
             self.eps_screen.ids.eps_sun.color = 1, 1, 1, 1
         else:
             self.eps_screen.ids.eps_sun.color = 1, 1, 1, 0.1
-            
+
         if float(v1a) < 151.5: #discharging
             self.eps_screen.ids.array_1a.source = "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
             #self.eps_screen.ids.array_1a.color = 1, 1, 1, 0.8
@@ -2873,7 +2873,7 @@ class MainApp(App):
                 self.ct_sgant_screen.ids.tdrs_east6.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
                 self.ct_sgant_screen.ids.tdrs_east12.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
                 self.ct_sgant_screen.ids.tdrs_z7.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.zip"
-        
+
         elif float(aos) == 0.0 and (float(sgant_transmit) == 0.0 or float(sgant_transmit) == 1.0):
             self.ct_sgant_screen.ids.radio_up.color = 0, 0, 0, 0
             self.ct_sgant_screen.ids.tdrs_east12.source = "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
@@ -3094,10 +3094,10 @@ class MainApp(App):
 
         self.us_eva.ids.EVA_psi_bar.pos_hint = {"center_x": psi_bar_x, "center_y": 0.56}
 
-        
+
         ##-------------------Signal Status Check-------------------##
 
-        if client_status.split(":")[0] == "CONNECTED": 
+        if client_status.split(":")[0] == "CONNECTED":
             if sub_status == "Subscribed":
                 #client connected and subscibed to ISS telemetry
                 if float(aos) == 1.00:
@@ -3105,7 +3105,7 @@ class MainApp(App):
 
                 elif float(aos) == 0.00:
                     self.signal_lost() #signal status 0 means loss of signal
-                
+
                 elif float(aos) == 2.00:
                     self.signal_stale() #signal status 2 means data is not being updated from server
             else:
