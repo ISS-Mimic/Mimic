@@ -2,7 +2,7 @@
 
 from datetime import datetime, timedelta #used for time conversions and logging timestamps
 import datetime as dtime #this is different from above for... reasons?
-import os #used to remove database on program exit
+import os # used to remove database on program exit; also used for importing config.json
 from subprocess import Popen #, PIPE, STDOUT #used to start/stop Javascript telemetry program and TDRS script and orbitmap
 import time #used for time
 import math #used for math
@@ -13,6 +13,7 @@ from bs4 import BeautifulSoup #used to parse webpages for data (EVA stats, ISS T
 import numpy as np
 import ephem #used for TLE orbit information on orbit screen
 import serial #used to send data over serial to arduino
+import json # used for serial port config
 
 from kivy.app import App
 from kivy.lang import Builder
@@ -37,6 +38,10 @@ from matplotlib import path
 from mpl_toolkits.basemap import Basemap
 """
 
+# Constants
+CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), "config.json")
+SERIAL_SPEED = 9600
+
 os.environ['KIVY_GL_BACKEND'] = 'gl' #need this to fix a kivy segfault that occurs with python3 for some reason
 
 # Create Program Logs
@@ -52,60 +57,38 @@ def logWrite(*args):
 logWrite("Initialized Mimic Program Log")
 
 #-------------------------Look for a connected arduino-----------------------------------
-def serial_ports():
-    #ports = glob.glob('/dev/tty[A-Z]*')
-    ports = glob.glob('/dev/ttyACM*')
-    result = []
-    for port in ports:
-        try:
-            s = serial.Serial(port)
-            result.append(port)
-            #s.close() #do I need to close the port each time
-        except (OSError, serial.SerialException) as e:
-            pass
-    return result
 
-ser1 = serial.Serial('/dev/ttyACM0', 9600, write_timeout=0, timeout=0)
-ser2 = serial.Serial('/dev/ttyACM1', 9600, write_timeout=0, timeout=0)
-ser3 = serial.Serial('/dev/ttyACM2', 9600, write_timeout=0, timeout=0)
-ser4 = serial.Serial('/dev/ttyACM3', 9600, write_timeout=0, timeout=0)
+def get_config_data():
+    """ Get the JSON config data. """
+    data = {}
+    with open (CONFIG_FILE_PATH, 'r') as f:
+        data = json.load(f)
+    return data
+
+def get_serial_ports():
+    using_config_file = True # TODO: make this a command line input
+    serial_ports = []
+    if using_config_file:
+        data = get_config_data()
+        serial_ports = data['arduino']['serial_ports']
+    else:
+        raise Exception("Not implemented yet.") # TODO: best effort at finding the correct ports
+    return serial_ports
+
+def open_serial_ports(serial_ports):
+    for s in serial_ports:
+        serial.Serial(s, SERIAL_SPEED, write_timeout=0, timeout=0)
 
 def serialWrite(*args): #
     logWrite("Function call - serial write: " + str(*args))
-    #ports = ['/dev/ttyACM0','/dev/ttyACM1','/dev/ttyACM2','/dev/ttyACM3' ]
-    #for port in serial_ports():
+    for s in serial_ports:
+        try:
+            s.write(str.encode(*args))
+        except (OSError, serial.SerialException) as e:
+            print(e)
 
-    try:
-        ser1.write(str.encode(*args))
-        #print("serial")
-    except (OSError, serial.SerialException) as e:
-        print(e)
-
-    try:
-        ser2.write(str.encode(*args))
-        #print("serial")
-    except (OSError, serial.SerialException) as e:
-        print(e)
-
-    try:
-        ser3.write(str.encode(*args))
-        #print("serial")
-    except (OSError, serial.SerialException) as e:
-        print(e)
-
-    try:
-        ser4.write(str.encode(*args))
-        #print("serial")
-    except (OSError, serial.SerialException) as e:
-        print(e)
-
-#for port in ports:
-    #    try:
-    #        ser = serial.Serial(port, 9600, write_timeout=0, timeout=5)
-    #        ser.write(str.encode(*args))
-    #    except (OSError, serial.SerialException) as e:
-    #        print(e)
-    #        pass
+serial_ports = get_serial_ports()
+open_serial_ports(serial_ports)
 
 #-------------------------TDRS Checking Database-----------------------------------------
 TDRSconn = sqlite3.connect('/dev/shm/tdrs.db')
@@ -2235,8 +2218,7 @@ class MainApp(App):
         global tdrs, module
         global old_mt_timestamp, old_mt_position, mt_speed
 
-        #arduino_count = len(serial_ports())-1
-        arduino_count = 1 #hard coding for now
+        arduino_count = len(serial_ports)
 
         if arduino_count > 0:
             self.mimic_screen.ids.arduino_count.text = str(arduino_count)

@@ -1,0 +1,11 @@
+{
+    "arduino": {
+        "serial_ports" : [
+            "/dev/ttyACM0",
+            "/dev/ttyACM1",
+            "/dev/ttyACM2",
+            "/dev/ttyACM3"
+        ]
+    }
+}
+
