@@ -14,6 +14,20 @@ import numpy as np
 import ephem #used for TLE orbit information on orbit screen
 import serial #used to send data over serial to arduino
 import json # used for serial port config
+from pyudev import Context, Devices # for automatically detecting Arduinos
+import argparse
+import sys
+
+# This is here because Kivy gets upset if you pass in your own non-Kivy args
+CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), "config.json")
+parser = argparse.ArgumentParser(description='ISS Mimic GUI. Arguments listed below are non-Kivy arguments.')
+parser.add_argument(
+        '--config', action='store_true',
+        help='use config.json to manually specify serial ports to use',
+        default=False)
+args, kivy_args = parser.parse_known_args()
+sys.argv[1:] = kivy_args
+USE_CONFIG_JSON = args.config
 
 from kivy.app import App
 from kivy.lang import Builder
@@ -30,7 +44,6 @@ import database_initialize # create and populate database script
 """ Unused imports
 import kivy
 from kivy.core.window import Window
-import sys #used to get active serial ports
 import threading #trying to send serial write to other thread
 matplotlib for plotting day/night time
 import matplotlib.pyplot as plt
@@ -39,7 +52,6 @@ from mpl_toolkits.basemap import Basemap
 """
 
 # Constants
-CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), "config.json")
 SERIAL_SPEED = 9600
 
 os.environ['KIVY_GL_BACKEND'] = 'gl' #need this to fix a kivy segfault that occurs with python3 for some reason
@@ -57,6 +69,31 @@ def logWrite(*args):
 logWrite("Initialized Mimic Program Log")
 
 #-------------------------Look for a connected arduino-----------------------------------
+def parse_tty_name(device, val):
+    """
+    It's not ideal to have to include FTDI because that's somewhat
+    generic, but if we want to use something like the Arduino Nano,
+    that's what it shows up as. If it causes a problem, we can change
+    it -- or the user can specify to use the config.json file instead.
+
+    Example of device as a string:
+    Device('/sys/devices/platform/scb/fd500000.pcie/pci0000:00/0000:00:00.0/0000:01:00.0/usb1/1-1/1-1.1/1-1.1.1/1-1.1.1:1.0/tty/ttyACM0')
+    """
+    if "Arduino" in val or "Adafruit" in val or "FTDI" in val:
+        name = str(device).split('/')[-1:][0][:-2] # to get ttyACM0, etc.
+        return '/dev/' + name
+    print("Skipping serial device:\n%s" % str(device))
+
+def get_tty_dev_names():
+    """ Checks ID_VENDOR string of tty devices to identify Arduinos. """
+    names = []
+    context = Context()
+    devices = context.list_devices(subsystem='tty')
+    for d in devices:
+        for k, v in d.items():
+            if k is not None and k == 'ID_VENDOR':
+                names.append(parse_tty_name(d, v))
+    return names
 
 def get_config_data():
     """ Get the JSON config data. """
@@ -65,14 +102,14 @@ def get_config_data():
         data = json.load(f)
     return data
 
-def get_serial_ports():
-    using_config_file = True # TODO: make this a command line input
+def get_serial_ports(using_config_file=False):
+    """ Gets the serial ports either from a config file or pyudev """
     serial_ports = []
     if using_config_file:
         data = get_config_data()
         serial_ports = data['arduino']['serial_ports']
     else:
-        raise Exception("Not implemented yet.") # TODO: best effort at finding the correct ports
+        serial_ports = get_tty_dev_names()
     return serial_ports
 
 def open_serial_ports(serial_ports):
@@ -87,7 +124,7 @@ def serialWrite(*args): #
         except (OSError, serial.SerialException) as e:
             print(e)
 
-serial_ports = get_serial_ports()
+serial_ports = get_serial_ports(USE_CONFIG_JSON)
 open_serial_ports(serial_ports)
 
 #-------------------------TDRS Checking Database-----------------------------------------
