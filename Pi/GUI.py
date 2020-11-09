@@ -14,7 +14,7 @@ import numpy as np
 import ephem #used for TLE orbit information on orbit screen
 import serial #used to send data over serial to arduino
 import json # used for serial port config
-from pyudev import Context, Devices # for automatically detecting Arduinos
+from pyudev import Context, Devices, Monitor, MonitorObserver # for automatically detecting Arduinos
 import argparse
 import sys
 
@@ -69,25 +69,68 @@ def logWrite(*args):
 logWrite("Initialized Mimic Program Log")
 
 #-------------------------Look for a connected arduino-----------------------------------
-def parse_tty_name(device, val):
+
+def remove_tty_device(name_to_remove):
+    """ Removes tty device from list of serial ports. """
+    global SERIAL_PORTS
+    try:
+        SERIAL_PORTS.remove(name_to_remove)
+        log_str = "Removed %s." % name_to_remove
+        logWrite(log_str)
+        print(log_str)
+    except ValueError:
+        # Not printing anything because it sometimes tries too many times and is irrelevant
+        pass
+
+def add_tty_device(name_to_add):
+    """ Adds tty device to list of serial ports after it successfully opens. """
+    global SERIAL_PORTS
+    if name_to_add not in SERIAL_PORTS:
+        try:
+            SERIAL_PORTS.append(name_to_add)
+            serial.Serial(SERIAL_PORTS[-1], SERIAL_SPEED, write_timeout=0, timeout=0)
+            log_str = "Added and opened %s." % name_to_add
+            logWrite(log_str)
+            print(log_str)
+        except IOError as e:
+            # Not printing anything because sometimes it successfully opens soon after
+            remove_tty_device(name_to_add) # don't leave it in the list if it didn't open
+
+def detect_device_event(device):
+    """ Callback for MonitorObserver to detect tty device and add or remove it. """
+    if 'tty' in device.device_path:
+        name = '/dev/' + (device.device_path).split('/')[-1:][0]
+        if device.action == 'remove':
+            remove_tty_device(name)
+        if device.action == 'add':
+            add_tty_device(name)
+
+def is_arduino_id_vendor_string(text):
     """
     It's not ideal to have to include FTDI because that's somewhat
     generic, but if we want to use something like the Arduino Nano,
     that's what it shows up as. If it causes a problem, we can change
     it -- or the user can specify to use the config.json file instead.
+    """
+    if "Arduino" in text or "Adafruit" in text or "FTDI" in text:
+        return True
+    return False
+
+def parse_tty_name(device, val):
+    """
+    Parses tty name from ID_VENDOR string.
 
     Example of device as a string:
     Device('/sys/devices/platform/scb/fd500000.pcie/pci0000:00/0000:00:00.0/0000:01:00.0/usb1/1-1/1-1.1/1-1.1.1/1-1.1.1:1.0/tty/ttyACM0')
     """
-    if "Arduino" in val or "Adafruit" in val or "FTDI" in val:
+    if is_arduino_id_vendor_string(val):
         name = str(device).split('/')[-1:][0][:-2] # to get ttyACM0, etc.
         return '/dev/' + name
-    print("Skipping serial device:\n%s" % str(device))
+    logWrite("Skipping serial device:\n%s" % str(device))
 
-def get_tty_dev_names():
+def get_tty_dev_names(context):
     """ Checks ID_VENDOR string of tty devices to identify Arduinos. """
     names = []
-    context = Context()
     devices = context.list_devices(subsystem='tty')
     for d in devices:
         for k, v in d.items():
@@ -102,30 +145,50 @@ def get_config_data():
         data = json.load(f)
     return data
 
-def get_serial_ports(using_config_file=False):
+def get_serial_ports(context, using_config_file=False):
     """ Gets the serial ports either from a config file or pyudev """
     serial_ports = []
     if using_config_file:
         data = get_config_data()
         serial_ports = data['arduino']['serial_ports']
     else:
-        serial_ports = get_tty_dev_names()
+        serial_ports = get_tty_dev_names(context)
     return serial_ports
 
 def open_serial_ports(serial_ports):
-    for s in serial_ports:
-        serial.Serial(s, SERIAL_SPEED, write_timeout=0, timeout=0)
+    """ Open all the serial ports in the list. Used when the GUI is first opened. """
+    try:
+        for s in serial_ports:
+            serial.Serial(s, SERIAL_SPEED, write_timeout=0, timeout=0)
+    except (OSError, serial.SerialException) as e:
+        if USE_CONFIG_JSON:
+            print("\nNot all serial ports were detected. Check config.json for accuracy.\n\n%s" % e)
+        raise Exception(e)
 
-def serialWrite(*args): #
+def serialWrite(*args):
+    """ Writes to serial ports in list. """
     logWrite("Function call - serial write: " + str(*args))
     for s in serial_ports:
         try:
             s.write(str.encode(*args))
         except (OSError, serial.SerialException) as e:
-            print(e)
+            logWrite(e)
 
-serial_ports = get_serial_ports(USE_CONFIG_JSON)
-open_serial_ports(serial_ports)
+context = Context()
+if not USE_CONFIG_JSON:
+    MONITOR = Monitor.from_netlink(context)
+    TTY_OBSERVER = MonitorObserver(MONITOR, callback=detect_device_event, name='monitor-observer')
+    TTY_OBSERVER.daemon = False
+SERIAL_PORTS = get_serial_ports(context, USE_CONFIG_JSON)
+open_serial_ports(SERIAL_PORTS)
+log_str = "Serial ports opened: %s" % str(SERIAL_PORTS)
+logWrite(log_str)
+print(log_str)
+if not USE_CONFIG_JSON:
+    TTY_OBSERVER.start()
+    log_str = "Started monitoring serial ports."
+    print(log_str)
+    logWrite(log_str)
 
 #-------------------------TDRS Checking Database-----------------------------------------
 TDRSconn = sqlite3.connect('/dev/shm/tdrs.db')
@@ -270,6 +333,11 @@ class MainScreen(Screen):
 
     def killproc(*args):
         global p,p2
+        if not USE_CONFIG_JSON:
+            TTY_OBSERVER.stop()
+            log_str = "Stopped monitoring serial ports."
+            logWrite(log_str)
+            print(log_str)
         try:
             p.kill()
             p2.kill()
@@ -2255,7 +2323,7 @@ class MainApp(App):
         global tdrs, module
         global old_mt_timestamp, old_mt_position, mt_speed
 
-        arduino_count = len(serial_ports)
+        arduino_count = len(SERIAL_PORTS)
 
         if arduino_count > 0:
             self.mimic_screen.ids.arduino_count.text = str(arduino_count)
