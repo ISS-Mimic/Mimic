@@ -168,7 +168,7 @@ def open_serial_ports(serial_ports):
 def serialWrite(*args):
     """ Writes to serial ports in list. """
     logWrite("Function call - serial write: " + str(*args))
-    for s in serial_ports:
+    for s in SERIAL_PORTS:
         try:
             s.write(str.encode(*args))
         except (OSError, serial.SerialException) as e:
