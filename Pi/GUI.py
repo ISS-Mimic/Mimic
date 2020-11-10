@@ -72,9 +72,13 @@ logWrite("Initialized Mimic Program Log")
 
 def remove_tty_device(name_to_remove):
     """ Removes tty device from list of serial ports. """
-    global SERIAL_PORTS
+    global SERIAL_PORTS, OPEN_SERIAL_PORTS
     try:
         SERIAL_PORTS.remove(name_to_remove)
+        for x in range(len(OPEN_SERIAL_PORTS)-1):
+            if name_to_remove in str(OPEN_SERIAL_PORTS[x]):
+                idx_to_remove = x
+        del OPEN_SERIAL_PORTS[x]
         log_str = "Removed %s." % name_to_remove
         logWrite(log_str)
         print(log_str)
@@ -84,11 +88,11 @@ def remove_tty_device(name_to_remove):
 
 def add_tty_device(name_to_add):
     """ Adds tty device to list of serial ports after it successfully opens. """
-    global SERIAL_PORTS
+    global SERIAL_PORTS, OPEN_SERIAL_PORTS
     if name_to_add not in SERIAL_PORTS:
         try:
             SERIAL_PORTS.append(name_to_add)
-            serial.Serial(SERIAL_PORTS[-1], SERIAL_SPEED, write_timeout=0, timeout=0)
+            OPEN_SERIAL_PORTS.append(serial.Serial(SERIAL_PORTS[-1], SERIAL_SPEED, write_timeout=0, timeout=0))
             log_str = "Added and opened %s." % name_to_add
             logWrite(log_str)
             print(log_str)
@@ -157,9 +161,10 @@ def get_serial_ports(context, using_config_file=False):
 
 def open_serial_ports(serial_ports):
     """ Open all the serial ports in the list. Used when the GUI is first opened. """
+    global OPEN_SERIAL_PORTS
     try:
         for s in serial_ports:
-            serial.Serial(s, SERIAL_SPEED, write_timeout=0, timeout=0)
+            OPEN_SERIAL_PORTS.append(serial.Serial(s, SERIAL_SPEED, write_timeout=0, timeout=0))
     except (OSError, serial.SerialException) as e:
         if USE_CONFIG_JSON:
             print("\nNot all serial ports were detected. Check config.json for accuracy.\n\n%s" % e)
@@ -168,7 +173,7 @@ def open_serial_ports(serial_ports):
 def serialWrite(*args):
     """ Writes to serial ports in list. """
     logWrite("Function call - serial write: " + str(*args))
-    for s in SERIAL_PORTS:
+    for s in OPEN_SERIAL_PORTS:
         try:
             s.write(str.encode(*args))
         except (OSError, serial.SerialException) as e:
@@ -180,6 +185,7 @@ if not USE_CONFIG_JSON:
     TTY_OBSERVER = MonitorObserver(MONITOR, callback=detect_device_event, name='monitor-observer')
     TTY_OBSERVER.daemon = False
 SERIAL_PORTS = get_serial_ports(context, USE_CONFIG_JSON)
+OPEN_SERIAL_PORTS = []
 open_serial_ports(SERIAL_PORTS)
 log_str = "Serial ports opened: %s" % str(SERIAL_PORTS)
 logWrite(log_str)
