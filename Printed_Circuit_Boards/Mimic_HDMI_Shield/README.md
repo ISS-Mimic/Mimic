@@ -17,3 +17,5 @@ Recommended PCB fab shop: JLCPCB, ALLPCB Seeedstudio. All located in China, they
 To order a PCB, go to any PCB fab website (they mostly all have the same quote process), enter the 56mm x 86mm for the board area, 2 layers, 1.6mm thickness, and 5x boards quantity. Once it prompts you for to upload the gerber file, upload Mimic_HDMI-edge_Shield_gerber.zip and checkout! That is generally the process for any PCB website.
 
 Those sites also provide the option of assembling (soldering) the components to the PCB for you, but that costs more money and for those hard to find HDMI components you would probably need to ship them some of those or pay for them to procur them. You will need the BOM file for assembly.
+
+The diptrace file Mimic_HDMI-edge_Shield.dip is also provided (PCB design file)
