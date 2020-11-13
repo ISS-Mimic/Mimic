@@ -1,0 +1,1 @@
+The HDMI breakout board extracts the motor power/signals from the HDMI cable and routes them to screw terminals/motor connectors to send across the slip ring to the BGAs or directly to the SARJ/TRRJ motors.
