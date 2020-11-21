@@ -77,7 +77,8 @@ def remove_tty_device(name_to_remove):
         SERIAL_PORTS.remove(name_to_remove)
         for x in range(len(OPEN_SERIAL_PORTS)-1):
             if name_to_remove in str(OPEN_SERIAL_PORTS[x]):
-                del OPEN_SERIAL_PORTS[x]
+                idx_to_remove = x
+        del OPEN_SERIAL_PORTS[idx_to_remove]
         log_str = "Removed %s." % name_to_remove
         logWrite(log_str)
         print(log_str)
