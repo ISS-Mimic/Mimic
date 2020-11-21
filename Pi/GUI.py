@@ -2,7 +2,7 @@
 
 from datetime import datetime, timedelta #used for time conversions and logging timestamps
 import datetime as dtime #this is different from above for... reasons?
-import os #used to remove database on program exit
+import os # used to remove database on program exit; also used for importing config.json
 from subprocess import Popen #, PIPE, STDOUT #used to start/stop Javascript telemetry program and TDRS script and orbitmap
 import time #used for time
 import math #used for math
@@ -13,6 +13,21 @@ from bs4 import BeautifulSoup #used to parse webpages for data (EVA stats, ISS T
 import numpy as np
 import ephem #used for TLE orbit information on orbit screen
 import serial #used to send data over serial to arduino
+import json # used for serial port config
+from pyudev import Context, Devices, Monitor, MonitorObserver # for automatically detecting Arduinos
+import argparse
+import sys
+
+# This is here because Kivy gets upset if you pass in your own non-Kivy args
+CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), "config.json")
+parser = argparse.ArgumentParser(description='ISS Mimic GUI. Arguments listed below are non-Kivy arguments.')
+parser.add_argument(
+        '--config', action='store_true',
+        help='use config.json to manually specify serial ports to use',
+        default=False)
+args, kivy_args = parser.parse_known_args()
+sys.argv[1:] = kivy_args
+USE_CONFIG_JSON = args.config
 
 from kivy.app import App
 from kivy.lang import Builder
@@ -29,13 +44,15 @@ import database_initialize # create and populate database script
 """ Unused imports
 import kivy
 from kivy.core.window import Window
-import sys #used to get active serial ports
 import threading #trying to send serial write to other thread
 matplotlib for plotting day/night time
 import matplotlib.pyplot as plt
 from matplotlib import path
 from mpl_toolkits.basemap import Basemap
 """
+
+# Constants
+SERIAL_SPEED = 9600
 
 os.environ['KIVY_GL_BACKEND'] = 'gl' #need this to fix a kivy segfault that occurs with python3 for some reason
 
@@ -52,60 +69,134 @@ def logWrite(*args):
 logWrite("Initialized Mimic Program Log")
 
 #-------------------------Look for a connected arduino-----------------------------------
-def serial_ports():
-    #ports = glob.glob('/dev/tty[A-Z]*')
-    ports = glob.glob('/dev/ttyACM*')
-    result = []
-    for port in ports:
+
+def remove_tty_device(name_to_remove):
+    """ Removes tty device from list of serial ports. """
+    global SERIAL_PORTS, OPEN_SERIAL_PORTS
+    try:
+        SERIAL_PORTS.remove(name_to_remove)
+        idx_to_remove = -1
+        for x in range(len(OPEN_SERIAL_PORTS)):
+            if name_to_remove in str(OPEN_SERIAL_PORTS[x]):
+                idx_to_remove = x
+        if idx_to_remove != -1:
+            del OPEN_SERIAL_PORTS[idx_to_remove]
+            log_str = "Removed %s." % name_to_remove
+            logWrite(log_str)
+            print(log_str)
+    except ValueError:
+        # Not printing anything because it sometimes tries too many times and is irrelevant
+        pass
+
+def add_tty_device(name_to_add):
+    """ Adds tty device to list of serial ports after it successfully opens. """
+    global SERIAL_PORTS, OPEN_SERIAL_PORTS
+    if name_to_add not in SERIAL_PORTS:
         try:
-            s = serial.Serial(port)
-            result.append(port)
-            #s.close() #do I need to close the port each time
-        except (OSError, serial.SerialException) as e:
-            pass
-    return result
+            SERIAL_PORTS.append(name_to_add)
+            OPEN_SERIAL_PORTS.append(serial.Serial(SERIAL_PORTS[-1], SERIAL_SPEED, write_timeout=0, timeout=0))
+            log_str = "Added and opened %s." % name_to_add
+            logWrite(log_str)
+            print(log_str)
+        except IOError as e:
+            # Not printing anything because sometimes it successfully opens soon after
+            remove_tty_device(name_to_add) # don't leave it in the list if it didn't open
 
-ser1 = serial.Serial('/dev/ttyACM0', 9600, write_timeout=0, timeout=0)
-ser2 = serial.Serial('/dev/ttyACM1', 9600, write_timeout=0, timeout=0)
-ser3 = serial.Serial('/dev/ttyACM2', 9600, write_timeout=0, timeout=0)
-ser4 = serial.Serial('/dev/ttyACM3', 9600, write_timeout=0, timeout=0)
+def detect_device_event(device):
+    """ Callback for MonitorObserver to detect tty device and add or remove it. """
+    if 'tty' in device.device_path:
+        name = '/dev/' + (device.device_path).split('/')[-1:][0]
+        if device.action == 'remove':
+            remove_tty_device(name)
+        if device.action == 'add':
+            add_tty_device(name)
 
-def serialWrite(*args): #
+def is_arduino_id_vendor_string(text):
+    """
+    It's not ideal to have to include FTDI because that's somewhat
+    generic, but if we want to use something like the Arduino Nano,
+    that's what it shows up as. If it causes a problem, we can change
+    it -- or the user can specify to use the config.json file instead.
+    """
+    if "Arduino" in text or "Adafruit" in text or "FTDI" in text:
+        return True
+    return False
+
+def parse_tty_name(device, val):
+    """
+    Parses tty name from ID_VENDOR string.
+
+    Example of device as a string:
+    Device('/sys/devices/platform/scb/fd500000.pcie/pci0000:00/0000:00:00.0/0000:01:00.0/usb1/1-1/1-1.1/1-1.1.1/1-1.1.1:1.0/tty/ttyACM0')
+    """
+    if is_arduino_id_vendor_string(val):
+        name = str(device).split('/')[-1:][0][:-2] # to get ttyACM0, etc.
+        return '/dev/' + name
+    logWrite("Skipping serial device:\n%s" % str(device))
+
+def get_tty_dev_names(context):
+    """ Checks ID_VENDOR string of tty devices to identify Arduinos. """
+    names = []
+    devices = context.list_devices(subsystem='tty')
+    for d in devices:
+        for k, v in d.items():
+            if k is not None and k == 'ID_VENDOR':
+                names.append(parse_tty_name(d, v))
+    return names
+
+def get_config_data():
+    """ Get the JSON config data. """
+    data = {}
+    with open (CONFIG_FILE_PATH, 'r') as f:
+        data = json.load(f)
+    return data
+
+def get_serial_ports(context, using_config_file=False):
+    """ Gets the serial ports either from a config file or pyudev """
+    serial_ports = []
+    if using_config_file:
+        data = get_config_data()
+        serial_ports = data['arduino']['serial_ports']
+    else:
+        serial_ports = get_tty_dev_names(context)
+    return serial_ports
+
+def open_serial_ports(serial_ports):
+    """ Open all the serial ports in the list. Used when the GUI is first opened. """
+    global OPEN_SERIAL_PORTS
+    try:
+        for s in serial_ports:
+            OPEN_SERIAL_PORTS.append(serial.Serial(s, SERIAL_SPEED, write_timeout=0, timeout=0))
+    except (OSError, serial.SerialException) as e:
+        if USE_CONFIG_JSON:
+            print("\nNot all serial ports were detected. Check config.json for accuracy.\n\n%s" % e)
+        raise Exception(e)
+
+def serialWrite(*args):
+    """ Writes to serial ports in list. """
     logWrite("Function call - serial write: " + str(*args))
-    #ports = ['/dev/ttyACM0','/dev/ttyACM1','/dev/ttyACM2','/dev/ttyACM3' ]
-    #for port in serial_ports():
+    for s in OPEN_SERIAL_PORTS:
+        try:
+            s.write(str.encode(*args))
+        except (OSError, serial.SerialException) as e:
+            logWrite(e)
 
-    try:
-        ser1.write(str.encode(*args))
-        #print("serial")
-    except (OSError, serial.SerialException) as e:
-        print(e)
-
-    try:
-        ser2.write(str.encode(*args))
-        #print("serial")
-    except (OSError, serial.SerialException) as e:
-        print(e)
-
-    try:
-        ser3.write(str.encode(*args))
-        #print("serial")
-    except (OSError, serial.SerialException) as e:
-        print(e)
-
-    try:
-        ser4.write(str.encode(*args))
-        #print("serial")
-    except (OSError, serial.SerialException) as e:
-        print(e)
-
-#for port in ports:
-    #    try:
-    #        ser = serial.Serial(port, 9600, write_timeout=0, timeout=5)
-    #        ser.write(str.encode(*args))
-    #    except (OSError, serial.SerialException) as e:
-    #        print(e)
-    #        pass
+context = Context()
+if not USE_CONFIG_JSON:
+    MONITOR = Monitor.from_netlink(context)
+    TTY_OBSERVER = MonitorObserver(MONITOR, callback=detect_device_event, name='monitor-observer')
+    TTY_OBSERVER.daemon = False
+SERIAL_PORTS = get_serial_ports(context, USE_CONFIG_JSON)
+OPEN_SERIAL_PORTS = []
+open_serial_ports(SERIAL_PORTS)
+log_str = "Serial ports opened: %s" % str(SERIAL_PORTS)
+logWrite(log_str)
+print(log_str)
+if not USE_CONFIG_JSON:
+    TTY_OBSERVER.start()
+    log_str = "Started monitoring serial ports."
+    print(log_str)
+    logWrite(log_str)
 
 #-------------------------TDRS Checking Database-----------------------------------------
 TDRSconn = sqlite3.connect('/dev/shm/tdrs.db')
@@ -250,6 +341,11 @@ class MainScreen(Screen):
 
     def killproc(*args):
         global p,p2
+        if not USE_CONFIG_JSON:
+            TTY_OBSERVER.stop()
+            log_str = "Stopped monitoring serial ports."
+            logWrite(log_str)
+            print(log_str)
         try:
             p.kill()
             p2.kill()
@@ -2235,8 +2331,7 @@ class MainApp(App):
         global tdrs, module
         global old_mt_timestamp, old_mt_position, mt_speed
 
-        #arduino_count = len(serial_ports())-1
-        arduino_count = 1 #hard coding for now
+        arduino_count = len(SERIAL_PORTS)
 
         if arduino_count > 0:
             self.mimic_screen.ids.arduino_count.text = str(arduino_count)
