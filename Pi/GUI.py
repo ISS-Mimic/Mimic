@@ -75,13 +75,15 @@ def remove_tty_device(name_to_remove):
     global SERIAL_PORTS, OPEN_SERIAL_PORTS
     try:
         SERIAL_PORTS.remove(name_to_remove)
-        for x in range(len(OPEN_SERIAL_PORTS)-1):
+        idx_to_remove = -1
+        for x in range(len(OPEN_SERIAL_PORTS)):
             if name_to_remove in str(OPEN_SERIAL_PORTS[x]):
                 idx_to_remove = x
-        del OPEN_SERIAL_PORTS[idx_to_remove]
-        log_str = "Removed %s." % name_to_remove
-        logWrite(log_str)
-        print(log_str)
+        if idx_to_remove != -1:
+            del OPEN_SERIAL_PORTS[idx_to_remove]
+            log_str = "Removed %s." % name_to_remove
+            logWrite(log_str)
+            print(log_str)
     except ValueError:
         # Not printing anything because it sometimes tries too many times and is irrelevant
         pass
