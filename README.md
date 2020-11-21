@@ -1,5 +1,7 @@
 Welcome to the ISS Mimic project repository! Join our discord to provide feedback, ask questions, or get involved! https://discord.gg/zPKyE6hBSe
 
+[![ISS MIMIC!](https://img.youtube.com/vi/W9iZBjzOEEQ/0.jpg)](https://www.youtube.com/watch?v=W9iZBjzOEEQ)
+
 ![ISS MIMIC!](https://github.com/ISS-Mimic/Mimic/blob/master/Pi/imgs/main/ISSmimicLogoPartsGroundtrack.png)
 
 The International Space Station is constantly downlinking data (telemetry) for Mission Control to monitor. Several years ago, NASA provided some of the data to the public in order to spur interest in the ISS and space exploration under the ISSlive project (https://isslive.com/) using the lightstreamer server (http://demos.lightstreamer.com/ISSLive/). We saw this project and wanted to expand on its potential. Since the development of isslive.com, some more data was added to the public feed and was, sadly, never incorporated into the website. The current total epic and all inclusive list of public telemetry can be seen at our page here https://iss-mimic.github.io/Mimic/ and in an even cooler format here https://iss-mimic.github.io/Mimic/dashboard.html
