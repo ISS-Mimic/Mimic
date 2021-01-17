@@ -3,6 +3,7 @@
 import sys
 import subprocess
 import argparse
+import shutil
 
 def run_command(cmd):
     print("{}".format(cmd))
@@ -17,59 +18,17 @@ def run_install(packages, method):
     install_string = "{} install {}".format(method, packages)
     run_command(install_string)
 
-def edit_kivy_config(username):
+def replace_kivy_config(username):
     kivy_config_path = "/home/{}/.kivy/config.ini".format(username)
-    lines = []
-    to_add = []
-    found_mouse_line = False
-    found_mtdev_line = False
-    found_hid_line = False
-    mouse_line = "mouse = mouse"
-    mtdev_line = "mtdev_%(name)s = probesysfs,provider=mtdev"
-    hid_line = "hid_%(name)s = probesysfs,provider=hidinput"
-    in_input_section = False
-    with open(kivy_config_path, "r") as f_in:
-        for line in f_in:
-            lines.append(line)
-            if "[input]" in line:
-                in_input_section = True
-            if "[postproc]" in line:
-                in_input_section = False
-            if in_input_section:
-                if mouse_line in line:
-                    found_mouse_line = True
-                if mtdev_line in line:
-                    found_mtdev_line = True
-                if hid_line in line:
-                    found_hid_line = True
-    if not found_mouse_line:
-        to_add.append(mouse_line)
-    if not found_mtdev_line:
-        to_add.append(mtdev_line)
-    if not found_hid_line:
-        to_add.append(hid_line)
-    input_index = -1
-    for x in range(len(lines)):
-        if "[input]" in lines[x]:
-            input_index = x
-    if input_index != -1:
-        for x in range(len(to_add)):
-            lines.insert(input_index + x + 1, to_add[x] + "\n")
-        if to_add:
-            print("\nAdding the following lines to the Kivy config:\n{}\n".format("\n".join(to_add)))
-            with open(kivy_config_path, 'w') as f_out:
-                f_out.writelines(lines)
-        else:
-            print("\nKivy config is already correct.")
-    else:
-        print("Not adding anything to the Kivy config.")
-
+    mimic_config_path = "/home/{}/Mimic/Pi/config.ini".format(username)
+    print("\nUpdating the Kivy config.ini file.")
+    shutil.copyfile(mimic_config_path, kivy_config_path)
 
 def main():
     parser = argparse.ArgumentParser(description='ISS Mimic initial Pi setup tool.')
     parser.add_argument(
             '--skip_kivy', action='store_true',
-            help='Skip installing the Kivy package; this is useful if you want to compile it yourself.',
+            help='Skip installing the Kivy package and replacing the Kivy config file.',
             default=False)
     parser.add_argument(
             '--username', type=str,
@@ -98,7 +57,7 @@ def main():
         run_install("--upgrade --user Cython==0.29.10 pillow", "python3 -m pip")
         run_install("--user kivy", "python3 -m pip")
         run_command("python3 -c 'import kivy'") # run kivy init to create the config.ini file
-        edit_kivy_config(args.username)
+        replace_kivy_config(args.username)
     else:
         print("\nSkipping Kivy setup.")
 
