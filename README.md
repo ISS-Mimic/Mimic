@@ -1,3 +1,10 @@
+[![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/tterb/atomic-design-ui/blob/master/LICENSEs)
+[![Discord](https://img.shields.io/discord/764217406041882684)](https://discord.gg/zPKyE6hBSe)
+[![HitCount](http://hits.dwyl.com/ISS-Mimic/Mimic.svg)](http://hits.dwyl.com/ISS-Mimic/Mimic)
+![GitHub last commit](https://img.shields.io/github/last-commit/ISS-Mimic/Mimic)
+![Twitter Follow](https://img.shields.io/twitter/follow/ISS_Mimic?style=social)
+![YouTube Video Views](https://img.shields.io/youtube/views/W9iZBjzOEEQ?style=social)
+
 Welcome to the ISS Mimic project repository! Join our discord to provide feedback, ask questions, or get involved! https://discord.gg/zPKyE6hBSe
 
 [![ISS MIMIC!](https://img.youtube.com/vi/W9iZBjzOEEQ/0.jpg)](https://www.youtube.com/watch?v=W9iZBjzOEEQ)
