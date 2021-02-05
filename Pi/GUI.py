@@ -351,8 +351,7 @@ class MainScreen(Screen):
             p2.kill()
         except Exception:
             pass
-        os.system('rm /dev/shm/iss_telemetry.db') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
-        os.system('rm /dev/shm/tdrs.db') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
+        os.system('rm /dev/shm/*') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
         staleTelemetry()
         logWrite("Successfully stopped ISS telemetry javascript and removed database")
 
@@ -2439,9 +2438,14 @@ class MainApp(App):
         aos = "{:.2f}".format(int((values[12])[0]))
         los = "{:.2f}".format(int((values[13])[0]))
         sasa_el = "{:.2f}".format(float((values[14])[0]))
+        sasa_az = "{:.2f}".format(float((values[18])[0]))
         active_sasa = int((values[54])[0])
         sasa1_active = int((values[53])[0])
         sasa2_active = int((values[52])[0])
+        if sasa1_active or sasa2_active:
+            sasa_xmit = True
+        else:
+            sasa_xmit = False
         sgant_elevation = float((values[15])[0])
         sgant_xelevation = float((values[17])[0])
         sgant_transmit = float((values[41])[0])
@@ -3209,7 +3213,7 @@ class MainApp(App):
             self.signal_unsubscribed()
 
         if mimicbutton: # and float(aos) == 1.00):
-            serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + v1a + " " + "V2A=" + v2a + " " + "V3A=" + v3a + " " + "V4A=" + v4a + " " + "V1B=" + v1b + " " + "V2B=" + v2b + " " + "V3B=" + v3b + " " + "V4B=" + v4b + " " + "ISS=" + module + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " ")
+            serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + v1a + " " + "V2A=" + v2a + " " + "V3A=" + v3a + " " + "V4A=" + v4a + " " + "V1B=" + v1b + " " + "V2B=" + v2b + " " + "V3B=" + v3b + " " + "V4B=" + v4b + " " + "ISS=" + module + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
 
 #All GUI Screens are on separate kv files
 Builder.load_file('/home/pi/Mimic/Pi/Screens/Settings_Screen.kv')
