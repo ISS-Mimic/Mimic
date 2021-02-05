@@ -1,3 +1,9 @@
+[![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/tterb/atomic-design-ui/blob/master/LICENSEs)
+[![Discord](https://img.shields.io/discord/764217406041882684)](https://discord.gg/zPKyE6hBSe)
+![GitHub last commit](https://img.shields.io/github/last-commit/ISS-Mimic/Mimic)
+[![Twitter Follow](https://img.shields.io/twitter/follow/ISS_Mimic?style=social)](https://twitter.com/ISS_Mimic)
+[![YouTube Video Views](https://img.shields.io/youtube/views/W9iZBjzOEEQ?style=social)](https://www.youtube.com/watch?v=W9iZBjzOEEQ)
+
 Welcome to the ISS Mimic project repository! Join our discord to provide feedback, ask questions, or get involved! https://discord.gg/zPKyE6hBSe
 
 [![ISS MIMIC!](https://img.youtube.com/vi/W9iZBjzOEEQ/0.jpg)](https://www.youtube.com/watch?v=W9iZBjzOEEQ)
@@ -22,7 +28,7 @@ That said, feel free to improve upon our caffeine-induced, late-night, insanity-
 
 Check out the wiki for more information.
 
-You can view a video showing some of our project here: https://www.youtube.com/watch?v=sbdHXjDQ-U8
+You can view a video showing some of our project here:https://youtu.be/W9iZBjzOEEQ. Here's an older video: https://www.youtube.com/watch?v=sbdHXjDQ-U8 .
 
 The software is pretty cool and provides even more in-depth functionality than isslive.com. We'll be adding videos and pictures soon to show off the software capabilities.
 
