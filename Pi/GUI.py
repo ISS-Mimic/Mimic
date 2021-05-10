@@ -3201,12 +3201,15 @@ class MainApp(App):
                 #client connected and subscibed to ISS telemetry
                 if float(aos) == 1.00:
                     self.signal_acquired() #signal status 1 means acquired
+                    sasa_xmit = 1
 
                 elif float(aos) == 0.00:
                     self.signal_lost() #signal status 0 means loss of signal
+                    sasa_xmit = 0
 
                 elif float(aos) == 2.00:
                     self.signal_stale() #signal status 2 means data is not being updated from server
+                    sasa_xmit = 0
             else:
                 self.signal_unsubscribed()
         else:
