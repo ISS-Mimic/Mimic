@@ -1,0 +1,53 @@
+connectors:
+  Port_Inboard:
+    type: Mimic Shield
+    subtype: female
+    pincount: 13
+    pins: [1,2,3,4,5,6,7,8,9,10,11,12,13]
+    pinlabels: [M2b,M2a,D3,D2,D1,D0,Neopixels,3.3v,5v,M1b,M1a,GND]
+  Port_Inboard_Breakout:
+    type: Mimic Breakout
+    subtype: female
+    pincount: 13
+    pins: [1,2,3,4,5,6,7,8,9,10,11,12,13]
+    pinlabels: [M2b,M2a,D3,D2,D1,D0,Neopixels,3.3v,5v,M1b,M1a,GND]
+  IEA_2A:
+    type: Mimic_IEA
+    pincount: 8
+    pins: [1,2,3,4,5,6,7,8]
+    pinlabels: [M1a,M1b,3.3v,GND,D1,D0,Neopixel_In,Neopixel_Out]
+  IEA_4A:
+    type: Mimic_IEA
+    pincount: 8
+    pins: [1,2,3,4,5,6,7,8]
+    pinlabels: [M1a,M1b,3.3v,GND,D1,D0,Neopixel_In,Neopixel_Out]
+
+cables:
+  Generic_Cable:
+    gauge: 24 AWG
+    length: 0.2
+    color: BK
+    wirecount: 13
+    shield: true
+    show_name: true
+  Slip_Ring:
+    gauge: 26 AWG
+    length: 0.2
+    colors: [BU,LB,RD,BK,OG,YE,PK,BN,GY,VT,WH,GN]
+    wirecount: 12
+    shield: false
+
+connections:
+  -
+    - Port_Inboard: [1,2,3,4,5,6,7,8,9,10,11,12,13]
+    - Generic_Cable: [1,2,3,4,5,6,7,8,9,10,11,12,13]
+    - Port_Inboard_Breakout: [1,2,3,4,5,6,7,8,9,10,11,12,13]
+  -
+    - Port_Inboard_Breakout: [12,11,9,13,1,4,5]
+    - Slip_Ring: [1,2,3,4,5,6,7]
+    - IEA_2A: [1,2,3,4,5,6,7]
+  -
+    - Port_Inboard_Breakout: [1,2,9,13,6,7]
+    - Slip_Ring: [8,9,3,4,10,11]
+    - IEA_4A: [1,2,3,4,5,6]
+    
