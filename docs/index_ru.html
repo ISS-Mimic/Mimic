@@ -1,0 +1,969 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<!-- Global site tag (gtag.js) - Google Analytics -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=UA-148243619-1"></script>
+		<script>
+  			window.dataLayer = window.dataLayer || [];
+  			function gtag(){dataLayer.push(arguments);}
+  			gtag('js', new Date());
+			
+  			gtag('config', 'UA-148243619-1');
+		</script>
+		<style>
+			tr:nth-child(even) {background: black;}
+			tr:hover {background: white;}
+			@keyframes hifade {
+				from { background: fuchsia; }
+				to { background: transparent; }
+			}
+			td.highlight { animation: hifade 0.5s; }
+		</style>
+	</head>
+<body onload="setevents()" style="background-color: black;">
+<table class="status" border="1px" align="center">
+<tr>
+  <td align="center" style="color: white;">Статус сигнала</td>
+  <td align="center"  id="AOS" style="color: white;"></td>
+</tr>
+</table>
+<table>
+<tr style="color: white;">
+  <th>Категория</th>
+  <th>Параметр</th>
+  <th>Значение</th>
+  <th>Время прихода ТМИ</th>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС</td>
+  <td style="color: fuchsia;">Режим работы РС МКС</td>
+  <td class="val" id="RUSSEG000001" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000001t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС-РТСС</td>
+  <td style="color: fuchsia;">Работа первого комплекта Курс-П СМ</td>
+  <td class="val" id="RUSSEG000002" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000002t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС-РТСС</td>
+  <td style="color: fuchsia;">Работа второго комплекта Курс-П СМ</td>
+  <td class="val" id="RUSSEG000003" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000003t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС-РТСС</td>
+  <td style="color: fuchsia;">Курс-П СМ 1/2 - АВАРИЯ</td>
+  <td class="val" id="RUSSEG000004" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000004t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС-РТСС</td>
+  <td style="color: fuchsia;">Дальность по данным Курс-П СМ (м)</td>
+  <td class="val" id="RUSSEG000005" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000005t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС-РТСС</td>
+  <td style="color: fuchsia;">Скорость сближения по данным Курс-П СМ (м/с)</td>
+  <td class="val" id="RUSSEG000006" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000006t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС-РТСС</td>
+  <td style="color: fuchsia;">Тест Курс-П СМ</td>
+  <td class="val" id="RUSSEG000007" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000007t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС-РТСС</td>
+  <td style="color: fuchsia;">Курс-П СМ - Захват</td>
+  <td class="val" id="RUSSEG000008" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000008t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС-РТСС</td>
+  <td style="color: fuchsia;">Курс-П СМ - Сигнал наличия цели (СНЦ)</td>
+  <td class="val" id="RUSSEG000009" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000009t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС-РТСС</td>
+  <td style="color: fuchsia;">Курс-П СМ - Режим функционирования (РФ)</td>
+  <td class="val" id="RUSSEG000010" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000010t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС-РТСС</td>
+  <td style="color: fuchsia;">Service Module Kurs-P Standby Mode</td>
+  <td class="val" id="RUSSEG000011" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000011t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС-ССВП</td>
+  <td style="color: fuchsia;">Стыковочные узлы РС МКС - Механическое соединение</td>
+  <td class="val" id="RUSSEG000012" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000012t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС-ССВП</td>
+  <td style="color: fuchsia;">Стыковочный узел ПхО СМ -X</td>
+  <td class="val" id="RUSSEG000013" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000013t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС-ССВП</td>
+  <td style="color: fuchsia;">Стыковочный узел ПхО СМ -Y</td>
+  <td class="val" id="RUSSEG000015" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000015t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС-ССВП</td>
+  <td style="color: fuchsia;">Стыковочный узел ГА ФГБ -Y</td>
+  <td class="val" id="RUSSEG000016" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000016t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС-ССВП</td>
+  <td style="color: fuchsia;">Стыковочный узел АО СМ</td>
+  <td class="val" id="RUSSEG000014" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000014t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС-ССВП</td>
+  <td style="color: fuchsia;">Стыквочный узел СО1</td>
+  <td class="val" id="RUSSEG000017" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000017t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС-ССВП</td>
+  <td style="color: fuchsia;">Стыковочный узел МИМ1</td>
+  <td class="val" id="RUSSEG000018" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000018t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС-ССВП</td>
+  <td style="color: fuchsia;">Стыковочный узел МИМ2</td>
+  <td class="val" id="RUSSEG000019" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000019t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС-ССВП</td>
+  <td style="color: fuchsia;">Крюки пристыкованного корабля закрыты</td>
+  <td class="val" id="RUSSEG000020" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000020t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС-СУДН СМ</td>
+  <td style="color: fuchsia;">Режим ориентации</td>
+  <td class="val" id="RUSSEG000021" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000021t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС-СУДН СМ</td>
+  <td style="color: fuchsia;">Работа СУДН СМ</td>
+  <td class="val" id="RUSSEG000022" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000022t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС-СУДН СМ</td>
+  <td style="color: fuchsia;">Переход в режим дрейфа</td>
+  <td class="val" id="RUSSEG000023" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000023t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС-СУДН СМ/ОДУ</td>
+  <td style="color: fuchsia;">Состояние двигателей</td>
+  <td class="val" id="RUSSEG000024" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000024t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">РС МКС-СУДН СМ</td>
+  <td style="color: fuchsia;">Режим задания ориентации</td>
+  <td class="val" id="RUSSEG000025" style="color: cyan;"></td>
+  <td class="val" id="RUSSEG000025t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">N/A</td>
+  <td style="color: fuchsia;">Миллисекунды года по GMT</td>
+  <td class="val" id="TIME_000001" style="color: cyan;"></td>
+  <td class="val" id="TIME_000001t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">N/A</td>
+  <td style="color: fuchsia;">Год</td>
+  <td class="val" id="TIME_000002" style="color: cyan;"></td>
+  <td class="val" id="TIME_000002t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO/VVO</td>
+  <td style="color: fuchsia;">СУДН (GNC) - Режим задания ориентации</td>
+  <td class="val" id="USLAB000012" style="color: cyan;"></td>
+  <td class="val" id="USLAB000012t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">Attitude Controller Type</td>
+  <td class="val" id="USLAB000016" style="color: cyan;"></td>
+  <td class="val" id="USLAB000016t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">Attitude Control Reference Frame</td>
+  <td class="val" id="USLAB000017" style="color: cyan;"></td>
+  <td class="val" id="USLAB000017t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">СУДН (GNC) - Фактический угол поворота по рысканию (°)</td>
+  <td class="val" id="USLAB000YAW" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">СУДН (GNC) - Фактический угол поворота по тангажу (°)</td>
+  <td class="val" id="USLAB000PIT" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">СУДН (GNC) - Фактический угол поворота по крену (°)</td>
+  <td class="val" id="USLAB000ROL" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">СУДН (GNC) - Ошибка по рысканию (°)</td>
+  <td class="val" id="USLAB000024" style="color: cyan;"></td>
+  <td class="val" id="USLAB000024t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">СУДН (GNC) - Ошибка по тангажу (°)</td>
+  <td class="val" id="USLAB000023" style="color: cyan;"></td>
+  <td class="val" id="USLAB000023t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">СУДН (GNC) - Ошибка по крену (°)</td>
+  <td class="val" id="USLAB000022" style="color: cyan;"></td>
+  <td class="val" id="USLAB000022t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">СУДН (GNC) - Скорость вращения по крену (ось X LVLH)(°/сек)</td>
+  <td class="val" id="USLAB000025" style="color: cyan;"></td>
+  <td class="val" id="USLAB000025t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">СУДН (GNC) - Скорость вращения по тангажу (ось Y LVLH)(°/сек)</td>
+  <td class="val" id="USLAB000026" style="color: cyan;"></td>
+  <td class="val" id="USLAB000026t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">СУДН (GNC) - Скорость вращения по рысканию (ось Z LVLH)(°/сек)</td>
+  <td class="val" id="USLAB000027" style="color: cyan;"></td>
+  <td class="val" id="USLAB000027t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">Фактический компонент кватерниона 0 (LVLH)</td>
+  <td class="val" id="USLAB000018" style="color: cyan;"></td>
+  <td class="val" id="USLAB000018t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">Фактический компонент кватерниона 1 (LVLH)</td>
+  <td class="val" id="USLAB000019" style="color: cyan;"></td>
+  <td class="val" id="USLAB000019t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">Фактический компонент кватерниона 2 (LVLH)</td>
+  <td class="val" id="USLAB000020" style="color: cyan;"></td>
+  <td class="val" id="USLAB000020t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">Фактический компонент кватерниона 3 (LVLH)</td>
+  <td class="val" id="USLAB000021" style="color: cyan;"></td>
+  <td class="val" id="USLAB000021t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">Задаваемый компонент кватерниона 0 (LVLH)</td>
+  <td class="val" id="USLAB000028" style="color: cyan;"></td>
+  <td class="val" id="USLAB000028t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">Задаваемый компонент кватерниона 1 (LVLH)</td>
+  <td class="val" id="USLAB000029" style="color: cyan;"></td>
+  <td class="val" id="USLAB000029t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">Задаваемый компонент кватерниона 2 (LVLH)</td>
+  <td class="val" id="USLAB000030" style="color: cyan;"></td>
+  <td class="val" id="USLAB000030t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">Задаваемый компонент кватерниона 3 (LVLH)</td>
+  <td class="val" id="USLAB000031" style="color: cyan;"></td>
+  <td class="val" id="USLAB000031t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO/TOPO</td>
+  <td style="color: fuchsia;">СУДН (GNC) - Положение по оси X в J2000 (км)</td>
+  <td class="val" id="USLAB000032" style="color: cyan;"></td>
+  <td class="val" id="USLAB000032t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO/TOPO</td>
+  <td style="color: fuchsia;">СУДН (GNC) - Положение по оси Y в J2000 (км)</td>
+  <td class="val" id="USLAB000033" style="color: cyan;"></td>
+  <td class="val" id="USLAB000033t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO/TOPO</td>
+  <td style="color: fuchsia;">СУДН (GNC) - Положение по оси Z в J2000 (км)</td>
+  <td class="val" id="USLAB000034" style="color: cyan;"></td>
+  <td class="val" id="USLAB000034t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO/TOPO</td>
+  <td style="color: fuchsia;">СУДН (GNC) - Скорость движения по оси X в J2000 (м/с)</td>
+  <td class="val" id="USLAB000035" style="color: cyan;"></td>
+  <td class="val" id="USLAB000035t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO/TOPO</td>
+  <td style="color: fuchsia;">СУДН (GNC) - Скорость движения по оси Y в J2000 (м/с)</td>
+  <td class="val" id="USLAB000036" style="color: cyan;"></td>
+  <td class="val" id="USLAB000036t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO/TOPO</td>
+  <td style="color: fuchsia;">СУДН (GNC) - Скорость движения по оси Z в J2000 (м/с)</td>
+  <td class="val" id="USLAB000037" style="color: cyan;"></td>
+  <td class="val" id="USLAB000037t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">TOPO</td>
+  <td style="color: fuchsia;">Высота МКС (км)</td>
+  <td class="val" id="USLAB000ALT" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">ADCO</td>
+  <td style="color: fuchsia;">Масса МКС (кг)</td>
+  <td class="val" id="USLAB000039" style="color: cyan;"></td>
+  <td class="val" id="USLAB000039t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">ADCO</td>
+  <td style="color: fuchsia;">β угол Солнца (°)</td>
+  <td class="val" id="USLAB000040" style="color: cyan;"></td>
+  <td class="val" id="USLAB000040t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">Потеря управления ориентацией гиродинами CMG (LOAC)</td>
+  <td class="val" id="USLAB000041" style="color: cyan;"></td>
+  <td class="val" id="USLAB000041t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">Потеря управления ориентацией МКС (LOAC)</td>
+  <td class="val" id="USLAB000042" style="color: cyan;"></td>
+  <td class="val" id="USLAB000042t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">Количество гиродинов (CMG) в работе</td>
+  <td class="val" id="USLAB000005" style="color: cyan;"></td>
+  <td class="val" id="USLAB000005t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">Работа гиродина CMG-1</td>
+  <td class="val" id="USLAB000001" style="color: cyan;"></td>
+  <td class="val" id="USLAB000001t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">Работа гиродина CMG-2</td>
+  <td class="val" id="USLAB000002" style="color: cyan;"></td>
+  <td class="val" id="USLAB000002t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">Работа гиродина CMG-3</td>
+  <td class="val" id="USLAB000003" style="color: cyan;"></td>
+  <td class="val" id="USLAB000003t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">Работа гиродина CMG-4</td>
+  <td class="val" id="USLAB000004" style="color: cyan;"></td>
+  <td class="val" id="USLAB000004t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">Гиродин CMG-1 - Скорость вращения (оборот/мин)</td>
+  <td class="val" id="Z1000009" style="color: cyan;"></td>
+  <td class="val" id="Z1000009t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">Гиродин CMG-2 - Скорость вращения (оборот/мин)</td>
+  <td class="val" id="Z1000010" style="color: cyan;"></td>
+  <td class="val" id="Z1000010t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">Гиродин CMG-3 - Скорость вращения (оборот/мин)</td>
+  <td class="val" id="Z1000011" style="color: cyan;"></td>
+  <td class="val" id="Z1000011t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">АС МКС-ADCO</td>
+  <td style="color: fuchsia;">Гиродин CMG-4 - Скорость вращения (оборот/мин)</td>
+  <td class="val" id="Z1000012" style="color: cyan;"></td>
+  <td class="val" id="Z1000012t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">VVO</td>
+  <td style="color: fuchsia;">Изменение ориентации</td>
+  <td class="val" id="USLAB000081" style="color: cyan;"></td>
+  <td class="val" id="USLAB000081t" style="color: cyan;"></td>
+</tr>
+<tr>
+  <td align="center" style="color: fuchsia;">ODIN/VVO</td>
+  <td style="color: fuchsia;">Режим работы МКС</td>
+  <td class="val" id="USLAB000086" style="color: cyan;"></td>
+  <td class="val" id="USLAB000086t" style="color: cyan;"></td>
+</tr>
+</table>
+
+<script src="https://demos.lightstreamer.com/commons/require.js"></script>
+<script src="https://demos.lightstreamer.com/commons/lightstreamer.min.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+
+<script>
+var setevents = function()
+{
+	$(".val").each( function()
+		       { 
+				$(this).on('animationend', function()
+					   		{ 
+								$(this).removeClass('highlight');
+							}
+				);
+			}
+	);
+};
+	
+require(["LightstreamerClient","Subscription"],function(LightstreamerClient,Subscription) 
+{
+	var client = new LightstreamerClient("https://push.lightstreamer.com","ISSLIVE");
+	client.connect();
+ 
+	var sub = new Subscription("MERGE",["AIRLOCK000001","AIRLOCK000002","AIRLOCK000003","AIRLOCK000004","AIRLOCK000005","AIRLOCK000006",
+"AIRLOCK000007","AIRLOCK000008","AIRLOCK000009","AIRLOCK000010","AIRLOCK000011","AIRLOCK000012",
+"AIRLOCK000013","AIRLOCK000014","AIRLOCK000015","AIRLOCK000016","AIRLOCK000017","AIRLOCK000018",
+"AIRLOCK000019","AIRLOCK000020","AIRLOCK000021","AIRLOCK000022","AIRLOCK000023","AIRLOCK000024",
+"AIRLOCK000025","AIRLOCK000026","AIRLOCK000027","AIRLOCK000028","AIRLOCK000029","AIRLOCK000030",
+"AIRLOCK000031","AIRLOCK000032","AIRLOCK000033","AIRLOCK000034","AIRLOCK000035","AIRLOCK000036",
+"AIRLOCK000037","AIRLOCK000038","AIRLOCK000039","AIRLOCK000040","AIRLOCK000041","AIRLOCK000042",
+"AIRLOCK000043","AIRLOCK000044","AIRLOCK000045","AIRLOCK000046","AIRLOCK000047","AIRLOCK000048",
+"AIRLOCK000049","AIRLOCK000050","AIRLOCK000051","AIRLOCK000052","AIRLOCK000053","AIRLOCK000054",
+"AIRLOCK000055","AIRLOCK000056","AIRLOCK000057","NODE2000001","NODE2000002","NODE2000003",
+"NODE2000006","NODE2000007","NODE3000001","NODE3000002","NODE3000003","NODE3000004",
+"NODE3000005","NODE3000006","NODE3000007","NODE3000008","NODE3000009","NODE3000010",
+"NODE3000011","NODE3000012","NODE3000013","NODE3000017","NODE3000018","NODE3000019",
+"USLAB000053","USLAB000054","USLAB000055","USLAB000056","USLAB000057","USLAB000058",
+"USLAB000059","USLAB000060","USLAB000061","USLAB000062","USLAB000063","USLAB000064",
+"USLAB000065","AIRLOCK000058","NODE1000001","NODE1000002","NODE2000004","NODE2000005",
+"NODE3000014","NODE3000015","NODE3000016","NODE3000020","P1000006","P1000008",
+"P1000009","P3000001","P3000002","P4000003","P4000006","P6000003","P6000006",
+"S0000010","S0000011","S0000012","S0000013","S1000006","S1000007","S1000008",
+"S3000001","S3000002","S4000003","S4000006","S6000003","S6000006","USLAB000066",
+"USLAB000067","USLAB000068","USLAB000069","USLAB000070","USLAB000071","USLAB000072",
+"USLAB000073","USLAB000074","USLAB000075","USLAB000076","USLAB000077","USLAB000078",
+"USLAB000079","USLAB000080","P1000001","P1000002","P1000003","P4000001",
+"P4000002","P4000004","P4000005","P4000007","P4000008","P6000001",
+"P6000002","P6000004","P6000005","P6000007","P6000008","S1000001",
+"S1000002","S1000003","S4000001","S4000002","S4000004","S4000005",
+"S4000007","S4000008","S6000001","S6000002","S6000004","S6000005",
+"S6000007","S6000008","P1000004","P1000005","P1000007","S1000004",
+"S1000009","USLAB000088","USLAB000089","USLAB000090","USLAB000091","USLAB000092",
+"USLAB000093","USLAB000094","USLAB000095","USLAB000096","USLAB000097","USLAB000098",
+"USLAB000099","USLAB000100","USLAB000101","Z1000013","Z1000014","Z1000015",
+"S0000001","S0000002","S0000003","S0000004","S0000005","S0000006",
+"S0000007","S0000008","S0000009","USLAB000081","RUSSEG000001","RUSSEG000002",
+"RUSSEG000003","RUSSEG000004","RUSSEG000005","RUSSEG000006","RUSSEG000007","RUSSEG000008",
+"RUSSEG000009","RUSSEG000010","RUSSEG000011","RUSSEG000012","RUSSEG000013","RUSSEG000014",
+"RUSSEG000015","RUSSEG000016","RUSSEG000017","RUSSEG000018","RUSSEG000019","RUSSEG000020",
+"RUSSEG000021","RUSSEG000022","RUSSEG000023","RUSSEG000024","S1000005","USLAB000001",
+"USLAB000002","USLAB000003","USLAB000004","USLAB000005","USLAB000006","USLAB000007",
+"USLAB000008","USLAB000009","USLAB000011","USLAB000013","USLAB000014","USLAB000015",
+"USLAB000016","USLAB000017","USLAB000018","USLAB000019","USLAB000020","USLAB000021",
+"USLAB000022","USLAB000023","USLAB000024","USLAB000025","USLAB000026","USLAB000027",
+"USLAB000028","USLAB000029","USLAB000030","USLAB000031","USLAB000038","USLAB000039",
+"USLAB000040","USLAB000041","USLAB000042","USLAB000043","USLAB000044","USLAB000045",
+"USLAB000046","USLAB000047","USLAB000048","USLAB000049","USLAB000050","USLAB000051",
+"USLAB000052","Z1000001","Z1000002","Z1000003","Z1000004","Z1000005",
+"Z1000006","Z1000007","Z1000008","Z1000009","Z1000010","Z1000011",
+"Z1000012","USLAB000010","USLAB000012","RUSSEG000025","USLAB000032","USLAB000033",
+"USLAB000034","USLAB000035","USLAB000036","USLAB000037","USLAB000082","USLAB000083",
+"USLAB000084","USLAB000085","USLAB000087","USLAB000086","USLAB000102","TIME_000001",
+"TIME_000002","CSAMT000001","CSAMT000002","CSASSRMS001","CSASSRMS002","CSASSRMS003",
+"CSASSRMS004","CSASSRMS005","CSASSRMS006","CSASSRMS007","CSASSRMS008","CSASSRMS009",
+"CSASSRMS010","CSASSRMS011","CSASPDM0001","CSASPDM0002","CSASPDM0003","CSASPDM0004",
+"CSASPDM0005","CSASPDM0006","CSASPDM0007","CSASPDM0008","CSASPDM0009","CSASPDM0010",
+"CSASPDM0011","CSASPDM0012","CSASPDM0013","CSASPDM0014","CSASPDM0015","CSASPDM0016",
+"CSASPDM0017","CSASPDM0018","CSASPDM0019","CSASPDM0020","CSASPDM0021","CSASPDM0022",
+"CSAMBS00001","CSAMBS00002","CSAMBA00003","CSAMBA00004"],["Value","TimeStamp"]);
+
+var timeSub = new Subscription('MERGE', 'TIME_000001', ['TimeStamp','Status.Class']);
+
+client.subscribe(sub);
+
+var unixtime = (new Date).getTime();
+var date = new Date(unixtime);
+var hours = date.getUTCHours();
+var minutes = "0" + date.getMinutes();
+var seconds = "0" + date.getSeconds();
+var timestmp = new Date().setFullYear(new Date().getFullYear(), 0, 1);
+var yearFirstDay = Math.floor(timestmp / 86400000);
+var today = Math.ceil((new Date().getTime()) / 86400000);
+var dayOfYear = today - yearFirstDay;
+
+var timestampnow = dayOfYear*24 + hours + minutes/60 + seconds/3600; 
+//console.log("timestamp now: " + timestampnow);
+	
+var specialPUIs = ["AIRLOCK000019","AIRLOCK000020","AIRLOCK000021","AIRLOCK000022","AIRLOCK000023","AIRLOCK000024","AIRLOCK000025","AIRLOCK000026","AIRLOCK000027","AIRLOCK000028","AIRLOCK000029","AIRLOCK000030","AIRLOCK000031","AIRLOCK000032","AIRLOCK000033","AIRLOCK000034","AIRLOCK000035","AIRLOCK000036","AIRLOCK000037","AIRLOCK000038","AIRLOCK000039","AIRLOCK000040","AIRLOCK000041","AIRLOCK000042","AIRLOCK000043","AIRLOCK000044","AIRLOCK000045","AIRLOCK000046","AIRLOCK000047","AIRLOCK000048","AIRLOCK000050","AIRLOCK000051","AIRLOCK000052","AIRLOCK000053","AIRLOCK000058","NODE1000001","NODE1000002","NODE2000003","NODE2000004","NODE2000005","NODE3000004","NODE3000006","NODE3000007","NODE3000010","NODE3000014","NODE3000015","NODE3000016","NODE3000018","NODE3000020","P1000006","P1000007","P1000008","P1000009","P3000001","P3000002","P4000003","P4000006","P6000003","P6000006","RUSSEG000001","RUSSEG000002","RUSSEG000003","RUSSEG000004","RUSSEG000007","RUSSEG000008","RUSSEG000009","RUSSEG000010","RUSSEG000011","RUSSEG000012","RUSSEG000013","RUSSEG000014","RUSSEG000015","RUSSEG000016","RUSSEG000017","RUSSEG000018","RUSSEG000019","RUSSEG000020","RUSSEG000021","RUSSEG000022","RUSSEG000023","RUSSEG000024","RUSSEG000025","S0000006","S0000007","S0000008","S0000009","S0000010","S0000011","S0000012","S0000013","S1000006","S1000007","S1000008","S1000009","S3000001","S3000002","S4000003","S4000006","S6000003","S6000006","USLAB000001","USLAB000002","USLAB000003","USLAB000004","USLAB000011","USLAB000012","USLAB000013","USLAB000014","USLAB000015","USLAB000016","USLAB000017","USLAB000041","USLAB000042","USLAB000043","USLAB000044","USLAB000062","USLAB000063","USLAB000064","USLAB000065","USLAB000066","USLAB000067","USLAB000068","USLAB000069","USLAB000070","USLAB000071","USLAB000072","USLAB000073","USLAB000074","USLAB000075","USLAB000076","USLAB000077","USLAB000078","USLAB000079","USLAB000080","USLAB000081","USLAB000086","USLAB000088","USLAB000089","USLAB000090","USLAB000091","USLAB000092","USLAB000093","USLAB000094","USLAB000095","USLAB000096","USLAB000097","USLAB000098","USLAB000099","USLAB000100","USLAB000101","Z1000013","CSAMT000002","CSASSRMS002","CSASSRMS003","CSASSRMS011","CSASPDM0002","CSASPDM0010","CSASPDM0019","CSASPDM0022","CSAMBS00002","CSAMBA00004"]
+
+var AIRLOCK000019 = {0:"Normal",1:"No Data",2:"Missing  Data",3:"Extra Data"}
+var AIRLOCK000020 = {0:"Normal",1:"No Data",2:"Missing  Data",3:"Extra Data"}
+var AIRLOCK000021 = {0:"Normal",1:"No Data",2:"Missing  Data",3:"Extra Data"}
+var AIRLOCK000022 = {0:"Normal",1:"No Data",2:"Missing  Data",3:"Extra Data"}
+var AIRLOCK000023 = {0:"No History - a charge has not been initiated yet",1:"Presently charging",2:"Task completed normally",3:"Task terminated due to stop switch being toggled",4:"Task terminated due to an open circuit error",5:"Task terminated due to Wrong Batt or Hi-imp",6:"Task terminated due to an over-temperature error",7:"Amp-hour capacity test result OK",8:"Amp-hour capacity test error",9:"Task terminated due to low charge slope error",10:"Task terminated due to power error",11:"Task terminated due to reverse-polarity error",12:"Task terminated due to a short-circuit error",13:"Task terminated due to a time-out error",14:"Task terminated due to an external-temperature error",15:"Discharge",16:"Wait on Discharge",17:"Wait on Charge"}
+var AIRLOCK000024 = {0:"No History - a charge has not been initiated yet",1:"Presently charging",2:"Task completed normally",3:"Task terminated due to stop switch being toggled",4:"Task terminated due to an open circuit error",5:"Task terminated due to Wrong Batt or Hi-imp",6:"Task terminated due to an over-temperature error",7:"Amp-hour capacity test result OK",8:"Amp-hour capacity test error",9:"Task terminated due to low charge slope error",10:"Task terminated due to power error",11:"Task terminated due to reverse-polarity error",12:"Task terminated due to a short-circuit error",13:"Task terminated due to a time-out error",14:"Task terminated due to an external-temperature error",15:"Discharge",16:"Wait on Discharge",17:"Wait on Charge"}
+var AIRLOCK000025 = {0:"No History - a charge has not been initiated yet",1:"Presently charging",2:"Task completed normally",3:"Task terminated due to stop switch being toggled",4:"Task terminated due to an open circuit error",5:"Task terminated due to Wrong Batt or Hi-imp",6:"Task terminated due to an over-temperature error",7:"Amp-hour capacity test result OK",8:"Amp-hour capacity test error",9:"Task terminated due to low charge slope error",10:"Task terminated due to power error",11:"Task terminated due to reverse-polarity error",12:"Task terminated due to a short-circuit error",13:"Task terminated due to a time-out error",14:"Task terminated due to an external-temperature error",15:"Discharge",16:"Wait on Discharge",17:"Wait on Charge"}
+var AIRLOCK000026 = {0:"No History - a charge has not been initiated yet",1:"Presently charging",2:"Task completed normally",3:"Task terminated due to stop switch being toggled",4:"Task terminated due to an open circuit error",5:"Task terminated due to Wrong Batt or Hi-imp",6:"Task terminated due to an over-temperature error",7:"Amp-hour capacity test result OK",8:"Amp-hour capacity test error",9:"Task terminated due to low charge slope error",10:"Task terminated due to power error",11:"Task terminated due to reverse-polarity error",12:"Task terminated due to a short-circuit error",13:"Task terminated due to a time-out error",14:"Task terminated due to an external-temperature error",15:"Discharge",16:"Wait on Discharge",17:"Wait on Charge"}
+var AIRLOCK000027 = {0:"No History - a charge has not been initiated yet",1:"Presently charging",2:"Task completed normally",3:"Task terminated due to stop switch being toggled",4:"Task terminated due to an open circuit error",5:"Task terminated due to Wrong Batt or Hi-imp",6:"Task terminated due to an over-temperature error",7:"Amp-hour capacity test result OK",8:"Amp-hour capacity test error",9:"Task terminated due to low charge slope error",10:"Task terminated due to power error",11:"Task terminated due to reverse-polarity error",12:"Task terminated due to a short-circuit error",13:"Task terminated due to a time-out error",14:"Task terminated due to an external-temperature error",15:"Discharge",16:"Wait on Discharge",17:"Wait on Charge"}
+var AIRLOCK000028 = {0:"No History - a charge has not been initiated yet",1:"Presently charging",2:"Task completed normally",3:"Task terminated due to stop switch being toggled",4:"Task terminated due to an open circuit error",5:"Task terminated due to Wrong Batt or Hi-imp",6:"Task terminated due to an over-temperature error",7:"Amp-hour capacity test result OK",8:"Amp-hour capacity test error",9:"Task terminated due to low charge slope error",10:"Task terminated due to power error",11:"Task terminated due to reverse-polarity error",12:"Task terminated due to a short-circuit error",13:"Task terminated due to a time-out error",14:"Task terminated due to an external-temperature error",15:"Discharge",16:"Wait on Discharge",17:"Wait on Charge"}
+var AIRLOCK000029 = {0:"No History - a charge has not been initiated yet",1:"Presently charging",2:"Task completed normally",3:"Task terminated due to stop switch being toggled",4:"Task terminated due to an open circuit error",5:"Task terminated due to Wrong Batt or Hi-imp",6:"Task terminated due to an over-temperature error",7:"Amp-hour capacity test result OK",8:"Amp-hour capacity test error",9:"Task terminated due to low charge slope error",10:"Task terminated due to power error",11:"Task terminated due to reverse-polarity error",12:"Task terminated due to a short-circuit error",13:"Task terminated due to a time-out error",14:"Task terminated due to an external-temperature error",15:"Discharge",16:"Wait on Discharge",17:"Wait on Charge"}
+var AIRLOCK000030 = {0:"No History - a charge has not been initiated yet",1:"Presently charging",2:"Task completed normally",3:"Task terminated due to stop switch being toggled",4:"Task terminated due to an open circuit error",5:"Task terminated due to Wrong Batt or Hi-imp",6:"Task terminated due to an over-temperature error",7:"Amp-hour capacity test result OK",8:"Amp-hour capacity test error",9:"Task terminated due to low charge slope error",10:"Task terminated due to power error",11:"Task terminated due to reverse-polarity error",12:"Task terminated due to a short-circuit error",13:"Task terminated due to a time-out error",14:"Task terminated due to an external-temperature error",15:"Discharge",16:"Wait on Discharge",17:"Wait on Charge"}
+var AIRLOCK000031 = {0:"No History - a charge has not been initiated yet",1:"Presently charging",2:"Task completed normally",3:"Task terminated due to stop switch being toggled",4:"Task terminated due to an open circuit error",5:"Task terminated due to Wrong Batt or Hi-imp",6:"Task terminated due to an over-temperature error",7:"Amp-hour capacity test result OK",8:"Amp-hour capacity test error",9:"Task terminated due to low charge slope error",10:"Task terminated due to power error",11:"Task terminated due to reverse-polarity error",12:"Task terminated due to a short-circuit error",13:"Task terminated due to a time-out error",14:"Task terminated due to an external-temperature error",15:"Discharge",16:"Wait on Discharge",17:"Wait on Charge"}
+var AIRLOCK000032 = {0:"No History - a charge has not been initiated yet",1:"Presently charging",2:"Task completed normally",3:"Task terminated due to stop switch being toggled",4:"Task terminated due to an open circuit error",5:"Task terminated due to Wrong Batt or Hi-imp",6:"Task terminated due to an over-temperature error",7:"Amp-hour capacity test result OK",8:"Amp-hour capacity test error",9:"Task terminated due to low charge slope error",10:"Task terminated due to power error",11:"Task terminated due to reverse-polarity error",12:"Task terminated due to a short-circuit error",13:"Task terminated due to a time-out error",14:"Task terminated due to an external-temperature error",15:"Discharge",16:"Wait on Discharge",17:"Wait on Charge"}
+var AIRLOCK000033 = {0:"No History - a charge has not been initiated yet",1:"Presently charging",2:"Task completed normally",3:"Task terminated due to stop switch being toggled",4:"Task terminated due to an open circuit error",5:"Task terminated due to Wrong Batt or Hi-imp",6:"Task terminated due to an over-temperature error",7:"Amp-hour capacity test result OK",8:"Amp-hour capacity test error",9:"Task terminated due to low charge slope error",10:"Task terminated due to power error",11:"Task terminated due to reverse-polarity error",12:"Task terminated due to a short-circuit error",13:"Task terminated due to a time-out error",14:"Task terminated due to an external-temperature error",15:"Discharge",16:"Wait on Discharge",17:"Wait on Charge"}
+var AIRLOCK000034 = {0:"No History - a charge has not been initiated yet",1:"Presently charging",2:"Task completed normally",3:"Task terminated due to stop switch being toggled",4:"Task terminated due to an open circuit error",5:"Task terminated due to Wrong Batt or Hi-imp",6:"Task terminated due to an over-temperature error",7:"Amp-hour capacity test result OK",8:"Amp-hour capacity test error",9:"Task terminated due to low charge slope error",10:"Task terminated due to power error",11:"Task terminated due to reverse-polarity error",12:"Task terminated due to a short-circuit error",13:"Task terminated due to a time-out error",14:"Task terminated due to an external-temperature error",15:"Discharge",16:"Wait on Discharge",17:"Wait on Charge"}
+var AIRLOCK000035 = {0:"No History - a charge has not been initiated yet",1:"Presently charging",2:"Task completed normally",3:"Task terminated due to stop switch being toggled",4:"Task terminated due to an open circuit error",5:"Task terminated due to Wrong Batt or Hi-imp",6:"Task terminated due to an over-temperature error",7:"Amp-hour capacity test result OK",8:"Amp-hour capacity test error",9:"Task terminated due to low charge slope error",10:"Task terminated due to power error",11:"Task terminated due to reverse-polarity error",12:"Task terminated due to a short-circuit error",13:"Task terminated due to a time-out error",14:"Task terminated due to an external-temperature error",15:"Discharge",16:"Wait on Discharge",17:"Wait on Charge"}
+var AIRLOCK000036 = {0:"No History - a charge has not been initiated yet",1:"Presently charging",2:"Task completed normally",3:"Task terminated due to stop switch being toggled",4:"Task terminated due to an open circuit error",5:"Task terminated due to Wrong Batt or Hi-imp",6:"Task terminated due to an over-temperature error",7:"Amp-hour capacity test result OK",8:"Amp-hour capacity test error",9:"Task terminated due to low charge slope error",10:"Task terminated due to power error",11:"Task terminated due to reverse-polarity error",12:"Task terminated due to a short-circuit error",13:"Task terminated due to a time-out error",14:"Task terminated due to an external-temperature error",15:"Discharge",16:"Wait on Discharge",17:"Wait on Charge"}
+var AIRLOCK000037 = {0:"No History - a charge has not been initiated yet",1:"Presently charging",2:"Task completed normally",3:"Task terminated due to stop switch being toggled",4:"Task terminated due to an open circuit error",5:"Task terminated due to Wrong Batt or Hi-imp",6:"Task terminated due to an over-temperature error",7:"Amp-hour capacity test result OK",8:"Amp-hour capacity test error",9:"Task terminated due to low charge slope error",10:"Task terminated due to power error",11:"Task terminated due to reverse-polarity error",12:"Task terminated due to a short-circuit error",13:"Task terminated due to a time-out error",14:"Task terminated due to an external-temperature error",15:"Discharge",16:"Wait on Discharge",17:"Wait on Charge"}
+var AIRLOCK000038 = {0:"No History - a charge has not been initiated yet",1:"Presently charging",2:"Task completed normally",3:"Task terminated due to stop switch being toggled",4:"Task terminated due to an open circuit error",5:"Task terminated due to Wrong Batt or Hi-imp",6:"Task terminated due to an over-temperature error",7:"Amp-hour capacity test result OK",8:"Amp-hour capacity test error",9:"Task terminated due to low charge slope error",10:"Task terminated due to power error",11:"Task terminated due to reverse-polarity error",12:"Task terminated due to a short-circuit error",13:"Task terminated due to a time-out error",14:"Task terminated due to an external-temperature error",15:"Discharge",16:"Wait on Discharge",17:"Wait on Charge"}
+var AIRLOCK000039 = {0:"No History - a charge has not been initiated yet",1:"Presently charging",2:"Task completed normally",3:"Task terminated due to stop switch being toggled",4:"Task terminated due to an open circuit error",5:"Task terminated due to Wrong Batt or Hi-imp",6:"Task terminated due to an over-temperature error",7:"Amp-hour capacity test result OK",8:"Amp-hour capacity test error",9:"Task terminated due to low charge slope error",10:"Task terminated due to power error",11:"Task terminated due to reverse-polarity error",12:"Task terminated due to a short-circuit error",13:"Task terminated due to a time-out error",14:"Task terminated due to an external-temperature error",15:"Discharge",16:"Wait on Discharge",17:"Wait on Charge"}
+var AIRLOCK000040 = {0:"No History - a charge has not been initiated yet",1:"Presently charging",2:"Task completed normally",3:"Task terminated due to stop switch being toggled",4:"Task terminated due to an open circuit error",5:"Task terminated due to Wrong Batt or Hi-imp",6:"Task terminated due to an over-temperature error",7:"Amp-hour capacity test result OK",8:"Amp-hour capacity test error",9:"Task terminated due to low charge slope error",10:"Task terminated due to power error",11:"Task terminated due to reverse-polarity error",12:"Task terminated due to a short-circuit error",13:"Task terminated due to a time-out error",14:"Task terminated due to an external-temperature error",15:"Discharge",16:"Wait on Discharge",17:"Wait on Charge"}
+var AIRLOCK000041 = {0:"No History - a charge has not been initiated yet",1:"Presently charging",2:"Task completed normally",3:"Task terminated due to stop switch being toggled",4:"Task terminated due to an open circuit error",5:"Task terminated due to Wrong Batt or Hi-imp",6:"Task terminated due to an over-temperature error",7:"Amp-hour capacity test result OK",8:"Amp-hour capacity test error",9:"Task terminated due to low charge slope error",10:"Task terminated due to power error",11:"Task terminated due to reverse-polarity error",12:"Task terminated due to a short-circuit error",13:"Task terminated due to a time-out error",14:"Task terminated due to an external-temperature error",15:"Discharge",16:"Wait on Discharge",17:"Wait on Charge"}
+var AIRLOCK000042 = {0:"No History - a charge has not been initiated yet",1:"Presently charging",2:"Task completed normally",3:"Task terminated due to stop switch being toggled",4:"Task terminated due to an open circuit error",5:"Task terminated due to Wrong Batt or Hi-imp",6:"Task terminated due to an over-temperature error",7:"Amp-hour capacity test result OK",8:"Amp-hour capacity test error",9:"Task terminated due to low charge slope error",10:"Task terminated due to power error",11:"Task terminated due to reverse-polarity error",12:"Task terminated due to a short-circuit error",13:"Task terminated due to a time-out error",14:"Task terminated due to an external-temperature error",15:"Discharge",16:"Wait on Discharge",17:"Wait on Charge"}
+var AIRLOCK000043 = {0:"No History - a charge has not been initiated yet",1:"Presently charging",2:"Task completed normally",3:"Task terminated due to stop switch being toggled",4:"Task terminated due to an open circuit error",5:"Task terminated due to Wrong Batt or Hi-imp",6:"Task terminated due to an over-temperature error",7:"Amp-hour capacity test result OK",8:"Amp-hour capacity test error",9:"Task terminated due to low charge slope error",10:"Task terminated due to power error",11:"Task terminated due to reverse-polarity error",12:"Task terminated due to a short-circuit error",13:"Task terminated due to a time-out error",14:"Task terminated due to an external-temperature error",15:"Discharge",16:"Wait on Discharge",17:"Wait on Charge"}
+var AIRLOCK000044 = {0:"No History - a charge has not been initiated yet",1:"Presently charging",2:"Task completed normally",3:"Task terminated due to stop switch being toggled",4:"Task terminated due to an open circuit error",5:"Task terminated due to Wrong Batt or Hi-imp",6:"Task terminated due to an over-temperature error",7:"Amp-hour capacity test result OK",8:"Amp-hour capacity test error",9:"Task terminated due to low charge slope error",10:"Task terminated due to power error",11:"Task terminated due to reverse-polarity error",12:"Task terminated due to a short-circuit error",13:"Task terminated due to a time-out error",14:"Task terminated due to an external-temperature error",15:"Discharge",16:"Wait on Discharge",17:"Wait on Charge"}
+var AIRLOCK000045 = {0:"No History - a charge has not been initiated yet",1:"Presently charging",2:"Task completed normally",3:"Task terminated due to stop switch being toggled",4:"Task terminated due to an open circuit error",5:"Task terminated due to Wrong Batt or Hi-imp",6:"Task terminated due to an over-temperature error",7:"Amp-hour capacity test result OK",8:"Amp-hour capacity test error",9:"Task terminated due to low charge slope error",10:"Task terminated due to power error",11:"Task terminated due to reverse-polarity error",12:"Task terminated due to a short-circuit error",13:"Task terminated due to a time-out error",14:"Task terminated due to an external-temperature error",15:"Discharge",16:"Wait on Discharge",17:"Wait on Charge"}
+var AIRLOCK000046 = {0:"No History - a charge has not been initiated yet",1:"Presently charging",2:"Task completed normally",3:"Task terminated due to stop switch being toggled",4:"Task terminated due to an open circuit error",5:"Task terminated due to Wrong Batt or Hi-imp",6:"Task terminated due to an over-temperature error",7:"Amp-hour capacity test result OK",8:"Amp-hour capacity test error",9:"Task terminated due to low charge slope error",10:"Task terminated due to power error",11:"Task terminated due to reverse-polarity error",12:"Task terminated due to a short-circuit error",13:"Task terminated due to a time-out error",14:"Task terminated due to an external-temperature error",15:"Discharge",16:"Wait on Discharge",17:"Wait on Charge"}
+var AIRLOCK000047 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var AIRLOCK000048 = {0:"PUMP OFF CMD",1:"PUMP ON CMD"}
+var AIRLOCK000050 = {0:"Закрыт",1:"Открыт",2:"IN-TRANSIT",3:"FAILED"}
+var AIRLOCK000051 = {0:"Закрыт",1:"Открыт",2:"IN-TRANSIT",3:"FAILED"}
+var AIRLOCK000052 = {0:"Закрыт",1:"Открыт",2:"IN-TRANSIT",3:"FAILED"}
+var AIRLOCK000053 = {0:"RESET",1:"DRAIN",2:"DRYOUT",3:"EIB OFF",4:"Выключена",5:"Включена",6:"STARTUP",7:"TEST"}
+var AIRLOCK000058 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var NODE1000001 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var NODE1000002 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var NODE2000003 = {0:"RESET",1:"DRAIN",2:"DRYOUT",3:"EIB OFF",4:"Выключена",5:"Включена",6:"STARTUP",7:"TEST"}
+var NODE2000004 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var NODE2000005 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var NODE3000004 = {2:"STOP",4:"SHUTDOWN",8:"MAINTENANCE",16:"NORMAL",32:"STANDBY",64:"IDLE",128:"SYSTEM INITIALIZED"}
+var NODE3000006 = {1:"STOP",2:"SHUTDOWN",3:"Режим ожидания",4:"Очистка",5:"HOT SERVICE",6:"FLUSH",7:"WARM SHUTDOWN"}
+var NODE3000007 = {0:"NONE",1:"VENT",2:"HEATUP",3:"PURGE",4:"FLOW",5:"TEST",6:"TEST_SV_1",7:"TEST_SV_2",8:"SERVICE"}
+var NODE3000010 = {1:"Генерация",2:"Режим ожидания",3:"SHUTDOWN",4:"STOP",5:"VENT_DOME",6:"INERT_DOME",7:"FAST_SHUTDOWN",8:"N2_PURGE_SHUTDOWN"}
+var NODE3000014 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var NODE3000015 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var NODE3000016 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var NODE3000018 = {0:"RESET",1:"DRAIN",2:"DRYOUT",3:"EIB OFF",4:"Выключена",5:"Включена",6:"STARTUP",7:"TEST"}
+var NODE3000020 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var P1000006 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var P1000007 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var P1000008 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var P1000009 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var P3000001 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var P3000002 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var P4000003 = {0:"Not Enabled",1:"Enabled"}
+var P4000006 = {0:"Not Enabled",1:"Enabled"}
+var P6000003 = {0:"Not Enabled",1:"Enabled"}
+var P6000006 = {0:"Not Enabled",1:"Enabled"}
+var RUSSEG000001 = {1:"Спасение экипажа",2:"Выживание",3:"Коррекция орбиты",4:"Стыковка/расстыковка/перестыковка",5:"ВКД",6:"Режим микрогравитации",7:"Стандартный"}
+var RUSSEG000002 = {0:"Нет",1:"Да"}
+var RUSSEG000003 = {0:"Нет",1:"Да"}
+var RUSSEG000004 = {0:"Нет",1:"ДА"}
+var RUSSEG000007 = {0:"Нет",1:"Да"}
+var RUSSEG000008 = {0:"Нет",1:"Есть"}
+var RUSSEG000009 = {0:"Нет",1:"Есть"}
+var RUSSEG000010 = {0:"Нет",1:"Да"}
+var RUSSEG000011 = {0:"Неопределенное состояние",1:"СМ Курс-П In Standby Mode"}
+var RUSSEG000012 = {0:"Нет",1:"Да"}
+var RUSSEG000013 = {0:"СМ ОТСТЫКОВАН",1:"СМ пристыкован"}
+var RUSSEG000014 = {0:"Нет пристыкованного ТК",1:"Союз/Прогресс пристыкован"}
+var RUSSEG000015 = {0:"СО1 отстыкован",1:"СО1 пристыкован"}
+var RUSSEG000016 = {0:"МИМ1 ОТСТЫКОВАН",1:"МИМ1 пристыкован"}
+var RUSSEG000017 = {0:"Нет пристыкованного ТК",1:"Союз/Прогресс пристыкован"}
+var RUSSEG000018 = {0:"Нет пристыкованного ТК",1:"Союз/Прогресс пристыкован"}
+var RUSSEG000019 = {0:"Нет пристыкованного ТК",1:"Союз/Прогресс пристыкован"}
+var RUSSEG000020 = {0:"Нет",1:"Да"}
+var RUSSEG000021 = {0:"ИСК",1:"ОСК+R",2:"Солнечная ориентация",3:"ОСК",4:"ИСКТ (ТП)",5:"Переход в ТП",6:"Равновесная ОСК",7:"X-POP"}
+var RUSSEG000022 = {0:"НЕТ",1:"Да"}
+var RUSSEG000023 = {0:"Нет",1:"Да"}
+var RUSSEG000024 = {0:"Набор готовности к запуску/Готовность к запуску",1:"Двигатели не работают"}
+var RUSSEG000025 = {0:"Reserv",1:"Работа двигателей",2:"Работа гиродинов",3:"Gyrodines with Desaturation on American Method",4:"Gyrodines with Desaturation on Russian Method",5:"Работа двигателей на перемещение",6:"Работа двигателей для разгрузки гиродинов CMG",7:"Режим дрейфа"}
+var S0000006 = {1:"STANDBY",2:"RESTART",3:"CHECKOUT",4:"DIRECTED_POSITION",5:"AUTOTRACK",6:"BLIND",7:"SHUTDOWN",8:"SWITCHOVER"}
+var S0000007 = {1:"STANDBY",2:"RESTART",3:"CHECKOUT",4:"DIRECTED_POSITION",5:"AUTOTRACK",6:"BLIND",7:"SHUTDOWN",8:"SWITCHOVER"}
+var S0000008 = {1:"STANDBY",2:"RESTART",3:"CHECKOUT",4:"DIRECTED_POSITION",5:"Автоотслеживание",6:"BLIND",7:"SHUTDOWN",8:"SWITCHOVER"}
+var S0000009 = {1:"STANDBY",2:"RESTART",3:"CHECKOUT",4:"DIRECTED_POSITION",5:"Автоотслеживание",6:"BLIND",7:"SHUTDOWN",8:"SWITCHOVER"}
+var S0000010 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var S0000011 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var S0000012 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var S0000013 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var S1000006 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var S1000007 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var S1000008 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var S1000009 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var S3000001 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var S3000002 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var S4000003 = {0:"Not Enabled",1:"Enabled"}
+var S4000006 = {0:"Not Enabled",1:"Enabled"}
+var S6000003 = {0:"Not Enabled",1:"Enabled"}
+var S6000006 = {0:"Not Enabled",1:"Enabled"}
+var USLAB000001 = {0:"Нет",1:"Да"}
+var USLAB000002 = {0:"Нет",1:"Да"}
+var USLAB000003 = {0:"Нет",1:"Да"}
+var USLAB000004 = {0:"Нет",1:"Да"}
+var USLAB000011 = {0:"ENABLED",1:"INHIBITED"}
+var USLAB000012 = {0:"Default",1:"WAIT",2:"RESERVED",3:"STANDBY",4:"Работа гиродинов CMG",5:"Работа гиродинов CMG с разгрузкой двигателями РС МКС",6:"USER DATA GENERATION",7:"Режим дрейфа"}
+var USLAB000013 = {0:"NONE",1:"GPS1",2:"GPS2",3:"Russian_Attitude",4:"Ku_Band"}
+var USLAB000014 = {0:"NONE",1:"RGA1",2:"RGA2",3:"RUSSIAN"}
+var USLAB000015 = {0:"NO_SOURCE",1:"Unused",2:"Unused",3:"RUSSIAN",4:"GPS1_DETERMINISTIC",5:"GPS2_DETERMINISTIC",6:"GROUND"}
+var USLAB000016 = {0:"ATTITUDE HOLD",1:"TEA"}
+var USLAB000017 = {0:"LVLH",1:"Inertial",2:"XPOP"}
+var USLAB000041 = {0:"Нет",1:"ДА"}
+var USLAB000042 = {0:"Нет",1:"ДА"}
+var USLAB000043 = {0:"DOING POSITION FIXES",1:"SV TIMING",2:"APPROXIMATE TIMING",3:"GPS TIME",4:"NEED INITIALIZATION",5:"GDOP NEEDED",6:"BAD TIMING",7:"NO USABLE SV",8:"ONLY 1 USABLE SVs",9:"ONLY 2 USABLE SVs",10:"ONLY 3 USABLE SVs",11:"BAD INTEGRITY",12:"NO VEL AVAIL",13:"UNUSABLE FIX"}
+var USLAB000044 = {0:"DOING POSITION FIXES",1:"SV TIMING",2:"APPROXIMATE TIMING",3:"GPS TIME",4:"NEED INITIALIZATION",5:"GDOP NEEDED",6:"BAD TIMING",7:"NO USABLE SV",8:"ONLY 1 USABLE SVs",9:"ONLY 2 USABLE SVs",10:"ONLY 3 USABLE SVs",11:"BAD INTEGRITY",12:"NO VEL AVAIL",13:"UNUSABLE FIX"}
+var USLAB000062 = {0:"FAIL",1:"OPEN",2:"CLSD",3:"TRNS"}
+var USLAB000063 = {0:"FAIL",1:"OPEN",2:"CLSD",3:"TRNS"}
+var USLAB000064 = {0:"RESET",1:"DRAIN",2:"DRYOUT",3:"EIB OFF",4:"Выключена",5:"Включена",6:"STARTUP",7:"TEST"}
+var USLAB000065 = {0:"RESET",1:"DRAIN",2:"DRYOUT",3:"EIB OFF",4:"Выключена",5:"Включена",6:"STARTUP",7:"TEST"}
+var USLAB000066 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var USLAB000067 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var USLAB000068 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var USLAB000069 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var USLAB000070 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var USLAB000071 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var USLAB000072 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var USLAB000073 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var USLAB000074 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var USLAB000075 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var USLAB000076 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var USLAB000077 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var USLAB000078 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var USLAB000079 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var USLAB000080 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var USLAB000081 = {0:"Нет",1:"Да"}
+var USLAB000086 = {1:"Standard",2:"Microgravity",4:"Reboost",8:"Proximity_Ops",16:"External_Ops",32:"Survival",64:"ASCR",127:"all_modes"}
+var USLAB000088 = {0:"INACTIVE",1:"ACTIVE"}
+var USLAB000089 = {0:"INACTIVE",1:"ACTIVE"}
+var USLAB000090 = {0:"INACTIVE",1:"ACTIVE"}
+var USLAB000091 = {0:"INACTIVE",1:"ACTIVE"}
+var USLAB000092 = {1:"String 1",2:"String 2"}
+var USLAB000093 = {0:"Backup",1:"Active"}
+var USLAB000094 = {0:"Backup",1:"Active"}
+var USLAB000095 = {0:" -",1:"WETA 113 (S3)",2:"S1 Upper Outboard (UPOB)",3:"SCU1 Mux",4:"S1 Lower Outboard (LOOB)",5:"JEM Channel 1",6:"JEM Channel 2",7:"S1 Upper Inboard (UPIB)",8:"S1 Lower Inboard (LOIB)",9:"Columbus 1",10:"Columbus 2",11:"P1 Upper Inboard (UPIB)",12:"SCU2 Mux",13:"Node 3 Starboard",14:"P1 Lower Inboard (LOIB)",15:"SCU1 Test",16:"WETA 112 (Node2)",17:"ORB1",18:"ORB2",19:"P1 Lower Outboard (LOOB)",20:"SCU2 Test",21:"P3 Aft",22:"Payload Rack",23:"VTR1",24:"VTR2",25:"Node 2 Nadir",26:"WETA 115 (Node1)",28:"Lab Starboard",31:"MBS POA Payload 3",32:"MBS POA",33:"SPDM S1",34:"SPDM S2",35:"MBS CLPA",36:"SPDM LEE",37:"MBS Mast",40:"SSRMS Base LEE",43:"SSRMS Base Elbow",48:"SSRMS Tip Elbow",50:"MSS Payload 3",51:"SSRMS Tip LEE",52:"Lab AVU1",53:"Lab AVU2",54:"Cup AVU1",55:"Cup AVU2",56:"SPDM OTCM 1",57:"SPDM Body 1",58:"SPDM OTCM 2",59:"SPDM Body 2",60:"SSRMS Payload 1",61:"SSRMS Payload 2",62:"SSRMS Payload 3",63:"MSS Payload 1",64:"MSS Payload 2",65:"Lab Rack 1D3",66:"Lab Rack 1P2",67:"Lab Rack 1P4",68:"Lab Camera",69:"Lab Rack 1O5",70:"Lab Rack 1O4",71:"Lab Rack 1O3",72:"Lab Rack 1O2",73:"Lab Rack 1O1",74:"Lab Rack 1S1",75:"Lab Rack 1S2",76:"Lab Rack 1S3",77:"Airlock Camera",78:"Lab Rack 1S4",79:"Node 1 Camera",80:"Node 3 Camera"}
+var USLAB000096 = {0:" -",1:"WETA 113 (S3)",2:"S1 Upper Outboard (UPOB)",3:"SCU1 Mux",4:"S1 Lower Outboard (LOOB)",5:"JEM Channel 1",6:"JEM Channel 2",7:"S1 Upper Inboard (UPIB)",8:"S1 Lower Inboard (LOIB)",9:"Columbus 1",10:"Columbus 2",11:"P1 Upper Inboard (UPIB)",12:"SCU2 Mux",13:"Node 3 Starboard",14:"P1 Lower Inboard (LOIB)",15:"SCU1 Test",16:"WETA 112 (Node2)",17:"ORB1",18:"ORB2",19:"P1 Lower Outboard (LOOB)",20:"SCU2 Test",21:"P3 Aft",22:"Payload Rack",23:"VTR1",24:"VTR2",25:"Node 2 Nadir",26:"WETA 115 (Node1)",28:"Lab Starboard",31:"MBS POA Payload 3",32:"MBS POA",33:"SPDM S1",34:"SPDM S2",35:"MBS CLPA",36:"SPDM LEE",37:"MBS Mast",40:"SSRMS Base LEE",43:"SSRMS Base Elbow",48:"SSRMS Tip Elbow",50:"MSS Payload 3",51:"SSRMS Tip LEE",52:"Lab AVU1",53:"Lab AVU2",54:"Cup AVU1",55:"Cup AVU2",56:"SPDM OTCM 1",57:"SPDM Body 1",58:"SPDM OTCM 2",59:"SPDM Body 2",60:"SSRMS Payload 1",61:"SSRMS Payload 2",62:"SSRMS Payload 3",63:"MSS Payload 1",64:"MSS Payload 2",65:"Lab Rack 1D3",66:"Lab Rack 1P2",67:"Lab Rack 1P4",68:"Lab Camera",69:"Lab Rack 1O5",70:"Lab Rack 1O4",71:"Lab Rack 1O3",72:"Lab Rack 1O2",73:"Lab Rack 1O1",74:"Lab Rack 1S1",75:"Lab Rack 1S2",76:"Lab Rack 1S3",77:"Airlock Camera",78:"Lab Rack 1S4",79:"Node 1 Camera",80:"Node 3 Camera"}
+var USLAB000097 = {0:" -",1:"WETA 113 (S3)",2:"S1 Upper Outboard (UPOB)",3:"SCU1 Mux",4:"S1 Lower Outboard (LOOB)",5:"JEM Channel 1",6:"JEM Channel 2",7:"S1 Upper Inboard (UPIB)",8:"S1 Lower Inboard (LOIB)",9:"Columbus 1",10:"Columbus 2",11:"P1 Upper Inboard (UPIB)",12:"SCU2 Mux",13:"Node 3 Starboard",14:"P1 Lower Inboard (LOIB)",15:"SCU1 Test",16:"WETA 112 (Node2)",17:"ORB1",18:"ORB2",19:"P1 Lower Outboard (LOOB)",20:"SCU2 Test",21:"P3 Aft",22:"Payload Rack",23:"VTR1",24:"VTR2",25:"Node 2 Nadir",26:"WETA 115 (Node1)",28:"Lab Starboard",31:"MBS POA Payload 3",32:"MBS POA",33:"SPDM S1",34:"SPDM S2",35:"MBS CLPA",36:"SPDM LEE",37:"MBS Mast",40:"SSRMS Base LEE",43:"SSRMS Base Elbow",48:"SSRMS Tip Elbow",50:"MSS Payload 3",51:"SSRMS Tip LEE",52:"Lab AVU1",53:"Lab AVU2",54:"Cup AVU1",55:"Cup AVU2",56:"SPDM OTCM 1",57:"SPDM Body 1",58:"SPDM OTCM 2",59:"SPDM Body 2",60:"SSRMS Payload 1",61:"SSRMS Payload 2",62:"SSRMS Payload 3",63:"MSS Payload 1",64:"MSS Payload 2",65:"Lab Rack 1D3",66:"Lab Rack 1P2",67:"Lab Rack 1P4",68:"Lab Camera",69:"Lab Rack 1O5",70:"Lab Rack 1O4",71:"Lab Rack 1O3",72:"Lab Rack 1O2",73:"Lab Rack 1O1",74:"Lab Rack 1S1",75:"Lab Rack 1S2",76:"Lab Rack 1S3",77:"Airlock Camera",78:"Lab Rack 1S4",79:"Node 1 Camera",80:"Node 3 Camera"}
+var USLAB000098 = {0:" -",1:"WETA 113 (S3)",2:"S1 Upper Outboard (UPOB)",3:"SCU1 Mux",4:"S1 Lower Outboard (LOOB)",5:"JEM Channel 1",6:"JEM Channel 2",7:"S1 Upper Inboard (UPIB)",8:"S1 Lower Inboard (LOIB)",9:"Columbus 1",10:"Columbus 2",11:"P1 Upper Inboard (UPIB)",12:"SCU2 Mux",13:"Node 3 Starboard",14:"P1 Lower Inboard (LOIB)",15:"SCU1 Test",16:"WETA 112 (Node2)",17:"ORB1",18:"ORB2",19:"P1 Lower Outboard (LOOB)",20:"SCU2 Test",21:"P3 Aft",22:"Payload Rack",23:"VTR1",24:"VTR2",25:"Node 2 Nadir",26:"WETA 115 (Node1)",28:"Lab Starboard",31:"MBS POA Payload 3",32:"MBS POA",33:"SPDM S1",34:"SPDM S2",35:"MBS CLPA",36:"SPDM LEE",37:"MBS Mast",40:"SSRMS Base LEE",43:"SSRMS Base Elbow",48:"SSRMS Tip Elbow",50:"MSS Payload 3",51:"SSRMS Tip LEE",52:"Lab AVU1",53:"Lab AVU2",54:"Cup AVU1",55:"Cup AVU2",56:"SPDM OTCM 1",57:"SPDM Body 1",58:"SPDM OTCM 2",59:"SPDM Body 2",60:"SSRMS Payload 1",61:"SSRMS Payload 2",62:"SSRMS Payload 3",63:"MSS Payload 1",64:"MSS Payload 2",65:"Lab Rack 1D3",66:"Lab Rack 1P2",67:"Lab Rack 1P4",68:"Lab Camera",69:"Lab Rack 1O5",70:"Lab Rack 1O4",71:"Lab Rack 1O3",72:"Lab Rack 1O2",73:"Lab Rack 1O1",74:"Lab Rack 1S1",75:"Lab Rack 1S2",76:"Lab Rack 1S3",77:"Airlock Camera",78:"Lab Rack 1S4",79:"Node 1 Camera",80:"Node 3 Camera"}
+var USLAB000099 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var USLAB000100 = {0:"Off-Ok",1:"Not-Off Ok",3:"Not-Off Failed"}
+var USLAB000101 = {0:"Frame Sync unlocked",1:"Frame Sync locked"}
+var Z1000013 = {0:"RESET",1:"NORMAL"}
+var CSAMT000002 = {0:"Translating", 1:"WS1 ", 2:"WS2 ", 3:"WS3 ", 4:"WS4 ", 5:"WS5 ", 6:"WS6 ",7:"WS7 ",8:"WS8"}
+var CSASSRMS002 = {1:"Lab ", 2:"Node3 ", 4:"Node2 ", 7:"MBS PDGF 1 ", 8:"MBS PDGF 2 ", 11:"MBS PDGF 3 ", 13:"MBS PDGF 4 ", 14:"FGB ", 16:"POA ", 19:"SSRMS Tip LEE ", 63:"Undefined"}
+var CSASSRMS003 = {0:"LEE A ", 5:"LEE B"}
+var CSASSRMS011 = {0:"Released",1:"Captive",2:"Captured"}
+var CSASPDM0002 = {1:"Lab ", 2:"Node3 ", 4:"Node2 ", 7:"MBS PDGF 1 ", 8:"MBS PDGF 2 ", 11:"MBS PDGF 3 ", 13:"MBS PDGF 4 ", 14:"FGB ", 16:"POA ", 19:"SSRMS Tip LEE ", 63:"Undefined"}
+var CSASPDM0010 = {0:"Released",1:"Captive",2:"Captured"}
+var CSASPDM0019 = {0:"Released",1:"Captive",2:"Captured"}
+var CSASPDM0022 = {0:"Released",1:"Captive",2:"Captured"}
+var CSAMBS00002 = {0:"Released",1:"Captured"}
+var CSAMBA00004 = {0:"Released",1:"Captive",2:"Captured"}	
+var yaw = null;
+var pitch = null;
+var roll = null;
+var Q0 = null;
+var Q1 = null;
+var Q2 = null;
+var Q3 = null;
+var xState = null;
+var yState = null;
+var zState = null;
+	
+var HOT = {0:"Null",1:"Hot"}
+var MBSOPBASE = {3:"MTCL",4:"TUS"}
+var LEESPEED = {1:"Slow",2:"Fast"}
+var STOPCOND = {1:"Soft Stop",2:"Hard Stop"}
+var MBSBASELOC = {58:"MT",60:"TUS",63:"Undefined"}
+var SPDMLEE = {1:"SPDM Body LEE",2:"SPDM Body PDGF"}
+
+var Decoder = 
+{
+	CSASSRMS001:function(value, ts)
+	{
+		var SACS_operating_base = (value >>> 6) & 15;
+		$("#CSASSRMS001-1").text(CSASSRMS003[SACS_operating_base]);
+		$("#CSASSRMS001-1").addClass('highlight');
+		
+		var ts_day = Math.floor(ts/24)
+		var ts_hour = Math.floor(((ts/24)-ts_day)*24)
+		var ts_minute = Math.floor((((ts/24)-ts_day)*24-ts_hour)*60)
+		var ts_seconds = ((((((ts/24)-ts_day)*24-ts_hour)*60) - ts_minute)*60).toFixed(0)
+		$("#CSASSRMS001-1t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+	},
+	CSASPDM0001:function(value, ts)
+	{
+		var SPDM_operating_base = (value >>> 8) & 15;
+		$("#CSASPDM0001-1").text(SPDMLEE[SPDM_operating_base]);
+		$("#CSASPDM0001-1").addClass('highlight');
+		
+		var ts_day = Math.floor(ts/24)
+		var ts_hour = Math.floor(((ts/24)-ts_day)*24)
+		var ts_minute = Math.floor((((ts/24)-ts_day)*24-ts_hour)*60)
+		var ts_seconds = ((((((ts/24)-ts_day)*24-ts_hour)*60) - ts_minute)*60).toFixed(0)
+		$("#CSASPDM0001-1t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+	},
+	CSASPDM0018:function(value, ts)
+	{
+		var SPDM_Arm_1_Hot = (value >>> 3) & 1;
+		var SPDM_Arm_2_Hot = (value >>> 11) & 1;
+		$("#CSASPDM0018-1").text(HOT[SPDM_Arm_1_Hot]);
+		$("#CSASPDM0018-2").text(HOT[SPDM_Arm_2_Hot]);
+		$("#CSASPDM0018-1").addClass('highlight');
+		$("#CSASPDM0018-2").addClass('highlight');
+		
+		var ts_day = Math.floor(ts/24)
+		var ts_hour = Math.floor(((ts/24)-ts_day)*24)
+		var ts_minute = Math.floor((((ts/24)-ts_day)*24-ts_hour)*60)
+		var ts_seconds = ((((((ts/24)-ts_day)*24-ts_hour)*60) - ts_minute)*60).toFixed(0)
+		$("#CSASPDM0018-1t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+		$("#CSASPDM0018-2t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+	},
+	CSASPDM0021:function(value, ts)
+	{
+		var SPDM_LEE_Hot = (value >>> 3) & 1;
+		var SPDM_LEE_Speed = (value >>> 4) & 3;
+		var SPDM_LEE_Stop = (value >>> 6) & 3;
+		$("#CSASPDM0021-1").text(STOPCOND[SPDM_LEE_Stop]);
+		$("#CSASPDM0021-2").text(LEESPEED[SPDM_LEE_Speed]);
+		$("#CSASPDM0021-3").text(HOT[SPDM_LEE_Hot]);
+		$("#CSASPDM0021-1").addClass('highlight');
+		$("#CSASPDM0021-2").addClass('highlight');
+		$("#CSASPDM0021-3").addClass('highlight');
+		
+		var ts_day = Math.floor(ts/24)
+		var ts_hour = Math.floor(((ts/24)-ts_day)*24)
+		var ts_minute = Math.floor((((ts/24)-ts_day)*24-ts_hour)*60)
+		var ts_seconds = ((((((ts/24)-ts_day)*24-ts_hour)*60) - ts_minute)*60).toFixed(0)
+		$("#CSASPDM0021-1t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+		$("#CSASPDM0021-2t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+		$("#CSASPDM0021-3t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+	},
+	CSAMBS00001:function(value, ts)
+	{
+		var MBS_op_base = (value >>> 8) & 15;
+		var MBS_loc = value & 63;
+		$("#CSAMBS00001-1").text(MBSOPBASE[MBS_op_base]);
+		$("#CSAMBS00001-2").text(MBSBASELOC[MBS_loc]);
+		$("#CSAMBS00001-1").addClass('highlight');
+		$("#CSAMBS00001-2").addClass('highlight');
+		
+		var ts_day = Math.floor(ts/24)
+		var ts_hour = Math.floor(((ts/24)-ts_day)*24)
+		var ts_minute = Math.floor((((ts/24)-ts_day)*24-ts_hour)*60)
+		var ts_seconds = ((((((ts/24)-ts_day)*24-ts_hour)*60) - ts_minute)*60).toFixed(0)
+		$("#CSAMBS00001-1t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+		$("#CSAMBS00001-2t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+	},
+	CSAMBA00003:function(value, ts)
+	{
+		var POA_stop = value >>> 14;
+		var POA_speed = (value >>> 12) & 3;
+		var POA_hot = (value >>> 11) & 1;
+		var LEE_stop = (value >>> 6) & 3;
+		var LEE_speed = (value >>> 4) & 3;
+		var LEE_hot = (value >>> 3) & 1;
+		$("#CSAMBA00003-1").text(STOPCOND[POA_stop]);
+		$("#CSAMBA00003-2").text(LEESPEED[POA_speed]);
+		$("#CSAMBA00003-3").text(HOT[POA_hot]);
+		$("#CSAMBA00003-4").text(STOPCOND[LEE_stop]);
+		$("#CSAMBA00003-5").text(LEESPEED[LEE_speed]);
+		$("#CSAMBA00003-6").text(HOT[LEE_hot]);
+		$("#CSAMBA00003-1").addClass('highlight');
+		$("#CSAMBA00003-2").addClass('highlight');
+		$("#CSAMBA00003-3").addClass('highlight');
+		$("#CSAMBA00003-4").addClass('highlight');
+		$("#CSAMBA00003-5").addClass('highlight');
+		$("#CSAMBA00003-6").addClass('highlight');
+		
+		var ts_day = Math.floor(ts/24)
+		var ts_hour = Math.floor(((ts/24)-ts_day)*24)
+		var ts_minute = Math.floor((((ts/24)-ts_day)*24-ts_hour)*60)
+		var ts_seconds = ((((((ts/24)-ts_day)*24-ts_hour)*60) - ts_minute)*60).toFixed(0)
+		$("#CSAMBA00003-1t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+		$("#CSAMBA00003-2t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+		$("#CSAMBA00003-3t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+		$("#CSAMBA00003-4t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+		$("#CSAMBA00003-5t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+		$("#CSAMBA00003-6t").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+	}
+};
+
+
+sub.addListener({
+	onItemUpdate: function(update) 
+	{
+		var item = update.getItemName();
+		var selector = $("#"+item);
+		selector.text(update.getValue("Value"));
+		
+		if (specialPUIs.includes(item))
+		{
+			selector.text(eval(item)[update.getValue("Value")]);
+		}
+		
+		if (Decoder.hasOwnProperty(item))
+		{
+			Decoder[item](update.getValue("Value"),update.getValue("TimeStamp"));
+		}
+		//altitude
+		if(item === "USLAB000032")
+		{
+			xState = update.getValue("Value");
+		}
+		if(item === "USLAB000033")
+		{
+			yState = update.getValue("Value");
+		}
+		if(item === "USLAB000034")
+		{
+			zState = update.getValue("Value");
+		}
+		
+		var altitude = Math.sqrt(Math.pow(xState,2)+Math.pow(yState,2)+Math.pow(zState,2))-6371.00;
+		$("#"+"USLAB000ALT").text(altitude.toFixed(2));
+		
+		//attitude conversion
+		if(item === "USLAB000018")
+		{
+			Q0 = update.getValue("Value");
+		}
+		if(item === "USLAB000019")
+		{
+			Q1 = update.getValue("Value");
+		}
+		if(item === "USLAB000020")
+		{
+			Q2 = update.getValue("Value");
+		}
+		if(item === "USLAB000021")
+		{
+			Q3 = update.getValue("Value");
+		}
+		
+		if (Q0 != null && Q1 != null && Q2 != null && Q3 != null)
+		{
+			var c12 = 2 * (Q1 * Q2 + Q0 * Q3);
+			var c11 = Q0 * Q0 + Q1 * Q1 - Q2 * Q2 - Q3 * Q3;
+			var c13 = 2 * (Q1 * Q3 - Q0 * Q2);
+			var c23 = 2 * (Q2 * Q3 + Q0 * Q1);
+			var c33 = Q0 * Q0 - Q1 * Q1 - Q2 * Q2 + Q3 * Q3;
+			var c22 = Q0 * Q0 - Q1 * Q1 + Q2 * Q2 - Q3 * Q3;
+			var c21 = 2 * (Q1 * Q2 - Q0 * Q3);
+			var mag_c13 = Math.abs(c13); //all c's should be in radians
+
+			yaw = 0.0;
+			pitch = 0.0;
+			roll = 0.0;
+
+			if (mag_c13 < 1)
+			{
+				yaw = Math.atan2(c12, c11);
+				pitch = Math.atan2(-c13, Math.sqrt(1.0 - (c13 * c13)));
+				roll = Math.atan2(c23, c33);
+			}
+			else if (mag_c13 == 1)
+			{
+				yaw = Math.atan2(-c21, c22);
+				pitch = Math.asin(-c13);
+				roll = 0.0;
+			}
+			
+			//convert to degrees
+			yaw = yaw * 180 / Math.PI;
+			pitch = pitch * 180 / Math.PI;
+			roll = roll * 180 / Math.PI;
+			$("#"+"USLAB000YAW").text(yaw.toFixed(2));
+			$("#"+"USLAB000PIT").text(pitch.toFixed(2));
+			$("#"+"USLAB000ROL").text(roll.toFixed(2));
+		}
+		var selector2 = $("#"+update.getItemName()+"t")
+		var ts = update.getValue("TimeStamp")
+		var ts_day = Math.floor(ts/24)
+		var ts_hour = Math.floor(((ts/24)-ts_day)*24)
+		var ts_minute = Math.floor((((ts/24)-ts_day)*24-ts_hour)*60)
+		var ts_seconds = ((((((ts/24)-ts_day)*24-ts_hour)*60) - ts_minute)*60).toFixed(0)
+		selector2.text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+		selector.addClass('highlight');
+	}
+});
+
+client.subscribe(timeSub);
+
+var statuses = {0:"Overridden",1:"Missing",2:"Dead",3:"Off-Scale High",4:"Off-Scale Low",5:"Out of Limit High",6:"Out of Limit Low",7:"Out of Calibration",8:"Overscaling",9:"Static",10:"SSME Controller",11:"SSME EIU",12:"Flight Critical MDM",13:"Payload MDM",14:"OI MDM",15:"OI DSC",16:"Lower Limit",17:"Upper Limit",18:"Event Limit",19:"Selmon Aggregate Measure",20:"Truncated",21:"User-Defined",22:"User-Defined",23:"User-Defined",24:"Default"}
+
+timeSub.addListener({
+  onItemUpdate: function (update) {
+		var status = update.getValue('Status.Class');
+		var AOStimestamp = parseFloat(update.getValue('TimeStamp'));
+		//console.log("Timestamp: " + update.getValue('TimeStamp'));
+		var difference = timestampnow - AOStimestamp;
+		//console.log("Difference " + difference);
+		if (status === '24') 
+		{
+			document.getElementById("AOS").innerHTML = "Есть сигнал!";
+			document.getElementById("AOS").bgColor = '#000000';
+		}
+		else 
+		{
+			document.getElementById("AOS").innerHTML = "Нет сигнала " + status + " " + statuses[status];
+			document.getElementById("AOS").bgColor = '#FF00FF';
+		}
+		if(difference > 0.00153680542553047)
+		{
+			document.getElementById("AOS").innerHTML = "Stale Signal " + status + " " + statuses[status];
+			document.getElementById("AOS").bgColor = '#00FFFF';
+		}
+	}
+  });
+});
+</script>
+</body>
+</html>
