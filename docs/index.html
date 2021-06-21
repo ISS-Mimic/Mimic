@@ -379,13 +379,13 @@ Russian Telemetry and Translation: <a href="https://iss-mimic.github.io/Mimic/in
 </tr>
 <tr>
   <td align="center">ETHOS</td>
-  <td>Coolant water quantity (Node 2), MT</td>
+  <td>Coolant Water (Node 2), MediumTemp [%?]</td>
   <td class="val" id="NODE2000001"></td>
   <td class="val" id="NODE2000001t"></td>
 </tr>
 <tr>
   <td align="center">ETHOS</td>
-  <td>Coolant water quantity (Node 2), LT</td>
+  <td>Coolant Water (Node 2), LowTemp [%?]</td>
   <td class="val" id="NODE2000002"></td>
   <td class="val" id="NODE2000002t"></td>
 </tr>
@@ -433,7 +433,7 @@ Russian Telemetry and Translation: <a href="https://iss-mimic.github.io/Mimic/in
 </tr>
 <tr>
   <td align="center">ETHOS</td>
-  <td>Urine Tank %</td>
+  <td>Urine Tank [%]</td>
   <td class="val" id="NODE3000005"></td>
   <td class="val" id="NODE3000005t"></td>
 </tr>
@@ -451,13 +451,13 @@ Russian Telemetry and Translation: <a href="https://iss-mimic.github.io/Mimic/in
 </tr>
 <tr>
   <td align="center">ETHOS</td>
-  <td>Waste Water Tank Qty</td>
+  <td>Waste Water Tank [%?]</td>
   <td class="val" id="NODE3000008"></td>
   <td class="val" id="NODE3000008t"></td>
 </tr>
 <tr>
   <td align="center">ETHOS</td>
-  <td>Clean Water Tank Qty</td>
+  <td>Clean Water Tank [%?]</td>
   <td class="val" id="NODE3000009"></td>
   <td class="val" id="NODE3000009t"></td>
 </tr>
@@ -469,7 +469,7 @@ Russian Telemetry and Translation: <a href="https://iss-mimic.github.io/Mimic/in
 </tr>
 <tr>
   <td align="center">ETHOS</td>
-  <td>O2 Production rate</td>
+  <td>O2 Production Rate [lb/day]</td>
   <td class="val" id="NODE3000011"></td>
   <td class="val" id="NODE3000011t"></td>
 </tr>
@@ -481,7 +481,7 @@ Russian Telemetry and Translation: <a href="https://iss-mimic.github.io/Mimic/in
 </tr>
 <tr>
   <td align="center">ETHOS</td>
-  <td>Coolant water quantity (Node 3)</td>
+  <td>Coolant Water (Node 3) [%?]</td>
   <td class="val" id="NODE3000017"></td>
   <td class="val" id="NODE3000017t"></td>
 </tr>
@@ -493,7 +493,7 @@ Russian Telemetry and Translation: <a href="https://iss-mimic.github.io/Mimic/in
 </tr>
 <tr>
   <td align="center">ETHOS</td>
-  <td>Coolant water quantity (Node 3)</td>
+  <td>Coolant Water (Node 3) [%?]</td>
   <td class="val" id="NODE3000019"></td>
   <td class="val" id="NODE3000019t"></td>
 </tr>
@@ -523,25 +523,25 @@ Russian Telemetry and Translation: <a href="https://iss-mimic.github.io/Mimic/in
 </tr>
 <tr>
   <td align="center">ETHOS</td>
-  <td>Coolant water quantity, LT (Lab)</td>
+  <td>Coolant Water (Lab), LowTemp [%?]</td>
   <td class="val" id="USLAB000056"></td>
   <td class="val" id="USLAB000056t"></td>
 </tr>
 <tr>
   <td align="center">ETHOS</td>
-  <td>Coolant water quantity, MT (Lab)</td>
+  <td>Coolant Water (Lab), MediumTemp [%?]</td>
   <td class="val" id="USLAB000057"></td>
   <td class="val" id="USLAB000057t"></td>
 </tr>
 <tr>
   <td align="center">ETHOS</td>
-  <td>Cabin pressure [torr]</td>
+  <td>Cabin Pressure [torr]</td>
   <td class="val" id="USLAB000058"></td>
   <td class="val" id="USLAB000058t"></td>
 </tr>
 <tr>
   <td align="center">ETHOS</td>
-  <td>Cabin temperature [°C]</td>
+  <td>Cabin Temperature [°C]</td>
   <td class="val" id="USLAB000059"></td>
   <td class="val" id="USLAB000059t"></td>
 </tr>
@@ -1216,7 +1216,7 @@ Russian Telemetry and Translation: <a href="https://iss-mimic.github.io/Mimic/in
 </tr>
 <tr>
   <td align="center">TOPO</td>
-  <td>US Altitude [km]</td>
+  <td>ISS Altitude from State Vectors [km]</td>
   <td class="val" id="USLAB000ALT"></td>
 </tr>
 <tr>
@@ -1311,7 +1311,7 @@ Russian Telemetry and Translation: <a href="https://iss-mimic.github.io/Mimic/in
 </tr>
 <tr>
   <td align="center">ADCO/VVO</td>
-  <td>Control Moment Gyroscope (CMG) Momentum %</td>
+  <td>Control Moment Gyroscope (CMG) Momentum [%]</td>
   <td class="val" id="USLAB000010"></td>
   <td class="val" id="USLAB000010t"></td>
 </tr>
@@ -1845,7 +1845,7 @@ Russian Telemetry and Translation: <a href="https://iss-mimic.github.io/Mimic/in
 </tr>
 <tr>
   <td align="center">CSA</td>
-  <td>MT Position Float</td>
+  <td>MT Position Float [cm from center of truss, + = stbd]</td>
   <td class="val" id="CSAMT000001"></td>
   <td class="val" id="CSAMT000001t"></td>
 </tr>
@@ -2554,7 +2554,7 @@ sub.addListener({
 			zState = update.getValue("Value");
 		}
 		
-		var altitude = Math.sqrt(Math.pow(xState,2)+Math.pow(yState,2)+Math.pow(zState,2))-6378.137;
+		var altitude = Math.sqrt(Math.pow(xState,2)+Math.pow(yState,2)+Math.pow(zState,2))-6371.137;
 		$("#"+"USLAB000ALT").text(altitude.toFixed(2));
 		
 		//attitude conversion
