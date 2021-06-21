@@ -2554,7 +2554,7 @@ sub.addListener({
 			zState = update.getValue("Value");
 		}
 		
-		var altitude = Math.sqrt(Math.pow(xState,2)+Math.pow(yState,2)+Math.pow(zState,2))-6371.137;
+		var altitude = Math.sqrt(Math.pow(xState,2)+Math.pow(yState,2)+Math.pow(zState,2))-6385; //fudging because alt is too high
 		$("#"+"USLAB000ALT").text(altitude.toFixed(2));
 		
 		//attitude conversion
