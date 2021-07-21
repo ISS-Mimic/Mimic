@@ -3,6 +3,8 @@ function alert(message)
 
 }
 
+//require(["LightstreamerCLient","Subscription"],function(LightstreanerClient,Subscription)
+
 var ls = require("lightstreamer-client");
 var sqlite3 = require("sqlite3");
 
@@ -13,7 +15,7 @@ var telemetry = require("/home/pi/Mimic/Pi/Telemetry_identifiers.js");
 var classes = ["TimeStamp", "Value"];
 
 var lsClient = new ls.LightstreamerClient("https://push.lightstreamer.com", "ISSLIVE"); //actual telemetry server
-//var lsClient = new ls.LightstreamerClient("http://push1.isslive.com", "PROXYTELEMETRY"); //actual telemetry server
+//pushvar lsClient = new ls.LightstreamerClient("http://push1.isslive.com", "PROXYTELEMETRY"); //actual telemetry server
 //var lsClient = new ls.LightstreamerClient("http://sl-iot-server-13.slsandbox.com:8080", "ISSLIVE_LS_SL"); //sl recorded data server
 
 lsClient.connectionOptions.setSlowingEnabled(false);
@@ -64,11 +66,11 @@ sub.addListener({
 timeSub.addListener({
   onItemUpdate: function (update) {
         var status = update.getValue("Status.Class");
-        //console.log("Status: " + status);
+        console.log("Status: " + status);
         AOStimestamp = parseFloat(update.getValue("TimeStamp"));
-        //console.log("Timestamp: " + update.getValue("TimeStamp"));
+        console.log("Timestamp: " + update.getValue("TimeStamp"));
         difference = timestampnow - AOStimestamp;
-        //console.log("Difference " + difference);
+        console.log("Difference " + difference);
 
     if ( status === "24")
     {
