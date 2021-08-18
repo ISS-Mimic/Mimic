@@ -1083,16 +1083,19 @@ Russian Telemetry and Translation: <a href="https://iss-mimic.github.io/Mimic/in
   <td align="center">ADCO</td>
   <td>US Attitude Yaw [°]</td>
   <td class="val" id="USLAB000YAW"></td>
+  <td class="val" id="USLAB000YAWt"></td>
 </tr>
 <tr>
   <td align="center">ADCO</td>
   <td>US Attitude Pitch [°]</td>
   <td class="val" id="USLAB000PIT"></td>
+  <td class="val" id="USLAB000PITt"></td>
 </tr>
 <tr>
   <td align="center">ADCO</td>
   <td>US Attitude Roll [°]</td>
   <td class="val" id="USLAB000ROL"></td>
+  <td class="val" id="USLAB000ROLt"></td>
 </tr>
 <tr>
   <td align="center">ADCO</td>
@@ -1218,6 +1221,7 @@ Russian Telemetry and Translation: <a href="https://iss-mimic.github.io/Mimic/in
   <td align="center">TOPO</td>
   <td>ISS Altitude from State Vectors [km]</td>
   <td class="val" id="USLAB000ALT"></td>
+  <td class="val" id="USLAB000ALTt"></td>
 </tr>
 <tr>
   <td align="center">ADCO</td>
@@ -2531,6 +2535,16 @@ sub.addListener({
 		var selector = $("#"+item);
 		selector.text(update.getValue("Value"));
 		
+		var selector2 = $("#"+update.getItemName()+"t")
+		var ts = update.getValue("TimeStamp")
+		var ts_day = Math.floor(ts/24)
+		var ts_hour = Math.floor(((ts/24)-ts_day)*24)
+		var ts_minute = Math.floor((((ts/24)-ts_day)*24-ts_hour)*60)
+		var ts_seconds = ((((((ts/24)-ts_day)*24-ts_hour)*60) - ts_minute)*60).toFixed(0)
+		selector2.text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+		selector.addClass('highlight');
+		
+		
 		if (specialPUIs.includes(item))
 		{
 			selector.text(eval(item)[update.getValue("Value")]);
@@ -2556,6 +2570,7 @@ sub.addListener({
 		
 		var altitude = Math.sqrt(Math.pow(xState,2)+Math.pow(yState,2)+Math.pow(zState,2))-6385; //fudging because alt is too high
 		$("#"+"USLAB000ALT").text(altitude.toFixed(2));
+		$("#USLAB000ALTt").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
 		
 		//attitude conversion
 		if(item === "USLAB000018")
@@ -2610,15 +2625,11 @@ sub.addListener({
 			$("#"+"USLAB000YAW").text(yaw.toFixed(2));
 			$("#"+"USLAB000PIT").text(pitch.toFixed(2));
 			$("#"+"USLAB000ROL").text(roll.toFixed(2));
+			$("#USLAB000YAWt").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+			$("#USLAB000PITt").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
+			$("#USLAB000ROLt").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
 		}
-		var selector2 = $("#"+update.getItemName()+"t")
-		var ts = update.getValue("TimeStamp")
-		var ts_day = Math.floor(ts/24)
-		var ts_hour = Math.floor(((ts/24)-ts_day)*24)
-		var ts_minute = Math.floor((((ts/24)-ts_day)*24-ts_hour)*60)
-		var ts_seconds = ((((((ts/24)-ts_day)*24-ts_hour)*60) - ts_minute)*60).toFixed(0)
-		selector2.text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
-		selector.addClass('highlight');
+		
 	}
 });
 
