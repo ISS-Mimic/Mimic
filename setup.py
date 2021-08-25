@@ -42,6 +42,7 @@ def main():
     print("sudo apt -y update; sudo apt -y upgrade\n")
 
     run_install("vim", "sudo apt-get")
+    run_install("python3-numpy", "sudo apt-get")
     run_install("nodejs sqlite3", "sudo apt-get")
     run_command("curl https://www.npmjs.com/install.sh | sudo sh")
     run_install("lightstreamer-client", "npm")
