@@ -825,29 +825,65 @@ class ManualControlScreen(Screen):
 
     def sendActive(self, *args):
         if Beta4Bcontrol:
-            self.sendBeta4B(float(args[0]))
+            try:
+                self.sendBeta4B(float(args[0]))
+            except Exception as e:
+                logWrite(e)
         if Beta3Bcontrol:
-            self.sendBeta3B(float(args[0]))
+            try:
+                self.sendBeta3B(float(args[0]))
+            except Exception as e:
+                logWrite(e)
         if Beta2Bcontrol:
-            self.sendBeta2B(float(args[0]))
+            try:
+                self.sendBeta2B(float(args[0]))
+            except Exception as e:
+                logWrite(e)
         if Beta1Bcontrol:
-            self.sendBeta1B(float(args[0]))
+            try:
+                self.sendBeta1B(float(args[0]))
+            except Exception as e:
+                logWrite(e)
         if Beta4Acontrol:
-            self.sendBeta4A(float(args[0]))
+            try:
+                self.sendBeta4A(float(args[0]))
+            except Exception as e:
+                logWrite(e)
         if Beta3Acontrol:
-            self.sendBeta3A(float(args[0]))
+            try:
+                self.sendBeta3A(float(args[0]))
+            except Exception as e:
+                logWrite(e)
         if Beta2Acontrol:
-            self.sendBeta2A(float(args[0]))
+            try:
+                self.sendBeta2A(float(args[0]))
+            except Exception as e:
+                logWrite(e)
         if Beta1Acontrol:
-            self.sendBeta1A(float(args[0]))
+            try:
+                self.sendBeta1A(float(args[0]))
+            except Exception as e:
+                logWrite(e)
         if PTRRJcontrol:
-            self.sendPTRRJ(float(args[0]))
+            try:
+                self.sendPTRRJ(float(args[0]))
+            except Exception as e:
+                logWrite(e)
         if STRRJcontrol:
-            self.sendSTRRJ(float(args[0]))
+            try:
+                self.sendSTRRJ(float(args[0]))
+            except Exception as e:
+                logWrite(e)
         if PSARJcontrol:
-            self.sendPSARJ(float(args[0]))
+            try:
+                self.sendPSARJ(float(args[0]))
+            except Exception as e:
+                logWrite(e)
         if SSARJcontrol:
-            self.sendSSARJ(float(args[0]))
+            try:
+                self.sendSSARJ(float(args[0]))
+            except Exception as e:
+                logWrite(e)
 
     def sendPSARJ(self, *args):
         global psarjmc
