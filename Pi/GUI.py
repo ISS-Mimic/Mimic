@@ -353,8 +353,8 @@ class MainScreen(Screen):
         try:
             p.kill()
             p2.kill()
-        except Exception:
-            pass
+        except Exception as e:
+            logWrite(e)
         os.system('rm /dev/shm/*') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
         staleTelemetry()
         logWrite("Successfully stopped ISS telemetry javascript and removed database")
@@ -1079,8 +1079,8 @@ class FakeOrbitScreen(Screen):
         global p2, runningDemo
         try:
             p2.kill()
-        except Exception:
-            pass
+        except Exception as e:
+            logWrite(e)
         else:
             runningDemo = False
 
@@ -1095,8 +1095,8 @@ class FakeOrbitScreen(Screen):
         global p2, runningDemo
         try:
             p2.kill()
-        except Exception:
-            pass
+        except Exception as e:
+            logWrite(e)
         else:
             logWrite("Successfully stopped Demo HTV Orbit script")
             runningDemo = False
@@ -1191,8 +1191,8 @@ class MimicScreen(Screen, EventDispatcher):
             p.kill()
             p2.kill()
             TDRSproc.kill()
-        except Exception:
-            pass
+        except Exception as e:
+            logWrilogWrite(e))
 
 class MainScreenManager(ScreenManager):
     pass
