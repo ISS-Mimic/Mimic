@@ -1192,7 +1192,7 @@ class MimicScreen(Screen, EventDispatcher):
             p2.kill()
             TDRSproc.kill()
         except Exception as e:
-            logWrilogWrite(e))
+            logWrite(e)
 
 class MainScreenManager(ScreenManager):
     pass
