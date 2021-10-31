@@ -153,8 +153,12 @@ void loop()
     allSet_module(moduleLED.Color(0,0,0),0);
   }
   moduleLED.show();
+
+  //if array voltage is under 151.5V, assume batteries are discharging and set LEDs to Red - note, the 151.5V value is not fixed and varies depending on array. might need tweaking
+  //if array voltage is 160V, assume batteries are fully charged and set LEDs to White
+  //if array voltage is between those values, assume batteries are being charged by the arrays and set LEDs to Blue
   
-  if(V2A < 151.5)
+  if(V2A < 151.5) 
   {
     portIEA.setPixelColor(0, portIEA.Color(255,0,0));
     portIEA.setPixelColor(1, portIEA.Color(255,0,0));
