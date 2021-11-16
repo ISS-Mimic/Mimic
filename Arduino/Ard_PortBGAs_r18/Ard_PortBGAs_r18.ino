@@ -173,7 +173,7 @@ void motorNULL(struct joints &myJoint) {
 
 // 0x70 is the "all call" which means all motor shields connected to this Ardwill be commanded, regardless of their I2C ID.  Works as long as it's not more than one motor shield for each Arduino. 
 // (If we ever stack multiple motor shields, will have to address individually)
-Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x78);  
+Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x60);  
 // Select which 'port' M1, M2, M3 or M4. In this case, M1,2,4
 Adafruit_DCMotor *myMotorB4A = AFMS.getMotor(1);
 Adafruit_DCMotor *myMotorB2A = AFMS.getMotor(2);
