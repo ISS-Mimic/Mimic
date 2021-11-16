@@ -171,26 +171,29 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x60);  // Stbd
 
 // 0x70 is the "all call" which means all motor shields connected to this Ardwill be commanded, regardless of their I2C ID.  Works as long as it's not more than one motor shield for each Arduino. 
 // (If we ever stack multiple motor shields, will have to address individually)
-//Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x70);
-//Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x70);  // Stbd
-
 
 // Select which 'port' M1, M2, M3 or M4. In this case, M1,2,4
-Adafruit_DCMotor *myMotorB1A = AFMS.getMotor(1);
-Adafruit_DCMotor *myMotorB3A = AFMS.getMotor(2);
-Adafruit_DCMotor *myMotorB1B = AFMS.getMotor(3);
-Adafruit_DCMotor *myMotorB3B = AFMS.getMotor(4);
+//Adafruit_DCMotor *myMotorB1A = AFMS.getMotor(1);
+//Adafruit_DCMotor *myMotorB3A = AFMS.getMotor(2);
+//Adafruit_DCMotor *myMotorB1B = AFMS.getMotor(3);
+//Adafruit_DCMotor *myMotorB3B = AFMS.getMotor(4);
+
+
+Adafruit_DCMotor *myMotorB3A = AFMS.getMotor(1);
+Adafruit_DCMotor *myMotorB1A = AFMS.getMotor(2);
+Adafruit_DCMotor *myMotorB3B = AFMS.getMotor(3);
+Adafruit_DCMotor *myMotorB1B = AFMS.getMotor(4);
 
 //Adafruit_DCMotor *myMotorPSARJ = AFMS2.getMotor(1);
 //Adafruit_DCMotor *myMotorSSARJ = AFMS2.getMotor(2);
 
-Encoder myEnc1A(0, 1);
-Encoder myEnc3A(2, 3); // was 4,5 but motor was oozing, digital pins were toggleing, but count wasn't incrementing (interrupt prob?) 
+Encoder myEnc3A(0, 1);
+Encoder myEnc1A(2, 3); // was 4,5 but motor was oozing, digital pins were toggleing, but count wasn't incrementing (interrupt prob?) 
 // Pins 9, 10 are used by Servos.
 // Odd issues with Pins 2-4.
 // Pin 13 is nominally used by LED and general guidance from encoder library is to avoid it.
-Encoder myEnc1B(7, 8); // BCM changed from 6,7 to 7,8 on Nov 15, 2018
-Encoder myEnc3B(11, 12);
+Encoder myEnc3B(7, 8); // BCM changed from 6,7 to 7,8 on Nov 15, 2018
+Encoder myEnc1B(11, 12);
 
 //Encoder myEncPSARJ(16, 17);// BCM changed from 14,15 to 9,10 since pin 15 always staed high for some reason on Nov 15, 2018
 //Encoder myEncSSARJ(14, 15);
