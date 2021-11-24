@@ -1,54 +1,16 @@
 
 /// MIMIC!!! MIMIC!!!
 //
-// This version is just for Port BGAs, uses "all call" for Motor shield (calls all motor shields) via 0x78 call
+// This version is for the Port BGA Arduino.  Other than naming (4B vs 3B), it's functionally identical to the Stbd BGA code.
 // 4A is Motor 1, Encoder pins 0,1
 // 2A is Motor 2, Encoder pins 2,3
 // 4B is Motor 3, Encoder pins 7,8
 // 2B is Motor 4, Encoder pins 11,12
 
 
-//// for LCD  =============================================
-//
-//#include <SPI.h>
-//#include <Wire.h>
-//#include <Adafruit_GFX.h>
-//#include <Adafruit_SSD1306.h>
-//static char dtostrfbuffer[21];  // added Oct 20
-//#include <avr/dtostrf.h>
-//
-//#define OLED_RESET 4 // likely unnecessary
-//Adafruit_SSD1306 display(OLED_RESET);
-//
-//#define NUMFLAKES 10
-//#define XPOS 0
-//#define YPOS 1
-//#define DELTAY 2
-//
-//
-//#define LOGO16_GLCD_HEIGHT 16
-//#define LOGO16_GLCD_WIDTH  16
-//static const unsigned char PROGMEM logo16_glcd_bmp[] =
-//{ B00000000, B11000000,
-//  B00000001, B11000000,
-//  B00000001, B11000000,
-//  B00000011, B11100000,
-//  B11110011, B11100000,
-//  B11111110, B11111000,
-//  B01111110, B11111111,
-//  B00110011, B10011111,
-//  B00011111, B11111100,
-//  B00001101, B01110000,
-//  B00011011, B10100000,
-//  B00111111, B11100000,
-//  B00111111, B11110000,
-//  B01111100, B11110000,
-//  B01110000, B01110000,
-//  B00000000, B00110000 };
-//// end LCD =============================================
+int SpeedLimit= 125; // integer from 0 to 255.  0 means 0% speed, 255 is 100% speed.  
 
-//int MaxMotorSpeedPercent = 50; //[Percent] Define upper limit of motor speed compared to capability.  100% is full capability
-int SpeedLimit= 125; // integer from 0 to 255.  0 means 0% speed, 255 is 100% speed.  round(255.0*float(MaxMotorSpeedPercent)/100.0; // Might night need all of this wrapping - just trying to get float to int to work properly
+// Some constants to keep track of time and do some math operations later
 unsigned long previousMillis = 0;
 unsigned long LoopStartMillis = 0;
 unsigned long  delta_t_millis = 1;
@@ -56,8 +18,11 @@ float inverse_delta_t_millis = 1;
 uint8_t i;
 unsigned long mytime;
 
+// "Smart Rollover" means it takes the shortest path when crossing 0 deg.  For instance, if at 350 deg and commanded to 20 deg, rather than moving backward 330 deg (350-20), it will move forward 30 deg.
 int SmartRolloverBGA = 1;
 int SmartRolloverSARJ = 1;
+
+// Defining some variables that will be used for each DC motor commanded.  Using a struct is a bit more tidy than creating unique variables for each motor.
 struct joints
 {
   float Kp;
@@ -76,11 +41,7 @@ struct joints
   int CmdSpeed;
 };
 
-//joints bga_4A = {10, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-//joints bga_2A = {10, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-//joints bga_4B = {10, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-//joints bga_2B = {10, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
+// This assigns values to each of the above variables in the struct (Kp, Ki, ...) for each "joint" struct created.
 joints bga_4A = {5, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 joints bga_2A = {5, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 joints bga_4B = {5, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -163,34 +124,21 @@ void motorNULL(struct joints &myJoint) {
 #include <Adafruit_MotorShield.h>
 #include "utility/Adafruit_MS_PWMServoDriver.h"
 #include <string.h>
-//#include <Servo.h>
-//Servo servo_PTRRJ;
-//Servo servo_STRRJ;
 
 // Create the motor shield object with the default I2C address
-//Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x60);  // Stbd
-//Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x78);  // Port
-
-// 0x70 is the "all call" which means all motor shields connected to this Ardwill be commanded, regardless of their I2C ID.  Works as long as it's not more than one motor shield for each Arduino. 
-// (If we ever stack multiple motor shields, will have to address individually)
 Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x60);  
-// Select which 'port' M1, M2, M3 or M4. In this case, M1,2,4
+
+// Select which 'port'  on the motor shield for each BGA entity: M1, M2, M3 or M4. 
 Adafruit_DCMotor *myMotorB4A = AFMS.getMotor(1);
 Adafruit_DCMotor *myMotorB2A = AFMS.getMotor(2);
 Adafruit_DCMotor *myMotorB4B = AFMS.getMotor(3);
 Adafruit_DCMotor *myMotorB2B = AFMS.getMotor(4);
 
-
+// Define the pins used as encoder signals for each motor.  These are read via "hardware interrupts" to ensure the Ard sees every blip.
 Encoder myEnc4A(0, 1);
-Encoder myEnc2A(2, 3); // was 4,5 but motor was oozing, digital pins were toggleing, but count wasn't incrementing (interrupt prob?) 
-// Pins 9, 10 are used by Servos.
-// Odd issues with Pins 2-4.
-// Pin 13 is nominally used by LED and general guidance from encoder library is to avoid it.
-Encoder myEnc4B(7, 8); // BCM changed from 6,7 to 7,8 on Nov 15, 2018
+Encoder myEnc2A(2, 3); 
+Encoder myEnc4B(7, 8); 
 Encoder myEnc2B(11, 12);
-
-//Encoder myEncPSARJ(16, 17);// BCM changed from 14,15 to 9,10 since pin 15 always staed high for some reason on Nov 15, 2018
-//Encoder myEncSSARJ(14, 15);
 
 // Per here, Analog pins on Metro M0 are also digtial IO. https://learn.adafruit.com/adafruit-metro-m0-express-designed-for-circuitpython/pinouts
 // From here, A1 is digital 15, A2 is 16, A3 is 17, A4 is 18, A5 is 19. http://www.pighixxx.net/portfolio_tags/pinout-2/#prettyPhoto[gallery1368]/0/
@@ -218,45 +166,18 @@ int D17 = 0;
 
 void setup() {
 
-  ////// for LCD  =============================================
-  ////
-  ////
-  //  // by default, we'll generate the high voltage from the 3.3v line internally! (neat!)
-  //  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3D (for the 128x64)
-  //  // init done
-  //
-  //  // Show image buffer on the display hardware.
-  //  // Since the buffer is intialized with an Adafruit splashscreen
-  //  // internally, this will display the splashscreen.
-  //  display.display();
-  //  delay(2000);
-  //
-  //  // Clear the buffer.
-  //  display.clearDisplay();
-  //
-  //// end for LCD  =========================================
-
-
-  // Set some pins to high, just for convenient connection to power Hall Effect Sensors - can't, per above use of these pins
+  // Set some pins to high, just for convenient connection to power Hall Effect Sensors
   pinMode(13, OUTPUT);
   digitalWrite(13, HIGH);
     pinMode(5, OUTPUT);
   digitalWrite(5, LOW); // always low, for convenient ground
   pinMode(6, OUTPUT);
   digitalWrite(6, HIGH);
-  //pinMode(A1, OUTPUT);
-  //digitalWrite(A1, HIGH);
-  //pinMode(A2, OUTPUT);
-  //digitalWrite(A2, HIGH);
 
-  // Attach a servo to dedicated pins 9,10.  Note that all shields in the stack will have these as common, so can connect to any.
-  //  servo_PTRRJ.attach(9);
-  //  servo_STRRJ.attach(10);
+// This sets the AdaFruit Motor Shield frequency to command the motors.  Mostly changed to reduce audible buzz.
   AFMS.begin(200);  // I set this at 200 previously to reduce audible buzz.
-//  AFMS2.begin(200);  // I set this at 200 previously to reduce audible buzz.
 
   Serial.begin(9600);
-  //Serial3.begin(115200);          //Serial1 is connected to the RasPi
   Serial.setTimeout(50);
 
 }

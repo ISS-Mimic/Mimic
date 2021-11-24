@@ -1,4 +1,4 @@
-
+// Read seriald data from the RasPi, telling the motors and LEDs what to do.
 void checkSerial()
 {
   //digitalWrite(ledBluePin, HIGH);
