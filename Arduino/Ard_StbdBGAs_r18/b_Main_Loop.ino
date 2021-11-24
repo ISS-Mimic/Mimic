@@ -95,28 +95,8 @@ void loop() {
   }
 
   int  debug_mode = 8;
-  //  B3A = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
-  //  B1A = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
-  //  B3B = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
-  //  B1B = 100 + 90.0* sin(2.0 * 3.14159 * 0.01 * millis() / 1000.0);
-  //  PTRRJ=104*sin(1*3.14159*0.01*millis()/1000.0);
-
-
-  // ========= Servo Stuff =============================
-  //map(value, fromLow, fromHigh, toLow, toHigh)
-  //  servo_PTRRJ.write(map(PTRRJ, -115, 115, 0, 180)); // from +/- 115deg to servo command min and max.
-  //  servo_STRRJ.write(map(STRRJ, -115, 115, 0, 180)); // from +/- 115deg to servo command min and max.
-  //servo_PTRRJ.write(PTRRJ+180);
-  //servo_STRRJ.write(PTRRJ+180);
-
+  
   delay(1);
-  //delay(10);
-  //  for (i = 255; i != 0; i--) {
-  //    servo_PTRRJ.write(map(i, 0, 255, 0, 180));
-  //    delay(1);
-  //  }
-  //delay(10);
-  // ==================================================
 
   // ============== Time measures ===================================================
   LoopStartMillis = millis();
@@ -131,59 +111,7 @@ void loop() {
   bga_1A.Count = myEnc1A.read();
 
   millisChPt2 = millis() - LoopStartMillis;
-
-  //if (debug_mode==5){
-  //Serial1.print("[Joint]:Cmd,Act,Err|  ");
-  //Serial1.print("3A:c");
-  //Serial1.print(B3A);
-  //Serial1.print(",a");
-  //Serial1.print(Pos_B3A);
-  //Serial1.print(",e");
-  //Serial1.print(PosErr_B3A);
-  //
-  //Serial1.print("|,  ");
-  //Serial1.print("1A:c");
-  //Serial1.print(B1A);
-  //Serial1.print(",a");
-  //Serial1.print(Pos_B1A);
-  //Serial1.print(",e");
-  //Serial1.print(PosErr_B1A);
-  //
-  //Serial1.print("|,  ");
-  //Serial1.print("3B:c");
-  //Serial1.print(B3B);
-  //Serial1.print(",a");
-  //Serial1.print(Pos_B3B);
-  //Serial1.print(",e");
-  //Serial1.print(PosErr_B3B);
-  //
-  //Serial1.print("|,  ");
-  //Serial1.print("1B:c");
-  //Serial1.print(B1B);
-  //Serial1.print(",a");
-  //Serial1.print(Pos_B1B);
-  //Serial1.print(",e");
-  //Serial1.print(PosErr_B1B);
-  //Serial1.print("|,");
-  //Serial1.println("");
-  //}
-  //
-  //
-  //
-  //if (debug_mode==6){
-  //Serial1.print(PosErr_B3A);
-  //
-  //Serial1.print(", ");
-  //Serial1.print(PosErr_B1A);
-  //
-  //Serial1.print(", ");
-  //Serial1.print(PosErr_B3B);
-  //
-  //Serial1.print(", ");
-  //Serial1.print(PosErr_B1B);
-  //Serial1.println("");
-  //}
-
+ 
   if (debug_mode == 8) {
     Serial.print("|  ");
 
@@ -197,11 +125,6 @@ void loop() {
     Serial.print(bga_1B.Count);
     Serial.print(",SmartRolloverBGA");
     Serial.print(SmartRolloverBGA);
-
-    //    Serial.print(",Count_PSARJ: ");
-    //    Serial.print(Count_PSARJ);
-    //    Serial.print(",Count_SSARJ: ");
-    //    Serial.print(Count_SSARJ);
 
     Serial.print(",D0:");
     Serial.print(D0);
@@ -260,163 +183,9 @@ void loop() {
     //    Serial.print(CmdSpeed_PSARJ);
     //Serial.print(PosErr_SSARJ);
     Serial.println("|  ");
-
-
-    // LCD
-    //
-    //    //
-    //      // LCD =======================================
-    //      // text display tests
-    //      display.setTextSize(1);
-    //      display.setTextColor(WHITE);
-    //      display.setCursor(0,0);
-    //      display.setTextColor(BLACK, WHITE); // 'inverted' text
-    //      display.println("Jnt|-ERR-|-CMD-|-ACT-");
-    //
-    //    //   display.println("3600.0|3600.0|3600.0");
-    //    //     float d=12345.6789;
-    //        //tostrf(floatVar, minStringWidthIncDecimalPoint, numVarsAfterDecimal, charBuf);
-    //
-    //
-    //        //int sensorValue = analogRead(A0);
-    //      //String stringThree = "I want " + sensorValue;
-    //    //  String temp="3A:" + PosErr_B3A + "|" + Count_B1B;
-    //    //
-    //    //dtostrf(PosErr_B3A, 4, 1, dtostrfbuffer);
-    //    //sendBuffer
-    //    //  sprintf(sendBuffer, "X%dY%dT", first, second);
-    //      //  display.print("3A:");
-    //      //  dtostrf(PosErr_B3A, 4, 1, dtostrfbuffer);
-    //
-    //      //Goal is "3A:[PosErr]|[PosCmd]|[ActPos]
-    //      display.setTextColor(WHITE, BLACK);
-    //    display.print("3A:");
-    //    dtostrf(PosErr_B3A, 5, 1, dtostrfbuffer);
-    //    display.print( dtostrfbuffer);
-    //    display.print("|");
-    //    dtostrf(B3A, 5, 1, dtostrfbuffer); //Cmd Pos
-    //    display.print( dtostrfbuffer);
-    //    display.print("|");
-    //    dtostrf(Pos_B3A, 5, 1, dtostrfbuffer);
-    //    display.println( dtostrfbuffer);
-    //
-    //     display.setTextColor(BLACK, WHITE); // 'inverted' text
-    //    display.print("1A:");
-    //    dtostrf(PosErr_B1A, 5, 1, dtostrfbuffer);
-    //    display.print( dtostrfbuffer);
-    //    display.print("|");
-    //    dtostrf(B1A, 5, 1, dtostrfbuffer); //Cmd Pos
-    //    display.print( dtostrfbuffer);
-    //    display.print("|");
-    //    dtostrf(Pos_B1A, 5, 1, dtostrfbuffer);
-    //    display.println( dtostrfbuffer);
-    //
-    //    display.setTextColor(WHITE, BLACK);
-    //    display.print("3B:");
-    //    dtostrf(PosErr_B3B, 5, 1, dtostrfbuffer);
-    //    display.print( dtostrfbuffer);
-    //    display.print("|");
-    //    dtostrf(B3B, 5, 1, dtostrfbuffer); //Cmd Pos
-    //    display.print( dtostrfbuffer);
-    //    display.print("|");
-    //    dtostrf(Pos_B3B, 5, 1, dtostrfbuffer);
-    //    display.println( dtostrfbuffer);
-    //
-    //     display.setTextColor(BLACK, WHITE); // 'inverted' text
-    //    display.print("1B:");
-    //    dtostrf(PosErr_B1B, 5, 1, dtostrfbuffer);
-    //    display.print( dtostrfbuffer);
-    //    display.print("|");
-    //    dtostrf(B1B, 5, 1, dtostrfbuffer); //Cmd Pos
-    //    display.print( dtostrfbuffer);
-    //    display.print("|");
-    //    dtostrf(Pos_B1B, 5, 1, dtostrfbuffer);
-    //    display.println( dtostrfbuffer);
-    //
-    //    display.setTextColor(WHITE, BLACK);
-    //    display.print("SS:");
-    //    dtostrf(PosErr_SSARJ, 5, 1, dtostrfbuffer);
-    //    display.print( dtostrfbuffer);
-    //    display.print("|");
-    //    dtostrf(SSARJ, 5, 1, dtostrfbuffer); //Cmd Pos
-    //    display.print( dtostrfbuffer);
-    //    display.print("|");
-    //    dtostrf(Pos_SSARJ, 5, 1, dtostrfbuffer);
-    //    display.println( dtostrfbuffer);
-    //
-    ////
-    //    display.setTextColor(BLACK, WHITE); // 'inverted' text
-    //    display.print("PS:");
-    //    dtostrf(PosErr_PSARJ, 5, 1, dtostrfbuffer);
-    //    display.print( dtostrfbuffer);
-    //    display.print("|");
-    //    dtostrf(PSARJ, 5, 1, dtostrfbuffer); //Cmd Pos
-    //    display.print( dtostrfbuffer);
-    //    display.print("|");
-    //    dtostrf(Pos_PSARJ, 5, 1, dtostrfbuffer);
-    //    display.println( dtostrfbuffer);
-    ////
-    //// PID vals
-    //    display.print("Kpid:");
-    //    dtostrf(Kp_PSARJ, 3, 0, dtostrfbuffer);
-    //    display.print( dtostrfbuffer);
-    //    display.print(",");
-    //    dtostrf(Ki_PSARJ, 3, 0, dtostrfbuffer);
-    //    display.print( dtostrfbuffer);
-    //    display.print(",");
-    //   dtostrf(Kd_PSARJ, 3, 0, dtostrfbuffer);
-    //    display.print( dtostrfbuffer);
-    //    display.print(",Mtr:");
-    //    dtostrf(CmdSpeed_PSARJ, 3, 0, dtostrfbuffer);
-    //    display.println( dtostrfbuffer);
-    //// end PID vals
-    //    //float Kp_PSARJ = 10; // Proportional Gain of PID
-    ////float Ki_PSARJ = 2; // Integral Gain of PID
-    ////float Kd_PSARJ = 2; // Derivative Gain of PID
-    //
-    //
-    ////    display.print(",PSMtrSpdU8bot:");
-    ////    dtostrf(CmdSpeed_PSARJ, 5, 1, dtostrfbuffer);
-    ////    display.println( dtostrfbuffer);
-    //
-    //
-    //
-    ////    display.setTextColor(WHITE, BLACK);
-    ////    display.print("STJ:");
-    ////    dtostrf(STRRJ, 6, 1, dtostrfbuffer);
-    ////    display.print( dtostrfbuffer);
-    ////
-    ////
-    ////    display.setTextColor(BLACK, WHITE); // 'inverted' text
-    ////    display.print("|PTJ:");
-    ////    dtostrf(PTRRJ, 6, 1, dtostrfbuffer);
-    ////    display.println( dtostrfbuffer);
-    //    //
-    //    //
-    //    ////
-    //    ////   // display.print(",");
-    //    ////
-    //    ////     display.println("4. Hello, world!");
-    //    ////      display.println("5. Hello, world!");
-    //    ////       display.println("6. Hello, world!");
-    //    ////        display.println("7. Hello, world!");
-    //    ////              display.println("8. Hello, world!");
-    //    ////       display.println("9. Hello, world!");
-    //    ////        display.println("10. Hello, world!");
-    //    //
-    //    //
-    //      display.display();
-    //      //delay(10);
-    //      display.clearDisplay();
-    //    //
-    //    //  // LCD =======================================
+   
   }
-  //
-  //
-  //
-  //
-
-
+ 
 
 
   previousMillis = LoopStartMillis;

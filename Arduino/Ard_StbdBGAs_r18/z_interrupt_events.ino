@@ -1,7 +1,5 @@
 
-//float Kp_PSARJ = 10; // Proportional Gain of PID
-//float Ki_PSARJ = 2; // Integral Gain of PID
-//float Kd_PSARJ = 2; // Derivative Gain of PID
+// Read seriald data from the RasPi, telling the motors and LEDs what to do.
 
 
 void checkSerial()
