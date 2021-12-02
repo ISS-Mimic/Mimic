@@ -1,49 +1,5 @@
 
-/// MIMIC!!! MIMIC!!!
-// Still need to add servo stuff for TRRJs
-//
-// This version is just for STBD BGAs, board I2C ID: 0x60 (default)
-// PSARJ is Motor 1, Encoder pins 3,2; 
-// SSARJ is Motor 2, Encoder pins 7,8
-//
-//// for LCD  =============================================
-//
-//#include <SPI.h>
-//#include <Wire.h>
-//#include <Adafruit_GFX.h>
-//#include <Adafruit_SSD1306.h>
-//static char dtostrfbuffer[21];  // added Oct 20
-//#include <avr/dtostrf.h>
-//
-//#define OLED_RESET 4 // likely unnecessary
-//Adafruit_SSD1306 display(OLED_RESET);
-//
-//#define NUMFLAKES 10
-//#define XPOS 0
-//#define YPOS 1
-//#define DELTAY 2
-//
-//
-//#define LOGO16_GLCD_HEIGHT 16
-//#define LOGO16_GLCD_WIDTH  16
-//static const unsigned char PROGMEM logo16_glcd_bmp[] =
-//{ B00000000, B11000000,
-//  B00000001, B11000000,
-//  B00000001, B11000000,
-//  B00000011, B11100000,
-//  B11110011, B11100000,
-//  B11111110, B11111000,
-//  B01111110, B11111111,
-//  B00110011, B10011111,
-//  B00011111, B11111100,
-//  B00001101, B01110000,
-//  B00011011, B10100000,
-//  B00111111, B11100000,
-//  B00111111, B11110000,
-//  B01111100, B11110000,
-//  B01110000, B01110000,
-//  B00000000, B00110000 };
-//// end LCD =============================================
+
 int SpeedLimit= 125; // integer from 0 to 255.  0 means 0% speed, 255 is 100% speed.  round(255.0*float(MaxMotorSpeedPercent)/100.0; // Might night need all of this wrapping - just trying to get float to int to work properly
 unsigned long previousMillis = 0;
 unsigned long LoopStartMillis = 0;
@@ -71,8 +27,6 @@ struct joints
   float IntNow;
   int CmdSpeed;
 };
-//joints sarj_port = {10, 1, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-//joints sarj_stbd = {10, 1, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 joints sarj_port = {5, 1, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 joints sarj_stbd = {2, 1, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};  // Starboard side is more peppy than Port, for some reason (gear box friction?) so dialing down the Proportional Gain (Kp) for it.
@@ -161,38 +115,18 @@ Servo servo_PTRRJ;
 Servo servo_STRRJ;
 
 // Create the motor shield object with the default I2C address
-Adafruit_MotorShield AFMS2 = Adafruit_MotorShield(0x60);  // Check ID -- Oct 2, 2020: going back to default board address
-//Adafruit_MotorShield AFMS2 = Adafruit_MotorShield(0x61); // Check ID
+Adafruit_MotorShield AFMS2 = Adafruit_MotorShield(0x60);  //going back to default board address
 
-// Or, create it with a different I2C address (say for stacking)
-// Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x61);
-
-// Select which 'port' M1, M2, M3 or M4. In this case, M1,2,4
-//Adafruit_DCMotor *myMotorB2A = AFMS.getMotor(1);
-//Adafruit_DCMotor *myMotorB4A = AFMS.getMotor(2);
-//Adafruit_DCMotor *myMotorB2B = AFMS.getMotor(3);
-//Adafruit_DCMotor *myMotorB4B = AFMS.getMotor(4);
+// Select which 'port' M1, M2, M3 or M4. 
 
 Adafruit_DCMotor *myMotorPSARJ = AFMS2.getMotor(1);
 Adafruit_DCMotor *myMotorSSARJ = AFMS2.getMotor(4); // Using Motor Ports 1 & 4 for SARJs
-
-
-
-
-//Encoder myEnc2A(0, 1);
-//Encoder myEnc4A(2, 3); // was 4,5 but motor was oozing, digital pins were toggleing, but count wasn't incrementing (interrupt prob?) 
-//// Pins 9, 10 are used by Servos.
-//// Odd issues with Pins 2-4.
-//// Pin 13 is nominally used by LED and general guidance from encoder library is to avoid it.
-//Encoder myEnc2B(7, 8); // BCM changed from 6,7 to 7,8 on Nov 15, 2018
-//Encoder myEnc4B(11, 12);
 
 Encoder myEncPSARJ(3,2);//(0,1); //5,2);//2, 5);// BCM July 1, 2019: Pin 3 appears burned out on this Metro, so switching from Pin 3 to 4.  Not sure yet if this interupt conflicts with any others. 
 Encoder myEncSSARJ(8,7);//(11,12); //8,7);//7, 8);
 
 // Per here, Analog pins on Metro M0 are also digtial IO. https://learn.adafruit.com/adafruit-metro-m0-express-designed-for-circuitpython/pinouts
 // From here, A1 is digital 15, A2 is 16, A3 is 17, A4 is 18, A5 is 19. http://www.pighixxx.net/portfolio_tags/pinout-2/#prettyPhoto[gallery1368]/0/
-
 
 int D0 = 0;
 int D1 = 0;
@@ -216,39 +150,17 @@ int D17 = 0;
 void setup() {
 
 
-  ////// for LCD  =============================================
-  ////
-  ////
-  //  // by default, we'll generate the high voltage from the 3.3v line internally! (neat!)
-  //  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3D (for the 128x64)
-  //  // init done
-  //
-  //  // Show image buffer on the display hardware.
-  //  // Since the buffer is intialized with an Adafruit splashscreen
-  //  // internally, this will display the splashscreen.
-  //  display.display();
-  //  delay(2000);
-  //
-  //  // Clear the buffer.
-  //  display.clearDisplay();
-  //
-  //// end for LCD  =========================================
-
-
   // Set some pins to high, just for convenient connection to power Hall Effect Sensors - can't, per above use of these pins
   pinMode(13, OUTPUT);
   digitalWrite(13, HIGH);
   pinMode(6, OUTPUT);
   digitalWrite(6, HIGH);
-  //pinMode(A1, OUTPUT);
-  //digitalWrite(A1, HIGH);
-  //pinMode(A2, OUTPUT);
-  //digitalWrite(A2, HIGH);
 
   // Attach a servo to dedicated pins 9,10.  Note that all shields in the stack will have these as common, so can connect to any.
     servo_PTRRJ.attach(9);
     servo_STRRJ.attach(10);
-//  AFMS.begin(200);  // I set this at 200 previously to reduce audible buzz.
+    
+// This sets the AdaFruit Motor Shield frequency to command the motors.  Mostly changed to reduce audible buzz.
   AFMS2.begin(200);  // I set this at 200 previously to reduce audible buzz.
 
   Serial.begin(9600);
