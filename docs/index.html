@@ -26,6 +26,8 @@ Russian Telemetry and Translation: <a href="https://iss-mimic.github.io/Mimic/in
 <tr>
   <td align="center">Signal Status</td>
   <td align="center"  id="AOS"></td>
+  <td align="center">Last Telemetry Update</td>
+  <td align="center"  id="telem_time"></td>
 </tr>
 </table>
 <table>
@@ -2221,18 +2223,7 @@ var timeSub = new Subscription('MERGE', 'TIME_000001', ['TimeStamp','Status.Clas
 
 client.subscribe(sub);
 
-var unixtime = (new Date).getTime();
-var date = new Date(unixtime);
-var hours = date.getUTCHours();
-var minutes = "0" + date.getMinutes();
-var seconds = "0" + date.getSeconds();
-var timestmp = new Date().setFullYear(new Date().getFullYear(), 0, 1);
-var yearFirstDay = Math.floor(timestmp / 86400000);
-var today = Math.ceil((new Date().getTime()) / 86400000);
-var dayOfYear = today - yearFirstDay;
 
-var timestampnow = dayOfYear*24 + hours + minutes/60 + seconds/3600; 
-//console.log("timestamp now: " + timestampnow);
 	
 var specialPUIs = ["AIRLOCK000019","AIRLOCK000020","AIRLOCK000021","AIRLOCK000022","AIRLOCK000023","AIRLOCK000024","AIRLOCK000025","AIRLOCK000026","AIRLOCK000027","AIRLOCK000028","AIRLOCK000029","AIRLOCK000030","AIRLOCK000031","AIRLOCK000032","AIRLOCK000033","AIRLOCK000034","AIRLOCK000035","AIRLOCK000036","AIRLOCK000037","AIRLOCK000038","AIRLOCK000039","AIRLOCK000040","AIRLOCK000041","AIRLOCK000042","AIRLOCK000043","AIRLOCK000044","AIRLOCK000045","AIRLOCK000046","AIRLOCK000047","AIRLOCK000048","AIRLOCK000050","AIRLOCK000051","AIRLOCK000052","AIRLOCK000053","AIRLOCK000058","NODE1000001","NODE1000002","NODE2000003","NODE2000004","NODE2000005","NODE3000004","NODE3000006","NODE3000007","NODE3000010","NODE3000014","NODE3000015","NODE3000016","NODE3000018","NODE3000020","P1000006","P1000007","P1000008","P1000009","P3000001","P3000002","P4000003","P4000006","P6000003","P6000006","RUSSEG000001","RUSSEG000002","RUSSEG000003","RUSSEG000004","RUSSEG000007","RUSSEG000008","RUSSEG000009","RUSSEG000010","RUSSEG000011","RUSSEG000012","RUSSEG000013","RUSSEG000014","RUSSEG000015","RUSSEG000016","RUSSEG000017","RUSSEG000018","RUSSEG000019","RUSSEG000020","RUSSEG000021","RUSSEG000022","RUSSEG000023","RUSSEG000024","RUSSEG000025","S0000006","S0000007","S0000008","S0000009","S0000010","S0000011","S0000012","S0000013","S1000006","S1000007","S1000008","S1000009","S3000001","S3000002","S4000003","S4000006","S6000003","S6000006","USLAB000001","USLAB000002","USLAB000003","USLAB000004","USLAB000011","USLAB000012","USLAB000013","USLAB000014","USLAB000015","USLAB000016","USLAB000017","USLAB000041","USLAB000042","USLAB000043","USLAB000044","USLAB000062","USLAB000063","USLAB000064","USLAB000065","USLAB000066","USLAB000067","USLAB000068","USLAB000069","USLAB000070","USLAB000071","USLAB000072","USLAB000073","USLAB000074","USLAB000075","USLAB000076","USLAB000077","USLAB000078","USLAB000079","USLAB000080","USLAB000081","USLAB000086","USLAB000088","USLAB000089","USLAB000090","USLAB000091","USLAB000092","USLAB000093","USLAB000094","USLAB000095","USLAB000096","USLAB000097","USLAB000098","USLAB000099","USLAB000100","USLAB000101","Z1000013","CSAMT000002","CSASSRMS002","CSASSRMS003","CSASSRMS011","CSASPDM0002","CSASPDM0010","CSASPDM0019","CSASPDM0022","CSAMBS00002","CSAMBA00004"]
 
@@ -2534,7 +2525,6 @@ sub.addListener({
 		var item = update.getItemName();
 		var selector = $("#"+item);
 		selector.text(update.getValue("Value"));
-		
 		var selector2 = $("#"+update.getItemName()+"t")
 		var ts = update.getValue("TimeStamp")
 		var ts_day = Math.floor(ts/24)
@@ -2543,7 +2533,6 @@ sub.addListener({
 		var ts_seconds = ((((((ts/24)-ts_day)*24-ts_hour)*60) - ts_minute)*60).toFixed(0)
 		selector2.text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
 		selector.addClass('highlight');
-		
 		
 		if (specialPUIs.includes(item))
 		{
@@ -2639,11 +2628,28 @@ var statuses = {0:"Overridden",1:"Missing",2:"Dead",3:"Off-Scale High",4:"Off-Sc
 
 timeSub.addListener({
   onItemUpdate: function (update) {
+		  
+        var unixtime = (new Date).getTime();
+		var date = new Date(unixtime);
+		var hours = date.getUTCHours();
+		var minutes = "0" + date.getMinutes();
+		var seconds = "0" + date.getSeconds();
+		var timestmp = new Date().setFullYear(new Date().getFullYear(), 0, 1);
+		var yearFirstDay = Math.floor(timestmp / 86400000);
+		var today = Math.ceil((new Date().getTime()) / 86400000);
+		var dayOfYear = today - yearFirstDay;
+
+		var timestampnow = dayOfYear*24 + hours + minutes/60 + seconds/3600;
+		//console.log("timestamp now: " + timestampnow);
+  
+  
+  
 		var status = update.getValue('Status.Class');
 		var AOStimestamp = parseFloat(update.getValue('TimeStamp'));
 		//console.log("Timestamp: " + update.getValue('TimeStamp'));
 		var difference = timestampnow - AOStimestamp;
-		//console.log("Difference " + difference);
+		var diff_seconds = difference*3600;
+		console.log(diff_seconds);
 		if (status === '24') 
 		{
 			document.getElementById("AOS").innerHTML = "Signal Acquired!";
@@ -2658,6 +2664,15 @@ timeSub.addListener({
 		{
 			document.getElementById("AOS").innerHTML = "Stale Signal " + status + " " + statuses[status];
 			document.getElementById("AOS").bgColor = '#FF8000';
+		}
+		document.getElementById("telem_time").innerHTML = diff_seconds.toFixed(0) + " seconds ago";
+		if (diff_seconds > 30) 
+		{
+			document.getElementById("telem_time").bgColor = '#FF8000';
+		}
+		else
+		{
+			document.getElementById("telem_time").bgColor = '#008000';
 		}
 	}
   });
