@@ -17,7 +17,7 @@ int oldEL = 0;
 int oldAZ = 0;
 int oldnewEL = 0;
 int oldnewAZ = 0;
-
+boolean Disco = false;
 boolean transmit = false;
 
 void setup()
@@ -30,8 +30,8 @@ void setup()
   allSet_LGA(LGA.Color(255,255,0),0);
   LGA.show();
   HGA.show();
-  AZ_Servo.attach(11);
-  EL_Servo.attach(12);
+  AZ_Servo.attach(10); //TiCo library for the Uno needs to be on these pins
+  EL_Servo.attach(9); //TiCo library for the Uno needs to be on these pins
 
   EL_Servo.write(0);
   delay(15);
@@ -66,6 +66,10 @@ void loop()
     readData2 = String(str);
     //Serial.println(readData2);
     delimeter = readData2.indexOf('=');
+    if(readData2.substring(0,delimeter)=="Disco")
+    {
+      Disco = true;
+    }
     if(readData2.substring(0,delimeter)=="SASA_Xmit")
     {
       transmit = (readData2.substring(delimeter+1)).toInt(); //ex SASA_Xmit=1
@@ -162,6 +166,12 @@ void loop()
     oldAZ = AZ;
     
   }
+
+  if(Disco)
+  {
+    theaterChaseRainbow_disco(50);
+  }
+  Disco = false;
   
 }
 
