@@ -2667,7 +2667,7 @@ timeSub.addListener({
 		}
 	  	if (diff_seconds < 0)
 		{
-			diff_seconds = diff_seconds+86400;	
+			diff_seconds = diff_seconds+86399;	//Yes I am too lazy to account for the GMT day change
 		}
 		document.getElementById("telem_time").innerHTML = diff_seconds.toFixed(0) + " seconds ago";
 		if (diff_seconds > 4) 
