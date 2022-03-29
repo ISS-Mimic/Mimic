@@ -2665,6 +2665,10 @@ timeSub.addListener({
 			document.getElementById("AOS").innerHTML = "Stale Signal " + status + " " + statuses[status];
 			document.getElementById("AOS").bgColor = '#FF8000';
 		}
+	  	if (diff_seconds < 0)
+		{
+			diff_seconds = diff_seconds+86400;	
+		}
 		document.getElementById("telem_time").innerHTML = diff_seconds.toFixed(0) + " seconds ago";
 		if (diff_seconds > 4) 
 		{
