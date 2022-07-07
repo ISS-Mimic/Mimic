@@ -1071,7 +1071,7 @@ class FakeOrbitScreen(Screen):
     def startDemo(*args):
         global p2, runningDemo
         if not runningDemo:
-            p2 = Popen(mimic_directory + "/Mimic/Pi/demoOrbit.sh")
+            p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/demoOrbit.sh")
             runningDemo = True
             logWrite("Successfully started Demo Orbit script")
 
@@ -1087,7 +1087,7 @@ class FakeOrbitScreen(Screen):
     def startHTVDemo(*args):
         global p2, runningDemo
         if not runningDemo:
-            p2 = Popen(mimic_directory + "/Mimic/Pi/demoHTVOrbit.sh")
+            p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/demoHTVOrbit.sh")
             runningDemo = True
             logWrite("Successfully started Demo HTV Orbit script")
 
@@ -1099,6 +1099,23 @@ class FakeOrbitScreen(Screen):
             logWrite(e)
         else:
             logWrite("Successfully stopped Demo HTV Orbit script")
+            runningDemo = False
+                
+    def startOFT2Demo(*args):
+        global p2, runningDemo
+        if not runningDemo:
+            p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/demoOFT2.sh")
+            runningDemo = True
+            logWrite("Successfully started Demo OFT2 Orbit script")
+
+    def stopOFT2Demo(*args):
+        global p2, runningDemo
+        try:
+            p2.kill()
+        except Exception as e:
+            logWrite(e)
+        else:
+            logWrite("Successfully stopped Demo OFT2 Orbit script")
             runningDemo = False
 
 class Settings_Screen(Screen, EventDispatcher):
