@@ -1063,7 +1063,7 @@ class FakeOrbitScreen(Screen):
     def startDisco(*args):
         global p2, runningDemo, Disco
         if not runningDemo:
-            p2 = Popen(mimic_directory + "/Mimic/Pi/disco.sh")
+            p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/disco.sh")
             runningDemo = True
             Disco = True
             logWrite("Successfully started Disco script")

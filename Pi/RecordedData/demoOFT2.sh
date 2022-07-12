@@ -26,6 +26,6 @@ do
     sqlite3 /dev/shm/iss_telemetry.db "update telemetry set value = '$v4b' where ID = 'P6000001'"
     sqlite3 /dev/shm/iss_telemetry.db "update telemetry set value = '$sasa_el' where ID = 'S1000005'"
     sqlite3 /dev/shm/iss_telemetry.db "update telemetry set value = '$sasa_az' where ID = 'S1000004'"
-done < "demoOFT2.txt"
+done < "/home/pi/Mimic/Pi/RecordedData/demoOFT2.txt"
 
 echo "Finished OFT2 Demo Orbit"
