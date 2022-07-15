@@ -1063,7 +1063,10 @@ class FakeOrbitScreen(Screen):
     def startDisco(*args):
         global p2, runningDemo, Disco
         if not runningDemo:
-            p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/disco.sh")
+            try:
+                p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/disco.sh")
+            except Exception as e:
+                logWrite(e)
             runningDemo = True
             Disco = True
             logWrite("Successfully started Disco script")
@@ -1071,7 +1074,10 @@ class FakeOrbitScreen(Screen):
     def startDemo(*args):
         global p2, runningDemo
         if not runningDemo:
-            p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/demoOrbit.sh")
+            try:
+                p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/demoOrbit.sh")
+            except Exception as e:
+                logWrite(e)
             runningDemo = True
             logWrite("Successfully started Demo Orbit script")
 
@@ -1087,7 +1093,10 @@ class FakeOrbitScreen(Screen):
     def startHTVDemo(*args):
         global p2, runningDemo
         if not runningDemo:
-            p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/demoHTVOrbit.sh")
+            try:
+                p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/demoHTVOrbit.sh")
+            except Exception as e:
+                logWrite(e)
             runningDemo = True
             logWrite("Successfully started Demo HTV Orbit script")
 
@@ -1104,7 +1113,10 @@ class FakeOrbitScreen(Screen):
     def startOFT2Demo(*args):
         global p2, runningDemo
         if not runningDemo:
-            p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/demoOFT2.sh")
+            try:
+                p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/demoOFT2.sh")
+            except Exception as e:
+                logWrite(e)
             runningDemo = True
             logWrite("Successfully started Demo OFT2 Orbit script")
 
@@ -3217,6 +3229,7 @@ class MainApp(App):
                 Disco = False
             #serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "V1A=" + v1a + " " + "V2A=" + v2a + " " + "V3A=" + v3a + " " + "V4A=" + v4a + " " + "V1B=" + v1b + " " + "V2B=" + v2b + " " + "V3B=" + v3b + " " + "V4B=" + v4b + " ")
             serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + v1a + " " + "V2A=" + v2a + " " + "V3A=" + v3a + " " + "V4A=" + v4a + " " + "V1B=" + v1b + " " + "V2B=" + v2b + " " + "V3B=" + v3b + " " + "V4B=" + v4b + " " + "ISS=" + module + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
+            print(sasa_el)
 
         self.eps_screen.ids.psarj_value.text = psarj + "deg"
         self.eps_screen.ids.ssarj_value.text = ssarj + "deg"
