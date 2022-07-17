@@ -20,7 +20,7 @@ main( int argc, char *argv[] )
 
   std::string path = argv[1];
 
-  double factor = 1.0;
+  double factor = 60.0;
 
   std::deque< std::string > filesToRead;
 
@@ -173,45 +173,45 @@ main( int argc, char *argv[] )
   filesToRead.push_back( "Z1000013" );
   filesToRead.push_back( "Z1000014" );
   filesToRead.push_back( "Z1000015" );
-  filesToRead.push_back( "CSAMT000001" ):
-  filesToRead.push_back( "CSAMT000002" ):
-  filesToRead.push_back( "CSASSRMS001" ):
-  filesToRead.push_back( "CSASSRMS002" ):
-  filesToRead.push_back( "CSASSRMS003" ):
-  filesToRead.push_back( "CSASSRMS004" ):
-  filesToRead.push_back( "CSASSRMS005" ):
-  filesToRead.push_back( "CSASSRMS006" ):
-  filesToRead.push_back( "CSASSRMS007" ):
-  filesToRead.push_back( "CSASSRMS008" ):
-  filesToRead.push_back( "CSASSRMS009" ):
-  filesToRead.push_back( "CSASSRMS010" ):
-  filesToRead.push_back( "CSASSRMS011" ):
-  filesToRead.push_back( "CSASPDM0001" ):
-  filesToRead.push_back( "CSASPDM0002" ):
-  filesToRead.push_back( "CSASPDM0003" ):
-  filesToRead.push_back( "CSASPDM0004" ):
-  filesToRead.push_back( "CSASPDM0005" ):
-  filesToRead.push_back( "CSASPDM0006" ):
-  filesToRead.push_back( "CSASPDM0007" ):
-  filesToRead.push_back( "CSASPDM0008" ):
-  filesToRead.push_back( "CSASPDM0009" ):
-  filesToRead.push_back( "CSASPDM0010" ):
-  filesToRead.push_back( "CSASPDM0011" ):
-  filesToRead.push_back( "CSASPDM0012" ):
-  filesToRead.push_back( "CSASPDM0013" ):
-  filesToRead.push_back( "CSASPDM0014" ):
-  filesToRead.push_back( "CSASPDM0015" ):
-  filesToRead.push_back( "CSASPDM0016" ):
-  filesToRead.push_back( "CSASPDM0017" ):
-  filesToRead.push_back( "CSASPDM0018" ):
-  filesToRead.push_back( "CSASPDM0019" ):
-  filesToRead.push_back( "CSASPDM0020" ):
-  filesToRead.push_back( "CSASPDM0021" ):
-  filesToRead.push_back( "CSASPDM0022" ):
-  filesToRead.push_back( "CSAMBS00001" ):
-  filesToRead.push_back( "CSAMBS00002" ):
-  filesToRead.push_back( "CSAMBA00003" ):
-  filesToRead.push_back( "CSAMBA00004" ):
+  filesToRead.push_back( "CSAMT000001" );
+  filesToRead.push_back( "CSAMT000002" );
+  filesToRead.push_back( "CSASSRMS001" );
+  filesToRead.push_back( "CSASSRMS002" );
+  filesToRead.push_back( "CSASSRMS003" );
+  filesToRead.push_back( "CSASSRMS004" );
+  filesToRead.push_back( "CSASSRMS005" );
+  filesToRead.push_back( "CSASSRMS006" );
+  filesToRead.push_back( "CSASSRMS007" );
+  filesToRead.push_back( "CSASSRMS008" );
+  filesToRead.push_back( "CSASSRMS009" );
+  filesToRead.push_back( "CSASSRMS010" );
+  filesToRead.push_back( "CSASSRMS011" );
+  filesToRead.push_back( "CSASPDM0001" );
+  filesToRead.push_back( "CSASPDM0002" );
+  filesToRead.push_back( "CSASPDM0003" );
+  filesToRead.push_back( "CSASPDM0004" );
+  filesToRead.push_back( "CSASPDM0005" );
+  filesToRead.push_back( "CSASPDM0006" );
+  filesToRead.push_back( "CSASPDM0007" );
+  filesToRead.push_back( "CSASPDM0008" );
+  filesToRead.push_back( "CSASPDM0009" );
+  filesToRead.push_back( "CSASPDM0010" );
+  filesToRead.push_back( "CSASPDM0011" );
+  filesToRead.push_back( "CSASPDM0012" );
+  filesToRead.push_back( "CSASPDM0013" );
+  filesToRead.push_back( "CSASPDM0014" );
+  filesToRead.push_back( "CSASPDM0015" );
+  filesToRead.push_back( "CSASPDM0016" );
+  filesToRead.push_back( "CSASPDM0017" );
+  filesToRead.push_back( "CSASPDM0018" );
+  filesToRead.push_back( "CSASPDM0019" );
+  filesToRead.push_back( "CSASPDM0020" );
+  filesToRead.push_back( "CSASPDM0021" );
+  filesToRead.push_back( "CSASPDM0022" );
+  filesToRead.push_back( "CSAMBS00001" );
+  filesToRead.push_back( "CSAMBS00002" );
+  filesToRead.push_back( "CSAMBA00003" );
+  filesToRead.push_back( "CSAMBA00004" );
   // Load all the data into the master data list
   for ( const auto & file : filesToRead )
   {
