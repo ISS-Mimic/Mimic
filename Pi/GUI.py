@@ -2044,8 +2044,8 @@ class MainApp(App):
     def getTLE(self, *args):
         global ISS_TLE, ISS_TLE_Line1, ISS_TLE_Line2, ISS_TLE_Acquired
         #iss_tle_url =  'https://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html' #the rev counter on this page is wrong
-        iss_tle_url =  'https://www.celestrak.com/NORAD/elements/stations.txt'
-        tdrs_tle_url =  'https://www.celestrak.com/NORAD/elements/tdrss.txt'
+        iss_tle_url =  'https://celestrak.org/NORAD/elements/stations.txt'
+        tdrs_tle_url =  'https://celestrak.org/NORAD/elements/tdrss.txt'
 
         def on_success(req, data): #if TLE data is successfully received, it is processed here
             global ISS_TLE, ISS_TLE_Line1, ISS_TLE_Line2, ISS_TLE_Acquired
