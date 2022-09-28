@@ -1,1 +1,4 @@
-The model contains both the 4 and 5 segment of the truss as one print, and the Port and Starboard sides both use the same model. 
+# Slicer Recommendation 
+
+|  **Sub-Assembly / Module Name** | **STL Name & Link** | **Qty** | **Filament Color** | **Slicer Comments** | **Approx Print Time [h:mm]** | **Approx Filament Used [g]** | **Approx Filament Used [m]** |
+| ---- | --- | --- | --- | --- | --- | --- | --- |
