@@ -211,7 +211,7 @@
             background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartUnlit.png'
             background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartDown.png'
             on_release: OFT2DemoStop.disabled = False
-            on_release: fakeorbitstatus.text = 'Transmitting HTV Demo Orbit'
+            on_release: fakeorbitstatus.text = 'Transmitting OFT2 Demo'
             on_release: root.changeDemoBoolean(True)
             on_release: self.disabled = True
             on_release: root.startOFT2Demo()
@@ -226,6 +226,34 @@
             background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopDown.png'
             disabled: True
             on_release: OFT2DemoStart.disabled = False
+            on_release: fakeorbitstatus.text = 'Stopped'
+            on_release: root.changeDemoBoolean(False)
+            on_release: self.disabled = True
+        Button:
+            id: LoadDemoStart
+            allow_stretch: False
+            keep_ratio: True
+            size_hint: 0.14,0.115
+            ##size_hint_y: 0.115
+            pos_hint: {"center_x": 0.722, "center_y": 0.57}
+            background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartUnlit.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartDown.png'
+            on_release: LoadDemoStop.disabled = False
+            on_release: fakeorbitstatus.text = 'Sending Demo'
+            on_release: root.changeDemoBoolean(True)
+            on_release: self.disabled = True
+            on_release: root.startLoadDemo()
+        Button:
+            id: LoadDemoStop
+            allow_stretch: False
+            keep_ratio: True
+            size_hint: 0.14,0.115
+            ##size_hint_y: 0.115
+            pos_hint: {"center_x": 0.722, "center_y": 0.424}
+            background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopUnlit.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopDown.png'
+            disabled: True
+            on_release: LoadDemoStart.disabled = False
             on_release: fakeorbitstatus.text = 'Stopped'
             on_release: root.changeDemoBoolean(False)
             on_release: self.disabled = True
