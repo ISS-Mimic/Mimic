@@ -1,6 +1,7 @@
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/IDA/LoFi_IDA23.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/BEAM/LoFi_BEAM.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_S6/LoFi_ITS-6_LS-complex.stl
+https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_S6/HiFi_Truss_S6.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_S6/LoFi_ITS-6-simple.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_S6/LoFi_ITS-6_IEA-complex.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_P3/LoFi_ITS-P3-complex.stl
@@ -21,6 +22,8 @@ https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_S3/LoFi_ITS-3-sim
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_S3/LoFi_ITS-S3-complex.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_S3/LoFi_ITS-3_SARJ_Gear_Ring.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Node_2_Harmony/LoFi_HarmonyNode2-2.stl
+https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Node_2_Harmony/LoFi_HarmonyNode2-3_v3b.stl
+https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Node_2_Harmony/LoFi_HarmonyNode2-3_v3a.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Node_2_Harmony/LoFi_node2-3-magnet-endcap_093018.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Node_2_Harmony/LoFi_node2-3-magnet-barrel_093018.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Node_2_Harmony/LoFi_HarmonyNode2-1.stl
@@ -38,24 +41,34 @@ https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/SSRMS_Canadarm_and_MT_M
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/SSRMS_Canadarm_and_MT_MBS/LoFi_Canadaarm2_Arm.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/SSRMS_Canadarm_and_MT_MBS/LoFi_MobileBaseSystem_Body.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_P1/LoFi_ITS-P1andS1.stl
+https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_P6/HiFi_Truss_P6_TTCR.stl
+https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_P6/HiFi_Truss_P6_PFCS.stl
+https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_P6/HiFi_Truss_P6.stl
+https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_P6/HiFi_Truss_P6_STCR.stl
+https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/EVA_Astronaut/EMU.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Visiting_Vehicles/Progress/HiFi_Progress.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Visiting_Vehicles/Cygnus/CygnusEnhanced.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Visiting_Vehicles/Soyuz/HiFi_Soyuz_Antenna.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Visiting_Vehicles/Soyuz/HiFi_Soyuz_Final.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/PV_Radiator/HiFi_PVR_ScissorBeam_1x.stl
+https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/PV_Radiator/HiFi_PVR_P4.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/PV_Radiator/HiFi_PVR.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_S4_S5_P4_P5/LoFi_ITS-4_SARJ_Connector.stl
+https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_S4_S5_P4_P5/HiFi_Truss_PS45.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_S4_S5_P4_P5/LoFi_ITS-4_5-simple.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_S4_S5_P4_P5/LoFi_ITS-4_5-complex.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_S4_S5_P4_P5/LoFi_OutboardRadiatorBase.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Node_1_Unity/LoFi_UnityNode1-2.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Node_1_Unity/LoFi_UnityNode1-1.stl
+https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Node_1_Unity/LoFi_UnityNode1-v2a.stl
+https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Node_1_Unity/LoFi_UnityNode1-v2b.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/PMA/LoFi_PMA123.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/PMA/HiFi_PMA2.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Mimic_Structural_Compoments/Metro 2040 Mount.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Mimic_Structural_Compoments/Sabrent USB Hub Mount.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Mimic_Structural_Compoments/LoFi_Outboard-Truss-support.stl
-https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Mimic_Structural_Compoments/HDMI Breakout Mount.stl
+https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Mimic_Structural_Compoments/Outboard_Truss_Interface.stl
+https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Mimic_Structural_Compoments/HDMI-PCB-Holder.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Mimic_Structural_Compoments/LoFi_2020-endcap-tall.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Cupola/Cupola-Body.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Cupola/Cupola-SideWindow.stl
@@ -64,6 +77,7 @@ https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/SM_Zvezda/LoFi_ServiceM
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/SM_Zvezda/LoFi_Zvezda.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/SM_Zvezda/LoFi_ServiceModule-ant-dish.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/SM_Zvezda/LoFi_Zvezda_End.stl
+https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_Z1/MidFi_Truss_Z1.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_Z1/HiFi_Truss_Z1_Scuff_Plate.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_Z1/HiFi_Truss_Z1_Top.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_Z1/LoFi-ITS-Z1.stl
@@ -71,9 +85,9 @@ https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_Z1/HiFi_Truss_Z1_
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_Z1/HiFi_Truss_Z1_SASA.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_Z1/HiFi_Truss_Z1_Tray.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_Z1/HiFi_Truss_Z1_CMG_Plate.stl
-https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Solar_Array_Wing/LoFi_Solar_Array_base.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Solar_Array_Wing/HiFi_Solar_Array_Wing.stl
-https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Solar_Array_Wing/LoFi_Solar_Array_end.stl
+https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Solar_Array_Wing/LoFi_Solar_Array_Wing.stl
+https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/JEM_EF/HiFi_JEM_EF.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/MLM_Nauka/LoFi-MLM-Airlock.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/MLM_Nauka/LoFi-MLM-Airlock-Hatch.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_S0/LoFi_ITS-S0.stl
