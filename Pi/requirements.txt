@@ -1,5 +1,11 @@
-pytz==2018.9
-Kivy==1.11.0.dev0
-beautifulsoup4==4.7.1
-pyephem==3.7.6.0
-pyserial==3.4
+pytz~=2018.9
+Kivy>=1.11.0.dev0
+beautifulsoup4~=4.7.1
+pyserial~=3.4
+numpy
+ephem
+matplotlib
+autobahn
+twisted
+pyudev
+lightstreamer-client-lib
