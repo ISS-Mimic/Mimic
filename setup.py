@@ -13,8 +13,8 @@ def run_command(cmd):
     return output
 
 def run_install(packages, method):
-    if method == "sudo apt-get":
-        method = "sudo apt-get -y"
+    if method == "sudo apt":
+        method = "sudo apt -y"
     install_string = "{} install {}".format(method, packages)
     run_command(install_string)
 
@@ -37,27 +37,24 @@ def main():
 
     args = parser.parse_args()
 
-    print("\nBefore running this script, you should make sure your packages are updated.")
-    print("If you still need to do that, Ctrl+C this script to exit and run the following:")
-    print("sudo apt -y update; sudo apt -y upgrade\n")
+    #Mimic Install Steps
 
-    run_install("vim", "sudo apt-get")
-    run_install("python3-numpy", "sudo apt-get")
-    run_install("nodejs sqlite3", "sudo apt-get")
-    run_command("curl https://www.npmjs.com/install.sh | sudo sh")
-    run_install("lightstreamer-client", "npm")
-    run_install("sqlite3", "npm")
-    run_install("ephem pytz matplotlib autobahn twisted pyudev", "python3 -m pip")
-    run_install("python3-mpltoolkits.basemap --fix-missing", "sudo apt-get")
+    run_command("sudo apt update")
+    run_command("sudo apt -y upgrade")
+    run_command("sudo apt -y autoremove")
+    run_install("vim", "sudo apt") #test editor
+    run_install("sqlite3", "sudo apt") #telemetry database
+    run_install("python3-sdl2", "sudo apt") #required for kivy window
+    run_install("python3-mpltoolkits.basemap", "sudo apt") #required for nightshade
+    run_command("pip install -U numpy") #update numpy
+    run_install("libatlas-base-dev", "sudo apt") #fix numpy issue
+    run_install("ephem pytz matplotlib pyudev lightstreamer-client-lib", "python -m pip") #python libs used by Mimic
 
     if not args.skip_kivy:
         print("\nInstalling Kivy requirements and package.")
-        kivy_packages = "libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev pkg-config libgl1-mesa-dev libgles2-mesa-dev python3-setuptools libgstreamer1.0-dev git-core gstreamer1.0-plugins-bad gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-omx gstreamer1.0-alsa python3-dev libmtdev-dev xclip xsel libjpeg-dev"
-        run_install(kivy_packages, "sudo apt-get")
-        run_install("--upgrade --user pip setuptools", "python3 -m pip")
-        run_install("--upgrade --user Cython==0.29.10 pillow", "python3 -m pip")
-        run_install("--user kivy", "python3 -m pip")
-        run_command("python3 -c 'import kivy'") # run kivy init to create the config.ini file
+        run_install("'kivy[base,media]'", "python -m pip")
+        run_command("python -c 'import kivy'") # run kivy init to create the config.ini file
+        print("Replacing Kivy config file")
         replace_kivy_config(args.username)
     else:
         print("\nSkipping Kivy setup.")
