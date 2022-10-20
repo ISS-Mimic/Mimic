@@ -7,10 +7,7 @@ import shutil
 
 def run_command(cmd):
     print("{}".format(cmd))
-    result = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)
-    output = result.decode("utf-8")
-    output = output.strip()
-    return output
+    print((subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)).decode("utf-8"))
 
 def run_install(packages, method):
     if method == "sudo apt":
