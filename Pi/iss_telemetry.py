@@ -79,10 +79,10 @@ class TimeListener(LSSubscriptionListener):
 
     def onItemUpdate(self, update):
         status = update.getValue("Status.Class")
-        print("Status: " + status)
+        #print("Status: " + status)
         AOStimestamp = float(update.getValue("TimeStamp"))
         difference = self.start_time - AOStimestamp
-        print(f"Timestamp: {AOStimestamp}; Difference: {difference} hrs")
+        #print(f"Timestamp: {AOStimestamp}; Difference: {difference} hrs")
 
         if status == "24":
             if difference > FIVE_SECONDS_AS_HOURS:
