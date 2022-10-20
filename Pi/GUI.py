@@ -3273,24 +3273,22 @@ class MainApp(App):
 
         ##-------------------Signal Status Check-------------------##
 
-        if client_status.split(":")[0] == "CONNECTED":
-            if sub_status == "Subscribed":
-                #client connected and subscibed to ISS telemetry
-                if float(aos) == 1.00:
-                    self.signal_acquired() #signal status 1 means acquired
-                    sasa_xmit = 1
-
-                elif float(aos) == 0.00:
-                    self.signal_lost() #signal status 0 means loss of signal
-                    sasa_xmit = 0
-
-                elif float(aos) == 2.00:
-                    self.signal_stale() #signal status 2 means data is not being updated from server
-                    sasa_xmit = 0
-            else:
-                self.signal_unsubscribed()
+        #if client_status.split(":")[0] == "CONNECTED": we dont check client status anymore in the python lightstreamer script
+        if sub_status == "Subscribed":
+            #client connected and subscibed to ISS telemetry
+            if float(aos) == 1.00:
+                self.signal_acquired() #signal status 1 means acquired
+                sasa_xmit = 1
+             elif float(aos) == 0.00:
+                self.signal_lost() #signal status 0 means loss of signal
+                sasa_xmit = 0
+             elif float(aos) == 2.00:
+                self.signal_stale() #signal status 2 means data is not being updated from server
+                sasa_xmit = 0
         else:
             self.signal_unsubscribed()
+        #else:
+        #    self.signal_unsubscribed()
 
         if mimicbutton: # and float(aos) == 1.00):
             serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + v1a + " " + "V2A=" + v2a + " " + "V3A=" + v3a + " " + "V4A=" + v4a + " " + "V1B=" + v1b + " " + "V2B=" + v2b + " " + "V3B=" + v3b + " " + "V4B=" + v4b + " " + "ISS=" + module + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
