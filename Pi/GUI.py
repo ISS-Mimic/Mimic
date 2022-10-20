@@ -1207,10 +1207,10 @@ class MimicScreen(Screen, EventDispatcher):
         global mimicbutton
         mimicbutton = args[0]
 
-    def startproc(*args):
+    def startproc(self):
         global p,TDRSproc
         logWrite("Telemetry Subprocess start")
-        p = Popen(["node", mimic_directory + "/Mimic/Pi/ISS_Telemetry.js"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
+        p = Popen(["python3", mimic_directory + "/Mimic/Pi/iss_telemetry.py"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
         TDRSproc = Popen(["python3", mimic_directory + "/Mimic/Pi/TDRScheck.py"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
         #p = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/Data"])
 
