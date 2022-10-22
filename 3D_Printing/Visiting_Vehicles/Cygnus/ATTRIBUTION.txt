@@ -1,0 +1,4 @@
+This thing was created by Thingiverse user astro_sam, and is licensed under cc.
+Cygnus (Enhanced) by astro_sam on Thingiverse: https://www.thingiverse.com/thing:4207318
+
+This was modified by Digisembler for ISS MIMIC use.  As of 10/22/2022 and of note, CBM outer diameter is still a tad large and may interfere with node nadir ports. Adding a washer on top of the magnet is the easiest fix.
