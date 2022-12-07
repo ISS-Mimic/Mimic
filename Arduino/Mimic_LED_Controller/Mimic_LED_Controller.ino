@@ -54,7 +54,7 @@ void loop()
   char *str;
   int delimeter = 0;
   String readData2 = ""; 
-  Serial2.println(readData);
+  //Serial2.println(readData);
   
   //Split up string into substrings separated by spaces
   //Go through each substring and extract data
