@@ -3213,16 +3213,16 @@ class MainApp(App):
 #            LOSpopup.open()
 
         ##-------------------Fake Orbit Simulator-------------------##
-        self.fakeorbit_screen.ids.psarj.text = str(psarj)
-        self.fakeorbit_screen.ids.ssarj.text = str(ssarj)
-        self.fakeorbit_screen.ids.beta1a.text = str(beta1a)
-        self.fakeorbit_screen.ids.beta1b.text = str(beta1b)
-        self.fakeorbit_screen.ids.beta2a.text = str(beta2a)
-        self.fakeorbit_screen.ids.beta2b.text = str(beta2b)
-        self.fakeorbit_screen.ids.beta3a.text = str(beta3a)
-        self.fakeorbit_screen.ids.beta3b.text = str(beta3b)
-        self.fakeorbit_screen.ids.beta4a.text = str(beta4a)
-        self.fakeorbit_screen.ids.beta4b.text = str(beta4b)
+        #self.fakeorbit_screen.ids.psarj.text = str(psarj)
+        #self.fakeorbit_screen.ids.ssarj.text = str(ssarj)
+        #self.fakeorbit_screen.ids.beta1a.text = str(beta1a)
+        #self.fakeorbit_screen.ids.beta1b.text = str(beta1b)
+        #self.fakeorbit_screen.ids.beta2a.text = str(beta2a)
+        #self.fakeorbit_screen.ids.beta2b.text = str(beta2b)
+        #self.fakeorbit_screen.ids.beta3a.text = str(beta3a)
+        #self.fakeorbit_screen.ids.beta3b.text = str(beta3b)
+        #self.fakeorbit_screen.ids.beta4a.text = str(beta4a)
+        #self.fakeorbit_screen.ids.beta4b.text = str(beta4b)
 
         if demoboolean:
             if Disco:
