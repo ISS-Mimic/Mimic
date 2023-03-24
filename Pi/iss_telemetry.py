@@ -3,7 +3,7 @@
 from datetime import datetime, timedelta, timezone
 import sqlite3
 
-from lightstreamer_client import LightstreamerClient, ConsoleLoggerProvider, ConsoleLogLevel, Subscription
+from lightstreamer.client import LightstreamerClient, ConsoleLoggerProvider, ConsoleLogLevel, Subscription
 
 from telemetry_ids import IDENTIFIERS
 
