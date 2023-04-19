@@ -1,4 +1,5 @@
-[![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/tterb/atomic-design-ui/blob/master/LICENSEs)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+![Contributors](https://img.shields.io/github/contributors-anon/ISS-Mimic/Mimic)
 [![Discord](https://img.shields.io/discord/764217406041882684)](https://discord.gg/zPKyE6hBSe)
 ![GitHub last commit](https://img.shields.io/github/last-commit/ISS-Mimic/Mimic)
 [![Twitter Follow](https://img.shields.io/twitter/follow/ISS_Mimic?style=social)](https://twitter.com/ISS_Mimic)
