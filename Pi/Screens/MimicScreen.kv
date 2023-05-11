@@ -59,18 +59,18 @@
             id: ISS_button
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.5, "center_y": 0.62}
-            background_normal: '/home/pi/Mimic/Pi/imgs/mimic/TCSunlit.png'
-            ##background_down: '/home/pi/Mimic/Pi/imgs/mimic/TCSdown.png'
-            text: 'ISS'
+            background_normal: '/home/pi/Mimic/Pi/imgs/mimic/ISSunlit.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/mimic/ISSdown.png'
+            text: ''
             font_size: 30
             on_release: root.manager.current = 'iss'
         Button:
             id: ECLSS_button
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.5, "center_y": 0.48}
-            ##background_normal: '/home/pi/Mimic/Pi/imgs/mimic/TCSunlit.png'
-            ##background_down: '/home/pi/Mimic/Pi/imgs/mimic/TCSdown.png'
-            text: 'ECLSS'
+            background_normal: '/home/pi/Mimic/Pi/imgs/mimic/ECLSSunlit.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/mimic/ECLSSdown.png'
+            text: ''
             font_size: 30
             on_release: root.manager.current = 'eclss'
         Button:
@@ -104,7 +104,9 @@
             id: MT_button
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.5, "center_y": 0.34}
-            text: 'MT'
+            background_normal: '/home/pi/Mimic/Pi/imgs/mimic/MTunlit.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/mimic/MTdown.png'
+            text: ''
             font_size: 30
             on_release: root.manager.current = 'mt'
         Button:
