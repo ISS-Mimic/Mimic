@@ -4,9 +4,15 @@
 <CT_Screen>:
     name: 'ct'
     FloatLayout:
+        Image:
+            id: CT_Antena_Background
+            source: '/home/pi/Mimic/Pi/imgs/ct/AntennasBase.png'
+            allow_stretch: False
+            ##size_hint_y: 1
+            ##keep_ratio: False
         Label:
             pos_hint: {"center_x": 0.5, "center_y": 0.92}
-            text: 'Communications and Tracking'
+            text: ''
             markup: True
             color: 1,1,1
             font_size: 30
