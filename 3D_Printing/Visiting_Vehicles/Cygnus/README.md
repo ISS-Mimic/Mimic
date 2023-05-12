@@ -1,3 +1,11 @@
+# Cygnus
+
+This model was created by Thingiverse user astro_sam, and is licensed under cc.
+Cygnus (Enhanced) by astro_sam on Thingiverse: https://www.thingiverse.com/thing:4207318
+
+This was modified by Digisembler for ISS MIMIC use.
+
+
 # Slicer Recommendation 
 
 |  **Sub-Assembly / Module Name** | **STL Name & Link** | **Qty** | **Filament Color** | **Slicer Comments** | **Approx Print Time [h:mm]** | **Approx Filament Used [g]** | **Approx Filament Used [m]** |
