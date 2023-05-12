@@ -4,36 +4,54 @@
 <TCS_Screen>:
     name: 'tcs'
     FloatLayout:
+        Image:
+            id: TCS_Background
+            source: "/home/pi/Mimic/Pi/imgs/tcs/TCSbackground.png"
+            allow_stretch: False
         Label:
-            pos_hint: {"center_x": 0.15, "center_y": 0.8}
-            text: 'TCS Stuff'
-            markup: True
-            color: 1,0,1
-            font_size: 30
+            ##pos_hint: {"center_x": 0.15, "center_y": 0.8}
+            ##text: 'TCS Stuff'
+            ##markup: True
+            ##color: 1,0,1
+            ##font_size: 30
         Label:
-            id: ptrrj_label
-            pos_hint: {"center_x": 0.6, "center_y": 0.78}
-            text: 'PTRRJ:'
-            markup: True
-            color: 1,1,1
-            font_size: 30
+            ##id: ptrrj_label
+            ##pos_hint: {"center_x": 0.6, "center_y": 0.78}
+            ##text: 'PTRRJ:'
+            ##markup: True
+            ##color: 1,1,1
+            ##font_size: 30
         Label:
-            id: ptrrj_value
-            pos_hint: {"center_x": 0.8, "center_y": 0.78}
+            id: SWmode_loopA
+            pos_hint: {"center_x": 0.5, "center_y": 0.8}
             text: '0.003'
             markup: True
             color: root.signalcolor
             font_size: 30
         Label:
-            id: strrj_label
-            pos_hint: {"center_x": 0.6, "center_y": 0.71}
-            text: 'STRRJ:'
+            id: SWmode_loopB
+            pos_hint: {"center_x": 0.5, "center_y": 0.8}
+            text: '0.003'
             markup: True
-            color: 1,1,1
+            color: root.signalcolor
             font_size: 30
         Label:
+            id: ptrrj_value
+            pos_hint: {"center_x": 0.3, "center_y": 0.8}
+            text: '0.003'
+            markup: True
+            color: root.signalcolor
+            font_size: 30
+        Label:
+            ##id: strrj_label
+            ##pos_hint: {"center_x": 0.6, "center_y": 0.71}
+            ##text: 'STRRJ:'
+            ##markup: True
+            ##color: 1,1,1
+            ##font_size: 30
+        Label:
             id: strrj_value
-            pos_hint: {"center_x": 0.8, "center_y": 0.71}
+            pos_hint: {"center_x": 0.8, "center_y": 0.8}
             text: '0.003'
             markup: True
             color: root.signalcolor

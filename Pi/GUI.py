@@ -2556,6 +2556,10 @@ class MainApp(App):
 
         stationmode = float((values[46])[0]) #russian segment mode same as usos mode
 
+        #TCS telemetry
+        SWmode_loopA = int((values[43])[0])
+        SWmode_loopB = int((values[42])[0])
+
         #GNC Telemetry
         rollerror = float((values[165])[0])
         pitcherror = float((values[166])[0])
@@ -3235,6 +3239,10 @@ class MainApp(App):
         self.eps_screen.ids.ssarj_value.text = ssarj + "deg"
         self.tcs_screen.ids.ptrrj_value.text = ptrrj + "deg"
         self.tcs_screen.ids.strrj_value.text = strrj + "deg"
+
+        self.tcs_screen.ids.SWmode_loopA.text = str(SWmode_loopA)
+        self.tcs_screen.ids.SWmode_loopB.text = str(SWmode_loopB)
+
         self.eps_screen.ids.beta1b_value.text = beta1b
         self.eps_screen.ids.beta1a_value.text = beta1a
         self.eps_screen.ids.beta2b_value.text = beta2b
