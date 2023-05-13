@@ -2559,6 +2559,14 @@ class MainApp(App):
         #TCS telemetry
         SWmode_loopA = int((values[43])[0])
         SWmode_loopB = int((values[42])[0])
+        NH3flow_loopA = "{:.2f}".format(float((values[22])[0]))
+        NH3flow_loopB = "{:.2f}".format(float((values[19])[0]))
+        NH3outletPress_loopA = "{:.2f}".format(float((values[23])[0]))
+        NH3outletPress_loopB = "{:.2f}".format(float((values[20])[0]))
+        NH3outletTemp_loopA = "{:.2f}".format(float((values[24])[0]))
+        NH3outletTemp_loopB = "{:.2f}".format(float((values[21])[0]))
+
+
 
         #GNC Telemetry
         rollerror = float((values[165])[0])
@@ -3242,6 +3250,12 @@ class MainApp(App):
 
         self.tcs_screen.ids.SWmode_loopA.text = str(SWmode_loopA)
         self.tcs_screen.ids.SWmode_loopB.text = str(SWmode_loopB)
+        self.tcs_screen.ids.NH3flow_loopA.text = str(NH3flow_loopA)
+        self.tcs_screen.ids.NH3flow_loopB.text = str(NH3flow_loopB)
+        self.tcs_screen.ids.NH3outletPress_loopA.text = str(NH3outletPress_loopA)
+        self.tcs_screen.ids.NH3outletPress_loopB.text = str(NH3outletPress_loopB)
+        self.tcs_screen.ids.NH3outletTemp_loopA.text = str(NH3outletTemp_loopA)
+        self.tcs_screen.ids.NH3outletTemp_loopB.text = str(NH3outletTemp_loopB)
 
         self.eps_screen.ids.beta1b_value.text = beta1b
         self.eps_screen.ids.beta1a_value.text = beta1a
