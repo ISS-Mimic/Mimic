@@ -3260,8 +3260,8 @@ class MainApp(App):
         self.tcs_screen.ids.NH3outletTemp_loopA.text = str(NH3outletTemp_loopA)
         self.tcs_screen.ids.NH3outletTemp_loopB.text = str(NH3outletTemp_loopB)
 
-        self.mss_mt_screen.ids.MCASpayload.text = str(MCASpayload)
-        self.mss_mt_screen.ids.POApayload.text = str(POApayload)
+        #self.mss_mt_screen.ids.mcas_payload_value.text = str(MCASpayload)
+        #self.mss_mt_screen.ids.poa_payload_value.text = str(POApayload)
 
 
         self.eps_screen.ids.beta1b_value.text = beta1b
