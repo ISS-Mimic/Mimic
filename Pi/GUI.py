@@ -2566,6 +2566,9 @@ class MainApp(App):
         NH3outletTemp_loopA = "{:.2f}".format(float((values[24])[0]))
         NH3outletTemp_loopB = "{:.2f}".format(float((values[21])[0]))
 
+        #MBS and MT telemetry
+        MCASpayload = str((values[292])[0])
+        POApayload = str((values[294])[0])
 
 
         #GNC Telemetry
@@ -3256,6 +3259,10 @@ class MainApp(App):
         self.tcs_screen.ids.NH3outletPress_loopB.text = str(NH3outletPress_loopB)
         self.tcs_screen.ids.NH3outletTemp_loopA.text = str(NH3outletTemp_loopA)
         self.tcs_screen.ids.NH3outletTemp_loopB.text = str(NH3outletTemp_loopB)
+
+        self.mss_mt_screen.ids.MCASpayload.text = str(MCASpayload)
+        self.mss_mt_screen.ids.POApayload.text = str(POApayload)
+
 
         self.eps_screen.ids.beta1b_value.text = beta1b
         self.eps_screen.ids.beta1a_value.text = beta1a
