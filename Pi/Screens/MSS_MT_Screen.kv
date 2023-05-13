@@ -4,54 +4,72 @@
 <MSS_MT_Screen>:
     name: 'mt'
     FloatLayout:
+        Image:
+            id: MBS_MT_background
+            source: '/home/pi/Mimic/Pi/imgs/robo/MBSbackground.png'
+            allow_stretch: False
         Label:
-            pos_hint: {"center_x": 0.5, "center_y": 0.8}
-            text: 'Mobile Transporter'
-            markup: True
-            color: 1,0,1
-            font_size: 30
+            ##pos_hint: {"center_x": 0.5, "center_y": 0.8}
+            ##text: 'Mobile Transporter'
+            ##markup: True
+            ##color: 1,0,1
+            ##font_size: 30
         Label:
-            id: mt_ws_label
-            pos_hint: {"center_x": 0.25, "center_y": 0.6}
-            text: 'MT is at WS: '
-            markup: True
-            color: 1,1,1
-            font_size: 30
+            ##id: mt_ws_label
+            ##pos_hint: {"center_x": 0.25, "center_y": 0.6}
+            ##text: 'MT is at WS: '
+            ##markup: True
+            ##color: 1,1,1
+            ##font_size: 30
         Label:
             id: mt_ws_value
-            pos_hint: {"center_x": 0.4, "center_y": 0.6}
+            pos_hint: {"center_x": 0.275, "center_y": 0.73}
             text: '0'
             markup: True
             color: root.signalcolor
-            font_size: 30
+            font_size: 20
         Label:
-            id: mt_positon_label
-            pos_hint: {"center_x": 0.2, "center_y": 0.45}
-            text: 'MT Position: '
-            markup: True
-            color: 1,1,1
-            font_size: 30
+            ##id: mt_positon_label
+            ##pos_hint: {"center_x": 0.2, "center_y": 0.45}
+            ##text: 'MT Position: '
+            ##markup: True
+            ##color: 1,1,1
+            ##font_size: 30
         Label:
             id: mt_position_value
-            pos_hint: {"center_x": 0.4, "center_y": 0.45}
+            pos_hint: {"center_x": 0.275, "center_y": 0.65}
             text: '0'
             markup: True
             color: root.signalcolor
-            font_size: 30
+            font_size: 20
         Label:
-            id: mt_speed_label
-            pos_hint: {"center_x": 0.22, "center_y": 0.3}
-            text: 'MT Speed: '
-            markup: True
-            color: 1,1,1
-            font_size: 30
+            ##id: mt_speed_label
+            ##pos_hint: {"center_x": 0.22, "center_y": 0.3}
+            ##text: 'MT Speed: '
+            ##markup: True
+            ##color: 1,1,1
+            ##font_size: 30
         Label:
             id: mt_speed_value
-            pos_hint: {"center_x": 0.4, "center_y": 0.3}
+            pos_hint: {"center_x": 0.275, "center_y": 0.69}
             text: '0'
             markup: True
             color: root.signalcolor
-            font_size: 30
+            font_size: 20
+        Label:
+            id: mcas_payload_value
+            pos_hint: {"center_x": 0.275, "center_y": 0.61}
+            text: '0'
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: poa_payload_value
+            pos_hint: {"center_x": 0.275, "center_y": 0.57}
+            text: '0'
+            markup: True
+            color: root.signalcolor
+            font_size: 20
         Button:
             size_hint: 0.1,0.11
             ##pos_hint: {"Left": 1, "Bottom": 1}
