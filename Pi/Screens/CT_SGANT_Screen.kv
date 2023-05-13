@@ -9,8 +9,15 @@
             source: "/home/pi/Mimic/Pi/imgs/ct/SGANTbackground.png"
             allow_stretch: False
         Label:
+            id: sgant_elevation_label
+            pos_hint: {"center_x": 0.4, "center_y": 0.2}
+            text: 'Ku-Band SGANT Elevation'
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Label:
             id: sgant_elevation
-            pos_hint: {"center_x": 0.5, "center_y": 0.1}
+            pos_hint: {"center_x": 0.7, "center_y": 0.2}
             text: ''
             markup: True
             color: root.signalcolor
