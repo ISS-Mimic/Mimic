@@ -3275,6 +3275,12 @@ class MainApp(App):
         #self.mss_mt_screen.ids.mcas_payload_value.text = str(MCASpayload)
         #self.mss_mt_screen.ids.poa_payload_value.text = str(POApayload)
 
+        self.eclss_screen.ids.CabinTemp.text = str(CabinTemp)
+        self.eclss_screen.ids.CabinPress.text = str(CabinPress)
+        self.eclss_screen.ids.CrewlockPress.text = str(CrewlockPress)
+        self.eclss_screen.ids.AirlockPress.text = str(AirlockPress)
+        self.eclss_screen.ids.CleanWater.text = str(CleanWater)
+        self.eclss_screen.ids.WasteWater.text = str(WasteWater)
 
         self.eps_screen.ids.beta1b_value.text = beta1b
         self.eps_screen.ids.beta1a_value.text = beta1a
