@@ -2575,7 +2575,12 @@ class MainApp(App):
         MCASpayload = str((values[292])[0])
         POApayload = str((values[294])[0])
 
-
+        #ECLSS telemetry
+        CabinTemp = "{:.2f}".format(float((values[195])[0]))
+        CabinPress = "{:.2f}".format(float((values[194])[0]))
+        #CrewlockPress = "{:.2f}".format(float((values[zz])[0]))
+        #AirlockPress = "{:.2f}".format(float((values[zz])[0]))
+        
         #GNC Telemetry
         rollerror = float((values[165])[0])
         pitcherror = float((values[166])[0])
