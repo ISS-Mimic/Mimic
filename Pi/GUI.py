@@ -1266,11 +1266,12 @@ class MainApp(App):
         ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen',
                       'ct_screen', 'ct_sasa_screen', 'ct_sgant_screen', 'ct_uhf_screen',
                       'ct_camera_screen', 'gnc_screen', 'orbit_screen', 'us_eva', 'rs_eva',
-                      'eva_main', 'mimic_screen', 'mss_mt_screen','orbit_pass','orbit_data']
+                      'eva_main', 'mimic_screen', 'mss_mt_screen','orbit_pass','orbit_data', 'led_screen']
 
         root = MainScreenManager(transition=SwapTransition())
         root.add_widget(self.main_screen)
         root.add_widget(self.control_screen)
+        root.add_widget(self.led_screen)
         root.add_widget(self.mimic_screen)
         root.add_widget(self.fakeorbit_screen)
         root.add_widget(self.orbit_screen)
