@@ -2578,8 +2578,10 @@ class MainApp(App):
         #ECLSS telemetry
         CabinTemp = "{:.2f}".format(float((values[195])[0]))
         CabinPress = "{:.2f}".format(float((values[194])[0]))
-        #CrewlockPress = "{:.2f}".format(float((values[zz])[0]))
-        #AirlockPress = "{:.2f}".format(float((values[zz])[0]))
+        CrewlockPress = "{:.2f}".format(float((values[16])[0]))
+        AirlockPress = "{:.2f}".format(float((values[77])[0]))
+        CleanWater = "{:.2f}".format(float((values[93])[0]))
+        WasteWater = "{:.2f}".format(float((values[94])[0]))
         
         #GNC Telemetry
         rollerror = float((values[165])[0])
