@@ -5,39 +5,89 @@
     name: 'eclss'
     FloatLayout:
         Label:
-            pos_hint: {"center_x": 0.15, "center_y": 0.8}
-            text: 'ECLSS Stuff'
-            markup: True
-            color: 1,0,1
-            font_size: 30
-        Label:
-            id: ptrrj_label
+            id: CabinTemp_label
             pos_hint: {"center_x": 0.6, "center_y": 0.78}
-            text: 'PTRRJ:'
+            text: 'Cabin Temperature (deg C):'
             markup: True
             color: 1,1,1
-            font_size: 30
+            font_size: 20
         Label:
-            id: ptrrj_value
+            id: CabinTemp_value
             pos_hint: {"center_x": 0.8, "center_y": 0.78}
-            text: '0.003'
+            text: ''
             markup: True
             color: root.signalcolor
-            font_size: 30
+            font_size: 20
         Label:
-            id: strrj_label
+            id: CabinPress_label
             pos_hint: {"center_x": 0.6, "center_y": 0.71}
-            text: 'STRRJ:'
+            text: 'Cabin Pressure (Torr):'
             markup: True
             color: 1,1,1
-            font_size: 30
+            font_size: 20
         Label:
-            id: strrj_value
+            id: CabinPress_value
             pos_hint: {"center_x": 0.8, "center_y": 0.71}
-            text: '0.003'
+            text: ''
             markup: True
             color: root.signalcolor
-            font_size: 30
+            font_size: 20
+        Label:
+            id: AirlockPress_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.65}
+            text: 'Airlock Pressure (Torr):'
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Label:
+            id: AirlockPress_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.65}
+            text: ''
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: CrewlockPress_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.59}
+            text: 'Crewlock Pressure (Torr):'
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Label:
+            id: CrewlockPress_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.59}
+            text: ''
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: CleanWater_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.53}
+            text: 'Clean Water Tank (%):'
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Label:
+            id: CleanWater_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.53}
+            text: ''
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: WasteWater_label
+            pos_hint: {"center_x": 0.6, "center_y": 0.49}
+            text: 'Waste Water Tank (%):'
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Label:
+            id: WasteWater_value
+            pos_hint: {"center_x": 0.8, "center_y": 0.49}
+            text: ''
+            markup: True
+            color: root.signalcolor
+            font_size: 20
         Button:
             size_hint: 0.1,0.11
             ##pos_hint: {"Left": 1, "Bottom": 1}
