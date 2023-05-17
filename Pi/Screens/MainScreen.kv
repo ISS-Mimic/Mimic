@@ -61,6 +61,18 @@
             height: 20
             on_press: root.changeManualControlBoolean(True)
             on_release: root.manager.current = 'manualcontrol'
+
+        Button:
+            size_hint: 0.15,0.4
+            pos_hint: {"center_x": 0.325, "center_y": 0.37}
+            background_normal: '/home/pi/Mimic/Pi/imgs/main/MainLightItUpButton.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/main/MainLightItUpButtonDown.png'
+            text: ''
+            disabled: False
+            font_size: 30
+            width: 50
+            height: 20
+            on_release: app.root.current = 'led'
         Button:
             size_hint: 0.15,0.4
             pos_hint: {"center_x": 0.505, "center_y": 0.37}
