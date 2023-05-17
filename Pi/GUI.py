@@ -1272,6 +1272,7 @@ class MainApp(App):
         root.add_widget(self.main_screen)
         root.add_widget(self.control_screen)
         root.add_widget(self.mimic_screen)
+        root.add_widget(self.led_screen)
         root.add_widget(self.fakeorbit_screen)
         root.add_widget(self.orbit_screen)
         root.add_widget(self.orbit_pass)
@@ -3329,6 +3330,7 @@ class MainApp(App):
 #All GUI Screens are on separate kv files
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Settings_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/FakeOrbitScreen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/LED_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Orbit_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Orbit_Pass.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Orbit_Data.kv')
