@@ -1193,7 +1193,7 @@ class TCS_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1, 1, 1])
 
 class LED_Screen(Screen, EventDispatcher):
-    signalcolor = ObjectProperty([1, 1, 1])
+    pass
 
 class RS_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1, 1, 1])
@@ -1271,7 +1271,6 @@ class MainApp(App):
         root = MainScreenManager(transition=SwapTransition())
         root.add_widget(self.main_screen)
         root.add_widget(self.control_screen)
-        root.add_widget(self.led_screen)
         root.add_widget(self.mimic_screen)
         root.add_widget(self.fakeorbit_screen)
         root.add_widget(self.orbit_screen)
@@ -3330,7 +3329,6 @@ class MainApp(App):
 #All GUI Screens are on separate kv files
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Settings_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/FakeOrbitScreen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/LED_screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Orbit_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Orbit_Pass.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Orbit_Data.kv')
