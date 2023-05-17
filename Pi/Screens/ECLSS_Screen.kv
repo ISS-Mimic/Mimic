@@ -4,6 +4,10 @@
 <ECLSS_Screen>:
     name: 'eclss'
     FloatLayout:
+        Image:
+            id: ECLSS_background
+            source: '/home/pi/Mimic/Pi/imgs/eclss/ECLSSbackground.png'
+            allow_stretch: False
         Label:
             id: CabinTemp_label
             pos_hint: {"center_x": 0.6, "center_y": 0.78}
@@ -76,14 +80,14 @@
             font_size: 20
         Label:
             id: WasteWater_label
-            pos_hint: {"center_x": 0.6, "center_y": 0.49}
+            pos_hint: {"center_x": 0.6, "center_y": 0.47}
             text: 'Waste Water Tank (%):'
             markup: True
             color: 1,1,1
             font_size: 20
         Label:
             id: WasteWater_value
-            pos_hint: {"center_x": 0.8, "center_y": 0.49}
+            pos_hint: {"center_x": 0.8, "center_y": 0.47}
             text: ''
             markup: True
             color: root.signalcolor
