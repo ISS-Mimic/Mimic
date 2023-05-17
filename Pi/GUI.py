@@ -1192,6 +1192,9 @@ class EVA_Pictures(Screen, EventDispatcher):
 class TCS_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1, 1, 1])
 
+class LED_Screen(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1, 1, 1])
+
 class RS_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1, 1, 1])
 
@@ -1237,6 +1240,7 @@ class MainApp(App):
         self.iss_screen = ISS_Screen(name = 'iss')
         self.eclss_screen = ECLSS_Screen(name = 'eclss')
         self.control_screen = ManualControlScreen(name = 'manualcontrol')
+        self.led_screen = LED_Screen(name = 'led')
         self.orbit_screen = Orbit_Screen(name = 'orbit')
         self.orbit_pass = Orbit_Pass(name = 'orbit_pass')
         self.orbit_data = Orbit_Data(name = 'orbit_data')
@@ -3356,6 +3360,7 @@ Builder.load_string('''
 ScreenManager:
     Settings_Screen:
     FakeOrbitScreen:
+    LED_Screen:
     Orbit_Screen:
     Orbit_Pass:
     Orbit_Data:
