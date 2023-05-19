@@ -3293,8 +3293,22 @@ class MainApp(App):
         self.eclss_screen.ids.CleanWater.text = str(CleanWater)
         self.eclss_screen.ids.WasteWater.text = str(WasteWater)
 
-        #self.mss_mt_screen.ids.mcas_payload_value.text = str(MCASpayload)
-        #self.mss_mt_screen.ids.poa_payload_value.text = str(POApayload)
+        self.mss_mt_screen.ids.mcas_payload_value.text = str(MCASpayload)
+        if int(MCASpayload) == 0:
+            self.mt_screen.ids.MCASpayload.text = "Released"
+        elif int(MCASpayload) == 1:
+            self.mt_screen.ids.MCASpayload.text = "Captured"
+        else:
+            self.mt_screen.ids.MCASpayload.text = "n/a"   
+        self.mss_mt_screen.ids.poa_payload_value.text = str(POApayload)
+        if int(POApayload) == 0:
+            self.mt_screen.ids.POApayload.text = "Released"
+        elif int(POApayload) == 1:
+            self.mt_screen.ids.POApayload.text = "Captive"
+        elif int(POApayload) == 2:
+            self.mt_screen.ids.POApayload.text = "Captured"
+        else:
+            self.mt_screen.ids.POApayload.text = "n/a" 
         
         self.ct_uhf_screen.ids.UHF1pwr.text = str(UHF1pwr)
         if int(UHF1pwr) == 0:
@@ -3304,7 +3318,7 @@ class MainApp(App):
         elif int(UHF1pwr) == 2:
             self.ct_uhf_screen.ids.UHF1pwr.text = "Not Off-Failed"
         else:
-            self.iss_screen.ids.UHF1pwr.text = "n/a"        
+            self.ct_uhf_screen.ids.UHF1pwr.text = "n/a"        
         self.ct_uhf_screen.ids.UHF2pwr.text = str(UHF2pwr)
         if int(UHF2pwr) == 0:
             self.ct_uhf_screen.ids.UHF2pwr.text = "Off-Ok"
@@ -3313,7 +3327,7 @@ class MainApp(App):
         elif int(UHF2pwr) == 2:
             self.ct_uhf_screen.ids.UHF2pwr.text = "Not Off-Failed"
         else:
-            self.iss_screen.ids.UHF2pwr.text = "n/a"
+            self.ct_uhf_screen.ids.UHF2pwr.text = "n/a"
         self.ct_uhf_screen.ids.UHFframeSync.text = str(UHFframeSync)
         if int(UHFframeSync) == 0:
             self.ct_uhf_screen.ids.UHFframeSync.text = "Unlocked"
@@ -3331,7 +3345,7 @@ class MainApp(App):
         elif int(RFG1status) == 2:
             self.ct_sasa_screen.ids.RFG1status.text = "Not Off-Failed"
         else:
-            self.iss_screen.ids.RFG1status.text = "n/a"
+            self.ct_sasa_screen.ids.RFG1status.text = "n/a"
         self.ct_sasa_screen.ids.RFG1azimuth.text = str(RFG1azimuth)
         self.ct_sasa_screen.ids.RFG1elev.text = str(RFG1elev)
         
@@ -3343,7 +3357,7 @@ class MainApp(App):
         elif int(RFG2status) == 2:
             self.ct_sasa_screen.ids.RFG2status.text = "Not Off-Failed"
         else:
-            self.iss_screen.ids.RFG2status.text = "n/a"
+            self.ct_sasa.ids.RFG2status.text = "n/a"
         self.ct_sasa_screen.ids.RFG2azimuth.text = str(RFG2azimuth)
         self.ct_sasa_screen.ids.RFG2elev.text = str(RFG2elev)        
 
