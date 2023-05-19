@@ -3294,21 +3294,21 @@ class MainApp(App):
         self.eclss_screen.ids.WasteWater.text = str(WasteWater)
 
         self.mss_mt_screen.ids.mcas_payload_value.text = str(MCASpayload)
-        if int(MCASpayload) == 0:
-            self.mss_mt_screen.ids.MCASpayload.text = "Released"
-        elif int(MCASpayload) == 1:
-            self.mss_mt_screen.ids.MCASpayload.text = "Captured"
-        else:
-            self.mss_mt_screen.ids.MCASpayload.text = "n/a"   
+        #if int(MCASpayload) == 0:
+            #self.mss_mt_screen.ids.MCASpayload.text = "Released"
+        #elif int(MCASpayload) == 1:
+            #self.mss_mt_screen.ids.MCASpayload.text = "Captured"
+        #else:
+            #self.mss_mt_screen.ids.MCASpayload.text = "n/a"   
         self.mss_mt_screen.ids.poa_payload_value.text = str(POApayload)
-        if int(POApayload) == 0:
-            self.mss_mt_screen.ids.POApayload.text = "Released"
-        elif int(POApayload) == 1:
-            self.mss_mt_screen.ids.POApayload.text = "Captive"
-        elif int(POApayload) == 2:
-            self.mss_mt_screen.ids.POApayload.text = "Captured"
-        else:
-            self.mss_mt_screen.ids.POApayload.text = "n/a" 
+        #if int(POApayload) == 0:
+            #self.mss_mt_screen.ids.POApayload.text = "Released"
+        #elif int(POApayload) == 1:
+            #self.mss_mt_screen.ids.POApayload.text = "Captive"
+        #elif int(POApayload) == 2:
+            #self.mss_mt_screen.ids.POApayload.text = "Captured"
+        #else:
+            #self.mss_mt_screen.ids.POApayload.text = "n/a" 
         
         self.ct_uhf_screen.ids.UHF1pwr.text = str(UHF1pwr)
         if int(UHF1pwr) == 0:
