@@ -2583,6 +2583,15 @@ class MainApp(App):
         CleanWater = "{:.2f}".format(float((values[93])[0]))
         WasteWater = "{:.2f}".format(float((values[94])[0]))
         
+        #SASA telemetry
+        ActiveString = str((values[54])[0])
+        RFG1status = str((values[53])[0])
+        RFG1azimuth = str((values[18])[0])
+        RFG1elev = str((values[14])[0])
+        RFG2status = str((values[52])[0])
+        RFG2azimuth = str((values[51])[0])
+        RFG2elev = str((values[50])[0])
+        
         #UHF telemetry
         UHF1pwr = str((values[233])[0])
         UHF2pwr = str((values[234])[0])
@@ -3295,8 +3304,7 @@ class MainApp(App):
         elif int(UHF1pwr) == 2:
             self.ct_uhf_screen.ids.UHF1pwr.text = "Not Off-Failed"
         else:
-            self.iss_screen.ids.UHF1pwr.text = "n/a"
-        
+            self.iss_screen.ids.UHF1pwr.text = "n/a"        
         self.ct_uhf_screen.ids.UHF2pwr.text = str(UHF2pwr)
         if int(UHF2pwr) == 0:
             self.ct_uhf_screen.ids.UHF2pwr.text = "Off-Ok"
@@ -3306,7 +3314,6 @@ class MainApp(App):
             self.ct_uhf_screen.ids.UHF2pwr.text = "Not Off-Failed"
         else:
             self.iss_screen.ids.UHF2pwr.text = "n/a"
-        
         self.ct_uhf_screen.ids.UHFframeSync.text = str(UHFframeSync)
         if int(UHFframeSync) == 0:
             self.ct_uhf_screen.ids.UHFframeSync.text = "Unlocked"
@@ -3314,6 +3321,31 @@ class MainApp(App):
             self.ct_uhf_screen.ids.UHFframeSync.text = "Locked"
         else:
             self.iss_screen.ids.UHFframeSync.text = "n/a"
+        
+        self.ct_sasa_screen.ids.ActiveString.text = str(ActiveString)
+        self.ct_sasa_screen.ids.RFG1status.text = str(RFG1status)
+        if int(RFG1status) == 0:
+            self.ct_sasa_screen.ids.RFG1status.text = "Off-Ok"
+        elif int(RFG1status) == 1:
+            self.ct_sasa_screen.ids.RFG1status.text = "Not Off-Ok"
+        elif int(RFG1status) == 2:
+            self.ct_sasa_screen.ids.RFG1status.text = "Not Off-Failed"
+        else:
+            self.iss_screen.ids.RFG1status.text = "n/a"
+        self.ct_sasa_screen.ids.RFG1azimuth.text = str(RFG1azimuth)
+        self.ct_sasa_screen.ids.RFG1elev.text = str(RFG1elev)
+        
+        self.ct_sasa_screen.ids.RFG2status.text = str(RFG2status)
+        if int(RFG2status) == 0:
+            self.ct_sasa_screen.ids.RFG2status.text = "Off-Ok"
+        elif int(RFG2status) == 1:
+            self.ct_sasa_screen.ids.RFG2status.text = "Not Off-Ok"
+        elif int(RFG2status) == 2:
+            self.ct_sasa_screen.ids.RFG2status.text = "Not Off-Failed"
+        else:
+            self.iss_screen.ids.RFG2status.text = "n/a"
+        self.ct_sasa_screen.ids.RFG2azimuth.text = str(RFG2azimuth)
+        self.ct_sasa_screen.ids.RFG2elev.text = str(RFG2elev)        
 
         self.eps_screen.ids.beta1b_value.text = beta1b
         self.eps_screen.ids.beta1a_value.text = beta1a
