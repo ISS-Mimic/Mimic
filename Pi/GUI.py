@@ -2586,11 +2586,11 @@ class MainApp(App):
         #SASA telemetry
         ActiveString = str((values[54])[0])
         RFG1status = str((values[53])[0])
-        RFG1azimuth = str((values[18])[0])
-        RFG1elev = str((values[14])[0])
+        RFG1azimuth = "{:.2f}".format(float((values[18])[0])
+        RFG1elev = "{:.2f}".format(float((values[14])[0])
         RFG2status = str((values[52])[0])
-        RFG2azimuth = str((values[51])[0])
-        RFG2elev = str((values[50])[0])
+        RFG2azimuth = "{:.2f}".format(float((values[51])[0])
+        RFG2elev = "{:.2f}".format(float((values[50])[0])
         
         #UHF telemetry
         UHF1pwr = str((values[233])[0])
