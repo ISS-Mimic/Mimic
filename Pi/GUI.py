@@ -3288,6 +3288,14 @@ class MainApp(App):
         #self.mss_mt_screen.ids.poa_payload_value.text = str(POApayload)
         
         self.ct_uhf_screen.ids.UHF1pwr.text = str(UHF1pwr)
+        if UHF1pwr == 0:
+            self.ct_uhf_screen.ids.UHF1pwr.text = "Off-Ok"
+        elif UHF1pwr == 1:
+            self.ct_uhf_screen.ids.UHF1pwr.text = "Not Off-Ok"
+        elif UHF1pwr == 2:
+            self.ct_uhf_screen.ids.UHF1pwr.text = "Not Off-Failed"
+        else:
+            self.iss_screen.ids.stationmode_value.text = "n/a"
         self.ct_uhf_screen.ids.UHF2pwr.text = str(UHF2pwr)
         self.ct_uhf_screen.ids.UHFframeSync.text = str(UHFframeSync)
 
