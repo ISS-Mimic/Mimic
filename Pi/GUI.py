@@ -3298,7 +3298,7 @@ class MainApp(App):
             self.iss_screen.ids.UHF1pwr.text = "n/a"
         
         self.ct_uhf_screen.ids.UHF2pwr.text = str(UHF2pwr)
-         if int(UHF2pwr) == 0:
+        if int(UHF2pwr) == 0:
             self.ct_uhf_screen.ids.UHF2pwr.text = "Off-Ok"
         elif int(UHF2pwr) == 1:
             self.ct_uhf_screen.ids.UHF2pwr.text = "Not Off-Ok"
