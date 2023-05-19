@@ -3295,20 +3295,20 @@ class MainApp(App):
 
         self.mss_mt_screen.ids.MCASpayload.text = str(MCASpayload)
         if int(MCASpayload) == 0:
-            #self.mss_mt_screen.ids.MCASpayload.text = "Released"
+            self.mss_mt_screen.ids.MCASpayload.text = "Released"
         elif int(MCASpayload) == 1:
-            #self.mss_mt_screen.ids.MCASpayload.text = "Captured"
+            self.mss_mt_screen.ids.MCASpayload.text = "Captured"
         else:
-            #self.mss_mt_screen.ids.MCASpayload.text = "n/a"   
+            self.mss_mt_screen.ids.MCASpayload.text = "n/a"   
         self.mss_mt_screen.ids.POApayload.text = str(POApayload)
         if int(POApayload) == 0:
-            #self.mss_mt_screen.ids.POApayload.text = "Released"
+            self.mss_mt_screen.ids.POApayload.text = "Released"
         elif int(POApayload) == 1:
-            #self.mss_mt_screen.ids.POApayload.text = "Captive"
+            self.mss_mt_screen.ids.POApayload.text = "Captive"
         elif int(POApayload) == 2:
-            #self.mss_mt_screen.ids.POApayload.text = "Captured"
+            self.mss_mt_screen.ids.POApayload.text = "Captured"
         else:
-            #self.mss_mt_screen.ids.POApayload.text = "n/a" 
+            self.mss_mt_screen.ids.POApayload.text = "n/a" 
         
         self.ct_uhf_screen.ids.UHF1pwr.text = str(UHF1pwr)
         if int(UHF1pwr) == 0:
