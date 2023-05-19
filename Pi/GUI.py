@@ -3295,9 +3295,25 @@ class MainApp(App):
         elif int(UHF1pwr) == 2:
             self.ct_uhf_screen.ids.UHF1pwr.text = "Not Off-Failed"
         else:
-            self.iss_screen.ids.stationmode_value.text = "n/a"
+            self.iss_screen.ids.UHF1pwr.text = "n/a"
+        
         self.ct_uhf_screen.ids.UHF2pwr.text = str(UHF2pwr)
+         if int(UHF2pwr) == 0:
+            self.ct_uhf_screen.ids.UHF2pwr.text = "Off-Ok"
+        elif int(UHF2pwr) == 1:
+            self.ct_uhf_screen.ids.UHF2pwr.text = "Not Off-Ok"
+        elif int(UHF2pwr) == 2:
+            self.ct_uhf_screen.ids.UHF2pwr.text = "Not Off-Failed"
+        else:
+            self.iss_screen.ids.UHF2pwr.text = "n/a"
+        
         self.ct_uhf_screen.ids.UHFframeSync.text = str(UHFframeSync)
+         if int(UHFframeSync) == 0:
+            self.ct_uhf_screen.ids.UHFframeSync.text = "Unlocked"
+        elif int(UHFframeSync) == 1:
+            self.ct_uhf_screen.ids.UHFframeSync.text = "Locked"
+        else:
+            self.iss_screen.ids.UHFframeSync.text = "n/a"
 
         self.eps_screen.ids.beta1b_value.text = beta1b
         self.eps_screen.ids.beta1a_value.text = beta1a
