@@ -2583,6 +2583,11 @@ class MainApp(App):
         CleanWater = "{:.2f}".format(float((values[93])[0]))
         WasteWater = "{:.2f}".format(float((values[94])[0]))
         
+        #UHF telemetry
+        UHF1pwr = str((values[233])[0])
+        UHF2Pwr = str((values[234])[0])
+        UHFframeSync = str((values[235])[0])
+        
         #GNC Telemetry
         rollerror = float((values[165])[0])
         pitcherror = float((values[166])[0])
@@ -3281,6 +3286,10 @@ class MainApp(App):
 
         #self.mss_mt_screen.ids.mcas_payload_value.text = str(MCASpayload)
         #self.mss_mt_screen.ids.poa_payload_value.text = str(POApayload)
+        
+        self.ct_uhf_screen.ids.UHF1pwr.text = str(UHF1pwr)
+        self.ct_uhf_screen.ids.UHF2pwr.text = str(UHF2pwr)
+        self.ct_uhf_screen.ids.UHFframeSync.text = str(UHFframeSync)
 
         self.eps_screen.ids.beta1b_value.text = beta1b
         self.eps_screen.ids.beta1a_value.text = beta1a
