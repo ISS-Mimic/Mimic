@@ -2585,7 +2585,7 @@ class MainApp(App):
         
         #UHF telemetry
         UHF1pwr = str((values[233])[0])
-        UHF2Pwr = str((values[234])[0])
+        UHF2pwr = str((values[234])[0])
         UHFframeSync = str((values[235])[0])
         
         #GNC Telemetry
