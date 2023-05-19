@@ -3308,7 +3308,7 @@ class MainApp(App):
             self.iss_screen.ids.UHF2pwr.text = "n/a"
         
         self.ct_uhf_screen.ids.UHFframeSync.text = str(UHFframeSync)
-         if int(UHFframeSync) == 0:
+        if int(UHFframeSync) == 0:
             self.ct_uhf_screen.ids.UHFframeSync.text = "Unlocked"
         elif int(UHFframeSync) == 1:
             self.ct_uhf_screen.ids.UHFframeSync.text = "Locked"
