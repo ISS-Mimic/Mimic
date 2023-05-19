@@ -22,7 +22,7 @@
         Button:
             id: Crew_button
             size_hint: 0.15,0.13
-            pos_hint: {"center_x": 0.15, "center_y": 0.48}
+            pos_hint: {"center_x": 0.5, "center_y": 0.34}
             background_normal: '/home/pi/Mimic/Pi/imgs/mimic/CrewUnlit.png'
             background_down: '/home/pi/Mimic/Pi/imgs/mimic/CrewDown.png'
             text: ''
@@ -67,7 +67,7 @@
         Button:
             id: ECLSS_button
             size_hint: 0.15,0.13
-            pos_hint: {"center_x": 0.5, "center_y": 0.48}
+            pos_hint: {"center_x": 0.15, "center_y": 0.48}
             background_normal: '/home/pi/Mimic/Pi/imgs/mimic/ECLSSunlit.png'
             background_down: '/home/pi/Mimic/Pi/imgs/mimic/ECLSSdown.png'
             text: ''
@@ -76,7 +76,7 @@
         Button:
             id: ROS_button
             size_hint: 0.15,0.13
-            pos_hint: {"center_x": 0.68, "center_y": 0.48}
+            pos_hint: {"center_x": 0.855, "center_y": 0.34}
             background_normal: '/home/pi/Mimic/Pi/imgs/mimic/ROSunlit.png'
             background_down: '/home/pi/Mimic/Pi/imgs/mimic/ROSdown.png'
             text: ''
@@ -94,21 +94,48 @@
         Button:
             id: Orbit_button
             size_hint: 0.15,0.13
-            pos_hint: {"center_x": 0.855, "center_y": 0.48}
+            pos_hint: {"center_x": 0.5, "center_y": 0.48}
             background_normal: '/home/pi/Mimic/Pi/imgs/mimic/OrbitUnlit.png'
             background_down: '/home/pi/Mimic/Pi/imgs/mimic/OrbitDown.png'
             text: ''
             font_size: 30
             on_release: root.manager.current = 'orbit'
         Button:
-            id: MT_button
+            id: Robo_button
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.5, "center_y": 0.34}
-            background_normal: '/home/pi/Mimic/Pi/imgs/mimic/MTunlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/mimic/MTdown.png'
+            background_normal: '/home/pi/Mimic/Pi/imgs/mimic/RoboUnlit.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/mimic/RoboDown.png'
             text: ''
             font_size: 30
             on_release: root.manager.current = 'mt'
+        Button:
+            id: CDH_button
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.855, "center_y": 0.48}
+            background_normal: '/home/pi/Mimic/Pi/imgs/mimic/CDHunlit.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/mimic/CDHdown.png'
+            text: ''
+            font_size: 30
+            #on_release: root.manager.current = 'cdh'
+        Button:
+            id: VV_button
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.33, "center_y": 0.34}
+            background_normal: '/home/pi/Mimic/Pi/imgs/mimic/VVunlit.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/mimic/VVdown.png'
+            text: ''
+            font_size: 30
+            #on_release: root.manager.current = 'vv'
+            Button:
+            id: Science_button
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.68, "center_y": 0.34}
+            background_normal: '/home/pi/Mimic/Pi/imgs/mimic/ScienceUnlit.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/mimic/ScienceDown.png'
+            text: ''
+            font_size: 30
+            #on_release: root.manager.current = 'science'
         Button:
             id: mimicstartbutton
             size_hint: 0.15,0.1
