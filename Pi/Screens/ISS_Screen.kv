@@ -110,6 +110,22 @@
             color: 0,0,0
             font_size: 16
         ToggleButton:
+            id: PMM_button
+            size_hint: 0.13,0.18
+            pos_hint: {"center_x": 0.6, "center_y": 0.8}
+            text: 'PMM'
+            group: "modules"
+            opacity: 0.0
+            font_size: 16
+            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack2_PMM.png"
+            on_release: root.selectModule("PMM")
+        Label:
+            pos_hint: {"center_x": 0.6, "center_y": 0.8}
+            text: 'PMM'
+            markup: True
+            color: 0,0,0
+            font_size: 16
+        ToggleButton:
             id: USLab_button
             size_hint: 0.17,0.18
             pos_hint: {"center_x": 0.73, "center_y": 0.55}
