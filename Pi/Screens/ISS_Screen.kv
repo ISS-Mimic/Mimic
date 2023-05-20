@@ -112,7 +112,7 @@
         ToggleButton:
             id: PMM_button
             size_hint: 0.13,0.18
-            pos_hint: {"center_x": 0.6, "center_y": 0.8}
+            pos_hint: {"center_x": 0.7, "center_y": 0.75}
             text: 'PMM'
             group: "modules"
             opacity: 0.0
@@ -128,7 +128,7 @@
         ToggleButton:
             id: BEAM_button
             size_hint: 0.05,0.05
-            pos_hint: {"center_x": 0.6, "center_y": 0.75}
+            pos_hint: {"center_x": 0.6, "center_y": 0.7}
             text: 'BEAM'
             group: "modules"
             opacity: 0.0
@@ -136,7 +136,7 @@
             on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack2_BEAM.png"
             on_release: root.selectModule("BEAM")
         Label:
-            pos_hint: {"center_x": 0.53, "center_y": 0.72}
+            pos_hint: {"center_x": 0.6, "center_y": 0.7}
             text: 'BEAM'
             markup: True
             color: 0,0,0
