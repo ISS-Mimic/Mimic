@@ -8,6 +8,10 @@
     FloatLayout:
         size_hint: 1,1
         Image:
+            id: Control_background
+            source: '/home/pi/Mimic/Pi/imgs/control/ControlBackground.png'
+            allow_stretch: False
+        Image:
             id: signal
             source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
             size_hint: None, 0.15
@@ -34,11 +38,6 @@
                     rgba: 1,1,1,1
                 Line:
                     rectangle: self.x, self.y+0.15*self.height, self.width, 0.7*self.height
-        
-        Image:
-            id: Control_background
-            source: '/home/pi/Mimic/Pi/imgs/control/ControlBackground.png'
-            allow_stretch: False
         Image:
             id: arduino
             source: "/home/pi/Mimic/Pi/imgs/signal/arduino_offline.png"
