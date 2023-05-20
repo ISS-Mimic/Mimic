@@ -1177,6 +1177,18 @@ class CT_SGANT_Screen(Screen, EventDispatcher):
 class GNC_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1, 1, 1])
 
+class CDH_Screen(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class Science_Screen(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class USOS_Screen(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class VV_Screen(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1, 1, 1])
+
 class EVA_Main_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1, 1, 1])
 
@@ -1259,6 +1271,10 @@ class MainApp(App):
         self.rs_eva = EVA_RS_Screen(name='rs_eva')
         self.rs_screen = RS_Screen(name='rs')
         self.mss_mt_screen = MSS_MT_Screen(name='mt')
+        self.cdh_screen = CDH_Screen(name = 'cdh')
+        self.science_screen = Science_Screen(name = 'science')
+        self.usos_screen = USOS_Screen(name = 'usos')
+        self.vv_screen = VV_Screen(name = 'vv')
         self.eva_main = EVA_Main_Screen(name='eva_main')
         self.eva_pictures = EVA_Pictures(name='eva_pictures')
 
@@ -1279,6 +1295,10 @@ class MainApp(App):
         root.add_widget(self.orbit_data)
         root.add_widget(self.iss_screen)
         root.add_widget(self.eclss_screen)
+        root.add_widget(self.cdh_screen)
+        root.add_widget(self.science_screen)
+        root.add_widget(self.usos_screen)
+        root.add_widget(self.vv_screen)
         root.add_widget(self.eps_screen)
         root.add_widget(self.ct_screen)
         root.add_widget(self.ct_sasa_screen)
@@ -3435,6 +3455,10 @@ Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/CT_SASA_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/CT_UHF_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/CT_Camera_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/GNC_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/CDH_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Science_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/USOS_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/VV_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/TCS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EVA_US_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EVA_RS_Screen.kv')
