@@ -11,10 +11,14 @@
             color: 1,0,1
             font_size: 30
         Image:
+            id: ISS_background
+            source: "/home/pi/Mimic/Pi/imgs/iss/ISSbackground.png"
+            aloow_stretch: False
+        Image:
             id: modulestack
             source: "/home/pi/Mimic/Pi/imgs/iss/LEDstack2.png"
             size_hint: 1,1
-            pos_hint: {"center_x": 0.5, "center_y": 0.65}
+            pos_hint: {"center_x": 0.5, "center_y": 0.6}
             keep_ratio: True
             angle: 0
             canvas.before:
@@ -28,15 +32,15 @@
         ToggleButton:
             id: SM_button
             size_hint: 0.25,0.2
-            pos_hint: {"center_x": 0.1, "center_y": 0.6}
+            pos_hint: {"center_x": 0.1, "center_y": 0.55}
             text: 'SM'
             group: "modules"
             opacity: 0.0
             font_size: 16
-            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack_SM.png"
+            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack2_SM.png"
             on_release: root.selectModule("SM")
         Label:
-            pos_hint: {"center_x": 0.1, "center_y": 0.6}
+            pos_hint: {"center_x": 0.1, "center_y": 0.55}
             text: 'SM'
             markup: True
             color: 0,0,0
@@ -44,15 +48,15 @@
         ToggleButton:
             id: FGB_button
             size_hint: 0.25,0.2
-            pos_hint: {"center_x": 0.35, "center_y": 0.6}
+            pos_hint: {"center_x": 0.35, "center_y": 0.55}
             text: 'FGB'
             group: "modules"
             opacity: 0.0
             font_size: 16
-            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack_FGB.png"
+            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack2_FGB.png"
             on_release: root.selectModule("FGB")
         Label:
-            pos_hint: {"center_x": 0.35, "center_y": 0.6}
+            pos_hint: {"center_x": 0.35, "center_y": 0.55}
             text: 'FGB'
             markup: True
             color: 0,0,0
@@ -60,15 +64,15 @@
         ToggleButton:
             id: Node1_button
             size_hint: 0.13,0.18
-            pos_hint: {"center_x": 0.58, "center_y": 0.6}
+            pos_hint: {"center_x": 0.58, "center_y": 0.55}
             text: 'Node 1'
             group: "modules"
             opacity: 0.0
             font_size: 16
-            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack_Node1.png"
+            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack2_Node1.png"
             on_release: root.selectModule("Node1")
         Label:
-            pos_hint: {"center_x": 0.58, "center_y": 0.6}
+            pos_hint: {"center_x": 0.58, "center_y": 0.55}
             text: 'Node 1'
             markup: True
             color: 0,0,0
@@ -76,15 +80,15 @@
         ToggleButton:
             id: Airlock_button
             size_hint: 0.1,0.2
-            pos_hint: {"center_x": 0.6, "center_y": 0.42}
+            pos_hint: {"center_x": 0.6, "center_y": 0.37}
             text: 'US Airlock'
             group: "modules"
             opacity: 0.0
             font_size: 16
-            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack_AL.png"
+            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack2_AL.png"
             on_release: root.selectModule("AL")
         Label:
-            pos_hint: {"center_x": 0.6, "center_y": 0.45}
+            pos_hint: {"center_x": 0.6, "center_y": 0.4}
             text: 'Airlock'
             markup: True
             color: 0,0,0
@@ -92,15 +96,15 @@
         ToggleButton:
             id: Node3_button
             size_hint: 0.1,0.25
-            pos_hint: {"center_x": 0.6, "center_y": 0.8}
+            pos_hint: {"center_x": 0.6, "center_y": 0.75}
             text: 'Node 3'
             group: "modules"
             opacity: 0.0
             font_size: 16
-            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack_Node3.png"
+            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack2_Node3.png"
             on_release: root.selectModule("Node3")
         Label:
-            pos_hint: {"center_x": 0.6, "center_y": 0.8}
+            pos_hint: {"center_x": 0.6, "center_y": 0.75}
             text: 'Node 3'
             markup: True
             color: 0,0,0
@@ -108,15 +112,15 @@
         ToggleButton:
             id: USLab_button
             size_hint: 0.17,0.18
-            pos_hint: {"center_x": 0.73, "center_y": 0.6}
+            pos_hint: {"center_x": 0.73, "center_y": 0.55}
             text: 'US Lab'
             group: "modules"
             opacity: 0.0
             font_size: 16
-            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack_USL.png"
+            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack2_USL.png"
             on_release: root.selectModule("USL")
         Label:
-            pos_hint: {"center_x": 0.73, "center_y": 0.6}
+            pos_hint: {"center_x": 0.73, "center_y": 0.55}
             text: 'US Lab'
             markup: True
             color: 0,0,0
@@ -124,15 +128,15 @@
         ToggleButton:
             id: Node2_button
             size_hint: 0.14,0.18
-            pos_hint: {"center_x": 0.88, "center_y": 0.6}
+            pos_hint: {"center_x": 0.88, "center_y": 0.55}
             text: 'Node2'
             group: "modules"
             opacity: 0.0
             font_size: 16
-            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack_Node2.png"
+            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack2_Node2.png"
             on_release: root.selectModule("Node2")
         Label:
-            pos_hint: {"center_x": 0.88, "center_y": 0.6}
+            pos_hint: {"center_x": 0.88, "center_y": 0.55}
             text: 'Node 2'
             markup: True
             color: 0,0,0
@@ -140,15 +144,15 @@
         ToggleButton:
             id: Columbus_button
             size_hint: 0.1,0.18
-            pos_hint: {"center_x": 0.901, "center_y": 0.41}
+            pos_hint: {"center_x": 0.901, "center_y": 0.36}
             text: 'Columbus'
             group: "modules"
             opacity: 0.0
             font_size: 16
-            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack_Col.png"
+            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack2_Col.png"
             on_release: root.selectModule("Col")
         Label:
-            pos_hint: {"center_x": 0.901, "center_y": 0.41}
+            pos_hint: {"center_x": 0.901, "center_y": 0.36}
             text: 'Columbus'
             markup: True
             color: 0,0,0
@@ -156,15 +160,15 @@
         ToggleButton:
             id: JEM_button
             size_hint: 0.1,0.26
-            pos_hint: {"center_x": 0.901, "center_y": 0.82}
+            pos_hint: {"center_x": 0.901, "center_y": 0.77}
             text: 'JEM'
             group: "modules"
             opacity: 0.0
             font_size: 16
-            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack_JEM.png"
+            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack2_JEM.png"
             on_release: root.selectModule("JEM")
         Label:
-            pos_hint: {"center_x": 0.901, "center_y": 0.82}
+            pos_hint: {"center_x": 0.901, "center_y": 0.77}
             text: 'JEM'
             markup: True
             color: 0,0,0
@@ -172,64 +176,64 @@
         ToggleButton:
             id: clear_module_button
             size_hint: 0.1,0.15
-            pos_hint: {"center_x": 0.07, "center_y": 0.3}
+            pos_hint: {"center_x": 0.07, "center_y": 0.25}
             text: 'Reset'
             group: "modules"
             font_size: 16
-            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack.png"
+            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack2.png"
             on_release: root.selectModule("reset")
         Label:
             id: velocity_label
-            pos_hint: {"center_x": 0.25, "center_y": 0.25}
+            pos_hint: {"center_x": 0.25, "center_y": 0.2}
             text: 'Speed'
             markup: True
             color: 1,1,1
             font_size: 20
         Label:
             id: velocity_value
-            pos_hint: {"center_x": 0.25, "center_y": 0.2}
+            pos_hint: {"center_x": 0.25, "center_y": 0.15}
             text: '0.00'
             markup: True
             color: root.signalcolor
             font_size: 20
         Label:
             id: altitude_label
-            pos_hint: {"center_x": 0.45, "center_y": 0.25}
+            pos_hint: {"center_x": 0.45, "center_y": 0.2}
             text: 'Altitude'
             markup: True
             color: 1,1,1
             font_size: 20
         Label:
             id: altitude_value
-            pos_hint: {"center_x": 0.45, "center_y": 0.2}
+            pos_hint: {"center_x": 0.45, "center_y": 0.15}
             text: '0.00'
             markup: True
             color: root.signalcolor
             font_size: 20
         Label:
             id: stationmass_label
-            pos_hint: {"center_x": 0.65, "center_y": 0.25}
+            pos_hint: {"center_x": 0.65, "center_y": 0.2}
             text: 'Total Mass'
             markup: True
             color: 1,1,1
             font_size: 20
         Label:
             id: stationmass_value
-            pos_hint: {"center_x": 0.65, "center_y": 0.2}
+            pos_hint: {"center_x": 0.65, "center_y": 0.15}
             text: '0.00 kg'
             markup: True
             color: root.signalcolor
             font_size: 20
         Label:
             id: stationmode_label
-            pos_hint: {"center_x": 0.85, "center_y": 0.25}
+            pos_hint: {"center_x": 0.85, "center_y": 0.2}
             text: 'Station Mode'
             markup: True
             color: 1,1,1
             font_size: 20
         Label:
             id: stationmode_value
-            pos_hint: {"center_x": 0.85, "center_y": 0.2}
+            pos_hint: {"center_x": 0.85, "center_y": 0.15}
             text: ''
             markup: True
             color: root.signalcolor
