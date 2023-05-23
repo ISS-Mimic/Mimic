@@ -2258,66 +2258,66 @@ class MainApp(App):
                         crewmembercountry[isscrew] = str('USA')
                     isscrew = isscrew+1
 
-            self.crew_screen.ids.crew1.text = str(crewmember[0])
-            self.crew_screen.ids.crew1title.text = str(crewmembertitle[0])
-            self.crew_screen.ids.crew1country.text = str(crewmembercountry[0])
-            self.crew_screen.ids.crew1daysonISS.text = str(crewmemberdays[0])
-            #self.crew_screen.ids.crew1image.source = str(crewmemberpicture[0])
-            self.crew_screen.ids.crew2.text = str(crewmember[1])
-            self.crew_screen.ids.crew2title.text = str(crewmembertitle[1])
-            self.crew_screen.ids.crew2country.text = str(crewmembercountry[1])
-            self.crew_screen.ids.crew2daysonISS.text = str(crewmemberdays[1])
-            #self.crew_screen.ids.crew2image.source = str(crewmemberpicture[1])
-            self.crew_screen.ids.crew3.text = str(crewmember[2])
-            self.crew_screen.ids.crew3title.text = str(crewmembertitle[2])
-            self.crew_screen.ids.crew3country.text = str(crewmembercountry[2])
-            self.crew_screen.ids.crew3daysonISS.text = str(crewmemberdays[2])
-            #self.crew_screen.ids.crew3image.source = str(crewmemberpicture[2])
-            self.crew_screen.ids.crew4.text = str(crewmember[3])
-            self.crew_screen.ids.crew4title.text = str(crewmembertitle[3])
-            self.crew_screen.ids.crew4country.text = str(crewmembercountry[3])
-            self.crew_screen.ids.crew4daysonISS.text = str(crewmemberdays[3])
-            #self.crew_screen.ids.crew4image.source = str(crewmemberpicture[3])
-            self.crew_screen.ids.crew5.text = str(crewmember[4])
-            self.crew_screen.ids.crew5title.text = str(crewmembertitle[4])
-            self.crew_screen.ids.crew5country.text = str(crewmembercountry[4])
-            self.crew_screen.ids.crew5daysonISS.text = str(crewmemberdays[4])
-            #self.crew_screen.ids.crew5image.source = str(crewmemberpicture[4])
-            self.crew_screen.ids.crew6.text = str(crewmember[5])
-            self.crew_screen.ids.crew6title.text = str(crewmembertitle[5])
-            self.crew_screen.ids.crew6country.text = str(crewmembercountry[5])
-            self.crew_screen.ids.crew6daysonISS.text = str(crewmemberdays[5])
-            #self.crew_screen.ids.crew6image.source = str(crewmemberpicture[5])
-            #self.crew_screen.ids.crew7.text = str(crewmember[6])
-            #self.crew_screen.ids.crew7title.text = str(crewmembertitle[6])
-            #self.crew_screen.ids.crew7country.text = str(crewmembercountry[6])
-            #self.crew_screen.ids.crew7daysonISS.text = str(crewmemberdays[6])
-            #self.crew_screen.ids.crew7image.source = str(crewmemberpicture[6])
-            #self.crew_screen.ids.crew8.text = str(crewmember[7])
-            #self.crew_screen.ids.crew8title.text = str(crewmembertitle[7])
-            #self.crew_screen.ids.crew8country.text = str(crewmembercountry[7])
-            #self.crew_screen.ids.crew8daysonISS.text = str(crewmemberdays[7])
-            #self.crew_screen.ids.crew8image.source = str(crewmemberpicture[7]))
-            #self.crew_screen.ids.crew9.text = str(crewmember[8])
-            #self.crew_screen.ids.crew9title.text = str(crewmembertitle[8])
-            #self.crew_screen.ids.crew9country.text = str(crewmembercountry[8])
-            #self.crew_screen.ids.crew9daysonISS.text = str(crewmemberdays[8])
-            #self.crew_screen.ids.crew9image.source = str(crewmemberpicture[8])
-            #self.crew_screen.ids.crew10.text = str(crewmember[9])
-            #self.crew_screen.ids.crew10title.text = str(crewmembertitle[9])
-            #self.crew_screen.ids.crew10country.text = str(crewmembercountry[9])
-            #self.crew_screen.ids.crew10daysonISS.text = str(crewmemberdays[9])
-            #self.crew_screen.ids.crew10image.source = str(crewmemberpicture[9])
-            #self.crew_screen.ids.crew11.text = str(crewmember[10])
-            #self.crew_screen.ids.crew11title.text = str(crewmembertitle[10])
-            #self.crew_screen.ids.crew11country.text = str(crewmembercountry[10])
-            #self.crew_screen.ids.crew11daysonISS.text = str(crewmemberdays[10])
-            #self.crew_screen.ids.crew11image.source = str(crewmemberpicture[10])
-            #self.crew_screen.ids.crew12.text = str(crewmember[11])
-            #self.crew_screen.ids.crew12title.text = str(crewmembertitle[11])
-            #self.crew_screen.ids.crew12country.text = str(crewmembercountry[11])
-            #self.crew_screen.ids.crew12daysonISS.text = str(crewmemberdays[11])
-            #self.crew_screen.ids.crew12image.source = str(crewmemberpicture[11])
+            #self.crew_screen.ids.crew1.text = str(crewmember[0])
+            #self.crew_screen.ids.crew1title.text = str(crewmembertitle[0])
+            #self.crew_screen.ids.crew1country.text = str(crewmembercountry[0])
+            #self.crew_screen.ids.crew1daysonISS.text = str(crewmemberdays[0])
+            ##self.crew_screen.ids.crew1image.source = str(crewmemberpicture[0])
+            #self.crew_screen.ids.crew2.text = str(crewmember[1])
+            #self.crew_screen.ids.crew2title.text = str(crewmembertitle[1])
+            #self.crew_screen.ids.crew2country.text = str(crewmembercountry[1])
+            #self.crew_screen.ids.crew2daysonISS.text = str(crewmemberdays[1])
+            ##self.crew_screen.ids.crew2image.source = str(crewmemberpicture[1])
+            #self.crew_screen.ids.crew3.text = str(crewmember[2])
+            #self.crew_screen.ids.crew3title.text = str(crewmembertitle[2])
+            #self.crew_screen.ids.crew3country.text = str(crewmembercountry[2])
+            #self.crew_screen.ids.crew3daysonISS.text = str(crewmemberdays[2])
+            ##self.crew_screen.ids.crew3image.source = str(crewmemberpicture[2])
+            #self.crew_screen.ids.crew4.text = str(crewmember[3])
+            #self.crew_screen.ids.crew4title.text = str(crewmembertitle[3])
+            #self.crew_screen.ids.crew4country.text = str(crewmembercountry[3])
+            #self.crew_screen.ids.crew4daysonISS.text = str(crewmemberdays[3])
+            ##self.crew_screen.ids.crew4image.source = str(crewmemberpicture[3])
+            #self.crew_screen.ids.crew5.text = str(crewmember[4])
+            #self.crew_screen.ids.crew5title.text = str(crewmembertitle[4])
+            #self.crew_screen.ids.crew5country.text = str(crewmembercountry[4])
+            #self.crew_screen.ids.crew5daysonISS.text = str(crewmemberdays[4])
+            ##self.crew_screen.ids.crew5image.source = str(crewmemberpicture[4])
+            #self.crew_screen.ids.crew6.text = str(crewmember[5])
+            #self.crew_screen.ids.crew6title.text = str(crewmembertitle[5])
+            #self.crew_screen.ids.crew6country.text = str(crewmembercountry[5])
+            #self.crew_screen.ids.crew6daysonISS.text = str(crewmemberdays[5])
+            ##self.crew_screen.ids.crew6image.source = str(crewmemberpicture[5])
+            ##self.crew_screen.ids.crew7.text = str(crewmember[6])
+            ##self.crew_screen.ids.crew7title.text = str(crewmembertitle[6])
+            ##self.crew_screen.ids.crew7country.text = str(crewmembercountry[6])
+            ##self.crew_screen.ids.crew7daysonISS.text = str(crewmemberdays[6])
+            ##self.crew_screen.ids.crew7image.source = str(crewmemberpicture[6])
+            ##self.crew_screen.ids.crew8.text = str(crewmember[7])
+            ##self.crew_screen.ids.crew8title.text = str(crewmembertitle[7])
+            ##self.crew_screen.ids.crew8country.text = str(crewmembercountry[7])
+            ##self.crew_screen.ids.crew8daysonISS.text = str(crewmemberdays[7])
+            ##self.crew_screen.ids.crew8image.source = str(crewmemberpicture[7]))
+            ##self.crew_screen.ids.crew9.text = str(crewmember[8])
+            ##self.crew_screen.ids.crew9title.text = str(crewmembertitle[8])
+            ##self.crew_screen.ids.crew9country.text = str(crewmembercountry[8])
+            ##self.crew_screen.ids.crew9daysonISS.text = str(crewmemberdays[8])
+            ##self.crew_screen.ids.crew9image.source = str(crewmemberpicture[8])
+            ##self.crew_screen.ids.crew10.text = str(crewmember[9])
+            ##self.crew_screen.ids.crew10title.text = str(crewmembertitle[9])
+            ##self.crew_screen.ids.crew10country.text = str(crewmembercountry[9])
+            ##self.crew_screen.ids.crew10daysonISS.text = str(crewmemberdays[9])
+            ##self.crew_screen.ids.crew10image.source = str(crewmemberpicture[9])
+            ##self.crew_screen.ids.crew11.text = str(crewmember[10])
+            ##self.crew_screen.ids.crew11title.text = str(crewmembertitle[10])
+            ##self.crew_screen.ids.crew11country.text = str(crewmembercountry[10])
+            ##self.crew_screen.ids.crew11daysonISS.text = str(crewmemberdays[10])
+            ##self.crew_screen.ids.crew11image.source = str(crewmemberpicture[10])
+            ##self.crew_screen.ids.crew12.text = str(crewmember[11])
+            ##self.crew_screen.ids.crew12title.text = str(crewmembertitle[11])
+            ##self.crew_screen.ids.crew12country.text = str(crewmembercountry[11])
+            ##self.crew_screen.ids.crew12daysonISS.text = str(crewmemberdays[11])
+            ##self.crew_screen.ids.crew12image.source = str(crewmemberpicture[11])
 
         def on_redirect(req, result):
             logWrite("Warning - checkCrew JSON failure (redirect)")
@@ -3334,14 +3334,14 @@ class MainApp(App):
         self.eclss_screen.ids.CleanWater.text = str(CleanWater)
         self.eclss_screen.ids.WasteWater.text = str(WasteWater)
 
-        self.mss_mt_screen.ids.MCASpayload.text = str(MCASpayload)
+        #self.mss_mt_screen.ids.MCASpayload.text = str(MCASpayload)
         if int(MCASpayload) == 0:
             self.mss_mt_screen.ids.MCASpayload.text = "Released"
         elif int(MCASpayload) == 1:
             self.mss_mt_screen.ids.MCASpayload.text = "Captured"
         else:
             self.mss_mt_screen.ids.MCASpayload.text = "n/a"   
-        self.mss_mt_screen.ids.POApayload.text = str(POApayload)
+        #self.mss_mt_screen.ids.POApayload.text = str(POApayload)
         if int(POApayload) == 0:
             self.mss_mt_screen.ids.POApayload.text = "Released"
         elif int(POApayload) == 1:
@@ -3351,7 +3351,7 @@ class MainApp(App):
         else:
             self.mss_mt_screen.ids.POApayload.text = "n/a" 
         
-        self.ct_uhf_screen.ids.UHF1pwr.text = str(UHF1pwr)
+        #self.ct_uhf_screen.ids.UHF1pwr.text = str(UHF1pwr)
         if int(UHF1pwr) == 0:
             self.ct_uhf_screen.ids.UHF1pwr.text = "Off-Ok"
         elif int(UHF1pwr) == 1:
@@ -3360,7 +3360,7 @@ class MainApp(App):
             self.ct_uhf_screen.ids.UHF1pwr.text = "Not Off-Failed"
         else:
             self.ct_uhf_screen.ids.UHF1pwr.text = "n/a"        
-        self.ct_uhf_screen.ids.UHF2pwr.text = str(UHF2pwr)
+        #self.ct_uhf_screen.ids.UHF2pwr.text = str(UHF2pwr)
         if int(UHF2pwr) == 0:
             self.ct_uhf_screen.ids.UHF2pwr.text = "Off-Ok"
         elif int(UHF2pwr) == 1:
@@ -3369,7 +3369,7 @@ class MainApp(App):
             self.ct_uhf_screen.ids.UHF2pwr.text = "Not Off-Failed"
         else:
             self.ct_uhf_screen.ids.UHF2pwr.text = "n/a"
-        self.ct_uhf_screen.ids.UHFframeSync.text = str(UHFframeSync)
+        #self.ct_uhf_screen.ids.UHFframeSync.text = str(UHFframeSync)
         if int(UHFframeSync) == 0:
             self.ct_uhf_screen.ids.UHFframeSync.text = "Unlocked"
         elif int(UHFframeSync) == 1:
