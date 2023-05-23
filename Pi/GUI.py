@@ -1883,9 +1883,9 @@ class MainApp(App):
                 normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
             
             if self.orbit_screen.ids.OrbitMap.texture_size[1] == 0:
-                normalizedX = 0
+                normalizedY = 0
             else:
-                normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
+                normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
                 
 
             self.orbit_screen.ids.OrbitISStiny.pos = (
