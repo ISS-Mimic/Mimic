@@ -5,7 +5,11 @@
 <Crew_Screen>:
     name: 'crew'
     FloatLayout:
-        Button:
+       Image:
+            id: Crew_background
+            source: '/home/pi/Mimic/Pi/imgs/crew/Crewbackground.png'
+            allow_stretch: False 
+       Button:
             size_hint: 0.1,0.11
             ##pos_hint: {"Left": 1, "Bottom": 1}
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
@@ -13,6 +17,7 @@
             text: ''
             font_size: 30
             on_release: app.root.current = 'mimic'
+### commenting out all old crew code since it will be re-written-------------------------------------------------------    
     BoxLayout:
         orientation: 'horizontal'
         BoxLayout:
@@ -229,3 +234,5 @@
                 color: 1,1,1
                 font_size: 18
                 #text_size: cm(8), cm(5)
+                
+###----------------------------------------------------------------------------
