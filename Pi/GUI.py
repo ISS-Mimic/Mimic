@@ -1877,7 +1877,7 @@ class MainApp(App):
 
             #inclination = ISS_TLE.inc
 
-            normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
+            #normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
             normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
 
             self.orbit_screen.ids.OrbitISStiny.pos = (
