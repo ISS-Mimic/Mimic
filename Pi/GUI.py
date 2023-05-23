@@ -1876,20 +1876,17 @@ class MainApp(App):
             longitude = float(str(ISS_TLE.sublong).split(':')[0]) + float(str(ISS_TLE.sublong).split(':')[1])/60 + float(str(ISS_TLE.sublong).split(':')[2])/3600
 
             #inclination = ISS_TLE.inc
-
-            try:
-                normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
-            except Exception as e:
-                print(e)
-            else:
+        
+            if self.orbit_screen.ids.OrbitMap.texture_size[0] == 0: #temp fix to ensure no divide by 0
                 normalizedX = 0
-                
-            try:
-                normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
-            except Exception as e:
-                print(e)
             else:
-                normalizedY = 0
+                normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
+            
+            if self.orbit_screen.ids.OrbitMap.texture_size[1] == 0:
+                normalizedX = 0
+            else:
+                normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
+                
 
             self.orbit_screen.ids.OrbitISStiny.pos = (
                     scaleLatLon2(latitude, longitude)['new_x'] - ((self.orbit_screen.ids.OrbitISStiny.width / 2) * normalizedX * 2), #had to fudge a little not sure why
