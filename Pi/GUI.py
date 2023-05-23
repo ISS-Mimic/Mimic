@@ -1334,7 +1334,7 @@ class MainApp(App):
         Clock.schedule_interval(self.check_internet, 1)
 
         #schedule the orbitmap to update with shadow every 5 mins
-        Clock.schedule_interval(self.updateNightShade, 120)
+        #Clock.schedule_interval(self.updateNightShade, 120)
         Clock.schedule_interval(self.updateOrbitMap, 10)
         Clock.schedule_interval(self.checkTDRS, 5)
         return root
@@ -1610,8 +1610,20 @@ class MainApp(App):
 
     def TDRSupdate(self, dt):
         global TDRS12_TLE, TDRS6_TLE, TDRS10_TLE, TDRS11_TLE, TDRS7_TLE
-        normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
-        normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
+        
+        #TEMP FIX TO ERROR DO NOT MERGE THESE LINES       
+        if self.orbit_screen.ids.OrbitMap.texture_size[0] == 0: #temp fix to ensure no divide by 0
+            normalizedX = 1
+        else:
+            normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
+
+        if self.orbit_screen.ids.OrbitMap.texture_size[1] == 0:
+            normalizedY = 1
+        else:
+            normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
+        
+        #normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
+        #normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
 
         def scaleLatLon(latitude, longitude):
             #converting lat lon to x, y for orbit map
@@ -1877,13 +1889,14 @@ class MainApp(App):
 
             #inclination = ISS_TLE.inc
         
+            #TEMP FIX TO ERROR DO NOT MERGE THESE LINES       
             if self.orbit_screen.ids.OrbitMap.texture_size[0] == 0: #temp fix to ensure no divide by 0
-                normalizedX = 0
+                normalizedX = 1
             else:
                 normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
             
             if self.orbit_screen.ids.OrbitMap.texture_size[1] == 0:
-                normalizedY = 0
+                normalizedY = 1
             else:
                 normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
                 
