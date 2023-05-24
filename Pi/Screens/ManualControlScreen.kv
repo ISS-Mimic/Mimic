@@ -213,23 +213,4 @@
             text: '-90'
             font_size: 20
             on_press: root.incrementActive(-90)
-    Widget:
-        size_hint: 0.22,0.4
-        pos_hint: {'center_x': 0.85, 'y': 0.21}
-        canvas.after:
-            Color:
-                rgba: 1,1,1,0.5
-            Rectangle:
-                size: self.size
-                pos: self.pos
-    TextInput:
-        id: text_input
-        pos_hint: {'center_x': 0.85, 'y': 0.25}
-        size_hint: (0.2, 0.06)
-        cursor_blink: True
-        font_size: 15
-        multiline: False
-    Label:
-        size_hint: (0.2, 0.06)
-        pos_hint: {'center_x': 0.85, 'y': 0.2}
-        text: "Manual Angle Entry"
+
