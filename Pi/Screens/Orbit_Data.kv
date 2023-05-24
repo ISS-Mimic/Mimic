@@ -1,6 +1,10 @@
 <Orbit_Data>:
     name: 'orbit_data'
     FloatLayout:
+        Image:
+            id: Orbit_Data_background
+            source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitDataBackground.png'
+            allow_stretch: False 
         Label:
             id: rawTLE 
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
@@ -47,10 +51,6 @@
             markup: True
             color: root.signalcolor
             font_size: 16
-        Image:
-            id: Orbit_Data_background
-            source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitDataBackground.png'
-            allow_stretch: False 
         Image:
             id: signal
             source: "/home/pi/Mimic/Pi/imgs/signal/signalred.zip"
