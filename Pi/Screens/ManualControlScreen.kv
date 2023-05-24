@@ -27,17 +27,6 @@
             text: ''
             font_size: 30
             on_release: app.root.current = 'main'
-        Label:
-            id: statusbar
-            size_hint: 0.6, 0.15
-            pos_hint: {"center_x": 0.55, "y": 0.0}
-            text: "Test"
-            font_size: 30
-            canvas.before:
-                Color:
-                    rgba: 1,1,1,1
-                Line:
-                    rectangle: self.x, self.y+0.15*self.height, self.width, 0.7*self.height
         Image:
             id: arduino
             source: "/home/pi/Mimic/Pi/imgs/signal/arduino_offline.png"
