@@ -383,7 +383,7 @@
             id: orbit_data_button
             size_hint: 0.13,0.11
             pos_hint: {"center_x": 0.70, "center_y": 0.18}
-            background_normal: 'home/pi/Mimic/Pi/imgs/orbit/OrbitDataUnit.png'
+            background_normal: 'home/pi/Mimic/Pi/imgs/orbit/OrbitDataUnlit.png'
             background_down: 'home/pi/Mimic/Pi/imgs/orbit/OrbitDataDown.png'
             text: ''
             font_size: 30
@@ -446,6 +446,21 @@
             markup: True
             color: 1,1,1
             font_size: 16
+        Image:
+            id: arduino
+            source: "/home/pi/Mimic/Pi/imgs/signal/arduino_offline.png"
+            size_hint_y: 0.15
+            anim_delay: 0.2
+            anim_loop: 0
+            keep_ratio: True
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+        Label:
+            id: arduino_count
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+            text: ''
+            markup: True
+            color: 1,1,1
+            font_size: 55
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
