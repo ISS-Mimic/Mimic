@@ -373,19 +373,19 @@
         Button:
             id: iss_pass_button
             size_hint: 0.12,0.1
-            pos_hint: {"center_x": 0.89, "center_y": 0.79}
-            background_normal: 'home/pi/Mimic/Pi/imgs/orbit/ISSpassLit.png'
-            background_down: 'home/pi/Mimic/Pi/imgs/orbit/ISSpassUnlit.png'
+            pos_hint: {"center_x": 0.92, "center_y": 0.82}
+            background_normal: 'home/pi/Mimic/Pi/imgs/orbit/ISSpassUnlit.png'
+            background_down: 'home/pi/Mimic/Pi/imgs/orbit/ISSpassDown.png'
             text: ''
             font_size: 30
             on_release: app.root.current = 'orbit_pass'
         Button:
             id: orbit_data_button
             size_hint: 0.13,0.11
-            pos_hint: {"center_x": 0.65, "center_y": 0.2}
+            pos_hint: {"center_x": 0.75, "center_y": 0.18}
             background_normal: 'home/pi/Mimic/Pi/imgs/orbit/OrbitDataLit.png'
             background_down: 'home/pi/Mimic/Pi/imgs/orbit/OrbitDataDown.png'
-            text: 'Orbit Data'
+            text: ''
             font_size: 30
             on_release: app.root.current = 'orbit_data'
         Label:
