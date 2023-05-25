@@ -94,6 +94,13 @@
             color: root.signalcolor
             font_size: 16
         Label:
+            id: position_sv_label
+            pos_hint: {"center_x": 0.2, "center_y": 0.35}
+            text: 'Position State Vector:'
+            markup: True
+            color: 1,1,1
+            font_size: 20
+        Label:
             id: position_x_label
             pos_hint: {"center_x": 0.4, "center_y": 0.35}
             text: 'x= :'
@@ -134,6 +141,13 @@
             text: '0'
             markup: True
             color: root.signalcolor
+            font_size: 20
+        Label:
+            id: velocity_sv_label
+            pos_hint: {"center_x": 0.2, "center_y": 0.29}
+            text: 'Velocity State Vector:'
+            markup: True
+            color: 1,1,1
             font_size: 20
         Label:
             id: velocity_x_label
