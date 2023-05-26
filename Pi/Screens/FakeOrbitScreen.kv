@@ -35,18 +35,18 @@
             on_release: root.changeDemoBoolean(True)
             on_release: root.startDisco()
         Label:
-            text: 'Demo Orbit'
-            font_size: 18
-            pos_hint: {"center_x": 0.122, "center_y": 0.67}
-            markup: True
-            color: 1,1,1
+            #text: 'Demo Orbit'
+            #font_size: 18
+            #pos_hint: {"center_x": 0.122, "center_y": 0.67}
+            #markup: True
+            #color: 1,1,1
         Button:
             id: DemoStart
             allow_stretch: False
             keep_ratio: True
             size_hint: 0.14,0.115
             ##size_hint_y: 0.115
-            pos_hint: {"center_x": 0.122, "center_y": 0.57}
+            pos_hint: {"center_x": 0.135, "center_y": 0.54}
             background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartUnlit.png'
             background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartDown.png'
             on_release: DemoStop.disabled = False
@@ -60,7 +60,7 @@
             keep_ratio: True
             size_hint: 0.14,0.115
             ##size_hint_y: 0.115
-            pos_hint: {"center_x": 0.122, "center_y": 0.424}
+            pos_hint: {"center_x": 0.135, "center_y": 0.40}
             background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopUnlit.png'
             background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopDown.png'
             disabled: True
@@ -70,18 +70,18 @@
             on_release: self.disabled = True
             on_release: root.stopDemo()
         Label:
-            text: 'HTV Demo'
-            font_size: 18
-            pos_hint: {"center_x": 0.322, "center_y": 0.67}
-            markup: True
-            color: 1,1,1
+            #text: 'HTV Demo'
+            #font_size: 18
+            #pos_hint: {"center_x": 0.35, "center_y": 0.67}
+            #markup: True
+            #color: 1,1,1
         Button:
             id: HTVDemoStart
             allow_stretch: False
             keep_ratio: True
             size_hint: 0.14,0.115
             ##size_hint_y: 0.115
-            pos_hint: {"center_x": 0.322, "center_y": 0.57}
+            pos_hint: {"center_x": 0.35, "center_y": 0.40}
             background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartUnlit.png'
             background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartDown.png'
             on_release: HTVDemoStop.disabled = False
@@ -95,7 +95,7 @@
             keep_ratio: True
             size_hint: 0.14,0.115
             ##size_hint_y: 0.115
-            pos_hint: {"center_x": 0.322, "center_y": 0.424}
+            pos_hint: {"center_x": 0.322, "center_y": 0.67}
             background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopUnlit.png'
             background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopDown.png'
             disabled: True
@@ -104,18 +104,18 @@
             on_release: root.changeDemoBoolean(False)
             on_release: self.disabled = True
         Label:
-            text: 'OFT2 Demo'
-            font_size: 18
-            pos_hint: {"center_x": 0.522, "center_y": 0.67}
-            markup: True
-            color: 1,1,1
+            #text: 'OFT2 Demo'
+            #font_size: 18
+            #pos_hint: {"center_x": 0.522, "center_y": 0.67}
+            #markup: True
+            #color: 1,1,1
         Button:
             id: OFT2DemoStart
             allow_stretch: False
             keep_ratio: True
             size_hint: 0.14,0.115
             ##size_hint_y: 0.115
-            pos_hint: {"center_x": 0.522, "center_y": 0.57}
+            pos_hint: {"center_x": 0.65, "center_y": 0.40}
             background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartUnlit.png'
             background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartDown.png'
             on_release: OFT2DemoStop.disabled = False
@@ -129,7 +129,7 @@
             keep_ratio: True
             size_hint: 0.14,0.115
             ##size_hint_y: 0.115
-            pos_hint: {"center_x": 0.522, "center_y": 0.424}
+            pos_hint: {"center_x": 0.65, "center_y": 0.47}
             background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopUnlit.png'
             background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopDown.png'
             disabled: True
@@ -138,11 +138,11 @@
             on_release: root.changeDemoBoolean(False)
             on_release: self.disabled = True
         Label:
-            text: 'Load Demo'
-            font_size: 18
-            pos_hint: {"center_x": 0.722, "center_y": 0.67}
-            markup: True
-            color: 1,1,1
+            #text: 'Load Demo'
+            #font_size: 18
+            #pos_hint: {"center_x": 0.85, "center_y": 0.67}
+            #markup: True
+            #color: 1,1,1
         Button:
             id: LoadDemoStart
             allow_stretch: False
@@ -150,7 +150,7 @@
             disabled: True
             size_hint: 0.14,0.115
             ##size_hint_y: 0.115
-            pos_hint: {"center_x": 0.722, "center_y": 0.57}
+            pos_hint: {"center_x": 0.85, "center_y": 0.40}
             background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartUnlit.png'
             background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartDown.png'
             on_release: LoadDemoStop.disabled = False
@@ -164,7 +164,7 @@
             keep_ratio: True
             size_hint: 0.14,0.115
             ##size_hint_y: 0.115
-            pos_hint: {"center_x": 0.722, "center_y": 0.424}
+            pos_hint: {"center_x": 0.722, "center_y": 0.47}
             background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopUnlit.png'
             background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopDown.png'
             disabled: True
@@ -173,19 +173,19 @@
             on_release: root.changeDemoBoolean(False)
             on_release: self.disabled = True
         Button:
-            id: OFT2loop
-            allow_stretch: False
-            text: 'OFT2 Loop'
-            keep_ratio: True
-            size_hint: 0.1,0.1
+            #id: OFT2loop
+            #allow_stretch: False
+            #text: 'OFT2 Loop'
+            #keep_ratio: True
+            #size_hint: 0.1,0.1
             ##size_hint_y: 0.115
-            pos_hint: {"center_x": 0.522, "center_y": 0.3}
-            background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopUnlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopDown.png'
-            disabled: True
-            on_release: fakeorbitstatus.text = 'Looping'
-            on_release: root.changeDemoBoolean(False)
-            on_release: self.disabled = True
+            #pos_hint: {"center_x": 0.522, "center_y": 0.3}
+            #background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopUnlit.png'
+            #background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopDown.png'
+            #disabled: True
+            #on_release: fakeorbitstatus.text = 'Looping'
+            #on_release: root.changeDemoBoolean(False)
+            #on_release: self.disabled = True
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
