@@ -196,6 +196,14 @@
             on_release: root.stopDemo()
             on_release: root.manager.current = 'main'
         Image:
+            id: signal
+            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+            size_hint_y: 0.15
+            anim_delay: 0.12
+            anim_loop: 0
+            keep_ratio: True
+            pos_hint: {"center_x": 0.05, "center_y": 0.07}
+        Image:
             id: arduino
             source: "/home/pi/Mimic/Pi/imgs/signal/arduino_offline.png"
             size_hint_y: 0.15
