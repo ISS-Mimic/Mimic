@@ -1210,9 +1210,6 @@ class LED_Screen(Screen, EventDispatcher):
 class RS_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1, 1, 1])
 
-class RS_Dock_Screen(Screen, EventDispatcher):
-    signalcolor = ObjectProperty([1, 1, 1])
-
 class Crew_Screen(Screen, EventDispatcher):
     pass
 
@@ -1273,7 +1270,6 @@ class MainApp(App):
         self.us_eva = EVA_US_Screen(name='us_eva')
         self.rs_eva = EVA_RS_Screen(name='rs_eva')
         self.rs_screen = RS_Screen(name='rs')
-        self.rs_dock = RS_Dock_Screen(name='rs_dock')
         self.mss_mt_screen = MSS_MT_Screen(name='mt')
         self.cdh_screen = CDH_Screen(name = 'cdh')
         self.science_screen = Science_Screen(name = 'science')
@@ -1312,7 +1308,6 @@ class MainApp(App):
         root.add_widget(self.gnc_screen)
         root.add_widget(self.us_eva)
         root.add_widget(self.rs_eva)
-        root.add_widget(self.rs_dock)
         root.add_widget(self.rs_screen)
         root.add_widget(self.mss_mt_screen)
         root.add_widget(self.eva_main)
@@ -3495,7 +3490,6 @@ Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/VV_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/TCS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EVA_US_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EVA_RS_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/RS_Dock_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EVA_Main_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EVA_Pictures.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Crew_Screen.kv')
