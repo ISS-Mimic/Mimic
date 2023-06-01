@@ -9,6 +9,16 @@
             allow_stretch: False
             keep_ratio: True
         Button:
+            background_normal: '/home/pi/Mimic/Pi/imgs/russian/DockingUnlit.png'
+            background_down: '/home/pi/Mimic/Pi/imgs/russian/DockingDown.png'
+            size_hint: 0.15,0.18
+            pos_hint: {"center_x": 0.85, "center_y": 0.47}
+            text: ''
+            font_size: 30
+            width: 50
+            height:20
+            on_release: root.manager.current = 'ROSdock'
+        Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
             background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
