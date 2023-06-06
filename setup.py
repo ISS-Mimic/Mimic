@@ -49,7 +49,8 @@ def main():
 
     if not args.skip_kivy:
         print("\nInstalling Kivy requirements and package.")
-        run_install("'kivy[base,media]'", "python -m pip")
+        run_install("kivy", "python -m pip")
+        #run_install("'kivy[base,media]'", "python -m pip") # might need this kivy install if we do audio/video stuff but it might be outdated?
         run_command("python -c 'import kivy'") # run kivy init to create the config.ini file
         print("Replacing Kivy config file")
         replace_kivy_config(args.username)
