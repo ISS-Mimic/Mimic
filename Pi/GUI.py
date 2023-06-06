@@ -1277,7 +1277,7 @@ class MainApp(App):
         self.rs_eva = EVA_RS_Screen(name='rs_eva')
         self.rs_screen = RS_Screen(name='rs')
         self.rs_dock = RS_Dock_Screen(name='rs_dock')
-        self.mss_mt_screen = Robo_Screen(name='robo')
+        self.robo_screen = Robo_Screen(name='robo')
         self.mss_mt_screen = MSS_MT_Screen(name='mt')
         self.cdh_screen = CDH_Screen(name = 'cdh')
         self.science_screen = Science_Screen(name = 'science')
