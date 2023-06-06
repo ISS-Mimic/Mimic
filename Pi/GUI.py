@@ -1219,6 +1219,12 @@ class Crew_Screen(Screen, EventDispatcher):
 class Robo_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1, 1, 1])
 
+class SSRMS_Screen(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class SPDM1_Screen(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1, 1, 1])
+
 class MSS_MT_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1, 1, 1])
 
@@ -1278,6 +1284,8 @@ class MainApp(App):
         self.rs_screen = RS_Screen(name='rs')
         self.rs_dock = RS_Dock_Screen(name='rs_dock')
         self.robo_screen = Robo_Screen(name='robo')
+        self.robo_screen = SSRMS_Screen(name='ssrms')
+        self.robo_screen = SPDM1_Screen(name='spdm1')
         self.mss_mt_screen = MSS_MT_Screen(name='mt')
         self.cdh_screen = CDH_Screen(name = 'cdh')
         self.science_screen = Science_Screen(name = 'science')
@@ -1319,6 +1327,8 @@ class MainApp(App):
         root.add_widget(self.rs_screen)
         root.add_widget(self.rs_dock)
         root.add_widget(self.robo_screen)
+        root.add_widget(self.ssrms_screen)
+        root.add_widget(self.spdm1_screen)
         root.add_widget(self.mss_mt_screen)
         root.add_widget(self.eva_main)
         root.add_widget(self.eva_pictures)
@@ -3507,6 +3517,8 @@ Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/RS_Screen.kv')
 
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ManualControlScreen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Robo_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/SSRMS_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/SPDM1_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MSS_MT_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MimicScreen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MainScreen.kv')
