@@ -1216,7 +1216,7 @@ class RS_Dock_Screen(Screen, EventDispatcher):
 class Crew_Screen(Screen, EventDispatcher):
     pass
 
-class RoboT_Screen(Screen, EventDispatcher):
+class Robo_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1, 1, 1])
 
 class MSS_MT_Screen(Screen, EventDispatcher):
