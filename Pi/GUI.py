@@ -3396,7 +3396,7 @@ class MainApp(App):
         self.eclss_screen.ids.WasteWater.text = str(WasteWater)
         
         ##Summary Telemetery on Robo Screen
-        self.robo_screen.ids.mt_worksite.text = int(mt_worksite)
+        self.robo_screen.ids.mt_worksite.text = str(mt_worksite)
         
         #self.robo_screen.ids.OperatingBase.text = str(OperatingBase)
         if int(OperatingBase) == 0:
