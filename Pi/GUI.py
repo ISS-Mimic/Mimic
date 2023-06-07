@@ -3519,7 +3519,7 @@ class MainApp(App):
         else:
             self.spdm1_screen.ids.BodyPayload.text = "n/a"
         
-        self.spdm1_screen.ids.Body1Roll.text = str(BodyRoll)
+        self.spdm1_screen.ids.BodyRoll.text = str(BodyRoll)
         self.spdm1_screen.ids.Shoulder1Roll.text = str(Shoulder1Roll)
         self.spdm1_screen.ids.Shoulder1Yaw.text = str(Shoulder1Yaw)
         self.spdm1_screen.ids.Shoulder1Pitch.text = str(Shoulder1Pitch)
