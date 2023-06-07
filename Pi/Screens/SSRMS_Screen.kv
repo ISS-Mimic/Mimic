@@ -8,6 +8,20 @@
             id: SSRMS_Background
             source: "/home/pi/Mimic/Pi/imgs/robo/SSRMSbackground.png"
             allow_stretch: False
+        Label:
+            id: OperatingBase_value
+            pos_hint: {"center_x": 0.3, "center_y": 0.85}
+            text: '0'
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: BaseLocation_value
+            pos_hint: {"center_x": 0.3, "center_y": 0.79}
+            text: '0'
+            markup: True
+            color: root.signalcolor
+            font_size: 20
         Button:
             size_hint: 0.1,0.11
             ##pos_hint: {"Left": 1, "Bottom": 1}
