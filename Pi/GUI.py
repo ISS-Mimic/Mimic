@@ -3394,6 +3394,77 @@ class MainApp(App):
         self.eclss_screen.ids.AirlockPress.text = str(AirlockPress)
         self.eclss_screen.ids.CleanWater.text = str(CleanWater)
         self.eclss_screen.ids.WasteWater.text = str(WasteWater)
+        
+        ##Summary Telemetery on Robo Screen
+        self.robo_screen.ids.mt_worksite.text = int(mt_worksite)
+        
+        #self.robo_screen.ids.OperatingBase.text = str(OperatingBase)
+        if int(OperatingBase) == 0:
+            self.robo_screen.ids.OperatingBase.text = "A"
+        elif int(OperatingBase) == 5:
+            self.robo_screen.ids.OperatingBase.text = "B"
+        else:
+            self.robo_screen.ids.OperatingBase.text = "n/a"
+        
+        #self.robo_screen.ids.BaseLocation.text = str(BaseLocation)
+        if int(BaseLocation) == 1:
+            self.robo_screen.ids.BaseLocation.text = "Lab"
+        elif int(BaseLocation) == 2:
+            self.robo_screen.ids.BaseLocation.text = "Node 3"
+        elif int(BaseLocation) == 4:
+            self.robo_screen.ids.BaseLocation.text = "Node 2"
+        elif int(BaseLocation) == 7:
+            self.robo_screen.ids.BaseLocation.text = "MBS PDGF 1"
+        elif int(BaseLocation) == 8:
+            self.robo_screen.ids.BaseLocation.text = "MBS PDGF 2"
+        elif int(BaseLocation) == 11:
+            self.robo_screen.ids.BaseLocation.text = "MBS PDGF 3"
+        elif int(BaseLocation) == 13:
+            self.robo_screen.ids.BaseLocation.text = "MBS PDGF 4"
+        elif int(BaseLocation) ==14:
+            self.robo_screen.ids.BaseLocation.text = "FGB"
+        elif int(BaseLocation) == 16:
+            self.robo_screen.ids.BaseLocation.text = "POA"
+        elif int(BaseLocation) == 19:
+            self.robo_screen.ids.BaseLocation.text = "SSRMS Tip LEE"
+        elif int(BaseLocation) == 63:
+            self.robo_screen.ids.BaseLocation.text = "Undefined"
+        else:
+            self.robo_screen.ids.BaseLocation.text = "n/a"
+        
+        #self.robo_screen.ids.SPDMbase.text = str(SPDMbase)
+        if int(SPDMbase) == 1:
+            self.robo_screen.ids.SPDMbase.text = "Lab"
+        elif int(SPDMbase) == 2:
+            self.robo_screen.ids.SPDMbase.text = "Node 3"
+        elif int(SPDMbase) == 4:
+            self.robo_screen.ids.SPDMbase.text = "Node 2"
+        elif int(SPDMbase) == 7:
+            self.robo_screen.ids.SPDMbase.text = "MBS PDGF 1"
+        elif int(SPDMbase) == 8:
+            self.robo_screen.ids.SPDMbase.text = "MBS PDGF 2"
+        elif int(SPDMbase) == 11:
+            self.robo_screen.ids.SPDMbase.text = "MBS PDGF 3"
+        elif int(SPDMbase) == 13:
+            self.robo_screen.ids.SPDMbase.text = "MBS PDGF 4"
+        elif int(SPDMbase) ==14:
+            self.robo_screen.ids.SPDMbase.text = "FGB"
+        elif int(SPDMbase) == 16:
+            self.robo_screen.ids.SPDMbase.text = "POA"
+        elif int(SPDMbase) == 19:
+            self.robo_screen.ids.SPDMbase.text = "SSRMS Tip LEE"
+        elif int(SPDMbase) == 63:
+            self.robo_screen.ids.SPDMbase.text = "Undefined"
+        else:
+            self.robo_screen.ids.SPDMbase.text = "n/a"
+        
+        #self.robo_screen.ids.SPDMoperatingBase.text = str(SPDMoperatingBase)
+        if int(SPDMoperatingBase) == 1:
+            self.robo_screen.ids.SPDMoperatingBase.text = "SPDM Body LEE"
+        elif int(SPDMoperatingBase) == 2:
+            self.robo_screen.ids.SPDMoperatingBase.text = "SPDM Body PDGF"
+        else:
+            self.robo_screen.ids.SPDMoperatingBase.text = "n/a"
 
         #self.mss_mt_screen.ids.MCASpayload.text = str(MCASpayload)
         if int(MCASpayload) == 0:
