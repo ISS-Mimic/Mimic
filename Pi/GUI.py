@@ -3519,14 +3519,22 @@ class MainApp(App):
         else:
             self.spdm1_screen.ids.BodyPayload.text = "n/a"
         
-        self.spdm1_screen.ids.BodyRoll.text = str(BodyRoll)
-        self.spdm1_screen.ids.ShoulderRoll.text = str(ShoulderRoll)
-        self.spdm1_screen.ids.ShoulderYaw.text = str(ShoulderYaw)
-        self.spdm1_screen.ids.ShoulderPitch.text = str(ShoulderPitch)
-        self.spdm1_screen.ids.ElbowPitch.text = str(ElbowPitch)
-        self.spdm1_screen.ids.WristRoll.text = str(WristRoll)
-        self.spdm1_screen.ids.WristYaw.text = str(WristYaw)
-        self.spdm1_screen.ids.WristPitch.text = str(WristPitch)
+        self.spdm1_screen.ids.Body1Roll.text = str(Body1Roll)
+        self.spdm1_screen.ids.Shoulder1Roll.text = str(Shoulder1Roll)
+        self.spdm1_screen.ids.Shoulder1Yaw.text = str(Shoulder1Yaw)
+        self.spdm1_screen.ids.Shoulder1Pitch.text = str(Shoulder1Pitch)
+        self.spdm1_screen.ids.Elbow1Pitch.text = str(Elbow1Pitch)
+        self.spdm1_screen.ids.Wrist1Roll.text = str(Wrist1Roll)
+        self.spdm1_screen.ids.Wris1tYaw.text = str(Wris1tYaw)
+        self.spdm1_screen.ids.Wrist1Pitch.text = str(Wrist1Pitch)
+        self.spdm1_screen.ids.Body1Roll.text = str(Body2Roll)
+        self.spdm1_screen.ids.Shoulder1Roll.text = str(Shoulder2Roll)
+        self.spdm1_screen.ids.Shoulder1Yaw.text = str(Shoulder2Yaw)
+        self.spdm1_screen.ids.Shoulder1Pitch.text = str(Shoulder2Pitch)
+        self.spdm1_screen.ids.Elbow1Pitch.text = str(Elbow2Pitch)
+        self.spdm1_screen.ids.Wrist1Roll.text = str(Wrist2Roll)
+        self.spdm1_screen.ids.Wris1tYaw.text = str(Wris2tYaw)
+        self.spdm1_screen.ids.Wrist1Pitch.text = str(Wrist2Pitch)
         
         #self.ct_uhf_screen.ids.UHF1pwr.text = str(UHF1pwr)
         if int(UHF1pwr) == 0:
