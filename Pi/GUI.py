@@ -2650,6 +2650,7 @@ class MainApp(App):
         
         ##SPDM Telemetry
         SPDMbase = str((values[271])[0])
+        SPDMoperatingBase = str((values[270])[0])
         Shoulder1Roll = "{:.2f}".format(float((values[272])[0]))
         Shoulder1Yaw = "{:.2f}".format(float((values[273])[0]))
         Shoulder1Pitch = "{:.2f}".format(float((values[274])[0]))
@@ -3488,6 +3489,14 @@ class MainApp(App):
             self.spdm1_screen.ids.SPDMbase.text = "Undefined"
         else:
             self.spdm1_screen.ids.SPDMbase.text = "n/a"
+        
+         #self.spdm1_screen.ids.SPDMoperatingBase.text = str(SPDMoperatingBase)
+        if int(SPDMoperatingBase) == 0:
+            self.spdm1_screen.ids.SPDMoperatingBase.text = "SPDM Body LEE"
+        elif int(SPDMoperatingBase) == 1:
+            self.spdm1_screen.ids.SPDMoperatingBase.text = "SPDM Body PDGF"
+        else:
+            self.spdm1_screen.ids.SPDMoperatingBase.text = "n/a"
         
         #self.spdm1_screen.ids.Arm1OTCM.text = str(Arm1OTCM)
         if int(Arm1OTCM) == 0:
