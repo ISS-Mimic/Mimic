@@ -2490,6 +2490,7 @@ class MainApp(App):
             self.mimic_screen.ids.mimicstartbutton.disabled = False
             self.fakeorbit_screen.ids.DemoStart.disabled = False
             self.fakeorbit_screen.ids.HTVDemoStart.disabled = False
+            self.fakeorbit_screen.ids.OFT2DemoStart.disabled = False
             self.control_screen.ids.set90.disabled = False
             self.control_screen.ids.set0.disabled = False
             if mimicbutton:
@@ -2502,6 +2503,7 @@ class MainApp(App):
             self.mimic_screen.ids.mimicstartbutton.text = "Transmit"
             self.fakeorbit_screen.ids.DemoStart.disabled = True
             self.fakeorbit_screen.ids.HTVDemoStart.disabled = True
+            self.fakeorbit_screen.ids.OFT2DemoStart.disabled = True
             self.control_screen.ids.set90.disabled = True
             self.control_screen.ids.set0.disabled = True
 
@@ -2510,6 +2512,8 @@ class MainApp(App):
             self.fakeorbit_screen.ids.HTVDemoStart.disabled = True
             self.fakeorbit_screen.ids.DemoStop.disabled = False
             self.fakeorbit_screen.ids.HTVDemoStop.disabled = False
+            self.fakeorbit_screen.ids.OFT2DemoStart.disabled = True
+            self.fakeorbit_screen.ids.OFT2DemoStop.disabled = False
             self.fakeorbit_screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
 
         c.execute('select Value from telemetry')
