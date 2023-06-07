@@ -3525,7 +3525,7 @@ class MainApp(App):
         self.spdm1_screen.ids.Shoulder1Pitch.text = str(Shoulder1Pitch)
         self.spdm1_screen.ids.Elbow1Pitch.text = str(Elbow1Pitch)
         self.spdm1_screen.ids.Wrist1Roll.text = str(Wrist1Roll)
-        self.spdm1_screen.ids.Wrist1Yaw.text = str(Wris1tYaw)
+        self.spdm1_screen.ids.Wrist1Yaw.text = str(Wrist1Yaw)
         self.spdm1_screen.ids.Wrist1Pitch.text = str(Wrist1Pitch)
         self.spdm1_screen.ids.Shoulder1Roll.text = str(Shoulder2Roll)
         self.spdm1_screen.ids.Shoulder1Yaw.text = str(Shoulder2Yaw)
