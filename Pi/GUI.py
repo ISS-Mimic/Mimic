@@ -2650,6 +2650,20 @@ class MainApp(App):
         
         ##SPDM Telemetry
         SPDMbase = str((values[271])[0])
+        Shoulder1Roll = "{:.2f}".format(float((values[272])[0]))
+        Shoulder1Yaw = "{:.2f}".format(float((values[273])[0]))
+        Shoulder1Pitch = "{:.2f}".format(float((values[274])[0]))
+        Elbow1Pitch = "{:.2f}".format(float((values[275])[0]))
+        Wrist1Roll = "{:.2f}".format(float((values[278])[0]))
+        Wrist1Yaw = "{:.2f}".format(float((values[277])[0]))
+        Wrist1Pitch = "{:.2f}".format(float((values[276])[0]))
+        Shoulder2Roll = "{:.2f}".format(float((values[280])[0]))
+        Shoulder2Yaw = "{:.2f}".format(float((values[281])[0]))
+        Shoulder2Pitch = "{:.2f}".format(float((values[282])[0]))
+        Elbow2Pitch = "{:.2f}".format(float((values[283])[0]))
+        Wrist2Roll = "{:.2f}".format(float((values[286])[0]))
+        Wrist2Yaw = "{:.2f}".format(float((values[285])[0]))
+        Wrist2Pitch = "{:.2f}".format(float((values[284])[0])) 
         Arm1OTCM = int((values[279])[0])
         Arm2OTCM = int((values[288])[0])
         BodyPayload = int((values[288])[0])
@@ -3505,8 +3519,14 @@ class MainApp(App):
         else:
             self.spdm1_screen.ids.BodyPayload.text = "n/a"
         
-        self.spdm1_screen.ids.BodyRoll.text = str(BodyRoll) + " deg"
-        #More more more
+        self.spdm1_screen.ids.BodyRoll.text = str(BodyRoll)
+        self.spdm1_screen.ids.ShoulderRoll.text = str(ShoulderRoll)
+        self.spdm1_screen.ids.ShoulderYaw.text = str(ShoulderYaw)
+        self.spdm1_screen.ids.ShoulderPitch.text = str(ShoulderPitch)
+        self.spdm1_screen.ids.ElbowPitch.text = str(ElbowPitch)
+        self.spdm1_screen.ids.WristRoll.text = str(WristRoll)
+        self.spdm1_screen.ids.WristYaw.text = str(WristYaw)
+        self.spdm1_screen.ids.WristPitch.text = str(WristPitch)
         
         #self.ct_uhf_screen.ids.UHF1pwr.text = str(UHF1pwr)
         if int(UHF1pwr) == 0:
