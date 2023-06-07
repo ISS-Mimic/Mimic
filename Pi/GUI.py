@@ -2633,8 +2633,12 @@ class MainApp(App):
         NH3outletTemp_loopB = "{:.2f}".format(float((values[21])[0]))
 
         #MBS and MT telemetry
-        MCASpayload = str((values[292])[0])
-        POApayload = str((values[294])[0])
+        MCASpayload = int((values[292])[0])
+        POApayload = int((values[294])[0])
+        
+        ##SSRMS telemetry
+        OperatingBase = str((values[261])[0])
+        BaseLocation = str((values[260])[0])
 
         #ECLSS telemetry
         CabinTemp = "{:.2f}".format(float((values[195])[0]))
@@ -3377,6 +3381,40 @@ class MainApp(App):
             self.mss_mt_screen.ids.POApayload.text = "Captured"
         else:
             self.mss_mt_screen.ids.POApayload.text = "n/a" 
+        
+        #self.ssrms_screen.ids.OperatingBase.text = str(OperatingBase)
+        if int(OperatingBase) == 0:
+            self.ssrms_screen.ids.OperatingBase.text = "A"
+        elif int(OperatingBase) == 5:
+            self.ssrms_screen.ids.OperatingBase.text = "B"
+        else:
+            self.ssrms_screen.ids.OperatingBase.text = "n/a"
+        
+        #self.ssrms_screen.ids.BaseLocation.text = str(BaseLocation)
+        if int(BaseLocation) == 1:
+            self.ssrms_screen.ids.BaseLocation.text = "Lab"
+        elif int(BaseLocation) == 2:
+            self.ssrms_screen.ids.BaseLocation.text = "Node 3"
+        elif int(BaseLocation) == 4:
+            self.ssrms_screen.ids.BaseLocation.text = "Node 2"
+        elif int(BaseLocation) == 7:
+            self.ssrms_screen.ids.BaseLocation.text = "MBS PDGF 1"
+        elif int(BaseLocation) == 8:
+            self.ssrms_screen.ids.BaseLocation.text = "MBS PDGF 2"
+        elif int(BaseLocation) == 11:
+            self.ssrms_screen.ids.BaseLocation.text = "MBS PDGF 3"
+        elif int(BaseLocation) == 13:
+            self.ssrms_screen.ids.BaseLocation.text = "MBS PDGF 4"
+        elif int(BaseLocation) ==14:
+            self.ssrms_screen.ids.BaseLocation.text = "FGB"
+        elif int(BaseLocation) == 16:
+            self.ssrms_screen.ids.BaseLocation.text = "POA"
+        elif int(BaseLocation) == 19:
+            self.ssrms_screen.ids.BaseLocation.text = "SSRMS Tip LEE"
+        elif int(BaseLocation) == 63:
+            self.ssrms_screen.ids.BaseLocation.text = "Undefined"
+        else:
+            self.ssrms_screen.ids.BaseLocation.text = "n/a"
         
         #self.ct_uhf_screen.ids.UHF1pwr.text = str(UHF1pwr)
         if int(UHF1pwr) == 0:
