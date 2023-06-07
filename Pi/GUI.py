@@ -3397,13 +3397,13 @@ class MainApp(App):
         else:
             self.ssrms_screen.ids.OperatingBase.text = "n/a"
                                       
-        self.ssrms_screen.ids.ShoulderRoll.text = str(ShoulderRoll) + "deg"
-        self.ssrms_screen.ids.ShoulderYaw.text = str(ShoulderYaw) + "deg"
-        self.ssrms_screen.ids.ShoulderPitch.text = str(ShoulderPitch) + "deg"
-        self.ssrms_screen.ids.ElbowPitch.text = str(ElbowPitch) + "deg"
-        self.ssrms_screen.ids.WristRoll.text = str(WristRoll) + "deg"
-        self.ssrms_screen.ids.WristYaw.text = str(WristYaw) + "deg"
-        self.ssrms_screen.ids.WristPitch.text = str(WristPitch) + "deg"
+        self.ssrms_screen.ids.ShoulderRoll.text = str(ShoulderRoll) + " deg"
+        self.ssrms_screen.ids.ShoulderYaw.text = str(ShoulderYaw) + " deg"
+        self.ssrms_screen.ids.ShoulderPitch.text = str(ShoulderPitch) + " deg"
+        self.ssrms_screen.ids.ElbowPitch.text = str(ElbowPitch) + " deg"
+        self.ssrms_screen.ids.WristRoll.text = str(WristRoll) + " deg"
+        self.ssrms_screen.ids.WristYaw.text = str(WristYaw) + " deg"
+        self.ssrms_screen.ids.WristPitch.text = str(WristPitch) + " deg"
         
         #self.ssrms_screen.ids.BaseLocation.text = str(BaseLocation)
         if int(BaseLocation) == 1:
