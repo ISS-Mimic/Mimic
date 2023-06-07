@@ -2643,9 +2643,9 @@ class MainApp(App):
         ShoulderYaw = "{:.2f}".format(float((values[273])[0]))
         ShoulderPitch = "{:.2f}".format(float((values[274])[0]))
         ElbowPitch = "{:.2f}".format(float((values[275])[0]))
-        WristrRoll = "{:.2f}".format(float((values[276])[0]))
-        WristrYaw = "{:.2f}".format(float((values[277])[0]))
-        WristrPitch = "{:.2f}".format(float((values[277])[0]))
+        WristRoll = "{:.2f}".format(float((values[276])[0]))
+        WristYaw = "{:.2f}".format(float((values[277])[0]))
+        WristPitch = "{:.2f}".format(float((values[277])[0]))
                                        
         #ECLSS telemetry
         CabinTemp = "{:.2f}".format(float((values[195])[0]))
