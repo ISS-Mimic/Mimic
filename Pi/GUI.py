@@ -3446,33 +3446,33 @@ class MainApp(App):
         else:
             self.ssrms_screen.ids.BaseLocation.text = "n/a"
         
-        #self.ssrms_screen.ids.SPDMbase.text = str(SPDMbase)
+        #self.spdm1_screen.ids.SPDMbase.text = str(SPDMbase)
         if int(SPDMbase) == 1:
-            self.spdm_screen.ids.SPDMbase.text = "Lab"
+            self.spdm1_screen.ids.SPDMbase.text = "Lab"
         elif int(SPDMbase) == 2:
-            self.spdm_screen.ids.SPDMbase.text = "Node 3"
+            self.spdm1_screen.ids.SPDMbase.text = "Node 3"
         elif int(SPDMbase) == 4:
-            self.spdm_screen.ids.SPDMbase.text = "Node 2"
+            self.spdm1_screen.ids.SPDMbase.text = "Node 2"
         elif int(SPDMbase) == 7:
-            self.spdm_screen.ids.SPDMbase.text = "MBS PDGF 1"
+            self.spdm1_screen.ids.SPDMbase.text = "MBS PDGF 1"
         elif int(SPDMbase) == 8:
-            self.spdm_screen.ids.SPDMbase.text = "MBS PDGF 2"
+            self.spdm1_screen.ids.SPDMbase.text = "MBS PDGF 2"
         elif int(SPDMbase) == 11:
-            self.spdm_screen.ids.SPDMbase.text = "MBS PDGF 3"
+            self.spdm1_screen.ids.SPDMbase.text = "MBS PDGF 3"
         elif int(SPDMbase) == 13:
-            self.spdm_screen.ids.SPDMbase.text = "MBS PDGF 4"
+            self.spdm1_screen.ids.SPDMbase.text = "MBS PDGF 4"
         elif int(SPDMbase) ==14:
-            self.spdm_screen.ids.SPDMbase.text = "FGB"
+            self.spdm1_screen.ids.SPDMbase.text = "FGB"
         elif int(SPDMbase) == 16:
-            self.spdm_screen.ids.SPDMbase.text = "POA"
+            self.spdm1_screen.ids.SPDMbase.text = "POA"
         elif int(SPDMbase) == 19:
-            self.spdm_screen.ids.SPDMbase.text = "SSRMS Tip LEE"
+            self.spdm1_screen.ids.SPDMbase.text = "SSRMS Tip LEE"
         elif int(SPDMbase) == 63:
-            self.spdm_screen.ids.SPDMbase.text = "Undefined"
+            self.spdm1_screen.ids.SPDMbase.text = "Undefined"
         else:
-            self.spdm_screen.ids.SPDMbase.text = "n/a"
+            self.spdm1_screen.ids.SPDMbase.text = "n/a"
         
-        self.spdm_screen.ids.BodyRoll.text = str(BodyRoll) + " deg"
+        self.spdm1_screen.ids.BodyRoll.text = str(BodyRoll) + " deg"
         #More more more
         
         #self.ct_uhf_screen.ids.UHF1pwr.text = str(UHF1pwr)
