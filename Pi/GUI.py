@@ -2639,7 +2639,14 @@ class MainApp(App):
         ##SSRMS telemetry
         OperatingBase = str((values[261])[0])
         BaseLocation = str((values[260])[0])
-
+        ShoulderRoll = "{:.2f}".format(float((values[272])[0])
+        ShoulderYaw = "{:.2f}".format(float((values[273])[0])
+        ShoulderPitch = "{:.2f}".format(float((values[274])[0])
+        ElbowPitch = "{:.2f}".format(float((values[275])[0])
+        WristrRoll = "{:.2f}".format(float((values[276])[0])
+        WristrYaw = "{:.2f}".format(float((values[277])[0])
+        WristrPitch = "{:.2f}".format(float((values[277])[0])
+                                       
         #ECLSS telemetry
         CabinTemp = "{:.2f}".format(float((values[195])[0]))
         CabinPress = "{:.2f}".format(float((values[194])[0]))
@@ -3389,6 +3396,14 @@ class MainApp(App):
             self.ssrms_screen.ids.OperatingBase.text = "B"
         else:
             self.ssrms_screen.ids.OperatingBase.text = "n/a"
+                                      
+        self.ssrms_screen.ids.ShoulderRoll.text = str(ShoulderRoll) + "deg"
+        self.ssrms_screen.ids.ShoulderYaw.text = str(ShoulderYaw) + "deg"
+        self.ssrms_screen.ids.ShoulderPitch.text = str(ShoulderPitch) + "deg"
+        self.ssrms_screen.ids.ElbowPitch.text = str(ElbowPitch) + "deg"
+        self.ssrms_screen.ids.WristRoll.text = str(WristRoll) + "deg"
+        self.ssrms_screen.ids.WristYaw.text = str(WristYaw) + "deg"
+        self.ssrms_screen.ids.WristPitch.text = str(WristPitch) + "deg"
         
         #self.ssrms_screen.ids.BaseLocation.text = str(BaseLocation)
         if int(BaseLocation) == 1:
