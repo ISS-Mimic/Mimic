@@ -2639,13 +2639,13 @@ class MainApp(App):
         ##SSRMS telemetry
         OperatingBase = str((values[261])[0])
         BaseLocation = str((values[260])[0])
-        ShoulderRoll = "{:.2f}".format(float((values[272])[0])
-        ShoulderYaw = "{:.2f}".format(float((values[273])[0])
-        ShoulderPitch = "{:.2f}".format(float((values[274])[0])
-        ElbowPitch = "{:.2f}".format(float((values[275])[0])
-        WristrRoll = "{:.2f}".format(float((values[276])[0])
-        WristrYaw = "{:.2f}".format(float((values[277])[0])
-        WristrPitch = "{:.2f}".format(float((values[277])[0])
+        ShoulderRoll = "{:.2f}".format(float((values[272])[0]))
+        ShoulderYaw = "{:.2f}".format(float((values[273])[0]))
+        ShoulderPitch = "{:.2f}".format(float((values[274])[0]))
+        ElbowPitch = "{:.2f}".format(float((values[275])[0]))
+        WristrRoll = "{:.2f}".format(float((values[276])[0]))
+        WristrYaw = "{:.2f}".format(float((values[277])[0]))
+        WristrPitch = "{:.2f}".format(float((values[277])[0]))
                                        
         #ECLSS telemetry
         CabinTemp = "{:.2f}".format(float((values[195])[0]))
