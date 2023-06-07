@@ -8,6 +8,36 @@
             id: Robo_Background
             source: "/home/pi/Mimic/Pi/imgs/robo/RoboBackground.png"
             allow_stretch: False
+        Label:
+            id: OperatingBase
+            pos_hint: {"center_x": 0.2, "center_y": 0.6}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: BaseLocation
+            pos_hint: {"center_x": 0.2, "center_y": 0.54}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: mt_worksite
+            pos_hint: {"center_x": 0.65, "center_y": 0.5}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: SPDMbase
+            pos_hint: {"center_x": 0.7, "center_y": 0.6}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: SPDMoperatingBase
+            pos_hint: {"center_x": 0.7, "center_y": 0.54}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
         Button:
             background_normal: '/home/pi/Mimic/Pi/imgs/robo/MTMBSunlit.png'
             background_down: '/home/pi/Mimic/Pi/imgs/robo/MTMBSdown.png'
