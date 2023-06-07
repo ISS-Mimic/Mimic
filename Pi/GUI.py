@@ -3491,9 +3491,9 @@ class MainApp(App):
             self.spdm1_screen.ids.SPDMbase.text = "n/a"
         
          #self.spdm1_screen.ids.SPDMoperatingBase.text = str(SPDMoperatingBase)
-        if int(SPDMoperatingBase) == 0:
+        if int(SPDMoperatingBase) == 1:
             self.spdm1_screen.ids.SPDMoperatingBase.text = "SPDM Body LEE"
-        elif int(SPDMoperatingBase) == 1:
+        elif int(SPDMoperatingBase) == 2:
             self.spdm1_screen.ids.SPDMoperatingBase.text = "SPDM Body PDGF"
         else:
             self.spdm1_screen.ids.SPDMoperatingBase.text = "n/a"
