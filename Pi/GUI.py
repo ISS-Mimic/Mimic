@@ -2639,6 +2639,7 @@ class MainApp(App):
         ##SSRMS telemetry
         OperatingBase = str((values[261])[0])
         BaseLocation = str((values[260])[0])
+        TipLEEstatus = str((values[269])[0])
         ShoulderRoll = "{:.2f}".format(float((values[272])[0]))
         ShoulderYaw = "{:.2f}".format(float((values[273])[0]))
         ShoulderPitch = "{:.2f}".format(float((values[274])[0]))
@@ -3397,6 +3398,16 @@ class MainApp(App):
         else:
             self.ssrms_screen.ids.OperatingBase.text = "n/a"
                                       
+        #self.ssrms_screen.ids.TipLEEstatus.text = str(TipLEEstatus)
+        if int(TipLEEstatus) == 0:
+            self.ssrms_screen.ids.TipLEEstatus.text = "Released"
+        elif int(TipLEEstatus) == 1:
+            self.ssrms_screen.ids.TipLEEstatus.text = "Captive"
+        elif int(TipLEEstatus) == 2:
+            self.ssrms_screen.ids.TipLEEstatus.text = "Captured"
+        else:
+            self.ssrms_screen.ids.TipLEEstatus.text = "n/a"
+        
         self.ssrms_screen.ids.ShoulderRoll.text = str(ShoulderRoll) + " deg"
         self.ssrms_screen.ids.ShoulderYaw.text = str(ShoulderYaw) + " deg"
         self.ssrms_screen.ids.ShoulderPitch.text = str(ShoulderPitch) + " deg"
