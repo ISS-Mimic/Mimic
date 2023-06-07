@@ -2650,6 +2650,9 @@ class MainApp(App):
         
         ##SPDM Telemetry
         SPDMbase = str((values[271])[0])
+        Arm1OTCM = int((values[279])[0])
+        Arm2OTCM = int((values[288])[0])
+        BodyPayload = int((values[288])[0])
         BodyRoll = "{:.2f}".format(float((values[289])[0]))
                                        
         #ECLSS telemetry
@@ -3471,6 +3474,36 @@ class MainApp(App):
             self.spdm1_screen.ids.SPDMbase.text = "Undefined"
         else:
             self.spdm1_screen.ids.SPDMbase.text = "n/a"
+        
+        #self.spdm1_screen.ids.Arm1OTCM.text = str(Arm1OTCM)
+        if int(Arm1OTCM) == 0:
+            self.spdm1_screen.ids.Arm1OTCM.text = "Released"
+        elif int(Arm1OTCM) == 1:
+            self.spdm1_screen.ids.Arm1OTCM.text = "Captive"
+        elif int(Arm1OTCM) == 2:
+            self.spdm1_screen.ids.Arm1OTCM.text = "Captured"
+        else:
+            self.spdm1_screen.ids.Arm1OTCM.text = "n/a"
+        
+        #self.spdm1_screen.ids.Arm2OTCM.text = str(Arm1OTCM)
+        if int(Arm2OTCM) == 0:
+            self.spdm1_screen.ids.Arm2OTCM.text = "Released"
+        elif int(Arm2OTCM) == 1:
+            self.spdm1_screen.ids.Arm2OTCM.text = "Captive"
+        elif int(Arm2OTCM) == 2:
+            self.spdm1_screen.ids.Arm2OTCM.text = "Captured"
+        else:
+            self.spdm1_screen.ids.Arm2OTCM.text = "n/a"
+        
+        #self.spdm1_screen.ids.BodyPayload.text = str(BodyPayload)
+        if int(BodyPayload) == 0:
+            self.spdm1_screen.ids.BodyPayload.text = "Released"
+        elif int(BodyPayload) == 1:
+            self.spdm1_screen.ids.BodyPayload.text = "Captive"
+        elif int(BodyPayload) == 2:
+            self.spdm1_screen.ids.BodyPayload.text = "Captured"
+        else:
+            self.spdm1_screen.ids.BodyPayload.text = "n/a"
         
         self.spdm1_screen.ids.BodyRoll.text = str(BodyRoll) + " deg"
         #More more more
