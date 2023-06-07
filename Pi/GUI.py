@@ -3519,7 +3519,7 @@ class MainApp(App):
         else:
             self.spdm1_screen.ids.BodyPayload.text = "n/a"
         
-        self.spdm1_screen.ids.Body1Roll.text = str(Body1Roll)
+        self.spdm1_screen.ids.Body1Roll.text = str(BodyRoll)
         self.spdm1_screen.ids.Shoulder1Roll.text = str(Shoulder1Roll)
         self.spdm1_screen.ids.Shoulder1Yaw.text = str(Shoulder1Yaw)
         self.spdm1_screen.ids.Shoulder1Pitch.text = str(Shoulder1Pitch)
@@ -3527,7 +3527,6 @@ class MainApp(App):
         self.spdm1_screen.ids.Wrist1Roll.text = str(Wrist1Roll)
         self.spdm1_screen.ids.Wris1tYaw.text = str(Wris1tYaw)
         self.spdm1_screen.ids.Wrist1Pitch.text = str(Wrist1Pitch)
-        self.spdm1_screen.ids.Body1Roll.text = str(Body2Roll)
         self.spdm1_screen.ids.Shoulder1Roll.text = str(Shoulder2Roll)
         self.spdm1_screen.ids.Shoulder1Yaw.text = str(Shoulder2Yaw)
         self.spdm1_screen.ids.Shoulder1Pitch.text = str(Shoulder2Pitch)
