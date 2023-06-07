@@ -2647,6 +2647,10 @@ class MainApp(App):
         WristRoll = "{:.2f}".format(float((values[276])[0]))
         WristYaw = "{:.2f}".format(float((values[277])[0]))
         WristPitch = "{:.2f}".format(float((values[277])[0]))
+        
+        ##SPDM Telemetry
+        SPDMbase = str((values[271])[0])
+        BodyRoll = "{:.2f}".format(float((values[289])[0]))
                                        
         #ECLSS telemetry
         CabinTemp = "{:.2f}".format(float((values[195])[0]))
@@ -3441,6 +3445,35 @@ class MainApp(App):
             self.ssrms_screen.ids.BaseLocation.text = "Undefined"
         else:
             self.ssrms_screen.ids.BaseLocation.text = "n/a"
+        
+        #self.ssrms_screen.ids.SPDMbase.text = str(SPDMbase)
+        if int(SPDMbase) == 1:
+            self.spdm_screen.ids.SPDMbase.text = "Lab"
+        elif int(SPDMbase) == 2:
+            self.spdm_screen.ids.SPDMbase.text = "Node 3"
+        elif int(SPDMbase) == 4:
+            self.spdm_screen.ids.SPDMbase.text = "Node 2"
+        elif int(SPDMbase) == 7:
+            self.spdm_screen.ids.SPDMbase.text = "MBS PDGF 1"
+        elif int(SPDMbase) == 8:
+            self.spdm_screen.ids.SPDMbase.text = "MBS PDGF 2"
+        elif int(SPDMbase) == 11:
+            self.spdm_screen.ids.SPDMbase.text = "MBS PDGF 3"
+        elif int(SPDMbase) == 13:
+            self.spdm_screen.ids.SPDMbase.text = "MBS PDGF 4"
+        elif int(SPDMbase) ==14:
+            self.spdm_screen.ids.SPDMbase.text = "FGB"
+        elif int(SPDMbase) == 16:
+            self.spdm_screen.ids.SPDMbase.text = "POA"
+        elif int(SPDMbase) == 19:
+            self.spdm_screen.ids.SPDMbase.text = "SSRMS Tip LEE"
+        elif int(SPDMbase) == 63:
+            self.spdm_screen.ids.SPDMbase.text = "Undefined"
+        else:
+            self.spdm_screen.ids.SPDMbase.text = "n/a"
+        
+        self.spdm_screen.ids.BodyRoll.text = str(BodyRoll) + " deg"
+        #More more more
         
         #self.ct_uhf_screen.ids.UHF1pwr.text = str(UHF1pwr)
         if int(UHF1pwr) == 0:
