@@ -2647,7 +2647,7 @@ class MainApp(App):
         ShoulderRoll = "{:.2f}".format(float((values[262])[0]))
         ShoulderYaw = "{:.2f}".format(float((values[263])[0]))
         ShoulderPitch = "{:.2f}".format(float((values[264])[0]))
-        ElbowPitch = "{:.2f}".format(float((values[255])[0]))
+        ElbowPitch = "{:.2f}".format(float((values[265])[0]))
         WristRoll = "{:.2f}".format(float((values[268])[0]))
         WristYaw = "{:.2f}".format(float((values[267])[0]))
         WristPitch = "{:.2f}".format(float((values[266])[0]))
