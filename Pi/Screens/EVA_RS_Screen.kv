@@ -7,17 +7,15 @@
         Image:
             id: RS_EVA_background
             source: '/home/pi/Mimic/Pi/imgs/eva/RSpageEVAbase.png'
-            allow_stretch: False
-            ##size_hint_y: 1
-            ##keep_ratio: False
+            fit_mode: "fill"
         Image:
             id: signal
             source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
             size_hint_y: 0.15
             anim_delay: 0.05
             anim_loop: 0
-            keep_ratio: True
             pos_hint: {"center_x": 0.05, "center_y": 0.07}
+            fit_mode: "scale-down"
         Button:
             size_hint: 0.1,0.11
             ##pos_hint: {"Left": 1, "Bottom": 1}
