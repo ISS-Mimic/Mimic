@@ -2644,6 +2644,7 @@ class MainApp(App):
         OperatingBase = str((values[261])[0])
         BaseLocation = str((values[260])[0])
         TipLEEstatus = str((values[269])[0])
+        SACSopBase = str((values[261])[0])
         ShoulderRoll = "{:.2f}".format(float((values[262])[0]))
         ShoulderYaw = "{:.2f}".format(float((values[263])[0]))
         ShoulderPitch = "{:.2f}".format(float((values[264])[0]))
@@ -3504,6 +3505,14 @@ class MainApp(App):
             self.ssrms_screen.ids.TipLEEstatus.text = "Captured"
         else:
             self.ssrms_screen.ids.TipLEEstatus.text = "n/a"
+        
+         #self.ssrms_screen.ids.SACSopBase.text = str(SACSopBase)
+        if int(SACSopBase) == 0:
+            self.ssrms_screen.ids.SACSopBase.text = "A"
+        elif int(SACSopBase) == 5:
+            self.ssrms_screen.ids.SACSopBase.text = "B"
+        else:
+            self.ssrms_screen.ids.OperatingBase.text = "n/a"
         
         self.ssrms_screen.ids.ShoulderRoll.text = str(ShoulderRoll) + " deg"
         self.ssrms_screen.ids.ShoulderYaw.text = str(ShoulderYaw) + " deg"
