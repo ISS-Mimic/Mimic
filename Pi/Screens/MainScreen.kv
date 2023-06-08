@@ -1,4 +1,4 @@
-#:kivy 1.8
+#:kivy 2.2
 #:import kivy kivy
 #:import win kivy.core.window
 
@@ -8,26 +8,22 @@
         orientation: 'vertical'
         Image:
             source: '/home/pi/Mimic/Pi/imgs/main/MainBackground.png'
-            allow_stretch: False
-            keep_ratio: True
+            fit_mode: "fill"
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
         Image:
             source: '/home/pi/Mimic/Pi/imgs/main/ISSmimicLogoPartsGroundtrackLightBlue.png'
-            allow_stretch: False
-            keep_ratio: True
+            fit_mode: "contain"
             pos_hint: {"center_x": 0.5, "center_y": 0.82}
         Image:
             id: ISStiny
             source: '/home/pi/Mimic/Pi/imgs/main/ISSmimicLogoPartsGlowingISSblue.png'
-            keep_ratio: False
-            allow_stretch: True
+            fit_mode: "contain"
             size_hint: 0.07,0.07
             pos_hint: {"center_x": 0.25, "center_y": 0.25}
         Image:
             id: ISStiny2
             source: '/home/pi/Mimic/Pi/imgs/main/ISSmimicLogoPartsGlowingISSblue.png'
-            keep_ratio: False
-            allow_stretch: True
+            fit_mode: "contain"
             size_hint: 0.0,0.0
             pos_hint: {"center_x": 0.25, "center_y": 0.25}
         Button:
@@ -61,7 +57,6 @@
             height: 20
             on_press: root.changeManualControlBoolean(True)
             on_release: root.manager.current = 'manualcontrol'
-
         Button:
             size_hint: 0.15,0.4
             pos_hint: {"center_x": 0.325, "center_y": 0.37}

@@ -1216,6 +1216,15 @@ class RS_Dock_Screen(Screen, EventDispatcher):
 class Crew_Screen(Screen, EventDispatcher):
     pass
 
+class Robo_Screen(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class SSRMS_Screen(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class SPDM1_Screen(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1, 1, 1])
+
 class MSS_MT_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1, 1, 1])
 
@@ -1274,6 +1283,9 @@ class MainApp(App):
         self.rs_eva = EVA_RS_Screen(name='rs_eva')
         self.rs_screen = RS_Screen(name='rs')
         self.rs_dock = RS_Dock_Screen(name='rs_dock')
+        self.robo_screen = Robo_Screen(name='robo')
+        self.ssrms_screen = SSRMS_Screen(name='ssrms')
+        self.spdm1_screen = SPDM1_Screen(name='spdm1')
         self.mss_mt_screen = MSS_MT_Screen(name='mt')
         self.cdh_screen = CDH_Screen(name = 'cdh')
         self.science_screen = Science_Screen(name = 'science')
@@ -1286,7 +1298,7 @@ class MainApp(App):
         ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen',
                       'ct_screen', 'ct_sasa_screen', 'ct_sgant_screen', 'ct_uhf_screen',
                       'ct_camera_screen', 'gnc_screen', 'orbit_screen', 'us_eva', 'rs_eva',
-                      'eva_main', 'mimic_screen', 'mss_mt_screen','orbit_pass','orbit_data','crew_screen']
+                      'eva_main', 'mimic_screen', 'robo_screen', 'mss_mt_screen', 'ssrms_screen', 'spdm1_screen','orbit_pass', 'orbit_data', 'crew_screen']
 
         root = MainScreenManager(transition=SwapTransition())
         root.add_widget(self.main_screen)
@@ -1314,6 +1326,9 @@ class MainApp(App):
         root.add_widget(self.rs_eva)
         root.add_widget(self.rs_screen)
         root.add_widget(self.rs_dock)
+        root.add_widget(self.robo_screen)
+        root.add_widget(self.ssrms_screen)
+        root.add_widget(self.spdm1_screen)
         root.add_widget(self.mss_mt_screen)
         root.add_widget(self.eva_main)
         root.add_widget(self.eva_pictures)
@@ -2475,6 +2490,7 @@ class MainApp(App):
             self.mimic_screen.ids.mimicstartbutton.disabled = False
             self.fakeorbit_screen.ids.DemoStart.disabled = False
             self.fakeorbit_screen.ids.HTVDemoStart.disabled = False
+            self.fakeorbit_screen.ids.OFT2DemoStart.disabled = False
             self.control_screen.ids.set90.disabled = False
             self.control_screen.ids.set0.disabled = False
             if mimicbutton:
@@ -2487,6 +2503,7 @@ class MainApp(App):
             self.mimic_screen.ids.mimicstartbutton.text = "Transmit"
             self.fakeorbit_screen.ids.DemoStart.disabled = True
             self.fakeorbit_screen.ids.HTVDemoStart.disabled = True
+            self.fakeorbit_screen.ids.OFT2DemoStart.disabled = True
             self.control_screen.ids.set90.disabled = True
             self.control_screen.ids.set0.disabled = True
 
@@ -2495,6 +2512,8 @@ class MainApp(App):
             self.fakeorbit_screen.ids.HTVDemoStart.disabled = True
             self.fakeorbit_screen.ids.DemoStop.disabled = False
             self.fakeorbit_screen.ids.HTVDemoStop.disabled = False
+            self.fakeorbit_screen.ids.OFT2DemoStart.disabled = True
+            self.fakeorbit_screen.ids.OFT2DemoStop.disabled = False
             self.fakeorbit_screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
 
         c.execute('select Value from telemetry')
@@ -2618,9 +2637,43 @@ class MainApp(App):
         NH3outletTemp_loopB = "{:.2f}".format(float((values[21])[0]))
 
         #MBS and MT telemetry
-        MCASpayload = str((values[292])[0])
-        POApayload = str((values[294])[0])
-
+        MCASpayload = int((values[292])[0])
+        POApayload = int((values[294])[0])
+        
+        ##SSRMS telemetry
+        OperatingBase = str((values[261])[0])
+        BaseLocation = str((values[260])[0])
+        TipLEEstatus = str((values[269])[0])
+        ShoulderRoll = "{:.2f}".format(float((values[272])[0]))
+        ShoulderYaw = "{:.2f}".format(float((values[273])[0]))
+        ShoulderPitch = "{:.2f}".format(float((values[274])[0]))
+        ElbowPitch = "{:.2f}".format(float((values[275])[0]))
+        WristRoll = "{:.2f}".format(float((values[276])[0]))
+        WristYaw = "{:.2f}".format(float((values[277])[0]))
+        WristPitch = "{:.2f}".format(float((values[277])[0]))
+        
+        ##SPDM Telemetry
+        SPDMbase = str((values[271])[0])
+        SPDMoperatingBase = str((values[270])[0])
+        Shoulder1Roll = "{:.2f}".format(float((values[272])[0]))
+        Shoulder1Yaw = "{:.2f}".format(float((values[273])[0]))
+        Shoulder1Pitch = "{:.2f}".format(float((values[274])[0]))
+        Elbow1Pitch = "{:.2f}".format(float((values[275])[0]))
+        Wrist1Roll = "{:.2f}".format(float((values[278])[0]))
+        Wrist1Yaw = "{:.2f}".format(float((values[277])[0]))
+        Wrist1Pitch = "{:.2f}".format(float((values[276])[0]))
+        Shoulder2Roll = "{:.2f}".format(float((values[280])[0]))
+        Shoulder2Yaw = "{:.2f}".format(float((values[281])[0]))
+        Shoulder2Pitch = "{:.2f}".format(float((values[282])[0]))
+        Elbow2Pitch = "{:.2f}".format(float((values[283])[0]))
+        Wrist2Roll = "{:.2f}".format(float((values[286])[0]))
+        Wrist2Yaw = "{:.2f}".format(float((values[285])[0]))
+        Wrist2Pitch = "{:.2f}".format(float((values[284])[0])) 
+        Arm1OTCM = int((values[279])[0])
+        Arm2OTCM = int((values[288])[0])
+        BodyPayload = int((values[288])[0])
+        BodyRoll = "{:.2f}".format(float((values[289])[0]))
+                                       
         #ECLSS telemetry
         CabinTemp = "{:.2f}".format(float((values[195])[0]))
         CabinPress = "{:.2f}".format(float((values[194])[0]))
@@ -3345,6 +3398,77 @@ class MainApp(App):
         self.eclss_screen.ids.AirlockPress.text = str(AirlockPress)
         self.eclss_screen.ids.CleanWater.text = str(CleanWater)
         self.eclss_screen.ids.WasteWater.text = str(WasteWater)
+        
+        ##Summary Telemetery on Robo Screen
+        self.robo_screen.ids.mt_worksite.text = str(mt_worksite)
+        
+        #self.robo_screen.ids.OperatingBase.text = str(OperatingBase)
+        if int(OperatingBase) == 0:
+            self.robo_screen.ids.OperatingBase.text = "A"
+        elif int(OperatingBase) == 5:
+            self.robo_screen.ids.OperatingBase.text = "B"
+        else:
+            self.robo_screen.ids.OperatingBase.text = "n/a"
+        
+        #self.robo_screen.ids.BaseLocation.text = str(BaseLocation)
+        if int(BaseLocation) == 1:
+            self.robo_screen.ids.BaseLocation.text = "Lab"
+        elif int(BaseLocation) == 2:
+            self.robo_screen.ids.BaseLocation.text = "Node 3"
+        elif int(BaseLocation) == 4:
+            self.robo_screen.ids.BaseLocation.text = "Node 2"
+        elif int(BaseLocation) == 7:
+            self.robo_screen.ids.BaseLocation.text = "MBS PDGF 1"
+        elif int(BaseLocation) == 8:
+            self.robo_screen.ids.BaseLocation.text = "MBS PDGF 2"
+        elif int(BaseLocation) == 11:
+            self.robo_screen.ids.BaseLocation.text = "MBS PDGF 3"
+        elif int(BaseLocation) == 13:
+            self.robo_screen.ids.BaseLocation.text = "MBS PDGF 4"
+        elif int(BaseLocation) ==14:
+            self.robo_screen.ids.BaseLocation.text = "FGB"
+        elif int(BaseLocation) == 16:
+            self.robo_screen.ids.BaseLocation.text = "POA"
+        elif int(BaseLocation) == 19:
+            self.robo_screen.ids.BaseLocation.text = "SSRMS Tip LEE"
+        elif int(BaseLocation) == 63:
+            self.robo_screen.ids.BaseLocation.text = "Undefined"
+        else:
+            self.robo_screen.ids.BaseLocation.text = "n/a"
+        
+        #self.robo_screen.ids.SPDMbase.text = str(SPDMbase)
+        if int(SPDMbase) == 1:
+            self.robo_screen.ids.SPDMbase.text = "Lab"
+        elif int(SPDMbase) == 2:
+            self.robo_screen.ids.SPDMbase.text = "Node 3"
+        elif int(SPDMbase) == 4:
+            self.robo_screen.ids.SPDMbase.text = "Node 2"
+        elif int(SPDMbase) == 7:
+            self.robo_screen.ids.SPDMbase.text = "MBS PDGF 1"
+        elif int(SPDMbase) == 8:
+            self.robo_screen.ids.SPDMbase.text = "MBS PDGF 2"
+        elif int(SPDMbase) == 11:
+            self.robo_screen.ids.SPDMbase.text = "MBS PDGF 3"
+        elif int(SPDMbase) == 13:
+            self.robo_screen.ids.SPDMbase.text = "MBS PDGF 4"
+        elif int(SPDMbase) ==14:
+            self.robo_screen.ids.SPDMbase.text = "FGB"
+        elif int(SPDMbase) == 16:
+            self.robo_screen.ids.SPDMbase.text = "POA"
+        elif int(SPDMbase) == 19:
+            self.robo_screen.ids.SPDMbase.text = "SSRMS Tip LEE"
+        elif int(SPDMbase) == 63:
+            self.robo_screen.ids.SPDMbase.text = "Undefined"
+        else:
+            self.robo_screen.ids.SPDMbase.text = "n/a"
+        
+        #self.robo_screen.ids.SPDMoperatingBase.text = str(SPDMoperatingBase)
+        if int(SPDMoperatingBase) == 1:
+            self.robo_screen.ids.SPDMoperatingBase.text = "SPDM Body LEE"
+        elif int(SPDMoperatingBase) == 2:
+            self.robo_screen.ids.SPDMoperatingBase.text = "SPDM Body PDGF"
+        else:
+            self.robo_screen.ids.SPDMoperatingBase.text = "n/a"
 
         #self.mss_mt_screen.ids.MCASpayload.text = str(MCASpayload)
         if int(MCASpayload) == 0:
@@ -3362,6 +3486,138 @@ class MainApp(App):
             self.mss_mt_screen.ids.POApayload.text = "Captured"
         else:
             self.mss_mt_screen.ids.POApayload.text = "n/a" 
+        
+        #self.ssrms_screen.ids.OperatingBase.text = str(OperatingBase)
+        if int(OperatingBase) == 0:
+            self.ssrms_screen.ids.OperatingBase.text = "A"
+        elif int(OperatingBase) == 5:
+            self.ssrms_screen.ids.OperatingBase.text = "B"
+        else:
+            self.ssrms_screen.ids.OperatingBase.text = "n/a"
+                                      
+        #self.ssrms_screen.ids.TipLEEstatus.text = str(TipLEEstatus)
+        if int(TipLEEstatus) == 0:
+            self.ssrms_screen.ids.TipLEEstatus.text = "Released"
+        elif int(TipLEEstatus) == 1:
+            self.ssrms_screen.ids.TipLEEstatus.text = "Captive"
+        elif int(TipLEEstatus) == 2:
+            self.ssrms_screen.ids.TipLEEstatus.text = "Captured"
+        else:
+            self.ssrms_screen.ids.TipLEEstatus.text = "n/a"
+        
+        self.ssrms_screen.ids.ShoulderRoll.text = str(ShoulderRoll) + " deg"
+        self.ssrms_screen.ids.ShoulderYaw.text = str(ShoulderYaw) + " deg"
+        self.ssrms_screen.ids.ShoulderPitch.text = str(ShoulderPitch) + " deg"
+        self.ssrms_screen.ids.ElbowPitch.text = str(ElbowPitch) + " deg"
+        self.ssrms_screen.ids.WristRoll.text = str(WristRoll) + " deg"
+        self.ssrms_screen.ids.WristYaw.text = str(WristYaw) + " deg"
+        self.ssrms_screen.ids.WristPitch.text = str(WristPitch) + " deg"
+        
+        #self.ssrms_screen.ids.BaseLocation.text = str(BaseLocation)
+        if int(BaseLocation) == 1:
+            self.ssrms_screen.ids.BaseLocation.text = "Lab"
+        elif int(BaseLocation) == 2:
+            self.ssrms_screen.ids.BaseLocation.text = "Node 3"
+        elif int(BaseLocation) == 4:
+            self.ssrms_screen.ids.BaseLocation.text = "Node 2"
+        elif int(BaseLocation) == 7:
+            self.ssrms_screen.ids.BaseLocation.text = "MBS PDGF 1"
+        elif int(BaseLocation) == 8:
+            self.ssrms_screen.ids.BaseLocation.text = "MBS PDGF 2"
+        elif int(BaseLocation) == 11:
+            self.ssrms_screen.ids.BaseLocation.text = "MBS PDGF 3"
+        elif int(BaseLocation) == 13:
+            self.ssrms_screen.ids.BaseLocation.text = "MBS PDGF 4"
+        elif int(BaseLocation) ==14:
+            self.ssrms_screen.ids.BaseLocation.text = "FGB"
+        elif int(BaseLocation) == 16:
+            self.ssrms_screen.ids.BaseLocation.text = "POA"
+        elif int(BaseLocation) == 19:
+            self.ssrms_screen.ids.BaseLocation.text = "SSRMS Tip LEE"
+        elif int(BaseLocation) == 63:
+            self.ssrms_screen.ids.BaseLocation.text = "Undefined"
+        else:
+            self.ssrms_screen.ids.BaseLocation.text = "n/a"
+        
+        #self.spdm1_screen.ids.SPDMbase.text = str(SPDMbase)
+        if int(SPDMbase) == 1:
+            self.spdm1_screen.ids.SPDMbase.text = "Lab"
+        elif int(SPDMbase) == 2:
+            self.spdm1_screen.ids.SPDMbase.text = "Node 3"
+        elif int(SPDMbase) == 4:
+            self.spdm1_screen.ids.SPDMbase.text = "Node 2"
+        elif int(SPDMbase) == 7:
+            self.spdm1_screen.ids.SPDMbase.text = "MBS PDGF 1"
+        elif int(SPDMbase) == 8:
+            self.spdm1_screen.ids.SPDMbase.text = "MBS PDGF 2"
+        elif int(SPDMbase) == 11:
+            self.spdm1_screen.ids.SPDMbase.text = "MBS PDGF 3"
+        elif int(SPDMbase) == 13:
+            self.spdm1_screen.ids.SPDMbase.text = "MBS PDGF 4"
+        elif int(SPDMbase) ==14:
+            self.spdm1_screen.ids.SPDMbase.text = "FGB"
+        elif int(SPDMbase) == 16:
+            self.spdm1_screen.ids.SPDMbase.text = "POA"
+        elif int(SPDMbase) == 19:
+            self.spdm1_screen.ids.SPDMbase.text = "SSRMS Tip LEE"
+        elif int(SPDMbase) == 63:
+            self.spdm1_screen.ids.SPDMbase.text = "Undefined"
+        else:
+            self.spdm1_screen.ids.SPDMbase.text = "n/a"
+        
+         #self.spdm1_screen.ids.SPDMoperatingBase.text = str(SPDMoperatingBase)
+        if int(SPDMoperatingBase) == 1:
+            self.spdm1_screen.ids.SPDMoperatingBase.text = "SPDM Body LEE"
+        elif int(SPDMoperatingBase) == 2:
+            self.spdm1_screen.ids.SPDMoperatingBase.text = "SPDM Body PDGF"
+        else:
+            self.spdm1_screen.ids.SPDMoperatingBase.text = "n/a"
+        
+        #self.spdm1_screen.ids.Arm1OTCM.text = str(Arm1OTCM)
+        if int(Arm1OTCM) == 0:
+            self.spdm1_screen.ids.Arm1OTCM.text = "Released"
+        elif int(Arm1OTCM) == 1:
+            self.spdm1_screen.ids.Arm1OTCM.text = "Captive"
+        elif int(Arm1OTCM) == 2:
+            self.spdm1_screen.ids.Arm1OTCM.text = "Captured"
+        else:
+            self.spdm1_screen.ids.Arm1OTCM.text = "n/a"
+        
+        #self.spdm1_screen.ids.Arm2OTCM.text = str(Arm1OTCM)
+        if int(Arm2OTCM) == 0:
+            self.spdm1_screen.ids.Arm2OTCM.text = "Released"
+        elif int(Arm2OTCM) == 1:
+            self.spdm1_screen.ids.Arm2OTCM.text = "Captive"
+        elif int(Arm2OTCM) == 2:
+            self.spdm1_screen.ids.Arm2OTCM.text = "Captured"
+        else:
+            self.spdm1_screen.ids.Arm2OTCM.text = "n/a"
+        
+        #self.spdm1_screen.ids.BodyPayload.text = str(BodyPayload)
+        if int(BodyPayload) == 0:
+            self.spdm1_screen.ids.BodyPayload.text = "Released"
+        elif int(BodyPayload) == 1:
+            self.spdm1_screen.ids.BodyPayload.text = "Captive"
+        elif int(BodyPayload) == 2:
+            self.spdm1_screen.ids.BodyPayload.text = "Captured"
+        else:
+            self.spdm1_screen.ids.BodyPayload.text = "n/a"
+        
+        self.spdm1_screen.ids.BodyRoll.text = str(BodyRoll)
+        self.spdm1_screen.ids.Shoulder1Roll.text = str(Shoulder1Roll)
+        self.spdm1_screen.ids.Shoulder1Yaw.text = str(Shoulder1Yaw)
+        self.spdm1_screen.ids.Shoulder1Pitch.text = str(Shoulder1Pitch)
+        self.spdm1_screen.ids.Elbow1Pitch.text = str(Elbow1Pitch)
+        self.spdm1_screen.ids.Wrist1Roll.text = str(Wrist1Roll)
+        self.spdm1_screen.ids.Wrist1Yaw.text = str(Wrist1Yaw)
+        self.spdm1_screen.ids.Wrist1Pitch.text = str(Wrist1Pitch)
+        self.spdm1_screen.ids.Shoulder2Roll.text = str(Shoulder2Roll)
+        self.spdm1_screen.ids.Shoulder2Yaw.text = str(Shoulder2Yaw)
+        self.spdm1_screen.ids.Shoulder2Pitch.text = str(Shoulder2Pitch)
+        self.spdm1_screen.ids.Elbow2Pitch.text = str(Elbow2Pitch)
+        self.spdm1_screen.ids.Wrist2Roll.text = str(Wrist2Roll)
+        self.spdm1_screen.ids.Wrist2Yaw.text = str(Wrist2Yaw)
+        self.spdm1_screen.ids.Wrist2Pitch.text = str(Wrist2Pitch)
         
         #self.ct_uhf_screen.ids.UHF1pwr.text = str(UHF1pwr)
         if int(UHF1pwr) == 0:
@@ -3501,6 +3757,9 @@ Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Crew_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/RS_Screen.kv')
 
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ManualControlScreen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Robo_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/SSRMS_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/SPDM1_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MSS_MT_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MimicScreen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MainScreen.kv')

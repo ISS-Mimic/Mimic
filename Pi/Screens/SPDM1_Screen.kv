@@ -1,0 +1,161 @@
+#:kivy 1.8
+#:import kivy kivy
+#:import win kivy.core.window
+<SPDM1_Screen>:
+    name: 'spdm1'
+    FloatLayout:
+        Image:
+            id: SPDM1_Background
+            source: "/home/pi/Mimic/Pi/imgs/robo/SPDM1background.png"
+            allow_stretch: False
+        Label:
+            id: SPDMbase
+            pos_hint: {"center_x": 0.8, "center_y": 0.95}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: SPDMoperatingBase
+            pos_hint: {"center_x": 0.8, "center_y": 0.815}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: Shoulder1Roll
+            pos_hint: {"center_x": 0.15, "center_y": 0.67}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: Shoulder1Yaw
+            pos_hint: {"center_x": 0.15, "center_y": 0.63}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: Shoulder1Pitch
+            pos_hint: {"center_x": 0.15, "center_y": 0.59}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: Elbow1Pitch
+            pos_hint: {"center_x": 0.15, "center_y": 0.55}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: Wrist1Roll
+            pos_hint: {"center_x": 0.15, "center_y": 0.51}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: Wrist1Yaw
+            pos_hint: {"center_x": 0.15, "center_y": 0.47}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: Wrist1Pitch
+            pos_hint: {"center_x": 0.15, "center_y": 0.43}
+            markup: True
+            color: root.signalcolor
+            font_size: 20 
+        Label:
+            id: Shoulder2Roll
+            pos_hint: {"center_x": 0.25, "center_y": 0.67}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: Shoulder2Yaw
+            pos_hint: {"center_x": 0.25, "center_y": 0.63}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: Shoulder2Pitch
+            pos_hint: {"center_x": 0.25, "center_y": 0.59}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: Elbow2Pitch
+            pos_hint: {"center_x": 0.25, "center_y": 0.55}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: Wrist2Roll
+            pos_hint: {"center_x": 0.25, "center_y": 0.51}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: Wrist2Yaw
+            pos_hint: {"center_x": 0.25, "center_y": 0.47}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: Wrist2Pitch
+            pos_hint: {"center_x": 0.25, "center_y": 0.43}
+            markup: True
+            color: root.signalcolor
+            font_size: 20 
+        Label:
+            id: Arm1OTCM
+            pos_hint: {"center_x": 0.3, "center_y": 0.3}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: Arm2OTCM
+            pos_hint: {"center_x": 0.3, "center_y": 0.26}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: BodyPayload
+            pos_hint: {"center_x": 0.3, "center_y": 0.22}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: BodyRoll
+            pos_hint: {"center_x": 0.8, "center_y": 0.32}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Button:
+            size_hint: 0.1,0.11
+            ##pos_hint: {"Left": 1, "Bottom": 1}
+            pos_hint: {"center_x": 0.9375, "center_y": 0.082}
+            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
+            text: ''
+            font_size: 30
+            on_release: app.root.current = 'robo'
+        Image:
+            id: signal
+            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+            size_hint_y: 0.15
+            anim_delay: 0.12
+            anim_loop: 0
+            keep_ratio: True
+            pos_hint: {"center_x": 0.05, "center_y": 0.07}
+        Image:
+            id: arduino
+            source: "/home/pi/Mimic/Pi/imgs/signal/arduino_offline.png"
+            size_hint_y: 0.15
+            anim_delay: 0.2
+            anim_loop: 0
+            keep_ratio: True
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+        Label:
+            id: arduino_count
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+            text: ''
+            markup: True
+            color: 1,1,1
+            font_size: 55

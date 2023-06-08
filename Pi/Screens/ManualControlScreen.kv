@@ -10,15 +10,15 @@
         Image:
             id: Control_background
             source: '/home/pi/Mimic/Pi/imgs/control/ControlBackground.png'
-            allow_stretch: False
+            fit_mode: "fill"
         Image:
             id: signal
             source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
-            size_hint: None, 0.15
+            size_hint_y: 0.15
             anim_delay: 0.12
             anim_loop: 0
-            keep_ratio: True
-            pos_hint: {"x": 0.0, "y": 0.0}
+            pos_hint: {"center_x": 0.05, "center_y": 0.07}
+            fit_mode: "scale-down"
         Button:
             size_hint: 0.1,0.11
             ##pos_hint: {"Left": 1, "Bottom": 1}
@@ -30,14 +30,13 @@
         Image:
             id: arduino
             source: "/home/pi/Mimic/Pi/imgs/signal/arduino_offline.png"
-            size_hint: None, 0.15
+            size_hint_y: 0.15
             anim_delay: 0.2
             anim_loop: 0
-            keep_ratio: True
-            pos_hint: {"x": 0.12, "y": 0.0}
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+            fit_mode: "scale-down"
         Label:
             id: arduino_count
-            size_hint: None, 0.15
             pos_hint: {"x": 0.12, "y": 0.0}
             text: ''
             markup: True
@@ -54,7 +53,7 @@
             size_hint: 0.08,0.3
             pos_hint: {"center_x": 0.6, "center_y": 0.7}
             text: "4B"
-            font_size: 30
+            font_size: dp(30)
             on_press: root.setActive("Beta4B")
             halign: "center"
         Button:
@@ -62,7 +61,7 @@
             size_hint: 0.08,0.3
             pos_hint: {"center_x": 0.6, "center_y": 0.3}
             text: "2B"
-            font_size: 30
+            font_size: dp(30)
             on_press: root.setActive("Beta2B")
             halign: "center"
         Button:
@@ -70,7 +69,7 @@
             size_hint: 0.2,0.1
             pos_hint: {"center_x": 0.55, "center_y": 0.5}
             text: "Port Truss"
-            font_size: 30
+            font_size: dp(30)
             on_press: root.setActive("PSARJ")
             halign: "center"
         Button:
@@ -78,7 +77,7 @@
             size_hint: 0.08,0.3
             pos_hint: {"center_x": 0.5, "center_y": 0.7}
             text: "2A"
-            font_size: 30
+            font_size: dp(30)
             on_press: root.setActive("Beta2A")
             halign: "center"
         Button:
@@ -86,7 +85,7 @@
             size_hint: 0.08,0.3
             pos_hint: {"center_x": 0.5, "center_y": 0.3}
             text: "4A"
-            font_size: 30
+            font_size: dp(30)
             on_press: root.setActive("Beta4A")
             halign: "center"
         Button:
@@ -94,7 +93,7 @@
             size_hint: 0.1,0.3
             pos_hint: {"center_x": 0.4, "center_y": 0.5}
             text: "Port\nHRS"
-            font_size: 25
+            font_size: dp(25)
             on_press: root.setActive("PTRRJ")
             halign: "center"
         Button:
@@ -102,7 +101,7 @@
             size_hint: 0.1,0.3
             pos_hint: {"center_x": 0.3, "center_y": 0.5}
             text: "Stbd\nHRS"
-            font_size: 25
+            font_size: dp(25)
             on_press: root.setActive("STRRJ")
             halign: "center"
         Button:
@@ -110,7 +109,7 @@
             size_hint: 0.08,0.3
             pos_hint: {"center_x": 0.2, "center_y": 0.7}
             text: "3A"
-            font_size: 30
+            font_size: dp(30)
             on_press: root.setActive("Beta3A")
             halign: "center"
         Button:
@@ -118,7 +117,7 @@
             size_hint: 0.08,0.3
             pos_hint: {"center_x": 0.2, "center_y": 0.3}
             text: "1A"
-            font_size: 30
+            font_size: dp(30)
             on_press: root.setActive("Beta1A")
             halign: "center"
         Button:
@@ -126,7 +125,7 @@
             size_hint: 0.2,0.1
             pos_hint: {"center_x": 0.15, "center_y": 0.5}
             text: "Stbd Truss"
-            font_size: 30
+            font_size: dp(30)
             on_press: root.setActive("SSARJ")
             halign: "center"
         Button:
@@ -134,7 +133,7 @@
             size_hint: 0.08,0.3
             pos_hint: {"center_x": 0.1, "center_y": 0.3}
             text: "3B"
-            font_size: 30
+            font_size: dp(30)
             on_press: root.setActive("Beta3B")
             halign: "center"
         Button:
@@ -142,7 +141,7 @@
             size_hint: 0.08,0.3
             pos_hint: {"center_x": 0.1, "center_y": 0.7}
             text: "1B"
-            font_size: 30
+            font_size: dp(30)
             on_press: root.setActive("Beta1B")
             halign: "center"
         Button:
@@ -150,56 +149,55 @@
             size_hint: 0.1,0.07
             pos_hint: {"center_x": 0.8, "center_y": 0.75}
             text: 'Set 0'
-            font_size: 20
+            font_size: dp(20)
             on_release: root.send0()
         Button:
             id: set90
             size_hint: 0.1,0.07
             pos_hint: {"center_x": 0.9, "center_y": 0.75}
             text: 'Set 90'
-            font_size: 20
+            font_size: dp(20)
             on_release: root.send90()
         Button:
             size_hint: 0.2,0.07
             pos_hint: {"center_x": 0.85, "center_y": 0.62}
             text: 'Calibrate Zero'
-            font_size: 20
+            font_size: dp(20)
             on_press: root.zeroJoints()
         Button:
             size_hint: 0.1,0.07
             pos_hint: {"center_x": 0.9, "center_y": 0.49}
             text: '+5'
-            font_size: 20
+            font_size: dp(20)
             on_press: root.incrementActive(5)
         Button:
             size_hint: 0.1,0.07
             pos_hint: {"center_x": 0.8, "center_y": 0.49}
             text: '-5'
-            font_size: 20
+            font_size: dp(20)
             on_press: root.incrementActive(-5)
         Button:
             size_hint: 0.1,0.07
             pos_hint: {"center_x": 0.9, "center_y": 0.40}
             text: '+20'
-            font_size: 20
+            font_size: dp(20)
             on_press: root.incrementActive(20)
         Button:
             size_hint: 0.1,0.07
             pos_hint: {"center_x": 0.8, "center_y": 0.40}
             text: '-20'
-            font_size: 20
+            font_size: dp(20)
             on_press: root.incrementActive(-20)
         Button:
             size_hint: 0.1,0.07
             pos_hint: {"center_x": 0.9, "center_y": 0.31}
             text: '+90'
-            font_size: 20
-            on_press: root.test1()
+            font_size: dp(20)
             on_press: root.incrementActive(90)
         Button:
             size_hint: 0.1,0.07
             pos_hint: {"center_x": 0.8, "center_y": 0.31}
             text: '-90'
-            font_size: 20
+            font_size: dp(20)
             on_press: root.incrementActive(-90)
 

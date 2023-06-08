@@ -8,8 +8,7 @@
         orientation: 'vertical'
         Image:
             source: '/home/pi/Mimic/Pi/imgs/SettingsBackground.png'
-            allow_stretch: False
-            keep_ratio: True
+            fit_mode: "fill"
         Label:
             text: ''
             pos_hint: {"center_x": 0.5,"center_y":0.8}
@@ -19,34 +18,36 @@
             height: "20dp"
             color: 1,0,1
             width: "100dp"
-        Label:
-            text: "Smartflip (check to enable smooth 0 crossing)"
-            pos_hint: {"center_x": 0.35,"center_y":0.5}
         CheckBox:
             id: smartflip
             pos_hint: {"center_x": 0.1,"center_y": 0.5}
             size_hint_y: None
             height: '64dp'
             on_active: root.checkbox_clicked(self,self.active)
-    TextInput:
-        id: lat_input1
-        pos_hint: {'center_x': 0.2, 'y': 0.4}
-        size_hint: (0.1, 0.06)
-        cursor_blink: True
-        font_size: 15
-        multiline: False
-    TextInput:
-        id: lat_input2
-        pos_hint: {'center_x': 0.4, 'y': 0.4}
-        size_hint: (0.1, 0.06)
-        cursor_blink: True
-        font_size: 15
-        multiline: False
-    Button:
-        size_hint: 0.1,0.11
-        ##pos_hint: {"Left": 1, "Bottom": 1}
-        pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-        background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
-        text: ''
-        font_size: 30
-        on_release: app.root.current = 'mimic'
+        Label:
+            text: "Smartflip (check to enable smooth 0 crossing)"
+            pos_hint: smartflip.pos_hint_x
+            pos_hint: {"center_x": 0.35,"center_y":0.5}
+            font_size: '20dp'
+        TextInput:
+            id: lat_input1
+            pos_hint: {'center_x': 0.2, 'y': 0.4}
+            size_hint: (0.1, 0.06)
+            cursor_blink: True
+            font_size: 15
+            multiline: False
+        TextInput:
+            id: lat_input2
+            pos_hint: {'center_x': 0.4, 'y': 0.4}
+            size_hint: (0.1, 0.06)
+            cursor_blink: True
+            font_size: 15
+            multiline: False
+        Button:
+            size_hint: 0.1,0.11
+            ##pos_hint: {"Left": 1, "Bottom": 1}
+            pos_hint: {"center_x": 0.9375, "center_y": 0.082}
+            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
+            text: ''
+            font_size: 30
+            on_release: app.root.current = 'main'

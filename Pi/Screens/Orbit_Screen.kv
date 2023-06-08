@@ -5,21 +5,19 @@
         Image:
             id: Orbit_background
             source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitBackground.png'
-            allow_stretch: False
+            fit_mode: "fill"
         Image:
             id:orbit3d
-            #source: 'https://www.heavens-above.com/orbitdisplay.aspx?icon=iss&width=100&height=100&mode=A&satid=25544'
             source: '/home/pi/Mimic/Pi/imgs/orbit/globe.png'
             size_hint: 0.2,0.2
             pos_hint: {"center_x": 0.92, "center_y": 0.35}
-            keep_ratio: True
+            fit_mode: "contain"
         Image:
             id: OrbitMap
             source: '/home/pi/Mimic/Pi/imgs/orbit/map.jpg'
             pos_hint: {"center_x": 0.5, "center_y": 0.56}
             size_hint_y: 0.598
-            allow_stretch: False
-            keep_ratio: True
+            fit_mode: "contain"
         Widget:
             id: OrbitSun
             pos: (0-(self.width/2),0-(self.height/2))
@@ -359,25 +357,21 @@
         Label:
             id: dailyorbit
             pos_hint: {"center_x": 0.08, "center_y": 0.7}
-            text: ''
-            markup: True
+            text: '0'
             color: 1,1,1
-            font_size: 50
+            font_size: dp(50)
         Label:
             id: totalorbits
             pos_hint: {"center_x": 0.08, "center_y": 0.5}
-            text: ''
-            markup: True
+            text: '0'
             color: 1,1,1
-            font_size: 26
+            font_size: dp(50)
         Button:
             id: iss_pass_button
             size_hint: 0.12,0.18
             pos_hint: {"center_x": 0.92, "center_y": 0.76}
             background_normal: '/home/pi/Mimic/Pi/imgs/orbit/ISSpassUnlit.png'
             background_down: '/home/pi/Mimic/Pi/imgs/orbit/ISSpassDown.png'
-            text: ''
-            font_size: 30
             on_release: app.root.current = 'orbit_pass'
         Button:
             id: orbit_data_button
@@ -385,75 +379,55 @@
             pos_hint: {"center_x": 0.72, "center_y": 0.19}
             background_normal: '/home/pi/Mimic/Pi/imgs/orbit/OrbitDataUnlit.png'
             background_down: '/home/pi/Mimic/Pi/imgs/orbit/OrbitDataDown.png'
-            text: ''
-            font_size: 30
             on_release: app.root.current = 'orbit_data'
         Label:
             id: iss_next_pass1
             pos_hint: {"center_x": 0.92, "center_y": 0.6}
             text: '-----'
-            size_hint_y: None
-            size_hint_x: 0.1
             halign: 'center'
-            text_size: self.width, None
-            markup: True
             color: 1,1,1
-            font_size: 16
+            font_size: dp(26)
         Label:
             id: iss_next_pass2
             pos_hint: {"center_x": 0.92, "center_y": 0.55}
             text: '-----'
-            size_hint_y: None
-            size_hint_x: 0.1
             halign: 'center'
-            text_size: self.width, None
-            markup: True
             color: 1,1,1
-            font_size: 16
+            font_size: dp(26)
         Label:
             id: countdown
             pos_hint: {"center_x": 0.92, "center_y": 0.5}
             text: '-----'
-            size_hint_y: None
-            size_hint_x: 0.1
             halign: 'center'
-            text_size: self.width, None
-            markup: True
             color: 1,1,1
-            font_size: 16
+            font_size: dp(26)
         Label:
             id: ISSvisible
             pos_hint: {"center_x": 0.92, "center_y": 0.45}
             text: '---'
-            size_hint_y: None
-            size_hint_x: 0.1
             halign: 'center'
-            text_size: self.width, None
-            markup: True
             color: 1,1,1
-            font_size: 16
+            font_size: dp(26)
         Label:
             id: latitude
             pos_hint: {"center_x": 0.12, "center_y": 0.22}
             text: '0.00'
-            markup: True
             color: 1,1,1
-            font_size: 16
+            font_size: dp(26)
         Label:
             id: longitude
             pos_hint: {"center_x": 0.13, "center_y": 0.185}
             text: '0.00'
-            markup: True
             color: 1,1,1
-            font_size: 16
+            font_size: dp(26)
         Image:
             id: arduino
             source: "/home/pi/Mimic/Pi/imgs/signal/arduino_offline.png"
             size_hint_y: 0.15
             anim_delay: 0.2
             anim_loop: 0
-            keep_ratio: True
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
+            fit_mode: "scale-down"
         Label:
             id: arduino_count
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
@@ -474,5 +448,5 @@
             size_hint_y: 0.15
             anim_delay: 0.12
             anim_loop: 0
-            keep_ratio: True
             pos_hint: {"center_x": 0.05, "center_y": 0.07}
+            fit_mode: "scale-down"

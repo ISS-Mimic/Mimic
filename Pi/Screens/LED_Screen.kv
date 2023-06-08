@@ -7,15 +7,15 @@
         Image:
             id: LED_Background
             source: "/home/pi/Mimic/Pi/imgs/led/LEDbackground.png"
-            allow_stretch: False
+            fit_mode: "fill"
         Image:
             id: arduino
             source: "/home/pi/Mimic/Pi/imgs/signal/arduino_offline.png"
             size_hint: None, 0.15
             anim_delay: 0.2
             anim_loop: 0
-            keep_ratio: True
             pos_hint: {"x": 0.12, "y": 0.0}
+            fit_mode: "scale-down"
         Label:
             id: arduino_count
             size_hint: None, 0.15
@@ -38,5 +38,5 @@
             size_hint_y: 0.15
             anim_delay: 0.12
             anim_loop: 0
-            keep_ratio: True
             pos_hint: {"center_x": 0.05, "center_y": 0.07}
+            fit_mode: "scale-down"

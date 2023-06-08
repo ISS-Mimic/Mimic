@@ -1,0 +1,104 @@
+#:kivy 1.8
+#:import kivy kivy
+#:import win kivy.core.window
+<SSRMS_Screen>:
+    name: 'ssrms'
+    FloatLayout:
+        Image:
+            id: SSRMS_Background
+            source: "/home/pi/Mimic/Pi/imgs/robo/SSRMSbackground.png"
+            allow_stretch: False
+        Label:
+            id: OperatingBase
+            pos_hint: {"center_x": 0.3, "center_y": 0.77}
+            text: '0'
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: BaseLocation
+            pos_hint: {"center_x": 0.3, "center_y": 0.73}
+            text: '0'
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: TipLEEstatus
+            pos_hint: {"center_x": 0.3, "center_y": 0.63}
+            text: '0'
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: ShoulderRoll
+            pos_hint: {"center_x": 0.85, "center_y": 0.88}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: ShoulderYaw
+            pos_hint: {"center_x": 0.85, "center_y": 0.84}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: ShoulderPitch
+            pos_hint: {"center_x": 0.85, "center_y": 0.8}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: ElbowPitch
+            pos_hint: {"center_x": 0.85, "center_y": 0.75}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: WristRoll
+            pos_hint: {"center_x": 0.85, "center_y": 0.71}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: WristYaw
+            pos_hint: {"center_x": 0.85, "center_y": 0.67}
+            markup: True
+            color: root.signalcolor
+            font_size: 20
+        Label:
+            id: WristPitch
+            pos_hint: {"center_x": 0.85, "center_y": 0.63}
+            markup: True
+            color: root.signalcolor
+            font_size: 20 
+        Button:
+            size_hint: 0.1,0.11
+            ##pos_hint: {"Left": 1, "Bottom": 1}
+            pos_hint: {"center_x": 0.9375, "center_y": 0.082}
+            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
+            text: ''
+            font_size: 30
+            on_release: app.root.current = 'robo'
+        Image:
+            id: signal
+            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+            size_hint_y: 0.15
+            anim_delay: 0.12
+            anim_loop: 0
+            keep_ratio: True
+            pos_hint: {"center_x": 0.05, "center_y": 0.07}
+        Image:
+            id: arduino
+            source: "/home/pi/Mimic/Pi/imgs/signal/arduino_offline.png"
+            size_hint_y: 0.15
+            anim_delay: 0.2
+            anim_loop: 0
+            keep_ratio: True
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+        Label:
+            id: arduino_count
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+            text: ''
+            markup: True
+            color: 1,1,1
+            font_size: 55
