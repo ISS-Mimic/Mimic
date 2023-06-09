@@ -1,3 +1,5 @@
+#:import dp kivy.metrics.dp
+
 <Orbit_Screen>:
     name: 'orbit'
     FloatLayout:
@@ -141,7 +143,8 @@
             text: 'TDRS-East'
             markup: True
             color: (0,0,0,0)
-            font_size: 15
+            font_size: self.height * 0.3
+            size_hint_y: 0.2
         Widget:
             id: TDRS11
             col: (0,0,0,0)
@@ -226,7 +229,8 @@
             text: 'TDRS-West'
             markup: True
             color: (0,0,0,0)
-            font_size: 15
+            font_size: self.height * 0.3
+            size_hint_y: 0.2
         Widget:
             id: ZOE
             col: (0,0,0,0)
@@ -245,7 +249,8 @@
             text: 'ZOE'
             markup: True
             color: (0,0,0,0)
-            font_size: 15
+            font_size: self.height * 0.3
+            size_hint_y: 0.2
         Widget:
             id: TDRS7
             col: (1,1,1,1)
@@ -291,7 +296,8 @@
             text: 'TDRS-Z'
             markup: True
             color: (0,0,0,0)
-            font_size: 15
+            font_size: self.height * 0.3
+            size_hint_y: 0.2
         Widget:
             id: ISSgroundtrack
             col: (0,0,0,0)
@@ -359,13 +365,15 @@
             pos_hint: {"center_x": 0.08, "center_y": 0.7}
             text: '0'
             color: 1,1,1
-            font_size: dp(50)
+            font_size: self.height * 0.3
+            size_hint_y: 0.2
         Label:
             id: totalorbits
             pos_hint: {"center_x": 0.08, "center_y": 0.5}
             text: '0'
             color: 1,1,1
-            font_size: dp(50)
+            font_size: self.height * 0.3
+            size_hint_y: 0.2
         Button:
             id: iss_pass_button
             size_hint: 0.12,0.18
@@ -386,40 +394,46 @@
             text: '-----'
             halign: 'center'
             color: 1,1,1
-            font_size: dp(26)
+            font_size: self.height * 0.17
+            size_hint_y: 0.2
         Label:
             id: iss_next_pass2
             pos_hint: {"center_x": 0.92, "center_y": 0.55}
             text: '-----'
             halign: 'center'
             color: 1,1,1
-            font_size: dp(26)
+            font_size: self.height * 0.17
+            size_hint_y: 0.2
         Label:
             id: countdown
             pos_hint: {"center_x": 0.92, "center_y": 0.5}
             text: '-----'
             halign: 'center'
             color: 1,1,1
-            font_size: dp(26)
+            font_size: self.height * 0.17
+            size_hint_y: 0.2
         Label:
             id: ISSvisible
             pos_hint: {"center_x": 0.92, "center_y": 0.45}
             text: '---'
             halign: 'center'
             color: 1,1,1
-            font_size: dp(26)
+            font_size: self.height * 0.17
+            size_hint_y: 0.2
         Label:
             id: latitude
             pos_hint: {"center_x": 0.12, "center_y": 0.22}
             text: '0.00'
             color: 1,1,1
-            font_size: dp(26)
+            font_size: self.height * 0.17
+            size_hint_y: 0.2
         Label:
             id: longitude
             pos_hint: {"center_x": 0.13, "center_y": 0.185}
             text: '0.00'
             color: 1,1,1
-            font_size: dp(26)
+            font_size: self.height * 0.17
+            size_hint_y: 0.2
         Image:
             id: arduino
             source: "/home/pi/Mimic/Pi/imgs/signal/arduino_offline.png"
