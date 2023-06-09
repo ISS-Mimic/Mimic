@@ -1237,8 +1237,8 @@ class MimicScreen(Screen, EventDispatcher):
     def startproc(self):
         global p,TDRSproc
         logWrite("Telemetry Subprocess start")
-        p = Popen(["python3", mimic_directory + "/Mimic/Pi/iss_telemetry.py"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
-        TDRSproc = Popen(["python3", mimic_directory + "/Mimic/Pi/TDRScheck.py"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
+        p = Popen(["python", mimic_directory + "/Mimic/Pi/iss_telemetry.py"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
+        TDRSproc = Popen(["python", mimic_directory + "/Mimic/Pi/TDRScheck.py"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
         #p = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/Data"])
 
     def killproc(*args):
@@ -1404,7 +1404,7 @@ class MainApp(App):
         self.orbit_screen.ids.OrbitMap.reload()
 
     def updateNightShade(self, dt):
-        proc = Popen(["python3", mimic_directory + "/Mimic/Pi/NightShade.py"])
+        proc = Popen(["python", mimic_directory + "/Mimic/Pi/NightShade.py"])
 
     def checkTDRS(self, dt):
         global activeTDRS1
