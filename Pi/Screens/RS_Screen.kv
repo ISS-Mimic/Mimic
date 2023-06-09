@@ -1,20 +1,14 @@
-#:kivy 1.8
-#:import kivy kivy
-#:import win kivy.core.window
 <RS_Screen>:
     name: 'rs'
     FloatLayout:
         Image:
             source: '/home/pi/Mimic/Pi/imgs/russian/ROSbackground.png'
-            allow_stretch: False
-            keep_ratio: True
+            fit_mode: "fill"
         Button:
             background_normal: '/home/pi/Mimic/Pi/imgs/russian/DockingUnlit.png'
             background_down: '/home/pi/Mimic/Pi/imgs/russian/DockingDown.png'
             size_hint: 0.15,0.18
             pos_hint: {"center_x": 0.9, "center_y": 0.45}
-            text: ''
-            font_size: 30
             width: 50
             height:20
             on_release: root.manager.current = 'rs_dock'
@@ -22,8 +16,6 @@
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
             background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
-            text: ''
-            font_size: 30
             on_release: app.root.current = 'mimic'
         Image:
             id: signal
@@ -31,7 +23,7 @@
             size_hint_y: 0.15
             anim_delay: 0.12
             anim_loop: 0
-            keep_ratio: True
+            fit_mode: "scale-down"
             pos_hint: {"center_x": 0.05, "center_y": 0.07}
         Image:
             id: arduino
@@ -39,7 +31,7 @@
             size_hint_y: 0.15
             anim_delay: 0.2
             anim_loop: 0
-            keep_ratio: True
+            fit_mode: "scale-down"
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
         Label:
             id: arduino_count
@@ -47,4 +39,5 @@
             text: ''
             markup: True
             color: 1,1,1
-            font_size: 55
+            font_size: self.height * 0.3
+            size_hint_y: 0.5

@@ -1,6 +1,3 @@
-#:kivy 1.8
-#:import kivy kivy
-#:import win kivy.core.window
 <CDH_Screen>:
     name: 'cdh'
     FloatLayout:
@@ -12,8 +9,6 @@
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
             background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
-            text: ''
-            font_size: dp(30)
             on_release: app.root.current = 'mimic'
         Image:
             id: signal

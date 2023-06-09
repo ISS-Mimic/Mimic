@@ -1,7 +1,3 @@
-#:kivy 2.2
-#:import kivy kivy
-#:import win kivy.core.window
-
 <MainScreen>:
     name: 'main'
     FloatLayout:
@@ -31,8 +27,6 @@
             background_down: '/home/pi/Mimic/Pi/imgs/main/MainSimulateButtonDown.png'
             size_hint: 0.15,0.4
             pos_hint: {"center_x": 0.68, "center_y": 0.37}
-            text: ''
-            font_size: 30
             width: 50
             height: 20
             on_release: root.manager.current = 'fakeorbit'
@@ -41,8 +35,6 @@
             background_down: '/home/pi/Mimic/Pi/imgs/main/MainSettingsButtonDown.png'
             size_hint: 0.15,0.18
             pos_hint: {"center_x": 0.85, "center_y": 0.47}
-            text: ''
-            font_size: 30
             width: 50
             height:20
             on_release: root.manager.current = 'settings'
@@ -51,8 +43,6 @@
             pos_hint: {"center_x": 0.15, "center_y": 0.37}
             background_normal: '/home/pi/Mimic/Pi/imgs/main/MainControlButton.png'
             background_down: '/home/pi/Mimic/Pi/imgs/main/MainControlButtonDown.png'
-            text: ''
-            font_size: 30
             width: 50
             height: 20
             on_press: root.changeManualControlBoolean(True)
@@ -62,9 +52,6 @@
             pos_hint: {"center_x": 0.325, "center_y": 0.37}
             background_normal: '/home/pi/Mimic/Pi/imgs/main/MainLightItUpButton.png'
             background_down: '/home/pi/Mimic/Pi/imgs/main/MainLightItUpButtonDown.png'
-            text: ''
-            disabled: False
-            font_size: 30
             width: 50
             height: 20
             on_release: root.manager.current = 'led'
@@ -73,9 +60,6 @@
             pos_hint: {"center_x": 0.505, "center_y": 0.37}
             background_normal: '/home/pi/Mimic/Pi/imgs/main/MainMimicButton.png'
             background_down: '/home/pi/Mimic/Pi/imgs/main/MainMimicButtonDown.png'
-            text: ''
-            disabled: False
-            font_size: 30
             width: 50
             height: 20
             on_release: app.root.current = 'mimic'
@@ -84,8 +68,6 @@
             pos_hint: {"center_x": 0.85, "center_y": 0.27}
             background_normal: '/home/pi/Mimic/Pi/imgs/main/MainExitButton.png'
             background_down: '/home/pi/Mimic/Pi/imgs/main/MainExitButtonDown.png'
-            text: ''
-            font_size: 30
             width: 50
             height: 20
             on_press: root.killproc()

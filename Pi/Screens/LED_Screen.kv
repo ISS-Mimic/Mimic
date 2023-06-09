@@ -1,6 +1,3 @@
-#:kivy 1.8
-#:import kivy kivy
-#:import win kivy.core.window
 <LED_Screen>:
     name: 'led'
     FloatLayout:
@@ -23,14 +20,12 @@
             text: ''
             markup: True
             color: 1,1,1
-            font_size: 55
+            font_size: self.height * 0.3
+            size_hint_y: 0.5
         Button:
             size_hint: 0.1,0.11
-            ##pos_hint: {"Left": 1, "Bottom": 1}
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
             background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
-            text: ''
-            font_size: 30
             on_release: app.root.current = 'main'
         Image:
             id: signal

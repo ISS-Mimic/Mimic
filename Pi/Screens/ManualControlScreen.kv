@@ -1,7 +1,3 @@
-#:kivy 1.11
-#:import kivy kivy
-#:import win kivy.core.window
-
 <ManualControlScreen>:
     name: 'manualcontrol'
     on_pre_enter: root.callback()
@@ -21,11 +17,8 @@
             fit_mode: "scale-down"
         Button:
             size_hint: 0.1,0.11
-            ##pos_hint: {"Left": 1, "Bottom": 1}
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
             background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
-            text: ''
-            font_size: 30
             on_release: app.root.current = 'main'
         Image:
             id: arduino
@@ -45,11 +38,6 @@
             size_hint_y: 0.5
         Widget:
         #---------------------------------------------------------------------------------------------------------------
-        Label:
-            text: ""
-            font_size: 55
-            color: 1,0,1,1
-            pos_hint: {"center_x": 0.37, "center_y": 0.95}
         Button:
             id: Beta4B_Button
             size_hint: 0.08,0.3

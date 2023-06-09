@@ -1,82 +1,85 @@
-#:kivy 1.8
-#:import kivy kivy
-#:import win kivy.core.window
 <MSS_MT_Screen>:
     name: 'mt'
     FloatLayout:
         Image:
             id: MBS_MT_background
             source: '/home/pi/Mimic/Pi/imgs/robo/MBSbackground.png'
-            allow_stretch: False
+            fit_mode: "fill"
         Label:
             ##pos_hint: {"center_x": 0.5, "center_y": 0.8}
             ##text: 'Mobile Transporter'
             ##markup: True
             ##color: 1,0,1
-            ##font_size: 30
+            ##size_hint_y: 0.4
+            ##font_size: self.height * 0.13
         Label:
             ##id: mt_ws_label
             ##pos_hint: {"center_x": 0.25, "center_y": 0.6}
             ##text: 'MT is at WS: '
             ##markup: True
             ##color: 1,1,1
-            ##font_size: 30
+            ##size_hint_y: 0.4
+            ##font_size: self.height * 0.13
         Label:
             id: mt_ws_value
             pos_hint: {"center_x": 0.275, "center_y": 0.73}
             text: '0'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.13
         Label:
             ##id: mt_positon_label
             ##pos_hint: {"center_x": 0.2, "center_y": 0.45}
             ##text: 'MT Position: '
             ##markup: True
             ##color: 1,1,1
-            ##font_size: 30
+            ##size_hint_y: 0.4
+            ##font_size: self.height * 0.13
         Label:
             id: mt_position_value
             pos_hint: {"center_x": 0.275, "center_y": 0.65}
             text: '0'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.13
         Label:
             ##id: mt_speed_label
             ##pos_hint: {"center_x": 0.22, "center_y": 0.3}
             ##text: 'MT Speed: '
             ##markup: True
             ##color: 1,1,1
-            ##font_size: 30
+            ##size_hint_y: 0.4
+            ##font_size: self.height * 0.13
         Label:
             id: mt_speed_value
             pos_hint: {"center_x": 0.275, "center_y": 0.69}
             text: '0'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.13
         Label:
             id: MCASpayload
             pos_hint: {"center_x": 0.275, "center_y": 0.32}
             text: '0'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.13
         Label:
             id: POApayload
             pos_hint: {"center_x": 0.275, "center_y": 0.28}
             text: '0'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.13
         Button:
             size_hint: 0.1,0.11
-            ##pos_hint: {"Left": 1, "Bottom": 1}
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
             background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
-            text: ''
-            font_size: 30
             on_release: app.root.current = 'robo'
         Image:
             id: signal
@@ -84,5 +87,5 @@
             size_hint_y: 0.15
             anim_delay: 0.12
             anim_loop: 0
-            keep_ratio: True
+            fit_mode: "scale-down"
             pos_hint: {"center_x": 0.05, "center_y": 0.07}

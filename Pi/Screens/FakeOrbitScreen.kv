@@ -1,6 +1,3 @@
-#:kivy 1.8
-#:import kivy kivy
-#:import win kivy.core.window
 <FakeOrbitScreen>:
     name: 'fakeorbit'
     FloatLayout:
@@ -11,7 +8,8 @@
         Label:
             id: fakeorbitstatus
             text: ''
-            font_size: 30
+            size_hint_y: 0.4
+            font_size: self.height * 0.2
             pos_hint: {"center_x": 0.5, "center_y": 0.1}
             markup: True
             color: 1,1,1
@@ -79,8 +77,6 @@
             on_release: self.disabled = True
         Button:
             id: OFT2DemoStart
-            allow_stretch: False
-            keep_ratio: True
             size_hint: 0.14,0.115
             pos_hint: {"center_x": 0.15, "center_y": 0.54}
             background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartUnlit.png'
@@ -167,4 +163,5 @@
             text: ''
             markup: True
             color: 1,1,1
-            font_size: 55
+            font_size: self.height * 0.3
+            size_hint_y: 0.5

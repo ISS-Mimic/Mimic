@@ -1,34 +1,40 @@
-#:kivy 1.8
-#:import kivy kivy
-#:import win kivy.core.window
 <CT_SGANT_Screen>:
     name: 'ct_sgant'
     FloatLayout:
         Image:
             id: SGANT_background
             source: "/home/pi/Mimic/Pi/imgs/ct/SGANTbackground.png"
-            allow_stretch: False
+            fit_mode: "fill"
+        Image:
+            id: signal
+            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+            size_hint_y: 0.15
+            anim_delay: 0.12
+            anim_loop: 0
+            fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.05, "center_y": 0.07}
         Label:
             id: sgant_elevation_label
             pos_hint: {"center_x": 0.4, "center_y": 0.2}
             text: 'Ku-Band SGANT Elevation'
             markup: True
             color: 1,1,1
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.14
         Label:
             id: sgant_elevation
             pos_hint: {"center_x": 0.7, "center_y": 0.2}
             text: ''
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.14
         Image:
             id: sgant_dish
             source: "/home/pi/Mimic/Pi/imgs/ct/SGANTantenna.png"
             color: 1,1,1,1
-            size_hint_y: 0.4
-            size_hint_x: 0.4
-            keep_ratio: False
+            size_hint: 0.4,0.4
+            fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.35}
             angle: 0
             canvas.before:
@@ -45,9 +51,8 @@
             anim_delay: 0.03
             anim_loop: 0
             color: 1,1,1,1
-            size_hint_y: 0.4
-            size_hint_x: 2
-            keep_ratio: False
+            size_hint: 2,0.4
+            fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.6}
             angle: sgant_dish.angle
             canvas.before:
@@ -62,9 +67,8 @@
             id: sgant_base
             source: "/home/pi/Mimic/Pi/imgs/ct/SGANTbase.png"
             pos_hint: {"center_x": 0.5, "center_y": 0.3}
-            size_hint_y: 0.15
-            size_hint_x: 0.15
-            keep_ratio: True
+            size_hint: 0.15,0.15
+            fit_mode: "scale-down"
         Image:
             id: tdrs_east12
             source: "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
@@ -72,7 +76,7 @@
             size_hint: 0.15,0.15
             anim_delay: 0.12
             anim_loop: 0
-            keep_ratio: False
+            fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
             angle: 0
             angle2: 180
@@ -96,7 +100,7 @@
             size_hint: 0.15,0.15
             anim_delay: 0.12
             anim_loop: 0
-            keep_ratio: False
+            fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
             angle: 0
             angle2: 180
@@ -120,7 +124,7 @@
             size_hint: 0.15,0.15
             anim_delay: 0.12
             anim_loop: 0
-            keep_ratio: False
+            fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
             angle: 0
             angle2: 180
@@ -144,7 +148,7 @@
             size_hint: 0.15,0.15
             anim_delay: 0.12
             anim_loop: 0
-            keep_ratio: False
+            fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
             angle: 0
             angle2: 180
@@ -168,7 +172,7 @@
             size_hint: 0.15,0.15
             anim_delay: 0.12
             anim_loop: 0
-            keep_ratio: False
+            fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
             angle: 0
             angle2: 180
@@ -192,20 +196,10 @@
             text: '---'
             markup: True
             color: root.signalcolor
-            font_size: 18
+            size_hint_y: 0.4
+            font_size: self.height * 0.12
         Button:
             size_hint: 0.1,0.11
-            ##pos_hint: {"Left": 1, "Bottom": 1}
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
             background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
-            text: ''
-            font_size: 30
             on_release: app.root.current = 'ct'
-        Image:
-            id: signal
-            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
-            size_hint_y: 0.15
-            anim_delay: 0.12
-            anim_loop: 0
-            keep_ratio: True
-            pos_hint: {"center_x": 0.05, "center_y": 0.07}

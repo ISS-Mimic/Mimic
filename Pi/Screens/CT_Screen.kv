@@ -1,68 +1,51 @@
-#:kivy 1.8
-#:import kivy kivy
-#:import win kivy.core.window
 <CT_Screen>:
     name: 'ct'
     FloatLayout:
         Image:
             id: CT_Antena_Background
             source: '/home/pi/Mimic/Pi/imgs/ct/AntennasBase.png'
-            allow_stretch: False
-            ##size_hint_y: 1
-            ##keep_ratio: False
-        Label:
-            pos_hint: {"center_x": 0.5, "center_y": 0.92}
-            text: ''
-            markup: True
-            color: 1,1,1
-            font_size: 30
+            fit_mode: "fill"
         Image:
             id: ISS_CT
             source: "/home/pi/Mimic/Pi/imgs/ct/CT_ISS3.png"
             size_hint_y: 0.95
-            keep_ratio: True
+            fit_mode: "contain"
             pos_hint: {"center_x": 0.5, "center_y": 0.45}
         Button:
             id: SGANT1
             size_hint: 0.1,0.2
             opacity: 0.1
             pos_hint: {"center_x": 0.57, "center_y": 0.7}
-            font_size: 30
             on_release: app.root.current = 'ct_sgant'
         Button:
             id: SGANT2
             size_hint: 0.1,0.2
             opacity: 0.1
             pos_hint: {"center_x": 0.43, "center_y": 0.7}
-            font_size: 30
             on_release: app.root.current = 'ct_sgant'
         Button:
             id: SASA1
             size_hint: 0.1,0.2
             opacity: 0.1
             pos_hint: {"center_x": 0.22, "center_y": 0.67}
-            font_size: 30
             on_release: app.root.current = 'ct_sasa'
         Button:
             id: SASA2
             size_hint: 0.1,0.2
             opacity: 0.1
             pos_hint: {"center_x": 0.7, "center_y": 0.67}
-            font_size: 30
             on_release: app.root.current = 'ct_sasa'
         Button:
             id: UHF1
             size_hint: 0.1,0.2
             opacity: 0.1
             pos_hint: {"center_x": 0.4, "center_y": 0.25}
-            font_size: 30
             on_release: app.root.current = 'ct_uhf'
         Button:
             id: UHF2
             size_hint: 0.1,0.2
             opacity: 0.1
             pos_hint: {"center_x": 0.8, "center_y": 0.67}
-            font_size: 30
             on_release: app.root.current = 'ct_uhf'
         Image:
             id: uhf1_radio
@@ -71,7 +54,7 @@
             anim_loop: 0
             color: 1,1,1,1
             size_hint_y: 0.2
-            keep_ratio: True
+            fit_mode: "contain"
             pos_hint: {"center_x": 0.37, "center_y": 0.18}
         Image:
             id: uhf2_radio
@@ -80,7 +63,7 @@
             anim_loop: 0
             color: 1,1,1,1
             size_hint_y: 0.2
-            keep_ratio: True
+            fit_mode: "contain"
             pos_hint: {"center_x": 0.805, "center_y": 0.69}
         Image:
             id: sasa1_radio
@@ -89,7 +72,7 @@
             anim_loop: 0
             color: 1,1,1,1
             size_hint_y: 0.2
-            keep_ratio: True
+            fit_mode: "contain"
             pos_hint: {"center_x": 0.245, "center_y": 0.8}
         Image:
             id: sasa2_radio
@@ -98,7 +81,7 @@
             anim_loop: 0
             color: 1,1,1,1
             size_hint_y: 0.2
-            keep_ratio: True
+            fit_mode: "contain"
             pos_hint: {"center_x": 0.71, "center_y": 0.8}
         Image:
             id: sgant1_radio
@@ -107,8 +90,7 @@
             anim_loop: 0
             color: 1,1,1,1
             size_hint_y: 0.2
-            size_hint_y: 0.5
-            keep_ratio: False
+            fit_mode: "contain"
             pos_hint: {"center_x": 0.44, "center_y": 0.83}
         Image:
             id: sgant2_radio
@@ -117,15 +99,12 @@
             anim_loop: 0
             color: 1,1,1,1
             size_hint_y: 0.2
-            size_hint_y: 0.5
-            keep_ratio: False
+            fit_mode: "contain"
             pos_hint: {"center_x": 0.58, "center_y": 0.83}
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
             background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
-            text: ''
-            font_size: 30
             on_release: app.root.current = 'mimic'
         Image:
             id: signal
@@ -133,5 +112,5 @@
             size_hint_y: 0.15
             anim_delay: 0.12
             anim_loop: 0
-            keep_ratio: True
+            fit_mode: "scale-down"
             pos_hint: {"center_x": 0.05, "center_y": 0.07}

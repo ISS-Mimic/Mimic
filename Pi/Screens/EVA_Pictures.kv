@@ -1,13 +1,10 @@
-#:kivy 1.8
-#:import kivy kivy
-#:import win kivy.core.window
 <EVA_Pictures>:
     name: 'eva_pictures'
     FloatLayout:
         AsyncImage:
             id: EVAimage
             source: ""
-            keep_ratio: True
+            fit_mode: "contain"
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
             opacity: 0.0
         Button:

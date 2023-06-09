@@ -1,104 +1,110 @@
-#:kivy 1.8
-#:import kivy kivy
-#:import win kivy.core.window
 <ECLSS_Screen>:
     name: 'eclss'
     FloatLayout:
         Image:
             id: ECLSS_background
             source: '/home/pi/Mimic/Pi/imgs/eclss/ECLSSbackground.png'
-            allow_stretch: False
+            fit_mode: "fill"
         Label:
             id: CabinTemp_label
             pos_hint: {"center_x": 0.7, "center_y": 0.78}
             text: 'Cabin Temperature (deg C):'
             markup: True
             color: 1,1,1
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.12
         Label:
             id: CabinTemp
             pos_hint: {"center_x": 0.9, "center_y": 0.78}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.12
         Label:
             id: CabinPress_label
             pos_hint: {"center_x": 0.7, "center_y": 0.71}
             text: 'Cabin Pressure (Torr):'
             markup: True
             color: 1,1,1
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.12
         Label:
             id: CabinPress
             pos_hint: {"center_x": 0.9, "center_y": 0.71}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.12
         Label:
             id: AirlockPress_label
             pos_hint: {"center_x": 0.7, "center_y": 0.65}
             text: 'Airlock Pressure (Torr):'
             markup: True
             color: 1,1,1
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.12
         Label:
             id: AirlockPress
             pos_hint: {"center_x": 0.9, "center_y": 0.65}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.12
         Label:
             id: CrewlockPress_label
             pos_hint: {"center_x": 0.7, "center_y": 0.59}
             text: 'Crewlock Pressure (Torr):'
             markup: True
             color: 1,1,1
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.12
         Label:
             id: CrewlockPress
             pos_hint: {"center_x": 0.9, "center_y": 0.59}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.12
         Label:
             id: CleanWater_label
             pos_hint: {"center_x": 0.7, "center_y": 0.53}
             text: 'Clean Water Tank (%):'
             markup: True
             color: 1,1,1
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.12
         Label:
             id: CleanWater
             pos_hint: {"center_x": 0.9, "center_y": 0.53}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.12
         Label:
             id: WasteWater_label
             pos_hint: {"center_x": 0.7, "center_y": 0.47}
             text: 'Waste Water Tank (%):'
             markup: True
             color: 1,1,1
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.12
         Label:
             id: WasteWater
             pos_hint: {"center_x": 0.9, "center_y": 0.47}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.12
         Button:
             size_hint: 0.1,0.11
-            ##pos_hint: {"Left": 1, "Bottom": 1}
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
             background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
-            text: ''
-            font_size: 30
             on_release: app.root.current = 'mimic'
         Image:
             id: signal
@@ -106,5 +112,5 @@
             size_hint_y: 0.15
             anim_delay: 0.12
             anim_loop: 0
-            keep_ratio: True
+            fit_mode: "scale-down"
             pos_hint: {"center_x": 0.05, "center_y": 0.07}
