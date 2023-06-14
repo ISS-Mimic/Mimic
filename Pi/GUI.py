@@ -2682,6 +2682,10 @@ class MainApp(App):
         AirlockPress = "{:.2f}".format(float((values[77])[0]))
         CleanWater = "{:.2f}".format(float((values[93])[0]))
         WasteWater = "{:.2f}".format(float((values[94])[0]))
+        O2genState = str((values[96])[0])
+        O2prodRate = "{:.2f}".format(float((values[95])[0]))
+        VRSvlvPosition = str((values[198])[0])
+        VESvlvPosition = str((values[199])[0])
         
         #SASA telemetry
         ActiveString = str((values[54])[0])
@@ -3399,6 +3403,51 @@ class MainApp(App):
         self.eclss_screen.ids.AirlockPress.text = str(AirlockPress)
         self.eclss_screen.ids.CleanWater.text = str(CleanWater)
         self.eclss_screen.ids.WasteWater.text = str(WasteWater)
+        self.eclss_screen.ids.O2prodRate.text = str(O2prodRate)
+        
+        #self.eclss_screen.ids.O2genState.text = str(O2genState)
+        if int(O2genState) == 1:
+            self.eclss_screen.ids.O2genState.text = "PROCESS"
+        elif int(O2genState) == 2:
+            self.eclss_screen.ids.O2genState.text = "STANDBY"
+        elif int(O2genState) == 3:
+            self.eclss_screen.ids.O2genState.text = "SHUTDOWN"
+        elif int(O2genState) == 4:
+            self.eclss_screen.ids.O2genState.text = "STOP"
+        elif int(O2genState) == 5:
+            self.eclss_screen.ids.O2genState.text = "VENT DOME"
+        elif int(O2genState) == 6:
+            self.eclss_screen.ids.O2genState.text = "INERT DOME"
+        elif int(O2genState) == 7:
+            self.eclss_screen.ids.O2genState.text = "FAST SHTDWN"
+        elif int(O2genState) == 8:
+            self.eclss_screen.ids.O2genState.text = "N2 PURGE SHTDWN"
+        else:
+            self.eclss_screen.ids.O2genState.text = "n/a"
+        
+        #self.eclss_screen.ids.VRSvlvPosition.text = str(VRSvlvPosition)
+        if int(VRSvlvPosition) == 0:
+            self.eclss_screen.ids.VRSvlvPosition.text = "FAIL"
+        elif int(VRSvlvPosition) == 1:
+            self.eclss_screen.ids.VRSvlvPosition.text = "OPEN"
+        elif int(VRSvlvPosition) == 2:
+            self.eclss_screen.ids.VRSvlvPosition.text = "CLSD"
+        elif int(VRSvlvPosition) == 3:
+            self.eclss_screen.ids.VRSvlvPosition.text = "TRNS"
+        else:
+            self.eclss_screen.ids.VESvlvPosition.text = "n/a"
+        
+        #self.eclss_screen.ids.VESvlvPosition.text = str(VESvlvPosition)
+        if int(VESvlvPosition) == 0:
+            self.eclss_screen.ids.VESvlvPosition.text = "FAIL"
+        elif int(VESvlvPosition) == 1:
+            self.eclss_screen.ids.VESvlvPosition.text = "OPEN"
+        elif int(VESvlvPosition) == 2:
+            self.eclss_screen.ids.VESvlvPosition.text = "CLSD"
+        elif int(VESvlvPosition) == 3:
+            self.eclss_screen.ids.VESvlvPosition.text = "TRNS"
+        else:
+            self.eclss_screen.ids.VESvlvPosition.text = "n/a"
         
         ##Summary Telemetery on Robo Screen
         self.robo_screen.ids.mt_worksite.text = str(mt_worksite)
