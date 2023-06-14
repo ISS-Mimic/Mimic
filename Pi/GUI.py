@@ -2682,7 +2682,7 @@ class MainApp(App):
         AirlockPress = "{:.2f}".format(float((values[77])[0]))
         CleanWater = "{:.2f}".format(float((values[93])[0]))
         WasteWater = "{:.2f}".format(float((values[94])[0]))
-        O2genState = int((values[96])[0])
+        O2genState = str((values[96])[0])
         O2prodRate = "{:.2f}".format(float((values[95])[0]))
         VRSvlvPosition = str((values[198])[0])
         VESvlvPosition = str((values[199])[0])
