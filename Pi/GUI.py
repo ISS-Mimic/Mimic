@@ -3459,6 +3459,8 @@ class MainApp(App):
             self.eclss_screen.ids.VESvlvPosition.text = "n/a"
         
         self.eclss_wrm_screen.ids.UrineTank.text = str(UrineTank)
+        self.eclss_wrm_screen.ids.CleanWater.text = str(CleanWater)
+        self.eclss_wrm_screen.ids.WasteWater.text = str(WasteWater)
         
         #self.eclss_wrm_screen.ids.UrineProcessState.text = str(UrineProcessState)
         if int(UrineProcessState) == 2:
