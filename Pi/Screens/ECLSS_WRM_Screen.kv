@@ -23,3 +23,63 @@
             font_size: self.height * 0.10
         Label:
             id: WaterProcessState
+            pos_hint: {"center_x": 0.85, "center_y": 0.75}
+            text: '0.003'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: WaterProcessStep
+            pos_hint: {"center_x": 0.85, "center_y": 0.69}
+            text: '0.003'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: CleanWater
+            pos_hint: {"center_x": 0.85, "center_y": 0.57}
+            text: '0.003'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+         Label:
+            id: WasteWater
+            pos_hint: {"center_x": 0.85, "center_y": 0.45}
+            text: '0.003'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+            
+        Button:
+            size_hint: 0.1,0.11
+            pos_hint: {"center_x": 0.9375, "center_y": 0.082}
+            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
+            on_release: app.root.current = 'eclss'
+        Image:
+            id: signal
+            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+            size_hint_y: 0.15
+            anim_delay: 0.12
+            anim_loop: 0
+            fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.05, "center_y": 0.07}
+        Image:
+            id: arduino
+            source: "/home/pi/Mimic/Pi/imgs/signal/arduino_offline.png"
+            size_hint_y: 0.15
+            anim_delay: 0.2
+            anim_loop: 0
+            fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.12, "center_y": 0.08}
+        Label:
+            id: arduino_count
+            pos_hint: {"center_x": 0.12, "center_y": 0.08}
+            text: ''
+            markup: True
+            color: 1,1,1
+            font_size: self.height * 0.3
+            size_hint_y: 0.5
