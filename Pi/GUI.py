@@ -3347,8 +3347,8 @@ class MainApp(App):
             self.us_eva.ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/InProgressLights.png'
             evatimerevent = Clock.schedule_once(self.EVA_clock, 1)
 
-        ##Repress
-        if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and crewlockpres >= 3 and airlockpres < 734:
+        ##Repress - this one still did not work with the code changes I did for eva88 (June 2023)
+        if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres >= 3 and airlockpres < 734:
             eva = False
             self.us_eva.ids.EVA_occuring.color = 0, 0, 1
             self.us_eva.ids.EVA_occuring.text = "Crewlock Repressurizing"
