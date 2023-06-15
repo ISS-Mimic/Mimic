@@ -3310,7 +3310,7 @@ class MainApp(App):
             self.us_eva.ids.EVA_occuring.text = "Pre-EVA Nitrogen Purge"
 
         ##EVA Depress1
-        if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres < 740 and airlockpres > 740 and int(stationmode) == 5:
+        if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres < 740 and airlockpres > 740:
             depress1 = True
             self.us_eva.ids.leak_timer.text = "~160s Leak Check"
             self.us_eva.ids.EVA_occuring.text = "Crewlock Depressurizing"
