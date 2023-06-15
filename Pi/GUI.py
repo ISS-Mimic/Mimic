@@ -3284,7 +3284,7 @@ class MainApp(App):
             usevaflashevent = Clock.schedule_once(self.flashUS_EVAbutton, 1)
 
         ##No EVA Currently
-        if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and crewlockpres > 740 and airlockpres > 740:
+        if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and crewlockpres > 737 and airlockpres > 740:
             eva = False
             self.us_eva.ids.leak_timer.text = ""
             self.us_eva.ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/BlankLights.png'
