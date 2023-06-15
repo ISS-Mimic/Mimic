@@ -9,10 +9,11 @@
         Label:
             id: now
             pos_hint: {"center_x": 0.95, "center_y": 0.95}
-            text: '0.00'
-            color: 1,1,1
+            text: '0.013'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
             font_size: self.height * 0.10
-            size_hint_y: 0.2
         Image:
             id:orbit3d
             source: '/home/pi/Mimic/Pi/imgs/orbit/globe.png'
