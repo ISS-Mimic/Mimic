@@ -3348,7 +3348,7 @@ class MainApp(App):
             evatimerevent = Clock.schedule_once(self.EVA_clock, 1)
 
         ##Repress
-        if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and airlockpres >= 3 and crewlockpres < 734:
+        if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and crewlockpres >= 3 and airlockpres < 734:
             eva = False
             self.us_eva.ids.EVA_occuring.color = 0, 0, 1
             self.us_eva.ids.EVA_occuring.text = "Crewlock Repressurizing"
