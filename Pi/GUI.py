@@ -3280,7 +3280,7 @@ class MainApp(App):
             self.us_eva.ids.pumpswitch.color = 0, 0, 0
 
         ##activate EVA button flash
-        if (airlock_pump_voltage == 1 or crewlockpres < 734) and int(stationmode) == 5:
+        if (airlock_pump_voltage == 1 or crewlockpres < 734):
             usevaflashevent = Clock.schedule_once(self.flashUS_EVAbutton, 1)
 
         ##No EVA Currently
@@ -3292,7 +3292,7 @@ class MainApp(App):
             self.us_eva.ids.EVA_occuring.text = "Currently No EVA"
 
         ##EVA Standby - NOT UNIQUE
-        if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres > 740 and airlockpres > 740 and int(stationmode) == 5:
+        if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres > 740 and airlockpres > 740:
             standby = True
             self.us_eva.ids.leak_timer.text = "~160s Leak Check"
             self.us_eva.ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/StandbyLights.png'
@@ -3302,7 +3302,7 @@ class MainApp(App):
             standby = False
 
         ##EVA Prebreath Pressure
-        if airlock_pump_voltage == 1 and crewlockpres > 740 and airlockpres > 740 and int(stationmode) == 5:
+        if airlock_pump_voltage == 1 and crewlockpres > 740 and airlockpres > 740:
             prebreath1 = True
             self.us_eva.ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/PreBreatheLights.png'
             self.us_eva.ids.leak_timer.text = "~160s Leak Check"
@@ -3318,7 +3318,7 @@ class MainApp(App):
             self.us_eva.ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/DepressLights.png'
 
         ##EVA Leakcheck
-        if airlock_pump_voltage == 1 and crewlockpres < 260 and crewlockpres > 250 and (depress1 or leakhold) and int(stationmode) == 5:
+        if airlock_pump_voltage == 1 and crewlockpres < 260 and crewlockpres > 250 and (depress1 or leakhold):
             if depress1:
                 holdstartTime = float(unixconvert[7])*24+unixconvert[3]+float(unixconvert[4])/60+float(unixconvert[5])/3600
             leakhold = True
@@ -3331,7 +3331,7 @@ class MainApp(App):
             leakhold = False
 
         ##EVA Depress2
-        if airlock_pump_voltage == 1 and crewlockpres <= 250 and crewlockpres > 3 and int(stationmode) == 5:
+        if airlock_pump_voltage == 1 and crewlockpres <= 250 and crewlockpres > 3:
             leakhold = False
             self.us_eva.ids.leak_timer.text = "Complete"
             self.us_eva.ids.EVA_occuring.text = "Crewlock Depressurizing"
@@ -3339,7 +3339,7 @@ class MainApp(App):
             self.us_eva.ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/DepressLights.png'
 
         ##EVA in progress
-        if crewlockpres < 2.5 and int(stationmode) == 5:
+        if crewlockpres < 2.5:
             eva = True
             self.us_eva.ids.EVA_occuring.text = "EVA In Progress!!!"
             self.us_eva.ids.EVA_occuring.color = 0.33, 0.7, 0.18
@@ -3348,7 +3348,7 @@ class MainApp(App):
             evatimerevent = Clock.schedule_once(self.EVA_clock, 1)
 
         ##Repress
-        if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and crewlockpres >= 3 and crewlockpres < 734 and int(stationmode) == 5:
+        if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and crewlockpres >= 3 and crewlockpres < 734:
             eva = False
             self.us_eva.ids.EVA_occuring.color = 0, 0, 1
             self.us_eva.ids.EVA_occuring.text = "Crewlock Repressurizing"
