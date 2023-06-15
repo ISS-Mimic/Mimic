@@ -1156,6 +1156,9 @@ class ISS_Screen(Screen, EventDispatcher):
 class ECLSS_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1, 1, 1])
 
+class ECLSS_WRM_Screen(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1, 1, 1])
+
 class EPS_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1, 1, 1])
 
@@ -1263,6 +1266,7 @@ class MainApp(App):
         self.mimic_screen = MimicScreen(name = 'mimic')
         self.iss_screen = ISS_Screen(name = 'iss')
         self.eclss_screen = ECLSS_Screen(name = 'eclss')
+        self.eclss_wrm_screen = ECLSS_WRM_Screen(name = 'wrm')
         self.control_screen = ManualControlScreen(name = 'manualcontrol')
         self.led_screen = LED_Screen(name = 'led')
         self.orbit_screen = Orbit_Screen(name = 'orbit')
@@ -1311,6 +1315,7 @@ class MainApp(App):
         root.add_widget(self.orbit_data)
         root.add_widget(self.iss_screen)
         root.add_widget(self.eclss_screen)
+        root.add_widget(self.eclss_wrm_screen)
         root.add_widget(self.cdh_screen)
         root.add_widget(self.science_screen)
         root.add_widget(self.usos_screen)
@@ -2686,6 +2691,10 @@ class MainApp(App):
         O2prodRate = "{:.2f}".format(float((values[96])[0]))
         VRSvlvPosition = str((values[198])[0])
         VESvlvPosition = str((values[199])[0])
+        UrineProcessState = str((values[89])[0])
+        UrineTank = "{:.2f}".format(float((values[90])[0]))
+        WaterProcessState = str((values[91])[0])
+        WaterProcessStep = str((values[92])[0])
         
         #SASA telemetry
         ActiveString = str((values[54])[0])
@@ -3449,6 +3458,66 @@ class MainApp(App):
         else:
             self.eclss_screen.ids.VESvlvPosition.text = "n/a"
         
+        self.eclss_wrm_screen.ids.UrineTank.text = str(UrineTank)
+        
+        #self.eclss_wrm_screen.ids.UrineProcessState.text = str(UrineProcessState)
+        if int(UrineProcessState) == 2:
+            self.eclss_wrm_screen.ids.UrineProcessState.text = "STOP"
+        elif int(UrineProcessState) == 4:
+            self.eclss_wrm_screen.ids.UrineProcessState.text = "SHTDWN"
+        elif int(UrineProcessState) == 8:
+            self.eclss_wrm_screen.ids.UrineProcessState.text = "MAINT"
+        elif int(UrineProcessState) == 16:
+            self.eclss_wrm_screen.ids.UrineProcessState.text = "NORM"
+        elif int(UrineProcessState) == 32:
+            self.eclss_wrm_screen.ids.UrineProcessState.text = "STBY"
+        elif int(UrineProcessState) == 64:
+            self.eclss_wrm_screen.ids.UrineProcessState.text = "IDLE"
+        elif int(UrineProcessState) == 128:
+            self.eclss_wrm_screen.ids.UrineProcessState.text = "INIT"
+        else:
+            self.eclss_wrm_screen.ids.UrineProcessState.text = "n/a"
+        
+        #self.eclss_wrm_screen.ids.WaterProcessState.text = str(WaterProcessState)
+        if int(WaterProcessState) == 1:
+            self.eclss_wrm_screen.ids.WaterProcessState.text = "STOP"
+        elif int(WaterProcessState) == 2:
+            self.eclss_wrm_screen.ids.WaterProcessState.text = "SHTDWN"
+        elif int(WaterProcessState) == 3:
+            self.eclss_wrm_screen.ids.WaterProcessState.text = "STBY"
+        elif int(WaterProcessState) == 4:
+            self.eclss_wrm_screen.ids.WaterProcessState.text = "PROC"
+        elif int(WaterProcessState) == 5:
+            self.eclss_wrm_screen.ids.WaterProcessState.text = "HOT SVC"
+        elif int(WaterProcessState) == 6:
+            self.eclss_wrm_screen.ids.WaterProcessState.text = "FLUSH"
+        elif int(WaterProcessState) == 7:
+            self.eclss_wrm_screen.ids.WaterProcessState.text = "WARM SHTDWN"
+        else:
+            self.eclss_wrm_screen.ids.WaterProcessState.text = "n/a"
+        
+        #self.eclss_wrm_screen.ids.WaterProcessStep.text = str(WaterProcessStep)
+        if int(WaterProcessStep) == 0:
+            self.eclss_wrm_screen.ids.WaterProcessStep.text = "NONE"
+        elif int(WaterProcessStep) == 1:
+            self.eclss_wrm_screen.ids.WaterProcessStep.text = "VENT"
+        elif int(WaterProcessStep) == 2:
+            self.eclss_wrm_screen.ids.WaterProcessStep.text = "HEATUP"
+        elif int(WaterProcessStep) == 3:
+            self.eclss_wrm_screen.ids.WaterProcessStep.text = "OURGE"
+        elif int(WaterProcessStep) == 4:
+            self.eclss_wrm_screen.ids.WaterProcessStep.text = "FLOW"
+        elif int(WaterProcessStep) == 5:
+            self.eclss_wrm_screen.ids.WaterProcessStep.text = "TEST"
+        elif int(WaterProcessStep) == 6:
+            self.eclss_wrm_screen.ids.WaterProcessStep.text = "TEST SV 1"
+        elif int(WaterProcessStep) == 7:
+            self.eclss_wrm_screen.ids.WaterProcessStep.text = "TEST SV 2"
+        elif int(WaterProcessStep) == 8:
+            self.eclss_wrm_screen.ids.WaterProcessStep.text = "SERVICE"
+        else:
+            self.eclss_wrm_screen.ids.WaterProcessStep.text = "n/a"
+        
         ##Summary Telemetery on Robo Screen
         self.robo_screen.ids.mt_worksite.text = str(mt_worksite)
         
@@ -3795,6 +3864,7 @@ Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Orbit_Pass.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Orbit_Data.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ISS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ECLSS_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ECLSS_WRM_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EPS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/CT_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/CT_SGANT_Screen.kv')
