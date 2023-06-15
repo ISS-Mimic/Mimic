@@ -1,0 +1,25 @@
+<ECLSS_WRM_Screen>:
+    name: 'wrm'
+    FloatLayout:
+        Image:
+            id: ECLSS_WRM_background
+            source: '/home/pi/Mimic/Pi/imgs/eclss/WRMbackground.png'
+            fit_mode: "fill"
+        Label:
+            id: UrineTank
+            pos_hint: {"center_x": 0.05, "center_y": 0.65}
+            text: '0.003'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+         Label:
+            id: UrineProcessState
+            pos_hint: {"center_x": 0.05, "center_y": 0.59}
+            text: '0.003'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: WaterProcessState
