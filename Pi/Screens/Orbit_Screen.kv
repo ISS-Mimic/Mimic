@@ -6,6 +6,13 @@
             id: Orbit_background
             source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitBackground.png'
             fit_mode: "fill"
+        Label:
+            id: now
+            pos_hint: {"center_x": 0.95, "center_y": 0.95}
+            text: '0.00'
+            color: 1,1,1
+            font_size: self.height * 0.10
+            size_hint_y: 0.2
         Image:
             id:orbit3d
             source: '/home/pi/Mimic/Pi/imgs/orbit/globe.png'
