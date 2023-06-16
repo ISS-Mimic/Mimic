@@ -2711,8 +2711,8 @@ class MainApp(App):
         AC_Node2 = str((values[83])[0])
         FluidTempAir_Node2 = "{:.2f}".format(float((values[84])[0]))
         FluidTempAv_Node2 = "{:.2f}".format(float((values[85])[0]))
-        LTwater_Node3 = "{:.2f}".format(float((values[101])[0]))           #These two could be switched
-        MTwater_Node3 = "{:.2f}".format(float((values[99])[0]))            #These two could be switched
+        LTwater_Node3 = "{:.2f}".format(float((values[101])[0]))           
+        MTwater_Node3 = "{:.2f}".format(float((values[99])[0]))            
         AC_Node3 = str((values[100])[0])
         FluidTempAir_Node3 = "{:.2f}".format(float((values[98])[0]))
         FluidTempAv_Node3 = "{:.2f}".format(float((values[97])[0]))
