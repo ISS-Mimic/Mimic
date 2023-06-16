@@ -1159,6 +1159,9 @@ class ECLSS_Screen(Screen, EventDispatcher):
 class ECLSS_WRM_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1, 1, 1])
 
+class ECLSS_IATCS_Screen(Screen, EventDispatcher):
+    signalcolor = ObjectProperty([1, 1, 1])
+
 class EPS_Screen(Screen, EventDispatcher):
     signalcolor = ObjectProperty([1, 1, 1])
 
@@ -1267,6 +1270,7 @@ class MainApp(App):
         self.iss_screen = ISS_Screen(name = 'iss')
         self.eclss_screen = ECLSS_Screen(name = 'eclss')
         self.eclss_wrm_screen = ECLSS_WRM_Screen(name = 'wrm')
+        self.eclss_iatcs_screen = ECLSS_WRM_Screen(name = 'iatcs')
         self.control_screen = ManualControlScreen(name = 'manualcontrol')
         self.led_screen = LED_Screen(name = 'led')
         self.orbit_screen = Orbit_Screen(name = 'orbit')
@@ -1299,7 +1303,7 @@ class MainApp(App):
         self.eva_pictures = EVA_Pictures(name='eva_pictures')
 
         #Add all new telemetry screens to this list, this is used for the signal status icon and telemetry value colors
-        ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen',
+        ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen' 'eclss_wrm_screen', 'eclss_iatcs_screen',
                       'ct_screen', 'ct_sasa_screen', 'ct_sgant_screen', 'ct_uhf_screen',
                       'ct_camera_screen', 'gnc_screen', 'orbit_screen', 'us_eva', 'rs_eva',
                       'eva_main', 'mimic_screen', 'robo_screen', 'mss_mt_screen', 'ssrms_screen', 'spdm1_screen','orbit_pass', 'orbit_data', 'crew_screen']
@@ -1316,6 +1320,7 @@ class MainApp(App):
         root.add_widget(self.iss_screen)
         root.add_widget(self.eclss_screen)
         root.add_widget(self.eclss_wrm_screen)
+        root.add_widget(self.eclss_iatcs_screen)
         root.add_widget(self.cdh_screen)
         root.add_widget(self.science_screen)
         root.add_widget(self.usos_screen)
@@ -2695,6 +2700,22 @@ class MainApp(App):
         UrineTank = "{:.2f}".format(float((values[90])[0]))
         WaterProcessState = str((values[91])[0])
         WaterProcessStep = str((values[92])[0])
+        LTwater_Lab = "{:.2f}".format(float((values[192])[0]))
+        MTwater_Lab = "{:.2f}".format(float((values[193])[0]))
+        AC_LabPort = str((values[200])[0])
+        AC_LabStbd = str((values[201])[0])
+        FluidTempAir_Lab = "{:.2f}".format(float((values[197])[0]))
+        FluidTempAv_Lab = "{:.2f}".format(float((values[196])[0]))
+        LTwater_Node2 = "{:.2f}".format(float((values[82])[0]))
+        MTwater_Node2 = "{:.2f}".format(float((values[81])[0]))
+        AC_Node2 = str((values[83])[0])
+        FluidTempAir_Node2 = "{:.2f}".format(float((values[84])[0]))
+        FluidTempAv_Node2 = "{:.2f}".format(float((values[85])[0]))
+        LTwater_Node3 = "{:.2f}".format(float((values[101])[0]))           #These two could be switched
+        MTwater_Node3 = "{:.2f}".format(float((values[99])[0]))            #These two could be switched
+        AC_Node3 = str((values[100])[0])
+        FluidTempAir_Node3 = "{:.2f}".format(float((values[98])[0]))
+        FluidTempAv_Node3 = "{:.2f}".format(float((values[97])[0]))
         
         #SASA telemetry
         ActiveString = str((values[54])[0])
@@ -3520,6 +3541,99 @@ class MainApp(App):
         else:
             self.eclss_wrm_screen.ids.WaterProcessStep.text = "n/a"
         
+        self.eclss_iatcs_screen.ids.LTwater_Lab.text = str(LTwater_Lab)
+        self.eclss_iatcs_screen.ids.MTwater_Lab.text = str(MTwater_Lab)
+        self.eclss_iatcs_screen.ids.FluidTempAir_Lab.text = str(FluidTempAir_Lab)
+        self.eclss_iatcs_screen.ids.FluidTempAv_Lab.text = str(FluidTempAv_Lab)
+        self.eclss_iatcs_screen.ids.LTwater_Node2.text = str(LTwater_Node2)
+        self.eclss_iatcs_screen.ids.MTwater_Node2.text = str(MTwater_Node2)
+        self.eclss_iatcs_screen.ids.FluidTempAir_Node2.text = str(FluidTempAir_Node2)
+        self.eclss_iatcs_screen.ids.FluidTempAv_Node2.text = str(FluidTempAv_Node2)
+        self.eclss_iatcs_screen.ids.LTwater_Node3.text = str(LTwater_Node3)
+        self.eclss_iatcs_screen.ids.MTwater_Node3.text = str(MTwater_Node3)
+        self.eclss_iatcs_screen.ids.FluidTempAir_Node3.text = str(FluidTempAir_Node3)
+        self.eclss_iatcs_screen.ids.FluidTempAv_Node3.text = str(FluidTempAv_Node3)
+        
+        #self.eclss_iatcs_screen.ids.AC_LabPort.text = str(WaterProcessStep)
+        if int(AC_LabPort) == 0:
+            self.eclss_iatcs_screen.ids.AC_LabPort.text = "RESET"
+        elif int(AC_LabPort) == 1:
+            self.eclss_iatcs_screen.ids.AC_LabPort.text = "DRAIN"
+        elif int(AC_LabPort) == 2:
+            self.eclss_iatcs_screen.ids.AC_LabPort.text = "DRYOUT"
+        elif int(AC_LabPort) == 3:
+            self.eclss_iatcs_screen.ids.AC_LabPort.text = "EIB OFF"
+        elif int(AC_LabPort) == 4:
+            self.eclss_iatcs_screen.ids.AC_LabPort.text = "OFF"
+        elif int(AC_LabPort) == 5:
+            self.eclss_iatcs_screen.ids.AC_LabPort.text = "ON"
+        elif int(AC_LabPort) == 6:
+            self.eclss_iatcs_screen.ids.AC_LabPort.text = "STARTUP"
+        elif int(AC_LabPort) == 7:
+            self.eclss_iatcs_screen.ids.AC_LabPort.text = "TEST2"
+        else:
+            self.eclss_iatcs_screen.ids.AC_LabPort.text = "n/a"
+        
+        #self.eclss_iatcs_screen.ids.AC_LabStbd.text = str(WaterProcessStep)
+        if int(AC_LabStbd) == 0:
+            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "RESET"
+        elif int(AC_LabStbd) == 1:
+            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "DRAIN"
+        elif int(AC_LabStbd) == 2:
+            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "DRYOUT"
+        elif int(AC_LabStbd) == 3:
+            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "EIB OFF"
+        elif int(AC_LabStbd) == 4:
+            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "OFF"
+        elif int(AC_LabStbd) == 5:
+            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "ON"
+        elif int(AC_LabStbd) == 6:
+            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "STARTUP"
+        elif int(AC_LabStbd) == 7:
+            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "TEST2"
+        else:
+            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "n/a"
+        
+        #self.eclss_iatcs_screen.ids.AC_Node2.text = str(WaterProcessStep)
+        if int(AC_Node2) == 0:
+            self.eclss_iatcs_screen.ids.AC_Node2.text = "RESET"
+        elif int(AC_Node2) == 1:
+            self.eclss_iatcs_screen.ids.AC_Node2.text = "DRAIN"
+        elif int(AC_Node2) == 2:
+            self.eclss_iatcs_screen.ids.AC_Node2.text = "DRYOUT"
+        elif int(AC_Node2) == 3:
+            self.eclss_iatcs_screen.ids.AC_Node2.text = "EIB OFF"
+        elif int(AC_Node2) == 4:
+            self.eclss_iatcs_screen.ids.AC_Node2.text = "OFF"
+        elif int(AC_Node2) == 5:
+            self.eclss_iatcs_screen.ids.AC_Node2.text = "ON"
+        elif int(AC_Node2) == 6:
+            self.eclss_iatcs_screen.ids.AC_Node2.text = "STARTUP"
+        elif int(AC_Node2) == 7:
+            self.eclss_iatcs_screen.ids.AC_Node2.text = "TEST2"
+        else:
+            self.eclss_iatcs_screen.ids.AC_Node2.text = "n/a"
+        
+        #self.eclss_iatcs_screen.ids.AC_Node3.text = str(WaterProcessStep)
+        if int(AC_Node3) == 0:
+            self.eclss_iatcs_screen.ids.AC_Node3.text = "RESET"
+        elif int(AC_Node3) == 1:
+            self.eclss_iatcs_screen.ids.AC_Node3.text = "DRAIN"
+        elif int(AC_Node3) == 2:
+            self.eclss_iatcs_screen.ids.AC_Node3.text = "DRYOUT"
+        elif int(AC_Node3) == 3:
+            self.eclss_iatcs_screen.ids.AC_Node3.text = "EIB OFF"
+        elif int(AC_Node3) == 4:
+            self.eclss_iatcs_screen.ids.AC_Node3.text = "OFF"
+        elif int(AC_Node3) == 5:
+            self.eclss_iatcs_screen.ids.AC_Node3.text = "ON"
+        elif int(AC_Node3) == 6:
+            self.eclss_iatcs_screen.ids.AC_Node3.text = "STARTUP"
+        elif int(AC_Node3) == 7:
+            self.eclss_iatcs_screen.ids.AC_Node3.text = "TEST2"
+        else:
+            self.eclss_iatcs_screen.ids.AC_Node3.text = "n/a"
+        
         ##Summary Telemetery on Robo Screen
         self.robo_screen.ids.mt_worksite.text = str(mt_worksite)
         
@@ -3867,6 +3981,7 @@ Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Orbit_Data.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ISS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ECLSS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ECLSS_WRM_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ECLSS_IATCS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EPS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/CT_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/CT_SGANT_Screen.kv')
