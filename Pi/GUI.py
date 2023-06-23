@@ -1563,6 +1563,14 @@ class MainApp(App):
         except Exception as e:
             logWrite("Error retrieving EVA stats: " + str(e))
 
+    def flashROBObutton(self, instance):
+        logWrite("Function call - flashRobo")
+
+        self.mimic_screen.ids.Robo_button.background_color = (0, 0, 1, 1)
+        def reset_color(*args):
+            self.mimic_screen.ids.Robo_button.background_color = (1, 1, 1, 1)
+        Clock.schedule_once(reset_color, 0.5)
+    
     def flashUS_EVAbutton(self, instance):
         logWrite("Function call - flashUS_EVA")
 
@@ -2647,6 +2655,20 @@ class MainApp(App):
         NH3outletTemp_loopB = "{:.2f}".format(float((values[21])[0]))
 
         #MBS and MT telemetry
+        mt_worksite = int((values[258])[0])
+        self.mss_mt_screen.ids.mt_ws_value.text = str(mt_worksite)
+        mt_position = float((values[257])[0])
+        mt_position_timestamp = float((timestamps[257])[0])
+
+        self.mss_mt_screen.ids.mt_position_value.text = str(mt_position)
+
+        if (mt_position_timestamp - old_mt_timestamp) > 0:
+            mt_speed = (mt_position - old_mt_position) / ((mt_position_timestamp - old_mt_timestamp)*3600)
+            old_mt_timestamp = mt_position_timestamp
+            old_mt_position = mt_position
+            roboflashevent = Clock.schedule_once(self.flashROBObutton, 1)
+        self.mss_mt_screen.ids.mt_speed_value.text = "{:2.2f}".format(float(mt_speed)) + " cm/s"
+
         MCASpayload = int((values[292])[0])
         POApayload = int((values[294])[0])
         
@@ -2859,21 +2881,6 @@ class MainApp(App):
         airlock_pump_switch = int((values[72])[0])
         crewlockpres = float((values[16])[0])
         airlockpres = float((values[77])[0])
-
-        #MSS Robotics Stuff
-        mt_worksite = int((values[258])[0])
-        self.mss_mt_screen.ids.mt_ws_value.text = str(mt_worksite)
-        mt_position = float((values[257])[0])
-        mt_position_timestamp = float((timestamps[257])[0])
-
-        self.mss_mt_screen.ids.mt_position_value.text = str(mt_position)
-
-        if (mt_position_timestamp - old_mt_timestamp) > 0:
-            mt_speed = (mt_position - old_mt_position) / ((mt_position_timestamp - old_mt_timestamp)*3600)
-            old_mt_timestamp = mt_position_timestamp
-            old_mt_position = mt_position
-        self.mss_mt_screen.ids.mt_speed_value.text = "{:2.2f}".format(float(mt_speed)) + " cm/s"
-
 
         ##US EPS Stuff---------------------------##
         solarbeta = "{:.2f}".format(float((values[176])[0]))
