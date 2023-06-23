@@ -2660,6 +2660,22 @@ class MainApp(App):
         mt_position = float((values[257])[0])
         mt_position_timestamp = float((timestamps[257])[0])
 
+        def map_mt_value(value):
+            mt_min_value = -800.0 #minimum mt position float value
+            mt_max_value = 800.0 #maximum mt position float value
+            min_mt_mapped_value = 0.2 #leftmost kivy screen percentage of truss image
+            max_mt_mapped_value = 0.7 #rightmost kivy screen percentage of truss image
+        
+            # Calculate the ratio of the input value within the range
+            ratio = (value - min_value) / (max_value - min_value)
+        
+            # Map the ratio to the desired output range
+            mt_mapped_value = min_mapped_value + ratio * (max_mt_mapped_value - min_mt_mapped_value)
+        
+            return mt_mapped_value #this should be the new pos_hint_x value
+
+        self.mss_mt_screen.ids.mt_image.pos_hint_x = map_mt_value(mt_position) #this widget needs to be added
+            
         self.mss_mt_screen.ids.mt_position_value.text = str(mt_position)
 
         if (mt_position_timestamp - old_mt_timestamp) > 0:
