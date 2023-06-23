@@ -2667,7 +2667,7 @@ class MainApp(App):
             max_mt_mapped_value = 0.7 #rightmost kivy screen percentage of truss image
         
             # Calculate the ratio of the input value within the range
-            ratio = (value - min_value) / (max_value - min_value)
+            ratio = (value - mt_min_value) / (mt_max_value - mt_min_value)
         
             # Map the ratio to the desired output range
             mt_mapped_value = min_mapped_value + ratio * (max_mt_mapped_value - min_mt_mapped_value)
