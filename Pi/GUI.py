@@ -2663,8 +2663,8 @@ class MainApp(App):
         def map_mt_value(value):
             mt_min_value = -800.0 #minimum mt position float value
             mt_max_value = 800.0 #maximum mt position float value
-            min_mt_mapped_value = 0.2 #leftmost kivy screen percentage of truss image
-            max_mt_mapped_value = 0.7 #rightmost kivy screen percentage of truss image
+            min_mt_mapped_value = 0.4 #leftmost kivy screen percentage of truss image
+            max_mt_mapped_value = 0.9 #rightmost kivy screen percentage of truss image
         
             # Calculate the ratio of the input value within the range
             ratio = (value - mt_min_value) / (mt_max_value - mt_min_value)
