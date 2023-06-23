@@ -2670,7 +2670,7 @@ class MainApp(App):
             ratio = (value - mt_min_value) / (mt_max_value - mt_min_value)
         
             # Map the ratio to the desired output range
-            mt_mapped_value = min_mapped_value + ratio * (max_mt_mapped_value - min_mt_mapped_value)
+            mt_mapped_value = min_mt_mapped_value + ratio * (max_mt_mapped_value - min_mt_mapped_value)
         
             return mt_mapped_value #this should be the new pos_hint_x value
 
