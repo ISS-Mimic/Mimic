@@ -2674,7 +2674,7 @@ class MainApp(App):
         
             return mt_mapped_value #this should be the new pos_hint_x value
 
-        self.mss_mt_screen.ids.mt_image.pos_hint_x = map_mt_value(mt_position) #this widget needs to be added
+        self.mss_mt_screen.ids.FloatingMT.pos_hint_x = map_mt_value(mt_position) #this widget needs to be added
             
         self.mss_mt_screen.ids.mt_position_value.text = str(mt_position)
 
