@@ -3696,7 +3696,7 @@ class MainApp(App):
         
         #self.robo_screen.ids.SPDMbase.text = str(SPDMbase)
         if int(SPDMbase) == 1:
-            self.robo_screen.ids.SPDMbase.text = "Lab"
+            self.robo_screen.ids.SPDMbase.text = "US Lab"
         elif int(SPDMbase) == 2:
             self.robo_screen.ids.SPDMbase.text = "Node 3"
         elif int(SPDMbase) == 4:
