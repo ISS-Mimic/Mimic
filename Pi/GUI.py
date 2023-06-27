@@ -2661,8 +2661,8 @@ class MainApp(App):
         mt_position_timestamp = float((timestamps[257])[0])
 
         def map_mt_value(value):
-            mt_min_value = 1600.0 #minimum mt position float value, rough guess needs refining
-            mt_max_value = -1600.0 #maximum mt position float value, rough guess needs refining
+            mt_min_value = 1800.0 #minimum mt position float value, rough guess needs refining
+            mt_max_value = -1800.0 #maximum mt position float value, rough guess needs refining
             min_mt_mapped_value = 0.4 #change this to be leftmost kivy screen percentage of truss image
             max_mt_mapped_value = 0.9 #change this to be rightmost kivy screen percentage of truss image
         
