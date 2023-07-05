@@ -58,7 +58,6 @@ void checkSerial()
     }
 
 
-
     else if (test2.substring(0, delimeter) == "SSARJ")
     {
       SSARJ = (test2.substring(delimeter + 1)).toFloat();
@@ -66,10 +65,12 @@ void checkSerial()
     else if (test2.substring(0, delimeter) == "PTRRJ")
     {
       PTRRJ = (test2.substring(delimeter + 1)).toFloat();
+      PTRRJ = map(PTRRJ, -105, 105, 0,180);
     }
     else if (test2.substring(0, delimeter) == "STRRJ")
     {
       STRRJ = (test2.substring(delimeter + 1)).toFloat();
+      STRRJ = map(STRRJ, -105, 105, 0,180);
     }
     else if (test2.substring(0, delimeter) == "B1B")
     {
