@@ -10,11 +10,11 @@
             font_size: self.height * 0.2
         Image:
             id: ISS_background
-            source: "/home/pi/Mimic/Pi/imgs/iss/ISSbackground.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/iss/ISSbackground.png"
             fit_mode: "fill"
         Image:
             id: modulestack
-            source: "/home/pi/Mimic/Pi/imgs/iss/LEDstack2.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2.png"
             size_hint: 1,1
             pos_hint: {"center_x": 0.5, "center_y": 0.6}
             fit_mode: "scale-down"
@@ -33,7 +33,7 @@
             pos_hint: {"center_x": 0.1, "center_y": 0.55}
             group: "modules"
             opacity: 0.0
-            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack2_SM.png"
+            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_SM.png"
             on_release: root.selectModule("SM")
         Label:
             pos_hint: {"center_x": 0.1, "center_y": 0.5}
@@ -48,7 +48,7 @@
             pos_hint: {"center_x": 0.35, "center_y": 0.55}
             group: "modules"
             opacity: 0.0
-            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack2_FGB.png"
+            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_FGB.png"
             on_release: root.selectModule("FGB")
         Label:
             pos_hint: {"center_x": 0.35, "center_y": 0.5}
@@ -63,7 +63,7 @@
             pos_hint: {"center_x": 0.57, "center_y": 0.55}
             group: "modules"
             opacity: 0.0
-            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack2_Node1.png"
+            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_Node1.png"
             on_release: root.selectModule("Node1")
         Label:
             pos_hint: {"center_x": 0.60, "center_y": 0.55}
@@ -78,7 +78,7 @@
             pos_hint: {"center_x": 0.6, "center_y": 0.37}
             group: "modules"
             opacity: 0.0
-            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack2_AL.png"
+            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_AL.png"
             on_release: root.selectModule("AL")
         Label:
             pos_hint: {"center_x": 0.6, "center_y": 0.4}
@@ -93,7 +93,7 @@
             pos_hint: {"center_x": 0.6, "center_y": 0.75}
             group: "modules"
             opacity: 0.0
-            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack2_Node3.png"
+            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_Node3.png"
             on_release: root.selectModule("Node3")
         Label:
             pos_hint: {"center_x": 0.6, "center_y": 0.75}
@@ -108,7 +108,7 @@
             pos_hint: {"center_x": 0.7, "center_y": 0.75}
             group: "modules"
             opacity: 0.0
-            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack2_PMM.png"
+            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_PMM.png"
             on_release: root.selectModule("PMM")
         Label:
             pos_hint: {"center_x": 0.7, "center_y": 0.75}
@@ -123,7 +123,7 @@
             pos_hint: {"center_x": 0.55, "center_y": 0.72}
             group: "modules"
             opacity: 0.0
-            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack2_BEAM.png"
+            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_BEAM.png"
             on_release: root.selectModule("BEAM")
         Label:
             pos_hint: {"center_x": 0.53, "center_y": 0.72}
@@ -138,7 +138,7 @@
             pos_hint: {"center_x": 0.73, "center_y": 0.55}
             group: "modules"
             opacity: 0.0
-            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack2_USL.png"
+            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_USL.png"
             on_release: root.selectModule("USL")
         Label:
             pos_hint: {"center_x": 0.73, "center_y": 0.55}
@@ -153,7 +153,7 @@
             pos_hint: {"center_x": 0.87, "center_y": 0.55}
             group: "modules"
             opacity: 0.0
-            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack2_Node2.png"
+            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_Node2.png"
             on_release: root.selectModule("Node2")
         Label:
             pos_hint: {"center_x": 0.9, "center_y": 0.55}
@@ -168,7 +168,7 @@
             pos_hint: {"center_x": 0.87, "center_y": 0.36}
             group: "modules"
             opacity: 0.0
-            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack2_Col.png"
+            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_Col.png"
             on_release: root.selectModule("Col")
         Label:
             pos_hint: {"center_x": 0.905, "center_y": 0.36}
@@ -183,7 +183,7 @@
             pos_hint: {"center_x": 0.87, "center_y": 0.77}
             group: "modules"
             opacity: 0.0
-            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack2_JEM.png"
+            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_JEM.png"
             on_release: root.selectModule("JEM")
         Label:
             pos_hint: {"center_x": 0.90, "center_y": 0.77}
@@ -196,10 +196,10 @@
             id: clear_module_button
             size_hint: 0.15,0.18
             pos_hint: {"center_x": 0.07, "center_y": 0.25}
-            background_normal: '/home/pi/Mimic/Pi/imgs/iss/ModuleReset.png/'
-            background_down: '/home/pi/Mimic/Pi/imgs/iss/ModuleResetDown.png/'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/iss/ModuleReset.png/'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/iss/ModuleResetDown.png/'
             group: "modules"
-            on_press: modulestack.source = "/home/pi/Mimic/Pi/imgs/iss/LEDstack2.png"
+            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2.png"
             on_release: root.selectModule("reset")
         Label:
             id: velocity_label
@@ -268,11 +268,11 @@
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: app.root.current = 'mimic'
         Image:
             id: signal
-            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
             size_hint_y: 0.15
             anim_delay: 0.12
             anim_loop: 0

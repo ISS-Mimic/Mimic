@@ -4,7 +4,7 @@
         id: orbit_layout
         Image:
             id: Orbit_background
-            source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitBackground.png'
+            source: f'{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitBackground.png'
             fit_mode: "fill"
         Label:
             id: gmtime
@@ -16,13 +16,13 @@
             font_size: self.height * 0.10
         Image:
             id:orbit3d
-            source: '/home/pi/Mimic/Pi/imgs/orbit/globe.png'
+            source: f'{root.mimic_directory}/Mimic/Pi/imgs/orbit/globe.png'
             size_hint: 0.2,0.2
             pos_hint: {"center_x": 0.92, "center_y": 0.35}
             fit_mode: "contain"
         Image:
             id: OrbitMap
-            source: '/home/pi/Mimic/Pi/imgs/orbit/map.jpg'
+            source: f'{root.mimic_directory}/Mimic/Pi/imgs/orbit/map.jpg'
             pos_hint: {"center_x": 0.5, "center_y": 0.56}
             size_hint_y: 0.598
             fit_mode: "contain"
@@ -41,7 +41,7 @@
                     x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
                     y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
                 Rectangle:
-                    source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitSun.png'
+                    source: f'{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitSun.png'
                     size: self.size
                     pos: self.pos
                 PopMatrix:
@@ -359,7 +359,7 @@
                     x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
                     y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
                 Rectangle:
-                    source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitYellowISSicon.png'
+                    source: f'{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitYellowISSicon.png'
                     size: self.size
                     pos: self.pos
                 Line:
@@ -384,15 +384,15 @@
             id: iss_pass_button
             size_hint: 0.12,0.18
             pos_hint: {"center_x": 0.92, "center_y": 0.76}
-            background_normal: '/home/pi/Mimic/Pi/imgs/orbit/ISSpassUnlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/orbit/ISSpassDown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/orbit/ISSpassUnlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/orbit/ISSpassDown.png'
             on_release: app.root.current = 'orbit_pass'
         Button:
             id: orbit_data_button
             size_hint: 0.20,.11
             pos_hint: {"center_x": 0.72, "center_y": 0.19}
-            background_normal: '/home/pi/Mimic/Pi/imgs/orbit/OrbitDataUnlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/orbit/OrbitDataDown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitDataUnlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitDataDown.png'
             on_release: app.root.current = 'orbit_data'
         Label:
             id: iss_next_pass1
@@ -442,7 +442,7 @@
             size_hint_y: 0.2
         Image:
             id: arduino
-            source: "/home/pi/Mimic/Pi/imgs/signal/arduino_offline.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
             size_hint_y: 0.15
             anim_delay: 0.2
             anim_loop: 0
@@ -459,11 +459,11 @@
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: app.root.current = 'mimic'
         Image:
             id: signal
-            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
             size_hint_y: 0.15
             anim_delay: 0.12
             anim_loop: 0

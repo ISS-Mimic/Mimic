@@ -3,7 +3,7 @@
     FloatLayout:
         orientation: 'vertical'
         Image:
-            source: '/home/pi/Mimic/Pi/imgs/fakeorbit/SimulatedOrbitBackground.png'
+            source: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/SimulatedOrbitBackground.png'
             fit_mode: "fill"
         Label:
             id: fakeorbitstatus
@@ -19,7 +19,7 @@
             pos_hint: {"center_x": 0.4, "center_y": 0.8}
             text: 'i'
             font_size: 10
-            ##background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/InfoIcon.png'
+            ##background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/InfoIcon.png'
             on_release: root.HTVpopup()
         Button:
             id: Disco
@@ -34,8 +34,8 @@
             id: DemoStart
             size_hint: 0.14,0.115
             pos_hint: {"center_x": 0.15, "center_y": 0.54}
-            background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartUnlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartDown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/StartUnlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/StartDown.png'
             on_release: DemoStop.disabled = False
             on_release: fakeorbitstatus.text = 'Transmitting Demo Orbit'
             on_release: root.changeDemoBoolean(True)
@@ -45,8 +45,8 @@
             id: DemoStop
             size_hint: 0.14,0.115
             pos_hint: {"center_x": 0.15, "center_y": 0.40}
-            background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopUnlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopDown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/StopUnlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/StopDown.png'
             disabled: True
             on_release: DemoStart.disabled = False
             on_release: fakeorbitstatus.text = 'Stopped'
@@ -57,8 +57,8 @@
             id: HTVDemoStart
             size_hint: 0.14,0.115
             pos_hint: {"center_x": 0.38, "center_y": 0.54}
-            background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartUnlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartDown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/StartUnlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/StartDown.png'
             on_release: HTVDemoStop.disabled = False
             on_release: fakeorbitstatus.text = 'Transmitting HTV Demo Orbit'
             on_release: root.changeDemoBoolean(True)
@@ -68,8 +68,8 @@
             id: HTVDemoStop
             size_hint: 0.14,0.115
             pos_hint: {"center_x": 0.38, "center_y": 0.40}
-            background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopUnlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopDown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/StopUnlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/StopDown.png'
             disabled: True
             on_release: HTVDemoStart.disabled = False
             on_release: fakeorbitstatus.text = 'Stopped'
@@ -79,8 +79,8 @@
             id: OFT2DemoStart
             size_hint: 0.14,0.115
             pos_hint: {"center_x": 0.15, "center_y": 0.54}
-            background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartUnlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartDown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/StartUnlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/StartDown.png'
             on_release: OFT2DemoStop.disabled = False
             on_release: fakeorbitstatus.text = 'Transmitting OFT2 Demo'
             on_release: root.changeDemoBoolean(True)
@@ -90,8 +90,8 @@
             id: OFT2DemoStop
             size_hint: 0.14,0.115
             pos_hint: {"center_x": 0.15, "center_y": 0.40}
-            background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopUnlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopDown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/StopUnlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/StopDown.png'
             disabled: True
             on_release: OFT2DemoStart.disabled = False
             on_release: fakeorbitstatus.text = 'Stopped'
@@ -102,8 +102,8 @@
             disabled: True
             size_hint: 0.14,0.115
             pos_hint: {"center_x": 0.615, "center_y": 0.54}
-            background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartUnlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StartDown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/StartUnlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/StartDown.png'
             on_release: LoadDemoStop.disabled = False
             on_release: fakeorbitstatus.text = 'Sending Demo'
             on_release: root.changeDemoBoolean(True)
@@ -113,8 +113,8 @@
             id: LoadDemoStop
             size_hint: 0.14,0.115
             pos_hint: {"center_x": 0.615, "center_y": 0.40}
-            background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopUnlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopDown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/StopUnlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/StopDown.png'
             disabled: True
             on_release: LoadDemoStart.disabled = False
             on_release: fakeorbitstatus.text = 'Stopped'
@@ -126,8 +126,8 @@
             size_hint: 0.1,0.1
             font_size: dp(20)
             pos_hint: {"center_x": 0.15, "center_y": 0.23}
-            background_normal: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopUnlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/fakeorbit/StopDown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/StopUnlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/StopDown.png'
             disabled: True
             on_release: fakeorbitstatus.text = 'Looping'
             on_release: root.changeDemoBoolean(False)
@@ -135,7 +135,7 @@
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: DemoStart.disabled = False
             on_release: DemoStop.disabled = True
             on_release: root.changeDemoBoolean(False)
@@ -143,7 +143,7 @@
             on_release: root.manager.current = 'main'
         Image:
             id: signal
-            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
             size_hint_y: 0.15
             anim_delay: 0.12
             anim_loop: 0
@@ -151,7 +151,7 @@
             fit_mode: "scale-down"
         Image:
             id: arduino
-            source: "/home/pi/Mimic/Pi/imgs/signal/arduino_offline.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
             size_hint_y: 0.15
             anim_delay: 0.2
             anim_loop: 0

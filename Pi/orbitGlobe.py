@@ -4,6 +4,10 @@ import numpy as np
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 import ephem
+import os
+import os.path as op
+
+mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
 url = "https://www.celestrak.com/NORAD/elements/stations.txt"
 response = urllib.request.urlopen(url)
@@ -50,7 +54,7 @@ def plotEarthColor():
 
     # show the plot
     #plt.show()
-    plt.savefig('/home/pi/Mimic/Pi/imgs/orbit/globe.png',transparent = True)
+    plt.savefig(mimic_directory + '/Mimic/Pi/imgs/orbit/globe.png',transparent = True)
 
 def plotEarthNoColor():
     # create a basemap of the earth
@@ -72,6 +76,6 @@ def plotEarthNoColor():
     #m.drawmeridians(np.arange(0., 420., 60.), labels=[0, 0, 0, 1])
 
     # show the plot
-    plt.savefig('/home/pi/Mimic/Pi/imgs/orbit/globe.png', dpi=100, transparent = True)
+    plt.savefig(mimic_directory + '/Mimic/Pi/imgs/orbit/globe.png', dpi=100, transparent = True)
 
 plotEarthNoColor()

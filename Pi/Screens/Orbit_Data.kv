@@ -3,7 +3,7 @@
     FloatLayout:
         Image:
             id: Orbit_Data_background
-            source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitDataBackground.png'
+            source: f'{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitDataBackground.png'
             fit_mode: "fill"
         #Label:
             #id: rawTLE 
@@ -219,7 +219,7 @@
             font_size: self.height * 0.10
         Image:
             id: signal
-            source: "/home/pi/Mimic/Pi/imgs/signal/signalred.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/signalred.zip"
             size_hint_y: 0.112
             anim_delay: 0.05
             anim_loop: 0
@@ -227,7 +227,7 @@
             pos_hint: {"center_x": 0.05, "center_y": 0.07}
         Image:
             id: arduino
-            source: "/home/pi/Mimic/Pi/imgs/signal/arduino_offline.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
             size_hint_y: 0.15
             anim_delay: 0.2
             anim_loop: 0
@@ -244,5 +244,5 @@
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: app.root.current = 'orbit'

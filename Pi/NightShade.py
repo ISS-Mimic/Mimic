@@ -5,6 +5,10 @@ from mpl_toolkits.basemap import Basemap
 from matplotlib import path
 import numpy as np
 from datetime import datetime, timedelta #used for time conversions and logging timestamps
+import os
+import os.path as op
+
+mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
 #this code uses basemap to draw the earth map and add the night section to the map
 #shamelessly stole most of this from stack overflow 
@@ -63,9 +67,9 @@ def bluemarble_daynight(date,scale):
     # Plot up Bluemarble Nightshade
     m    = Basemap(projection='cyl', resolution= None, 
                    area_thresh=None, ax=axes)
-    bm_n = m.warpimage('/home/pi/Mimic/Pi/imgs/orbit/earth_lights_lrg.jpg',scale=scale)
+    bm_n = m.warpimage(mimic_directory + '/Mimic/Pi/imgs/orbit/earth_lights_lrg.jpg',scale=scale)
     bm_d = m.imshow(bm_rgba)
-    plt.savefig('/home/pi/Mimic/Pi/imgs/orbit/map.jpg', bbox_inches='tight', pad_inches=0)
+    plt.savefig(mimic_directory + '/Mimic/Pi/imgs/orbit/map.jpg', bbox_inches='tight', pad_inches=0)
 
 date = datetime.utcnow()
 bluemarble_daynight(date,0.3)

@@ -3,23 +3,23 @@
     FloatLayout:
         Image:
             id: EVA_background
-            source: '/home/pi/Mimic/Pi/imgs/eva/GenericEVAbase.png'
+            source: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/GenericEVAbase.png'
             fit_mode: "fill"
         Button:
             id: US_EVA_Button
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.31, "center_y": 0.465}
-            background_normal: '/home/pi/Mimic/Pi/imgs/eva/GenericEVAusButton.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/GenericEVAusButton.png'
             on_release: app.root.current = 'us_eva'
         Button:
             id: RS_EVA_Button
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.31, "center_y": 0.23}
-            background_normal: '/home/pi/Mimic/Pi/imgs/eva/GenericEVArsButton.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/GenericEVArsButton.png'
             on_release: app.root.current = 'rs_eva'
         Image:
             id: signal
-            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
             size_hint_y: 0.15
             anim_delay: 0.05
             anim_loop: 0
@@ -28,5 +28,5 @@
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: app.root.current = 'mimic'

@@ -3,7 +3,7 @@
     FloatLayout:
         Image:
             id: TCS_Background
-            source: "/home/pi/Mimic/Pi/imgs/tcs/TCSbackground.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/tcs/TCSbackground.png"
             fit_mode: "fill"
         Label:
             id: SWmode_loopA
@@ -88,11 +88,11 @@
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: app.root.current = 'mimic'
         Image:
             id: signal
-            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
             size_hint_y: 0.15
             anim_delay: 0.12
             anim_loop: 0

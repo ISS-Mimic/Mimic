@@ -3,7 +3,7 @@
     FloatLayout:
         Image:
             id: Robo_Background
-            source: "/home/pi/Mimic/Pi/imgs/robo/RoboBackground.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/robo/RoboBackground.png"
             fit_mode: "fill"
         Label:
             id: OperatingBase
@@ -41,31 +41,31 @@
             size_hint_y: 0.4
             font_size: self.height * 0.10
         Button:
-            background_normal: '/home/pi/Mimic/Pi/imgs/robo/MTMBSunlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/robo/MTMBSdown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/robo/MTMBSunlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/robo/MTMBSdown.png'
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.6, "center_y": 0.9}
             on_release: root.manager.current = 'mt'
         Button:
-            background_normal: '/home/pi/Mimic/Pi/imgs/robo/SSRMSunlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/robo/SSRMSdown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/robo/SSRMSunlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/robo/SSRMSdown.png'
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.75, "center_y": 0.9}
             on_release: root.manager.current = 'ssrms'
         Button:
-            background_normal: '/home/pi/Mimic/Pi/imgs/robo/SPDMunlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/robo/SPDMdown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/robo/SPDMunlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/robo/SPDMdown.png'
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.9, "center_y": 0.9}
             on_release: root.manager.current = 'spdm1'
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: app.root.current = 'mimic'
         Image:
             id: signal
-            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
             size_hint_y: 0.15
             anim_delay: 0.12
             anim_loop: 0
@@ -73,7 +73,7 @@
             pos_hint: {"center_x": 0.05, "center_y": 0.07}
         Image:
             id: arduino
-            source: "/home/pi/Mimic/Pi/imgs/signal/arduino_offline.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
             size_hint_y: 0.15
             anim_delay: 0.2
             anim_loop: 0

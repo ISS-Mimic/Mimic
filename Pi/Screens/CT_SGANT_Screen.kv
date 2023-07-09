@@ -3,11 +3,11 @@
     FloatLayout:
         Image:
             id: SGANT_background
-            source: "/home/pi/Mimic/Pi/imgs/ct/SGANTbackground.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/ct/SGANTbackground.png"
             fit_mode: "fill"
         Image:
             id: signal
-            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
             size_hint_y: 0.15
             anim_delay: 0.12
             anim_loop: 0
@@ -31,7 +31,7 @@
             font_size: self.height * 0.10
         Image:
             id: sgant_dish
-            source: "/home/pi/Mimic/Pi/imgs/ct/SGANTantenna.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/ct/SGANTantenna.png"
             color: 1,1,1,1
             size_hint: 0.4,0.4
             fit_mode: "scale-down"
@@ -47,7 +47,7 @@
                 PopMatrix
         Image:
             id: radio_up
-            source: "/home/pi/Mimic/Pi/imgs/ct/Radio.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/ct/Radio.zip"
             anim_delay: 0.03
             anim_loop: 0
             color: 1,1,1,1
@@ -65,13 +65,13 @@
                 PopMatrix
         Image:
             id: sgant_base
-            source: "/home/pi/Mimic/Pi/imgs/ct/SGANTbase.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/ct/SGANTbase.png"
             pos_hint: {"center_x": 0.5, "center_y": 0.3}
             size_hint: 0.15,0.15
             fit_mode: "scale-down"
         Image:
             id: tdrs_east12
-            source: "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
             color: 1,1,1,1
             size_hint: 0.15,0.15
             anim_delay: 0.12
@@ -95,7 +95,7 @@
                 PopMatrix
         Image:
             id: tdrs_east6
-            source: "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
             color: 1,1,1,1
             size_hint: 0.15,0.15
             anim_delay: 0.12
@@ -119,7 +119,7 @@
                 PopMatrix
         Image:
             id: tdrs_west10
-            source: "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
             color: 1,1,1,1
             size_hint: 0.15,0.15
             anim_delay: 0.12
@@ -143,7 +143,7 @@
                 PopMatrix
         Image:
             id: tdrs_west11
-            source: "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
             color: 1,1,1,1
             size_hint: 0.15,0.15
             anim_delay: 0.12
@@ -167,7 +167,7 @@
                 PopMatrix
         Image:
             id: tdrs_z7
-            source: "/home/pi/Mimic/Pi/imgs/ct/TDRS.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
             color: 1,1,1,0.2
             size_hint: 0.15,0.15
             anim_delay: 0.12
@@ -201,5 +201,5 @@
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: app.root.current = 'ct'

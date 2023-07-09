@@ -3,11 +3,11 @@
     FloatLayout:
         Image:
             id: CT_Antena_Background
-            source: '/home/pi/Mimic/Pi/imgs/ct/AntennasBase.png'
+            source: f'{root.mimic_directory}/Mimic/Pi/imgs/ct/AntennasBase.png'
             fit_mode: "fill"
         Image:
             id: ISS_CT
-            source: "/home/pi/Mimic/Pi/imgs/ct/CT_ISS3.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/ct/CT_ISS3.png"
             size_hint_y: 0.95
             fit_mode: "contain"
             pos_hint: {"center_x": 0.5, "center_y": 0.45}
@@ -49,7 +49,7 @@
             on_release: app.root.current = 'ct_uhf'
         Image:
             id: uhf1_radio
-            source: "/home/pi/Mimic/Pi/imgs/ct/RadioSphere.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/ct/RadioSphere.zip"
             anim_delay: 0.12
             anim_loop: 0
             color: 1,1,1,1
@@ -58,7 +58,7 @@
             pos_hint: {"center_x": 0.37, "center_y": 0.18}
         Image:
             id: uhf2_radio
-            source: "/home/pi/Mimic/Pi/imgs/ct/RadioSphere.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/ct/RadioSphere.zip"
             anim_delay: 0.12
             anim_loop: 0
             color: 1,1,1,1
@@ -67,7 +67,7 @@
             pos_hint: {"center_x": 0.805, "center_y": 0.69}
         Image:
             id: sasa1_radio
-            source: "/home/pi/Mimic/Pi/imgs/ct/Radio.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/ct/Radio.zip"
             anim_delay: 0.02
             anim_loop: 0
             color: 1,1,1,1
@@ -76,7 +76,7 @@
             pos_hint: {"center_x": 0.245, "center_y": 0.8}
         Image:
             id: sasa2_radio
-            source: "/home/pi/Mimic/Pi/imgs/ct/Radio.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/ct/Radio.zip"
             anim_delay: 0.02
             anim_loop: 0
             color: 1,1,1,1
@@ -85,7 +85,7 @@
             pos_hint: {"center_x": 0.71, "center_y": 0.8}
         Image:
             id: sgant1_radio
-            source: "/home/pi/Mimic/Pi/imgs/ct/Radio.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/ct/Radio.zip"
             anim_delay: 0.02
             anim_loop: 0
             color: 1,1,1,1
@@ -94,7 +94,7 @@
             pos_hint: {"center_x": 0.44, "center_y": 0.83}
         Image:
             id: sgant2_radio
-            source: "/home/pi/Mimic/Pi/imgs/ct/Radio.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/ct/Radio.zip"
             anim_delay: 0.02
             anim_loop: 0
             color: 1,1,1,1
@@ -104,11 +104,11 @@
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: app.root.current = 'mimic'
         Image:
             id: signal
-            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
             size_hint_y: 0.15
             anim_delay: 0.12
             anim_loop: 0

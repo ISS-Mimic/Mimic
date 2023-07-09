@@ -339,6 +339,8 @@ old_mt_timestamp = 0.00
 old_mt_position = 0.00
 
 class MainScreen(Screen):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    
     def changeManualControlBoolean(self, *args):
         global manualcontrol
         manualcontrol = args[0]
@@ -360,6 +362,7 @@ class MainScreen(Screen):
         logWrite("Successfully stopped ISS telemetry javascript and removed database")
 
 class ManualControlScreen(Screen):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     def on_pre_enter(self): #call the callback funcion when activating this screen, to update all angles
         self.callback()
 
@@ -1050,6 +1053,7 @@ class ManualControlScreen(Screen):
         serialWrite("STRRJ=90 ")
 
 class FakeOrbitScreen(Screen):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
     def changeDemoBoolean(self, *args):
         global demoboolean
@@ -1132,6 +1136,7 @@ class FakeOrbitScreen(Screen):
             runningDemo = False
 
 class Settings_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     def checkbox_clicked(*args):
         if args[2]:
             serialWrite("SmartRolloverBGA=1 ")
@@ -1139,102 +1144,131 @@ class Settings_Screen(Screen, EventDispatcher):
             serialWrite("SmartRolloverBGA=0 ")
 
 class Orbit_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class Orbit_Pass(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class Orbit_Data(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class ISS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
     def selectModule(*args): #used for choosing a module on screen to light up
         global module
         module = str(args[1])
 
 class ECLSS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class ECLSS_WRM_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class ECLSS_IATCS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class EPS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class CT_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class CT_SASA_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class CT_Camera_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class CT_UHF_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class CT_SGANT_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class GNC_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class CDH_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class Science_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class USOS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class VV_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class EVA_Main_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class EVA_US_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class EVA_RS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class EVA_Pictures(Screen, EventDispatcher):
-    pass
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
 class TCS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class LED_Screen(Screen, EventDispatcher):
-    pass
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
 class RS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class RS_Dock_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class Crew_Screen(Screen, EventDispatcher):
-    pass
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
 class Robo_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class SSRMS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class SPDM1_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class MSS_MT_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class MimicScreen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
     def changeMimicBoolean(self, *args):
         global mimicbutton
@@ -1258,9 +1292,10 @@ class MimicScreen(Screen, EventDispatcher):
             logWrite(e)
 
 class MainScreenManager(ScreenManager):
-    pass
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
 class MainApp(App):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
     def build(self):
         global startup, ScreenList, stopAnimation

@@ -3,112 +3,112 @@
     FloatLayout:
         Image:
             id: Mimic_background
-            source: '/home/pi/Mimic/Pi/imgs/mimic/MimicBase.png'
+            source: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/MimicBase.png'
             fit_mode: "fill"
         Button:
             id: EPS_button
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.15, "center_y": 0.62}
-            background_normal: '/home/pi/Mimic/Pi/imgs/mimic/EPSunlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/mimic/EPSdown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/EPSunlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/EPSdown.png'
             on_release: root.manager.current = 'eps'
         Button:
             id: Crew_button
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.5, "center_y": 0.34}
-            background_normal: '/home/pi/Mimic/Pi/imgs/mimic/CrewUnlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/mimic/CrewDown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/CrewUnlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/CrewDown.png'
             on_release: root.manager.current = 'crew'
         Button:
             id: CT_button
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.33, "center_y": 0.62}
-            background_normal: '/home/pi/Mimic/Pi/imgs/mimic/CTunlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/mimic/CTdown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/CTunlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/CTdown.png'
             on_release: root.manager.current = 'ct'
         Button:
             id: EVA_button
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.33, "center_y": 0.48}
-            background_normal: '/home/pi/Mimic/Pi/imgs/mimic/EVAunlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/mimic/EVAdown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/EVAunlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/EVAdown.png'
             on_release: root.manager.current = 'eva_main'
         Button:
             id: TCS_button
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.68, "center_y": 0.62}
-            background_normal: '/home/pi/Mimic/Pi/imgs/mimic/TCSunlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/mimic/TCSdown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/TCSunlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/TCSdown.png'
             on_release: root.manager.current = 'tcs'
         Button:
             id: ISS_button
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.5, "center_y": 0.62}
-            background_normal: '/home/pi/Mimic/Pi/imgs/mimic/ISSunlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/mimic/ISSdown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/ISSunlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/ISSdown.png'
             on_release: root.manager.current = 'iss'
         Button:
             id: ECLSS_button
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.15, "center_y": 0.48}
-            background_normal: '/home/pi/Mimic/Pi/imgs/mimic/ECLSSunlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/mimic/ECLSSdown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/ECLSSunlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/ECLSSdown.png'
             on_release: root.manager.current = 'eclss'
         Button:
             id: ROS_button
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.855, "center_y": 0.34}
-            background_normal: '/home/pi/Mimic/Pi/imgs/mimic/ROSunlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/mimic/ROSdown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/ROSunlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/ROSdown.png'
             on_release: root.manager.current = 'rs'
         Button:
             id: GNC_button
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.855, "center_y": 0.62}
-            background_normal: '/home/pi/Mimic/Pi/imgs/mimic/GNCunlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/mimic/GNCdown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/GNCunlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/GNCdown.png'
             on_release: root.manager.current = 'gnc'
         Button:
             id: Orbit_button
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.5, "center_y": 0.48}
-            background_normal: '/home/pi/Mimic/Pi/imgs/mimic/OrbitUnlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/mimic/OrbitDown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/OrbitUnlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/OrbitDown.png'
             on_release: root.manager.current = 'orbit'
         Button:
             id: Robo_button
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.68, "center_y": 0.48}
-            background_normal: '/home/pi/Mimic/Pi/imgs/mimic/RoboUnlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/mimic/RoboDown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/RoboUnlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/RoboDown.png'
             on_release: root.manager.current = 'robo'
         Button:
             id: CDH_button
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.855, "center_y": 0.48}
-            background_normal: '/home/pi/Mimic/Pi/imgs/mimic/CDHunlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/mimic/CDHdown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/CDHunlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/CDHdown.png'
             on_release: root.manager.current = 'cdh'
         Button:
             id: VV_button
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.33, "center_y": 0.34}
-            background_normal: '/home/pi/Mimic/Pi/imgs/mimic/VVunlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/mimic/VVdown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/VVunlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/VVdown.png'
             on_release: root.manager.current = 'vv'
         Button:
             id: USOS_button
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.15, "center_y": 0.34}
-            background_normal: '/home/pi/Mimic/Pi/imgs/mimic/USOSunlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/mimic/USOSdown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/USOSunlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/USOSdown.png'
             on_release: root.manager.current = 'usos'
         Button:
             id: Science_button
             size_hint: 0.15,0.13
             pos_hint: {"center_x": 0.68, "center_y": 0.34}
-            background_normal: '/home/pi/Mimic/Pi/imgs/mimic/ScienceUnlit.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/mimic/ScienceDown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/ScienceUnlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/mimic/ScienceDown.png'
             on_release: root.manager.current = 'science'
         Button:
             id: mimicstartbutton
@@ -162,7 +162,7 @@
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: root.changeMimicBoolean(False)
             on_release: mimicstartbutton.text = 'Transmit'
             on_release: mimicstopbutton.disabled = True
@@ -173,7 +173,7 @@
             on_release: app.root.current = 'main'
         Image:
             id: signal
-            source: "/home/pi/Mimic/Pi/imgs/signal/signalred.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/signalred.zip"
             size_hint_y: 0.112
             anim_delay: 0.05
             anim_loop: 0
@@ -181,7 +181,7 @@
             fit_mode: "scale-down"
         Image:
             id: arduino
-            source: "/home/pi/Mimic/Pi/imgs/signal/arduino_offline.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
             size_hint_y: 0.15
             anim_delay: 0.2
             anim_loop: 0
