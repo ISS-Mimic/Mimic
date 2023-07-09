@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-
+import os
 import sys
 import subprocess
 import argparse
@@ -10,8 +10,8 @@ def run_command(cmd):
     print((subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)).decode("utf-8"))
 
 def run_install(packages, method):
-    if method == "sudo apt":
-        method = "sudo apt -y"
+    if method == "sudo apt-get":
+        method = "sudo apt-get -y"
     install_string = "{} install {}".format(method, packages)
     run_command(install_string)
 
@@ -27,24 +27,22 @@ def main():
             '--skip_kivy', action='store_true',
             help='Skip installing the Kivy package and replacing the Kivy config file.',
             default=False)
-    parser.add_argument(
-            '--username', type=str,
-            help='Specify Pi username (default is pi).',
-            default="pi")
-
+    
+    username = os.getlogin()
     args = parser.parse_args()
 
     #Mimic Install Steps
 
-    run_command("sudo apt update")
-    run_command("sudo apt -y upgrade")
-    run_command("sudo apt -y autoremove")
-    run_install("vim", "sudo apt") #test editor
-    run_install("sqlite3", "sudo apt") #telemetry database
-    run_install("python3-sdl2", "sudo apt") #required for kivy window
-    run_install("python3-mpltoolkits.basemap", "sudo apt") #required for nightshade
+    run_command("sudo apt-get update")
+    run_command("sudo apt-get -y upgrade")
+    run_command("sudo apt-get -y autoremove")
+    run_install("rdate","sudo apt-get")
+    run_install("vim", "sudo apt-get") #test editor
+    run_install("sqlite3", "sudo apt-get") #telemetry database
+    run_install("python3-sdl2", "sudo apt-get") #required for kivy window
+    run_install("python3-mpltoolkits.basemap", "sudo apt-get") #required for nightshade
     run_command("pip install -U numpy") #update numpy
-    run_install("libatlas-base-dev", "sudo apt") #fix numpy issue
+    run_install("libatlas-base-dev", "sudo apt-get") #fix numpy issue
     run_install("ephem pytz matplotlib pyudev lightstreamer-client-lib", "python -m pip") #python libs used by Mimic
 
     if not args.skip_kivy:
@@ -53,7 +51,7 @@ def main():
         #run_install("'kivy[base,media]'", "python -m pip") # might need this kivy install if we do audio/video stuff but it might be outdated?
         run_command("python -c 'import kivy'") # run kivy init to create the config.ini file
         print("Replacing Kivy config file")
-        replace_kivy_config(args.username)
+        replace_kivy_config(username)
     else:
         print("\nSkipping Kivy setup.")
 
