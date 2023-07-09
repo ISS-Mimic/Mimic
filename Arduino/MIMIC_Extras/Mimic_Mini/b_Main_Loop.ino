@@ -10,44 +10,105 @@ void loop() {
   if (MimiSetAllServos_Flag == 1)
   {
     MimiSetAllServos_Flag = 0;
-    B1A = MimiAllServoVals;
-    B3A = MimiAllServoVals;
-    B1B = MimiAllServoVals;
-    B3B = MimiAllServoVals;
+    B1A = MiniAllServoVals;
+    B3A = MiniAllServoVals;
+    B1B = MiniAllServoVals;
+    B3B = MiniAllServoVals;
 
-    B2B = MimiAllServoVals;
-    B4B = MimiAllServoVals;
-    B2A = MimiAllServoVals;
-    B4A = MimiAllServoVals;
+    B2B = MiniAllServoVals;
+    B4B = MiniAllServoVals;
+    B2A = MiniAllServoVals;
+    B4A = MiniAllServoVals;
 
-    PSARJ = MimiAllServoVals;
-    SSARJ = MimiAllServoVals;
+    PSARJ = MiniAllServoVals;
+    SSARJ = MiniAllServoVals;
     
     // biasing TRRJ commands, since they use +/- 180 deg commands, unlike BGAs & SARJ which use 0-360 deg commands.
-    PTRRJ = MimiAllServoVals-180; 
-    STRRJ = MimiAllServoVals-180;
+    PTRRJ = MiniAllServoVals-180; 
+    STRRJ = MiniAllServoVals-180;
   }
 
+  if (Mini_MidPosServos_Flag == 1)
+  {
+    Mini_MidPosServos_Flag = 0;
+    B1A = 180;
+    B3A = 180;
+    B1B = 180;
+    B3B = 180;
 
+    B2B = 180;
+    B4B = 180;
+    B2A = 180;
+    B4A = 180;
+
+    PSARJ = 180;
+    SSARJ = 180;
+    
+    // TRRJ cmds use +/- 105 deg commands, unlike BGAs & SARJ which use 0-360 deg commands.
+    PTRRJ = 90; 
+    STRRJ = 90;
+  }
+
+    if (Mini_MaxPosServos_Flag == 1)
+  {
+    Mini_MaxPosServos_Flag = 0;
+    B1A = 360;
+    B3A = 360;
+    B1B = 360;
+    B3B = 360;
+
+    B2B = 360;
+    B4B = 360;
+    B2A = 360;
+    B4A = 360;
+
+    PSARJ = 360;
+    SSARJ = 360;
+    
+    // TRRJ cmds use +/- 105 deg commands, unlike BGAs & SARJ which use 0-360 deg commands.
+    PTRRJ = 180; 
+    STRRJ = 180;
+  }
+
+   if (Mini_MinPosServos_Flag == 1)
+  {
+    Mini_MinPosServos_Flag = 0;
+    B1A = 0;
+    B3A = 0;
+    B1B = 0;
+    B3B = 0;
+
+    B2B = 0;
+    B4B = 0;
+    B2A = 0;
+    B4A = 0;
+
+    PSARJ = 0;
+    SSARJ = 0;
+    
+    // TRRJ cmds use +/- 105 deg commands, unlike BGAs & SARJ which use 0-360 deg commands.
+    PTRRJ = 0; 
+    STRRJ = 0;
+  }
 
   // servonum_B2B = 1;
 
-  pulselen_B1A = map(B1A, 0, 360, SERVOMAX, SERVOMIN);
-  pulselen_B3A = map(B3A, 0, 360, SERVOMAX, SERVOMIN);
-  pulselen_B1B = map(B1B, 0, 360, SERVOMAX, SERVOMIN);
-  pulselen_B3B = map(B3B, 0, 360, SERVOMAX, SERVOMIN);
+  pulselen_B1A = map(B1A, 0, 360, SERVOMIN, SERVOMAX);
+  pulselen_B3A = map(B3A, 0, 360, SERVOMIN, SERVOMAX);
+  pulselen_B1B = map(B1B, 0, 360, SERVOMIN, SERVOMAX);
+  pulselen_B3B = map(B3B, 0, 360, SERVOMIN, SERVOMAX);
 
-  pulselen_B2B = map(B2B, 0, 360, SERVOMAX, SERVOMIN);
-  pulselen_B4B = map(B4B, 0, 360, SERVOMAX, SERVOMIN);
-  pulselen_B2A = map(B2A, 0, 360, SERVOMAX, SERVOMIN);
-  pulselen_B4A = map(B4A, 0, 360, SERVOMAX, SERVOMIN);
+  pulselen_B2B = map(B2B, 0, 360, SERVOMIN, SERVOMAX);
+  pulselen_B4B = map(B4B, 0, 360, SERVOMIN, SERVOMAX);
+  pulselen_B2A = map(B2A, 0, 360, SERVOMIN, SERVOMAX);
+  pulselen_B4A = map(B4A, 0, 360, SERVOMIN, SERVOMAX);
 
-  pulselen_PSARJ = map(PSARJ, 0, 360, SERVOMAX, SERVOMIN);
-  pulselen_SSARJ = map(SSARJ, 0, 360, SERVOMAX, SERVOMIN);
+  pulselen_PSARJ = map(PSARJ, 0, 360, SERVOMIN, SERVOMAX);
+  pulselen_SSARJ = map(SSARJ, 0, 360, SERVOMIN, SERVOMAX);
   
   // TRRJ commands are +/- 180 degrees (from ISS), so scaling differently than BGAs and SARJs, which are 0-360 deg.
-  pulselen_PTRRJ = map(PTRRJ, 0, 360, SERVOMAX, SERVOMIN); 
-  pulselen_STRRJ = map(STRRJ, 0, 360,  SERVOMAX, SERVOMIN);
+  pulselen_PTRRJ = map(PTRRJ, 0, 360, SERVOMIN, SERVOMAX); 
+  pulselen_STRRJ = map(STRRJ, 0, 360,  SERVOMIN, SERVOMAX);
 
 
   pwm.setPWM(servonum_B1A, 0, pulselen_B1A);

@@ -52,12 +52,33 @@ void checkSerial()
 
     else if (test2.substring(0, delimeter) == "MimiSetAllServos")
     {
-      MimiSetAllServos_Flag=1;
-      MimiAllServoVals= (test2.substring(delimeter + 1)).toFloat();
-      Serial.print("Setting all Mimi Servos to zero");
+      MimiSetAllServos_Flag = 1;
+      MiniAllServoVals = (test2.substring(delimeter + 1)).toFloat();
+      Serial.println("--- Setting all Mimi Servos to zero ---");
     }
 
+    else if (test2.substring(0, delimeter) == "Mini_MidPosServos")
+    {
+      Mini_MidPosServos_Flag = 1;
+      //      MiniAllServoVals= (test2.substring(delimeter + 1)).toFloat();
+      Serial.println("--- Setting all Servos to center of travel ---");
+    }
 
+    else if (test2.substring(0, delimeter) == "Mini_MinPosServos")
+    {
+      Mini_MinPosServos_Flag = 1;
+      //      MiniAllServoVals= (test2.substring(delimeter + 1)).toFloat();
+      Serial.println("--- Setting all Servos to minimum position ---");
+    }
+
+        else if (test2.substring(0, delimeter) == "Mini_MaxPosServos")
+    {
+      Mini_MaxPosServos_Flag = 1;
+      //      MiniAllServoVals= (test2.substring(delimeter + 1)).toFloat();
+      Serial.print("--- Setting all Servos to maximum position ---");
+    }
+    
+    
     else if (test2.substring(0, delimeter) == "SSARJ")
     {
       SSARJ = (test2.substring(delimeter + 1)).toFloat();
@@ -65,12 +86,12 @@ void checkSerial()
     else if (test2.substring(0, delimeter) == "PTRRJ")
     {
       PTRRJ = (test2.substring(delimeter + 1)).toFloat();
-      PTRRJ = map(PTRRJ, -105, 105, 0,180);
+      PTRRJ = map(PTRRJ, -105, 105, 0, 180);
     }
     else if (test2.substring(0, delimeter) == "STRRJ")
     {
       STRRJ = (test2.substring(delimeter + 1)).toFloat();
-      STRRJ = map(STRRJ, -105, 105, 0,180);
+      STRRJ = map(STRRJ, -105, 105, 0, 180);
     }
     else if (test2.substring(0, delimeter) == "B1B")
     {
