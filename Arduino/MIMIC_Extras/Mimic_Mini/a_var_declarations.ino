@@ -26,6 +26,7 @@ int MiniAllServoVals=0;
 int Mini_MinPosServos_Flag =0;
 int Mini_MidPosServos_Flag =0; // This is used to center all 12 servos.  Helpful for initial setup.  Put this command into the Serial Monitor (no "'s, and no _Flag): Mini_MidPosServos=1
 int Mini_MaxPosServos_Flag =0;
+int Mini_ServosInstallPos_Flag =0; // This is to put servos in proper postion for initial installation.
 
 int servonum_B1A = 0;
 int servonum_B3A = 1;

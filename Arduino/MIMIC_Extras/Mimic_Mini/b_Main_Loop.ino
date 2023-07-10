@@ -86,10 +86,37 @@ void loop() {
     PSARJ = 0;
     SSARJ = 0;
     
-    // TRRJ cmds use +/- 105 deg commands, unlike BGAs & SARJ which use 0-360 deg commands.
+    // TRRJ cmds use +/- 105 deg commands, unlike BGAs & SARJ which use 0-360 deg commands. 
     PTRRJ = 0; 
     STRRJ = 0;
   }
+
+
+
+
+   if (Mini_ServosInstallPos_Flag == 1)
+  {
+    Mini_ServosInstallPos_Flag = 0;
+    B1A = 0;
+    B3A = 0;
+    B1B = 0;
+    B3B = 0;
+
+    B2B = 0;
+    B4B = 0;
+    B2A = 0;
+    B4A = 0;
+
+    PSARJ = 0;
+    SSARJ = 0;
+    
+    // TRRJ cmds use +/- 105 deg commands, unlike BGAs & SARJ which use 0-360 deg commands. 
+    //**Switching to 300 deg motors, so setting midpoint pos a bit. May require tweaking
+    PTRRJ = 180; 
+    STRRJ = 180;
+  }
+
+
 
   // servonum_B2B = 1;
 
