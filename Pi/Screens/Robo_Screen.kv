@@ -1,0 +1,89 @@
+<Robo_Screen>:
+    name: 'robo'
+    FloatLayout:
+        Image:
+            id: Robo_Background
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/robo/RoboBackground.png"
+            fit_mode: "fill"
+        Label:
+            id: OperatingBase
+            pos_hint: {"center_x": 0.25, "center_y": 0.62}
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: BaseLocation
+            pos_hint: {"center_x": 0.25, "center_y": 0.56}
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: mt_worksite
+            pos_hint: {"center_x": 0.625, "center_y": 0.47}
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: SPDMbase
+            pos_hint: {"center_x": 0.7, "center_y": 0.6}
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: SPDMoperatingBase
+            pos_hint: {"center_x": 0.7, "center_y": 0.54}
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Button:
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/robo/MTMBSunlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/robo/MTMBSdown.png'
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.6, "center_y": 0.9}
+            on_release: root.manager.current = 'mt'
+        Button:
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/robo/SSRMSunlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/robo/SSRMSdown.png'
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.75, "center_y": 0.9}
+            on_release: root.manager.current = 'ssrms'
+        Button:
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/robo/SPDMunlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/robo/SPDMdown.png'
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.9, "center_y": 0.9}
+            on_release: root.manager.current = 'spdm1'
+        Button:
+            size_hint: 0.1,0.11
+            pos_hint: {"center_x": 0.9375, "center_y": 0.082}
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            on_release: app.root.current = 'mimic'
+        Image:
+            id: signal
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+            size_hint_y: 0.15
+            anim_delay: 0.12
+            anim_loop: 0
+            fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.05, "center_y": 0.07}
+        Image:
+            id: arduino
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
+            size_hint_y: 0.15
+            anim_delay: 0.2
+            anim_loop: 0
+            fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+        Label:
+            id: arduino_count
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+            text: ''
+            markup: True
+            color: 1,1,1
+            font_size: self.height * 0.3
+            size_hint_y: 0.5

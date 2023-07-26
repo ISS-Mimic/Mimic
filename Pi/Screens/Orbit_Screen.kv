@@ -4,22 +4,28 @@
         id: orbit_layout
         Image:
             id: Orbit_background
-            source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitBase.png'
-            allow_stretch: False
+            source: f'{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitBackground.png'
+            fit_mode: "fill"
+        Label:
+            id: gmtime
+            pos_hint: {"center_x": 0.95, "center_y": 0.98}
+            text: '0.013'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Image:
             id:orbit3d
-            #source: 'https://www.heavens-above.com/orbitdisplay.aspx?icon=iss&width=100&height=100&mode=A&satid=25544'
-            source: '/home/pi/Mimic/Pi/imgs/orbit/globe.png'
+            source: f'{root.mimic_directory}/Mimic/Pi/imgs/orbit/globe.png'
             size_hint: 0.2,0.2
             pos_hint: {"center_x": 0.92, "center_y": 0.35}
-            keep_ratio: True
+            fit_mode: "contain"
         Image:
             id: OrbitMap
-            source: '/home/pi/Mimic/Pi/imgs/orbit/map.jpg'
+            source: f'{root.mimic_directory}/Mimic/Pi/imgs/orbit/map.jpg'
             pos_hint: {"center_x": 0.5, "center_y": 0.56}
             size_hint_y: 0.598
-            allow_stretch: False
-            keep_ratio: True
+            fit_mode: "contain"
         Widget:
             id: OrbitSun
             pos: (0-(self.width/2),0-(self.height/2))
@@ -35,7 +41,7 @@
                     x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
                     y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
                 Rectangle:
-                    source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitSun.png'
+                    source: f'{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitSun.png'
                     size: self.size
                     pos: self.pos
                 PopMatrix:
@@ -143,7 +149,8 @@
             text: 'TDRS-East'
             markup: True
             color: (0,0,0,0)
-            font_size: 15
+            font_size: self.height * 0.3
+            size_hint_y: 0.2
         Widget:
             id: TDRS11
             col: (0,0,0,0)
@@ -228,7 +235,8 @@
             text: 'TDRS-West'
             markup: True
             color: (0,0,0,0)
-            font_size: 15
+            font_size: self.height * 0.3
+            size_hint_y: 0.2
         Widget:
             id: ZOE
             col: (0,0,0,0)
@@ -247,7 +255,8 @@
             text: 'ZOE'
             markup: True
             color: (0,0,0,0)
-            font_size: 15
+            font_size: self.height * 0.3
+            size_hint_y: 0.2
         Widget:
             id: TDRS7
             col: (1,1,1,1)
@@ -293,7 +302,8 @@
             text: 'TDRS-Z'
             markup: True
             color: (0,0,0,0)
-            font_size: 15
+            font_size: self.height * 0.3
+            size_hint_y: 0.2
         Widget:
             id: ISSgroundtrack
             col: (0,0,0,0)
@@ -349,7 +359,7 @@
                     x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
                     y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
                 Rectangle:
-                    source: '/home/pi/Mimic/Pi/imgs/orbit/OrbitYellowISSicon.png'
+                    source: f'{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitYellowISSicon.png'
                     size: self.size
                     pos: self.pos
                 Line:
@@ -359,101 +369,103 @@
         Label:
             id: dailyorbit
             pos_hint: {"center_x": 0.08, "center_y": 0.7}
-            text: ''
-            markup: True
+            text: '0'
             color: 1,1,1
-            font_size: 50
+            font_size: self.height * 0.3
+            size_hint_y: 0.2
         Label:
             id: totalorbits
             pos_hint: {"center_x": 0.08, "center_y": 0.5}
-            text: ''
-            markup: True
+            text: '0'
             color: 1,1,1
-            font_size: 26
+            font_size: self.height * 0.3
+            size_hint_y: 0.2
         Button:
             id: iss_pass_button
-            size_hint: 0.1,0.2
-            pos_hint: {"center_x": 0.92, "center_y": 0.8}
-            text: 'ISS \n Pass'
-            font_size: 30
+            size_hint: 0.12,0.18
+            pos_hint: {"center_x": 0.92, "center_y": 0.76}
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/orbit/ISSpassUnlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/orbit/ISSpassDown.png'
             on_release: app.root.current = 'orbit_pass'
         Button:
             id: orbit_data_button
-            size_hint: 0.1,0.1
-            pos_hint: {"center_x": 0.7, "center_y": 0.2}
-            text: 'Orbit Data'
-            font_size: 30
+            size_hint: 0.20,.11
+            pos_hint: {"center_x": 0.72, "center_y": 0.19}
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitDataUnlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitDataDown.png'
             on_release: app.root.current = 'orbit_data'
         Label:
             id: iss_next_pass1
             pos_hint: {"center_x": 0.92, "center_y": 0.6}
             text: '-----'
-            size_hint_y: None
-            size_hint_x: 0.1
             halign: 'center'
-            text_size: self.width, None
-            markup: True
             color: 1,1,1
-            font_size: 16
+            font_size: self.height * 0.17
+            size_hint_y: 0.2
         Label:
             id: iss_next_pass2
             pos_hint: {"center_x": 0.92, "center_y": 0.55}
             text: '-----'
-            size_hint_y: None
-            size_hint_x: 0.1
             halign: 'center'
-            text_size: self.width, None
-            markup: True
             color: 1,1,1
-            font_size: 16
+            font_size: self.height * 0.17
+            size_hint_y: 0.2
         Label:
             id: countdown
             pos_hint: {"center_x": 0.92, "center_y": 0.5}
             text: '-----'
-            size_hint_y: None
-            size_hint_x: 0.1
             halign: 'center'
-            text_size: self.width, None
-            markup: True
             color: 1,1,1
-            font_size: 16
+            font_size: self.height * 0.17
+            size_hint_y: 0.2
         Label:
             id: ISSvisible
             pos_hint: {"center_x": 0.92, "center_y": 0.45}
             text: '---'
-            size_hint_y: None
-            size_hint_x: 0.1
             halign: 'center'
-            text_size: self.width, None
-            markup: True
             color: 1,1,1
-            font_size: 16
+            font_size: self.height * 0.17
+            size_hint_y: 0.2
         Label:
             id: latitude
             pos_hint: {"center_x": 0.12, "center_y": 0.22}
             text: '0.00'
-            markup: True
             color: 1,1,1
-            font_size: 16
+            font_size: self.height * 0.17
+            size_hint_y: 0.2
         Label:
             id: longitude
             pos_hint: {"center_x": 0.13, "center_y": 0.185}
             text: '0.00'
+            color: 1,1,1
+            font_size: self.height * 0.17
+            size_hint_y: 0.2
+        Image:
+            id: arduino
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
+            size_hint_y: 0.15
+            anim_delay: 0.2
+            anim_loop: 0
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+            fit_mode: "scale-down"
+        Label:
+            id: arduino_count
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+            text: ''
             markup: True
             color: 1,1,1
-            font_size: 16
+            font_size: self.height * 0.3
+            size_hint_y: 0.5
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
-            text: ''
-            font_size: 30
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: app.root.current = 'mimic'
         Image:
             id: signal
-            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
             size_hint_y: 0.15
             anim_delay: 0.12
             anim_loop: 0
-            keep_ratio: True
             pos_hint: {"center_x": 0.05, "center_y": 0.07}
+            fit_mode: "scale-down"

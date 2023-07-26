@@ -1,84 +1,73 @@
-#:kivy 1.8
-#:import kivy kivy
-#:import win kivy.core.window
-
 <MainScreen>:
     name: 'main'
     FloatLayout:
         orientation: 'vertical'
         Image:
-            source: '/home/pi/Mimic/Pi/imgs/main/MainBase.png'
-            allow_stretch: False
-            keep_ratio: True
+            source: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainBackground.png'
+            fit_mode: "fill"
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
         Image:
-            source: '/home/pi/Mimic/Pi/imgs/main/ISSmimicLogoPartsGroundtrackLightBlue.png'
-            allow_stretch: False
-            keep_ratio: True
+            source: f'{root.mimic_directory}/Mimic/Pi/imgs/main/ISSmimicLogoPartsGroundtrackLightBlue.png'
+            fit_mode: "contain"
             pos_hint: {"center_x": 0.5, "center_y": 0.82}
         Image:
             id: ISStiny
-            source: '/home/pi/Mimic/Pi/imgs/main/ISSmimicLogoPartsGlowingISSblue.png'
-            keep_ratio: False
-            allow_stretch: True
+            source: f'{root.mimic_directory}/Mimic/Pi/imgs/main/ISSmimicLogoPartsGlowingISSblue.png'
+            fit_mode: "contain"
             size_hint: 0.07,0.07
             pos_hint: {"center_x": 0.25, "center_y": 0.25}
         Image:
             id: ISStiny2
-            source: '/home/pi/Mimic/Pi/imgs/main/ISSmimicLogoPartsGlowingISSblue.png'
-            keep_ratio: False
-            allow_stretch: True
+            source: f'{root.mimic_directory}/Mimic/Pi/imgs/main/ISSmimicLogoPartsGlowingISSblue.png'
+            fit_mode: "contain"
             size_hint: 0.0,0.0
             pos_hint: {"center_x": 0.25, "center_y": 0.25}
         Button:
-            background_normal: '/home/pi/Mimic/Pi/imgs/main/MainSimulateButton.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/main/MainSimulateButtonDown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainSimulateButton.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainSimulateButtonDown.png'
             size_hint: 0.15,0.4
             pos_hint: {"center_x": 0.68, "center_y": 0.37}
-            text: ''
-            font_size: 30
             width: 50
             height: 20
             on_release: root.manager.current = 'fakeorbit'
         Button:
-            background_normal: '/home/pi/Mimic/Pi/imgs/main/MainSettingsButton.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/main/MainSettingsButtonDown.png'
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainSettingsButton.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainSettingsButtonDown.png'
             size_hint: 0.15,0.18
             pos_hint: {"center_x": 0.85, "center_y": 0.47}
-            text: ''
-            font_size: 30
             width: 50
             height:20
             on_release: root.manager.current = 'settings'
         Button:
             size_hint: 0.15,0.4
             pos_hint: {"center_x": 0.15, "center_y": 0.37}
-            background_normal: '/home/pi/Mimic/Pi/imgs/main/MainControlButton.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/main/MainControlButtonDown.png'
-            text: ''
-            font_size: 30
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainControlButton.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainControlButtonDown.png'
             width: 50
             height: 20
             on_press: root.changeManualControlBoolean(True)
             on_release: root.manager.current = 'manualcontrol'
         Button:
             size_hint: 0.15,0.4
+            pos_hint: {"center_x": 0.325, "center_y": 0.37}
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainLightItUpButton.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainLightItUpButtonDown.png'
+            width: 50
+            height: 20
+            on_release: root.manager.current = 'led'
+        Button:
+            size_hint: 0.15,0.4
             pos_hint: {"center_x": 0.505, "center_y": 0.37}
-            background_normal: '/home/pi/Mimic/Pi/imgs/main/MainMimicButton.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/main/MainMimicButtonDown.png'
-            text: ''
-            disabled: False
-            font_size: 30
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainMimicButton.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainMimicButtonDown.png'
             width: 50
             height: 20
             on_release: app.root.current = 'mimic'
         Button:
             size_hint: 0.15,0.18
             pos_hint: {"center_x": 0.85, "center_y": 0.27}
-            background_normal: '/home/pi/Mimic/Pi/imgs/main/MainExitButton.png'
-            background_down: '/home/pi/Mimic/Pi/imgs/main/MainExitButtonDown.png'
-            text: ''
-            font_size: 30
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainExitButton.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainExitButtonDown.png'
             width: 50
             height: 20
             on_press: root.killproc()

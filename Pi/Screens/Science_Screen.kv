@@ -1,0 +1,20 @@
+<Science_Screen>:
+    name: 'science'
+    FloatLayout:
+        Image:
+            id: Science_Background
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/science/ScienceBackground.png"
+            fit_mode: "contain"
+        Button:
+            size_hint: 0.1,0.11
+            pos_hint: {"center_x": 0.9375, "center_y": 0.082}
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            on_release: app.root.current = 'mimic'
+        Image:
+            id: signal
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+            size_hint_y: 0.15
+            anim_delay: 0.12
+            anim_loop: 0
+            fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.05, "center_y": 0.07}

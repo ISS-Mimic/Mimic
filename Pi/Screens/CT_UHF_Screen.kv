@@ -1,40 +1,83 @@
-#:kivy 1.8
-#:import kivy kivy
-#:import win kivy.core.window
 <CT_UHF_Screen>:
     name: 'ct_uhf'
     FloatLayout:
         Image:
             id: UHF_Background
-            source: "/home/pi/Mimic/Pi/imgs/ct/UHFbackground.png"
-            allow_stretch: False
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/ct/UHFbackground.png"
+            fit_mode: "fill"
         Label:
-            id: tdrs_label
+            #id: tdrs_label
             ##pos: tdrs.pos
-            pos_hint: {"center_x": 0.5, "center_y": 0.85}
-            text: '---'
-            markup: True
-            color: root.signalcolor
-            font_size: 18
+            #pos_hint: {"center_x": 0.5, "center_y": 0.85}
+            #text: '---'
+            #markup: True
+            #color: root.signalcolor
+            #size_hint_y: 0.4
+            #font_size: self.height * 0.10
         Image:
             id: UHF
-            source: "/home/pi/Mimic/Pi/imgs/ct/UHF.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/ct/UHF.png"
             size_hint_y: 0.7
-            keep_ratio: True
-            pos_hint: {"center_x": 0.4, "center_y": 0.5}
+            fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.45, "center_y": 0.5}
+        Label:
+            id: UHF1pwr_label
+            pos_hint: {"center_x": 0.7, "center_y": 0.59}
+            text: 'UHF 1 Power:'
+            markup: True
+            color: 1,1,1
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: UHF1pwr
+            pos_hint: {"center_x": 0.9, "center_y": 0.59}
+            text: '0.003'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: UHF2pwr_label
+            pos_hint: {"center_x": 0.7, "center_y": 0.53}
+            text: 'UHF 2 Power:'
+            markup: True
+            color: 1,1,1
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: UHF2pwr
+            pos_hint: {"center_x": 0.9, "center_y": 0.53}
+            text: '0.003'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: UHFframeSync_label
+            pos_hint: {"center_x": 0.7, "center_y": 0.47}
+            text: 'UHF Frame Sync:'
+            markup: True
+            color: 1,1,1
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: UHFframeSync
+            pos_hint: {"center_x": 0.9, "center_y": 0.47}
+            text: '0.003'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Button:
             size_hint: 0.1,0.11
-            ##pos_hint: {"Left": 1, "Bottom": 1}
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
-            text: ''
-            font_size: 30
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: app.root.current = 'ct'
         Image:
             id: signal
-            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
             size_hint_y: 0.15
             anim_delay: 0.12
             anim_loop: 0
-            keep_ratio: True
+            fit_mode: "scale-down"
             pos_hint: {"center_x": 0.05, "center_y": 0.07}

@@ -1,231 +1,61 @@
-#:kivy 1.8
-#:import kivy kivy
-#:import win kivy.core.window
-#:import kivy kivy.graphics.svg
 <Crew_Screen>:
     name: 'crew'
     FloatLayout:
+        Image:
+            id: Crew_background
+            source: f'{root.mimic_directory}/Mimic/Pi/imgs/crew/Crewbackground.png'
+            fit_mode: "fill"
+        Label:
+            id: ISS_crewed_years
+            pos_hint: {"center_x": 0.715, "center_y": 0.91}
+            text: '22'
+            markup: True
+            color: 1,1,1
+            font_size: self.height * 0.09
+            size_hint_y: 0.4
+        Label:
+            id: ISS_crewed_months
+            pos_hint: {"center_x": 0.80, "center_y": 0.91}
+            text: '6'
+            markup: True
+            color: 1,1,1
+            font_size: self.height * 0.09
+            size_hint_y: 0.4
+        Label:
+            id: ISS_crewed_days
+            pos_hint: {"center_x": 0.90, "center_y": 0.91}
+            text: '25'
+            markup: True
+            color: 1,1,1
+            font_size: self.height * 0.09
+            size_hint_y: 0.4
+        Image:
+            id: signal
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/signalred.zip"
+            size_hint_y: 0.112
+            anim_delay: 0.05
+            anim_loop: 0
+            fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.05, "center_y": 0.07}
+        Image:
+            id: arduino
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
+            size_hint_y: 0.15
+            anim_delay: 0.2
+            anim_loop: 0
+            fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+        Label:
+            id: arduino_count
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+            text: ''
+            markup: True
+            color: 1,1,1
+            font_size: self.height * 0.3
+            size_hint_y: 0.5
         Button:
             size_hint: 0.1,0.11
-            ##pos_hint: {"Left": 1, "Bottom": 1}
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
-            text: ''
-            font_size: 30
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: app.root.current = 'mimic'
-    BoxLayout:
-        orientation: 'horizontal'
-        BoxLayout:
-            orientation: 'vertical'
-##-----------------------------------------------------------CREW1-------------------------------------------------------------
-            Label:
-                id: crew1
-                halign: 'center'
-                valign: 'middle'
-                text: ''
-                markup: True
-                color: 1,0,1
-                font_size: 25
-            Label:
-                id: crew1title
-                halign: 'center'
-                valign: 'middle'
-                text: ''
-                markup: True
-                color: 1,1,1
-                font_size: 20
-            Label:
-                id: crew1country
-                markup: True
-                halign: 'center'
-                valign: 'middle'
-                text: ''
-                color: 1,1,1
-                font_size: 18
-                #text_size: cm(8), cm(5)
-            Label:
-                id: crew1daysonISS
-                markup: True
-                halign: 'center'
-                valign: 'middle'
-                text: ''
-                color: 1,1,1
-                font_size: 18
-                #text_size: cm(8), cm(5)
-##-----------------------------------------------------------CREW2-------------------------------------------------------------
-            Label:
-                id: crew2
-                halign: 'center'
-                valign: 'middle'
-                text: ''
-                markup: True
-                color: 1,0,1
-                font_size: 25
-            Label:
-                id: crew2title
-                halign: 'center'
-                valign: 'middle'
-                text: ''
-                markup: True
-                color: 1,1,1
-                font_size: 20
-            Label:
-                id: crew2country
-                markup: True
-                halign: 'center'
-                valign: 'middle'
-                text: ''
-                color: 1,1,1
-                font_size: 18
-                #text_size: cm(8), cm(5)
-            Label:
-                id: crew2daysonISS
-                markup: True
-                halign: 'center'
-                valign: 'middle'
-                text: ''
-                color: 1,1,1
-                font_size: 18
-                #text_size: cm(8), cm(5)
-##-----------------------------------------------------------CREW3-------------------------------------------------------------
-            Label:
-                id: crew3
-                halign: 'center'
-                valign: 'middle'
-                text: ''
-                markup: True
-                color: 1,0,1
-                font_size: 25
-            Label:
-                id: crew3title
-                halign: 'center'
-                valign: 'middle'
-                text: ''
-                markup: True
-                color: 1,1,1
-                font_size: 20
-            Label:
-                id: crew3country
-                markup: True
-                halign: 'center'
-                valign: 'middle'
-                text: ''
-                color: 1,1,1
-                font_size: 18
-                #text_size: cm(8), cm(5)
-            Label:
-                id: crew3daysonISS
-                markup: True
-                halign: 'center'
-                valign: 'middle'
-                text: ''
-                color: 1,1,1
-                font_size: 18
-                #text_size: cm(8), cm(5)
-##-----------------------------------------------------------CREW4-------------------------------------------------------------
-        BoxLayout:
-            orientation: 'vertical'
-            Label:
-                id: crew4
-                halign: 'center'
-                valign: 'middle'
-                text: ''
-                markup: True
-                color: 1,0,1
-                font_size: 25
-            Label:
-                id: crew4title
-                halign: 'center'
-                valign: 'middle'
-                text: ''
-                markup: True
-                color: 1,1,1
-                font_size: 20
-            Label:
-                id: crew4country
-                markup: True
-                halign: 'center'
-                valign: 'middle'
-                text: ''
-                color: 1,1,1
-                font_size: 18
-                #text_size: cm(8), cm(5)
-            Label:
-                id: crew4daysonISS
-                markup: True
-                halign: 'center'
-                valign: 'middle'
-                text: ''
-                color: 1,1,1
-                font_size: 18
-                #text_size: cm(8), cm(5)
-##-----------------------------------------------------------CREW5-------------------------------------------------------------
-            Label:
-                id: crew5
-                halign: 'center'
-                valign: 'middle'
-                text: ''
-                markup: True
-                color: 1,0,1
-                font_size: 25
-            Label:
-                id: crew5title
-                halign: 'center'
-                valign: 'middle'
-                text: ''
-                markup: True
-                color: 1,1,1
-                font_size: 20
-            Label:
-                id: crew5country
-                markup: True
-                halign: 'center'
-                valign: 'middle'
-                text: ''
-                color: 1,1,1
-                font_size: 18
-                #text_size: cm(8), cm(5)
-            Label:
-                id: crew5daysonISS
-                markup: True
-                halign: 'center'
-                valign: 'middle'
-                text: ''
-                color: 1,1,1
-                font_size: 18
-                #text_size: cm(8), cm(5)
-##-----------------------------------------------------------CREW6-------------------------------------------------------------
-            Label:
-                id: crew6
-                halign: 'center'
-                valign: 'middle'
-                text: ''
-                markup: True
-                color: 1,0,1
-                font_size: 25
-            Label:
-                id: crew6title
-                halign: 'center'
-                valign: 'middle'
-                text: ''
-                markup: True
-                color: 1,1,1
-                font_size: 20
-            Label:
-                id: crew6country
-                markup: True
-                halign: 'center'
-                valign: 'middle'
-                text: ''
-                color: 1,1,1
-                font_size: 18
-                #text_size: cm(8), cm(5)
-            Label:
-                id: crew6daysonISS
-                markup: True
-                halign: 'center'
-                valign: 'middle'
-                text: ''
-                color: 1,1,1
-                font_size: 18
-                #text_size: cm(8), cm(5)
+

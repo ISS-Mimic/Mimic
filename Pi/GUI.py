@@ -339,6 +339,8 @@ old_mt_timestamp = 0.00
 old_mt_position = 0.00
 
 class MainScreen(Screen):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    
     def changeManualControlBoolean(self, *args):
         global manualcontrol
         manualcontrol = args[0]
@@ -360,6 +362,7 @@ class MainScreen(Screen):
         logWrite("Successfully stopped ISS telemetry javascript and removed database")
 
 class ManualControlScreen(Screen):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     def on_pre_enter(self): #call the callback funcion when activating this screen, to update all angles
         self.callback()
 
@@ -740,84 +743,84 @@ class ManualControlScreen(Screen):
         psarjmc += args[0]
         serialWrite("PSARJ=" + str(psarjmc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'psarj'",(psarjmc,))
-        self.ids.statusbar.text = "PSARJ Value Sent: " + str(psarjmc)
+        #self.ids.statusbar.text = "PSARJ Value Sent: " + str(psarjmc)
 
     def incrementSSARJ(self, *args):
         global ssarjmc
         ssarjmc += args[0]
         serialWrite("SSARJ=" + str(ssarjmc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'ssarj'",(ssarjmc,))
-        self.ids.statusbar.text = "SSARJ Value Sent: " + str(ssarjmc)
+        #self.ids.statusbar.text = "SSARJ Value Sent: " + str(ssarjmc)
 
     def incrementPTRRJ(self, *args):
         global ptrrjmc
         ptrrjmc += args[0]
         serialWrite("PTRRJ=" + str(ptrrjmc) + " ")
         c.execute("UPDATE telemetry  SET Value = ? WHERE Label = 'ptrrj'",(ptrrjmc,))
-        self.ids.statusbar.text = "PTRRJ Value Sent: " + str(ptrrjmc)
+        #self.ids.statusbar.text = "PTRRJ Value Sent: " + str(ptrrjmc)
 
     def incrementSTRRJ(self, *args):
         global strrjmc
         strrjmc += args[0]
         serialWrite("STRRJ=" + str(strrjmc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'strrj'",(strrjmc,))
-        self.ids.statusbar.text = "STRRJ Value Sent: " + str(strrjmc)
+        #self.ids.statusbar.text = "STRRJ Value Sent: " + str(strrjmc)
 
     def incrementBeta1B(self, *args):
         global beta1bmc
         beta1bmc += args[0]
         serialWrite("B1B=" + str(beta1bmc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1b'",(beta1bmc,))
-        self.ids.statusbar.text = "Beta1B Value Sent: " + str(beta1bmc)
+        #self.ids.statusbar.text = "Beta1B Value Sent: " + str(beta1bmc)
 
     def incrementBeta1A(self, *args):
         global beta1amc
         beta1amc += args[0]
         serialWrite("B1A=" + str(beta1amc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1a'",(beta1amc,))
-        self.ids.statusbar.text = "Beta1A Value Sent: " + str(beta1amc)
+        #self.ids.statusbar.text = "Beta1A Value Sent: " + str(beta1amc)
 
     def incrementBeta2B(self, *args):
         global beta2bmc
         beta2bmc += args[0]
         serialWrite("B2B=" + str(beta2bmc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2b'",(beta2bmc,))
-        self.ids.statusbar.text = "Beta2B Value Sent: " + str(beta2bmc)
+        #self.ids.statusbar.text = "Beta2B Value Sent: " + str(beta2bmc)
 
     def incrementBeta2A(self, *args):
         global beta2amc
         beta2amc += args[0]
         serialWrite("B2A=" + str(beta2amc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2a'",(beta2amc,))
-        self.ids.statusbar.text = "Beta2A Value Sent: " + str(beta2amc)
+        #self.ids.statusbar.text = "Beta2A Value Sent: " + str(beta2amc)
 
     def incrementBeta3B(self, *args):
         global beta3bmc
         beta3bmc += args[0]
         serialWrite("B3B=" + str(beta3bmc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3b'",(beta3bmc,))
-        self.ids.statusbar.text = "Beta3B Value Sent: " + str(beta3bmc)
+        #self.ids.statusbar.text = "Beta3B Value Sent: " + str(beta3bmc)
 
     def incrementBeta3A(self, *args):
         global beta3amc
         beta3amc += args[0]
         serialWrite("B3A=" + str(beta3amc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3a'",(beta3amc,))
-        self.ids.statusbar.text = "Beta3A Value Sent: " + str(beta3amc)
+        #self.ids.statusbar.text = "Beta3A Value Sent: " + str(beta3amc)
 
     def incrementBeta4B(self, *args):
         global beta4bmc
         beta4bmc += args[0]
         serialWrite("B4B=" + str(beta4bmc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4b'",(beta4bmc,))
-        self.ids.statusbar.text = "Beta4B Value Sent: " + str(beta4bmc)
+        #self.ids.statusbar.text = "Beta4B Value Sent: " + str(beta4bmc)
 
     def incrementBeta4A(self, *args):
         global beta4amc
         beta4amc += args[0]
         serialWrite("B4A=" + str(beta4amc) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4a'",(beta4amc,))
-        self.ids.statusbar.text = "Beta4A Value Sent: " + str(beta4amc)
+        #self.ids.statusbar.text = "Beta4A Value Sent: " + str(beta4amc)
 
     def changeBoolean(self, *args):
         global manualcontrol
@@ -890,84 +893,84 @@ class ManualControlScreen(Screen):
         psarjmc = args[0]
         serialWrite("PSARJ=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'psarj'",(args[0],))
-        self.ids.statusbar.text = "PSARJ Value Sent: " + str(args[0])
+        #self.ids.statusbar.text = "PSARJ Value Sent: " + str(args[0])
 
     def sendSSARJ(self, *args):
         global ssarjmc
         ssarjmc = args[0]
         serialWrite("SSARJ=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'ssarj'",(args[0],))
-        self.ids.statusbar.text = "SSARJ Value Sent: " + str(args[0])
+        #self.ids.statusbar.text = "SSARJ Value Sent: " + str(args[0])
 
     def sendPTRRJ(self, *args):
         global ptrrjmc
         ptrrjmc = args[0]
         serialWrite("PTRRJ=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry  SET Value = ? WHERE Label = 'ptrrj'",(args[0],))
-        self.ids.statusbar.text = "PTRRJ Value Sent: " + str(args[0])
+        #self.ids.statusbar.text = "PTRRJ Value Sent: " + str(args[0])
 
     def sendSTRRJ(self, *args):
         global strrjmc
         strrjmc = args[0]
         serialWrite("STRRJ=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'strrj'",(args[0],))
-        self.ids.statusbar.text = "STRRJ Value Sent: " + str(args[0])
+        #self.ids.statusbar.text = "STRRJ Value Sent: " + str(args[0])
 
     def sendBeta1B(self, *args):
         global beta1bmc
         beta1bmc = args[0]
         serialWrite("B1B=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1b'",(args[0],))
-        self.ids.statusbar.text = "Beta1B Value Sent: " + str(args[0])
+        #self.ids.statusbar.text = "Beta1B Value Sent: " + str(args[0])
 
     def sendBeta1A(self, *args):
         global beta1amc
         beta1amc = args[0]
         serialWrite("B1A=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1a'",(args[0],))
-        self.ids.statusbar.text = "Beta1A Value Sent: " + str(args[0])
+        #self.ids.statusbar.text = "Beta1A Value Sent: " + str(args[0])
 
     def sendBeta2B(self, *args):
         global beta2bmc
         beta2bmc = args[0]
         serialWrite("B2B=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2b'",(args[0],))
-        self.ids.statusbar.text = "Beta2B Value Sent: " + str(args[0])
+        #self.ids.statusbar.text = "Beta2B Value Sent: " + str(args[0])
 
     def sendBeta2A(self, *args):
         global beta2amc
         beta2amc = args[0]
         serialWrite("B2A=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2a'",(args[0],))
-        self.ids.statusbar.text = "Beta2A Value Sent: " + str(args[0])
+        #self.ids.statusbar.text = "Beta2A Value Sent: " + str(args[0])
 
     def sendBeta3B(self, *args):
         global beta3bmc
         beta3bmc = args[0]
         serialWrite("B3B=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3b'",(args[0],))
-        self.ids.statusbar.text = "Beta3B Value Sent: " + str(args[0])
+        #self.ids.statusbar.text = "Beta3B Value Sent: " + str(args[0])
 
     def sendBeta3A(self, *args):
         global beta3amc
         beta3amc = args[0]
         serialWrite("B3A=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3a'",(args[0],))
-        self.ids.statusbar.text = "Beta3A Value Sent: " + str(args[0])
+        #self.ids.statusbar.text = "Beta3A Value Sent: " + str(args[0])
 
     def sendBeta4B(self, *args):
         global beta4bmc
         beta4bmc = args[0]
         serialWrite("B4B=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4b'",(args[0],))
-        self.ids.statusbar.text = "Beta4B Value Sent: " + str(args[0])
+        #self.ids.statusbar.text = "Beta4B Value Sent: " + str(args[0])
 
     def sendBeta4A(self, *args):
         global beta4amc
         beta4amc = args[0]
         serialWrite("B4A=" + str(args[0]) + " ")
         c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4a'",(args[0],))
-        self.ids.statusbar.text = "Beta4A Value Sent: " + str(args[0])
+        #self.ids.statusbar.text = "Beta4A Value Sent: " + str(args[0])
 
     def send0(self, *args):
         global psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1amc,beta1bmc,beta2amc,beta2bmc,beta3amc,beta3bmc,beta4amc,beta4bmc
@@ -995,7 +998,7 @@ class ManualControlScreen(Screen):
         beta3amc = 0
         beta4bmc = 0
         beta4amc = 0
-        self.ids.statusbar.text = "0 sent to all"
+        #self.ids.statusbar.text = "0 sent to all"
         serialWrite("B1A=0 ")
         serialWrite("B1B=0 ")
         serialWrite("B2A=0 ")
@@ -1035,7 +1038,7 @@ class ManualControlScreen(Screen):
         beta3amc = 90
         beta4bmc = 90
         beta4amc = 90
-        self.ids.statusbar.text = "90 sent to all"
+        #self.ids.statusbar.text = "90 sent to all"
         serialWrite("B1A=90 ")
         serialWrite("B1B=90 ")
         serialWrite("B2A=90 ")
@@ -1050,6 +1053,7 @@ class ManualControlScreen(Screen):
         serialWrite("STRRJ=90 ")
 
 class FakeOrbitScreen(Screen):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
     def changeDemoBoolean(self, *args):
         global demoboolean
@@ -1132,6 +1136,7 @@ class FakeOrbitScreen(Screen):
             runningDemo = False
 
 class Settings_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     def checkbox_clicked(*args):
         if args[2]:
             serialWrite("SmartRolloverBGA=1 ")
@@ -1139,69 +1144,131 @@ class Settings_Screen(Screen, EventDispatcher):
             serialWrite("SmartRolloverBGA=0 ")
 
 class Orbit_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class Orbit_Pass(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class Orbit_Data(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class ISS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
     def selectModule(*args): #used for choosing a module on screen to light up
         global module
         module = str(args[1])
 
 class ECLSS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class ECLSS_WRM_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class ECLSS_IATCS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class EPS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class CT_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class CT_SASA_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class CT_Camera_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class CT_UHF_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class CT_SGANT_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class GNC_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class CDH_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class Science_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class USOS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class VV_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class EVA_Main_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class EVA_US_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class EVA_RS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class EVA_Pictures(Screen, EventDispatcher):
-    pass
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
 class TCS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
+class LED_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+
 class RS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class RS_Dock_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class Crew_Screen(Screen, EventDispatcher):
-    pass
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+
+class Robo_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class SSRMS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class SPDM1_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
 
 class MSS_MT_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
 class MimicScreen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
     def changeMimicBoolean(self, *args):
         global mimicbutton
@@ -1210,8 +1277,8 @@ class MimicScreen(Screen, EventDispatcher):
     def startproc(self):
         global p,TDRSproc
         logWrite("Telemetry Subprocess start")
-        p = Popen(["python3", mimic_directory + "/Mimic/Pi/iss_telemetry.py"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
-        TDRSproc = Popen(["python3", mimic_directory + "/Mimic/Pi/TDRScheck.py"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
+        p = Popen(["python", mimic_directory + "/Mimic/Pi/iss_telemetry.py"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
+        TDRSproc = Popen(["python", mimic_directory + "/Mimic/Pi/TDRScheck.py"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
         #p = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/Data"])
 
     def killproc(*args):
@@ -1225,9 +1292,10 @@ class MimicScreen(Screen, EventDispatcher):
             logWrite(e)
 
 class MainScreenManager(ScreenManager):
-    pass
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
 class MainApp(App):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
     def build(self):
         global startup, ScreenList, stopAnimation
@@ -1236,7 +1304,10 @@ class MainApp(App):
         self.mimic_screen = MimicScreen(name = 'mimic')
         self.iss_screen = ISS_Screen(name = 'iss')
         self.eclss_screen = ECLSS_Screen(name = 'eclss')
+        self.eclss_wrm_screen = ECLSS_WRM_Screen(name = 'wrm')
+        self.eclss_iatcs_screen = ECLSS_IATCS_Screen(name = 'iatcs')
         self.control_screen = ManualControlScreen(name = 'manualcontrol')
+        self.led_screen = LED_Screen(name = 'led')
         self.orbit_screen = Orbit_Screen(name = 'orbit')
         self.orbit_pass = Orbit_Pass(name = 'orbit_pass')
         self.orbit_data = Orbit_Data(name = 'orbit_data')
@@ -1254,26 +1325,41 @@ class MainApp(App):
         self.us_eva = EVA_US_Screen(name='us_eva')
         self.rs_eva = EVA_RS_Screen(name='rs_eva')
         self.rs_screen = RS_Screen(name='rs')
+        self.rs_dock = RS_Dock_Screen(name='rs_dock')
+        self.robo_screen = Robo_Screen(name='robo')
+        self.ssrms_screen = SSRMS_Screen(name='ssrms')
+        self.spdm1_screen = SPDM1_Screen(name='spdm1')
         self.mss_mt_screen = MSS_MT_Screen(name='mt')
+        self.cdh_screen = CDH_Screen(name = 'cdh')
+        self.science_screen = Science_Screen(name = 'science')
+        self.usos_screen = USOS_Screen(name = 'usos')
+        self.vv_screen = VV_Screen(name = 'vv')
         self.eva_main = EVA_Main_Screen(name='eva_main')
         self.eva_pictures = EVA_Pictures(name='eva_pictures')
 
         #Add all new telemetry screens to this list, this is used for the signal status icon and telemetry value colors
-        ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen',
+        ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen', 'eclss_wrm_screen', 'eclss_iatcs_screen',
                       'ct_screen', 'ct_sasa_screen', 'ct_sgant_screen', 'ct_uhf_screen',
                       'ct_camera_screen', 'gnc_screen', 'orbit_screen', 'us_eva', 'rs_eva',
-                      'eva_main', 'mimic_screen', 'mss_mt_screen','orbit_pass','orbit_data']
+                      'eva_main', 'mimic_screen', 'robo_screen', 'mss_mt_screen', 'ssrms_screen', 'spdm1_screen','orbit_pass', 'orbit_data', 'crew_screen']
 
         root = MainScreenManager(transition=SwapTransition())
         root.add_widget(self.main_screen)
         root.add_widget(self.control_screen)
         root.add_widget(self.mimic_screen)
+        root.add_widget(self.led_screen)
         root.add_widget(self.fakeorbit_screen)
         root.add_widget(self.orbit_screen)
         root.add_widget(self.orbit_pass)
         root.add_widget(self.orbit_data)
         root.add_widget(self.iss_screen)
         root.add_widget(self.eclss_screen)
+        root.add_widget(self.eclss_wrm_screen)
+        root.add_widget(self.eclss_iatcs_screen)
+        root.add_widget(self.cdh_screen)
+        root.add_widget(self.science_screen)
+        root.add_widget(self.usos_screen)
+        root.add_widget(self.vv_screen)
         root.add_widget(self.eps_screen)
         root.add_widget(self.ct_screen)
         root.add_widget(self.ct_sasa_screen)
@@ -1284,6 +1370,10 @@ class MainApp(App):
         root.add_widget(self.us_eva)
         root.add_widget(self.rs_eva)
         root.add_widget(self.rs_screen)
+        root.add_widget(self.rs_dock)
+        root.add_widget(self.robo_screen)
+        root.add_widget(self.ssrms_screen)
+        root.add_widget(self.spdm1_screen)
         root.add_widget(self.mss_mt_screen)
         root.add_widget(self.eva_main)
         root.add_widget(self.eva_pictures)
@@ -1359,7 +1449,7 @@ class MainApp(App):
         self.orbit_screen.ids.OrbitMap.reload()
 
     def updateNightShade(self, dt):
-        proc = Popen(["python3", mimic_directory + "/Mimic/Pi/NightShade.py"])
+        proc = Popen(["python", mimic_directory + "/Mimic/Pi/NightShade.py"])
 
     def checkTDRS(self, dt):
         global activeTDRS1
@@ -1508,6 +1598,14 @@ class MainApp(App):
         except Exception as e:
             logWrite("Error retrieving EVA stats: " + str(e))
 
+    def flashROBObutton(self, instance):
+        logWrite("Function call - flashRobo")
+
+        self.mimic_screen.ids.Robo_button.background_color = (0, 0, 1, 1)
+        def reset_color(*args):
+            self.mimic_screen.ids.Robo_button.background_color = (1, 1, 1, 1)
+        Clock.schedule_once(reset_color, 0.5)
+    
     def flashUS_EVAbutton(self, instance):
         logWrite("Function call - flashUS_EVA")
 
@@ -1585,8 +1683,20 @@ class MainApp(App):
 
     def TDRSupdate(self, dt):
         global TDRS12_TLE, TDRS6_TLE, TDRS10_TLE, TDRS11_TLE, TDRS7_TLE
-        normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
-        normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
+        
+        #TEMP FIX TO ERROR DO NOT MERGE THESE LINES       
+        if self.orbit_screen.ids.OrbitMap.texture_size[0] == 0: #temp fix to ensure no divide by 0
+            normalizedX = 1
+        else:
+            normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
+
+        if self.orbit_screen.ids.OrbitMap.texture_size[1] == 0:
+            normalizedY = 1
+        else:
+            normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
+        
+        #normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
+        #normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
 
         def scaleLatLon(latitude, longitude):
             #converting lat lon to x, y for orbit map
@@ -1851,9 +1961,18 @@ class MainApp(App):
             longitude = float(str(ISS_TLE.sublong).split(':')[0]) + float(str(ISS_TLE.sublong).split(':')[1])/60 + float(str(ISS_TLE.sublong).split(':')[2])/3600
 
             #inclination = ISS_TLE.inc
-
-            normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
-            normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
+        
+            #TEMP FIX TO ERROR DO NOT MERGE THESE LINES       
+            if self.orbit_screen.ids.OrbitMap.texture_size[0] == 0: #temp fix to ensure no divide by 0
+                normalizedX = 1
+            else:
+                normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
+            
+            if self.orbit_screen.ids.OrbitMap.texture_size[1] == 0:
+                normalizedY = 1
+            else:
+                normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
+                
 
             self.orbit_screen.ids.OrbitISStiny.pos = (
                     scaleLatLon2(latitude, longitude)['new_x'] - ((self.orbit_screen.ids.OrbitISStiny.width / 2) * normalizedX * 2), #had to fudge a little not sure why
@@ -2212,66 +2331,66 @@ class MainApp(App):
                         crewmembercountry[isscrew] = str('USA')
                     isscrew = isscrew+1
 
-            self.crew_screen.ids.crew1.text = str(crewmember[0])
-            self.crew_screen.ids.crew1title.text = str(crewmembertitle[0])
-            self.crew_screen.ids.crew1country.text = str(crewmembercountry[0])
-            self.crew_screen.ids.crew1daysonISS.text = str(crewmemberdays[0])
-            #self.crew_screen.ids.crew1image.source = str(crewmemberpicture[0])
-            self.crew_screen.ids.crew2.text = str(crewmember[1])
-            self.crew_screen.ids.crew2title.text = str(crewmembertitle[1])
-            self.crew_screen.ids.crew2country.text = str(crewmembercountry[1])
-            self.crew_screen.ids.crew2daysonISS.text = str(crewmemberdays[1])
-            #self.crew_screen.ids.crew2image.source = str(crewmemberpicture[1])
-            self.crew_screen.ids.crew3.text = str(crewmember[2])
-            self.crew_screen.ids.crew3title.text = str(crewmembertitle[2])
-            self.crew_screen.ids.crew3country.text = str(crewmembercountry[2])
-            self.crew_screen.ids.crew3daysonISS.text = str(crewmemberdays[2])
-            #self.crew_screen.ids.crew3image.source = str(crewmemberpicture[2])
-            self.crew_screen.ids.crew4.text = str(crewmember[3])
-            self.crew_screen.ids.crew4title.text = str(crewmembertitle[3])
-            self.crew_screen.ids.crew4country.text = str(crewmembercountry[3])
-            self.crew_screen.ids.crew4daysonISS.text = str(crewmemberdays[3])
-            #self.crew_screen.ids.crew4image.source = str(crewmemberpicture[3])
-            self.crew_screen.ids.crew5.text = str(crewmember[4])
-            self.crew_screen.ids.crew5title.text = str(crewmembertitle[4])
-            self.crew_screen.ids.crew5country.text = str(crewmembercountry[4])
-            self.crew_screen.ids.crew5daysonISS.text = str(crewmemberdays[4])
-            #self.crew_screen.ids.crew5image.source = str(crewmemberpicture[4])
-            self.crew_screen.ids.crew6.text = str(crewmember[5])
-            self.crew_screen.ids.crew6title.text = str(crewmembertitle[5])
-            self.crew_screen.ids.crew6country.text = str(crewmembercountry[5])
-            self.crew_screen.ids.crew6daysonISS.text = str(crewmemberdays[5])
-            #self.crew_screen.ids.crew6image.source = str(crewmemberpicture[5])
-            #self.crew_screen.ids.crew7.text = str(crewmember[6])
-            #self.crew_screen.ids.crew7title.text = str(crewmembertitle[6])
-            #self.crew_screen.ids.crew7country.text = str(crewmembercountry[6])
-            #self.crew_screen.ids.crew7daysonISS.text = str(crewmemberdays[6])
-            #self.crew_screen.ids.crew7image.source = str(crewmemberpicture[6])
-            #self.crew_screen.ids.crew8.text = str(crewmember[7])
-            #self.crew_screen.ids.crew8title.text = str(crewmembertitle[7])
-            #self.crew_screen.ids.crew8country.text = str(crewmembercountry[7])
-            #self.crew_screen.ids.crew8daysonISS.text = str(crewmemberdays[7])
-            #self.crew_screen.ids.crew8image.source = str(crewmemberpicture[7]))
-            #self.crew_screen.ids.crew9.text = str(crewmember[8])
-            #self.crew_screen.ids.crew9title.text = str(crewmembertitle[8])
-            #self.crew_screen.ids.crew9country.text = str(crewmembercountry[8])
-            #self.crew_screen.ids.crew9daysonISS.text = str(crewmemberdays[8])
-            #self.crew_screen.ids.crew9image.source = str(crewmemberpicture[8])
-            #self.crew_screen.ids.crew10.text = str(crewmember[9])
-            #self.crew_screen.ids.crew10title.text = str(crewmembertitle[9])
-            #self.crew_screen.ids.crew10country.text = str(crewmembercountry[9])
-            #self.crew_screen.ids.crew10daysonISS.text = str(crewmemberdays[9])
-            #self.crew_screen.ids.crew10image.source = str(crewmemberpicture[9])
-            #self.crew_screen.ids.crew11.text = str(crewmember[10])
-            #self.crew_screen.ids.crew11title.text = str(crewmembertitle[10])
-            #self.crew_screen.ids.crew11country.text = str(crewmembercountry[10])
-            #self.crew_screen.ids.crew11daysonISS.text = str(crewmemberdays[10])
-            #self.crew_screen.ids.crew11image.source = str(crewmemberpicture[10])
-            #self.crew_screen.ids.crew12.text = str(crewmember[11])
-            #self.crew_screen.ids.crew12title.text = str(crewmembertitle[11])
-            #self.crew_screen.ids.crew12country.text = str(crewmembercountry[11])
-            #self.crew_screen.ids.crew12daysonISS.text = str(crewmemberdays[11])
-            #self.crew_screen.ids.crew12image.source = str(crewmemberpicture[11])
+            #self.crew_screen.ids.crew1.text = str(crewmember[0])
+            #self.crew_screen.ids.crew1title.text = str(crewmembertitle[0])
+            #self.crew_screen.ids.crew1country.text = str(crewmembercountry[0])
+            #self.crew_screen.ids.crew1daysonISS.text = str(crewmemberdays[0])
+            ##self.crew_screen.ids.crew1image.source = str(crewmemberpicture[0])
+            #self.crew_screen.ids.crew2.text = str(crewmember[1])
+            #self.crew_screen.ids.crew2title.text = str(crewmembertitle[1])
+            #self.crew_screen.ids.crew2country.text = str(crewmembercountry[1])
+            #self.crew_screen.ids.crew2daysonISS.text = str(crewmemberdays[1])
+            ##self.crew_screen.ids.crew2image.source = str(crewmemberpicture[1])
+            #self.crew_screen.ids.crew3.text = str(crewmember[2])
+            #self.crew_screen.ids.crew3title.text = str(crewmembertitle[2])
+            #self.crew_screen.ids.crew3country.text = str(crewmembercountry[2])
+            #self.crew_screen.ids.crew3daysonISS.text = str(crewmemberdays[2])
+            ##self.crew_screen.ids.crew3image.source = str(crewmemberpicture[2])
+            #self.crew_screen.ids.crew4.text = str(crewmember[3])
+            #self.crew_screen.ids.crew4title.text = str(crewmembertitle[3])
+            #self.crew_screen.ids.crew4country.text = str(crewmembercountry[3])
+            #self.crew_screen.ids.crew4daysonISS.text = str(crewmemberdays[3])
+            ##self.crew_screen.ids.crew4image.source = str(crewmemberpicture[3])
+            #self.crew_screen.ids.crew5.text = str(crewmember[4])
+            #self.crew_screen.ids.crew5title.text = str(crewmembertitle[4])
+            #self.crew_screen.ids.crew5country.text = str(crewmembercountry[4])
+            #self.crew_screen.ids.crew5daysonISS.text = str(crewmemberdays[4])
+            ##self.crew_screen.ids.crew5image.source = str(crewmemberpicture[4])
+            #self.crew_screen.ids.crew6.text = str(crewmember[5])
+            #self.crew_screen.ids.crew6title.text = str(crewmembertitle[5])
+            #self.crew_screen.ids.crew6country.text = str(crewmembercountry[5])
+            #self.crew_screen.ids.crew6daysonISS.text = str(crewmemberdays[5])
+            ##self.crew_screen.ids.crew6image.source = str(crewmemberpicture[5])
+            ##self.crew_screen.ids.crew7.text = str(crewmember[6])
+            ##self.crew_screen.ids.crew7title.text = str(crewmembertitle[6])
+            ##self.crew_screen.ids.crew7country.text = str(crewmembercountry[6])
+            ##self.crew_screen.ids.crew7daysonISS.text = str(crewmemberdays[6])
+            ##self.crew_screen.ids.crew7image.source = str(crewmemberpicture[6])
+            ##self.crew_screen.ids.crew8.text = str(crewmember[7])
+            ##self.crew_screen.ids.crew8title.text = str(crewmembertitle[7])
+            ##self.crew_screen.ids.crew8country.text = str(crewmembercountry[7])
+            ##self.crew_screen.ids.crew8daysonISS.text = str(crewmemberdays[7])
+            ##self.crew_screen.ids.crew8image.source = str(crewmemberpicture[7]))
+            ##self.crew_screen.ids.crew9.text = str(crewmember[8])
+            ##self.crew_screen.ids.crew9title.text = str(crewmembertitle[8])
+            ##self.crew_screen.ids.crew9country.text = str(crewmembercountry[8])
+            ##self.crew_screen.ids.crew9daysonISS.text = str(crewmemberdays[8])
+            ##self.crew_screen.ids.crew9image.source = str(crewmemberpicture[8])
+            ##self.crew_screen.ids.crew10.text = str(crewmember[9])
+            ##self.crew_screen.ids.crew10title.text = str(crewmembertitle[9])
+            ##self.crew_screen.ids.crew10country.text = str(crewmembercountry[9])
+            ##self.crew_screen.ids.crew10daysonISS.text = str(crewmemberdays[9])
+            ##self.crew_screen.ids.crew10image.source = str(crewmemberpicture[9])
+            ##self.crew_screen.ids.crew11.text = str(crewmember[10])
+            ##self.crew_screen.ids.crew11title.text = str(crewmembertitle[10])
+            ##self.crew_screen.ids.crew11country.text = str(crewmembercountry[10])
+            ##self.crew_screen.ids.crew11daysonISS.text = str(crewmemberdays[10])
+            ##self.crew_screen.ids.crew11image.source = str(crewmemberpicture[10])
+            ##self.crew_screen.ids.crew12.text = str(crewmember[11])
+            ##self.crew_screen.ids.crew12title.text = str(crewmembertitle[11])
+            ##self.crew_screen.ids.crew12country.text = str(crewmembercountry[11])
+            ##self.crew_screen.ids.crew12daysonISS.text = str(crewmemberdays[11])
+            ##self.crew_screen.ids.crew12image.source = str(crewmemberpicture[11])
 
         def on_redirect(req, result):
             logWrite("Warning - checkCrew JSON failure (redirect)")
@@ -2424,6 +2543,7 @@ class MainApp(App):
             self.mimic_screen.ids.mimicstartbutton.disabled = False
             self.fakeorbit_screen.ids.DemoStart.disabled = False
             self.fakeorbit_screen.ids.HTVDemoStart.disabled = False
+            self.fakeorbit_screen.ids.OFT2DemoStart.disabled = False
             self.control_screen.ids.set90.disabled = False
             self.control_screen.ids.set0.disabled = False
             if mimicbutton:
@@ -2436,6 +2556,7 @@ class MainApp(App):
             self.mimic_screen.ids.mimicstartbutton.text = "Transmit"
             self.fakeorbit_screen.ids.DemoStart.disabled = True
             self.fakeorbit_screen.ids.HTVDemoStart.disabled = True
+            self.fakeorbit_screen.ids.OFT2DemoStart.disabled = True
             self.control_screen.ids.set90.disabled = True
             self.control_screen.ids.set0.disabled = True
 
@@ -2444,6 +2565,8 @@ class MainApp(App):
             self.fakeorbit_screen.ids.HTVDemoStart.disabled = True
             self.fakeorbit_screen.ids.DemoStop.disabled = False
             self.fakeorbit_screen.ids.HTVDemoStop.disabled = False
+            self.fakeorbit_screen.ids.OFT2DemoStart.disabled = True
+            self.fakeorbit_screen.ids.OFT2DemoStop.disabled = False
             self.fakeorbit_screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
 
         c.execute('select Value from telemetry')
@@ -2559,7 +2682,128 @@ class MainApp(App):
         #TCS telemetry
         SWmode_loopA = int((values[43])[0])
         SWmode_loopB = int((values[42])[0])
+        NH3flow_loopA = "{:.2f}".format(float((values[22])[0]))
+        NH3flow_loopB = "{:.2f}".format(float((values[19])[0]))
+        NH3outletPress_loopA = "{:.2f}".format(float((values[23])[0]))
+        NH3outletPress_loopB = "{:.2f}".format(float((values[20])[0]))
+        NH3outletTemp_loopA = "{:.2f}".format(float((values[24])[0]))
+        NH3outletTemp_loopB = "{:.2f}".format(float((values[21])[0]))
 
+        #MBS and MT telemetry
+        mt_worksite = int((values[258])[0])
+        self.mss_mt_screen.ids.mt_ws_value.text = str(mt_worksite)
+        mt_position = float((values[257])[0])
+        mt_position_timestamp = float((timestamps[257])[0])
+
+        def map_mt_value(value):
+            mt_min_value = 2000.0 #minimum mt position float value, rough guess needs refining
+            mt_max_value = -2000.0 #maximum mt position float value, rough guess needs refining
+            min_mt_mapped_value = 0.4 #change this to be leftmost kivy screen percentage of truss image
+            max_mt_mapped_value = 0.9 #change this to be rightmost kivy screen percentage of truss image
+        
+            # Calculate the ratio of the input value within the range
+            ratio = (value - mt_min_value) / (mt_max_value - mt_min_value)
+        
+            # Map the ratio to the desired output range
+            mt_mapped_value = min_mt_mapped_value + ratio * (max_mt_mapped_value - min_mt_mapped_value)
+        
+            return mt_mapped_value #this should be the new pos_hint_x value
+        
+        self.mss_mt_screen.ids.FloatingMT.pos_hint = {"center_x": map_mt_value(mt_position),"center_y": 0.375}
+            
+        self.mss_mt_screen.ids.mt_position_value.text = str(mt_position)
+
+        if (mt_position_timestamp - old_mt_timestamp) > 0:
+            mt_speed = (mt_position - old_mt_position) / ((mt_position_timestamp - old_mt_timestamp)*3600)
+            old_mt_timestamp = mt_position_timestamp
+            old_mt_position = mt_position
+            roboflashevent = Clock.schedule_once(self.flashROBObutton, 1)
+        self.mss_mt_screen.ids.mt_speed_value.text = "{:2.2f}".format(float(mt_speed)) + " cm/s"
+
+        MCASpayload = int((values[292])[0])
+        POApayload = int((values[294])[0])
+        
+        ##SSRMS telemetry
+        OperatingBase = str((values[261])[0])
+        BaseLocation = str((values[260])[0])
+        TipLEEstatus = str((values[269])[0])
+        SACSopBase = str((values[261])[0])
+        ShoulderRoll = "{:.2f}".format(float((values[262])[0]))
+        ShoulderYaw = "{:.2f}".format(float((values[263])[0]))
+        ShoulderPitch = "{:.2f}".format(float((values[264])[0]))
+        ElbowPitch = "{:.2f}".format(float((values[265])[0]))
+        WristRoll = "{:.2f}".format(float((values[268])[0]))
+        WristYaw = "{:.2f}".format(float((values[267])[0]))
+        WristPitch = "{:.2f}".format(float((values[266])[0]))
+        
+        ##SPDM Telemetry
+        SPDMbase = str((values[271])[0])
+        SPDMoperatingBase = str((values[270])[0])
+        Shoulder1Roll = "{:.2f}".format(float((values[272])[0]))
+        Shoulder1Yaw = "{:.2f}".format(float((values[273])[0]))
+        Shoulder1Pitch = "{:.2f}".format(float((values[274])[0]))
+        Elbow1Pitch = "{:.2f}".format(float((values[275])[0]))
+        Wrist1Roll = "{:.2f}".format(float((values[278])[0]))
+        Wrist1Yaw = "{:.2f}".format(float((values[277])[0]))
+        Wrist1Pitch = "{:.2f}".format(float((values[276])[0]))
+        Shoulder2Roll = "{:.2f}".format(float((values[280])[0]))
+        Shoulder2Yaw = "{:.2f}".format(float((values[281])[0]))
+        Shoulder2Pitch = "{:.2f}".format(float((values[282])[0]))
+        Elbow2Pitch = "{:.2f}".format(float((values[283])[0]))
+        Wrist2Roll = "{:.2f}".format(float((values[286])[0]))
+        Wrist2Yaw = "{:.2f}".format(float((values[285])[0]))
+        Wrist2Pitch = "{:.2f}".format(float((values[284])[0])) 
+        Arm1OTCM = int((values[279])[0])
+        Arm2OTCM = int((values[288])[0])
+        BodyPayload = int((values[288])[0])
+        BodyRoll = "{:.2f}".format(float((values[289])[0]))
+                                       
+        #ECLSS telemetry
+        CabinTemp = "{:.2f}".format(float((values[195])[0]))
+        CabinPress = "{:.2f}".format(float((values[194])[0]))
+        CrewlockPress = "{:.2f}".format(float((values[16])[0]))
+        AirlockPress = "{:.2f}".format(float((values[77])[0]))
+        CleanWater = "{:.2f}".format(float((values[93])[0]))
+        WasteWater = "{:.2f}".format(float((values[94])[0]))
+        O2genState = str((values[95])[0])
+        O2prodRate = "{:.2f}".format(float((values[96])[0]))
+        VRSvlvPosition = str((values[198])[0])
+        VESvlvPosition = str((values[199])[0])
+        UrineProcessState = str((values[89])[0])
+        UrineTank = "{:.2f}".format(float((values[90])[0]))
+        WaterProcessState = str((values[91])[0])
+        WaterProcessStep = str((values[92])[0])
+        LTwater_Lab = "{:.2f}".format(float((values[192])[0]))
+        MTwater_Lab = "{:.2f}".format(float((values[193])[0]))
+        AC_LabPort = str((values[200])[0])
+        AC_LabStbd = str((values[201])[0])
+        FluidTempAir_Lab = "{:.2f}".format(float((values[197])[0]))
+        FluidTempAv_Lab = "{:.2f}".format(float((values[196])[0]))
+        LTwater_Node2 = "{:.2f}".format(float((values[82])[0]))
+        MTwater_Node2 = "{:.2f}".format(float((values[81])[0]))
+        AC_Node2 = str((values[83])[0])
+        FluidTempAir_Node2 = "{:.2f}".format(float((values[84])[0]))
+        FluidTempAv_Node2 = "{:.2f}".format(float((values[85])[0]))
+        LTwater_Node3 = "{:.2f}".format(float((values[101])[0]))           
+        MTwater_Node3 = "{:.2f}".format(float((values[99])[0]))            
+        AC_Node3 = str((values[100])[0])
+        FluidTempAir_Node3 = "{:.2f}".format(float((values[98])[0]))
+        FluidTempAv_Node3 = "{:.2f}".format(float((values[97])[0]))
+        
+        #SASA telemetry
+        ActiveString = str((values[54])[0])
+        RFG1status = str((values[53])[0])
+        RFG1azimuth = "{:.2f}".format(float((values[18])[0]))
+        RFG1elev = "{:.2f}".format(float((values[14])[0]))
+        RFG2status = str((values[52])[0])
+        RFG2azimuth = "{:.2f}".format(float((values[51])[0]))
+        RFG2elev = "{:.2f}".format(float((values[50])[0]))
+        
+        #UHF telemetry
+        UHF1pwr = str((values[233])[0])
+        UHF2pwr = str((values[234])[0])
+        UHFframeSync = str((values[235])[0])
+        
         #GNC Telemetry
         rollerror = float((values[165])[0])
         pitcherror = float((values[166])[0])
@@ -2688,21 +2932,6 @@ class MainApp(App):
         airlock_pump_switch = int((values[72])[0])
         crewlockpres = float((values[16])[0])
         airlockpres = float((values[77])[0])
-
-        #MSS Robotics Stuff
-        mt_worksite = int((values[258])[0])
-        self.mss_mt_screen.ids.mt_ws_value.text = str(mt_worksite)
-        mt_position = float((values[257])[0])
-        mt_position_timestamp = float((timestamps[257])[0])
-
-        self.mss_mt_screen.ids.mt_position_value.text = str(mt_position)
-
-        if (mt_position_timestamp - old_mt_timestamp) > 0:
-            mt_speed = (mt_position - old_mt_position) / ((mt_position_timestamp - old_mt_timestamp)*3600)
-            old_mt_timestamp = mt_position_timestamp
-            old_mt_position = mt_position
-        self.mss_mt_screen.ids.mt_speed_value.text = "{:2.2f}".format(float(mt_speed)) + " cm/s"
-
 
         ##US EPS Stuff---------------------------##
         solarbeta = "{:.2f}".format(float((values[176])[0]))
@@ -3130,11 +3359,11 @@ class MainApp(App):
             self.us_eva.ids.pumpswitch.color = 0, 0, 0
 
         ##activate EVA button flash
-        if (airlock_pump_voltage == 1 or crewlockpres < 734) and int(stationmode) == 5:
+        if (airlock_pump_voltage == 1 or crewlockpres < 734):
             usevaflashevent = Clock.schedule_once(self.flashUS_EVAbutton, 1)
 
         ##No EVA Currently
-        if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and crewlockpres > 740 and airlockpres > 740:
+        if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and crewlockpres > 737 and airlockpres > 740:
             eva = False
             self.us_eva.ids.leak_timer.text = ""
             self.us_eva.ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/BlankLights.png'
@@ -3142,7 +3371,7 @@ class MainApp(App):
             self.us_eva.ids.EVA_occuring.text = "Currently No EVA"
 
         ##EVA Standby - NOT UNIQUE
-        if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres > 740 and airlockpres > 740 and int(stationmode) == 5:
+        if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres > 740 and airlockpres > 740:
             standby = True
             self.us_eva.ids.leak_timer.text = "~160s Leak Check"
             self.us_eva.ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/StandbyLights.png'
@@ -3152,7 +3381,7 @@ class MainApp(App):
             standby = False
 
         ##EVA Prebreath Pressure
-        if airlock_pump_voltage == 1 and crewlockpres > 740 and airlockpres > 740 and int(stationmode) == 5:
+        if airlock_pump_voltage == 1 and crewlockpres > 740 and airlockpres > 740:
             prebreath1 = True
             self.us_eva.ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/PreBreatheLights.png'
             self.us_eva.ids.leak_timer.text = "~160s Leak Check"
@@ -3160,7 +3389,7 @@ class MainApp(App):
             self.us_eva.ids.EVA_occuring.text = "Pre-EVA Nitrogen Purge"
 
         ##EVA Depress1
-        if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres < 740 and airlockpres > 740 and int(stationmode) == 5:
+        if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres < 740 and airlockpres > 740:
             depress1 = True
             self.us_eva.ids.leak_timer.text = "~160s Leak Check"
             self.us_eva.ids.EVA_occuring.text = "Crewlock Depressurizing"
@@ -3168,7 +3397,7 @@ class MainApp(App):
             self.us_eva.ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/DepressLights.png'
 
         ##EVA Leakcheck
-        if airlock_pump_voltage == 1 and crewlockpres < 260 and crewlockpres > 250 and (depress1 or leakhold) and int(stationmode) == 5:
+        if airlock_pump_voltage == 1 and crewlockpres < 260 and crewlockpres > 250 and (depress1 or leakhold):
             if depress1:
                 holdstartTime = float(unixconvert[7])*24+unixconvert[3]+float(unixconvert[4])/60+float(unixconvert[5])/3600
             leakhold = True
@@ -3181,7 +3410,7 @@ class MainApp(App):
             leakhold = False
 
         ##EVA Depress2
-        if airlock_pump_voltage == 1 and crewlockpres <= 250 and crewlockpres > 3 and int(stationmode) == 5:
+        if airlock_pump_voltage == 1 and crewlockpres <= 250 and crewlockpres > 3:
             leakhold = False
             self.us_eva.ids.leak_timer.text = "Complete"
             self.us_eva.ids.EVA_occuring.text = "Crewlock Depressurizing"
@@ -3189,7 +3418,7 @@ class MainApp(App):
             self.us_eva.ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/DepressLights.png'
 
         ##EVA in progress
-        if crewlockpres < 2.5 and int(stationmode) == 5:
+        if crewlockpres < 2.5:
             eva = True
             self.us_eva.ids.EVA_occuring.text = "EVA In Progress!!!"
             self.us_eva.ids.EVA_occuring.color = 0.33, 0.7, 0.18
@@ -3197,8 +3426,8 @@ class MainApp(App):
             self.us_eva.ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/InProgressLights.png'
             evatimerevent = Clock.schedule_once(self.EVA_clock, 1)
 
-        ##Repress
-        if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and crewlockpres >= 3 and crewlockpres < 734 and int(stationmode) == 5:
+        ##Repress - this one still did not work with the code changes I did for eva88 (June 2023)
+        if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres >= 3 and airlockpres < 734:
             eva = False
             self.us_eva.ids.EVA_occuring.color = 0, 0, 1
             self.us_eva.ids.EVA_occuring.text = "Crewlock Repressurizing"
@@ -3235,6 +3464,13 @@ class MainApp(App):
             #serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "V1A=" + v1a + " " + "V2A=" + v2a + " " + "V3A=" + v3a + " " + "V4A=" + v4a + " " + "V1B=" + v1b + " " + "V2B=" + v2b + " " + "V3B=" + v3b + " " + "V4B=" + v4b + " ")
             serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + v1a + " " + "V2A=" + v2a + " " + "V3A=" + v3a + " " + "V4A=" + v4a + " " + "V1B=" + v1b + " " + "V2B=" + v2b + " " + "V3B=" + v3b + " " + "V4B=" + v4b + " " + "ISS=" + module + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
 
+        self.orbit_data.ids.position_x.text = str("{:.2f}".format(position_x))
+        self.orbit_data.ids.position_y.text = str("{:.2f}".format(position_y))
+        self.orbit_data.ids.position_z.text = str("{:.2f}".format(position_z))
+        self.orbit_data.ids.velocity_x.text = str("{:.2f}".format(velocity_x))
+        self.orbit_data.ids.velocity_y.text = str("{:.2f}".format(velocity_y))
+        self.orbit_data.ids.velocity_z.text = str("{:.2f}".format(velocity_z))
+ 
         self.eps_screen.ids.psarj_value.text = psarj + "deg"
         self.eps_screen.ids.ssarj_value.text = ssarj + "deg"
         self.tcs_screen.ids.ptrrj_value.text = ptrrj + "deg"
@@ -3242,6 +3478,498 @@ class MainApp(App):
 
         self.tcs_screen.ids.SWmode_loopA.text = str(SWmode_loopA)
         self.tcs_screen.ids.SWmode_loopB.text = str(SWmode_loopB)
+        self.tcs_screen.ids.NH3flow_loopA.text = str(NH3flow_loopA)
+        self.tcs_screen.ids.NH3flow_loopB.text = str(NH3flow_loopB)
+        self.tcs_screen.ids.NH3outletPress_loopA.text = str(NH3outletPress_loopA)
+        self.tcs_screen.ids.NH3outletPress_loopB.text = str(NH3outletPress_loopB)
+        self.tcs_screen.ids.NH3outletTemp_loopA.text = str(NH3outletTemp_loopA)
+        self.tcs_screen.ids.NH3outletTemp_loopB.text = str(NH3outletTemp_loopB)
+        
+        self.eclss_screen.ids.CabinTemp.text = str(CabinTemp)
+        self.eclss_screen.ids.CabinPress.text = str(CabinPress)
+        self.eclss_screen.ids.CrewlockPress.text = str(CrewlockPress)
+        self.eclss_screen.ids.AirlockPress.text = str(AirlockPress)
+        self.eclss_screen.ids.CleanWater.text = str(CleanWater)
+        self.eclss_screen.ids.WasteWater.text = str(WasteWater)
+        self.eclss_screen.ids.O2prodRate.text = str(O2prodRate)
+        
+        #self.eclss_screen.ids.O2genState.text = str(O2genState)
+        if int(O2genState) == 1:
+            self.eclss_screen.ids.O2genState.text = "PROCESS"
+        elif int(O2genState) == 2:
+            self.eclss_screen.ids.O2genState.text = "STANDBY"
+        elif int(O2genState) == 3:
+            self.eclss_screen.ids.O2genState.text = "SHUTDOWN"
+        elif int(O2genState) == 4:
+            self.eclss_screen.ids.O2genState.text = "STOP"
+        elif int(O2genState) == 5:
+            self.eclss_screen.ids.O2genState.text = "VENT DOME"
+        elif int(O2genState) == 6:
+            self.eclss_screen.ids.O2genState.text = "INERT DOME"
+        elif int(O2genState) == 7:
+            self.eclss_screen.ids.O2genState.text = "FAST SHTDWN"
+        elif int(O2genState) == 8:
+            self.eclss_screen.ids.O2genState.text = "N2 PURGE SHTDWN"
+        else:
+            self.eclss_screen.ids.O2genState.text = "n/a"
+        
+        #self.eclss_screen.ids.VRSvlvPosition.text = str(VRSvlvPosition)
+        if int(VRSvlvPosition) == 0:
+            self.eclss_screen.ids.VRSvlvPosition.text = "FAIL"
+        elif int(VRSvlvPosition) == 1:
+            self.eclss_screen.ids.VRSvlvPosition.text = "OPEN"
+        elif int(VRSvlvPosition) == 2:
+            self.eclss_screen.ids.VRSvlvPosition.text = "CLSD"
+        elif int(VRSvlvPosition) == 3:
+            self.eclss_screen.ids.VRSvlvPosition.text = "TRNS"
+        else:
+            self.eclss_screen.ids.VESvlvPosition.text = "n/a"
+        
+        #self.eclss_screen.ids.VESvlvPosition.text = str(VESvlvPosition)
+        if int(VESvlvPosition) == 0:
+            self.eclss_screen.ids.VESvlvPosition.text = "FAIL"
+        elif int(VESvlvPosition) == 1:
+            self.eclss_screen.ids.VESvlvPosition.text = "OPEN"
+        elif int(VESvlvPosition) == 2:
+            self.eclss_screen.ids.VESvlvPosition.text = "CLSD"
+        elif int(VESvlvPosition) == 3:
+            self.eclss_screen.ids.VESvlvPosition.text = "TRNS"
+        else:
+            self.eclss_screen.ids.VESvlvPosition.text = "n/a"
+        
+        self.eclss_wrm_screen.ids.UrineTank.text = str(UrineTank)
+        self.eclss_wrm_screen.ids.CleanWater.text = str(CleanWater)
+        self.eclss_wrm_screen.ids.WasteWater.text = str(WasteWater)
+        
+        #self.eclss_wrm_screen.ids.UrineProcessState.text = str(UrineProcessState)
+        if int(UrineProcessState) == 2:
+            self.eclss_wrm_screen.ids.UrineProcessState.text = "STOP"
+        elif int(UrineProcessState) == 4:
+            self.eclss_wrm_screen.ids.UrineProcessState.text = "SHTDWN"
+        elif int(UrineProcessState) == 8:
+            self.eclss_wrm_screen.ids.UrineProcessState.text = "MAINT"
+        elif int(UrineProcessState) == 16:
+            self.eclss_wrm_screen.ids.UrineProcessState.text = "NORM"
+        elif int(UrineProcessState) == 32:
+            self.eclss_wrm_screen.ids.UrineProcessState.text = "STBY"
+        elif int(UrineProcessState) == 64:
+            self.eclss_wrm_screen.ids.UrineProcessState.text = "IDLE"
+        elif int(UrineProcessState) == 128:
+            self.eclss_wrm_screen.ids.UrineProcessState.text = "INIT"
+        else:
+            self.eclss_wrm_screen.ids.UrineProcessState.text = "n/a"
+        
+        #self.eclss_wrm_screen.ids.WaterProcessState.text = str(WaterProcessState)
+        if int(WaterProcessState) == 1:
+            self.eclss_wrm_screen.ids.WaterProcessState.text = "STOP"
+        elif int(WaterProcessState) == 2:
+            self.eclss_wrm_screen.ids.WaterProcessState.text = "SHTDWN"
+        elif int(WaterProcessState) == 3:
+            self.eclss_wrm_screen.ids.WaterProcessState.text = "STBY"
+        elif int(WaterProcessState) == 4:
+            self.eclss_wrm_screen.ids.WaterProcessState.text = "PROC"
+        elif int(WaterProcessState) == 5:
+            self.eclss_wrm_screen.ids.WaterProcessState.text = "HOT SVC"
+        elif int(WaterProcessState) == 6:
+            self.eclss_wrm_screen.ids.WaterProcessState.text = "FLUSH"
+        elif int(WaterProcessState) == 7:
+            self.eclss_wrm_screen.ids.WaterProcessState.text = "WARM SHTDWN"
+        else:
+            self.eclss_wrm_screen.ids.WaterProcessState.text = "n/a"
+        
+        #self.eclss_wrm_screen.ids.WaterProcessStep.text = str(WaterProcessStep)
+        if int(WaterProcessStep) == 0:
+            self.eclss_wrm_screen.ids.WaterProcessStep.text = "NONE"
+        elif int(WaterProcessStep) == 1:
+            self.eclss_wrm_screen.ids.WaterProcessStep.text = "VENT"
+        elif int(WaterProcessStep) == 2:
+            self.eclss_wrm_screen.ids.WaterProcessStep.text = "HEATUP"
+        elif int(WaterProcessStep) == 3:
+            self.eclss_wrm_screen.ids.WaterProcessStep.text = "OURGE"
+        elif int(WaterProcessStep) == 4:
+            self.eclss_wrm_screen.ids.WaterProcessStep.text = "FLOW"
+        elif int(WaterProcessStep) == 5:
+            self.eclss_wrm_screen.ids.WaterProcessStep.text = "TEST"
+        elif int(WaterProcessStep) == 6:
+            self.eclss_wrm_screen.ids.WaterProcessStep.text = "TEST SV 1"
+        elif int(WaterProcessStep) == 7:
+            self.eclss_wrm_screen.ids.WaterProcessStep.text = "TEST SV 2"
+        elif int(WaterProcessStep) == 8:
+            self.eclss_wrm_screen.ids.WaterProcessStep.text = "SERVICE"
+        else:
+            self.eclss_wrm_screen.ids.WaterProcessStep.text = "n/a"
+        
+        self.eclss_iatcs_screen.ids.LTwater_Lab.text = str(LTwater_Lab)
+        self.eclss_iatcs_screen.ids.MTwater_Lab.text = str(MTwater_Lab)
+        self.eclss_iatcs_screen.ids.FluidTempAir_Lab.text = str(FluidTempAir_Lab)
+        self.eclss_iatcs_screen.ids.FluidTempAv_Lab.text = str(FluidTempAv_Lab)
+        self.eclss_iatcs_screen.ids.LTwater_Node2.text = str(LTwater_Node2)
+        self.eclss_iatcs_screen.ids.MTwater_Node2.text = str(MTwater_Node2)
+        self.eclss_iatcs_screen.ids.FluidTempAir_Node2.text = str(FluidTempAir_Node2)
+        self.eclss_iatcs_screen.ids.FluidTempAv_Node2.text = str(FluidTempAv_Node2)
+        self.eclss_iatcs_screen.ids.LTwater_Node3.text = str(LTwater_Node3)
+        self.eclss_iatcs_screen.ids.MTwater_Node3.text = str(MTwater_Node3)
+        self.eclss_iatcs_screen.ids.FluidTempAir_Node3.text = str(FluidTempAir_Node3)
+        self.eclss_iatcs_screen.ids.FluidTempAv_Node3.text = str(FluidTempAv_Node3)
+        
+        #self.eclss_iatcs_screen.ids.AC_LabPort.text = str(WaterProcessStep)
+        if int(AC_LabPort) == 0:
+            self.eclss_iatcs_screen.ids.AC_LabPort.text = "RESET"
+        elif int(AC_LabPort) == 1:
+            self.eclss_iatcs_screen.ids.AC_LabPort.text = "DRAIN"
+        elif int(AC_LabPort) == 2:
+            self.eclss_iatcs_screen.ids.AC_LabPort.text = "DRYOUT"
+        elif int(AC_LabPort) == 3:
+            self.eclss_iatcs_screen.ids.AC_LabPort.text = "EIB OFF"
+        elif int(AC_LabPort) == 4:
+            self.eclss_iatcs_screen.ids.AC_LabPort.text = "OFF"
+        elif int(AC_LabPort) == 5:
+            self.eclss_iatcs_screen.ids.AC_LabPort.text = "ON"
+        elif int(AC_LabPort) == 6:
+            self.eclss_iatcs_screen.ids.AC_LabPort.text = "STARTUP"
+        elif int(AC_LabPort) == 7:
+            self.eclss_iatcs_screen.ids.AC_LabPort.text = "TEST2"
+        else:
+            self.eclss_iatcs_screen.ids.AC_LabPort.text = "n/a"
+        
+        #self.eclss_iatcs_screen.ids.AC_LabStbd.text = str(WaterProcessStep)
+        if int(AC_LabStbd) == 0:
+            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "RESET"
+        elif int(AC_LabStbd) == 1:
+            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "DRAIN"
+        elif int(AC_LabStbd) == 2:
+            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "DRYOUT"
+        elif int(AC_LabStbd) == 3:
+            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "EIB OFF"
+        elif int(AC_LabStbd) == 4:
+            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "OFF"
+        elif int(AC_LabStbd) == 5:
+            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "ON"
+        elif int(AC_LabStbd) == 6:
+            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "STARTUP"
+        elif int(AC_LabStbd) == 7:
+            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "TEST2"
+        else:
+            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "n/a"
+        
+        #self.eclss_iatcs_screen.ids.AC_Node2.text = str(WaterProcessStep)
+        if int(AC_Node2) == 0:
+            self.eclss_iatcs_screen.ids.AC_Node2.text = "RESET"
+        elif int(AC_Node2) == 1:
+            self.eclss_iatcs_screen.ids.AC_Node2.text = "DRAIN"
+        elif int(AC_Node2) == 2:
+            self.eclss_iatcs_screen.ids.AC_Node2.text = "DRYOUT"
+        elif int(AC_Node2) == 3:
+            self.eclss_iatcs_screen.ids.AC_Node2.text = "EIB OFF"
+        elif int(AC_Node2) == 4:
+            self.eclss_iatcs_screen.ids.AC_Node2.text = "OFF"
+        elif int(AC_Node2) == 5:
+            self.eclss_iatcs_screen.ids.AC_Node2.text = "ON"
+        elif int(AC_Node2) == 6:
+            self.eclss_iatcs_screen.ids.AC_Node2.text = "STARTUP"
+        elif int(AC_Node2) == 7:
+            self.eclss_iatcs_screen.ids.AC_Node2.text = "TEST2"
+        else:
+            self.eclss_iatcs_screen.ids.AC_Node2.text = "n/a"
+        
+        #self.eclss_iatcs_screen.ids.AC_Node3.text = str(WaterProcessStep)
+        if int(AC_Node3) == 0:
+            self.eclss_iatcs_screen.ids.AC_Node3.text = "RESET"
+        elif int(AC_Node3) == 1:
+            self.eclss_iatcs_screen.ids.AC_Node3.text = "DRAIN"
+        elif int(AC_Node3) == 2:
+            self.eclss_iatcs_screen.ids.AC_Node3.text = "DRYOUT"
+        elif int(AC_Node3) == 3:
+            self.eclss_iatcs_screen.ids.AC_Node3.text = "EIB OFF"
+        elif int(AC_Node3) == 4:
+            self.eclss_iatcs_screen.ids.AC_Node3.text = "OFF"
+        elif int(AC_Node3) == 5:
+            self.eclss_iatcs_screen.ids.AC_Node3.text = "ON"
+        elif int(AC_Node3) == 6:
+            self.eclss_iatcs_screen.ids.AC_Node3.text = "STARTUP"
+        elif int(AC_Node3) == 7:
+            self.eclss_iatcs_screen.ids.AC_Node3.text = "TEST2"
+        else:
+            self.eclss_iatcs_screen.ids.AC_Node3.text = "n/a"
+        
+        ##Summary Telemetery on Robo Screen
+        self.robo_screen.ids.mt_worksite.text = str(mt_worksite)
+        
+        #self.robo_screen.ids.OperatingBase.text = str(OperatingBase)
+        if int(OperatingBase) == 0:
+            self.robo_screen.ids.OperatingBase.text = "A"
+        elif int(OperatingBase) == 5:
+            self.robo_screen.ids.OperatingBase.text = "B"
+        else:
+            self.robo_screen.ids.OperatingBase.text = "n/a"
+        
+        #self.robo_screen.ids.BaseLocation.text = str(BaseLocation)
+        if int(BaseLocation) == 1:
+            self.robo_screen.ids.BaseLocation.text = "Lab"
+        elif int(BaseLocation) == 2:
+            self.robo_screen.ids.BaseLocation.text = "Node 3"
+        elif int(BaseLocation) == 4:
+            self.robo_screen.ids.BaseLocation.text = "Node 2"
+        elif int(BaseLocation) == 7:
+            self.robo_screen.ids.BaseLocation.text = "MBS PDGF 1"
+        elif int(BaseLocation) == 8:
+            self.robo_screen.ids.BaseLocation.text = "MBS PDGF 2"
+        elif int(BaseLocation) == 11:
+            self.robo_screen.ids.BaseLocation.text = "MBS PDGF 3"
+        elif int(BaseLocation) == 13:
+            self.robo_screen.ids.BaseLocation.text = "MBS PDGF 4"
+        elif int(BaseLocation) == 14:
+            self.robo_screen.ids.BaseLocation.text = "FGB"
+        elif int(BaseLocation) == 16:
+            self.robo_screen.ids.BaseLocation.text = "POA"
+        elif int(BaseLocation) == 19:
+            self.robo_screen.ids.BaseLocation.text = "SSRMS Tip LEE"
+        elif int(BaseLocation) == 63:
+            self.robo_screen.ids.BaseLocation.text = "Undefined"
+        else:
+            self.robo_screen.ids.BaseLocation.text = "n/a"
+        
+        #self.robo_screen.ids.SPDMbase.text = str(SPDMbase)
+        if int(SPDMbase) == 1:
+            self.robo_screen.ids.SPDMbase.text = "US Lab"
+        elif int(SPDMbase) == 2:
+            self.robo_screen.ids.SPDMbase.text = "Node 3"
+        elif int(SPDMbase) == 4:
+            self.robo_screen.ids.SPDMbase.text = "Node 2"
+        elif int(SPDMbase) == 7:
+            self.robo_screen.ids.SPDMbase.text = "MBS PDGF 1"
+        elif int(SPDMbase) == 8:
+            self.robo_screen.ids.SPDMbase.text = "MBS PDGF 2"
+        elif int(SPDMbase) == 11:
+            self.robo_screen.ids.SPDMbase.text = "MBS PDGF 3"
+        elif int(SPDMbase) == 13:
+            self.robo_screen.ids.SPDMbase.text = "MBS PDGF 4"
+        elif int(SPDMbase) ==14:
+            self.robo_screen.ids.SPDMbase.text = "FGB"
+        elif int(SPDMbase) == 16:
+            self.robo_screen.ids.SPDMbase.text = "POA"
+        elif int(SPDMbase) == 19:
+            self.robo_screen.ids.SPDMbase.text = "SSRMS Tip LEE"
+        elif int(SPDMbase) == 63:
+            self.robo_screen.ids.SPDMbase.text = "Undefined"
+        else:
+            self.robo_screen.ids.SPDMbase.text = "n/a"
+        
+        #self.robo_screen.ids.SPDMoperatingBase.text = str(SPDMoperatingBase)
+        if int(SPDMoperatingBase) == 1:
+            self.robo_screen.ids.SPDMoperatingBase.text = "SPDM Body LEE"
+        elif int(SPDMoperatingBase) == 2:
+            self.robo_screen.ids.SPDMoperatingBase.text = "SPDM Body PDGF"
+        else:
+            self.robo_screen.ids.SPDMoperatingBase.text = "n/a"
+
+        #self.mss_mt_screen.ids.MCASpayload.text = str(MCASpayload)
+        if int(MCASpayload) == 0:
+            self.mss_mt_screen.ids.MCASpayload.text = "Released"
+        elif int(MCASpayload) == 1:
+            self.mss_mt_screen.ids.MCASpayload.text = "Captured"
+        else:
+            self.mss_mt_screen.ids.MCASpayload.text = "n/a"   
+        #self.mss_mt_screen.ids.POApayload.text = str(POApayload)
+        if int(POApayload) == 0:
+            self.mss_mt_screen.ids.POApayload.text = "Released"
+        elif int(POApayload) == 1:
+            self.mss_mt_screen.ids.POApayload.text = "Captive"
+        elif int(POApayload) == 2:
+            self.mss_mt_screen.ids.POApayload.text = "Captured"
+        else:
+            self.mss_mt_screen.ids.POApayload.text = "n/a" 
+        
+        #self.ssrms_screen.ids.OperatingBase.text = str(OperatingBase)
+        if int(OperatingBase) == 0:
+            self.ssrms_screen.ids.OperatingBase.text = "A"
+        elif int(OperatingBase) == 5:
+            self.ssrms_screen.ids.OperatingBase.text = "B"
+        else:
+            self.ssrms_screen.ids.OperatingBase.text = "n/a"
+                                      
+        #self.ssrms_screen.ids.TipLEEstatus.text = str(TipLEEstatus)
+        if int(TipLEEstatus) == 0:
+            self.ssrms_screen.ids.TipLEEstatus.text = "Released"
+        elif int(TipLEEstatus) == 1:
+            self.ssrms_screen.ids.TipLEEstatus.text = "Captive"
+        elif int(TipLEEstatus) == 2:
+            self.ssrms_screen.ids.TipLEEstatus.text = "Captured"
+        else:
+            self.ssrms_screen.ids.TipLEEstatus.text = "n/a"
+        
+         #self.ssrms_screen.ids.SACSopBase.text = str(SACSopBase)
+        if int(SACSopBase) == 0:
+            self.ssrms_screen.ids.SACSopBase.text = "A"
+        elif int(SACSopBase) == 5:
+            self.ssrms_screen.ids.SACSopBase.text = "B"
+        else:
+            self.ssrms_screen.ids.OperatingBase.text = "n/a"
+        
+        self.ssrms_screen.ids.ShoulderRoll.text = str(ShoulderRoll) + " deg"
+        self.ssrms_screen.ids.ShoulderYaw.text = str(ShoulderYaw) + " deg"
+        self.ssrms_screen.ids.ShoulderPitch.text = str(ShoulderPitch) + " deg"
+        self.ssrms_screen.ids.ElbowPitch.text = str(ElbowPitch) + " deg"
+        self.ssrms_screen.ids.WristRoll.text = str(WristRoll) + " deg"
+        self.ssrms_screen.ids.WristYaw.text = str(WristYaw) + " deg"
+        self.ssrms_screen.ids.WristPitch.text = str(WristPitch) + " deg"
+        
+        #self.ssrms_screen.ids.BaseLocation.text = str(BaseLocation)
+        if int(BaseLocation) == 1:
+            self.ssrms_screen.ids.BaseLocation.text = "Lab"
+        elif int(BaseLocation) == 2:
+            self.ssrms_screen.ids.BaseLocation.text = "Node 3"
+        elif int(BaseLocation) == 4:
+            self.ssrms_screen.ids.BaseLocation.text = "Node 2"
+        elif int(BaseLocation) == 7:
+            self.ssrms_screen.ids.BaseLocation.text = "MBS PDGF 1"
+        elif int(BaseLocation) == 8:
+            self.ssrms_screen.ids.BaseLocation.text = "MBS PDGF 2"
+        elif int(BaseLocation) == 11:
+            self.ssrms_screen.ids.BaseLocation.text = "MBS PDGF 3"
+        elif int(BaseLocation) == 13:
+            self.ssrms_screen.ids.BaseLocation.text = "MBS PDGF 4"
+        elif int(BaseLocation) ==14:
+            self.ssrms_screen.ids.BaseLocation.text = "FGB"
+        elif int(BaseLocation) == 16:
+            self.ssrms_screen.ids.BaseLocation.text = "POA"
+        elif int(BaseLocation) == 19:
+            self.ssrms_screen.ids.BaseLocation.text = "SSRMS Tip LEE"
+        elif int(BaseLocation) == 63:
+            self.ssrms_screen.ids.BaseLocation.text = "Undefined"
+        else:
+            self.ssrms_screen.ids.BaseLocation.text = "n/a"
+        
+        #self.spdm1_screen.ids.SPDMbase.text = str(SPDMbase)
+        if int(SPDMbase) == 1:
+            self.spdm1_screen.ids.SPDMbase.text = "Lab"
+        elif int(SPDMbase) == 2:
+            self.spdm1_screen.ids.SPDMbase.text = "Node 3"
+        elif int(SPDMbase) == 4:
+            self.spdm1_screen.ids.SPDMbase.text = "Node 2"
+        elif int(SPDMbase) == 7:
+            self.spdm1_screen.ids.SPDMbase.text = "MBS PDGF 1"
+        elif int(SPDMbase) == 8:
+            self.spdm1_screen.ids.SPDMbase.text = "MBS PDGF 2"
+        elif int(SPDMbase) == 11:
+            self.spdm1_screen.ids.SPDMbase.text = "MBS PDGF 3"
+        elif int(SPDMbase) == 13:
+            self.spdm1_screen.ids.SPDMbase.text = "MBS PDGF 4"
+        elif int(SPDMbase) ==14:
+            self.spdm1_screen.ids.SPDMbase.text = "FGB"
+        elif int(SPDMbase) == 16:
+            self.spdm1_screen.ids.SPDMbase.text = "POA"
+        elif int(SPDMbase) == 19:
+            self.spdm1_screen.ids.SPDMbase.text = "SSRMS Tip LEE"
+        elif int(SPDMbase) == 63:
+            self.spdm1_screen.ids.SPDMbase.text = "Undefined"
+        else:
+            self.spdm1_screen.ids.SPDMbase.text = "n/a"
+        
+         #self.spdm1_screen.ids.SPDMoperatingBase.text = str(SPDMoperatingBase)
+        if int(SPDMoperatingBase) == 1:
+            self.spdm1_screen.ids.SPDMoperatingBase.text = "SPDM Body LEE"
+        elif int(SPDMoperatingBase) == 2:
+            self.spdm1_screen.ids.SPDMoperatingBase.text = "SPDM Body PDGF"
+        else:
+            self.spdm1_screen.ids.SPDMoperatingBase.text = "n/a"
+        
+        #self.spdm1_screen.ids.Arm1OTCM.text = str(Arm1OTCM)
+        if int(Arm1OTCM) == 0:
+            self.spdm1_screen.ids.Arm1OTCM.text = "Released"
+        elif int(Arm1OTCM) == 1:
+            self.spdm1_screen.ids.Arm1OTCM.text = "Captive"
+        elif int(Arm1OTCM) == 2:
+            self.spdm1_screen.ids.Arm1OTCM.text = "Captured"
+        else:
+            self.spdm1_screen.ids.Arm1OTCM.text = "n/a"
+        
+        #self.spdm1_screen.ids.Arm2OTCM.text = str(Arm1OTCM)
+        if int(Arm2OTCM) == 0:
+            self.spdm1_screen.ids.Arm2OTCM.text = "Released"
+        elif int(Arm2OTCM) == 1:
+            self.spdm1_screen.ids.Arm2OTCM.text = "Captive"
+        elif int(Arm2OTCM) == 2:
+            self.spdm1_screen.ids.Arm2OTCM.text = "Captured"
+        else:
+            self.spdm1_screen.ids.Arm2OTCM.text = "n/a"
+        
+        #self.spdm1_screen.ids.BodyPayload.text = str(BodyPayload)
+        if int(BodyPayload) == 0:
+            self.spdm1_screen.ids.BodyPayload.text = "Released"
+        elif int(BodyPayload) == 1:
+            self.spdm1_screen.ids.BodyPayload.text = "Captive"
+        elif int(BodyPayload) == 2:
+            self.spdm1_screen.ids.BodyPayload.text = "Captured"
+        else:
+            self.spdm1_screen.ids.BodyPayload.text = "n/a"
+        
+        self.spdm1_screen.ids.BodyRoll.text = str(BodyRoll)
+        self.spdm1_screen.ids.Shoulder1Roll.text = str(Shoulder1Roll)
+        self.spdm1_screen.ids.Shoulder1Yaw.text = str(Shoulder1Yaw)
+        self.spdm1_screen.ids.Shoulder1Pitch.text = str(Shoulder1Pitch)
+        self.spdm1_screen.ids.Elbow1Pitch.text = str(Elbow1Pitch)
+        self.spdm1_screen.ids.Wrist1Roll.text = str(Wrist1Roll)
+        self.spdm1_screen.ids.Wrist1Yaw.text = str(Wrist1Yaw)
+        self.spdm1_screen.ids.Wrist1Pitch.text = str(Wrist1Pitch)
+        self.spdm1_screen.ids.Shoulder2Roll.text = str(Shoulder2Roll)
+        self.spdm1_screen.ids.Shoulder2Yaw.text = str(Shoulder2Yaw)
+        self.spdm1_screen.ids.Shoulder2Pitch.text = str(Shoulder2Pitch)
+        self.spdm1_screen.ids.Elbow2Pitch.text = str(Elbow2Pitch)
+        self.spdm1_screen.ids.Wrist2Roll.text = str(Wrist2Roll)
+        self.spdm1_screen.ids.Wrist2Yaw.text = str(Wrist2Yaw)
+        self.spdm1_screen.ids.Wrist2Pitch.text = str(Wrist2Pitch)
+        
+        #self.ct_uhf_screen.ids.UHF1pwr.text = str(UHF1pwr)
+        if int(UHF1pwr) == 0:
+            self.ct_uhf_screen.ids.UHF1pwr.text = "Off-Ok"
+        elif int(UHF1pwr) == 1:
+            self.ct_uhf_screen.ids.UHF1pwr.text = "Not Off-Ok"
+        elif int(UHF1pwr) == 2:
+            self.ct_uhf_screen.ids.UHF1pwr.text = "Not Off-Failed"
+        else:
+            self.ct_uhf_screen.ids.UHF1pwr.text = "n/a"        
+        #self.ct_uhf_screen.ids.UHF2pwr.text = str(UHF2pwr)
+        if int(UHF2pwr) == 0:
+            self.ct_uhf_screen.ids.UHF2pwr.text = "Off-Ok"
+        elif int(UHF2pwr) == 1:
+            self.ct_uhf_screen.ids.UHF2pwr.text = "Not Off-Ok"
+        elif int(UHF2pwr) == 2:
+            self.ct_uhf_screen.ids.UHF2pwr.text = "Not Off-Failed"
+        else:
+            self.ct_uhf_screen.ids.UHF2pwr.text = "n/a"
+        #self.ct_uhf_screen.ids.UHFframeSync.text = str(UHFframeSync)
+        if int(UHFframeSync) == 0:
+            self.ct_uhf_screen.ids.UHFframeSync.text = "Unlocked"
+        elif int(UHFframeSync) == 1:
+            self.ct_uhf_screen.ids.UHFframeSync.text = "Locked"
+        else:
+            self.iss_screen.ids.UHFframeSync.text = "n/a"
+        
+        self.ct_sasa_screen.ids.ActiveString.text = str(ActiveString)
+        self.ct_sasa_screen.ids.RFG1status.text = str(RFG1status)
+        if int(RFG1status) == 0:
+            self.ct_sasa_screen.ids.RFG1status.text = "Off-Ok"
+        elif int(RFG1status) == 1:
+            self.ct_sasa_screen.ids.RFG1status.text = "Not Off-Ok"
+        elif int(RFG1status) == 2:
+            self.ct_sasa_screen.ids.RFG1status.text = "Not Off-Failed"
+        else:
+            self.ct_sasa_screen.ids.RFG1status.text = "n/a"
+        self.ct_sasa_screen.ids.RFG1azimuth.text = str(RFG1azimuth)
+        self.ct_sasa_screen.ids.RFG1elev.text = str(RFG1elev)
+        
+        self.ct_sasa_screen.ids.RFG2status.text = str(RFG2status)
+        if int(RFG2status) == 0:
+            self.ct_sasa_screen.ids.RFG2status.text = "Off-Ok"
+        elif int(RFG2status) == 1:
+            self.ct_sasa_screen.ids.RFG2status.text = "Not Off-Ok"
+        elif int(RFG2status) == 2:
+            self.ct_sasa_screen.ids.RFG2status.text = "Not Off-Failed"
+        else:
+            self.ct_sasa.ids.RFG2status.text = "n/a"
+        self.ct_sasa_screen.ids.RFG2azimuth.text = str(RFG2azimuth)
+        self.ct_sasa_screen.ids.RFG2elev.text = str(RFG2elev)        
 
         self.eps_screen.ids.beta1b_value.text = beta1b
         self.eps_screen.ids.beta1a_value.text = beta1a
@@ -3304,11 +4032,14 @@ class MainApp(App):
 #All GUI Screens are on separate kv files
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Settings_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/FakeOrbitScreen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/LED_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Orbit_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Orbit_Pass.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Orbit_Data.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ISS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ECLSS_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ECLSS_WRM_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ECLSS_IATCS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EPS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/CT_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/CT_SGANT_Screen.kv')
@@ -3316,6 +4047,10 @@ Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/CT_SASA_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/CT_UHF_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/CT_Camera_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/GNC_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/CDH_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Science_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/USOS_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/VV_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/TCS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EVA_US_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EVA_RS_Screen.kv')
@@ -3323,11 +4058,15 @@ Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EVA_Main_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EVA_Pictures.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Crew_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/RS_Screen.kv')
+
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ManualControlScreen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Robo_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/SSRMS_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/SPDM1_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MSS_MT_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MimicScreen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MainScreen.kv')
-
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/RS_Dock_Screen.kv')
 Builder.load_string('''
 #:kivy 1.8
 #:import kivy kivy
@@ -3335,6 +4074,7 @@ Builder.load_string('''
 ScreenManager:
     Settings_Screen:
     FakeOrbitScreen:
+    LED_Screen:
     Orbit_Screen:
     Orbit_Pass:
     Orbit_Data:

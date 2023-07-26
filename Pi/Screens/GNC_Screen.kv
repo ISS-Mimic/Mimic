@@ -1,16 +1,18 @@
-#:kivy 1.8
-#:import kivy kivy
-#:import win kivy.core.window
 <GNC_Screen>:
     name: 'gnc'
     FloatLayout:
+        Image:
+            id: GNC_background
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/gnc/GNCbackground.png"
+            fit_mode: "fill"
         Label:
             id: cmgsaturation_value
             pos_hint: {"center_x": 0.5, "center_y": 0.55}
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         ProgressBar:
             id: cmgsaturation
             max: 100
@@ -19,247 +21,274 @@
             size_hint_x: 0.25
         Image:
             id: cmg1
-            source: "/home/pi/Mimic/Pi/imgs/gnc/cmg.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/gnc/cmg.png"
             size_hint_y: 0.2
-            keep_ratio: True
             pos_hint: {"center_x": 0.4, "center_y": 0.35}
+            fit_mode: "scale-down"
         Label:
             pos_hint: {"center_x": 0.4, "center_y": 0.23}
             text: 'CMG 1'
             markup: True
             color: 1,1,1
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: cmg1spintemp
-            pos_hint: {"center_x": 0.25, "center_y": 0.45}
+            pos_hint: {"center_x": 0.2, "center_y": 0.45}
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: cmg1halltemp
-            pos_hint: {"center_x": 0.25, "center_y": 0.4}
+            pos_hint: {"center_x": 0.2, "center_y": 0.4}
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: cmg1vibration
-            pos_hint: {"center_x": 0.25, "center_y": 0.35}
+            pos_hint: {"center_x": 0.2, "center_y": 0.35}
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: cmg1current
-            pos_hint: {"center_x": 0.25, "center_y": 0.3}
+            pos_hint: {"center_x": 0.2, "center_y": 0.3}
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: cmg1speed
-            pos_hint: {"center_x": 0.25, "center_y": 0.25}
+            pos_hint: {"center_x": 0.2, "center_y": 0.25}
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Image:
             id: cmg2
-            source: "/home/pi/Mimic/Pi/imgs/gnc/cmg.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/gnc/cmg.png"
             size_hint_y: 0.2
-            keep_ratio: True
-            pos_hint: {"center_x": 0.4, "center_y": 0.7}
+            pos_hint: {"center_x": 0.4, "center_y": 0.72}
+            fit_mode: "scale-down"
         Label:
             pos_hint: {"center_x": 0.4, "center_y": 0.82}
             text: 'CMG 2'
             markup: True
             color: 1,1,1
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: cmg2spintemp
-            pos_hint: {"center_x": 0.25, "center_y": 0.8}
+            pos_hint: {"center_x": 0.2, "center_y": 0.8}
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: cmg2halltemp
-            pos_hint: {"center_x": 0.25, "center_y": 0.75}
+            pos_hint: {"center_x": 0.2, "center_y": 0.75}
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: cmg2vibration
-            pos_hint: {"center_x": 0.25, "center_y": 0.7}
+            pos_hint: {"center_x": 0.2, "center_y": 0.7}
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: cmg2current
-            pos_hint: {"center_x": 0.25, "center_y": 0.65}
+            pos_hint: {"center_x": 0.2, "center_y": 0.65}
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: cmg2speed
-            pos_hint: {"center_x": 0.25, "center_y": 0.6}
+            pos_hint: {"center_x": 0.2, "center_y": 0.6}
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Image:
             id: cmg3
-            source: "/home/pi/Mimic/Pi/imgs/gnc/cmg.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/gnc/cmg.png"
             size_hint_y: 0.2
-            keep_ratio: True
-            pos_hint: {"center_x": 0.6, "center_y": 0.7}
+            pos_hint: {"center_x": 0.6, "center_y": 0.72}
+            fit_mode: "scale-down"
         Label:
             pos_hint: {"center_x": 0.6, "center_y": 0.82}
             text: 'CMG 3'
             markup: True
             color: 1,1,1
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: cmg3spintemp
-            pos_hint: {"center_x": 0.75, "center_y": 0.8}
+            pos_hint: {"center_x": 0.8, "center_y": 0.8}
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: cmg3halltemp
-            pos_hint: {"center_x": 0.75, "center_y": 0.75}
+            pos_hint: {"center_x": 0.8, "center_y": 0.75}
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: cmg3vibration
-            pos_hint: {"center_x": 0.75, "center_y": 0.7}
+            pos_hint: {"center_x": 0.8, "center_y": 0.7}
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: cmg3current
-            pos_hint: {"center_x": 0.75, "center_y": 0.65}
+            pos_hint: {"center_x": 0.8, "center_y": 0.65}
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: cmg3speed
-            pos_hint: {"center_x": 0.75, "center_y": 0.6}
+            pos_hint: {"center_x": 0.8, "center_y": 0.6}
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Image:
             id: cmg4
-            source: "/home/pi/Mimic/Pi/imgs/gnc/cmg.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/gnc/cmg.png"
             size_hint_y: 0.2
-            keep_ratio: True
             pos_hint: {"center_x": 0.6, "center_y": 0.35}
+            fit_mode: "scale-down"
         Label:
             pos_hint: {"center_x": 0.6, "center_y": 0.23}
             text: 'CMG 4'
             markup: True
             color: 1,1,1
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: cmg4spintemp
-            pos_hint: {"center_x": 0.75, "center_y": 0.45}
+            pos_hint: {"center_x": 0.8, "center_y": 0.45}
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: cmg4halltemp
-            pos_hint: {"center_x": 0.75, "center_y": 0.4}
+            pos_hint: {"center_x": 0.8, "center_y": 0.4}
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: cmg4vibration
-            pos_hint: {"center_x": 0.75, "center_y": 0.35}
+            pos_hint: {"center_x": 0.8, "center_y": 0.35}
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: cmg4current
-            pos_hint: {"center_x": 0.75, "center_y": 0.3}
+            pos_hint: {"center_x": 0.8, "center_y": 0.3}
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: cmg4speed
-            pos_hint: {"center_x": 0.75, "center_y": 0.25}
+            pos_hint: {"center_x": 0.8, "center_y": 0.25}
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: yaw_label
             pos_hint: {"center_x": 0.4, "center_y": 0.15}
             text: 'Yaw:'
             markup: True
             color: 1,1,1
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: yaw
             pos_hint: {"center_x": 0.4, "center_y": 0.1}
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: pitch_label
             pos_hint: {"center_x": 0.5, "center_y": 0.15}
             text: 'Pitch:'
             markup: True
             color: 1,1,1
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: pitch
             pos_hint: {"center_x": 0.5, "center_y": 0.1}
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: roll_label
             pos_hint: {"center_x": 0.6, "center_y": 0.15}
             text: 'Roll:'
             markup: True
             color: 1,1,1
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: roll
             pos_hint: {"center_x": 0.6, "center_y": 0.1}
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 14
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Button:
             size_hint: 0.1,0.11
-            ##pos_hint: {"Left": 1, "Bottom": 1}
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
-            text: ''
-            font_size: 30
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: app.root.current = 'mimic'
         Image:
             id: signal
-            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
             size_hint_y: 0.15
             anim_delay: 0.12
             anim_loop: 0
-            keep_ratio: True
             pos_hint: {"center_x": 0.05, "center_y": 0.07}
+            fit_mode: "scale-down"

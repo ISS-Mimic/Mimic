@@ -2,6 +2,8 @@
 
 echo "Demo Orbit"
 
+home_dir=$HOME
+
 while read beta1a beta1b beta2a beta2b beta3a beta3b beta4a beta4b psarj ssarj
 do
     sqlite3 /dev/shm/iss_telemetry.db "update telemetry set value = '$beta1a' where ID = 'S4000007'"
@@ -14,6 +16,6 @@ do
     sqlite3 /dev/shm/iss_telemetry.db "update telemetry set value = '$beta4b' where ID = 'P6000007'"
     sqlite3 /dev/shm/iss_telemetry.db "update telemetry set value = '$psarj' where ID = 'S0000004'"
     sqlite3 /dev/shm/iss_telemetry.db "update telemetry set value = '$ssarj' where ID = 'S0000003'"
-done < "/home/pi/Mimic/Pi/RecordedData/demoOrbit.txt"
+done < "$home_dir/Mimic/Pi/RecordedData/demoOrbit.txt"
 
 echo "Finished Demo Orbit"

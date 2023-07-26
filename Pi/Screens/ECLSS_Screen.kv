@@ -1,56 +1,188 @@
-#:kivy 1.8
-#:import kivy kivy
-#:import win kivy.core.window
 <ECLSS_Screen>:
     name: 'eclss'
     FloatLayout:
+        Image:
+            id: ECLSS_background
+            source: f'{root.mimic_directory}/Mimic/Pi/imgs/eclss/ECLSSbackground.png'
+            fit_mode: "fill"
+        Button:
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eclss/WRMunlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/eclss/WRMdown.png'
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.6, "center_y": 0.9}
+            on_release: root.manager.current = 'wrm'
+        Button:
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eclss/IATCSunlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/eclss/IATCSdown.png'
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.75, "center_y": 0.9}
+            on_release: root.manager.current = 'iatcs'
         Label:
-            pos_hint: {"center_x": 0.15, "center_y": 0.8}
-            text: 'ECLSS Stuff'
-            markup: True
-            color: 1,0,1
-            font_size: 30
-        Label:
-            id: ptrrj_label
-            pos_hint: {"center_x": 0.6, "center_y": 0.78}
-            text: 'PTRRJ:'
+            id: CabinTemp_label
+            pos_hint: {"center_x": 0.7, "center_y": 0.78}
+            text: 'Cabin Temperature (deg C):'
             markup: True
             color: 1,1,1
-            font_size: 30
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Label:
-            id: ptrrj_value
-            pos_hint: {"center_x": 0.8, "center_y": 0.78}
+            id: CabinTemp
+            pos_hint: {"center_x": 0.9, "center_y": 0.78}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 30
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Label:
-            id: strrj_label
-            pos_hint: {"center_x": 0.6, "center_y": 0.71}
-            text: 'STRRJ:'
+            id: CabinPress_label
+            pos_hint: {"center_x": 0.7, "center_y": 0.71}
+            text: 'Cabin Pressure (Torr):'
             markup: True
             color: 1,1,1
-            font_size: 30
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Label:
-            id: strrj_value
-            pos_hint: {"center_x": 0.8, "center_y": 0.71}
+            id: CabinPress
+            pos_hint: {"center_x": 0.9, "center_y": 0.71}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 30
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: AirlockPress_label
+            pos_hint: {"center_x": 0.7, "center_y": 0.65}
+            text: 'Airlock Pressure (Torr):'
+            markup: True
+            color: 1,1,1
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: AirlockPress
+            pos_hint: {"center_x": 0.9, "center_y": 0.65}
+            text: '0.003'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: CrewlockPress_label
+            pos_hint: {"center_x": 0.7, "center_y": 0.59}
+            text: 'Crewlock Pressure (Torr):'
+            markup: True
+            color: 1,1,1
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: CrewlockPress
+            pos_hint: {"center_x": 0.9, "center_y": 0.59}
+            text: '0.003'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: CleanWater_label
+            pos_hint: {"center_x": 0.7, "center_y": 0.53}
+            text: 'Clean Water Tank (%):'
+            markup: True
+            color: 1,1,1
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: CleanWater
+            pos_hint: {"center_x": 0.9, "center_y": 0.53}
+            text: '0.003'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: WasteWater_label
+            pos_hint: {"center_x": 0.7, "center_y": 0.47}
+            text: 'Waste Water Tank (%):'
+            markup: True
+            color: 1,1,1
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: WasteWater
+            pos_hint: {"center_x": 0.9, "center_y": 0.47}
+            text: '0.003'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: O2genState_label
+            pos_hint: {"center_x": 0.7, "center_y": 0.41}
+            text: 'Oxygen Generator State:'
+            markup: True
+            color: 1,1,1
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: O2genState
+            pos_hint: {"center_x": 0.9, "center_y": 0.41}
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: O2prodRate_label
+            pos_hint: {"center_x": 0.7, "center_y": 0.35}
+            text: 'Oxygen Prod Rate:'
+            markup: True
+            color: 1,1,1
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: O2prodRate
+            pos_hint: {"center_x": 0.9, "center_y": 0.35}
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: VRSvlvPosition_label
+            pos_hint: {"center_x": 0.7, "center_y": 0.29}
+            text: 'VRS Valve:'
+            markup: True
+            color: 1,1,1
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: VRSvlvPosition
+            pos_hint: {"center_x": 0.9, "center_y": 0.29}
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: VESvlvPosition_label
+            pos_hint: {"center_x": 0.7, "center_y": 0.23}
+            text: 'VES Valve:'
+            markup: True
+            color: 1,1,1
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: VESvlvPosition
+            pos_hint: {"center_x": 0.9, "center_y": 0.23}
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Button:
             size_hint: 0.1,0.11
-            ##pos_hint: {"Left": 1, "Bottom": 1}
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
-            text: ''
-            font_size: 30
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: app.root.current = 'mimic'
         Image:
             id: signal
-            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
             size_hint_y: 0.15
             anim_delay: 0.12
             anim_loop: 0
-            keep_ratio: True
+            fit_mode: "scale-down"
             pos_hint: {"center_x": 0.05, "center_y": 0.07}

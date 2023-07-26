@@ -1,16 +1,12 @@
-#:kivy 1.8
-#:import kivy kivy
-#:import win kivy.core.window
 <EPS_Screen>:
     name: 'eps'
     FloatLayout:
         Image:
             id: eps_sun
-            source: '/home/pi/Mimic/Pi/imgs/eps/sun.png'
-            allow_stretch: False
-            keep_ratio: True
+            source: f'{root.mimic_directory}/Mimic/Pi/imgs/eps/sun.png'
+            fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.9}
-            size_hint: 0.2,0.2
+            size_hint_y: 0.2
             color: 1,1,1,0.1
         Label:
             id: solarbeta
@@ -18,90 +14,98 @@
             text: 'n/a'
             markup: True
             color: root.signalcolor
-            font_size: 16
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Label:
             id: ssarj_label
             pos_hint: {"center_x": 0.40, "center_y": 0.55}
             text: 'SSARJ:'
             markup: True
             color: 1,1,1
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Label:
             id: ssarj_value
             pos_hint: {"center_x": 0.40, "center_y": 0.48}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Label:
             id: psarj_label
             pos_hint: {"center_x": 0.60, "center_y": 0.55}
             text: 'PSARJ:'
             markup: True
             color: 1,1,1
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Label:
             id: psarj_value
             pos_hint: {"center_x": 0.60, "center_y": 0.48}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
 ##----------------------------------------------------------------------        
         Label:
             pos_hint: {"center_x": 0.57, "center_y": 0.85}
             text: '2A'
             markup: True
             color: 1,0,1
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Image:
             id: array_2a
-            source: "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/eps/array-charging.zip"
             anim_delay: 0.12
             color: 1,1,1,1
-            size_hint_y: 0.6
-            size_hint_x: 1
+            size_hint_y: 0.5
+            fit_mode: "contain"
             anim_loop: 0
-            keep_ratio: False
-            pos_hint: {"center_x": 0.68, "center_y": 0.8}
+            pos_hint: {"center_x": 0.68, "center_y": 0.75}
         Label:
             id: beta2a_value
             pos_hint: {"center_x": 0.57, "center_y": 0.78}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Label:
             id: c2a_value
             pos_hint: {"center_x": 0.57, "center_y": 0.73}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Label:
             id: v2a_value
             pos_hint: {"center_x": 0.57, "center_y": 0.68}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
 ##----------------------------------------------------------------------        
         Label:
             pos_hint: {"center_x": 0.93, "center_y": 0.42}
             text: '2B'
             markup: True
             color: 1,0,1
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Image:
             id: array_2b
-            source: "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/eps/array-charging.zip"
             anim_delay: 0.12
             anim_loop: 0
             color: 1,1,1,1
-            size_hint_y: 0.6
-            size_hint_x: 1
-            keep_ratio: False
-            pos_hint: {"center_x": 0.83, "center_y": 0.2}
+            size_hint_y: 0.5
+            fit_mode: "contain"
+            pos_hint: {"center_x": 0.83, "center_y": 0.25}
             angle: 0
             canvas.before:
                 PushMatrix
@@ -118,38 +122,41 @@
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Label:
             id: c2b_value
             pos_hint: {"center_x": 0.94, "center_y": 0.30}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Label:
             id: v2b_value
             pos_hint: {"center_x": 0.94, "center_y": 0.25}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
 ##----------------------------------------------------------------------        
         Label:
             pos_hint: {"center_x": 0.43, "center_y": 0.42}
             text: '1A'
             markup: True
             color: 1,0,1
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Image:
             id: array_1a
-            source: "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/eps/array-charging.zip"
             anim_delay: 0.12
             anim_loop: 0
             color: 1,1,1,1
-            size_hint_y: 0.6
-            size_hint_x: 1
-            keep_ratio: False
-            pos_hint: {"center_x": 0.32, "center_y": 0.2}
+            size_hint_y: 0.5
+            fit_mode: "contain"
+            pos_hint: {"center_x": 0.32, "center_y": 0.25}
             angle: 0
             canvas.before:
                 PushMatrix
@@ -166,76 +173,82 @@
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Label:
             id: c1a_value
             pos_hint: {"center_x": 0.43, "center_y": 0.30}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Label:
             id: v1a_value
             pos_hint: {"center_x": 0.43, "center_y": 0.25}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20   
+            size_hint_y: 0.4
+            font_size: self.height * 0.10   
 ##----------------------------------------------------------------------        
         Label:
             pos_hint: {"center_x": 0.07, "center_y": 0.85}
             text: '1B'
             markup: True
             color: 1,0,1
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Image:
             id: array_1b
-            source: "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/eps/array-charging.zip"
             anim_delay: 0.12
             color: 1,1,1,1
-            size_hint_y: 0.6
-            size_hint_x: 1
+            size_hint_y: 0.5
+            fit_mode: "contain"
             anim_loop: 0
-            keep_ratio: False
-            pos_hint: {"center_x": 0.17, "center_y": 0.8}
+            pos_hint: {"center_x": 0.17, "center_y": 0.75}
         Label:
             id: beta1b_value
             pos_hint: {"center_x": 0.06, "center_y": 0.78}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Label:
             id: c1b_value
             pos_hint: {"center_x": 0.06, "center_y": 0.73}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Label:
             id: v1b_value
             pos_hint: {"center_x": 0.06, "center_y": 0.68}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20    
+            size_hint_y: 0.4
+            font_size: self.height * 0.10    
 ##----------------------------------------------------------------------        
         Label:
             pos_hint: {"center_x": 0.57, "center_y": 0.42}
             text: '4A'
             markup: True
             color: 1,0,1
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Image:
             id: array_4a
-            source: "/home/pi/Mimic/Pi/imgs/eps/array-charging.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/eps/array-charging.zip"
             anim_delay: 0.12
             anim_loop: 0
             color: 1,1,1,1
-            size_hint_y: 0.6
-            size_hint_x: 1
-            keep_ratio: False
-            pos_hint: {"center_x": 0.68, "center_y": 0.2}
+            size_hint_y: 0.5
+            fit_mode: "contain"
+            pos_hint: {"center_x": 0.68, "center_y": 0.25}
             angle: 0
             canvas.before:
                 PushMatrix
@@ -252,38 +265,41 @@
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20   
+            size_hint_y: 0.4
+            font_size: self.height * 0.10   
         Label:
             id: c4a_value
             pos_hint: {"center_x": 0.57, "center_y": 0.30}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Label:
             id: v4a_value
             pos_hint: {"center_x": 0.57, "center_y": 0.25}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20     
+            size_hint_y: 0.4
+            font_size: self.height * 0.10     
 ##----------------------------------------------------------------------        
         Label:
             pos_hint: {"center_x": 0.93, "center_y": 0.85}
             text: '4B'
             markup: True
             color: 1,0,1
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Image:
             id: array_4b
-            source: "/home/pi/Mimic/Pi/imgs/eps/array-offline.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/eps/array-offline.png"
             anim_delay: 0.12
             color: 1,1,1,1
-            size_hint_y: 0.6
-            size_hint_x: 1
+            size_hint_y: 0.5
             anim_loop: 0
-            keep_ratio: False
-            pos_hint: {"center_x": 0.83, "center_y": 0.8}
+            fit_mode: "contain"
+            pos_hint: {"center_x": 0.83, "center_y": 0.75}
         Label:
             id: beta4b_value
             pos_hint: {"center_x": 0.94, "center_y": 0.78}
@@ -291,76 +307,82 @@
             markup: True
             color: 1,1,1
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Label:
             id: c4b_value
             pos_hint: {"center_x": 0.94, "center_y": 0.73}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Label:
             id: v4b_value
             pos_hint: {"center_x": 0.94, "center_y": 0.68}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
 ##----------------------------------------------------------------------        
         Label:
             pos_hint: {"center_x": 0.43, "center_y": 0.85}
             text: '3A'
             markup: True
             color: 1,0,1
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Image:
             id: array_3a
-            source: "/home/pi/Mimic/Pi/imgs/eps/array-discharging.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/eps/array-discharging.zip"
             anim_delay: 0.12
             anim_loop: 0
             color: 1,1,1,1
-            size_hint_y: 0.6
-            size_hint_x: 1
-            keep_ratio: False
-            pos_hint: {"center_x": 0.32, "center_y": 0.8}
+            size_hint_y: 0.5
+            fit_mode: "contain"
+            pos_hint: {"center_x": 0.32, "center_y": 0.75}
         Label:
             id: beta3a_value
             pos_hint: {"center_x": 0.43, "center_y": 0.78}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Label:
             id: c3a_value
             pos_hint: {"center_x": 0.43, "center_y": 0.73}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Label:
             id: v3a_value
             pos_hint: {"center_x": 0.43, "center_y": 0.68}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
 ##----------------------------------------------------------------------        
         Label:
             pos_hint: {"center_x": 0.07, "center_y": 0.42}
             text: '3B'
             markup: True
             color: 1,0,1
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Image:
             id: array_3b
-            source: "/home/pi/Mimic/Pi/imgs/eps/array-charged.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/eps/array-charged.zip"
             anim_delay: 0.12
             anim_loop: 0
-            size_hint_y: 0.6
+            size_hint_y: 0.5
             color: 1,1,1,1
-            size_hint_x: 1
-            keep_ratio: False
-            pos_hint: {"center_x": 0.17, "center_y": 0.2}
+            fit_mode: "contain"
+            pos_hint: {"center_x": 0.17, "center_y": 0.25}
             angle: 0
             canvas.before:
                 PushMatrix
@@ -377,21 +399,24 @@
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Label:
             id: c3b_value
             pos_hint: {"center_x": 0.06, "center_y": 0.30}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Label:
             id: v3b_value
             pos_hint: {"center_x": 0.06, "center_y": 0.25}
             text: '0.003'
             markup: True
             color: root.signalcolor
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
 ##----------------------------------------------------------------------            
         Label:
             id: angle_label
@@ -399,21 +424,24 @@
             text: 'Angle = deg'
             markup: True
             color: 1,1,1
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Label:
             id: current_label
             pos_hint: {"center_x": 0.5, "center_y": 0.10}
             text: 'Current = A'
             markup: True
             color: 1,1,1
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
         Label:
             id: voltage_label
             pos_hint: {"center_x": 0.5, "center_y": 0.06}
             text: 'Voltage = V'
             markup: True
             color: 1,1,1
-            font_size: 20
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
 ##----------------------------------------------------------------------        
         Label:
             id: usos_power
@@ -421,19 +449,18 @@
             text: ''
             markup: True
             color: root.signalcolor
-            font_size: 16
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: '/home/pi/Mimic/Pi/imgs/eva/BackButton.png'
-            text: ''
-            font_size: 20
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: app.root.current = 'mimic'
         Image:
             id: signal
-            source: "/home/pi/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
             size_hint_y: 0.15
             anim_delay: 0.12
             anim_loop: 0
-            keep_ratio: True
+            fit_mode: "scale-down"
             pos_hint: {"center_x": 0.05, "center_y": 0.07}
