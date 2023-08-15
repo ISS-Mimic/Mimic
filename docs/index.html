@@ -2564,7 +2564,7 @@ sub.addListener({
 			zState = update.getValue("Value");
 		}
 		
-		var altitude = Math.sqrt(Math.pow(xState,2)+Math.pow(yState,2)+Math.pow(zState,2))-6385; //fudging because alt is too high
+		var altitude = Math.sqrt(Math.pow(xState,2)+Math.pow(yState,2)+Math.pow(zState,2))-6378; //equatorial radius
 		$("#"+"USLAB000ALT").text(altitude.toFixed(2));
 		$("#USLAB000ALTt").text("GMT " + ts_day + "/" + ts_hour + ":" + ts_minute + ":" + ts_seconds) 
 		
