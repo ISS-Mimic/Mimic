@@ -1385,12 +1385,12 @@ class MainApp(App):
         Clock.schedule_interval(self.update_labels, 1) #all telemetry wil refresh and get pushed to arduinos every half second!
         Clock.schedule_interval(self.animate3, 0.1)
         Clock.schedule_interval(self.orbitUpdate, 1)
-        Clock.schedule_interval(self.checkCrew, 600)
+        #Clock.schedule_interval(self.checkCrew, 600)
         if startup:
             startup = False
 
-        Clock.schedule_once(self.checkCrew, 30)
-        Clock.schedule_once(self.checkBlogforEVA, 30)
+        #Clock.schedule_once(self.checkCrew, 30)
+        #Clock.schedule_once(self.checkBlogforEVA, 30)
         Clock.schedule_once(self.getTLE, 15) #uncomment when internet works again
         Clock.schedule_once(self.TDRSupdate, 30) #uncomment when internet works again
 
