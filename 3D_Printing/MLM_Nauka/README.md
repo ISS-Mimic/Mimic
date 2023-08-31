@@ -1,4 +1,4 @@
-### MLM Body is the same as the FGB Body - print [this STL](https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/FGB_Zarya/HiFi_FGB.stl) twice
+### Small differences from the FGB print
 
 # Slicer Recommendation 
 
