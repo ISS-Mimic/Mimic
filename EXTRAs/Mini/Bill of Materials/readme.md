@@ -7,7 +7,7 @@
 | Pi micro HDMI to HDMI cable | 1 | N/A | N/A |  [  ]() | Note : from kit above |  | 
 | Pi SD card | 1 | N/A | N/A |  [  ]() | Note : from kit above |  | 
 | Pi Switch (optional) | 1 | $6.99 | N/A |  [ Amazon ](https://www.amazon.com/LoveRPi-MicroUSB-Switch-Raspberry-Female/dp/B018BFWLRU/ref=sr_1_3?crid=2B6BAVTULFIHY&keywords=pi%2Bpower%2Bswitch&qid=1693777916&s=electronics&sprefix=pi%2Bpower%2Bswitch%2Celectronics%2C145&sr=1-3&th=1) | Completely optional, only if needing a power button option to turn on the Pi without unplugging and re-plugging | ![image](https://m.media-amazon.com/images/I/31h-+zNDQQL.jpg) | 
-| screen | 1 | $239.99 | $239.99 |  [ Amazon ](https://www.amazon.com/dp/B08778F756?ref_=cm_sw_r_apan_dp_42NR1TACEGAQ6Z8WAE2F&th=1) | Any monitor, TV or touch screen will do. Here is an example for consideration | ![image](https://m.media-amazon.com/images/I/61ZOhSHPTPL._AC_SY355_.jpg) | 
+| screen | 1 | $239.99 | $239.99 |  [ Amazon ](https://www.amazon.com/dp/B08778F756?ref_=cm_sw_r_apan_dp_42NR1TACEGAQ6Z8WAE2F&th=1) | Any standard monitor, TV or touch screen will do. Here is an option of touch screen for consideration if budget allows | ![image](https://m.media-amazon.com/images/I/61ZOhSHPTPL._AC_SY355_.jpg) | 
 
 
 
