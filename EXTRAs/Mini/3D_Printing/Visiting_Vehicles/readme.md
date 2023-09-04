@@ -10,7 +10,7 @@
 ![image](https://github.com/ISS-Mimic/Mimic/assets/58833710/4b74865a-5d4b-4bf7-9fe9-19616447a384)
 | Visiting_Vehicles| [0p5_Mimic_Soyuz.stl](https://github.com/ISS-Mimic/Mimic/blob/SpaceTowel-patch-2/EXTRAs/Mini/3D_Printing/Visiting_Vehicles/Soyuz/0p5_Mimic_Soyuz.stl) |2| Silver| 0.10mm; 10%; supports| 1h 41m| 6.02| 2.02| 
 ![image](https://github.com/ISS-Mimic/Mimic/assets/58833710/decdc5a2-a206-477c-913c-3a1ad2eac4eb)
-| Visiting_Vehicles| [0p5_Mimic_Starliner.stl](https://github.com/ISS-Mimic/Mimic/blob/SpaceTowel-patch-2/EXTRAs/Mini/3D_Printing/Visiting_Vehicles/Starliner/0p5_Mimic_Starliner.stl) |1| Silver| 0.10mm; 10%; supports| 1h 9m| 5.26| 1.73| 
+| Visiting_Vehicles| [0p5_Mimic_Starliner.stl](https://github.com/ISS-Mimic/Mimic/blob/SpaceTowel-patch-2/EXTRAs/Mini/3D_Printing/Visiting_Vehicles/Starliner/0p5_Mimic_Starliner.stl) |1| Silver or Optional of 2 tune color gray + white | 0.10mm; 10%; supports| 1h 9m| 5.26| 1.73| 
 ![image](https://github.com/ISS-Mimic/Mimic/assets/58833710/6d985faa-5ef0-4a39-b66a-34c529402edb)
 
 
