@@ -20,8 +20,8 @@
 | USB-C power cable | 1 | $10 | $10 |  [ Amazon ](https://www.amazon.com/CanaKit-Raspberry-Power-Supply-USB-C/dp/B07TYQRXTK/) |  | ![image](https://github.com/ISS-Mimic/Mimic/assets/58833710/8f139bd1-5ddf-4cd3-9496-f63689776b64) | 
 | KEYESTUDIO 16-Channel 12-bit Servo Motor Driver Board I2C Interface for Arduino R3 Controller | 1 | $10 | $10 |  [ Amazon ](https://www.amazon.com/gp/product/B0797JK4RW/) |  | ![image](https://github.com/ISS-Mimic/Mimic/assets/58833710/29ac3e62-3ed9-45e3-b34f-0763520656fd) | 
 | USB to micro USB cable | 1 | $11.99 | $11.99 |  [ Amazon ](https://www.amazon.com/dp/B011KLFERG/ref=pe_386300_440135490_TE_simp_item_image?th=1) | 1 cable is needed, this comes in a package of 6.   | ![image](https://github.com/ISS-Mimic/Mimic/assets/58833710/02f6d5c4-fb72-440e-abdd-a909a453beb3) | 
-| 50 cm Extension cables (connect between PCB and motor) | 4 | $14 | $56 |  [ Amazon ](https://www.amazon.com/dp/B08BF4C6S2/ref=pe_386300_440135490_TE_simp_item_image) |  | ![image](https://github.com/ISS-Mimic/Mimic/assets/58833710/5270b045-40a5-4025-b54a-fcf717a93887) | 
-| 60 cm Extension cables (connect between PCB and motor) | 8 | $18 | $144 |  [ Amazon ](https://www.amazon.com/dp/B01HLUZQ5A/ref=pe_386300_440135490_TE_simp_item_image?th=1) |  | ![image](https://github.com/ISS-Mimic/Mimic/assets/58833710/64d6f64a-e395-4657-b9ad-ecb93f4bbace)  | 
+| 50 cm Extension cables (connect between PCB and motor) | 1 | $14 | $14 |  [ Amazon ](https://www.amazon.com/dp/B08BF4C6S2/ref=pe_386300_440135490_TE_simp_item_image) | Note: 4 pieces of 50cm will be used. 30pc of multiple lengths comes in a pack.  For cost saving, option to skip the 50cm and use all 60cm cables  | ![image](https://github.com/ISS-Mimic/Mimic/assets/58833710/5270b045-40a5-4025-b54a-fcf717a93887) | 
+| 60 cm Extension cables (connect between PCB and motor) | 1 | $18 | $18 |  [ Amazon ](https://www.amazon.com/dp/B01HLUZQ5A/ref=pe_386300_440135490_TE_simp_item_image?th=1) | Note: 8 pieces of 60cm will be used. 30pc comes in a pack. For cost saving, option to skip the 50cm and use all 60cm cables | ![image](https://github.com/ISS-Mimic/Mimic/assets/58833710/64d6f64a-e395-4657-b9ad-ecb93f4bbace)  | 
 
 
 
@@ -46,7 +46,7 @@
 ### Frame
 |  **Part** | **Quantity** | **Cost Per Unit** | **Total Cost** | **URL** | **Notes** | **Image** |
 | --- | :--: | :--: | :--: | --- | --- | --- |
-| MakerBeam Regular Starter Kit Black Anodized Including Beams (10x10mm in Diameter), Brackets, Nuts and Bolts | 1 | $140.27 | $140.27 |  [ Amazon ](https://www.amazon.com/gp/product/B00G3J6GDM/) | Pieces below from kit will be used |  ![image](https://github.com/ISS-Mimic/Mimic/assets/58833710/72139f8d-74c9-4f0d-90b7-a70f71b41728) |
+| MakerBeam Regular Starter Kit Black Anodized Including Beams (10x10mm in Diameter), Brackets, Nuts and Bolts | 1 | $140.27 | $140.27 |  [ Amazon ](https://www.amazon.com/gp/product/B00G3J6GDM/) | More in kit than needed.  Only the pieces below from kit will be used |  ![image](https://github.com/ISS-Mimic/Mimic/assets/58833710/72139f8d-74c9-4f0d-90b7-a70f71b41728) |
 | stick  (Maker Beam 300/10/10mm) | 2 | N/A | N/A |  [  ]() |  |  | 
 | stick  (Maker Beam 200/10/10mm) | 4 | N/A | N/A |  [  ]() |  |  | 
 | stick  (Maker Beam 100/10/10mm) | 1 | N/A | N/A |  [  ]() |  |  | 
@@ -61,6 +61,12 @@
 | MakerBeam straight bracket (100269)  | 1 | N/A | N/A |  [  ]() |  |  | 
 
 
+
+### Mini-Mimic Total Cost
+
+|  **Total w/ exsiting monitor/TV** | **Total w/ New Touch Screen** |**Notes** |
+| :---: | :---: | :---: |
+| $506.71 | $746.70 | Not including taxes or shipping in most cases
 
 
 
