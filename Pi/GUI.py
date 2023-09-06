@@ -363,694 +363,113 @@ class MainScreen(Screen):
 
 class ManualControlScreen(Screen):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    def on_pre_enter(self): #call the callback funcion when activating this screen, to update all angles
-        self.callback()
 
-    def callback(self):
-        global psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1amc,beta1bmc,beta2amc,beta2bmc,beta3amc,beta3bmc,beta4amc,beta4bmc
-        self.ids.Beta4B_Button.text = "4B\n" + str(math.trunc(beta4bmc))
-        self.ids.Beta4A_Button.text = "4A\n" + str(math.trunc(beta4amc))
-        self.ids.Beta3B_Button.text = "3B\n" + str(math.trunc(beta3bmc))
-        self.ids.Beta3A_Button.text = "3A\n" + str(math.trunc(beta3amc))
-        self.ids.Beta2B_Button.text = "2B\n" + str(math.trunc(beta2bmc))
-        self.ids.Beta2A_Button.text = "2A\n" + str(math.trunc(beta2amc))
-        self.ids.Beta1B_Button.text = "1B\n" + str(math.trunc(beta1bmc))
-        self.ids.Beta1A_Button.text = "1A\n" + str(math.trunc(beta1amc))
-        self.ids.PSARJ_Button.text = "PSARJ " + str(math.trunc(psarjmc))
-        self.ids.SSARJ_Button.text = "SSARJ " + str(math.trunc(ssarjmc))
-        self.ids.PTRRJ_Button.text = "PTRRJ\n" + str(math.trunc(ptrrjmc))
-        self.ids.STRRJ_Button.text = "STRRJ\n" + str(math.trunc(strrjmc))
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.controls = {
+            'Beta4B': 0.0,
+            'Beta4A': 0.0,
+            'Beta3B': 0.0,
+            'Beta3A': 0.0,
+            'Beta2B': 0.0,
+            'Beta2A': 0.0,
+            'Beta1B': 0.0,
+            'Beta1A': 0.0,
+            'PSARJ': 0.0,
+            'SSARJ': 0.0,
+            'PTRRJ': 0.0,
+            'STRRJ': 0.0
+        }
+        self.active_control = None
 
-    def zeroJoints(self):
-        global psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1amc,beta1bmc,beta2amc,beta2bmc,beta3amc,beta3bmc,beta4amc,beta4bmc
+    def on_pre_enter(self):
+        self.update_angles()
+
+    def update_angles(self):
+        for control, value in self.controls.items():
+            button_id = f"{control}_Button"
+            text = control + "\n" + str(math.trunc(value))
+            setattr(self.ids[button_id], 'text', text)
+
+    def zero_joints(self):
+        #send the zero command to all arduinos
         serialWrite("NULLIFY=1 ")
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1a'")
-        beta1amc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1b'")
-        beta1bmc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2a'")
-        beta2amc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2b'")
-        beta2bmc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3a'")
-        beta3amc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3b'")
-        beta3bmc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4a'")
-        beta4amc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4b'")
-        beta4bmc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'psarj'")
-        psarjmc = 0.00
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ssarj'")
-        ssarjmc = 0.00
-        self.callback()
+        for control in self.controls:
+            if control == "PTRRJ" or control == "STRRJ":
+                return
+            else:
+                self.set_telemetry_value(control, 0)
+                self.controls[control] = 0.0
+        self.update_angles()
 
-    def setActive(self, *args):
-        global Beta4Bcontrol, Beta3Bcontrol, Beta2Bcontrol, Beta1Bcontrol, Beta4Acontrol, Beta3Acontrol, Beta2Acontrol, Beta1Acontrol, PSARJcontrol, SSARJcontrol, PTRRJcontrol, STRRJcontrol
-        if str(args[0])=="Beta4B":
-            Beta4Bcontrol = True
-            Beta4Acontrol = False
-            Beta3Bcontrol = False
-            Beta3Acontrol = False
-            Beta2Bcontrol = False
-            Beta2Acontrol = False
-            Beta1Bcontrol = False
-            Beta1Acontrol = False
-            PSARJcontrol = False
-            SSARJcontrol = False
-            PTRRJcontrol = False
-            STRRJcontrol = False
-            self.ids.Beta4B_Button.background_color = (0, 0, 1, 1)
-            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
-            self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
-        if str(args[0])=="Beta3B":
-            Beta3Bcontrol = True
-            Beta4Bcontrol = False
-            Beta4Acontrol = False
-            Beta3Acontrol = False
-            Beta2Bcontrol = False
-            Beta2Acontrol = False
-            Beta1Bcontrol = False
-            Beta1Acontrol = False
-            PSARJcontrol = False
-            SSARJcontrol = False
-            PTRRJcontrol = False
-            STRRJcontrol = False
-            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3B_Button.background_color = (0, 0, 1, 1)
-            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
-            self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
-        if str(args[0])=="Beta2B":
-            Beta2Bcontrol = True
-            Beta4Bcontrol = False
-            Beta4Acontrol = False
-            Beta3Bcontrol = False
-            Beta3Acontrol = False
-            Beta2Acontrol = False
-            Beta1Bcontrol = False
-            Beta1Acontrol = False
-            PSARJcontrol = False
-            SSARJcontrol = False
-            PTRRJcontrol = False
-            STRRJcontrol = False
-            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2B_Button.background_color = (0, 0, 1, 1)
-            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
-            self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
-        if str(args[0])=="Beta1B":
-            Beta1Bcontrol = True
-            Beta4Bcontrol = False
-            Beta4Acontrol = False
-            Beta3Bcontrol = False
-            Beta3Acontrol = False
-            Beta2Bcontrol = False
-            Beta2Acontrol = False
-            Beta1Acontrol = False
-            PSARJcontrol = False
-            SSARJcontrol = False
-            PTRRJcontrol = False
-            STRRJcontrol = False
-            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1B_Button.background_color = (0, 0, 1, 1)
-            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
-            self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
-        if str(args[0])=="Beta4A":
-            Beta4Acontrol = True
-            Beta4Bcontrol = False
-            Beta3Bcontrol = False
-            Beta3Acontrol = False
-            Beta2Bcontrol = False
-            Beta2Acontrol = False
-            Beta1Bcontrol = False
-            Beta1Acontrol = False
-            PSARJcontrol = False
-            SSARJcontrol = False
-            PTRRJcontrol = False
-            STRRJcontrol = False
-            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta4A_Button.background_color = (0, 0, 1, 1)
-            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
-            self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
-        if str(args[0])=="Beta3A":
-            Beta3Acontrol = True
-            Beta4Bcontrol = False
-            Beta4Acontrol = False
-            Beta3Bcontrol = False
-            Beta2Bcontrol = False
-            Beta2Acontrol = False
-            Beta1Bcontrol = False
-            Beta1Acontrol = False
-            PSARJcontrol = False
-            SSARJcontrol = False
-            PTRRJcontrol = False
-            STRRJcontrol = False
-            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3A_Button.background_color = (0, 0, 1, 1)
-            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
-            self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
-        if str(args[0])=="Beta2A":
-            Beta2Acontrol = True
-            Beta4Bcontrol = False
-            Beta4Acontrol = False
-            Beta3Bcontrol = False
-            Beta3Acontrol = False
-            Beta2Bcontrol = False
-            Beta1Bcontrol = False
-            Beta1Acontrol = False
-            PSARJcontrol = False
-            SSARJcontrol = False
-            PTRRJcontrol = False
-            STRRJcontrol = False
-            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2A_Button.background_color = (0, 0, 1, 1)
-            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
-            self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
-        if str(args[0])=="Beta1A":
-            Beta1Acontrol = True
-            Beta4Bcontrol = False
-            Beta4Acontrol = False
-            Beta3Bcontrol = False
-            Beta3Acontrol = False
-            Beta2Bcontrol = False
-            Beta2Acontrol = False
-            Beta1Bcontrol = False
-            PSARJcontrol = False
-            SSARJcontrol = False
-            PTRRJcontrol = False
-            STRRJcontrol = False
-            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1A_Button.background_color = (0, 0, 1, 1)
-            self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
-        if str(args[0])=="PTRRJ":
-            PTRRJcontrol = True
-            Beta4Bcontrol = False
-            Beta4Acontrol = False
-            Beta3Bcontrol = False
-            Beta3Acontrol = False
-            Beta2Bcontrol = False
-            Beta2Acontrol = False
-            Beta1Bcontrol = False
-            Beta1Acontrol = False
-            PSARJcontrol = False
-            SSARJcontrol = False
-            STRRJcontrol = False
-            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
-            self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.PTRRJ_Button.background_color = (0, 0, 1, 1)
-            self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
-        if str(args[0])=="STRRJ":
-            STRRJcontrol = True
-            Beta4Bcontrol = False
-            Beta4Acontrol = False
-            Beta3Bcontrol = False
-            Beta3Acontrol = False
-            Beta2Bcontrol = False
-            Beta2Acontrol = False
-            Beta1Bcontrol = False
-            Beta1Acontrol = False
-            PSARJcontrol = False
-            SSARJcontrol = False
-            PTRRJcontrol = False
-            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
-            self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.STRRJ_Button.background_color = (0, 0, 1, 1)
-        if str(args[0])=="PSARJ":
-            PSARJcontrol = True
-            Beta4Bcontrol = False
-            Beta4Acontrol = False
-            Beta3Bcontrol = False
-            Beta3Acontrol = False
-            Beta2Bcontrol = False
-            Beta2Acontrol = False
-            Beta1Bcontrol = False
-            Beta1Acontrol = False
-            SSARJcontrol = False
-            PTRRJcontrol = False
-            STRRJcontrol = False
-            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
-            self.ids.PSARJ_Button.background_color = (0, 0, 1, 1)
-            self.ids.SSARJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
-        if str(args[0])=="SSARJ":
-            SSARJcontrol = True
-            Beta4Bcontrol = False
-            Beta4Acontrol = False
-            Beta3Bcontrol = False
-            Beta3Acontrol = False
-            Beta2Bcontrol = False
-            Beta2Acontrol = False
-            Beta1Bcontrol = False
-            Beta1Acontrol = False
-            PSARJcontrol = False
-            PTRRJcontrol = False
-            STRRJcontrol = False
-            self.ids.Beta4B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta4A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta3A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta2A_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1B_Button.background_color = (1, 1, 1, 1)
-            self.ids.Beta1A_Button.background_color = (1, 1, 1, 1)
-            self.ids.PSARJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.SSARJ_Button.background_color = (0, 0, 1, 1)
-            self.ids.PTRRJ_Button.background_color = (1, 1, 1, 1)
-            self.ids.STRRJ_Button.background_color = (1, 1, 1, 1)
+    def set_telemetry_value(self, label, value):
+        # Just a placeholder for the actual database operation
+        c.execute(f"UPDATE telemetry SET Value = '{value}' WHERE Label = '{label.lower()}'")
 
-    def incrementActive(self, *args):
-        global Beta4Bcontrol, Beta3Bcontrol, Beta2Bcontrol, Beta1Bcontrol, Beta4Acontrol, Beta3Acontrol, Beta2Acontrol, Beta1Acontrol, PSARJcontrol, SSARJcontrol, PTRRJcontrol, STRRJcontrol
+    def increment_control(self, control, value):
+        if control in self.controls:
+            self.controls[control] += value
+            self.set_telemetry_value(control, self.controls[control])
+            self.update_angles()
+            self.send_value(control, self.controls[control])
 
-        if Beta4Bcontrol:
-            self.incrementBeta4B(float(args[0]))
-        if Beta3Bcontrol:
-            self.incrementBeta3B(float(args[0]))
-        if Beta2Bcontrol:
-            self.incrementBeta2B(float(args[0]))
-        if Beta1Bcontrol:
-            self.incrementBeta1B(float(args[0]))
-        if Beta4Acontrol:
-            self.incrementBeta4A(float(args[0]))
-        if Beta3Acontrol:
-            self.incrementBeta3A(float(args[0]))
-        if Beta2Acontrol:
-            self.incrementBeta2A(float(args[0]))
-        if Beta1Acontrol:
-            self.incrementBeta1A(float(args[0]))
-        if PTRRJcontrol:
-            self.incrementPTRRJ(float(args[0]))
-        if STRRJcontrol:
-            self.incrementSTRRJ(float(args[0]))
-        if PSARJcontrol:
-            self.incrementPSARJ(float(args[0]))
-        if SSARJcontrol:
-            self.incrementSSARJ(float(args[0]))
-        self.callback()
+    def set_active(self, control_name):
+        self.active_control = control_name
 
-    def incrementPSARJ(self, *args):
-        global psarjmc
-        psarjmc += args[0]
-        serialWrite("PSARJ=" + str(psarjmc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'psarj'",(psarjmc,))
-        #self.ids.statusbar.text = "PSARJ Value Sent: " + str(psarjmc)
+        # Reset all button colors
+        for control in self.controls:
+            button_id = f"{control}_Button"
+            setattr(self.ids[button_id], 'background_color', (1, 1, 1, 1))
+        
+        # Set the active button's background color
+        if self.active_control:
+            active_button_id = f"{self.active_control}_Button"
+            setattr(self.ids[active_button_id], 'background_color', (0, 0, 1, 1))
 
-    def incrementSSARJ(self, *args):
-        global ssarjmc
-        ssarjmc += args[0]
-        serialWrite("SSARJ=" + str(ssarjmc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'ssarj'",(ssarjmc,))
-        #self.ids.statusbar.text = "SSARJ Value Sent: " + str(ssarjmc)
+    def increment_active(self, value):
+        if self.active_control:
+            self.increment_control(self.active_control, value)
 
-    def incrementPTRRJ(self, *args):
-        global ptrrjmc
-        ptrrjmc += args[0]
-        serialWrite("PTRRJ=" + str(ptrrjmc) + " ")
-        c.execute("UPDATE telemetry  SET Value = ? WHERE Label = 'ptrrj'",(ptrrjmc,))
-        #self.ids.statusbar.text = "PTRRJ Value Sent: " + str(ptrrjmc)
-
-    def incrementSTRRJ(self, *args):
-        global strrjmc
-        strrjmc += args[0]
-        serialWrite("STRRJ=" + str(strrjmc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'strrj'",(strrjmc,))
-        #self.ids.statusbar.text = "STRRJ Value Sent: " + str(strrjmc)
-
-    def incrementBeta1B(self, *args):
-        global beta1bmc
-        beta1bmc += args[0]
-        serialWrite("B1B=" + str(beta1bmc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1b'",(beta1bmc,))
-        #self.ids.statusbar.text = "Beta1B Value Sent: " + str(beta1bmc)
-
-    def incrementBeta1A(self, *args):
-        global beta1amc
-        beta1amc += args[0]
-        serialWrite("B1A=" + str(beta1amc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1a'",(beta1amc,))
-        #self.ids.statusbar.text = "Beta1A Value Sent: " + str(beta1amc)
-
-    def incrementBeta2B(self, *args):
-        global beta2bmc
-        beta2bmc += args[0]
-        serialWrite("B2B=" + str(beta2bmc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2b'",(beta2bmc,))
-        #self.ids.statusbar.text = "Beta2B Value Sent: " + str(beta2bmc)
-
-    def incrementBeta2A(self, *args):
-        global beta2amc
-        beta2amc += args[0]
-        serialWrite("B2A=" + str(beta2amc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2a'",(beta2amc,))
-        #self.ids.statusbar.text = "Beta2A Value Sent: " + str(beta2amc)
-
-    def incrementBeta3B(self, *args):
-        global beta3bmc
-        beta3bmc += args[0]
-        serialWrite("B3B=" + str(beta3bmc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3b'",(beta3bmc,))
-        #self.ids.statusbar.text = "Beta3B Value Sent: " + str(beta3bmc)
-
-    def incrementBeta3A(self, *args):
-        global beta3amc
-        beta3amc += args[0]
-        serialWrite("B3A=" + str(beta3amc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3a'",(beta3amc,))
-        #self.ids.statusbar.text = "Beta3A Value Sent: " + str(beta3amc)
-
-    def incrementBeta4B(self, *args):
-        global beta4bmc
-        beta4bmc += args[0]
-        serialWrite("B4B=" + str(beta4bmc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4b'",(beta4bmc,))
-        #self.ids.statusbar.text = "Beta4B Value Sent: " + str(beta4bmc)
-
-    def incrementBeta4A(self, *args):
-        global beta4amc
-        beta4amc += args[0]
-        serialWrite("B4A=" + str(beta4amc) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4a'",(beta4amc,))
-        #self.ids.statusbar.text = "Beta4A Value Sent: " + str(beta4amc)
-
-    def changeBoolean(self, *args):
-        global manualcontrol
-        manualcontrol = args[0]
-
-    def sendActive(self, *args):
-        if Beta4Bcontrol:
-            try:
-                self.sendBeta4B(float(args[0]))
-            except Exception as e:
-                logWrite(e)
-        if Beta3Bcontrol:
-            try:
-                self.sendBeta3B(float(args[0]))
-            except Exception as e:
-                logWrite(e)
-        if Beta2Bcontrol:
-            try:
-                self.sendBeta2B(float(args[0]))
-            except Exception as e:
-                logWrite(e)
-        if Beta1Bcontrol:
-            try:
-                self.sendBeta1B(float(args[0]))
-            except Exception as e:
-                logWrite(e)
-        if Beta4Acontrol:
-            try:
-                self.sendBeta4A(float(args[0]))
-            except Exception as e:
-                logWrite(e)
-        if Beta3Acontrol:
-            try:
-                self.sendBeta3A(float(args[0]))
-            except Exception as e:
-                logWrite(e)
-        if Beta2Acontrol:
-            try:
-                self.sendBeta2A(float(args[0]))
-            except Exception as e:
-                logWrite(e)
-        if Beta1Acontrol:
-            try:
-                self.sendBeta1A(float(args[0]))
-            except Exception as e:
-                logWrite(e)
-        if PTRRJcontrol:
-            try:
-                self.sendPTRRJ(float(args[0]))
-            except Exception as e:
-                logWrite(e)
-        if STRRJcontrol:
-            try:
-                self.sendSTRRJ(float(args[0]))
-            except Exception as e:
-                logWrite(e)
-        if PSARJcontrol:
-            try:
-                self.sendPSARJ(float(args[0]))
-            except Exception as e:
-                logWrite(e)
-        if SSARJcontrol:
-            try:
-                self.sendSSARJ(float(args[0]))
-            except Exception as e:
-                logWrite(e)
-
-    def sendPSARJ(self, *args):
-        global psarjmc
-        psarjmc = args[0]
-        serialWrite("PSARJ=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'psarj'",(args[0],))
-        #self.ids.statusbar.text = "PSARJ Value Sent: " + str(args[0])
-
-    def sendSSARJ(self, *args):
-        global ssarjmc
-        ssarjmc = args[0]
-        serialWrite("SSARJ=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'ssarj'",(args[0],))
-        #self.ids.statusbar.text = "SSARJ Value Sent: " + str(args[0])
-
-    def sendPTRRJ(self, *args):
-        global ptrrjmc
-        ptrrjmc = args[0]
-        serialWrite("PTRRJ=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry  SET Value = ? WHERE Label = 'ptrrj'",(args[0],))
-        #self.ids.statusbar.text = "PTRRJ Value Sent: " + str(args[0])
-
-    def sendSTRRJ(self, *args):
-        global strrjmc
-        strrjmc = args[0]
-        serialWrite("STRRJ=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'strrj'",(args[0],))
-        #self.ids.statusbar.text = "STRRJ Value Sent: " + str(args[0])
-
-    def sendBeta1B(self, *args):
-        global beta1bmc
-        beta1bmc = args[0]
-        serialWrite("B1B=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1b'",(args[0],))
-        #self.ids.statusbar.text = "Beta1B Value Sent: " + str(args[0])
-
-    def sendBeta1A(self, *args):
-        global beta1amc
-        beta1amc = args[0]
-        serialWrite("B1A=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta1a'",(args[0],))
-        #self.ids.statusbar.text = "Beta1A Value Sent: " + str(args[0])
-
-    def sendBeta2B(self, *args):
-        global beta2bmc
-        beta2bmc = args[0]
-        serialWrite("B2B=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2b'",(args[0],))
-        #self.ids.statusbar.text = "Beta2B Value Sent: " + str(args[0])
-
-    def sendBeta2A(self, *args):
-        global beta2amc
-        beta2amc = args[0]
-        serialWrite("B2A=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta2a'",(args[0],))
-        #self.ids.statusbar.text = "Beta2A Value Sent: " + str(args[0])
-
-    def sendBeta3B(self, *args):
-        global beta3bmc
-        beta3bmc = args[0]
-        serialWrite("B3B=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3b'",(args[0],))
-        #self.ids.statusbar.text = "Beta3B Value Sent: " + str(args[0])
-
-    def sendBeta3A(self, *args):
-        global beta3amc
-        beta3amc = args[0]
-        serialWrite("B3A=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta3a'",(args[0],))
-        #self.ids.statusbar.text = "Beta3A Value Sent: " + str(args[0])
-
-    def sendBeta4B(self, *args):
-        global beta4bmc
-        beta4bmc = args[0]
-        serialWrite("B4B=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4b'",(args[0],))
-        #self.ids.statusbar.text = "Beta4B Value Sent: " + str(args[0])
-
-    def sendBeta4A(self, *args):
-        global beta4amc
-        beta4amc = args[0]
-        serialWrite("B4A=" + str(args[0]) + " ")
-        c.execute("UPDATE telemetry SET Value = ? WHERE Label = 'beta4a'",(args[0],))
-        #self.ids.statusbar.text = "Beta4A Value Sent: " + str(args[0])
-
-    def send0(self, *args):
-        global psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1amc,beta1bmc,beta2amc,beta2bmc,beta3amc,beta3bmc,beta4amc,beta4bmc
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1a'")
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta1b'")
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2a'")
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta2b'")
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3a'")
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta3b'")
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4a'")
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'beta4b'")
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'psarj'")
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ssarj'")
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'ptrrj'")
-        c.execute("UPDATE telemetry SET Value = '0' WHERE Label = 'strrj'")
-        strrjmc = 0
-        ptrrjmc = 0
-        ssarjmc = 0
-        psarjmc = 0
-        beta1bmc = 0
-        beta1amc = 0
-        beta2bmc = 0
-        beta2amc = 0
-        beta3bmc = 0
-        beta3amc = 0
-        beta4bmc = 0
-        beta4amc = 0
-        #self.ids.statusbar.text = "0 sent to all"
-        serialWrite("B1A=0 ")
-        serialWrite("B1B=0 ")
-        serialWrite("B2A=0 ")
-        serialWrite("B2B=0 ")
-        serialWrite("B3A=0 ")
-        serialWrite("B3B=0 ")
-        serialWrite("B4A=0 ")
-        serialWrite("B4B=0 ")
-        serialWrite("PSARJ=0 ")
-        serialWrite("SSARJ=0 ")
-        serialWrite("PTRRJ=0 ")
-        serialWrite("STRRJ=0 ")
-
-    def send90(self, *args):
-        global psarjmc,ssarjmc,ptrrjmc,strrjmc,beta1amc,beta1bmc,beta2amc,beta2bmc,beta3amc,beta3bmc,beta4amc,beta4bmc
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta1a'")
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta1b'")
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta2a'")
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta2b'")
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta3a'")
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta3b'")
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta4a'")
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'beta4b'")
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'psarj'")
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'ssarj'")
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'ptrrj'")
-        c.execute("UPDATE telemetry SET Value = '90' WHERE Label = 'strrj'")
-        strrjmc = 90
-        ptrrjmc = 90
-        ssarjmc = 90
-        psarjmc = 90
-        beta1bmc = 90
-        beta1amc = 90
-        beta2bmc = 90
-        beta2amc = 90
-        beta3bmc = 90
-        beta3amc = 90
-        beta4bmc = 90
-        beta4amc = 90
-        #self.ids.statusbar.text = "90 sent to all"
-        serialWrite("B1A=90 ")
-        serialWrite("B1B=90 ")
-        serialWrite("B2A=90 ")
-        serialWrite("B2B=90 ")
-        serialWrite("B3A=90 ")
-        serialWrite("B3B=90 ")
-        serialWrite("B4A=90 ")
-        serialWrite("B4B=90 ")
-        serialWrite("PSARJ=90 ")
-        serialWrite("SSARJ=90 ")
-        serialWrite("PTRRJ=90 ")
-        serialWrite("STRRJ=90 ")
+    def send_value(self, control, value):
+        print("Entering send_value")
+        print(control)
+        print(value)
+        if control in self.controls:
+            self.controls[control] = value
+            #different naming convention here and in DB ugh
+            if "Beta" in control:
+                alt_control = "B" + control[4:]
+            else:
+                alt_control = control
+            #get current angle from DB
+            c.execute(f"SELECT Value FROM telemetry WHERE Label = '{control.lower()}'")
+            results = c.fetchall()
+            if results:
+                current_angle = results[0][0]
+            else:
+                logWrite("error retrieving telemetry DB value in manual control screen")
+                current_angle = 0
+            print(current_angle)
+            print(type(current_angle))
+            new_angle = float(current_angle) + value
+            print(new_angle)
+            command = str(alt_control) + "=" + str(new_angle) + " "
+            print(command)
+            serialWrite(command)
+            self.update_angles()
+    
+    def send_value_all(self, value):
+        for control in self.controls:
+            self.controls[control] = value
+            self.set_telemetry_value(control, value)
+            if "Beta" in control:
+                alt_control = "B" + control[4:]
+            else:
+                alt_control = control
+            command = str(alt_control) + "=" + str(value) + " "
+            print(command)
+            serialWrite(control + str(value) + " ")
+        self.update_angles()
 
 class FakeOrbitScreen(Screen):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
