@@ -22,6 +22,8 @@ Steps:
      *   60cm servo extension – BGAs  (8 per build) – 40 (Options : combined 2x 30cm extensions to create a 60cm extension or use all 60cm cable) 
 
 
+https://lh3.googleusercontent.com/pw/AIL4fc91ignF92c3tVI0V4MufIDrmNjLoWEDSyEkASGumMNdLFS0mrI-HlgTVTtDEaE-q8RgLA5xqFlAN2fGy1J2Na0PIATaSvlAHcGKzC9h26J9GI1aAcDI8SGBXduEucRozHwMUq4j0_7HYZbGTmDfwd7Ahg=w1170-h879-s-no?authuser=0
+
 
 
 
