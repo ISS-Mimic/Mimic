@@ -9,4 +9,4 @@ As you assemble me, piece by piece, you'll find yourself immersed in the fascina
 So come, embark on this stellar journey with me.  Together, we'll bring you little closer to space!  
 Remember, sky is not the limit when you have Mini Mimic in your hands.  I can't wait to come to live by your hands!
 
--Mini Mimic-
+-Mini Mimic-  (est. July 2023)
