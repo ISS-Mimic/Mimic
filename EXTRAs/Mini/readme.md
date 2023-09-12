@@ -10,3 +10,4 @@ So, are you ready to blast off on this exciting journey with me?  Together, we'l
 Remember, sky is not the limit when you have Mini Mimic in your hands.  I can't wait to come to live by your hands!
 
 -Mini Mimic-  (est. July 2023)
+          ![image](https://github.com/ISS-Mimic/Mimic/assets/58833710/38a69185-c53a-4a8f-a3cb-29565bf338b5)
