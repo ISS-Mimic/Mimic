@@ -380,6 +380,14 @@ class ManualControlScreen(Screen):
             'PTRRJ': 0.0,
             'STRRJ': 0.0
         }
+        for control in self.controls:
+            c.execute(f"SELECT Value FROM telemetry WHERE Label = '{control.lower()}'")
+            results = c.fetchall()
+            if results:
+                self.controls[control] = float(results[0][0])
+            else:
+                logWrite("error retrieving telemetry DB value in manual control screen")
+        print(self.controls)
         self.active_control = None
 
     def on_pre_enter(self):
@@ -388,7 +396,10 @@ class ManualControlScreen(Screen):
     def update_angles(self):
         for control, value in self.controls.items():
             button_id = f"{control}_Button"
-            text = control + "\n" + str(math.trunc(value))
+            if type(value) == str:
+                text = control + "\n" + value
+            else:
+                text = control + "\n" + str(math.trunc(value))
             setattr(self.ids[button_id], 'text', text)
 
     def zero_joints(self):
@@ -431,30 +442,13 @@ class ManualControlScreen(Screen):
             self.increment_control(self.active_control, value)
 
     def send_value(self, control, value):
-        print("Entering send_value")
-        print(control)
-        print(value)
         if control in self.controls:
-            self.controls[control] = value
             #different naming convention here and in DB ugh
             if "Beta" in control:
                 alt_control = "B" + control[4:]
             else:
                 alt_control = control
-            #get current angle from DB
-            c.execute(f"SELECT Value FROM telemetry WHERE Label = '{control.lower()}'")
-            results = c.fetchall()
-            if results:
-                current_angle = results[0][0]
-            else:
-                logWrite("error retrieving telemetry DB value in manual control screen")
-                current_angle = 0
-            print(current_angle)
-            print(type(current_angle))
-            new_angle = float(current_angle) + value
-            print(new_angle)
-            command = str(alt_control) + "=" + str(new_angle) + " "
-            print(command)
+            command = str(alt_control) + "=" + str(value) + " "
             serialWrite(command)
             self.update_angles()
     
