@@ -144,10 +144,11 @@ def get_tty_dev_names(context):
     devices = context.list_devices(subsystem='tty')
     for d in devices:
         for k, v in d.items():
-            if k is not None and k == 'ID_VENDOR':
+            # Check for both ID_VENDOR and ID_USB_VENDOR
+            if k in ['ID_VENDOR', 'ID_USB_VENDOR']:
                 names.append(parse_tty_name(d, v))
     return names
-
+        
 def get_config_data():
     """ Get the JSON config data. """
     data = {}
