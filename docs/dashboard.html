@@ -772,6 +772,30 @@
   <div class="desc">PVCU 1B BGA POS</div>
   <div class="val" id="S6000008">NO DATA</div>
 </div>
+<div class="N/A pui" title="Greenwich Mean Time (GMT)">
+  <div class="desc">GMT</div>
+  <div class="val" id="TIME_000001">NO DATA</div>
+</div>
+<div class="N/A pui" title="Year">
+  <div class="desc">YEAR</div>
+  <div class="val" id="TIME_000002">NO DATA</div>
+</div>
+<div class="TOPO pui" title="ISS Altitude from State Vectors">
+  <div class="desc">ATT STATE VECTORS</div>
+  <div class="val" id="USLAB000ALT">NO DATA</div>
+</div>
+<div class="ADCO pui" title="US Attitude Pitch">
+  <div class="desc">US ATT PITCH</div>
+  <div class="val" id="USLAB000PIT">NO DATA</div>
+</div>
+<div class="ADCO pui" title="US Attitude Roll">
+  <div class="desc">US ATT ROLL</div>
+  <div class="val" id="USLAB000ROL">NO DATA</div>
+</div>
+<div class="ADCO pui" title="US Attitude Yaw">
+  <div class="desc">US ATT YAW</div>
+  <div class="val" id="USLAB000YAW">NO DATA</div>
+</div>
 <div class="ADCO pui" title="Control Moment Gyroscope (CMG)-1 On-Line">
   <div class="desc">CMG 1 STATUS</div>
   <div class="val" id="USLAB000001">NO DATA</div>
@@ -1105,8 +1129,12 @@
   <div class="val" id="USLAB000083">NO DATA</div>
 </div>
 <div class="ODIN pui" title="ISS Command and Control Multiplexer/Demultiplexer Onboard Time (course)">
-  <div class="desc">ISS TIME</div>
+  <div class="desc">ISS TIME COURSE</div>
   <div class="val" id="USLAB000084">NO DATA</div>
+</div>
+<div class="ODIN pui" title="ISS Command and Control Multiplexer/Demultiplexer Onboard Time (fine)">
+  <div class="desc">ISS TIME FINE</div>
+  <div class="val" id="USLAB000085">NO DATA</div>
 </div>
 <div class="ODIN-VVO pui" title="ISS Station Mode">
   <div class="desc">STATION MODE</div>
@@ -1544,7 +1572,18 @@ require(["LightstreamerClient","Subscription"],function(LightstreamerClient,Subs
 	var oldAngleDif = 0.00;
 	var oldSGANT_el = 0.00;
 	var oldAngleTime = 0.00;
-	
+
+	var yaw = null;
+	var pitch = null;
+	var roll = null;
+	var Q0 = null;
+	var Q1 = null;
+	var Q2 = null;
+	var Q3 = null;
+	var xState = null;
+	var yState = null;
+	var zState = null;
+
 	var time;
 	var difference = 0.00;
     var unixtime = (new Date).getTime();
@@ -1558,38 +1597,34 @@ require(["LightstreamerClient","Subscription"],function(LightstreamerClient,Subs
 	var dayOfYear = today - yearFirstDay;
 	
 	var timestampnow = dayOfYear*24 + hours + minutes/60 + seconds/3600; 
-	
+
 var specialPUIs = ["AIRLOCK000019","AIRLOCK000020","AIRLOCK000021","AIRLOCK000022","AIRLOCK000023","AIRLOCK000024",
-                   "AIRLOCK000025","AIRLOCK000026","AIRLOCK000027","AIRLOCK000028","AIRLOCK000029","AIRLOCK000030",
-                   "AIRLOCK000031","AIRLOCK000032","AIRLOCK000033","AIRLOCK000034","AIRLOCK000035","AIRLOCK000036",
-                   "AIRLOCK000037","AIRLOCK000038","AIRLOCK000039","AIRLOCK000040","AIRLOCK000041","AIRLOCK000042",
-                   "AIRLOCK000043","AIRLOCK000044","AIRLOCK000045","AIRLOCK000046","AIRLOCK000047","AIRLOCK000048",
-                   "AIRLOCK000050","AIRLOCK000051","AIRLOCK000052","AIRLOCK000053","AIRLOCK000058",
-                   "NODE1000001","NODE1000002","NODE2000003","NODE2000004","NODE2000005",
-                   "NODE3000004","NODE3000006","NODE3000007","NODE3000010","NODE3000014","NODE3000015",
-                   "NODE3000016","NODE3000018","NODE3000020",
-                   "P1000006","P1000007","P1000008","P1000009",
-                   "P3000001","P3000002","P4000003","P4000006","P6000003","P6000006",
-                   "RUSSEG000001","RUSSEG000002","RUSSEG000003","RUSSEG000004","RUSSEG000007",
-                   "RUSSEG000008","RUSSEG000009","RUSSEG000010","RUSSEG000011","RUSSEG000012",
-                   "RUSSEG000013","RUSSEG000014","RUSSEG000015","RUSSEG000016","RUSSEG000017",
-                   "RUSSEG000018","RUSSEG000019","RUSSEG000020","RUSSEG000021","RUSSEG000022",
-                   "RUSSEG000023","RUSSEG000024","RUSSEG000025",
-                   "S0000006","S0000007","S0000008","S0000009","S0000010","S0000011","S0000012","S0000013",
-                   "S1000006","S1000007","S1000008","S1000009",
-                   "S3000001","S3000002","S4000003","S4000006","S6000003","S6000006",
-                   "USLAB000001","USLAB000002","USLAB000003","USLAB000004","USLAB000011","USLAB000012",
-                   "USLAB000013","USLAB000014","USLAB000015","USLAB000016","USLAB000017","USLAB000041",
-                   "USLAB000042","USLAB000043","USLAB000044","USLAB000062","USLAB000063","USLAB000064",
-                   "USLAB000065","USLAB000066","USLAB000067","USLAB000068","USLAB000069","USLAB000070",
-                   "USLAB000071","USLAB000072","USLAB000073","USLAB000074","USLAB000075","USLAB000076",
-                   "USLAB000077","USLAB000078","USLAB000079","USLAB000080","USLAB000081","USLAB000086",
-                   "USLAB000088","USLAB000089","USLAB000090","USLAB000091","USLAB000092","USLAB000093",
-                   "USLAB000094","USLAB000095","USLAB000096","USLAB000097","USLAB000098","USLAB000099",
-                   "USLAB000100","USLAB000101",
-                   "Z1000013",
-                   "CSAMT000002","CSASSRMS002","CSASSRMS003","CSASSRMS011","CSASPDM0002","CSASPDM0010",
-                   "CSASPDM0019","CSASPDM0022","CSAMBS00002","CSAMBA00004"];
+		   "AIRLOCK000025","AIRLOCK000026","AIRLOCK000027","AIRLOCK000028","AIRLOCK000029","AIRLOCK000030",
+		   "AIRLOCK000031","AIRLOCK000032","AIRLOCK000033","AIRLOCK000034","AIRLOCK000035","AIRLOCK000036",
+		   "AIRLOCK000037","AIRLOCK000038","AIRLOCK000039","AIRLOCK000040","AIRLOCK000041","AIRLOCK000042",
+		   "AIRLOCK000043","AIRLOCK000044","AIRLOCK000045","AIRLOCK000046","AIRLOCK000047","AIRLOCK000048",
+		   "AIRLOCK000050","AIRLOCK000051","AIRLOCK000052","AIRLOCK000053","AIRLOCK000058",
+		   "NODE1000001","NODE1000002","NODE2000003","NODE2000004","NODE2000005","NODE3000004","NODE3000006",
+		   "NODE3000007","NODE3000010","NODE3000014","NODE3000015","NODE3000016","NODE3000018","NODE3000020",
+		   "P1000006","P1000007","P1000008","P1000009","P3000001","P3000002","P4000003","P4000006","P6000003",
+		   "P6000006",
+		   "RUSSEG000001","RUSSEG000002","RUSSEG000003","RUSSEG000004","RUSSEG000007","RUSSEG000008","RUSSEG000009",
+		   "RUSSEG000010","RUSSEG000011","RUSSEG000012","RUSSEG000013","RUSSEG000014","RUSSEG000015","RUSSEG000016",
+		   "RUSSEG000017","RUSSEG000018","RUSSEG000019","RUSSEG000020","RUSSEG000021","RUSSEG000022","RUSSEG000023",
+		   "RUSSEG000024","RUSSEG000025",
+		   "S0000006","S0000007","S0000008","S0000009","S0000010","S0000011","S0000012","S0000013","S1000006",
+		   "S1000007","S1000008","S1000009","S3000001","S3000002","S4000003","S4000006","S6000003","S6000006",
+		   "USLAB000001","USLAB000002","USLAB000003","USLAB000004","USLAB000011","USLAB000012","USLAB000013",
+		   "USLAB000014","USLAB000015","USLAB000016","USLAB000017","USLAB000041","USLAB000042","USLAB000043",
+		   "USLAB000044","USLAB000062","USLAB000063","USLAB000064","USLAB000065","USLAB000066","USLAB000067",
+		   "USLAB000068","USLAB000069","USLAB000070","USLAB000071","USLAB000072","USLAB000073","USLAB000074",
+		   "USLAB000075","USLAB000076","USLAB000077","USLAB000078","USLAB000079","USLAB000080","USLAB000081",
+		   "USLAB000086","USLAB000088","USLAB000089","USLAB000090","USLAB000091","USLAB000092","USLAB000093",
+		   "USLAB000094","USLAB000095","USLAB000096","USLAB000097","USLAB000098","USLAB000099","USLAB000100",
+		   "USLAB000101",
+		   "Z1000013",
+		   "CSAMT000002","CSASSRMS002","CSASSRMS003","CSASSRMS011","CSASPDM0002","CSASPDM0010","CSASPDM0019",
+		   "CSASPDM0022","CSAMBS00002","CSAMBA00004"]
 
 var AIRLOCK000019 = {0:"NORMAL",1:"NO DATA",2:"MISSING  DATA",3:"EXTRA DATA"};
 var AIRLOCK000020 = AIRLOCK000019;
@@ -1863,11 +1898,84 @@ var Decoder =
 				selector.text(eval(item)[update.getValue("Value")]);
 //				selector.text(update.getValue("Status.Class"));
 			}
+			//altitude state values
+			else if (item === "USLAB000032")
+			{
+				xState = update.getValue("Value");
+			}
+			else if (item === "USLAB000033")
+			{
+				yState = update.getValue("Value");
+			}
+			else if (item === "USLAB000034")
+			{
+				zState = update.getValue("Value");
+			}
 			else
 			{
 				selector.text(+Math.round(update.getValue("Value")*1000000)/1000000);
 //				selector.text(update.getValue("Status.Class"));
 			}
+
+			//altitude calculation
+			var altitude = Math.sqrt(Math.pow(xState,2)+Math.pow(yState,2)+Math.pow(zState,2))-6378; //equatorial radius
+			$("#"+"USLAB000ALT").text(altitude.toFixed(2));
+			
+			//attitude conversion
+			if(item === "USLAB000018")
+			{
+				Q0 = update.getValue("Value");
+			}
+			if(item === "USLAB000019")
+			{
+				Q1 = update.getValue("Value");
+			}
+			if(item === "USLAB000020")
+			{
+				Q2 = update.getValue("Value");
+			}
+			if(item === "USLAB000021")
+			{
+				Q3 = update.getValue("Value");
+			}
+
+			if (Q0 != null && Q1 != null && Q2 != null && Q3 != null)
+			{
+				var c12 = 2 * (Q1 * Q2 + Q0 * Q3);
+				var c11 = Q0 * Q0 + Q1 * Q1 - Q2 * Q2 - Q3 * Q3;
+				var c13 = 2 * (Q1 * Q3 - Q0 * Q2);
+				var c23 = 2 * (Q2 * Q3 + Q0 * Q1);
+				var c33 = Q0 * Q0 - Q1 * Q1 - Q2 * Q2 + Q3 * Q3;
+				var c22 = Q0 * Q0 - Q1 * Q1 + Q2 * Q2 - Q3 * Q3;
+				var c21 = 2 * (Q1 * Q2 - Q0 * Q3);
+				var mag_c13 = Math.abs(c13); //all c's should be in radians
+	
+				yaw = 0.0;
+				pitch = 0.0;
+				roll = 0.0;
+	
+				if (mag_c13 < 1)
+				{
+					yaw = Math.atan2(c12, c11);
+					pitch = Math.atan2(-c13, Math.sqrt(1.0 - (c13 * c13)));
+					roll = Math.atan2(c23, c33);
+				}
+				else if (mag_c13 == 1)
+				{
+					yaw = Math.atan2(-c21, c22);
+					pitch = Math.asin(-c13);
+					roll = 0.0;
+				}
+				
+				//convert to degrees
+				yaw = yaw * 180 / Math.PI;
+				pitch = pitch * 180 / Math.PI;
+				roll = roll * 180 / Math.PI;
+				$("#"+"USLAB000YAW").text(yaw.toFixed(2));
+				$("#"+"USLAB000PIT").text(pitch.toFixed(2));
+				$("#"+"USLAB000ROL").text(roll.toFixed(2));
+            };
+
 			selector.addClass('highlight');
 //			selector.one('animationend', function() { selector.removeClass('highlight');});
 			switch (update.getItemName()){
@@ -1908,7 +2016,7 @@ var Decoder =
 					document.getElementById("LOS").bgColor = '#FFFFFF';
 				}
 				break;
-			} 
+			}
 		}
 	});
 	
