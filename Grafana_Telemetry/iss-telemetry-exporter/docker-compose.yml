@@ -1,0 +1,9 @@
+---
+version: '3.8'
+
+services:
+  iss-telemetry:
+    build:
+      context: .
+    ports:
+      - 9155:9155

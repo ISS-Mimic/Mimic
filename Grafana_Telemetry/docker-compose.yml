@@ -1,0 +1,58 @@
+---
+version: '3.8'
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    pull_policy: always
+    mem_limit: 2048M
+    mem_reservation: 1024M
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - iss_telemetry_prometheus:/prometheus
+      - ./config/prometheus:/etc/prometheus/:ro
+    ports:
+      - 9090:9090
+    networks:
+      - iss_telemetry_net
+
+  grafana:
+    image: grafana/grafana:10.1.2
+    pull_policy: always
+    cpus: 1.0
+    mem_limit: 1024M
+    mem_reservation: 256M
+    restart: unless-stopped
+    env_file:
+      - .env_grafana
+    volumes:
+      -  iss_telemetry_grafana:/var/lib/grafana
+      - ./config/grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml:ro
+      - ./config/grafana/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml:ro
+      - ./config/grafana/dashboards/:/var/lib/grafana/dashboards/
+    ports:
+      - 3000:3000
+    networks:
+      - iss_telemetry_net
+
+  iss-telemetry-exporter:
+    build:
+      context: ./iss-telemetry-exporter/
+    cpus: 0.5
+    mem_limit: 512M
+    mem_reservation: 256M
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
+    ports:
+      - 9155:9155
+    networks:
+      - iss_telemetry_net
+
+volumes:
+  iss_telemetry_prometheus:
+  iss_telemetry_grafana:
+networks:
+  iss_telemetry_net:
