@@ -10,7 +10,6 @@ import glob #used to parse serial port names
 import sqlite3 #used to access ISS telemetry database
 import pytz #used for timezone conversion in orbit pass predictions
 from bs4 import BeautifulSoup #used to parse webpages for data (EVA stats, ISS TLE)
-import numpy as np
 import ephem #used for TLE orbit information on orbit screen
 import serial #used to send data over serial to arduino
 import json # used for serial port config
@@ -1910,10 +1909,10 @@ class MainApp(App):
 
             yr = year - 2000
 
-            nleap = int(np.floor((year - 1601.0) / 4.0))
+            nleap = int(math.floor((year - 1601.0) / 4.0))
             nleap -= 99
             if year <= 1900:
-                ncent = int(np.floor((year - 1601.0) / 100.0))
+                ncent = int(math.floor((year - 1601.0) / 100.0))
                 ncent = 3 - ncent
                 nleap = nleap + ncent
 
@@ -1927,21 +1926,21 @@ class MainApp(App):
             lmean = l0 + 0.9856474 * df
 
             # Mean anomaly in radians:
-            grad = np.radians(g0 + 0.9856003 * df)
+            grad = math.radians(g0 + 0.9856003 * df)
 
             # Ecliptic longitude:
-            lmrad = np.radians(lmean + 1.915 * np.sin(grad)
-                               + 0.020 * np.sin(2.0 * grad))
-            sinlm = np.sin(lmrad)
+            lmrad = math.radians(lmean + 1.915 * math.sin(grad)
+                               + 0.020 * math.sin(2.0 * grad))
+            sinlm = math.sin(lmrad)
 
             # Obliquity of ecliptic in radians:
-            epsrad = np.radians(23.439 - 4e-7 * (df + 365 * yr + nleap))
+            epsrad = math.radians(23.439 - 4e-7 * (df + 365 * yr + nleap))
 
             # Right ascension:
-            alpha = np.degrees(np.arctan2(np.cos(epsrad) * sinlm, np.cos(lmrad)))
+            alpha = math.degrees(math.atan2(math.cos(epsrad) * sinlm, math.cos(lmrad)))
 
             # Declination, which is also the subsolar latitude:
-            sslat = np.degrees(np.arcsin(np.sin(epsrad) * sinlm))
+            sslat = math.degrees(math.asin(math.sin(epsrad) * sinlm))
 
             # Equation of time (degrees):
             etdeg = lmean - alpha
