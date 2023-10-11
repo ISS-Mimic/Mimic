@@ -41,7 +41,6 @@ def main():
     run_install("sqlite3", "sudo apt-get") #telemetry database
     run_install("python3-sdl2", "sudo apt-get") #required for kivy window
     run_install("python3-mpltoolkits.basemap", "sudo apt-get") #required for nightshade
-    run_command("pip install -U numpy") #update numpy
     run_install("libatlas-base-dev", "sudo apt-get") #fix numpy issue
     run_install("ephem pytz matplotlib pyudev lightstreamer-client-lib", "python -m pip") #python libs used by Mimic
 
