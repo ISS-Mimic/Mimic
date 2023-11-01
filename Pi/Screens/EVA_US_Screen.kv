@@ -6,23 +6,6 @@
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/USpageEVAbaseNew.png'
             fit_mode: "fill"
         Image:
-            id: EVA_needle
-            source: './imgs/eva/GuageNeedle.png'
-            pos_hint: {"center_x": 0.83, "center_y": 0.633}
-            source: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/GuageNeedle.png'
-            pos_hint: {"center_x": 0.83, "center_y": 0.633}
-            size_hint_x: 0.24 
-            fit_mode: "scale-down"
-            angle: 180
-            canvas.before:
-                PushMatrix
-                Rotate:
-                    angle: self.angle
-                    axis: 0,0,-1
-                    origin: self.center
-            canvas.after:
-                PopMatrix
-        Image:
             id: Crewlock_Status_image
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BlankLights.png'
             size_hint_y: 0.14
@@ -232,3 +215,20 @@
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: app.root.current = 'eva_main'
+        Image:
+            id: EVA_needle
+            source: './imgs/eva/GuageNeedle.png'
+            pos_hint: {"center_x": 0.83, "center_y": 0.633}
+            source: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/GuageNeedle.png'
+            pos_hint: {"center_x": 0.83, "center_y": 0.633}
+            size_hint_x: 0.24 
+            fit_mode: "scale-down"
+            angle: 180
+            canvas.before:
+                PushMatrix
+                Rotate:
+                    angle: self.angle
+                    axis: 0,0,-1
+                    origin: self.center
+            canvas.after:
+                PopMatrix

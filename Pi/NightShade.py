@@ -69,7 +69,7 @@ def bluemarble_daynight(date,scale):
                    area_thresh=None, ax=axes)
     bm_n = m.warpimage(mimic_directory + '/Mimic/Pi/imgs/orbit/earth_lights_lrg.jpg',scale=scale)
     bm_d = m.imshow(bm_rgba)
-    plt.savefig(mimic_directory + '/Mimic/Pi/imgs/orbit/map.jpg', bbox_inches='tight', pad_inches=0)
+    plt.savefig('/dev/shm/map.jpg', bbox_inches='tight', pad_inches=0)
 
 date = datetime.utcnow()
 bluemarble_daynight(date,0.3)

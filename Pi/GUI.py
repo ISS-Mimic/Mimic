@@ -144,7 +144,8 @@ def get_tty_dev_names(context):
     devices = context.list_devices(subsystem='tty')
     for d in devices:
         for k, v in d.items():
-            if k is not None and k == 'ID_VENDOR':
+            # Check for both ID_VENDOR and ID_USB_VENDOR
+            if k in ['ID_VENDOR', 'ID_USB_VENDOR']:
                 names.append(parse_tty_name(d, v))
     return names
 
@@ -357,7 +358,7 @@ class MainScreen(Screen):
             p2.kill()
         except Exception as e:
             logWrite(e)
-        os.system('rm /dev/shm/*') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
+        os.system('rm /dev/shm/*.db*') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
         staleTelemetry()
         logWrite("Successfully stopped ISS telemetry javascript and removed database")
 
@@ -461,7 +462,7 @@ class ManualControlScreen(Screen):
             else:
                 alt_control = control
             command = str(alt_control) + "=" + str(value) + " "
-            print(command)
+            #print(command)
             serialWrite(control + str(value) + " ")
         self.update_angles()
 
@@ -806,6 +807,7 @@ class MainApp(App):
         #Clock.schedule_once(self.checkBlogforEVA, 30) #disabling for now issue #407
         Clock.schedule_once(self.getTLE, 15) #uncomment when internet works again
         Clock.schedule_once(self.TDRSupdate, 30) #uncomment when internet works again
+        Clock.schedule_once(self.updateNightShade, 30)
 
         Clock.schedule_interval(self.getTLE, 300)
         Clock.schedule_interval(self.TDRSupdate, 600)
@@ -858,7 +860,7 @@ class MainApp(App):
         if urlindex > urlsize-1:
             urlindex = 0
     def updateOrbitMap(self, dt):
-        self.orbit_screen.ids.OrbitMap.source = mimic_directory + '/Mimic/Pi/imgs/orbit/map.jpg'
+        self.orbit_screen.ids.OrbitMap.source = '/dev/shm/map.jpg'
         self.orbit_screen.ids.OrbitMap.reload()
 
     def updateNightShade(self, dt):
@@ -3481,7 +3483,7 @@ Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MimicScreen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MainScreen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/RS_Dock_Screen.kv')
 Builder.load_string('''
-#:kivy 1.8
+#:kivy 2.2
 #:import kivy kivy
 #:import win kivy.core.window
 ScreenManager:
