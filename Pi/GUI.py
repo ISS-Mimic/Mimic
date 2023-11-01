@@ -357,7 +357,7 @@ class MainScreen(Screen):
             p2.kill()
         except Exception as e:
             logWrite(e)
-        os.system('rm /dev/shm/*') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
+        os.system('rm /dev/shm/*.db*') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
         staleTelemetry()
         logWrite("Successfully stopped ISS telemetry javascript and removed database")
 
@@ -1393,6 +1393,7 @@ class MainApp(App):
         #Clock.schedule_once(self.checkBlogforEVA, 30) #disabling for now issue #407
         Clock.schedule_once(self.getTLE, 15) #uncomment when internet works again
         Clock.schedule_once(self.TDRSupdate, 30) #uncomment when internet works again
+        Clock.schedule_once(self.updateNightShade, 20)
 
         Clock.schedule_interval(self.getTLE, 300)
         Clock.schedule_interval(self.TDRSupdate, 600)
@@ -1445,7 +1446,7 @@ class MainApp(App):
         if urlindex > urlsize-1:
             urlindex = 0
     def updateOrbitMap(self, dt):
-        self.orbit_screen.ids.OrbitMap.source = mimic_directory + '/Mimic/Pi/imgs/orbit/map.jpg'
+        self.orbit_screen.ids.OrbitMap.source = '/dev/shm/map.jpg'
         self.orbit_screen.ids.OrbitMap.reload()
 
     def updateNightShade(self, dt):
