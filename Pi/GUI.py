@@ -4005,7 +4005,7 @@ class MainApp(App):
 
         psi_bar_x = self.map_psi_bar(0.0193368*float(crewlockpres)) #convert to torr
 
-        self.us_eva.ids.EVA_psi_bar.pos_hint = {"center_x": psi_bar_x, "center_y": 0.56}
+        self.us_eva.ids.EVA_psi_bar.pos_hint = {"center_x": psi_bar_x, "center_y": 0.61}
 
 
         ##-------------------Signal Status Check-------------------##
