@@ -2431,7 +2431,7 @@ class MainApp(App):
 
         new_bar_x = self.map_hold_bar(260-seconds2)
         self.us_eva.ids.leak_timer.text = "~"+ str(int(seconds2)) + "s"
-        self.us_eva.ids.Hold_bar.pos_hint = {"center_x": new_bar_x, "center_y": 0.49}
+        self.us_eva.ids.Hold_bar.pos_hint = {"center_x": new_bar_x, "center_y": 0.54}
         self.us_eva.ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/LeakCheckLights.png'
 
     def signal_unsubscribed(self): #change images, used stale signal image
