@@ -12,7 +12,9 @@ def run_command(cmd):
 def run_install(packages, method):
     if method == "sudo apt-get":
         method = "sudo apt-get -y"
-    install_string = "{} install {}".format(method, packages)
+        install_string = "{} install {}".format(method, packages)
+    else:
+        install_string = "{} install {} --break-system-packages".format(method, packages)
     run_command(install_string)
 
 def replace_kivy_config(username):
@@ -44,15 +46,11 @@ def main():
     run_install("libatlas-base-dev", "sudo apt-get") #fix numpy issue
     run_install("ephem pytz matplotlib pyudev lightstreamer-client-lib", "python -m pip") #python libs used by Mimic
 
-    if not args.skip_kivy:
-        print("\nInstalling Kivy requirements and package.")
-        run_install("kivy", "python -m pip")
-        #run_install("'kivy[base,media]'", "python -m pip") # might need this kivy install if we do audio/video stuff but it might be outdated?
-        run_command("python -c 'import kivy'") # run kivy init to create the config.ini file
-        print("Replacing Kivy config file")
-        replace_kivy_config(username)
-    else:
-        print("\nSkipping Kivy setup.")
-
+    print("\nInstalling Kivy requirements and package.")
+    run_install("python3-kivy", "sudo apt-get")
+    run_command("python -c 'import kivy'") # run kivy init to create the config.ini file
+    print("Replacing Kivy config file")
+    replace_kivy_config(username)
+   
 if __name__ == '__main__':
     main()
