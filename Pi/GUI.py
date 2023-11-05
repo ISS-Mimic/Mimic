@@ -1577,10 +1577,22 @@ class MainApp(App):
 
     def getTLE(self, *args):
         global ISS_TLE, ISS_TLE_Line1, ISS_TLE_Line2, ISS_TLE_Acquired
-        #iss_tle_url =  'https://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html' #the rev counter on this page is wrong
+        config_filename = 'path/to/your/iss_tle_config.json'  # TLE JSON config file
         iss_tle_url =  'https://celestrak.org/NORAD/elements/stations.txt'
         tdrs_tle_url =  'https://celestrak.org/NORAD/elements/tdrss.txt'
 
+        # Check if the config file exists and has a valid timestamp
+        try:
+            with open(config_filename, 'r') as file:
+                config = json.load(file)
+            last_acquired = datetime.strptime(config['timestamp'], '%Y-%m-%dT%H:%M:%S')
+            if datetime.now() - last_acquired < timedelta(days=1):
+                # Use the TLE from the config file if it's less than a day old
+                return config['ISS_TLE_Line1'], config['ISS_TLE_Line2']
+        except (FileNotFoundError, json.JSONDecodeError, KeyError):
+            # If any error occurs, we assume we need to fetch a new TLE
+            pass
+            
         def on_success(req, data): #if TLE data is successfully received, it is processed here
             global ISS_TLE, ISS_TLE_Line1, ISS_TLE_Line2, ISS_TLE_Acquired
             soup = BeautifulSoup(data, "lxml")
@@ -1711,6 +1723,15 @@ class MainApp(App):
         def on_error2(req2, result):
             logWrite("Warning - Get TDRS TLE failure (url error)")
             logWrite(result)
+
+        # Once fetched, save the new TLE and timestamp to the JSON config file
+        config = {
+            'ISS_TLE_Line1': ISS_TLE_Line1,  # Replace with the actual fetched line 1
+            'ISS_TLE_Line2': ISS_TLE_Line2,  # Replace with the actual fetched line 2
+            'timestamp': datetime.now().isoformat()
+        }
+        with open(config_filename, 'w') as file:
+            json.dump(config, file)
 
         req = UrlRequest(iss_tle_url, on_success, on_redirect, on_failure, on_error, timeout=1)
         req2 = UrlRequest(tdrs_tle_url, on_success2, on_redirect2, on_failure2, on_error2, timeout=1)
