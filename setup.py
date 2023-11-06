@@ -19,8 +19,8 @@ else:
     bullseye = False
 
 print("Deleting 3D print folders to free up space")
-os.system('rm -rf 3D_Printing/*')
-os.system('rm -rf Blender/*')
+os.system('rm -rf 3D_Printing*')
+os.system('rm -rf Blender')
 
 def run_command(cmd):
     print("{}".format(cmd))
