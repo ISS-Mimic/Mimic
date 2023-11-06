@@ -49,7 +49,7 @@ def plot_earth_no_color():
     # Plot the current location of the ISS
     ax.plot(longitude, latitude, 'ro', markersize=15, transform=ccrs.Geodetic())
 
-    plt.savefig(mimic_directory + '/Pi/imgs/orbit/globe.png', dpi=100, transparent=True)
+    plt.savefig('/dev/shm/globe.png', dpi=100, transparent=True)
 
 
 plot_earth_no_color()
