@@ -8,7 +8,7 @@ import time #used for time
 import math #used for math
 import glob #used to parse serial port names
 import sqlite3 #used to access ISS telemetry database
-import pytz #used for timezone conversion in orbit pass predictions
+import arrow #used for timezone conversion in orbit pass predictions
 from bs4 import BeautifulSoup #used to parse webpages for data (EVA stats, ISS TLE)
 import ephem #used for TLE orbit information on orbit screen
 import serial #used to send data over serial to arduino
