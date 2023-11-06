@@ -6,7 +6,9 @@ import subprocess
 import argparse
 import shutil
 
-if "bullseye" in distro.linux_distribution():
+print(distro.codename())
+
+if "bullseye" in distro.codename():
     bullseye = True
     print("bullseye detected \n")
 else:
