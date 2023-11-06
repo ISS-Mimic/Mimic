@@ -6,7 +6,10 @@ import subprocess
 import argparse
 import shutil
 
-print(distro.codename())
+print("--------ISS MIMIC Automatic Install--------")
+print("\n This install takes between 10-30 minutes on average \n")
+
+print("Raspbian distro: "distro.codename())
 
 if "bullseye" in distro.codename():
     bullseye = True
