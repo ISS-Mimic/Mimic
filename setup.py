@@ -27,7 +27,7 @@ def run_install(packages, method):
             run_command(install_string)
         except Exception as e:
             install_string = "{} install {}".format(method, packages)
-            run_command(install_string)v
+            run_command(install_string)
 
 def replace_kivy_config(username):
     kivy_config_path = "/home/{}/.kivy/config.ini".format(username)
