@@ -1452,11 +1452,11 @@ class MainApp(App):
             urlindex = 0
                 
     def updateOrbitMap(self, dt):
-        self.orbit_screen.ids.OrbitMap.source = 'C:/Users/samrt/Documents/Mimic_Full_Dev/map.jpg'
+        self.orbit_screen.ids.OrbitMap.source = '/dev/shm/map.jpg'
         self.orbit_screen.ids.OrbitMap.reload()
 
     def updateOrbitGlobeImage(self, dt):
-        self.orbit_screen.ids.orbit3d.source = 'C:/Users/samrt/Documents/Mimic_Full_Dev/Pi/imgs/orbit/globe.png'
+        self.orbit_screen.ids.orbit3d.source = '/dev/shm/globe.png'
         self.orbit_screen.ids.orbit3d.reload()
 
     def updateOrbitGlobe(self, dt):
@@ -1702,7 +1702,7 @@ class MainApp(App):
         manualcontrol = args[0]
 
    def TDRSupdate(self, dt):
-        tdrs_config_filename = 'C:/Users/samrt/Documents/Mimic_Full_Dev/Pi/tdrs_tle_config.json'
+        tdrs_config_filename = '/dev/shm/tdrs_tle_config.json'
 
         # Load TDRS TLE data from the config file
         try:
@@ -1912,7 +1912,7 @@ class MainApp(App):
         self.orbit_screen.ids.ZOElabel.pos_hint = {"center_x": scaleLatLon(0, 77)['newLon'], "center_y": scaleLatLon(0, 77)['newLat']+0.1}
 
     def orbitUpdate(self, dt):
-        iss_config_filename = 'C:/Users/samrt/Documents/Mimic_Full_Dev/Pi/iss_tle_config.json'
+        iss_config_filename = '/dev/shm/iss_tle_config.json'
         try:
             with open(iss_config_filename, 'r') as file:
                 config = json.load(file)
