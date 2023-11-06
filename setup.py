@@ -93,6 +93,6 @@ def main():
     os.system('python Pi/NightShade.py')
     print("running orbitGlobe to populate the initial 3d orbit map")
     os.system('python Pi/orbitGlobe.py')
-   
+    print("--------Install Complete--------")
 if __name__ == '__main__':
     main()
