@@ -1701,7 +1701,7 @@ class MainApp(App):
         global manualcontrol
         manualcontrol = args[0]
 
-   def TDRSupdate(self, dt):
+    def TDRSupdate(self, dt):
         tdrs_config_filename = '/dev/shm/tdrs_tle_config.json'
 
         # Load TDRS TLE data from the config file
