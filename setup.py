@@ -8,6 +8,7 @@ import shutil
 
 print("--------ISS MIMIC Automatic Install--------")
 print("\n This install takes between 10-30 minutes on average \n")
+print("If you encounter an error, try re-running the script and ensure a stable internet connection. If the problem persists, file an issue on github and/or contact the mimic team on discord")
 
 print("Raspbian distro: "distro.codename())
 
