@@ -1460,16 +1460,16 @@ class MainApp(App):
         self.orbit_screen.ids.orbit3d.reload()
 
     def updateOrbitGlobe(self, dt):
-        proc = Popen(["python", mimic_directory + "/Pi/orbitGlobe.py"])
+        proc = Popen(["python", mimic_directory + "/Mimic/Pi/orbitGlobe.py"])
 
     def updateNightShade(self, dt):
-        proc = Popen(["python", mimic_directory + "/Pi/NightShade.py"])
+        proc = Popen(["python", mimic_directory + "/Mimic/Pi/NightShade.py"])
 
     def updateISS_TLE(self, dt):
-        proc = Popen(["python", mimic_directory + "/Pi/getTLE_ISS.py"])
+        proc = Popen(["python", mimic_directory + "/Mimic/Pi/getTLE_ISS.py"])
 
     def updateTDRS_TLE(self, dt):
-        proc = Popen(["python", mimic_directory + "/Pi/getTLE_TDRS.py"])
+        proc = Popen(["python", mimic_directory + "/Mimic/Pi/getTLE_TDRS.py"])
 
     def checkTDRS(self, dt):
         global activeTDRS1
