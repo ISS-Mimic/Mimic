@@ -9,7 +9,7 @@ import os.path as op
 # Assuming the __file__ is defined in your context
 mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
-iss_config_filename = mimic_directory + '/Pi/iss_tle_config.json'
+iss_config_filename = '/dev/shm/iss_tle_config.json'
 try:
     with open(iss_config_filename, 'r') as file:
         config = json.load(file)
