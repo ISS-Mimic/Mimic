@@ -17,7 +17,7 @@ def fetch_tle_from_celestrak(url):
 
 
 def getTLE_ISS():
-    config_filename = 'C:/Users/samrt/Documents/Mimic_Full_Dev/Pi/iss_tle_config.json'  # Update the path as necessary
+    config_filename = '/dev/shm/iss_tle_config.json'  # Update the path as necessary
     iss_tle_url = 'https://celestrak.com/NORAD/elements/stations.txt'
 
     # Check if the config file exists and has a valid timestamp
