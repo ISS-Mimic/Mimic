@@ -18,6 +18,9 @@ if "bullseye" in distro.codename():
 else:
     bullseye = False
 
+print("Deleting 3D print folders to free up space")
+os.system('rm 3D_Printing/*')
+
 def run_command(cmd):
     print("{}".format(cmd))
     print((subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True)).decode("utf-8"))
