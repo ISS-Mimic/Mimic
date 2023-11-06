@@ -1,9 +1,16 @@
 #!/usr/bin/python3
 import os
+import distro
 import sys
 import subprocess
 import argparse
 import shutil
+
+if "bullseye" in distro.linux_distribution():
+    bullseye = True
+    print("bullseye detected /n")
+else:
+    bullseye = False
 
 def run_command(cmd):
     print("{}".format(cmd))
@@ -13,9 +20,14 @@ def run_install(packages, method):
     if method == "sudo apt-get":
         method = "sudo apt-get -y"
         install_string = "{} install {}".format(method, packages)
+        run_command(install_string)
     else:
         install_string = "{} install {} --break-system-packages".format(method, packages)
-    run_command(install_string)
+        try:
+            run_command(install_string)
+        except Exception as e:
+            install_string = "{} install {}".format(method, packages)
+            run_command(install_string)v
 
 def replace_kivy_config(username):
     kivy_config_path = "/home/{}/.kivy/config.ini".format(username)
@@ -46,13 +58,16 @@ def main():
     run_install("python3-scipy", "sudo apt-get") #required for nightshade
     run_install("libatlas-base-dev", "sudo apt-get") #fix numpy issue
     run_install("python3-ephem", "sudo apt-get") #python libs for mimic
-    run_install("python3-pytz", "sudo apt-get") #python libs for mimic
+    run_install("python3-arrow", "sudo apt-get") #python libs for mimic
     run_install("python3-matplotlib", "sudo apt-get") #python libs for mimic
     run_install("python3-pyudev", "sudo apt-get") #python libs for mimic
     run_install("lightstreamer-client-lib", "python -m pip") #iss telemetry service
 
     print("\nInstalling Kivy requirements and package.")
-    run_install("python3-kivy", "sudo apt-get")
+    if bullseye:
+        run_install("kivy", "python -m pip") #iss telemetry service
+    else:
+        run_install("python3-kivy", "sudo apt-get")
     run_command("python -c 'import kivy'") # run kivy init to create the config.ini file
     print("Replacing Kivy config file")
     replace_kivy_config(username)
