@@ -58,7 +58,10 @@ def main():
     run_install("python3-scipy", "sudo apt-get") #required for nightshade
     run_install("libatlas-base-dev", "sudo apt-get") #fix numpy issue
     run_install("python3-ephem", "sudo apt-get") #python libs for mimic
-    run_install("python3-arrow", "sudo apt-get") #python libs for mimic
+    if bullseye:
+        run_install("pytz", "python -m pip") #python libs for mimic
+    else:
+        run_install("python3-pytzdata", "sudo apt-get") #python libs for mimic
     run_install("python3-matplotlib", "sudo apt-get") #python libs for mimic
     run_install("python3-pyudev", "sudo apt-get") #python libs for mimic
     run_install("lightstreamer-client-lib", "python -m pip") #iss telemetry service
@@ -71,6 +74,15 @@ def main():
     run_command("python -c 'import kivy'") # run kivy init to create the config.ini file
     print("Replacing Kivy config file")
     replace_kivy_config(username)
+
+    print("fetching ISS TLE to populate initial config file")
+    os.system('python Pi/getTLE_ISS.py')
+    print("fetching TDRS TLE to populate initial config file")
+    os.system('python Pi/getTLE_TDRS.py')
+    print("running nightshade to populate the initial orbit map")
+    os.system('python Pi/NightShade.py')
+    print("running orbitGlobe to populate the initial 3d orbit map")
+    os.system('python Pi/orbitGlobe.py')
    
 if __name__ == '__main__':
     main()
