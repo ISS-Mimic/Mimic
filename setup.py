@@ -8,7 +8,7 @@ import shutil
 
 if "bullseye" in distro.linux_distribution():
     bullseye = True
-    print("bullseye detected /n")
+    print("bullseye detected \n")
 else:
     bullseye = False
 
