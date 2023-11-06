@@ -20,7 +20,7 @@ def fetch_tdrs_tles_from_celestrak(url):
 
 
 def getTLE_TDRS():
-    config_filename = 'C:/Users/samrt/Documents/Mimic_Full_Dev/Pi/tdrs_tle_config.json'  # Update the path as necessary
+    config_filename = '/dev/shm/tdrs_tle_config.json'  # Update the path as necessary
     tdrs_tle_url = 'https://celestrak.com/NORAD/elements/tdrss.txt'
 
     # Check if the config file exists and has a valid timestamp
