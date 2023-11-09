@@ -2697,6 +2697,10 @@ class MainApp(App):
             period = (2*math.pi/math.sqrt(mu))*math.pow(sma,3/2) #seconds
             self.orbit_data.ids.apogee_height.text = str("{:.2f}".format(apogee_height))
             self.orbit_data.ids.perigee_height.text = str("{:.2f}".format(perigee_height))
+            
+            gmt_time = datetime.utcnow()
+            gmt = gmt_time.strftime('%j:%H:%M:%S')
+            self.orbit.ids.gmt.text = gmt                
 
         cmg1_active = int((values[145])[0])
         cmg2_active = int((values[146])[0])
