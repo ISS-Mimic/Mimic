@@ -10,10 +10,9 @@ import glob #used to parse serial port names
 import sqlite3 #used to access ISS telemetry database
 import pytz #used for timezone conversion in orbit pass predictions
 from bs4 import BeautifulSoup #used to parse webpages for data (EVA stats, ISS TLE)
-import numpy as np
 import ephem #used for TLE orbit information on orbit screen
 import serial #used to send data over serial to arduino
-import json # used for serial port config
+import json # used for serial port config and storing TLEs and crew info
 from pyudev import Context, Devices, Monitor, MonitorObserver # for automatically detecting Arduinos
 import argparse
 import sys
@@ -144,10 +143,11 @@ def get_tty_dev_names(context):
     devices = context.list_devices(subsystem='tty')
     for d in devices:
         for k, v in d.items():
-            if k is not None and k == 'ID_VENDOR':
+            # Check for both ID_VENDOR and ID_USB_VENDOR
+            if k in ['ID_VENDOR', 'ID_USB_VENDOR']:
                 names.append(parse_tty_name(d, v))
     return names
-
+        
 def get_config_data():
     """ Get the JSON config data. """
     data = {}
@@ -357,7 +357,7 @@ class MainScreen(Screen):
             p2.kill()
         except Exception as e:
             logWrite(e)
-        os.system('rm /dev/shm/*') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
+        os.system('rm /dev/shm/*.db*') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
         staleTelemetry()
         logWrite("Successfully stopped ISS telemetry javascript and removed database")
 
@@ -1385,22 +1385,28 @@ class MainApp(App):
         Clock.schedule_interval(self.update_labels, 1) #all telemetry wil refresh and get pushed to arduinos every half second!
         Clock.schedule_interval(self.animate3, 0.1)
         Clock.schedule_interval(self.orbitUpdate, 1)
-        #Clock.schedule_interval(self.checkCrew, 600)
+        #Clock.schedule_interval(self.checkCrew, 600) #disabling for now issue #407
         if startup:
             startup = False
 
-        #Clock.schedule_once(self.checkCrew, 30)
-        #Clock.schedule_once(self.checkBlogforEVA, 30)
-        Clock.schedule_once(self.getTLE, 15) #uncomment when internet works again
-        Clock.schedule_once(self.TDRSupdate, 30) #uncomment when internet works again
+        #Clock.schedule_once(self.checkCrew, 30) #disabling for now issue #407
+        #Clock.schedule_once(self.checkBlogforEVA, 30) #disabling for now issue #407
+        Clock.schedule_once(self.updateISS_TLE, 15)
+        Clock.schedule_once(self.updateTDRS_TLE, 15)
+        Clock.schedule_once(self.updateOrbitGlobe, 15)
+        Clock.schedule_once(self.TDRSupdate, 30)
+        Clock.schedule_once(self.updateNightShade, 20)
 
-        Clock.schedule_interval(self.getTLE, 300)
+        Clock.schedule_interval(self.updateISS_TLE, 300)
+        Clock.schedule_interval(self.updateTDRS_TLE, 300)
+        Clock.schedule_interval(self.updateOrbitGlobe, 10)
         Clock.schedule_interval(self.TDRSupdate, 600)
         Clock.schedule_interval(self.check_internet, 1)
 
         #schedule the orbitmap to update with shadow every 5 mins
         Clock.schedule_interval(self.updateNightShade, 120)
         Clock.schedule_interval(self.updateOrbitMap, 10)
+        Clock.schedule_interval(self.updateOrbitGlobeImage, 10)
         Clock.schedule_interval(self.checkTDRS, 5)
         return root
 
@@ -1444,12 +1450,26 @@ class MainApp(App):
         urlindex = urlindex + 1
         if urlindex > urlsize-1:
             urlindex = 0
+                
     def updateOrbitMap(self, dt):
-        self.orbit_screen.ids.OrbitMap.source = mimic_directory + '/Mimic/Pi/imgs/orbit/map.jpg'
+        self.orbit_screen.ids.OrbitMap.source = '/dev/shm/map.jpg'
         self.orbit_screen.ids.OrbitMap.reload()
+
+    def updateOrbitGlobeImage(self, dt):
+        self.orbit_screen.ids.orbit3d.source = '/dev/shm/globe.png'
+        self.orbit_screen.ids.orbit3d.reload()
+
+    def updateOrbitGlobe(self, dt):
+        proc = Popen(["python", mimic_directory + "/Mimic/Pi/orbitGlobe.py"])
 
     def updateNightShade(self, dt):
         proc = Popen(["python", mimic_directory + "/Mimic/Pi/NightShade.py"])
+
+    def updateISS_TLE(self, dt):
+        proc = Popen(["python", mimic_directory + "/Mimic/Pi/getTLE_ISS.py"])
+
+    def updateTDRS_TLE(self, dt):
+        proc = Popen(["python", mimic_directory + "/Mimic/Pi/getTLE_TDRS.py"])
 
     def checkTDRS(self, dt):
         global activeTDRS1
@@ -1682,8 +1702,25 @@ class MainApp(App):
         manualcontrol = args[0]
 
     def TDRSupdate(self, dt):
-        global TDRS12_TLE, TDRS6_TLE, TDRS10_TLE, TDRS11_TLE, TDRS7_TLE
-        
+        tdrs_config_filename = '/dev/shm/tdrs_tle_config.json'
+
+        # Load TDRS TLE data from the config file
+        try:
+            with open(tdrs_config_filename, 'r') as file:
+                config = json.load(file)
+            tdrs_tles = config['TDRS_TLEs']
+            # You should have keys like 'TDRS12_TLE', 'TDRS6_TLE', etc. in your TDRS_TLEs dictionary.
+        except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
+            # Handle the error: if the config is missing or corrupt, TDRS TLEs can't be updated.
+            print(f"Error loading TDRS TLE data: {e}")
+            return  # Exit the function if we can't get the TLE data
+
+        TDRS12_TLE = ephem.readtle("TDRS 12", tdrs_tles.get('TDRS 12')[0], tdrs_tles.get('TDRS 12')[1])
+        TDRS6_TLE = ephem.readtle("TDRS 6",tdrs_tles.get('TDRS 6')[0],tdrs_tles.get('TDRS 6')[1])
+        TDRS10_TLE = ephem.readtle("TDRS 10", tdrs_tles.get('TDRS 10')[0], tdrs_tles.get('TDRS 10')[1])
+        TDRS11_TLE = ephem.readtle("TDRS 11", tdrs_tles.get('TDRS 11')[0], tdrs_tles.get('TDRS 11')[1])
+        TDRS7_TLE = ephem.readtle("TDRS 7", tdrs_tles.get('TDRS 7')[0], tdrs_tles.get('TDRS 7')[1])
+
         #TEMP FIX TO ERROR DO NOT MERGE THESE LINES       
         if self.orbit_screen.ids.OrbitMap.texture_size[0] == 0: #temp fix to ensure no divide by 0
             normalizedX = 1
@@ -1875,8 +1912,18 @@ class MainApp(App):
         self.orbit_screen.ids.ZOElabel.pos_hint = {"center_x": scaleLatLon(0, 77)['newLon'], "center_y": scaleLatLon(0, 77)['newLat']+0.1}
 
     def orbitUpdate(self, dt):
-        global overcountry, ISS_TLE, ISS_TLE_Line1, ISS_TLE_Line2, ISS_TLE_Acquired, sgant_elevation, sgant_elevation_old, sgant_xelevation, aos, oldtdrs, tdrs, logged
-        global TDRS12_TLE, TDRS6_TLE, TDRS7_TLE, TDRS10_TLE, TDRS11_TLE, tdrs1, tdrs2, tdrs_timestamp
+        iss_config_filename = '/dev/shm/iss_tle_config.json'
+        try:
+            with open(iss_config_filename, 'r') as file:
+                config = json.load(file)
+                ISS_TLE_Line1 = config['ISS_TLE_Line1']
+                ISS_TLE_Line2 = config['ISS_TLE_Line2']
+                ISS_TLE = ephem.readtle("ISS (ZARYA)",config['ISS_TLE_Line1'],config['ISS_TLE_Line2'])
+        except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
+            # If any error occurs, we assume we need to fetch a new TLE
+            print(e)
+            return
+
         def scaleLatLon(latitude, longitude):
             #converting lat lon to x, y for orbit map
             fromLatSpan = 180.0
@@ -1909,10 +1956,10 @@ class MainApp(App):
 
             yr = year - 2000
 
-            nleap = int(np.floor((year - 1601.0) / 4.0))
+            nleap = int(math.floor((year - 1601.0) / 4.0))
             nleap -= 99
             if year <= 1900:
-                ncent = int(np.floor((year - 1601.0) / 100.0))
+                ncent = int(math.floor((year - 1601.0) / 100.0))
                 ncent = 3 - ncent
                 nleap = nleap + ncent
 
@@ -1926,21 +1973,21 @@ class MainApp(App):
             lmean = l0 + 0.9856474 * df
 
             # Mean anomaly in radians:
-            grad = np.radians(g0 + 0.9856003 * df)
+            grad = math.radians(g0 + 0.9856003 * df)
 
             # Ecliptic longitude:
-            lmrad = np.radians(lmean + 1.915 * np.sin(grad)
-                               + 0.020 * np.sin(2.0 * grad))
-            sinlm = np.sin(lmrad)
+            lmrad = math.radians(lmean + 1.915 * math.sin(grad)
+                               + 0.020 * math.sin(2.0 * grad))
+            sinlm = math.sin(lmrad)
 
             # Obliquity of ecliptic in radians:
-            epsrad = np.radians(23.439 - 4e-7 * (df + 365 * yr + nleap))
+            epsrad = math.radians(23.439 - 4e-7 * (df + 365 * yr + nleap))
 
             # Right ascension:
-            alpha = np.degrees(np.arctan2(np.cos(epsrad) * sinlm, np.cos(lmrad)))
+            alpha = math.degrees(math.atan2(math.cos(epsrad) * sinlm, math.cos(lmrad)))
 
             # Declination, which is also the subsolar latitude:
-            sslat = np.degrees(np.arcsin(np.sin(epsrad) * sinlm))
+            sslat = math.degrees(math.asin(math.sin(epsrad) * sinlm))
 
             # Equation of time (degrees):
             etdeg = lmean - alpha
@@ -1954,456 +2001,211 @@ class MainApp(App):
 
             return sslat, sslon
 
-        if ISS_TLE_Acquired:
-            ISS_TLE.compute(datetime.utcnow())
-            #------------------Latitude/Longitude Stuff---------------------------
-            latitude = float(str(ISS_TLE.sublat).split(':')[0]) + float(str(ISS_TLE.sublat).split(':')[1])/60 + float(str(ISS_TLE.sublat).split(':')[2])/3600
-            longitude = float(str(ISS_TLE.sublong).split(':')[0]) + float(str(ISS_TLE.sublong).split(':')[1])/60 + float(str(ISS_TLE.sublong).split(':')[2])/3600
+        ISS_TLE.compute(datetime.utcnow())
+        #------------------Latitude/Longitude Stuff---------------------------
+        latitude = float(str(ISS_TLE.sublat).split(':')[0]) + float(str(ISS_TLE.sublat).split(':')[1])/60 + float(str(ISS_TLE.sublat).split(':')[2])/3600
+        longitude = float(str(ISS_TLE.sublong).split(':')[0]) + float(str(ISS_TLE.sublong).split(':')[1])/60 + float(str(ISS_TLE.sublong).split(':')[2])/3600
 
-            #inclination = ISS_TLE.inc
-        
-            #TEMP FIX TO ERROR DO NOT MERGE THESE LINES       
-            if self.orbit_screen.ids.OrbitMap.texture_size[0] == 0: #temp fix to ensure no divide by 0
-                normalizedX = 1
+        #inclination = ISS_TLE.inc
+
+        #TEMP FIX TO ERROR DO NOT MERGE THESE LINES
+        if self.orbit_screen.ids.OrbitMap.texture_size[0] == 0: #temp fix to ensure no divide by 0
+            normalizedX = 1
+        else:
+            normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
+
+        if self.orbit_screen.ids.OrbitMap.texture_size[1] == 0:
+            normalizedY = 1
+        else:
+            normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
+
+
+        self.orbit_screen.ids.OrbitISStiny.pos = (
+                scaleLatLon2(latitude, longitude)['new_x'] - ((self.orbit_screen.ids.OrbitISStiny.width / 2) * normalizedX * 2), #had to fudge a little not sure why
+                scaleLatLon2(latitude, longitude)['new_y'] - ((self.orbit_screen.ids.OrbitISStiny.height / 2) * normalizedY * 2)) #had to fudge a little not sure why
+
+        #get the position of the sub solar point to add the sun icon to the map
+        sunlatitude, sunlongitude = subsolar(datetime.utcnow())
+
+        self.orbit_screen.ids.OrbitSun.pos = (
+                scaleLatLon2(int(sunlatitude), int(sunlongitude))['new_x'] - ((self.orbit_screen.ids.OrbitSun.width / 2) * normalizedX * 2), #had to fudge a little not sure why
+                scaleLatLon2(int(sunlatitude), int(sunlongitude))['new_y'] - ((self.orbit_screen.ids.OrbitSun.height / 2) * normalizedY * 2)) #had to fudge a little not sure why
+
+        #draw the ISS groundtrack behind and ahead of the 180 longitude cutoff
+        ISS_groundtrack = []
+        ISS_groundtrack2 = []
+        date_i = datetime.utcnow()
+        groundtrackdate = datetime.utcnow()
+        while date_i < groundtrackdate + timedelta(minutes=95):
+            ISS_TLE.compute(date_i)
+
+            ISSlon_gt = float(str(ISS_TLE.sublong).split(':')[0]) + float(
+                str(ISS_TLE.sublong).split(':')[1]) / 60 + float(str(ISS_TLE.sublong).split(':')[2]) / 3600
+            ISSlat_gt = float(str(ISS_TLE.sublat).split(':')[0]) + float(
+                str(ISS_TLE.sublat).split(':')[1]) / 60 + float(str(ISS_TLE.sublat).split(':')[2]) / 3600
+
+            if ISSlon_gt < longitude-1: #if the propagated groundtrack is behind the iss (i.e. wraps around the screen) add to new groundtrack line
+                ISS_groundtrack2.append(scaleLatLon2(ISSlat_gt, ISSlon_gt)['new_x'])
+                ISS_groundtrack2.append(scaleLatLon2(ISSlat_gt, ISSlon_gt)['new_y'])
             else:
-                normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
-            
-            if self.orbit_screen.ids.OrbitMap.texture_size[1] == 0:
-                normalizedY = 1
-            else:
-                normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
-                
+                ISS_groundtrack.append(scaleLatLon2(ISSlat_gt, ISSlon_gt)['new_x'])
+                ISS_groundtrack.append(scaleLatLon2(ISSlat_gt, ISSlon_gt)['new_y'])
 
-            self.orbit_screen.ids.OrbitISStiny.pos = (
-                    scaleLatLon2(latitude, longitude)['new_x'] - ((self.orbit_screen.ids.OrbitISStiny.width / 2) * normalizedX * 2), #had to fudge a little not sure why
-                    scaleLatLon2(latitude, longitude)['new_y'] - ((self.orbit_screen.ids.OrbitISStiny.height / 2) * normalizedY * 2)) #had to fudge a little not sure why
+            date_i += timedelta(seconds=60)
 
-            #get the position of the sub solar point to add the sun icon to the map
-            sunlatitude, sunlongitude = subsolar(datetime.utcnow())
+        self.orbit_screen.ids.ISSgroundtrack.width = 1
+        self.orbit_screen.ids.ISSgroundtrack.col = (1, 0, 0, 1)
+        self.orbit_screen.ids.ISSgroundtrack.points = ISS_groundtrack
 
-            self.orbit_screen.ids.OrbitSun.pos = (
-                    scaleLatLon2(int(sunlatitude), int(sunlongitude))['new_x'] - ((self.orbit_screen.ids.OrbitSun.width / 2) * normalizedX * 2), #had to fudge a little not sure why
-                    scaleLatLon2(int(sunlatitude), int(sunlongitude))['new_y'] - ((self.orbit_screen.ids.OrbitSun.height / 2) * normalizedY * 2)) #had to fudge a little not sure why
+        self.orbit_screen.ids.ISSgroundtrack2.width = 1
+        self.orbit_screen.ids.ISSgroundtrack2.col = (1, 0, 0, 1)
+        self.orbit_screen.ids.ISSgroundtrack2.points = ISS_groundtrack2
 
-            #draw the ISS groundtrack behind and ahead of the 180 longitude cutoff
-            ISS_groundtrack = []
-            ISS_groundtrack2 = []
-            date_i = datetime.utcnow()
-            groundtrackdate = datetime.utcnow()
-            while date_i < groundtrackdate + timedelta(minutes=95):
-                ISS_TLE.compute(date_i)
+        self.orbit_screen.ids.latitude.text = str("{:.2f}".format(latitude))
+        self.orbit_screen.ids.longitude.text = str("{:.2f}".format(longitude))
 
-                ISSlon_gt = float(str(ISS_TLE.sublong).split(':')[0]) + float(
-                    str(ISS_TLE.sublong).split(':')[1]) / 60 + float(str(ISS_TLE.sublong).split(':')[2]) / 3600
-                ISSlat_gt = float(str(ISS_TLE.sublat).split(':')[0]) + float(
-                    str(ISS_TLE.sublat).split(':')[1]) / 60 + float(str(ISS_TLE.sublat).split(':')[2]) / 3600
+        TDRScursor.execute('select TDRS1 from tdrs')
+        tdrs1 = int(TDRScursor.fetchone()[0])
+        TDRScursor.execute('select TDRS2 from tdrs')
+        tdrs2 = int(TDRScursor.fetchone()[0])
+        TDRScursor.execute('select Timestamp from tdrs')
+        tdrs_timestamp = TDRScursor.fetchone()[0]
 
-                if ISSlon_gt < longitude-1: #if the propagated groundtrack is behind the iss (i.e. wraps around the screen) add to new groundtrack line
-                    ISS_groundtrack2.append(scaleLatLon2(ISSlat_gt, ISSlon_gt)['new_x'])
-                    ISS_groundtrack2.append(scaleLatLon2(ISSlat_gt, ISSlon_gt)['new_y'])
-                else:
-                    ISS_groundtrack.append(scaleLatLon2(ISSlat_gt, ISSlon_gt)['new_x'])
-                    ISS_groundtrack.append(scaleLatLon2(ISSlat_gt, ISSlon_gt)['new_y'])
+        # THIS SECTION NEEDS IMPROVEMENT
+        tdrs = "n/a"
+        self.ct_sgant_screen.ids.tdrs_east12.angle = (-1*longitude)-41
+        self.ct_sgant_screen.ids.tdrs_east6.angle = (-1*longitude)-46
+        self.ct_sgant_screen.ids.tdrs_z7.angle = ((-1*longitude)-41)+126
+        self.ct_sgant_screen.ids.tdrs_west11.angle = ((-1*longitude)-41)-133
+        self.ct_sgant_screen.ids.tdrs_west10.angle = ((-1*longitude)-41)-130
 
-                date_i += timedelta(seconds=60)
+        if ((tdrs1 or tdrs2) == 12) and float(aos) == 1.0:
+            tdrs = "east-12"
+            self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East-12"
+        if ((tdrs1 or tdrs2) == 6) and float(aos) == 1.0:
+            tdrs = "east-6"
+            self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East-6"
+        if ((tdrs1 or tdrs2) == 10) and float(aos) == 1.0:
+            tdrs = "west-10"
+            self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West-10"
+        if ((tdrs1 or tdrs2) == 11) and float(aos) == 1.0:
+            tdrs = "west-11"
+            self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West-11"
+        if ((tdrs1 or tdrs2) == 7) and float(aos) == 1.0:
+            tdrs = "z-7"
+            self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-Z-7"
+        elif tdrs1 == 0 and tdrs2 == 0:
+            self.ct_sgant_screen.ids.tdrs_label.text = "-"
+            tdrs = "----"
 
-            self.orbit_screen.ids.ISSgroundtrack.width = 1
-            self.orbit_screen.ids.ISSgroundtrack.col = (1, 0, 0, 1)
-            self.orbit_screen.ids.ISSgroundtrack.points = ISS_groundtrack
+        self.ct_sgant_screen.ids.tdrs_z7.color = 1, 1, 1, 1
+        self.orbit_screen.ids.TDRSwLabel.color = (1,1,1,1)
+        self.orbit_screen.ids.TDRSeLabel.color = (1,1,1,1)
+        self.orbit_screen.ids.TDRSzLabel.color = (1,1,1,1)
+        self.orbit_screen.ids.TDRS11.col = (1,1,1,1)
+        self.orbit_screen.ids.TDRS10.col = (1,1,1,1)
+        self.orbit_screen.ids.TDRS12.col = (1,1,1,1)
+        self.orbit_screen.ids.TDRS6.col = (1,1,1,1)
+        self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
+        self.orbit_screen.ids.ZOElabel.color = (1,1,1,1)
+        self.orbit_screen.ids.ZOE.col = (1,0.5,0,0.5)
 
-            self.orbit_screen.ids.ISSgroundtrack2.width = 1
-            self.orbit_screen.ids.ISSgroundtrack2.col = (1, 0, 0, 1)
-            self.orbit_screen.ids.ISSgroundtrack2.points = ISS_groundtrack2
-
-            self.orbit_screen.ids.latitude.text = str("{:.2f}".format(latitude))
-            self.orbit_screen.ids.longitude.text = str("{:.2f}".format(longitude))
-
-            TDRScursor.execute('select TDRS1 from tdrs')
-            tdrs1 = int(TDRScursor.fetchone()[0])
-            TDRScursor.execute('select TDRS2 from tdrs')
-            tdrs2 = int(TDRScursor.fetchone()[0])
-            TDRScursor.execute('select Timestamp from tdrs')
-            tdrs_timestamp = TDRScursor.fetchone()[0]
-
-            # THIS SECTION NEEDS IMPROVEMENT
-            tdrs = "n/a"
-            self.ct_sgant_screen.ids.tdrs_east12.angle = (-1*longitude)-41
-            self.ct_sgant_screen.ids.tdrs_east6.angle = (-1*longitude)-46
-            self.ct_sgant_screen.ids.tdrs_z7.angle = ((-1*longitude)-41)+126
-            self.ct_sgant_screen.ids.tdrs_west11.angle = ((-1*longitude)-41)-133
-            self.ct_sgant_screen.ids.tdrs_west10.angle = ((-1*longitude)-41)-130
-
-            if ((tdrs1 or tdrs2) == 12) and float(aos) == 1.0:
-                tdrs = "east-12"
-                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East-12"
-            if ((tdrs1 or tdrs2) == 6) and float(aos) == 1.0:
-                tdrs = "east-6"
-                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East-6"
-            if ((tdrs1 or tdrs2) == 10) and float(aos) == 1.0:
-                tdrs = "west-10"
-                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West-10"
-            if ((tdrs1 or tdrs2) == 11) and float(aos) == 1.0:
-                tdrs = "west-11"
-                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West-11"
-            if ((tdrs1 or tdrs2) == 7) and float(aos) == 1.0:
-                tdrs = "z-7"
-                self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-Z-7"
-            elif tdrs1 == 0 and tdrs2 == 0:
-                self.ct_sgant_screen.ids.tdrs_label.text = "-"
-                tdrs = "----"
-
-            self.ct_sgant_screen.ids.tdrs_z7.color = 1, 1, 1, 1
-            self.orbit_screen.ids.TDRSwLabel.color = (1,1,1,1)
-            self.orbit_screen.ids.TDRSeLabel.color = (1,1,1,1)
-            self.orbit_screen.ids.TDRSzLabel.color = (1,1,1,1)
-            self.orbit_screen.ids.TDRS11.col = (1,1,1,1)
+        if "10" in tdrs: #tdrs10 and 11 west
+            self.orbit_screen.ids.TDRSwLabel.color = (1,0,1,1)
+            self.orbit_screen.ids.TDRS10.col = (1,0,1,1)
+        if "11" in tdrs: #tdrs10 and 11 west
+            self.orbit_screen.ids.TDRSwLabel.color = (1,0,1,1)
+            self.orbit_screen.ids.TDRS11.col = (1,0,1,1)
             self.orbit_screen.ids.TDRS10.col = (1,1,1,1)
-            self.orbit_screen.ids.TDRS12.col = (1,1,1,1)
-            self.orbit_screen.ids.TDRS6.col = (1,1,1,1)
-            self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
-            self.orbit_screen.ids.ZOElabel.color = (1,1,1,1)
-            self.orbit_screen.ids.ZOE.col = (1,0.5,0,0.5)
+        if "6" in tdrs: #tdrs6 and 12 east
+            self.orbit_screen.ids.TDRSeLabel.color = (1,0,1,1)
+            self.orbit_screen.ids.TDRS6.col = (1,0,1,1)
+        if "12" in tdrs: #tdrs6 and 12 east
+            self.orbit_screen.ids.TDRSeLabel.color = (1,0,1,1)
+            self.orbit_screen.ids.TDRS12.col = (1,0,1,1)
+        if "7" in tdrs: #tdrs7 z
+            self.ct_sgant_screen.ids.tdrs_z7.color = 1, 1, 1, 1
+            self.orbit_screen.ids.TDRSzLabel.color = (1,0,1,1)
+            self.orbit_screen.ids.TDRS7.col = (1,0,1,1)
+            self.orbit_screen.ids.ZOElabel.color = 0, 0, 0, 0
+            self.orbit_screen.ids.ZOE.col = (0,0,0,0)
 
-            if "10" in tdrs: #tdrs10 and 11 west
-                self.orbit_screen.ids.TDRSwLabel.color = (1,0,1,1)
-                self.orbit_screen.ids.TDRS10.col = (1,0,1,1)
-            if "11" in tdrs: #tdrs10 and 11 west
-                self.orbit_screen.ids.TDRSwLabel.color = (1,0,1,1)
-                self.orbit_screen.ids.TDRS11.col = (1,0,1,1)
-                self.orbit_screen.ids.TDRS10.col = (1,1,1,1)
-            if "6" in tdrs: #tdrs6 and 12 east
-                self.orbit_screen.ids.TDRSeLabel.color = (1,0,1,1)
-                self.orbit_screen.ids.TDRS6.col = (1,0,1,1)
-            if "12" in tdrs: #tdrs6 and 12 east
-                self.orbit_screen.ids.TDRSeLabel.color = (1,0,1,1)
-                self.orbit_screen.ids.TDRS12.col = (1,0,1,1)
-            if "7" in tdrs: #tdrs7 z
-                self.ct_sgant_screen.ids.tdrs_z7.color = 1, 1, 1, 1
-                self.orbit_screen.ids.TDRSzLabel.color = (1,0,1,1)
-                self.orbit_screen.ids.TDRS7.col = (1,0,1,1)
-                self.orbit_screen.ids.ZOElabel.color = 0, 0, 0, 0
-                self.orbit_screen.ids.ZOE.col = (0,0,0,0)
+        #------------------Orbit Stuff---------------------------
+        now = datetime.utcnow()
+        mins = (now - now.replace(hour=0,minute=0,second=0,microsecond=0)).total_seconds()
+        orbits_today = math.floor((float(mins)/60)/90)
+        self.orbit_screen.ids.dailyorbit.text = str(int(orbits_today)) #display number of orbits since utc midnight
 
-            #------------------Orbit Stuff---------------------------
-            now = datetime.utcnow()
-            mins = (now - now.replace(hour=0,minute=0,second=0,microsecond=0)).total_seconds()
-            orbits_today = math.floor((float(mins)/60)/90)
-            self.orbit_screen.ids.dailyorbit.text = str(int(orbits_today)) #display number of orbits since utc midnight
+        year = int('20' + str(ISS_TLE_Line1[18:20]))
+        decimal_days = float(ISS_TLE_Line1[20:32])
+        converted_time = datetime(year, 1 ,1) + timedelta(decimal_days - 1)
+        time_since_epoch = ((now - converted_time).total_seconds()) #convert time difference to hours
+        totalorbits = int(ISS_TLE_Line2[63:68]) + 100000 + int(float(time_since_epoch)/(90*60)) #add number of orbits since the tle was generated
+        self.orbit_screen.ids.totalorbits.text = str(totalorbits) #display number of orbits since utc midnight
+        #------------------ISS Pass Detection---------------------------
+        location = ephem.Observer()
+        location.lon         = '-95:21:59' #will next to make these an input option
+        location.lat         = '29:45:43'
+        location.elevation   = 10
+        location.name        = 'location'
+        location.horizon    = '10'
+        location.pressure = 0
+        location.date = datetime.utcnow()
 
-            year = int('20' + str(ISS_TLE_Line1[18:20]))
-            decimal_days = float(ISS_TLE_Line1[20:32])
-            converted_time = datetime(year, 1 ,1) + timedelta(decimal_days - 1)
-            time_since_epoch = ((now - converted_time).total_seconds()) #convert time difference to hours
-            totalorbits = int(ISS_TLE_Line2[63:68]) + 100000 + int(float(time_since_epoch)/(90*60)) #add number of orbits since the tle was generated
-            self.orbit_screen.ids.totalorbits.text = str(totalorbits) #display number of orbits since utc midnight
-            #------------------ISS Pass Detection---------------------------
-            location = ephem.Observer()
-            location.lon         = '-95:21:59' #will next to make these an input option
-            location.lat         = '29:45:43'
-            location.elevation   = 10
-            location.name        = 'location'
-            location.horizon    = '10'
-            location.pressure = 0
-            location.date = datetime.utcnow()
+        #use location to draw dot on orbit map
+        mylatitude = float(str(location.lat).split(':')[0]) + float(str(location.lat).split(':')[1])/60 + float(str(location.lat).split(':')[2])/3600
+        mylongitude = float(str(location.lon).split(':')[0]) + float(str(location.lon).split(':')[1])/60 + float(str(location.lon).split(':')[2])/3600
+        self.orbit_screen.ids.mylocation.col = (0,0,1,1)
+        self.orbit_screen.ids.mylocation.pos = (scaleLatLon2(mylatitude, mylongitude)['new_x']-((self.orbit_screen.ids.mylocation.width/2)*normalizedX),scaleLatLon2(mylatitude, mylongitude)['new_y']-((self.orbit_screen.ids.mylocation.height/2)*normalizedY))
 
-            #use location to draw dot on orbit map
-            mylatitude = float(str(location.lat).split(':')[0]) + float(str(location.lat).split(':')[1])/60 + float(str(location.lat).split(':')[2])/3600
-            mylongitude = float(str(location.lon).split(':')[0]) + float(str(location.lon).split(':')[1])/60 + float(str(location.lon).split(':')[2])/3600
-            self.orbit_screen.ids.mylocation.col = (0,0,1,1)
-            self.orbit_screen.ids.mylocation.pos = (scaleLatLon2(mylatitude, mylongitude)['new_x']-((self.orbit_screen.ids.mylocation.width/2)*normalizedX),scaleLatLon2(mylatitude, mylongitude)['new_y']-((self.orbit_screen.ids.mylocation.height/2)*normalizedY))
+        def isVisible(pass_info):
+            def seconds_between(d1, d2):
+                return abs((d2 - d1).seconds)
 
-            def isVisible(pass_info):
-                def seconds_between(d1, d2):
-                    return abs((d2 - d1).seconds)
+            def datetime_from_time(tr):
+                year, month, day, hour, minute, second = tr.tuple()
+                dt = dtime.datetime(year, month, day, hour, minute, int(second))
+                return dt
 
-                def datetime_from_time(tr):
-                    year, month, day, hour, minute, second = tr.tuple()
-                    dt = dtime.datetime(year, month, day, hour, minute, int(second))
-                    return dt
+            tr, azr, tt, altt, ts, azs = pass_info
+            max_time = datetime_from_time(tt)
 
-                tr, azr, tt, altt, ts, azs = pass_info
-                max_time = datetime_from_time(tt)
+            location.date = max_time
 
-                location.date = max_time
+            sun = ephem.Sun()
+            sun.compute(location)
+            ISS_TLE.compute(location)
+            sun_alt = float(str(sun.alt).split(':')[0]) + float(str(sun.alt).split(':')[1])/60 + float(str(sun.alt).split(':')[2])/3600
+            visible = False
+            if ISS_TLE.eclipsed is False and -18 < sun_alt < -6:
+                visible = True
+            #on the pass screen add info for why not visible
+            return visible
 
-                sun = ephem.Sun()
-                sun.compute(location)
-                ISS_TLE.compute(location)
-                sun_alt = float(str(sun.alt).split(':')[0]) + float(str(sun.alt).split(':')[1])/60 + float(str(sun.alt).split(':')[2])/3600
-                visible = False
-                if ISS_TLE.eclipsed is False and -18 < sun_alt < -6:
-                    visible = True
-                #on the pass screen add info for why not visible
-                return visible
+        ISS_TLE.compute(location) #compute tle propagation based on provided location
+        nextpassinfo = location.next_pass(ISS_TLE)
 
-            ISS_TLE.compute(location) #compute tle propagation based on provided location
-            nextpassinfo = location.next_pass(ISS_TLE)
-
-            if nextpassinfo[0] is None:
-                self.orbit_screen.ids.iss_next_pass1.text = "n/a"
-                self.orbit_screen.ids.iss_next_pass2.text = "n/a"
-                self.orbit_screen.ids.countdown.text = "n/a"
+        if nextpassinfo[0] is None:
+            self.orbit_screen.ids.iss_next_pass1.text = "n/a"
+            self.orbit_screen.ids.iss_next_pass2.text = "n/a"
+            self.orbit_screen.ids.countdown.text = "n/a"
+        else:
+            nextpassdatetime = datetime.strptime(str(nextpassinfo[0]), '%Y/%m/%d %H:%M:%S') #convert to datetime object for timezone conversion
+            nextpassinfo_format = nextpassdatetime.replace(tzinfo=pytz.utc)
+            localtimezone = pytz.timezone('America/Chicago')
+            localnextpass = nextpassinfo_format.astimezone(localtimezone)
+            self.orbit_screen.ids.iss_next_pass1.text = str(localnextpass).split()[0] #display next pass time
+            self.orbit_screen.ids.iss_next_pass2.text = str(localnextpass).split()[1].split('-')[0] #display next pass time
+            timeuntilnextpass = nextpassinfo[0] - location.date
+            nextpasshours = timeuntilnextpass*24.0
+            nextpassmins = (nextpasshours-math.floor(nextpasshours))*60
+            nextpassseconds = (nextpassmins-math.floor(nextpassmins))*60
+            if isVisible(nextpassinfo):
+                self.orbit_screen.ids.ISSvisible.text = "Visible Pass!"
             else:
-                nextpassdatetime = datetime.strptime(str(nextpassinfo[0]), '%Y/%m/%d %H:%M:%S') #convert to datetime object for timezone conversion
-                nextpassinfo_format = nextpassdatetime.replace(tzinfo=pytz.utc)
-                localtimezone = pytz.timezone('America/Chicago')
-                localnextpass = nextpassinfo_format.astimezone(localtimezone)
-                self.orbit_screen.ids.iss_next_pass1.text = str(localnextpass).split()[0] #display next pass time
-                self.orbit_screen.ids.iss_next_pass2.text = str(localnextpass).split()[1].split('-')[0] #display next pass time
-                timeuntilnextpass = nextpassinfo[0] - location.date
-                nextpasshours = timeuntilnextpass*24.0
-                nextpassmins = (nextpasshours-math.floor(nextpasshours))*60
-                nextpassseconds = (nextpassmins-math.floor(nextpassmins))*60
-                if isVisible(nextpassinfo):
-                    self.orbit_screen.ids.ISSvisible.text = "Visible Pass!"
-                else:
-                    self.orbit_screen.ids.ISSvisible.text = "Not Visible"
-                self.orbit_screen.ids.countdown.text = str("{:.0f}".format(math.floor(nextpasshours))) + ":" + str("{:.0f}".format(math.floor(nextpassmins))) + ":" + str("{:.0f}".format(math.floor(nextpassseconds))) #display time until next pass
+                self.orbit_screen.ids.ISSvisible.text = "Not Visible"
+            self.orbit_screen.ids.countdown.text = str("{:.0f}".format(math.floor(nextpasshours))) + ":" + str("{:.0f}".format(math.floor(nextpassmins))) + ":" + str("{:.0f}".format(math.floor(nextpassseconds))) #display time until next pass
 
-    def getTLE(self, *args):
-        global ISS_TLE, ISS_TLE_Line1, ISS_TLE_Line2, ISS_TLE_Acquired
-        #iss_tle_url =  'https://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html' #the rev counter on this page is wrong
-        iss_tle_url =  'https://celestrak.org/NORAD/elements/stations.txt'
-        tdrs_tle_url =  'https://celestrak.org/NORAD/elements/tdrss.txt'
-
-        def on_success(req, data): #if TLE data is successfully received, it is processed here
-            global ISS_TLE, ISS_TLE_Line1, ISS_TLE_Line2, ISS_TLE_Acquired
-            soup = BeautifulSoup(data, "lxml")
-            body = iter(soup.get_text().split('\n'))
-            results = []
-            for line in body:
-                if "ISS (ZARYA)" in line:
-                    results.append(line)
-                    results.append(next(body))
-                    results.append(next(body))
-                    break
-            results = [i.strip() for i in results]
-
-            if len(results) > 0:
-                ISS_TLE_Line1 = results[1]
-                ISS_TLE_Line2 = results[2]
-                ISS_TLE = ephem.readtle("ISS (ZARYA)", str(ISS_TLE_Line1), str(ISS_TLE_Line2))
-                ISS_TLE_Acquired = True
-                logWrite("ISS TLE Acquired!")
-            else:
-                logWrite("ISS TLE Not Acquired")
-                ISS_TLE_Acquired = False
-
-        def on_redirect(req, result):
-            logWrite("Warning - Get ISS TLE failure (redirect)")
-            logWrite(result)
-
-        def on_failure(req, result):
-            logWrite("Warning - Get ISS TLE failure (url failure)")
-            logWrite(result)
-
-        def on_error(req, result):
-            logWrite("Warning - Get ISS TLE failure (url error)")
-            logWrite(result)
-
-        def on_success2(req2, data2): #if TLE data is successfully received, it is processed here
-            #retrieve the TLEs for every TDRS that ISS talks too
-            global TDRS12_TLE,TDRS6_TLE,TDRS11_TLE,TDRS10_TLE,TDRS7_TLE
-            soup = BeautifulSoup(data2, "lxml")
-            body = iter(soup.get_text().split('\n'))
-            results = ['','','']
-            #TDRS 12 TLE
-            for line in body:
-                if "TDRS 12" in line:
-                    results[0] = line
-                    results[1] = next(body)
-                    results[2] = next(body)
-                    break
-
-            if len(results[1]) > 0:
-                TDRS12_TLE = ephem.readtle("TDRS 12", str(results[1]), str(results[2]))
-                logWrite("TDRS 12 TLE Success!")
-            else:
-                logWrite("TDRS 12 TLE not acquired")
-
-            results = ['','','']
-            body = iter(soup.get_text().split('\n'))
-            #TDRS 6 TLE
-            for line in body:
-                if "TDRS 6" in line:
-                    results[0] = line
-                    results[1] = next(body)
-                    results[2] = next(body)
-                    break
-
-            if len(results[1]) > 0:
-                TDRS6_TLE = ephem.readtle("TDRS 6", str(results[1]), str(results[2]))
-                logWrite("TDRS 6 TLE Success!")
-            else:
-                logWrite("TDRS 6 TLE not acquired")
-
-            results = ['','','']
-            body = iter(soup.get_text().split('\n'))
-            #TDRS 11 TLE
-            for line in body:
-                if "TDRS 11" in line:
-                    results[0] = line
-                    results[1] = next(body)
-                    results[2] = next(body)
-                    break
-
-            if len(results[1]) > 0:
-                TDRS11_TLE = ephem.readtle("TDRS 11", str(results[1]), str(results[2]))
-                logWrite("TDRS 11 TLE Success!")
-            else:
-                logWrite("TDRS 11 TLE not acquired")
-
-            results = ['','','']
-            body = iter(soup.get_text().split('\n'))
-            #TDRS 10 TLE
-            for line in body:
-                if "TDRS 10" in line:
-                    results[0] = line
-                    results[1] = next(body)
-                    results[2] = next(body)
-                    break
-
-            if len(results[1]) > 0:
-                TDRS10_TLE = ephem.readtle("TDRS 10", str(results[1]), str(results[2]))
-                logWrite("TDRS 10 TLE Success!")
-            else:
-                logWrite("TDRS 10 TLE not acquired")
-
-            results = ['','','']
-            body = iter(soup.get_text().split('\n'))
-            #TDRS 7 TLE
-            for line in body:
-                if "TDRS 7" in line:
-                    results[0] = line
-                    results[1] = next(body)
-                    results[2] = next(body)
-                    break
-
-            if len(results[1]) > 0:
-                TDRS7_TLE = ephem.readtle("TDRS 7", str(results[1]), str(results[2]))
-                logWrite("TDRS 7 TLE Success!")
-            else:
-                logWrite("TDRS 7 TLE not acquired")
-
-        def on_redirect2(req2, result):
-            logWrite("Warning - Get TDRS TLE failure (redirect)")
-            logWrite(result)
-
-        def on_failure2(req2, result):
-            logWrite("Warning - Get TDRS TLE failure (url failure)")
-            logWrite(result)
-
-        def on_error2(req2, result):
-            logWrite("Warning - Get TDRS TLE failure (url error)")
-            logWrite(result)
-
-        req = UrlRequest(iss_tle_url, on_success, on_redirect, on_failure, on_error, timeout=1)
-        req2 = UrlRequest(tdrs_tle_url, on_success2, on_redirect2, on_failure2, on_error2, timeout=1)
-
-    def checkCrew(self, dt):
-        iss_crew_url = 'https://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'
-        urlsuccess = False
-
-        def on_success(req, data):
-            logWrite("Successfully fetched crew JSON")
-            isscrew = 0
-            crewmember = ['', '', '', '', '', '', '', '', '', '', '', '']
-            crewmemberbio = ['', '', '', '', '', '', '', '', '', '', '', '']
-            crewmembertitle = ['', '', '', '', '', '', '', '', '', '', '', '']
-            crewmemberdays = ['', '', '', '', '', '', '', '', '', '', '', '']
-            crewmemberpicture = ['', '', '', '', '', '', '', '', '', '', '', '']
-            crewmembercountry = ['', '', '', '', '', '', '', '', '', '', '', '']
-            now = datetime.utcnow()
-            number_of_space = int(data['number'])
-            for num in range(1, number_of_space+1):
-                if str(data['people'][num-1]['location']) == str("International Space Station"):
-                    crewmember[isscrew] = str(data['people'][num-1]['name']) #.encode('utf-8')
-                    crewmemberbio[isscrew] = str(data['people'][num-1]['bio'])
-                    crewmembertitle[isscrew] = str(data['people'][num-1]['title'])
-                    datetime_object = datetime.strptime(str(data['people'][num-1]['launchdate']), '%Y-%m-%d')
-                    previousdays = int(data['people'][num-1]['careerdays'])
-                    totaldaysinspace = str(now-datetime_object)
-                    d_index = totaldaysinspace.index('d')
-                    crewmemberdays[isscrew] = str(int(totaldaysinspace[:d_index])+previousdays)+" days in space"
-                    crewmemberpicture[isscrew] = str(data['people'][num-1]['biophoto'])
-                    crewmembercountry[isscrew] = str(data['people'][num-1]['country']).title()
-                    if str(data['people'][num-1]['country'])==str('usa'):
-                        crewmembercountry[isscrew] = str('USA')
-                    isscrew = isscrew+1
-
-            #self.crew_screen.ids.crew1.text = str(crewmember[0])
-            #self.crew_screen.ids.crew1title.text = str(crewmembertitle[0])
-            #self.crew_screen.ids.crew1country.text = str(crewmembercountry[0])
-            #self.crew_screen.ids.crew1daysonISS.text = str(crewmemberdays[0])
-            ##self.crew_screen.ids.crew1image.source = str(crewmemberpicture[0])
-            #self.crew_screen.ids.crew2.text = str(crewmember[1])
-            #self.crew_screen.ids.crew2title.text = str(crewmembertitle[1])
-            #self.crew_screen.ids.crew2country.text = str(crewmembercountry[1])
-            #self.crew_screen.ids.crew2daysonISS.text = str(crewmemberdays[1])
-            ##self.crew_screen.ids.crew2image.source = str(crewmemberpicture[1])
-            #self.crew_screen.ids.crew3.text = str(crewmember[2])
-            #self.crew_screen.ids.crew3title.text = str(crewmembertitle[2])
-            #self.crew_screen.ids.crew3country.text = str(crewmembercountry[2])
-            #self.crew_screen.ids.crew3daysonISS.text = str(crewmemberdays[2])
-            ##self.crew_screen.ids.crew3image.source = str(crewmemberpicture[2])
-            #self.crew_screen.ids.crew4.text = str(crewmember[3])
-            #self.crew_screen.ids.crew4title.text = str(crewmembertitle[3])
-            #self.crew_screen.ids.crew4country.text = str(crewmembercountry[3])
-            #self.crew_screen.ids.crew4daysonISS.text = str(crewmemberdays[3])
-            ##self.crew_screen.ids.crew4image.source = str(crewmemberpicture[3])
-            #self.crew_screen.ids.crew5.text = str(crewmember[4])
-            #self.crew_screen.ids.crew5title.text = str(crewmembertitle[4])
-            #self.crew_screen.ids.crew5country.text = str(crewmembercountry[4])
-            #self.crew_screen.ids.crew5daysonISS.text = str(crewmemberdays[4])
-            ##self.crew_screen.ids.crew5image.source = str(crewmemberpicture[4])
-            #self.crew_screen.ids.crew6.text = str(crewmember[5])
-            #self.crew_screen.ids.crew6title.text = str(crewmembertitle[5])
-            #self.crew_screen.ids.crew6country.text = str(crewmembercountry[5])
-            #self.crew_screen.ids.crew6daysonISS.text = str(crewmemberdays[5])
-            ##self.crew_screen.ids.crew6image.source = str(crewmemberpicture[5])
-            ##self.crew_screen.ids.crew7.text = str(crewmember[6])
-            ##self.crew_screen.ids.crew7title.text = str(crewmembertitle[6])
-            ##self.crew_screen.ids.crew7country.text = str(crewmembercountry[6])
-            ##self.crew_screen.ids.crew7daysonISS.text = str(crewmemberdays[6])
-            ##self.crew_screen.ids.crew7image.source = str(crewmemberpicture[6])
-            ##self.crew_screen.ids.crew8.text = str(crewmember[7])
-            ##self.crew_screen.ids.crew8title.text = str(crewmembertitle[7])
-            ##self.crew_screen.ids.crew8country.text = str(crewmembercountry[7])
-            ##self.crew_screen.ids.crew8daysonISS.text = str(crewmemberdays[7])
-            ##self.crew_screen.ids.crew8image.source = str(crewmemberpicture[7]))
-            ##self.crew_screen.ids.crew9.text = str(crewmember[8])
-            ##self.crew_screen.ids.crew9title.text = str(crewmembertitle[8])
-            ##self.crew_screen.ids.crew9country.text = str(crewmembercountry[8])
-            ##self.crew_screen.ids.crew9daysonISS.text = str(crewmemberdays[8])
-            ##self.crew_screen.ids.crew9image.source = str(crewmemberpicture[8])
-            ##self.crew_screen.ids.crew10.text = str(crewmember[9])
-            ##self.crew_screen.ids.crew10title.text = str(crewmembertitle[9])
-            ##self.crew_screen.ids.crew10country.text = str(crewmembercountry[9])
-            ##self.crew_screen.ids.crew10daysonISS.text = str(crewmemberdays[9])
-            ##self.crew_screen.ids.crew10image.source = str(crewmemberpicture[9])
-            ##self.crew_screen.ids.crew11.text = str(crewmember[10])
-            ##self.crew_screen.ids.crew11title.text = str(crewmembertitle[10])
-            ##self.crew_screen.ids.crew11country.text = str(crewmembercountry[10])
-            ##self.crew_screen.ids.crew11daysonISS.text = str(crewmemberdays[10])
-            ##self.crew_screen.ids.crew11image.source = str(crewmemberpicture[10])
-            ##self.crew_screen.ids.crew12.text = str(crewmember[11])
-            ##self.crew_screen.ids.crew12title.text = str(crewmembertitle[11])
-            ##self.crew_screen.ids.crew12country.text = str(crewmembercountry[11])
-            ##self.crew_screen.ids.crew12daysonISS.text = str(crewmemberdays[11])
-            ##self.crew_screen.ids.crew12image.source = str(crewmemberpicture[11])
-
-        def on_redirect(req, result):
-            logWrite("Warning - checkCrew JSON failure (redirect)")
-            logWrite(result)
-            print(result)
-
-        def on_failure(req, result):
-            logWrite("Warning - checkCrew JSON failure (url failure)")
-
-        def on_error(req, result):
-            logWrite("Warning - checkCrew JSON failure (url error)")
-
-        req = UrlRequest(iss_crew_url, on_success, on_redirect, on_failure, on_error, timeout=1)
 
     def map_rotation(self, args):
         scalefactor = 0.083333

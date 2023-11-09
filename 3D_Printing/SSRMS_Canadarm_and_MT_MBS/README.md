@@ -1,3 +1,7 @@
+HiFi SSRMS model Credit: Canadian Space Agency https://www.asc-csa.gc.ca/eng/multimedia/search/image/10186
+
+Modified slightly to work with ISS MIMIC model
+
 # Slicer Recommendation 
 
 |  **Sub-Assembly / Module Name** | **STL Name & Link** | **Qty** | **Filament Color** | **Slicer Comments** | **Approx Print Time [h:mm]** | **Approx Filament Used [g]** | **Approx Filament Used [m]** |
