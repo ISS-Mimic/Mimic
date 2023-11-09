@@ -2716,7 +2716,7 @@ class MainApp(App):
             apogee_height = apogee - 6371.00
             perigee_height = perigee - 6371.00
             sma = 0.5*(apogee+perigee) #km
-            period = ((2*math.pi/math.sqrt(mu))*math.pow(sma,3/2))/60 + " min" #minutes
+            period = ((2*math.pi/math.sqrt(mu))*math.pow(sma,3/2))/60 #minutes
             self.orbit_data.ids.apogee_height.text = str("{:.2f}".format(apogee_height))
             self.orbit_data.ids.perigee_height.text = str("{:.2f}".format(perigee_height))
             self.orbit_screen.ids.period.text = str("{:.2f}".format(period))
