@@ -2700,7 +2700,7 @@ class MainApp(App):
             
             gmt_time = datetime.utcnow()
             gmt = gmt_time.strftime('%j:%H:%M:%S')
-            self.orbit.ids.gmt.text = gmt                
+            self.orbit_screen.ids.gmt.text = gmt                
 
         cmg1_active = int((values[145])[0])
         cmg2_active = int((values[146])[0])
