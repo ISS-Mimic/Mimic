@@ -2517,7 +2517,7 @@ class MainApp(App):
             getattr(self, x).ids.signal.size_hint_y = 0.112
 
     def update_labels(self, dt): #THIS IS THE IMPORTANT FUNCTION
-        global mimicbutton, switchtofake, demoboolean, runningDemo, fakeorbitboolean, psarj2, ssarj2, manualcontrol, aos, los, oldLOS, psarjmc, ssarjmc, ptrrjmc, strrjmc, beta1bmc, beta1amc, beta2bmc, beta2amc, beta3bmc, beta3amc, beta4bmc, beta4amc, US_EVAinProgress, position_x, position_y, position_z, velocity_x, velocity_y, velocity_z, apogee_height, perigee_height, altitude, velocity, iss_mass, testvalue, testfactor, airlock_pump, crewlockpres, leak_hold, firstcrossing, EVA_activities, repress, depress, oldAirlockPump, obtained_EVA_crew, EVAstartTime
+        global mimicbutton, switchtofake, demoboolean, runningDemo, fakeorbitboolean, psarj2, ssarj2, manualcontrol, aos, los, oldLOS, psarjmc, ssarjmc, ptrrjmc, strrjmc, beta1bmc, beta1amc, beta2bmc, beta2amc, beta3bmc, beta3amc, beta4bmc, beta4amc, US_EVAinProgress, position_x, position_y, position_z, velocity_x, velocity_y, velocity_z, altitude, velocity, iss_mass, testvalue, testfactor, airlock_pump, crewlockpres, leak_hold, firstcrossing, EVA_activities, repress, depress, oldAirlockPump, obtained_EVA_crew, EVAstartTime
         global holdstartTime, LS_Subscription
         global Disco, eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
         global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power
@@ -2893,6 +2893,8 @@ class MainApp(App):
             perigee_height = perigee - 6371.00
             sma = 0.5*(apogee+perigee) #km
             period = (2*math.pi/math.sqrt(mu))*math.pow(sma,3/2) #seconds
+            self.orbit_data.ids.apogee_height.text = str("{:.2f}".format(apogee_height))
+            self.orbit_data.ids.perigee_height.text = str("{:.2f}".format(perigee_height))
 
         cmg1_active = int((values[145])[0])
         cmg2_active = int((values[146])[0])
@@ -3470,8 +3472,6 @@ class MainApp(App):
         self.orbit_data.ids.velocity_x.text = str("{:.2f}".format(velocity_x))
         self.orbit_data.ids.velocity_y.text = str("{:.2f}".format(velocity_y))
         self.orbit_data.ids.velocity_z.text = str("{:.2f}".format(velocity_z))
-        self.orbit_data.ids.apogee_height.text = str("{:.2f}".format(apogee_height))
-        self.orbit_data.ids.perigee_height.text = str("{:.2f}".format(perigee_height))
  
         self.eps_screen.ids.psarj_value.text = psarj + "deg"
         self.eps_screen.ids.ssarj_value.text = ssarj + "deg"
