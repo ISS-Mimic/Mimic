@@ -11,7 +11,7 @@
             #text: "TLE"
         Label:
             id: sma_label
-            pos_hint: {"center_x": 0.7, "center_y": 0.82}
+            pos_hint: {"center_x": 0.7, "center_y": 0.81}
             text: 'Semi Major Axis:'
             markup: True
             color: 1,1,1
@@ -19,7 +19,7 @@
             font_size: self.height * 0.10
         Label:
             id: sma
-            pos_hint: {"center_x": 0.9, "center_y": 0.82}
+            pos_hint: {"center_x": 0.9, "center_y": 0.81}
             text: '0'
             markup: True
             color: root.signalcolor
@@ -58,8 +58,28 @@
             size_hint_y: 0.4
             font_size: self.height * 0.1
         Label:
-            id: raan_label
+            id: apogee_label
             pos_hint: {"center_x": 0.7, "center_y": 0.63}
+            text: 'Apogee (km):'
+            markup: True
+            color: 1,1,1
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        #
+        #
+        Label:
+            id: perigee_label
+            pos_hint: {"center_x": 0.7, "center_y": 0.57}
+            text: 'Perigee (dkm):'
+            markup: True
+            color: 1,1,1
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        #
+        #
+        Label:
+            id: raan_label
+            pos_hint: {"center_x": 0.7, "center_y": 0.51}
             text: 'Right Ascension (deg):'
             markup: True
             color: 1,1,1
@@ -67,7 +87,7 @@
             font_size: self.height * 0.10
         Label:
             id: raan
-            pos_hint: {"center_x": 0.9, "center_y": 0.63}
+            pos_hint: {"center_x": 0.9, "center_y": 0.51}
             text: '0'
             markup: True
             color: root.signalcolor
@@ -75,7 +95,7 @@
             font_size: self.height * 0.1
         Label:
             id: arg_per_label
-            pos_hint: {"center_x": 0.7, "center_y": 0.57}
+            pos_hint: {"center_x": 0.7, "center_y": 0.45}
             text: 'Argument of Periapsis (deg):'
             markup: True
             color: 1,1,1
@@ -83,7 +103,7 @@
             font_size: self.height * 0.10
         Label:
             id: arg_per
-            pos_hint: {"center_x": 0.9, "center_y": 0.57}
+            pos_hint: {"center_x": 0.9, "center_y": 0.45}
             text: '0'
             markup: True
             color: root.signalcolor
@@ -91,7 +111,7 @@
             font_size: self.height * 0.1
         Label:
             id: true_anomaly_label
-            pos_hint: {"center_x": 0.7, "center_y": 0.51}
+            pos_hint: {"center_x": 0.7, "center_y": 0.39}
             text: 'True Anomaly (deg):'
             markup: True
             color: 1,1,1
@@ -99,7 +119,7 @@
             font_size: self.height * 0.10
         Label:
             id: true_anomaly
-            pos_hint: {"center_x": 0.9, "center_y": 0.51}
+            pos_hint: {"center_x": 0.9, "center_y": 0.39}
             text: '0'
             markup: True
             color: root.signalcolor
