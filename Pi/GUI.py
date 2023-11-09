@@ -1170,6 +1170,10 @@ class ECLSS_WRM_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
+class ECLSS_ACS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
 class ECLSS_IATCS_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
@@ -1305,6 +1309,7 @@ class MainApp(App):
         self.iss_screen = ISS_Screen(name = 'iss')
         self.eclss_screen = ECLSS_Screen(name = 'eclss')
         self.eclss_wrm_screen = ECLSS_WRM_Screen(name = 'wrm')
+        self.eclss_acs_screen = ECLSS_ACS_Screen(name = 'acs')    
         self.eclss_iatcs_screen = ECLSS_IATCS_Screen(name = 'iatcs')
         self.control_screen = ManualControlScreen(name = 'manualcontrol')
         self.led_screen = LED_Screen(name = 'led')
@@ -1355,6 +1360,7 @@ class MainApp(App):
         root.add_widget(self.iss_screen)
         root.add_widget(self.eclss_screen)
         root.add_widget(self.eclss_wrm_screen)
+        root.add_widget(self.eclss_acs_screen)    
         root.add_widget(self.eclss_iatcs_screen)
         root.add_widget(self.cdh_screen)
         root.add_widget(self.science_screen)
@@ -3872,6 +3878,7 @@ Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Orbit_Data.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ISS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ECLSS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ECLSS_WRM_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ECLSS_ACS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ECLSS_IATCS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EPS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/CT_Screen.kv')
