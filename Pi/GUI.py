@@ -2684,7 +2684,7 @@ class MainApp(App):
 
             inc = math.acos(h_mom[2]/h_mom_mag)
             self.orbit_data.ids.inc.text = "{:.2f}".format(math.degrees(inc))
-            self.orbit_screen.ids.inc.text = "{:.2f}".format(math.degrees(inc))
+            self.orbit_screen.ids.inc.text = "{:.2f}".format(math.degrees(inc)) + " km"
 
             node_vec = cross([0,0,1],h_mom)
             node_mag = math.sqrt(dot(node_vec,node_vec))
@@ -2779,6 +2779,7 @@ class MainApp(App):
         USOS_Power = power_1a + power_1b + power_2a + power_2b + power_3a + power_3b + power_4a + power_4b
         self.eps_screen.ids.usos_power.text = str("{:.0f}".format(USOS_Power*-1.0)) + " W"
         self.eps_screen.ids.solarbeta.text = str(solarbeta)
+        self.orbit_screen.ids.solarbeta.text = str(solarbeta) + " deg"
 
         avg_total_voltage = (float(v1a)+float(v1b)+float(v2a)+float(v2b)+float(v3a)+float(v3b)+float(v4a)+float(v4b))/8.0
 
