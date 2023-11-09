@@ -3384,12 +3384,12 @@ class MainApp(App):
         self.eclss_wrm_screen.ids.UrineTank.text = str(UrineTank)
         self.eclss_wrm_screen.ids.CleanWater.text = str(CleanWater)
         self.eclss_wrm_screen.ids.WasteWater.text = str(WasteWater)
-        self.eclss_acs_screen.ids.LabPPN2.text = str(LabPPN2)
-        self.eclss_acs_screen.ids.LabPPO2.text = str(LabPPO2)
-        self.eclss_acs_screen.ids.LabPPCO2.text = str(LabPPCO2)
-        self.eclss_acs_screen.ids.N3PPN2.text = str(N3PPN2)
-        self.eclss_acs_screen.ids.N3PPO2.text = str(N3PPO2) 
-        self.eclss_acs_screen.ids.N3PPCO2.text = str(N3PPCO2)
+        self.eclss_acs_screen.ids.LabPPN2.text = str(LabPPN2) + " mmHG"
+        self.eclss_acs_screen.ids.LabPPO2.text = str(LabPPO2) + " mmHG"
+        self.eclss_acs_screen.ids.LabPPCO2.text = str(LabPPCO2) + " mmHG"
+        self.eclss_acs_screen.ids.N3PPN2.text = str(N3PPN2) + " mmHG"
+        self.eclss_acs_screen.ids.N3PPO2.text = str(N3PPO2) + " mmHG" 
+        self.eclss_acs_screen.ids.N3PPCO2.text = str(N3PPCO2) + " mmHG"
         
         #self.eclss_wrm_screen.ids.UrineProcessState.text = str(UrineProcessState)
         if int(UrineProcessState) == 2:
