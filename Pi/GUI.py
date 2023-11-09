@@ -2618,7 +2618,13 @@ class MainApp(App):
         AC_Node3 = str((values[100])[0])
         FluidTempAir_Node3 = "{:.2f}".format(float((values[98])[0]))
         FluidTempAv_Node3 = "{:.2f}".format(float((values[97])[0]))
-        
+        LabPPN2 = "{:.2f}".format(float((values[190])[0]))    
+        LabPPO2 = "{:.2f}".format(float((values[189])[0])) 
+        LabPPCO2 = "{:.2f}".format(float((values[191])[0])) 
+        N3PPN2 = "{:.2f}".format(float((values[87])[0]))    
+        N3PPO2 = "{:.2f}".format(float((values[86])[0])) 
+        N3PPCO2 = "{:.2f}".format(float((values[88])[0])) 
+            
         #SASA telemetry
         ActiveString = str((values[54])[0])
         RFG1status = str((values[53])[0])
@@ -3378,6 +3384,12 @@ class MainApp(App):
         self.eclss_wrm_screen.ids.UrineTank.text = str(UrineTank)
         self.eclss_wrm_screen.ids.CleanWater.text = str(CleanWater)
         self.eclss_wrm_screen.ids.WasteWater.text = str(WasteWater)
+        self.eclss_acs_screen.ids.LabPPN2.text = str(LabPPN2)
+        self.eclss_acs_screen.ids.LabPPO2.text = str(LabPPO2)
+        self.eclss_acs_screen.ids.LabPPCO2.text = str(LabPPCO2)
+        self.eclss_acs_screen.ids.N3PPN2.text = str(N3PPN2)
+        self.eclss_acs_screen.ids.N3PPO2.text = str(N3PPO2) 
+        self.eclss_acs_screen.ids.N3PPCO2.text = str(N3PPCO2)
         
         #self.eclss_wrm_screen.ids.UrineProcessState.text = str(UrineProcessState)
         if int(UrineProcessState) == 2:
