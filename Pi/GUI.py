@@ -2232,7 +2232,7 @@ class MainApp(App):
 
         new_bar_x = self.map_hold_bar(260-seconds2)
         self.us_eva.ids.leak_timer.text = "~"+ str(int(seconds2)) + "s"
-        self.us_eva.ids.Hold_bar.pos_hint = {"center_x": new_bar_x, "center_y": 0.54}
+        self.us_eva.ids.Hold_bar.pos_hint = {"center_x": new_bar_x, "center_y": 0.47}
         self.us_eva.ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/LeakCheckLights.png'
 
     def signal_unsubscribed(self): #change images, used stale signal image
@@ -2695,6 +2695,8 @@ class MainApp(App):
             perigee_height = perigee - 6371.00
             sma = 0.5*(apogee+perigee) #km
             period = (2*math.pi/math.sqrt(mu))*math.pow(sma,3/2) #seconds
+            self.orbit_data.ids.apogee_height.text = str("{:.2f}".format(apogee_height))
+            self.orbit_data.ids.perigee_height.text = str("{:.2f}".format(perigee_height))
 
         cmg1_active = int((values[145])[0])
         cmg2_active = int((values[146])[0])

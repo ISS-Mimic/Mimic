@@ -15,11 +15,11 @@
             id: EVA_psi_bar
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/GuageBar.png'
             size_hint_y: 0.15
-            pos_hint: {"center_x": 0.945, "center_y": 0.61}
+            pos_hint: {"center_x": 0.945, "center_y": 0.0}
             fit_mode: "scale-down"
         Label:
             id: crewlockpressure_value
-            pos_hint: {"center_x": 0.83, "center_y": 0.61}
+            pos_hint: {"center_x": 0.9, "center_y": 0.61}
             text: '0.00'
             markup: True
             color: root.signalcolor 
@@ -29,7 +29,7 @@
             id: Hold_bar
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/GuageBar.png'
             size_hint_y: 0.15
-            pos_hint: {"center_x": 0.945, "center_y": 0.54}
+            pos_hint: {"center_x": 0.83, "center_y": 0.54}
             fit_mode: "scale-down"
         Label:
             id: leak_timer
@@ -40,7 +40,7 @@
             size_hint_y: 0.4
             font_size: self.height * 0.10
         Label:
-            pos_hint: {"center_x": 0.82, "center_y": 0.70}
+            pos_hint: {"center_x": 0.835, "center_y": 0.61}
             text: '(psi)'
             markup: True
             color: 0,0,0

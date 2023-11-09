@@ -1,1 +1,1 @@
-All stack imagesare from historicspacecraft.com
+All stack images are from historicspacecraft.com.
