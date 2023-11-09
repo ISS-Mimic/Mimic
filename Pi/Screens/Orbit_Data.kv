@@ -65,8 +65,14 @@
             color: 1,1,1
             size_hint_y: 0.4
             font_size: self.height * 0.10
-        #
-        #
+        Label:
+            id: apogee_height
+            pos_hint: {"center_x": 0.9, "center_y": 0.63}
+            text: '0'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: perigee_label
             pos_hint: {"center_x": 0.7, "center_y": 0.57}
@@ -75,8 +81,14 @@
             color: 1,1,1
             size_hint_y: 0.4
             font_size: self.height * 0.10
-        #
-        #
+        Label:
+            id: perigee_height
+            pos_hint: {"center_x": 0.9, "center_y": 0.57}
+            text: '0'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.1
         Label:
             id: raan_label
             pos_hint: {"center_x": 0.7, "center_y": 0.51}
