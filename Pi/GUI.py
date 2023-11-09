@@ -1296,9 +1296,6 @@ class MainScreenManager(ScreenManager):
 
 class MainApp(App):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-        
-    def __init__(self):
-        self.lock_file_path = "orbitGlobe_lock.lock"  # Path to the lock file
             
     def build(self):
         global startup, ScreenList, stopAnimation
@@ -1463,6 +1460,8 @@ class MainApp(App):
         self.orbit_screen.ids.orbit3d.reload()
 
     def updateOrbitGlobe(self, dt):
+        def __init__(self):
+            self.lock_file_path = "orbitGlobe_lock.lock"  # Path to the lock file
         # Check if the lock file exists
         if os.path.exists(self.lock_file_path):
             print("Previous process is still running. Waiting...")
