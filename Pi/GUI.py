@@ -1460,8 +1460,7 @@ class MainApp(App):
         self.orbit_screen.ids.orbit3d.reload()
 
     def updateOrbitGlobe(self, dt):
-        def __init__(self):
-            self.lock_file_path = "orbitGlobe_lock.lock"  # Path to the lock file
+        self.lock_file_path = "/dev/shm/orbitGlobe_lock.lock"  # Path to the lock file
         # Check if the lock file exists
         if os.path.exists(self.lock_file_path):
             print("Previous process is still running. Waiting...")
@@ -1479,6 +1478,7 @@ class MainApp(App):
             proc.wait()
         finally:
             # Remove the lock file after the process finishes
+            print("process finished")
             os.remove(self.lock_file_path)
                 
         #proc = Popen(["python", mimic_directory + "/Mimic/Pi/orbitGlobe.py"])
@@ -2650,12 +2650,12 @@ class MainApp(App):
         iss_mass = "{:.2f}".format(float((values[48])[0]))
 
         #ISS state vectors
-        position_x = float((values[55])[0]) #km
-        position_y = float((values[56])[0]) #km
-        position_z = float((values[57])[0]) #km
-        velocity_x = float((values[58])[0])/1000.00 #convert to km/s
-        velocity_y = float((values[59])[0])/1000.00 #convert to km/s
-        velocity_z = float((values[60])[0])/1000.00 #convert to km/s
+        position_x = float((values[55])[0]) #
+        position_y = float((values[56])[0]) #
+        position_z = float((values[57])[0]) #
+        velocity_x = float((values[58])[0])/1000.00 #convert to /s
+        velocity_y = float((values[59])[0])/1000.00 #convert to /s
+        velocity_z = float((values[60])[0])/1000.00 #convert to /s
 
         #test values from orbital mechanics book
         #position_x = (-6045.00)
@@ -2683,7 +2683,7 @@ class MainApp(App):
 
             inc = math.acos(h_mom[2]/h_mom_mag)
             self.orbit_data.ids.inc.text = "{:.2f}".format(math.degrees(inc))
-            self.orbit_screen.ids.inc.text = "{:.2f}".format(math.degrees(inc)) + " km"
+            self.orbit_screen.ids.inc.text = "{:.2f}".format(math.degrees(inc)) + " deg"
 
             node_vec = cross([0,0,1],h_mom)
             node_mag = math.sqrt(dot(node_vec,node_vec))
