@@ -2662,6 +2662,7 @@ class MainApp(App):
 
             inc = math.acos(h_mom[2]/h_mom_mag)
             self.orbit_data.ids.inc.text = "{:.2f}".format(math.degrees(inc))
+            self.orbit_screen.ids.inc.text = "{:.2f}".format(math.degrees(inc))
 
             node_vec = cross([0,0,1],h_mom)
             node_mag = math.sqrt(dot(node_vec,node_vec))
