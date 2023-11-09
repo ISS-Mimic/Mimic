@@ -454,6 +454,13 @@
             color: 1,1,1
             font_size: self.height * 0.17
             size_hint_y: 0.2
+        Label:
+            id: solarbeta
+            pos_hint: {"center_x": 0.52, "center_y": 0.22}
+            text: '0.00'
+            color: 1,1,1
+            font_size: self.height * 0.17
+            size_hint_y: 0.2
         Image:
             id: arduino
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
