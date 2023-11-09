@@ -3470,6 +3470,8 @@ class MainApp(App):
         self.orbit_data.ids.velocity_x.text = str("{:.2f}".format(velocity_x))
         self.orbit_data.ids.velocity_y.text = str("{:.2f}".format(velocity_y))
         self.orbit_data.ids.velocity_z.text = str("{:.2f}".format(velocity_z))
+        self.orbit_data.ids.apogee_height.text = str("{:.2f}".format(apogee_height))
+        self.orbit_data.ids.perigee_height.text = str("{:.2f}".format(perigee_height))
  
         self.eps_screen.ids.psarj_value.text = psarj + "deg"
         self.eps_screen.ids.ssarj_value.text = ssarj + "deg"
