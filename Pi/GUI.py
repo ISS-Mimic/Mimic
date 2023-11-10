@@ -1343,7 +1343,7 @@ class MainApp(App):
         self.eva_pictures = EVA_Pictures(name='eva_pictures')
 
         #Add all new telemetry screens to this list, this is used for the signal status icon and telemetry value colors
-        ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen', 'eclss_wrm_screen', 'eclss_iatcs_screen',
+        ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen', 'eclss_wrm_screen', 'eclss_acs_screen', 'eclss_iatcs_screen',
                       'ct_screen', 'ct_sasa_screen', 'ct_sgant_screen', 'ct_uhf_screen',
                       'ct_camera_screen', 'gnc_screen', 'orbit_screen', 'us_eva', 'rs_eva',
                       'eva_main', 'mimic_screen', 'robo_screen', 'mss_mt_screen', 'ssrms_screen', 'spdm1_screen','orbit_pass', 'orbit_data', 'crew_screen']
