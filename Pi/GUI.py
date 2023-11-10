@@ -3386,15 +3386,18 @@ class MainApp(App):
         totalLabAtmo = float(LabPPN2) + float(LabPPO2) + float(LabPPCO2) 
         if totalLabAtmo == 0: totalLabAtmo = 1
 
+        totalN3Atmo = float(N3PPN2) + float(N3PPO2) + float(N3PPCO2) 
+        if totalN3Atmo == 0: totalN3Atmo = 1
+
         self.eclss_wrm_screen.ids.UrineTank.text = UrineTank
         self.eclss_wrm_screen.ids.CleanWater.text = CleanWater
         self.eclss_wrm_screen.ids.WasteWater.text = WasteWater
-        self.eclss_acs_screen.ids.LabPPN2.text = LabPPN2 + " mmHg" + str(float(LabPPN2)/totalLabAtmo) + "%"
-        self.eclss_acs_screen.ids.LabPPO2.text = LabPPO2 + " mmHg" + str(float(LabPPO2)/totalLabAtmo) + "%"
-        self.eclss_acs_screen.ids.LabPPCO2.text = LabPPCO2 + " mmHg" + str(float(LabPPCO2)/totalLabAtmo) + "%"
-        self.eclss_acs_screen.ids.N3PPN2.text = N3PPN2 + " mmHg" + str(float(N3PPN2)/totalLabAtmo) + "%"
-        self.eclss_acs_screen.ids.N3PPO2.text = N3PPO2 + " mmHg" + str(float(N3PPO2)/totalLabAtmo) + "%"
-        self.eclss_acs_screen.ids.N3PPCO2.text = N3PPCO2 + " mmHg" + str(float(N3PPCO2)/totalLabAtmo) + "%"
+        self.eclss_acs_screen.ids.LabPPN2.text = LabPPN2 + " mmHg" + "{:.2f}".format(float(LabPPN2)/totalLabAtmo) + "%"
+        self.eclss_acs_screen.ids.LabPPO2.text = LabPPO2 + " mmHg" + "{:.2f}".format(float(LabPPO2)/totalLabAtmo) + "%"
+        self.eclss_acs_screen.ids.LabPPCO2.text = LabPPCO2 + " mmHg" + "{:.2f}".format(float(LabPPCO2)/totalLabAtmo) + "%"
+        self.eclss_acs_screen.ids.N3PPN2.text = N3PPN2 + " mmHg" + "{:.2f}".format(float(N3PPN2)/totalN3Atmo) + "%"
+        self.eclss_acs_screen.ids.N3PPO2.text = N3PPO2 + " mmHg" + "{:.2f}".format(float(N3PPO2)/totalN3Atmo) + "%"
+        self.eclss_acs_screen.ids.N3PPCO2.text = N3PPCO2 + " mmHg" + "{:.2f}".format(float(N3PPCO2)/totalN3Atmo) + "%"
         
         #self.eclss_wrm_screen.ids.UrineProcessState.text = str(UrineProcessState)
         if int(UrineProcessState) == 2:
