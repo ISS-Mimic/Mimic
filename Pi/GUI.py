@@ -3380,16 +3380,21 @@ class MainApp(App):
             self.eclss_screen.ids.VESvlvPosition.text = "TRNS"
         else:
             self.eclss_screen.ids.VESvlvPosition.text = "n/a"
-        
-        self.eclss_wrm_screen.ids.UrineTank.text = str(UrineTank)
-        self.eclss_wrm_screen.ids.CleanWater.text = str(CleanWater)
-        self.eclss_wrm_screen.ids.WasteWater.text = str(WasteWater)
-        self.eclss_acs_screen.ids.LabPPN2.text = str(LabPPN2) + " mmHg"
-        self.eclss_acs_screen.ids.LabPPO2.text = str(LabPPO2) + " mmHg"
-        self.eclss_acs_screen.ids.LabPPCO2.text = str(LabPPCO2) + " mmHg"
-        self.eclss_acs_screen.ids.N3PPN2.text = str(N3PPN2) + " mmHg"
-        self.eclss_acs_screen.ids.N3PPO2.text = str(N3PPO2) + " mmHg" 
-        self.eclss_acs_screen.ids.N3PPCO2.text = str(N3PPCO2) + " mmHg"
+
+        #Calculate Total Atmospheric Air for percentages on PPO2, PPN2, and PPCO2 lines on ECLSS ACS Screen
+
+        totalLabAtmo = float(LabPPN2) + float(LabPPO2) + float(LabPPCO2) 
+        if totalLabAtmo == 0: totalLabAtmo = 1
+
+        self.eclss_wrm_screen.ids.UrineTank.text = UrineTank
+        self.eclss_wrm_screen.ids.CleanWater.text = CleanWater
+        self.eclss_wrm_screen.ids.WasteWater.text = WasteWater
+        self.eclss_acs_screen.ids.LabPPN2.text = LabPPN2 + " mmHg" + str(float(LabPPN2)/totalLabAtmo) + "%"
+        self.eclss_acs_screen.ids.LabPPO2.text = LabPPO2 + " mmHg" + str(float(LabPPO2)/totalLabAtmo) + "%"
+        self.eclss_acs_screen.ids.LabPPCO2.text = LabPPCO2 + " mmHg" + str(float(LabPPCO2)/totalLabAtmo) + "%"
+        self.eclss_acs_screen.ids.N3PPN2.text = N3PPN2 + " mmHg" + str(float(N3PPN2)/totalLabAtmo) + "%"
+        self.eclss_acs_screen.ids.N3PPO2.text = N3PPO2 + " mmHg" + str(float(N3PPO2)/totalLabAtmo) + "%"
+        self.eclss_acs_screen.ids.N3PPCO2.text = N3PPCO2 + " mmHg" + str(float(N3PPCO2)/totalLabAtmo) + "%"
         
         #self.eclss_wrm_screen.ids.UrineProcessState.text = str(UrineProcessState)
         if int(UrineProcessState) == 2:
