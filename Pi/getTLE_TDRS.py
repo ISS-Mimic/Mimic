@@ -1,6 +1,10 @@
 import json
 from datetime import datetime, timedelta
 import requests  # This will be needed for the HTTP request to Celestrak
+from pathlib import Path
+
+home_dir = Path.home()
+mimic_data_path = home_dir / '.mimic_data'
 
 
 def fetch_tdrs_tles_from_celestrak(url):
@@ -20,7 +24,7 @@ def fetch_tdrs_tles_from_celestrak(url):
 
 
 def getTLE_TDRS():
-    config_filename = '/dev/shm/tdrs_tle_config.json'  # Update the path as necessary
+    config_filename = mimic_data_path / 'tdrs_tle_config.json'  # Update the path as necessary
     tdrs_tle_url = 'https://celestrak.com/NORAD/elements/tdrss.txt'
 
     # Check if the config file exists and has a valid timestamp

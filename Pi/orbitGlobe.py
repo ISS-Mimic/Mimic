@@ -5,11 +5,15 @@ import json
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import os.path as op
+from pathlib import Path
+
+home_dir = Path.home()
+mimic_data_path = home_dir / '.mimic_data'
 
 # Assuming the __file__ is defined in your context
 mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
-iss_config_filename = '/dev/shm/iss_tle_config.json'
+iss_config_filename = mimic_data_path / 'iss_tle_config.json'
 try:
     with open(iss_config_filename, 'r') as file:
         config = json.load(file)
@@ -49,7 +53,7 @@ def plot_earth_no_color():
     # Plot the current location of the ISS
     ax.plot(longitude, latitude, 'ro', markersize=15, transform=ccrs.Geodetic())
 
-    plt.savefig('/dev/shm/globe.png', dpi=100, transparent=True)
+    plt.savefig(mimic_data_path / 'globe.png', dpi=100, transparent=True)
 
 
 plot_earth_no_color()
