@@ -16,13 +16,13 @@
             font_size: self.height * 0.10
         Image:
             id:orbit3d
-            source: f'{root.mimic_directory}/Mimic/Pi/imgs/orbit/globe.png'
+            source: f'{root.mimic_data_directory}/globe.png'
             size_hint: 0.2,0.2
             pos_hint: {"center_x": 0.92, "center_y": 0.35}
             fit_mode: "contain"
         Image:
             id: OrbitMap
-            source: '/dev/shm/map.jpg'
+            source: f'{root.mimic_data_directory}/map.jpg'
             pos_hint: {"center_x": 0.5, "center_y": 0.56}
             size_hint_y: 0.598
             fit_mode: "contain"

@@ -17,6 +17,7 @@ from pyudev import Context, Devices, Monitor, MonitorObserver # for automaticall
 import argparse
 import sys
 import os.path as op #use for getting mimic directory
+from pathlib import Path
 
 # This is here because Kivy gets upset if you pass in your own non-Kivy args
 CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), "config.json")
@@ -41,16 +42,7 @@ from kivy.uix.label import Label
 
 import database_initialize # create and populate database script
 
-""" Unused imports
-import kivy
-from kivy.core.window import Window
-import threading #trying to send serial write to other thread
-matplotlib for plotting day/night time
-import matplotlib.pyplot as plt
-from matplotlib import path
-from mpl_toolkits.basemap import Basemap
-"""
-
+mimic_data_directory = Path.home() / '.mimic_data'
 mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 print("Mimic Directory: " + mimic_directory)
 
@@ -1145,6 +1137,7 @@ class Settings_Screen(Screen, EventDispatcher):
 
 class Orbit_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    mimic_data_directory = Path.home() / '.mimic_data'
     signalcolor = ObjectProperty([1, 1, 1])
 
 class Orbit_Pass(Screen, EventDispatcher):
@@ -1452,11 +1445,11 @@ class MainApp(App):
             urlindex = 0
                 
     def updateOrbitMap(self, dt):
-        self.orbit_screen.ids.OrbitMap.source = '/dev/shm/map.jpg'
+        self.orbit_screen.ids.OrbitMap.source = str(mimic_data_directory) + '/map.jpg'
         self.orbit_screen.ids.OrbitMap.reload()
 
     def updateOrbitGlobeImage(self, dt):
-        self.orbit_screen.ids.orbit3d.source = '/dev/shm/globe.png'
+        self.orbit_screen.ids.orbit3d.source = str(mimic_data_directory) + '/globe.png'
         self.orbit_screen.ids.orbit3d.reload()
 
     def updateOrbitGlobe(self, dt):
@@ -1702,7 +1695,7 @@ class MainApp(App):
         manualcontrol = args[0]
 
     def TDRSupdate(self, dt):
-        tdrs_config_filename = '/dev/shm/tdrs_tle_config.json'
+        tdrs_config_filename = mimic_data_directory / 'tdrs_tle_config.json'
 
         # Load TDRS TLE data from the config file
         try:
@@ -1912,7 +1905,7 @@ class MainApp(App):
         self.orbit_screen.ids.ZOElabel.pos_hint = {"center_x": scaleLatLon(0, 77)['newLon'], "center_y": scaleLatLon(0, 77)['newLat']+0.1}
 
     def orbitUpdate(self, dt):
-        iss_config_filename = '/dev/shm/iss_tle_config.json'
+        iss_config_filename = mimic_data_directory / 'iss_tle_config.json'
         try:
             with open(iss_config_filename, 'r') as file:
                 config = json.load(file)
