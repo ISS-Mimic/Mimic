@@ -10,25 +10,11 @@ Steps:
   2.  Label the last two motors “T” for TRRJs.  These two will receive different commands.        ![image](https://github.com/ISS-Mimic/Mimic/assets/58833710/3fca182c-949a-4941-b85a-b19a0a94602a)
   3.  Plug in power supply for Servo PCB
   4.  Upload Arduino code “Mimic Mini”
-     
-               - int servonum_B1A = 0
-               - int servonum_B3A = 1
-               - int servonum_B1B = 2
-               - int servonum_B3B = 3
-          
-               - int servonum_B2B = 4
-               - int servonum_B4B = 5
-               - int servonum_B2A = 6
-               - int servonum_B4A = 7
-          
-               - int servonum_PSARJ = 8
-               - int servonum_SSARJ = 9
-               - int servonum_PTRRJ = 10
-               - int servonum_STRRJ = 11
-                 
-  5.  Open Arduino Serial Monitor
-  6.  Send a special command in the Serial Monitor.
-  7.  Disconnect motors for later use.  
+        ****  Code will be linked, please standby ****
+      
+  6.  Open Arduino Serial Monitor
+  7.  Send a special command in the Serial Monitor.
+  8.  Disconnect motors for later use.  
 
 # Notes on Lego adapter install
  * Slots in Lego adapter must be “square” with motor, so that SAW will be oriented correctly.  ![image](https://github.com/ISS-Mimic/Mimic/assets/58833710/d1a42a0e-58b4-4c59-9b65-2cc4723c542b)
