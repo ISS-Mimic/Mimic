@@ -41,3 +41,19 @@
             color: 1,1,1
             font_size: self.height * 0.3
             size_hint_y: 0.5
+        Image:
+            id: arduino
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
+            size_hint_y: 0.15
+            anim_delay: 0.2
+            anim_loop: 0
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+            fit_mode: "scale-down"
+        Label:
+            id: arduino_count
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+            text: ''
+            markup: True
+            color: 1,1,1
+            font_size: self.height * 0.3
+            size_hint_y: 0.5
