@@ -1330,11 +1330,13 @@ class MainApp(App):
         self.eva_main = EVA_Main_Screen(name='eva_main')
         self.eva_pictures = EVA_Pictures(name='eva_pictures')
 
-        #Add all new telemetry screens to this list, this is used for the signal status icon and telemetry value colors
-        ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen', 'eclss_wrm_screen', 'eclss_iatcs_screen',
+        #Add all new telemetry screens to this list, this is used for the signal status icon and telemetry value colors and arduino icon
+        ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen', 'eclss_wrm_screen', 
+                      'eclss_iatcs_screen', 'main_screen', 'control_screen', 'settings_screen',
                       'ct_screen', 'ct_sasa_screen', 'ct_sgant_screen', 'ct_uhf_screen',
                       'ct_camera_screen', 'gnc_screen', 'orbit_screen', 'us_eva', 'rs_eva',
-                      'eva_main', 'mimic_screen', 'robo_screen', 'mss_mt_screen', 'ssrms_screen', 'spdm1_screen','orbit_pass', 'orbit_data', 'crew_screen']
+                      'eva_main', 'mimic_screen', 'robo_screen', 'mss_mt_screen', 'ssrms_screen', 
+                      'spdm1_screen','orbit_pass', 'orbit_data', 'crew_screen', 'fakeorbit_screen']
 
         root = MainScreenManager(transition=SwapTransition())
         root.add_widget(self.main_screen)
@@ -1395,6 +1397,7 @@ class MainApp(App):
         Clock.schedule_interval(self.updateOrbitGlobe, 10)
         Clock.schedule_interval(self.TDRSupdate, 600)
         Clock.schedule_interval(self.check_internet, 1)
+        Clock.schedule_interval(self.updateArduinoCount, 5)
 
         #schedule the orbitmap to update with shadow every 5 mins
         Clock.schedule_interval(self.updateNightShade, 120)
@@ -1423,6 +1426,42 @@ class MainApp(App):
             internet = False
 
         req = UrlRequest("http://google.com", on_success, on_redirect, on_failure, on_error, timeout=1)
+
+    def updateArduinoCount(self, dt):
+        global ScreenList
+
+        arduino_count = len(SERIAL_PORTS)
+
+        for screen_name in ScreenList:
+            screen = getattr(self, screen_name)
+            if arduino_count > 0:
+                screen.ids.arduino_count.text = str(arduino_count)
+                screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/arduino_notransmit.png"
+                if mimicbutton:
+                    screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
+            else:
+                screen.ids.arduino_count.text = ""
+                screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/arduino_offline.png"
+
+        if arduino_count > 0:
+            self.mimic_screen.ids.mimicstartbutton.disabled = False
+            self.fakeorbit_screen.ids.DemoStart.disabled = False
+            self.fakeorbit_screen.ids.HTVDemoStart.disabled = False
+            self.fakeorbit_screen.ids.OFT2DemoStart.disabled = False
+            self.control_screen.ids.set90.disabled = False
+            self.control_screen.ids.set0.disabled = False
+            if mimicbutton:
+                self.mimic_screen.ids.mimicstartbutton.disabled = True
+            else:
+                self.mimic_screen.ids.mimicstartbutton.disabled = False
+        else:
+            self.mimic_screen.ids.mimicstartbutton.disabled = True
+            self.mimic_screen.ids.mimicstartbutton.text = "Transmit"
+            self.fakeorbit_screen.ids.DemoStart.disabled = True
+            self.fakeorbit_screen.ids.HTVDemoStart.disabled = True
+            self.fakeorbit_screen.ids.OFT2DemoStart.disabled = True
+            self.control_screen.ids.set90.disabled = True
+            self.control_screen.ids.set0.disabled = True
 
     def deleteURLPictures(self, dt):
         logWrite("Function call - deleteURLPictures")
@@ -2319,41 +2358,6 @@ class MainApp(App):
         global stationmode, sgant_elevation, sgant_xelevation
         global tdrs, module
         global old_mt_timestamp, old_mt_position, mt_speed
-
-        arduino_count = len(SERIAL_PORTS)
-
-        if arduino_count > 0:
-            self.mimic_screen.ids.arduino_count.text = str(arduino_count)
-            self.mimic_screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/arduino_notransmit.png"
-            self.fakeorbit_screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/arduino_notransmit.png"
-            self.fakeorbit_screen.ids.arduino_count.text = str(arduino_count)
-        else:
-            self.mimic_screen.ids.arduino_count.text = ""
-            self.fakeorbit_screen.ids.arduino_count.text = ""
-            self.mimic_screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/arduino_offline.png"
-            self.fakeorbit_screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/arduino_offline.png"
-            runningDemo = False
-
-        if arduino_count > 0:
-            self.mimic_screen.ids.mimicstartbutton.disabled = False
-            self.fakeorbit_screen.ids.DemoStart.disabled = False
-            self.fakeorbit_screen.ids.HTVDemoStart.disabled = False
-            self.fakeorbit_screen.ids.OFT2DemoStart.disabled = False
-            self.control_screen.ids.set90.disabled = False
-            self.control_screen.ids.set0.disabled = False
-            if mimicbutton:
-                self.mimic_screen.ids.mimicstartbutton.disabled = True
-                self.mimic_screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
-            else:
-                self.mimic_screen.ids.mimicstartbutton.disabled = False
-        else:
-            self.mimic_screen.ids.mimicstartbutton.disabled = True
-            self.mimic_screen.ids.mimicstartbutton.text = "Transmit"
-            self.fakeorbit_screen.ids.DemoStart.disabled = True
-            self.fakeorbit_screen.ids.HTVDemoStart.disabled = True
-            self.fakeorbit_screen.ids.OFT2DemoStart.disabled = True
-            self.control_screen.ids.set90.disabled = True
-            self.control_screen.ids.set0.disabled = True
 
         if runningDemo:
             self.fakeorbit_screen.ids.DemoStart.disabled = True
