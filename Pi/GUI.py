@@ -3138,12 +3138,7 @@ class MainApp(App):
         elif float(uhf2_power) == 0.0:
             self.ct_screen.ids.uhf2_radio.color = 0, 0, 0, 0
 
-        ##-------------------EVA Functionality-------------------##
-        if stationmode == 5:
-            evaflashevent = Clock.schedule_once(self.flashEVAbutton, 1)
-
         ##-------------------US EVA Functionality-------------------##
-
 
         if airlock_pump_voltage == 1:
             self.us_eva.ids.pumpvoltage.text = "Airlock Pump Power On!"
@@ -3233,12 +3228,6 @@ class MainApp(App):
             self.us_eva.ids.EVA_occuring.color = 0, 0, 1
             self.us_eva.ids.EVA_occuring.text = "Crewlock Repressurizing"
             self.us_eva.ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/RepressLights.png'
-
-        ##-------------------RS EVA Functionality-------------------##
-        ##if eva station mode and not us eva
-        if airlock_pump_voltage == 0 and crewlockpres >= 734 and stationmode == 5:
-            rsevaflashevent = Clock.schedule_once(self.flashRS_EVAbutton, 1)
-
 
         ##-------------------EVA Functionality End-------------------##
 
