@@ -40,7 +40,6 @@ from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
-from kivy.uix.button import Button
 
 import database_initialize # create and populate database script
 
@@ -331,9 +330,6 @@ module = ""
 internet = False
 old_mt_timestamp = 0.00
 old_mt_position = 0.00
-
-class ImageButton(Button):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
 class MainScreen(Screen):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
