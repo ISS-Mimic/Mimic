@@ -4,6 +4,7 @@ from datetime import datetime, timedelta #used for time conversions and logging 
 import datetime as dtime #this is different from above for... reasons?
 import os # used to remove database on program exit; also used for importing config.json
 from subprocess import Popen #, PIPE, STDOUT #used to start/stop Javascript telemetry program and TDRS script and orbitmap
+import threading #used for background monitoring of USB ports for playback data
 import time #used for time
 import math #used for math
 import glob #used to parse serial port names
@@ -39,6 +40,7 @@ from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
+from kivy.uix.button import Button
 
 import database_initialize # create and populate database script
 
@@ -329,6 +331,9 @@ module = ""
 internet = False
 old_mt_timestamp = 0.00
 old_mt_position = 0.00
+
+class ImageButton(Button):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
 class MainScreen(Screen):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
@@ -1046,15 +1051,48 @@ class ManualControlScreen(Screen):
 
 class FakeOrbitScreen(Screen):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    
+    def __init__(self, **kwargs):
+        super(FakeOrbitScreen, self).__init__(**kwargs)
+        self.usb_drives = self.get_mount_points()  # Initialize with already connected drives
+        self.start_usb_monitoring()
+        Clock.schedule_once(self.update_dropdown)  # Update dropdown with initial drives
+
+    def get_mount_points(self):
+        # This function returns a set of current mount points
+        return set(os.listdir('/media/pi'))
+
+    def usb_monitoring_task(self):
+        initial_mounts = self.get_mount_points()
+        while True:
+            current_mounts = self.get_mount_points()
+            if current_mounts != initial_mounts:
+                new_drive = current_mounts - initial_mounts
+                if new_drive:
+                    self.usb_drives.update(new_drive)
+                    Clock.schedule_once(self.update_dropdown)  # Schedule the update
+                initial_mounts = current_mounts
+            time.sleep(5)
+
+    def update_dropdown(self, dt):
+        # Get the Spinner widget from your layout
+        dropdown = self.ids.playback_dropdown  # Adjust this according to your KV layout
+        formatted_drives = [f"{drive} (USB)" for drive in self.usb_drives]
+        dropdown.values = formatted_drives + ['HTV','OFT-2']
+
+    def start_usb_monitoring(self):
+        # Start the monitoring in a background thread
+        thread = threading.Thread(target=self.usb_monitoring_task)
+        thread.daemon = True  # Daemonize thread
+        thread.start()
+
+    def on_dropdown_select(self, value):
+        playback = value
+        print(playback)
 
     def changeDemoBoolean(self, *args):
         global demoboolean
         demoboolean = args[0]
-
-    def HTVpopup(self, *args): #not fully working
-        HTVpopup = Popup(title='HTV Berthing Orbit', content=Label(text='This will playback recorded data from when the Japanese HTV spacecraft berthed to the ISS. During berthing, the SARJs and nadir BGAs lock but the zenith BGAs autotrack'), text_size=self.size, size_hint=(0.5, 0.3), auto_dismiss=True)
-        HTVpopup.text_size = self.size
-        HTVpopup.open()
 
     def startDisco(*args):
         global p2, runningDemo, Disco

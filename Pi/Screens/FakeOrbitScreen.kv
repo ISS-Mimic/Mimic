@@ -1,3 +1,22 @@
+#:import Factory kivy.factory.Factory
+<DescriptionPopup@Popup>:
+    title: 'HTV Spacecraft Berthing'
+    size_hint: 0.6, 0.4
+    auto_dismiss: True
+
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: 'This will playback recorded data from when the Japanese HTV spacecraft berthed to the ISS. During berthing, the SARJs and nadir BGAs lock but the zenith BGAs autotrack'
+            padding: 10, 10
+            halign: 'center'
+            valign: 'middle'
+            text_size: self.width - 20, None
+
+<ImageButton>:
+    background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/InfoIcon.png'
+    fit_mode: "scale-down"
+
 <FakeOrbitScreen>:
     name: 'fakeorbit'
     FloatLayout:
@@ -5,6 +24,13 @@
         Image:
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/SimulatedOrbitBackground.png'
             fit_mode: "fill"
+        Spinner:
+            id: playback_dropdown
+            size_hint: 0.2, 0.1
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            text: 'Select Playback Data'
+            values: ['HTV','OFT-2']
+            on_text: root.on_dropdown_select(self.text)
         Label:
             id: fakeorbitstatus
             text: ''
@@ -14,13 +40,16 @@
             markup: True
             color: 1,1,1
         Button:
-            id: popupbutton
-            size_hint: 0.01,0.02
-            pos_hint: {"center_x": 0.4, "center_y": 0.8}
-            text: 'i'
-            font_size: 10
-            ##background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/InfoIcon.png'
-            on_release: root.HTVpopup()
+            id: popup
+            text: ''
+            size_hint: 0.1,0.1
+            pos_hint: {"center_x": 0.5, "center_y": 0.8}
+            background_color: 0,0,0,0
+            on_release: Factory.DescriptionPopup().open()
+            Image:
+                source: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/InfoIcon.png'
+                center_x: self.parent.center_x
+                center_y: self.parent.center_y
         Button:
             id: Disco
             size_hint: 0.14,0.115
