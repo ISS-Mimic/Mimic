@@ -3085,26 +3085,31 @@ timeSub.addListener({
 <script>
 
 
-function applyFilter() {
+function applyFilter() 
+{
     var allRows = document.querySelectorAll('table tr');
     var checkboxes = document.querySelectorAll('.row-checkbox');
     
     // Hide all rows except the header
-    allRows.forEach(function(row, index) {
-        if(index === 0) return; // Skip the header row
+    allRows.forEach(function(row, index) 
+	{
+        if(index === 0) return; // Skip the signal status row
+		if(index === 1) return; // Skip the header row
         row.style.display = 'none';
     });
 
-    // Show only rows with checked checkboxes
-    checkboxes.forEach(function(checkbox, index) {
-        if(checkbox.checked) {
-            allRows[index + 1].style.display = ''; // +1 to account for the header row
+    checkboxes.forEach(function(checkbox, index) 
+	{
+        if(checkbox.checked) 
+		{
+            allRows[index+2].style.display = ''; // +1 to account for the header row
         }
     });
 }
 
 
-function resetFilter() {
+function resetFilter() 
+{
     document.querySelectorAll('table tr').forEach(tr => tr.style.display = '');
     document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
 }
