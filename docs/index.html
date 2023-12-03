@@ -33,14 +33,22 @@ Russian Telemetry and Translation: <a href="https://iss-mimic.github.io/Mimic/in
 <select id="telemetryFilter" onchange="filterTable()" multiple><option value="">Select Telemetry IDs to Watch</option></select><script>
 function updateTime() {
     var now = new Date();
-	var dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+    
+    // Create a Date object representing January 1st of the current year, at 00:00:00 in UTC
+    var startOfYear = new Date(Date.UTC(now.getUTCFullYear(), 0, 1));
+
+    // Calculate the difference in milliseconds and convert to days
+    var dayOfYear = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
+
     var day = ("0" + now.getUTCDate()).slice(-2);
     var hours = ("0" + now.getUTCHours()).slice(-2);
     var minutes = ("0" + now.getUTCMinutes()).slice(-2);
     var seconds = ("0" + now.getUTCSeconds()).slice(-2);
+
     var currentTime = 'Current GMT Time: ' + dayOfYear + '/' + hours + ':' + minutes + ':' + seconds;
     document.getElementById('current-time-display').textContent = currentTime;
 }
+
 
 setInterval(updateTime, 1000);  // Update the time every second
 </script></body></html>
