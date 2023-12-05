@@ -2215,7 +2215,12 @@ class MainApp(App):
             return visible
 
         ISS_TLE.compute(location) #compute tle propagation based on provided location
-        nextpassinfo = location.next_pass(ISS_TLE)
+        try:    
+            nextpassinfo = location.next_pass(ISS_TLE)
+        except Exception as e:
+            logWrite("Orbit Update error: " + str(e))
+        else:
+            logWrite("Successfull pass prediction update")
 
         if nextpassinfo[0] is None:
             self.orbit_screen.ids.iss_next_pass1.text = "n/a"
