@@ -1,17 +1,74 @@
 #:import Factory kivy.factory.Factory
 <DescriptionPopup@Popup>:
-    title: 'HTV Spacecraft Berthing'
+    title: 'Recorded ISS Data Descriptions'
     size_hint: 0.6, 0.4
     auto_dismiss: True
 
     BoxLayout:
         orientation: 'vertical'
-        Label:
-            text: 'This will playback recorded data from when the Japanese HTV spacecraft berthed to the ISS. During berthing, the SARJs and nadir BGAs lock but the zenith BGAs autotrack'
-            padding: 10, 10
-            halign: 'center'
-            valign: 'middle'
-            text_size: self.width - 20, None
+        ScrollView:
+            do_scroll_x: False  # Disabling horizontal scrolling
+            do_scroll_y: True   # Enabling vertical scrolling
+
+            # You can add your content inside this GridLayout
+            GridLayout:
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height  # Important for scrolling
+                # Add your widgets here
+
+                #Label:
+                #    text: 'This will playback recorded data from when the Japanese HTV spacecraft berthed to the ISS. During berthing, the SARJs and nadir BGAs lock but the zenith BGAs autotrack'
+                #    padding: 10, 10
+                #    halign: 'center'
+                #    text_size: self.width - 20, None
+
+                # Example of a text box with ISS information
+                Label:
+                    text: 'This will playback recorded data from when the Japanese HTV spacecraft berthed to the ISS. During berthing, the SARJs and nadir BGAs lock but the zenith BGAs autotrack'
+                    size_hint_y: None
+                    height: self.texture_size[1] + 20  
+                    text_size: self.width, None  
+                    halign: 'left'
+                    valign: 'middle'
+
+                Label:
+                    text: 'ISS Info 2: [More ISS info here]'
+                    size_hint_y: None
+                    height: self.texture_size[1] + 20
+                    text_size: self.width, None
+                    halign: 'left'
+                    valign: 'middle'
+
+                Label:
+                    text: 'ISS Info 2: [More ISS info here]'
+                    size_hint_y: None
+                    height: self.texture_size[1] + 20
+                    text_size: self.width, None
+                    halign: 'left'
+                    valign: 'middle'
+
+                Label:
+                    text: 'ISS Info 2: [More ISS info here]'
+                    size_hint_y: None
+                    height: self.texture_size[1] + 20
+                    text_size: self.width, None
+                    halign: 'left'
+                    valign: 'middle'
+
+                Label:
+                    text: 'ISS Info 2: [More ISS info here]'
+                    size_hint_y: None
+                    height: self.texture_size[1] + 20
+                    text_size: self.width, None
+                    halign: 'left'
+                    valign: 'middle'
+
+                Label:
+                    text: 'DEmo orbit 2'
+                    padding: 10, 10
+                    halign: 'center'
+                    text_size: self.width - 20, None
 
 <ImageButton>:
     background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/fakeorbit/InfoIcon.png'
