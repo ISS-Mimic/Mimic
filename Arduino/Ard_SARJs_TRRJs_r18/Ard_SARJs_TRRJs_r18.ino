@@ -1,5 +1,3 @@
-
-
 int SpeedLimit= 125; // integer from 0 to 255.  0 means 0% speed, 255 is 100% speed.  round(255.0*float(MaxMotorSpeedPercent)/100.0; // Might night need all of this wrapping - just trying to get float to int to work properly
 unsigned long previousMillis = 0;
 unsigned long LoopStartMillis = 0;
@@ -28,24 +26,29 @@ struct joints
   int CmdSpeed;
 };
 
-joints sarj_port = {5, 1, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-joints sarj_stbd = {2, 1, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};  // Starboard side is more peppy than Port, for some reason (gear box friction?) so dialing down the Proportional Gain (Kp) for it.
+joints sarj_port = {8, 1, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+joints sarj_stbd = {5, 1, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};  // Starboard side is more peppy than Port, for some reason (gear box friction?) so dialing down the Proportional Gain (Kp) for it.
 
 void motorfnc(struct joints &myJoint) {
   
   // 150 motor shaft rotations / gearbox output shaft rotation * 12 encoder counts / motor rotation  /(360 deg per /output rotation) = 150*12/360 = 5 encoder counts per output shaft degree
  // myJoint.PosAct = float(myJoint.Count) / (5 * 42 / 12); // / 25; // 150:1 gear ratio, 6 encoder counts per motor shaft rotation 150/6=25;  42 teeth on bull gear. T12 pinion for SARJ
  myJoint.PosAct = float(myJoint.Count) / (150.694*12/360 * 42 / 12);
-  // Added Aug 18, 2019 by BCM for "Smart Rollover"
-  if (SmartRolloverSARJ == 1) {
-    if (abs(myJoint.PosAct) > 360) {
-      float tmp_raw_div = myJoint.PosAct / 360.0; // result will be 0.xx, 1.xx, 2.xx, etc.  Solve for the Y in Y.xx, then subtract from the whole.
-      // we want (for example) -900.1 degrees to become something in 0..360 range.
-      //(double(tmp_raw_div)-double(floor(tmp_raw_div)))*360 - from Octave check
-      float tmp_pos = (float(tmp_raw_div) - float(floor(tmp_raw_div))) * 360;
-      myJoint.PosAct = tmp_pos;
-    }
-  }  // end Added Aug 18, 2019
+
+
+//Dec 2023 update by Sam to resolve PSARJ crossing zero degrees (PSARJ angle goes 360 to 0, SSARJ goes 0 to 360)
+if (SmartRolloverSARJ == 1) 
+{
+  if (myJoint.PosAct >= 360) 
+  {
+    myJoint.PosAct -= 360 * floor(myJoint.PosAct / 360);
+  } 
+  else if (myJoint.PosAct < 0) 
+  {
+    myJoint.PosAct += 360 * ceil(-myJoint.PosAct / 360);
+  }
+}
+
 
   myJoint.PosErr = myJoint.PosCmd - myJoint.PosAct; // raw position error  
   myJoint.dPosErr = myJoint.PosErr - myJoint.PosErr_old;
