@@ -1,556 +1,163 @@
 #include <Adafruit_NeoPixel.h>
-#include <string.h>
-//Connect USB port to Pi USB Port
-//For serial debugging - connect to the RX1 and TX1 pins
-Adafruit_NeoPixel stbdIEA = Adafruit_NeoPixel(24, 5, NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel portIEA = Adafruit_NeoPixel(24, 6, NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel moduleLED = Adafruit_NeoPixel(16, 7, NEO_GRB + NEO_KHZ800);
 
-String readData;
+Adafruit_NeoPixel stbdIEA = Adafruit_NeoPixel(24, 6, NEO_GRB);
+Adafruit_NeoPixel portIEA = Adafruit_NeoPixel(24, 5, NEO_GRB);
 
-double V1A = 0.00;
-double V1B = 0.00;
-double V3A = 0.00;
-double V3B = 0.00;
-double V2A = 0.00;
-double V2B = 0.00;
-double V4A = 0.00;
-double V4B = 0.00;
-  
-String module = "unset module";
+double voltages[4][2] = 
+{
+  {0.00, 0.00}, // V1A, V1B
+  {0.00, 0.00}, // V2A, V2B
+  {0.00, 0.00}, // V3A, V3B
+  {0.00, 0.00}  // V4A, V4B
+};
+
 boolean Disco = false;
 int NULLIFY = 0;
 
-void setup()
+void setup() 
 {
   Serial.begin(9600);
   Serial.setTimeout(50);
   portIEA.begin();
   stbdIEA.begin();
-  moduleLED.begin();
-  allSet_stbdIEA(stbdIEA.Color(0,255,0),0);
-  allSet_portIEA(portIEA.Color(0,255,0),0);
   portIEA.show();
   stbdIEA.show();
-  allSet_module(moduleLED.Color(255,0,0),5);
-  moduleLED.show();
 }
 
-void loop()
+void loop() 
 {
-  //Process any incoming serial data
-  readData = "";
-  if(Serial.available() > 0)
+  if (Serial.available()) 
   {
-    readData = Serial.readString();
-  }
-  delay(100);
-  Serial.flush();
-  
-  char sz[readData.length() + 1];
-  char copy[readData.length() + 1];
-  strcpy(sz, readData.c_str());  
-  char *p = sz;
-  char *str;
-  int delimeter = 0;
-  String readData2 = ""; 
-  //Serial2.println(readData);
-  
-  //Split up string into substrings separated by spaces
-  //Go through each substring and extract data
-  while((str = strtok_r(p," ",&p))!=NULL)
-  {
-    readData2 = String(str);
-    //Serial.println(readData2);
-    delimeter = readData2.indexOf('=');
-    if(readData2.substring(0,delimeter)=="Disco")
-    {
-      Disco = true; 
-    }
-    else if (readData2.substring(0, delimeter) == "NULLIFY")
-    {
-      NULLIFY = int((readData2.substring(delimeter + 1)).toFloat());
-    }
-    if(readData2.substring(0,delimeter)=="V2A")
-    {
-      V2A = (readData2.substring(delimeter+1)).toFloat();
-    }
-    else if(readData2.substring(0,delimeter)=="V2B")
-    {
-      V2B = (readData2.substring(delimeter+1)).toFloat();
-    }
-    else if(readData2.substring(0,delimeter)=="V4A")
-    {
-      V4A = (readData2.substring(delimeter+1)).toFloat();
-    }
-    else if(readData2.substring(0,delimeter)=="V4B")
-    {
-      V4B = (readData2.substring(delimeter+1)).toFloat();
-    }
-    else if(readData2.substring(0,delimeter)=="V1A")
-    {
-      V1A = (readData2.substring(delimeter+1)).toFloat();
-    }
-    else if(readData2.substring(0,delimeter)=="V1B")
-    {
-      V1B = (readData2.substring(delimeter+1)).toFloat();
-    }
-    else if(readData2.substring(0,delimeter)=="V3A")
-    {
-      V3A = (readData2.substring(delimeter+1)).toFloat();
-    }
-    else if(readData2.substring(0,delimeter)=="V3B")
-    {
-      V3B = (readData2.substring(delimeter+1)).toFloat();
-    }
-    //module Selection
-    else if(readData2.substring(0,delimeter)=="ISS")
-    {
-      module = String((readData2.substring(delimeter+1)));
-    }
+    checkSerial();
   }
 
-  module.trim(); //trim whitespace off serial data
+  updateLEDs(portIEA, 0);
+  updateLEDs(portIEA, 6);
+  updateLEDs(portIEA, 12);
+  updateLEDs(portIEA, 18);
+  updateLEDs(stbdIEA, 0);
+  updateLEDs(stbdIEA, 6);
+  updateLEDs(stbdIEA, 12);
+  updateLEDs(stbdIEA, 18);
 
-  if(module == "SM")
+  if (Disco) 
   {
-    moduleLED.setPixelColor(0, moduleLED.Color(255,255,255));
-  }
-  else if(module == "FGB")
-  {
-    moduleLED.setPixelColor(1, moduleLED.Color(255,255,255));
-  }
-  else if(module == "Node1")
-  {
-    moduleLED.setPixelColor(2, moduleLED.Color(255,255,255));
-  }
-  else if(module == "Node2")
-  {
-    moduleLED.setPixelColor(6, moduleLED.Color(255,255,255));
-  }
-  else if(module == "Node3")
-  {
-    moduleLED.setPixelColor(4, moduleLED.Color(255,255,255));
-  }
-  else if(module == "AL")
-  {
-    moduleLED.setPixelColor(3, moduleLED.Color(255,255,255));
-  }
-  else if(module == "USL")
-  {
-    moduleLED.setPixelColor(5, moduleLED.Color(255,255,255));
-  }
-  else if(module == "Col")
-  {
-    moduleLED.setPixelColor(7, moduleLED.Color(255,255,255));
-  }
-  else if(module == "JEM")
-  {
-    moduleLED.setPixelColor(8, moduleLED.Color(255,255,255));
-  }
-  else
-  {
-    allSet_module(moduleLED.Color(0,0,0),0);
-  }
-  moduleLED.show();
-
-  //if array voltage is under 151.5V, assume batteries are discharging and set LEDs to Red - note, the 151.5V value is not fixed and varies depending on array. might need tweaking
-  //if array voltage is 160V, assume batteries are fully charged and set LEDs to White
-  //if array voltage is between those values, assume batteries are being charged by the arrays and set LEDs to Blue
-  
-  if(V2A < 151.5) 
-  {
-    portIEA.setPixelColor(0, portIEA.Color(255,0,0));
-    portIEA.setPixelColor(1, portIEA.Color(255,0,0));
-    portIEA.setPixelColor(2, portIEA.Color(255,0,0));
-    portIEA.setPixelColor(3, portIEA.Color(255,0,0));
-    portIEA.setPixelColor(4, portIEA.Color(255,0,0));
-    portIEA.setPixelColor(5, portIEA.Color(255,0,0));
-    portIEA.show();
-  }
-  else if(V2A > 160)
-  {
-    portIEA.setPixelColor(0, portIEA.Color(255,255,255));
-    portIEA.setPixelColor(1, portIEA.Color(255,255,255));
-    portIEA.setPixelColor(2, portIEA.Color(255,255,255));
-    portIEA.setPixelColor(3, portIEA.Color(255,255,255));
-    portIEA.setPixelColor(4, portIEA.Color(255,255,255));
-    portIEA.setPixelColor(5, portIEA.Color(255,255,255));
-    portIEA.show();
-  }
-  else
-  {
-    portIEA.setPixelColor(0, portIEA.Color(0,0,255));
-    portIEA.setPixelColor(1, portIEA.Color(0,0,255));
-    portIEA.setPixelColor(2, portIEA.Color(0,0,255));
-    portIEA.setPixelColor(3, portIEA.Color(0,0,255));
-    portIEA.setPixelColor(4, portIEA.Color(0,0,255));
-    portIEA.setPixelColor(5, portIEA.Color(0,0,255));
-    portIEA.show();
-  }
-  
-  if(V4A < 151.5)
-  {
-    portIEA.setPixelColor(6, portIEA.Color(255,0,0));
-    portIEA.setPixelColor(7, portIEA.Color(255,0,0));
-    portIEA.setPixelColor(8, portIEA.Color(255,0,0));
-    portIEA.setPixelColor(9, portIEA.Color(255,0,0));
-    portIEA.setPixelColor(10, portIEA.Color(255,0,0));
-    portIEA.setPixelColor(11, portIEA.Color(255,0,0));
-    portIEA.show();
-  }
-  else if(V4A > 160)
-  {
-    portIEA.setPixelColor(6, portIEA.Color(255,255,255));
-    portIEA.setPixelColor(7, portIEA.Color(255,255,255));
-    portIEA.setPixelColor(8, portIEA.Color(255,255,255));
-    portIEA.setPixelColor(9, portIEA.Color(255,255,255));
-    portIEA.setPixelColor(10, portIEA.Color(255,255,255));
-    portIEA.setPixelColor(11, portIEA.Color(255,255,255));
-    portIEA.show();
-  }
-  else
-  {
-    portIEA.setPixelColor(6, portIEA.Color(0,0,255));
-    portIEA.setPixelColor(7, portIEA.Color(0,0,255));
-    portIEA.setPixelColor(8, portIEA.Color(0,0,255));
-    portIEA.setPixelColor(9, portIEA.Color(0,0,255));
-    portIEA.setPixelColor(10, portIEA.Color(0,0,255));
-    portIEA.setPixelColor(11, portIEA.Color(0,0,255));
-    portIEA.show();
-  }
-
-  if(V4B < 151.5)
-  {
-    portIEA.setPixelColor(12, portIEA.Color(255,0,0));
-    portIEA.setPixelColor(13, portIEA.Color(255,0,0));
-    portIEA.setPixelColor(14, portIEA.Color(255,0,0));
-    portIEA.setPixelColor(15, portIEA.Color(255,0,0));
-    portIEA.setPixelColor(16, portIEA.Color(255,0,0));
-    portIEA.setPixelColor(17, portIEA.Color(255,0,0));
-    portIEA.show();
-  }
-  else if(V4B > 160)
-  {
-    portIEA.setPixelColor(12, portIEA.Color(255,255,255));
-    portIEA.setPixelColor(13, portIEA.Color(255,255,255));
-    portIEA.setPixelColor(14, portIEA.Color(255,255,255));
-    portIEA.setPixelColor(15, portIEA.Color(255,255,255));
-    portIEA.setPixelColor(16, portIEA.Color(255,255,255));
-    portIEA.setPixelColor(17, portIEA.Color(255,255,255));
-    portIEA.show();
-  }
-  else
-  {
-    portIEA.setPixelColor(12, portIEA.Color(0,0,255));
-    portIEA.setPixelColor(13, portIEA.Color(0,0,255));
-    portIEA.setPixelColor(14, portIEA.Color(0,0,255));
-    portIEA.setPixelColor(15, portIEA.Color(0,0,255));
-    portIEA.setPixelColor(16, portIEA.Color(0,0,255));
-    portIEA.setPixelColor(17, portIEA.Color(0,0,255));
-    portIEA.show();
-  }
-
-  if(V2B < 151.5)
-  {
-    portIEA.setPixelColor(18, portIEA.Color(255,0,0));
-    portIEA.setPixelColor(19, portIEA.Color(255,0,0));
-    portIEA.setPixelColor(20, portIEA.Color(255,0,0));
-    portIEA.setPixelColor(21, portIEA.Color(255,0,0));
-    portIEA.setPixelColor(22, portIEA.Color(255,0,0));
-    portIEA.setPixelColor(23, portIEA.Color(255,0,0));
-    portIEA.show();
-  }
-  else if(V2B > 160)
-  {
-    portIEA.setPixelColor(18, portIEA.Color(255,255,255));
-    portIEA.setPixelColor(19, portIEA.Color(255,255,255));
-    portIEA.setPixelColor(20, portIEA.Color(255,255,255));
-    portIEA.setPixelColor(21, portIEA.Color(255,255,255));
-    portIEA.setPixelColor(22, portIEA.Color(255,255,255));
-    portIEA.setPixelColor(23, portIEA.Color(255,255,255));
-    portIEA.show();
-  }
-  else
-  {
-    portIEA.setPixelColor(18, portIEA.Color(0,0,255));
-    portIEA.setPixelColor(19, portIEA.Color(0,0,255));
-    portIEA.setPixelColor(20, portIEA.Color(0,0,255));
-    portIEA.setPixelColor(21, portIEA.Color(0,0,255));
-    portIEA.setPixelColor(22, portIEA.Color(0,0,255));
-    portIEA.setPixelColor(23, portIEA.Color(0,0,255));
-    portIEA.show();
-  }
-  if(V1A < 151.5)
-  {
-    stbdIEA.setPixelColor(0, stbdIEA.Color(255,0,0));
-    stbdIEA.setPixelColor(1, stbdIEA.Color(255,0,0));
-    stbdIEA.setPixelColor(2, stbdIEA.Color(255,0,0));
-    stbdIEA.setPixelColor(3, stbdIEA.Color(255,0,0));
-    stbdIEA.setPixelColor(4, stbdIEA.Color(255,0,0));
-    stbdIEA.setPixelColor(5, stbdIEA.Color(255,0,0));
-    stbdIEA.show();
-  }
-  else if(V1A > 160)
-  {
-    stbdIEA.setPixelColor(0, stbdIEA.Color(255,255,255));
-    stbdIEA.setPixelColor(1, stbdIEA.Color(255,255,255));
-    stbdIEA.setPixelColor(2, stbdIEA.Color(255,255,255));
-    stbdIEA.setPixelColor(3, stbdIEA.Color(255,255,255));
-    stbdIEA.setPixelColor(4, stbdIEA.Color(255,255,255));
-    stbdIEA.setPixelColor(5, stbdIEA.Color(255,255,255));
-    stbdIEA.show();
-  }
-  else
-  {
-    stbdIEA.setPixelColor(0, stbdIEA.Color(0,0,255));
-    stbdIEA.setPixelColor(1, stbdIEA.Color(0,0,255));
-    stbdIEA.setPixelColor(2, stbdIEA.Color(0,0,255));
-    stbdIEA.setPixelColor(3, stbdIEA.Color(0,0,255));
-    stbdIEA.setPixelColor(4, stbdIEA.Color(0,0,255));
-    stbdIEA.setPixelColor(5, stbdIEA.Color(0,0,255));
-    stbdIEA.show();
-  }
-  
-  if(V3A < 151.5)
-  {
-    stbdIEA.setPixelColor(6, stbdIEA.Color(255,0,0));
-    stbdIEA.setPixelColor(7, stbdIEA.Color(255,0,0));
-    stbdIEA.setPixelColor(8, stbdIEA.Color(255,0,0));
-    stbdIEA.setPixelColor(9, stbdIEA.Color(255,0,0));
-    stbdIEA.setPixelColor(10, stbdIEA.Color(255,0,0));
-    stbdIEA.setPixelColor(11, stbdIEA.Color(255,0,0));
-    stbdIEA.show();
-  }
-  else if(V3A > 160)
-  {
-    stbdIEA.setPixelColor(6, stbdIEA.Color(255,255,255));
-    stbdIEA.setPixelColor(7, stbdIEA.Color(255,255,255));
-    stbdIEA.setPixelColor(8, stbdIEA.Color(255,255,255));
-    stbdIEA.setPixelColor(9, stbdIEA.Color(255,255,255));
-    stbdIEA.setPixelColor(10, stbdIEA.Color(255,255,255));
-    stbdIEA.setPixelColor(11, stbdIEA.Color(255,255,255));
-    stbdIEA.show();
-  }
-  else
-  {
-    stbdIEA.setPixelColor(6, stbdIEA.Color(0,0,255));
-    stbdIEA.setPixelColor(7, stbdIEA.Color(0,0,255));
-    stbdIEA.setPixelColor(8, stbdIEA.Color(0,0,255));
-    stbdIEA.setPixelColor(9, stbdIEA.Color(0,0,255));
-    stbdIEA.setPixelColor(10, stbdIEA.Color(0,0,255));
-    stbdIEA.setPixelColor(11, stbdIEA.Color(0,0,255));
-    stbdIEA.show();
-  }
-
-  if(V3B < 151.5)
-  {
-    stbdIEA.setPixelColor(12, stbdIEA.Color(255,0,0));
-    stbdIEA.setPixelColor(13, stbdIEA.Color(255,0,0));
-    stbdIEA.setPixelColor(14, stbdIEA.Color(255,0,0));
-    stbdIEA.setPixelColor(15, stbdIEA.Color(255,0,0));
-    stbdIEA.setPixelColor(16, stbdIEA.Color(255,0,0));
-    stbdIEA.setPixelColor(17, stbdIEA.Color(255,0,0));
-    stbdIEA.show();
-  }
-  else if(V3B > 160)
-  {
-    stbdIEA.setPixelColor(12, stbdIEA.Color(255,255,255));
-    stbdIEA.setPixelColor(13, stbdIEA.Color(255,255,255));
-    stbdIEA.setPixelColor(14, stbdIEA.Color(255,255,255));
-    stbdIEA.setPixelColor(15, stbdIEA.Color(255,255,255));
-    stbdIEA.setPixelColor(16, stbdIEA.Color(255,255,255));
-    stbdIEA.setPixelColor(17, stbdIEA.Color(255,255,255));
-    stbdIEA.show();
-  }
-  else
-  {
-    stbdIEA.setPixelColor(12, stbdIEA.Color(0,0,255));
-    stbdIEA.setPixelColor(13, stbdIEA.Color(0,0,255));
-    stbdIEA.setPixelColor(14, stbdIEA.Color(0,0,255));
-    stbdIEA.setPixelColor(15, stbdIEA.Color(0,0,255));
-    stbdIEA.setPixelColor(16, stbdIEA.Color(0,0,255));
-    stbdIEA.setPixelColor(17, stbdIEA.Color(0,0,255));
-    stbdIEA.show();
-  }
-
-  if(V1B < 151.5)
-  {
-    stbdIEA.setPixelColor(18, stbdIEA.Color(255,0,0));
-    stbdIEA.setPixelColor(19, stbdIEA.Color(255,0,0));
-    stbdIEA.setPixelColor(20, stbdIEA.Color(255,0,0));
-    stbdIEA.setPixelColor(21, stbdIEA.Color(255,0,0));
-    stbdIEA.setPixelColor(22, stbdIEA.Color(255,0,0));
-    stbdIEA.setPixelColor(23, stbdIEA.Color(255,0,0));
-    stbdIEA.show();
-  }
-  else if(V1B > 160)
-  {
-    stbdIEA.setPixelColor(18, stbdIEA.Color(255,255,255));
-    stbdIEA.setPixelColor(19, stbdIEA.Color(255,255,255));
-    stbdIEA.setPixelColor(20, stbdIEA.Color(255,255,255));
-    stbdIEA.setPixelColor(21, stbdIEA.Color(255,255,255));
-    stbdIEA.setPixelColor(22, stbdIEA.Color(255,255,255));
-    stbdIEA.setPixelColor(23, stbdIEA.Color(255,255,255));
-    stbdIEA.show();
-  }
-  else
-  {
-    stbdIEA.setPixelColor(18, stbdIEA.Color(0,0,255));
-    stbdIEA.setPixelColor(19, stbdIEA.Color(0,0,255));
-    stbdIEA.setPixelColor(20, stbdIEA.Color(0,0,255));
-    stbdIEA.setPixelColor(21, stbdIEA.Color(0,0,255));
-    stbdIEA.setPixelColor(22, stbdIEA.Color(0,0,255));
-    stbdIEA.setPixelColor(23, stbdIEA.Color(0,0,255));
-    stbdIEA.show();
-  }
-  if(Disco)
-  {
-    theaterChaseRainbow_disco(50);
+    theaterChaseRainbow(portIEA, stbdIEA, 100);
   }
   Disco = false;
 }
 
-//module led functions
-void allSet_module(uint32_t c, uint8_t wait) {
-  for(uint16_t i=0; i<moduleLED.numPixels(); i++) 
+void updateLEDs(Adafruit_NeoPixel &strip, int startIndex) 
+{
+  double voltageA = voltages[startIndex / 6][0];
+  double voltageB = voltages[startIndex / 6][1];
+
+  for (int i = startIndex; i < startIndex + 6; i++) 
   {
-    moduleLED.setPixelColor(i, c);
-    moduleLED.show();
-    delay(wait);
+    setColorBasedOnVoltage(strip, i, voltageA, voltageB);
+  }
+
+  strip.show();
+}
+
+void setColorBasedOnVoltage(Adafruit_NeoPixel &strip, int index, double voltageA, double voltageB) 
+{
+  if (voltageA < 151.5) 
+  {
+    strip.setPixelColor(index, strip.Color(111, 0, 0));
+  } 
+  else if (voltageA > 160) 
+  {
+    strip.setPixelColor(index, strip.Color(111, 111, 111));
+  } 
+  else 
+  {
+    strip.setPixelColor(index, strip.Color(0, 0, 111));
   }
 }
-void theaterChaseRainbow_Module(uint8_t wait) {
-  for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
-    for (int q=0; q < 3; q++) {
-      for (uint16_t i=0; i < moduleLED.numPixels(); i=i+3) {
-        moduleLED.setPixelColor(i+q, Wheel_Module( (i+j) % 255));    //turn every third pixel on
-      }
-      moduleLED.show();
 
-      delay(wait);
+void checkSerial() 
+{
+  String receivedData = Serial.readStringUntil('\n');
 
-      for (uint16_t i=0; i < moduleLED.numPixels(); i=i+3) {
-        moduleLED.setPixelColor(i+q, 0);        //turn every third pixel off
+  char buffer[receivedData.length() + 1];
+  strcpy(buffer, receivedData.c_str());
+
+  char *token;
+  char *remainder;
+  token = strtok_r(buffer, " ", &remainder);
+
+  while (token != NULL) 
+  {
+    String dataString(token);
+    int delimiterIndex = dataString.indexOf('=');
+
+    if (delimiterIndex != -1) 
+    {
+      String key = dataString.substring(0, delimiterIndex);
+      String value = dataString.substring(delimiterIndex + 1);
+      Serial.print("Key: ");
+      Serial.println(key);
+      Serial.print("Value: ");
+      Serial.println(value);
+      if (key == "Disco") 
+      {
+        Disco = true;
+      } 
+      else if (key == "NULLIFY") 
+      {
+        NULLIFY = value.toInt();
+        Serial.println("Got the NULL cmd over Serial...");
+      } 
+      else if (key.startsWith("V")) 
+      {
+        int voltageIndex = key.substring(1).toInt(); // Extract the index after "Voltage"
+        if (voltageIndex >= 1 && voltageIndex <= 4) 
+        {
+          int subIndex = key.endsWith("A") ? 0 : 1; // Determine whether it's A or B voltage
+          voltages[voltageIndex - 1][subIndex] = value.toFloat(); // Update the voltage array
+        }
       }
+    }
+    token = strtok_r(NULL, " ", &remainder);
+  }
+}
+
+void theaterChaseRainbow(Adafruit_NeoPixel &strip1, Adafruit_NeoPixel &strip2, uint8_t wait) 
+{
+  uint16_t numPixels = strip1.numPixels();
+
+  for (int j = 0; j < 256; j++) 
+  { // cycle all 256 colors in the wheel
+    for (uint16_t i = 0; i < numPixels; i = i + 3) 
+    {
+      strip1.setPixelColor(i + j % 3, Wheel(strip1, (i + j) % 255)); // turn every third pixel on for strip1
+      strip2.setPixelColor(i + j % 3, Wheel(strip2, (i + j) % 255)); // turn every third pixel on for strip2
+    }
+    strip1.show();
+    strip2.show();
+    delay(wait);
+
+    for (uint16_t i = 0; i < numPixels; i = i + 3) 
+    {
+      strip1.setPixelColor(i + j % 3, 0); // turn every third pixel off for strip1
+      strip2.setPixelColor(i + j % 3, 0); // turn every third pixel off for strip2
     }
   }
 }
 
-// Input a value 0 to 255 to get a color value.
-// The colours are a transition r - g - b - back to r.
-uint32_t Wheel_Module(byte WheelPos) {
+uint32_t Wheel(Adafruit_NeoPixel &strip, byte WheelPos)
+{
   WheelPos = 255 - WheelPos;
-  if(WheelPos < 85) {
-    return moduleLED.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  if (WheelPos < 85) 
+  {
+    return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
   }
-  if(WheelPos < 170) {
+  if (WheelPos < 170) 
+  {
     WheelPos -= 85;
-    return moduleLED.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+    return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
   }
   WheelPos -= 170;
-  return moduleLED.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
-}
-
-//port IEA led functions
-void allSet_portIEA(uint32_t c, uint8_t wait) {
-  for(uint16_t i=0; i<portIEA.numPixels(); i++) 
-  {
-    portIEA.setPixelColor(i, c);
-    portIEA.show();
-    delay(wait);
-  }
-}
-
-void theaterChaseRainbow_portIEA(uint8_t wait) {
-  for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
-    for (int q=0; q < 3; q++) {
-      for (uint16_t i=0; i < portIEA.numPixels(); i=i+3) {
-        portIEA.setPixelColor(i+q, Wheel_portIEA( (i+j) % 255));    //turn every third pixel on
-      }
-      portIEA.show();
-
-      delay(wait);
-
-      for (uint16_t i=0; i < portIEA.numPixels(); i=i+3) {
-        portIEA.setPixelColor(i+q, 0);        //turn every third pixel off
-      }
-    }
-  }
-}
-
-// Input a value 0 to 255 to get a color value.
-// The colours are a transition r - g - b - back to r.
-uint32_t Wheel_portIEA(byte WheelPos) {
-  WheelPos = 255 - WheelPos;
-  if(WheelPos < 85) {
-    return portIEA.Color(255 - WheelPos * 3, 0, WheelPos * 3);
-  }
-  if(WheelPos < 170) {
-    WheelPos -= 85;
-    return portIEA.Color(0, WheelPos * 3, 255 - WheelPos * 3);
-  }
-  WheelPos -= 170;
-  return portIEA.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
-}
-
-
-//stbd IEA led functions
-void allSet_stbdIEA(uint32_t c, uint8_t wait) {
-  for(uint16_t i=0; i<stbdIEA.numPixels(); i++) 
-  {
-    stbdIEA.setPixelColor(i, c);
-    stbdIEA.show();
-    delay(wait);
-  }
-}
-
-void theaterChaseRainbow_stbdIEA(uint8_t wait) {
-  for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
-    for (int q=0; q < 3; q++) {
-      for (uint16_t i=0; i < stbdIEA.numPixels(); i=i+3) {
-        stbdIEA.setPixelColor(i+q, Wheel_stbdIEA( (i+j) % 255));    //turn every third pixel on
-      }
-      stbdIEA.show();
-
-      delay(wait);
-
-      for (uint16_t i=0; i < stbdIEA.numPixels(); i=i+3) {
-        stbdIEA.setPixelColor(i+q, 0);        //turn every third pixel off
-      }
-    }
-  }
-}
-void theaterChaseRainbow_disco(uint8_t wait) {
-  for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
-    for (int q=0; q < 3; q++) {
-      for (uint16_t i=0; i < stbdIEA.numPixels(); i=i+3) {
-        stbdIEA.setPixelColor(i+q, Wheel_stbdIEA( (i+j) % 255));    //turn every third pixel on
-        portIEA.setPixelColor(i+q, Wheel_portIEA( (i+j) % 255));    //turn every third pixel on
-      }
-      stbdIEA.show();
-      portIEA.show();
-
-      delay(wait);
-
-      for (uint16_t i=0; i < stbdIEA.numPixels(); i=i+3) {
-        stbdIEA.setPixelColor(i+q, 0);        //turn every third pixel off
-        portIEA.setPixelColor(i+q, 0);        //turn every third pixel off
-      }
-    }
-  }
-}
-// Input a value 0 to 255 to get a color value.
-// The colours are a transition r - g - b - back to r.
-uint32_t Wheel_stbdIEA(byte WheelPos) {
-  WheelPos = 255 - WheelPos;
-  if(WheelPos < 85) {
-    return stbdIEA.Color(255 - WheelPos * 3, 0, WheelPos * 3);
-  }
-  if(WheelPos < 170) {
-    WheelPos -= 85;
-    return stbdIEA.Color(0, WheelPos * 3, 255 - WheelPos * 3);
-  }
-  WheelPos -= 170;
-  return stbdIEA.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+  return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
