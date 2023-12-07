@@ -96,10 +96,6 @@ void checkSerial()
     {
       String key = dataString.substring(0, delimiterIndex);
       String value = dataString.substring(delimiterIndex + 1);
-      Serial.print("Key: ");
-      Serial.println(key);
-      Serial.print("Value: ");
-      Serial.println(value);
       if (key == "Disco") 
       {
         Disco = true;
