@@ -211,7 +211,7 @@ isslocationsuccess = False
 testfactor = -1
 crew_mention= False
 mimicbutton = False
-fakeorbitboolean = False
+playbackboolean = False
 demoboolean = False
 switchtofake = False
 manualcontrol = False
@@ -1045,11 +1045,11 @@ class ManualControlScreen(Screen):
         serialWrite("PTRRJ=90 ")
         serialWrite("STRRJ=90 ")
 
-class FakeOrbitScreen(Screen):
+class Playback_Screen(Screen):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     
     def __init__(self, **kwargs):
-        super(FakeOrbitScreen, self).__init__(**kwargs)
+        super(Playback_Screen, self).__init__(**kwargs)
         self.usb_drives = self.get_mount_points()  # Initialize with already connected drives
         self.start_usb_monitoring()
         Clock.schedule_once(self.update_dropdown)  # Update dropdown with initial drives
@@ -1338,7 +1338,7 @@ class MainApp(App):
         self.orbit_screen = Orbit_Screen(name = 'orbit')
         self.orbit_pass = Orbit_Pass(name = 'orbit_pass')
         self.orbit_data = Orbit_Data(name = 'orbit_data')
-        self.fakeorbit_screen = FakeOrbitScreen(name = 'fakeorbit')
+        self.playback_screen = Playback_Screen(name = 'playback')
         self.eps_screen = EPS_Screen(name = 'eps')
         self.ct_screen = CT_Screen(name = 'ct')
         self.ct_sasa_screen = CT_SASA_Screen(name = 'ct_sasa')
@@ -1370,14 +1370,14 @@ class MainApp(App):
                       'ct_screen', 'ct_sasa_screen', 'ct_sgant_screen', 'ct_uhf_screen',
                       'ct_camera_screen', 'gnc_screen', 'orbit_screen', 'us_eva', 'rs_eva',
                       'eva_main', 'mimic_screen', 'robo_screen', 'mss_mt_screen', 'ssrms_screen', 
-                      'spdm1_screen','orbit_pass', 'orbit_data', 'crew_screen', 'fakeorbit_screen']
+                      'spdm1_screen','orbit_pass', 'orbit_data', 'crew_screen', 'playback_screen']
 
         root = MainScreenManager(transition=SwapTransition())
         root.add_widget(self.main_screen)
         root.add_widget(self.control_screen)
         root.add_widget(self.mimic_screen)
         root.add_widget(self.led_screen)
-        root.add_widget(self.fakeorbit_screen)
+        root.add_widget(self.playback_screen)
         root.add_widget(self.orbit_screen)
         root.add_widget(self.orbit_pass)
         root.add_widget(self.orbit_data)
@@ -1479,9 +1479,9 @@ class MainApp(App):
 
         if arduino_count > 0:
             self.mimic_screen.ids.mimicstartbutton.disabled = False
-            self.fakeorbit_screen.ids.DemoStart.disabled = False
-            self.fakeorbit_screen.ids.HTVDemoStart.disabled = False
-            self.fakeorbit_screen.ids.OFT2DemoStart.disabled = False
+            self.playback_screen.ids.DemoStart.disabled = False
+            self.playback_screen.ids.HTVDemoStart.disabled = False
+            self.playback_screen.ids.OFT2DemoStart.disabled = False
             self.control_screen.ids.set90.disabled = False
             self.control_screen.ids.set0.disabled = False
             if mimicbutton:
@@ -1491,9 +1491,9 @@ class MainApp(App):
         else:
             self.mimic_screen.ids.mimicstartbutton.disabled = True
             self.mimic_screen.ids.mimicstartbutton.text = "Transmit"
-            self.fakeorbit_screen.ids.DemoStart.disabled = True
-            self.fakeorbit_screen.ids.HTVDemoStart.disabled = True
-            self.fakeorbit_screen.ids.OFT2DemoStart.disabled = True
+            self.playback_screen.ids.DemoStart.disabled = True
+            self.playback_screen.ids.HTVDemoStart.disabled = True
+            self.playback_screen.ids.OFT2DemoStart.disabled = True
             self.control_screen.ids.set90.disabled = True
             self.control_screen.ids.set0.disabled = True
 
@@ -2249,7 +2249,13 @@ class MainApp(App):
             return visible
 
         ISS_TLE.compute(location) #compute tle propagation based on provided location
-        nextpassinfo = location.next_pass(ISS_TLE)
+        #nextpassinfo = location.next_pass(ISS_TLE)
+        try:    
+            nextpassinfo = location.next_pass(ISS_TLE)
+        except Exception as e:
+            logWrite("Orbit Update error: " + str(e))
+        else:
+            logWrite("Successfull pass prediction update")
 
         if nextpassinfo[0] is None:
             self.orbit_screen.ids.iss_next_pass1.text = "n/a"
@@ -2385,7 +2391,7 @@ class MainApp(App):
             getattr(self, x).ids.signal.size_hint_y = 0.112
 
     def update_labels(self, dt): #THIS IS THE IMPORTANT FUNCTION
-        global mimicbutton, switchtofake, demoboolean, runningDemo, fakeorbitboolean, psarj2, ssarj2, manualcontrol, aos, los, oldLOS, psarjmc, ssarjmc, ptrrjmc, strrjmc, beta1bmc, beta1amc, beta2bmc, beta2amc, beta3bmc, beta3amc, beta4bmc, beta4amc, US_EVAinProgress, position_x, position_y, position_z, velocity_x, velocity_y, velocity_z, altitude, velocity, iss_mass, testvalue, testfactor, airlock_pump, crewlockpres, leak_hold, firstcrossing, EVA_activities, repress, depress, oldAirlockPump, obtained_EVA_crew, EVAstartTime
+        global mimicbutton, switchtofake, demoboolean, runningDemo, playbackboolean, psarj2, ssarj2, manualcontrol, aos, los, oldLOS, psarjmc, ssarjmc, ptrrjmc, strrjmc, beta1bmc, beta1amc, beta2bmc, beta2amc, beta3bmc, beta3amc, beta4bmc, beta4amc, US_EVAinProgress, position_x, position_y, position_z, velocity_x, velocity_y, velocity_z, altitude, velocity, iss_mass, testvalue, testfactor, airlock_pump, crewlockpres, leak_hold, firstcrossing, EVA_activities, repress, depress, oldAirlockPump, obtained_EVA_crew, EVAstartTime
         global holdstartTime, LS_Subscription
         global Disco, eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
         global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power
@@ -2394,13 +2400,13 @@ class MainApp(App):
         global old_mt_timestamp, old_mt_position, mt_speed
 
         if runningDemo:
-            self.fakeorbit_screen.ids.DemoStart.disabled = True
-            self.fakeorbit_screen.ids.HTVDemoStart.disabled = True
-            self.fakeorbit_screen.ids.DemoStop.disabled = False
-            self.fakeorbit_screen.ids.HTVDemoStop.disabled = False
-            self.fakeorbit_screen.ids.OFT2DemoStart.disabled = True
-            self.fakeorbit_screen.ids.OFT2DemoStop.disabled = False
-            self.fakeorbit_screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
+            self.playback_screen.ids.DemoStart.disabled = True
+            self.playback_screen.ids.HTVDemoStart.disabled = True
+            self.playback_screen.ids.DemoStop.disabled = False
+            self.playback_screen.ids.HTVDemoStop.disabled = False
+            self.playback_screen.ids.OFT2DemoStart.disabled = True
+            self.playback_screen.ids.OFT2DemoStop.disabled = False
+            self.playback_screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
 
         c.execute('select Value from telemetry')
         values = c.fetchall()
@@ -2484,6 +2490,16 @@ class MainApp(App):
         uhf1_power = int((values[233])[0]) #0 = off, 1 = on, 3 = failed
         uhf2_power = int((values[234])[0]) #0 = off, 1 = on, 3 = failed
         uhf_framesync = int((values[235])[0]) #1 or 0
+
+        #initialize array statuses to discharge
+        v1as = 1
+        v1bs = 1
+        v2as = 1
+        v2bs = 1
+        v3as = 1
+        v3bs = 1
+        v4as = 1
+        v4bs = 1
 
         v1a = "{:.2f}".format(float((values[25])[0]))
         channel1A_voltage[EPSstorageindex] = float(v1a)
@@ -2991,93 +3007,132 @@ class MainApp(App):
         else:
             self.eps_screen.ids.eps_sun.color = 1, 1, 1, 0.1
 
+        # array status numbers to be sent to arduino
+        # 1 = discharging
+        # 2 = charging
+        # 3 = full
+        # 4 = offline
+
         if float(v1a) < 151.5: #discharging
             self.eps_screen.ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
+            v1as = 1
             #self.eps_screen.ids.array_1a.color = 1, 1, 1, 0.8
         elif float(v1a) > 160.0: #charged
             self.eps_screen.ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
+            v1as = 3
         elif float(v1a) >= 151.5:  #charging
             self.eps_screen.ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_1a.color = 1, 1, 1, 1.0
+            v1as = 2
         if float(c1a) > 0.0:    #power channel offline!
             self.eps_screen.ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
+            v1as = 4
 
         if float(v1b) < 151.5: #discharging
             self.eps_screen.ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
+            v1bs = 1
             #self.eps_screen.ids.array_1b.color = 1, 1, 1, 0.8
         elif float(v1b) > 160.0: #charged
             self.eps_screen.ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
+            v1bs = 3
         elif float(v1b) >= 151.5:  #charging
             self.eps_screen.ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_1b.color = 1, 1, 1, 1.0
+            v1bs = 2
         if float(c1b) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
+            v1bs = 4
 
         if float(v2a) < 151.5: #discharging
             self.eps_screen.ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
+            v2as = 1
             #self.eps_screen.ids.array_2a.color = 1, 1, 1, 0.8
         elif float(v2a) > 160.0: #charged
             self.eps_screen.ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
+            v2as = 3
         elif float(v2a) >= 151.5:  #charging
             self.eps_screen.ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_2a.color = 1, 1, 1, 1.0
+            v2as = 2
         if float(c2a) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
+            v2as = 4
 
         if float(v2b) < 151.5: #discharging
             self.eps_screen.ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
+            v2bs = 1
             #self.eps_screen.ids.array_2b.color = 1, 1, 1, 0.8
         elif float(v2b) > 160.0: #charged
             self.eps_screen.ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
+            v2bs = 3
         elif float(v2b) >= 151.5:  #charging
             self.eps_screen.ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_2b.color = 1, 1, 1, 1.0
+            v2bs = 2
         if float(c2b) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
+            v2bs = 4
 
         if float(v3a) < 151.5: #discharging
             self.eps_screen.ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
+            v3as = 1
             #self.eps_screen.ids.array_3a.color = 1, 1, 1, 0.8
         elif float(v3a) > 160.0: #charged
             self.eps_screen.ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
+            v3as = 3
         elif float(v3a) >= 151.5:  #charging
             self.eps_screen.ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_3a.color = 1, 1, 1, 1.0
+            v3as = 2
         if float(c3a) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
+            v3as = 4
 
         if float(v3b) < 151.5: #discharging
             self.eps_screen.ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
+            v3bs = 1
             #self.eps_screen.ids.array_3b.color = 1, 1, 1, 0.8
         elif float(v3b) > 160.0: #charged
             self.eps_screen.ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
+            v3bs = 3
         elif float(v3b) >= 151.5:  #charging
             self.eps_screen.ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_3b.color = 1, 1, 1, 1.0
+            v3bs = 2
         if float(c3b) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
+            v3bs = 4
 
         if float(v4a) < 151.5: #discharging
             self.eps_screen.ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
+            v4as = 1
             #self.eps_screen.ids.array_4a.color = 1, 1, 1, 0.8
         elif float(v4a) > 160.0: #charged
             self.eps_screen.ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
+            v4as = 3
         elif float(v4a) >= 151.5:  #charging
             self.eps_screen.ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_4a.color = 1, 1, 1, 1.0
+            v4as = 2
         if float(c4a) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
+            v4as = 4
+        
         #4b has a lower setpoint voltage for now - reverted back as of US EVA 63
         if float(v4b) < 141.5: #discharging
             self.eps_screen.ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
+            v4bs = 1
             #self.eps_screen.ids.array_4b.color = 1, 1, 1, 0.8
         elif float(v4b) > 150.0: #charged
             self.eps_screen.ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
+            v4bs = 3
         elif float(v4b) >= 141.5:  #charging
             self.eps_screen.ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_4b.color = 1, 1, 1, 1.0
+            v4bs = 2
         if float(c4b) > 0.0:                                  #power channel offline!
             self.eps_screen.ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
+            v4bs = 4
 
         ##-------------------C&T Functionality-------------------##
         self.ct_sgant_screen.ids.sgant_dish.angle = float(sgant_elevation)
@@ -3270,23 +3325,23 @@ class MainApp(App):
 #            LOSpopup.open()
 
         ##-------------------Fake Orbit Simulator-------------------##
-        #self.fakeorbit_screen.ids.psarj.text = str(psarj)
-        #self.fakeorbit_screen.ids.ssarj.text = str(ssarj)
-        #self.fakeorbit_screen.ids.beta1a.text = str(beta1a)
-        #self.fakeorbit_screen.ids.beta1b.text = str(beta1b)
-        #self.fakeorbit_screen.ids.beta2a.text = str(beta2a)
-        #self.fakeorbit_screen.ids.beta2b.text = str(beta2b)
-        #self.fakeorbit_screen.ids.beta3a.text = str(beta3a)
-        #self.fakeorbit_screen.ids.beta3b.text = str(beta3b)
-        #self.fakeorbit_screen.ids.beta4a.text = str(beta4a)
-        #self.fakeorbit_screen.ids.beta4b.text = str(beta4b)
+        #self.playback_screen.ids.psarj.text = str(psarj)
+        #self.playback_screen.ids.ssarj.text = str(ssarj)
+        #self.playback_screen.ids.beta1a.text = str(beta1a)
+        #self.playback_screen.ids.beta1b.text = str(beta1b)
+        #self.playback_screen.ids.beta2a.text = str(beta2a)
+        #self.playback_screen.ids.beta2b.text = str(beta2b)
+        #self.playback_screen.ids.beta3a.text = str(beta3a)
+        #self.playback_screen.ids.beta3b.text = str(beta3b)
+        #self.playback_screen.ids.beta4a.text = str(beta4a)
+        #self.playback_screen.ids.beta4b.text = str(beta4b)
 
         if demoboolean:
             if Disco:
                 serialWrite("Disco ")
                 Disco = False
             #serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "V1A=" + v1a + " " + "V2A=" + v2a + " " + "V3A=" + v3a + " " + "V4A=" + v4a + " " + "V1B=" + v1b + " " + "V2B=" + v2b + " " + "V3B=" + v3b + " " + "V4B=" + v4b + " ")
-            serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + v1a + " " + "V2A=" + v2a + " " + "V3A=" + v3a + " " + "V4A=" + v4a + " " + "V1B=" + v1b + " " + "V2B=" + v2b + " " + "V3B=" + v3b + " " + "V4B=" + v4b + " " + "ISS=" + module + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
+            serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + v1as + " " + "V2A=" + v2as + " " + "V3A=" + v3as + " " + "V4A=" + v4as + " " + "V1B=" + v1bs + " " + "V2B=" + v2bs + " " + "V3B=" + v3bs + " " + "V4B=" + v4bs + " " + "ISS=" + module + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
 
         self.orbit_data.ids.position_x.text = str("{:.2f}".format(position_x))
         self.orbit_data.ids.position_y.text = str("{:.2f}".format(position_y))
@@ -3851,11 +3906,11 @@ class MainApp(App):
         #    self.signal_unsubscribed()
 
         if mimicbutton: # and float(aos) == 1.00):
-            serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + v1a + " " + "V2A=" + v2a + " " + "V3A=" + v3a + " " + "V4A=" + v4a + " " + "V1B=" + v1b + " " + "V2B=" + v2b + " " + "V3B=" + v3b + " " + "V4B=" + v4b + " " + "ISS=" + module + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
+            serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + v1as + " " + "V2A=" + v2as + " " + "V3A=" + v3as + " " + "V4A=" + v4as + " " + "V1B=" + v1bs + " " + "V2B=" + v2bs + " " + "V3B=" + v3bs + " " + "V4B=" + v4bs + " " + "ISS=" + module + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
 
 #All GUI Screens are on separate kv files
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Settings_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/FakeOrbitScreen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Playback_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/LED_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Orbit_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Orbit_Pass.kv')
@@ -3897,7 +3952,7 @@ Builder.load_string('''
 #:import win kivy.core.window
 ScreenManager:
     Settings_Screen:
-    FakeOrbitScreen:
+    Playback_Screen:
     LED_Screen:
     Orbit_Screen:
     Orbit_Pass:
