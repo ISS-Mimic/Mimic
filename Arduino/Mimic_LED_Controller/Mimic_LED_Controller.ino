@@ -3,13 +3,22 @@
 Adafruit_NeoPixel stbdIEA = Adafruit_NeoPixel(24, 6, NEO_GRB);
 Adafruit_NeoPixel portIEA = Adafruit_NeoPixel(24, 5, NEO_GRB);
 
-double voltages[4][2] = 
-{
-  {0.00, 0.00}, // V1A, V1B
-  {0.00, 0.00}, // V2A, V2B
-  {0.00, 0.00}, // V3A, V3B
-  {0.00, 0.00}  // V4A, V4B
-};
+int port_LEDs_4A[] = {0, 1, 2, 3, 4, 5};
+int port_LEDs_2A[] = {6, 7, 8, 9, 10, 11};
+int port_LEDs_4B[] = {12, 13, 14, 15, 16, 17};
+int port_LEDs_2B[] = {18, 19, 20, 21, 22, 23};
+
+int stbd_LEDs_3A[] = {0, 1, 2, 3, 4, 5};
+int stbd_LEDs_1A[] = {6, 7, 8, 9, 10, 11};
+int stbd_LEDs_3B[] = {12, 13, 14, 15, 16, 17};
+int stbd_LEDs_1B[] = {18, 19, 20, 21, 22, 23};
+
+
+double port_voltages[4] = {0,0,0,0}; // 2A, 4A, 2B, 4B
+double stbd_voltages[4] = {0,0,0,0}; // 1A, 3A, 1B, 3B
+
+double prev_port_voltages[4] = {0, 0, 0, 0};
+double prev_stbd_voltages[4] = {0, 0, 0, 0};
 
 boolean Disco = false;
 int NULLIFY = 0;
@@ -30,15 +39,19 @@ void loop()
   {
     checkSerial();
   }
-    
-  updateLEDs(portIEA, 0);
-  updateLEDs(portIEA, 6);
-  updateLEDs(portIEA, 12);
-  updateLEDs(portIEA, 18);
-  updateLEDs(stbdIEA, 0);
-  updateLEDs(stbdIEA, 6);
-  updateLEDs(stbdIEA, 12);
-  updateLEDs(stbdIEA, 18);
+
+  // Update LEDs for each array on the port side
+  updateLEDs(portIEA, port_LEDs_2A, 6, port_voltages[0], prev_port_voltages[0]);
+  updateLEDs(portIEA, port_LEDs_4A, 6, port_voltages[1], prev_port_voltages[1]);
+  updateLEDs(portIEA, port_LEDs_2B, 6, port_voltages[2], prev_port_voltages[2]);
+  updateLEDs(portIEA, port_LEDs_4B, 6, port_voltages[3], prev_port_voltages[3]);
+
+  // Update LEDs for each array on the starboard side
+  updateLEDs(stbdIEA, stbd_LEDs_1A, 6, stbd_voltages[0], prev_stbd_voltages[0]);
+  updateLEDs(stbdIEA, stbd_LEDs_3A, 6, stbd_voltages[1], prev_stbd_voltages[1]);
+  updateLEDs(stbdIEA, stbd_LEDs_1B, 6, stbd_voltages[2], prev_stbd_voltages[2]);
+  updateLEDs(stbdIEA, stbd_LEDs_3B, 6, stbd_voltages[3], prev_stbd_voltages[3]);
+
 
   if (Disco) 
   {
@@ -47,26 +60,37 @@ void loop()
   Disco = false;
 }
 
-void updateLEDs(Adafruit_NeoPixel &strip, int startIndex) 
+void updateLEDs(Adafruit_NeoPixel &strip, int* ledArray, int arraySize, double state, double &prevState) 
 {
-  for (int i = 0; i < 6; i++) { // Assuming 6 LEDs per solar array section
-    double arrayState = voltages[startIndex / 6][startIndex % 2];
-    uint32_t color = setColorBasedOnVoltage(arrayState);
-    strip.setPixelColor(startIndex + i, color);
-  }
-  strip.show();
+    if (state != prevState) 
+    {
+        uint32_t color = setColorBasedOnState(state);
+        for (int i = 0; i < arraySize; i++) 
+        {
+            strip.setPixelColor(ledArray[i], color);
+        }
+        strip.show();
+        prevState = state;
+    }
 }
 
-uint32_t setColorBasedOnVoltage(double arrayState) 
+uint32_t setColorBasedOnState(double arrayState) 
 {
-  if(arrayState == 1.00) {
+  if(arrayState == 1.00) 
+  {
     return portIEA.Color(111, 0, 0); // Red
-  } else if(arrayState == 2.00) {
+  } 
+  else if(arrayState == 2.00) 
+  {
     return portIEA.Color(0, 0, 111); // Blue
-  } else if(arrayState == 3.00) {
+  } 
+  else if(arrayState == 3.00) 
+  {
     return portIEA.Color(111, 111, 111); // White
-  } else {
-    return portIEA.Color(111, 111, 0); // Yellow
+  } 
+  else 
+  {
+    return portIEA.Color(111, 30, 22); // Orange
   }
 }
 void checkSerial() 
@@ -93,18 +117,61 @@ void checkSerial()
       {
         Disco = true;
       } 
-      else if (key == "NULLIFY") 
-      {
-        NULLIFY = value.toInt();
-        Serial.println("Got the NULL cmd over Serial...");
-      } 
       else if (key.startsWith("V")) 
       {
         int voltageIndex = key.substring(1,2).toInt(); // Extract the index after "Voltage"
-        if (voltageIndex >= 1 && voltageIndex <= 4) 
+        switch (voltageIndex) 
         {
-          int subIndex = key.endsWith("A") ? 0 : 1; // Determine whether it's A or B voltage
-          voltages[voltageIndex - 1][subIndex] = value.toFloat(); // Update the voltage array
+          case 1:
+            if(key.endsWith("A"))
+            {
+              //1A
+              stbd_voltages[0] = value.toFloat();
+            }
+            else
+            {
+              //1B
+              stbd_voltages[2] = value.toFloat();
+            }
+            break;
+          case 2:
+            if(key.endsWith("A"))
+            {
+              //2A
+              port_voltages[0] = value.toFloat();
+            }
+            else
+            {
+              //2B
+              port_voltages[2] = value.toFloat();
+            }
+            break;
+          case 3:
+            if(key.endsWith("A"))
+            {
+              //3A
+              stbd_voltages[1] = value.toFloat();
+            }
+            else
+            {
+              //3B
+              stbd_voltages[3] = value.toFloat();
+            }
+            break;
+          case 4:
+            if(key.endsWith("A"))
+            {
+              //4A
+              port_voltages[1] = value.toFloat();
+            }
+            else
+            {
+              //4B
+              port_voltages[3] = value.toFloat();
+            }
+            break;
+          default:
+            break;
         }
       }
     }
