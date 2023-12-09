@@ -30,7 +30,7 @@ void loop()
   {
     checkSerial();
   }
-
+    
   updateLEDs(portIEA, 0);
   updateLEDs(portIEA, 6);
   updateLEDs(portIEA, 12);
@@ -49,33 +49,26 @@ void loop()
 
 void updateLEDs(Adafruit_NeoPixel &strip, int startIndex) 
 {
-  double voltageA = voltages[startIndex / 6][0];
-  double voltageB = voltages[startIndex / 6][1];
-
-  for (int i = startIndex; i < startIndex + 6; i++) 
-  {
-    setColorBasedOnVoltage(strip, i, voltageA, voltageB);
+  for (int i = 0; i < 6; i++) { // Assuming 6 LEDs per solar array section
+    double arrayState = voltages[startIndex / 6][startIndex % 2];
+    uint32_t color = setColorBasedOnVoltage(arrayState);
+    strip.setPixelColor(startIndex + i, color);
   }
-
   strip.show();
 }
 
-void setColorBasedOnVoltage(Adafruit_NeoPixel &strip, int index, double voltageA, double voltageB) 
+uint32_t setColorBasedOnVoltage(double arrayState) 
 {
-  if (voltageA < 151.5) 
-  {
-    strip.setPixelColor(index, strip.Color(111, 0, 0));
-  } 
-  else if (voltageA > 160) 
-  {
-    strip.setPixelColor(index, strip.Color(111, 111, 111));
-  } 
-  else 
-  {
-    strip.setPixelColor(index, strip.Color(0, 0, 111));
+  if(arrayState == 1.00) {
+    return portIEA.Color(111, 0, 0); // Red
+  } else if(arrayState == 2.00) {
+    return portIEA.Color(0, 0, 111); // Blue
+  } else if(arrayState == 3.00) {
+    return portIEA.Color(111, 111, 111); // White
+  } else {
+    return portIEA.Color(111, 111, 0); // Yellow
   }
 }
-
 void checkSerial() 
 {
   String receivedData = Serial.readStringUntil('\n');
@@ -107,7 +100,7 @@ void checkSerial()
       } 
       else if (key.startsWith("V")) 
       {
-        int voltageIndex = key.substring(1).toInt(); // Extract the index after "Voltage"
+        int voltageIndex = key.substring(1,2).toInt(); // Extract the index after "Voltage"
         if (voltageIndex >= 1 && voltageIndex <= 4) 
         {
           int subIndex = key.endsWith("A") ? 0 : 1; // Determine whether it's A or B voltage
