@@ -156,6 +156,7 @@ def get_serial_ports(context, using_config_file=False):
         serial_ports = data['arduino']['serial_ports']
     else:
         serial_ports = get_tty_dev_names(context)
+    serial_ports = list(set(serial_ports)) #remove duplicate ports that show up somehow
     return serial_ports
 
 def open_serial_ports(serial_ports):
@@ -2249,7 +2250,6 @@ class MainApp(App):
             return visible
 
         ISS_TLE.compute(location) #compute tle propagation based on provided location
-        #nextpassinfo = location.next_pass(ISS_TLE)
         try:    
             nextpassinfo = location.next_pass(ISS_TLE)
         except Exception as e:

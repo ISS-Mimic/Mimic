@@ -10,7 +10,7 @@ Steps:
   2.  Label the last two motors “T” for TRRJs.  These two will receive different commands.        ![image](https://github.com/ISS-Mimic/Mimic/assets/58833710/3fca182c-949a-4941-b85a-b19a0a94602a)
   3.  Plug in power supply for Servo PCB
   4.  Upload Arduino code “Mimic Mini”
-        ****  Code will be linked, please standby ****
+       (https://github.com/ISS-Mimic/Mimic/tree/main/EXTRAs/Mini/Arduino_Mini/Mimic_Mini)
       
   6.  Open Arduino Serial Monitor
   7.  Send a special command in the Serial Monitor.
