@@ -2093,15 +2093,23 @@ class MainApp(App):
 
 
         self.orbit_screen.ids.OrbitISStiny.pos = (
-                scaleLatLon2(latitude, longitude)['new_x'] - ((self.orbit_screen.ids.OrbitISStiny.width / 2) * normalizedX * 2), #had to fudge a little not sure why
-                scaleLatLon2(latitude, longitude)['new_y'] - ((self.orbit_screen.ids.OrbitISStiny.height / 2) * normalizedY * 2)) #had to fudge a little not sure why
+                scaleLatLon2(latitude, longitude)['new_x'] - (self.orbit_screen.ids.OrbitISStiny.width / 2),
+                scaleLatLon2(latitude, longitude)['new_y'] - (self.orbit_screen.ids.OrbitISStiny.height / 2))
 
         #get the position of the sub solar point to add the sun icon to the map
-        sunlatitude, sunlongitude = subsolar(datetime.utcnow())
+        
+        def update_sun_position(self):
+            sunlatitude, sunlongitude = subsolar(datetime.utcnow())
+            scaled_coordinates = scaleLatLon2(int(sunlatitude),int(sunlongitude))
 
-        self.orbit_screen.ids.OrbitSun.pos = (
-                scaleLatLon2(int(sunlatitude), int(sunlongitude))['new_x'] - ((self.orbit_screen.ids.OrbitSun.width / 2) * normalizedX * 2), #had to fudge a little not sure why
-                scaleLatLon2(int(sunlatitude), int(sunlongitude))['new_y'] - ((self.orbit_screen.ids.OrbitSun.height / 2) * normalizedY * 2)) #had to fudge a little not sure why
+            #Adjust for centering of the sun image
+            sun_x = scaled_coordinates['new_x'] - (self.orbit_screen.ids.OrbitSun.width / 2)
+            sun_y = scaled_coordinates['new_y'] - (self.orbit_screen.ids.OrbitSun.height / 2)
+
+            self.orbit_screen.ids.OrbitSun.pos = (sun_x, sun_y)
+
+
+        update_sun_position(self)
 
         #draw the ISS groundtrack behind and ahead of the 180 longitude cutoff
         ISS_groundtrack = []
