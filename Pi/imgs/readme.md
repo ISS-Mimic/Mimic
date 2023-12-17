@@ -1,1 +1,1 @@
-All stack images are from historicspacecraft.com.
+All ISS module stack images are from historicspacecraft.com.

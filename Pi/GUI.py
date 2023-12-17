@@ -1075,7 +1075,7 @@ class Playback_Screen(Screen):
         # Get the Spinner widget from your layout
         dropdown = self.ids.playback_dropdown  # Adjust this according to your KV layout
         formatted_drives = [f"{drive} (USB)" for drive in self.usb_drives]
-        dropdown.values = formatted_drives + ['HTV','OFT-2']
+        dropdown.values = formatted_drives + ['HTV','OFT-2','Standard']
 
     def start_usb_monitoring(self):
         # Start the monitoring in a background thread
@@ -1084,8 +1084,42 @@ class Playback_Screen(Screen):
         thread.start()
 
     def on_dropdown_select(self, value):
+        global playback
         playback = value
         print(playback)
+        
+
+    def start_press(self):
+        global playback
+        if playback == "OFT-2":
+            print("oft2")
+            self.startOFT2Demo()
+        elif playback == "HTV":
+            print("htv")
+            self.startHTVDemo()
+        elif playback == "Standard":
+            print("standard")
+            self.startDemo()
+        elif playback == "Disco":
+            print("disco")
+            self.startDisco()
+
+
+    def stop_press(self):
+        global playback
+        if playback == "OFT-2":
+            print("oft2")
+            self.stopOFT2Demo()
+        elif playback == "HTV":
+            print("htv")
+            self.stopHTVDemo()
+        elif playback == "Standard":
+            print("standard")
+            self.stopDemo()
+        elif playback == "Disco":
+            print("disco")
+            self.stopDisco()
+
 
     def changeDemoBoolean(self, *args):
         global demoboolean
@@ -1095,6 +1129,7 @@ class Playback_Screen(Screen):
         global p2, runningDemo, Disco
         if not runningDemo:
             try:
+                #p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/Disco"])
                 p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/disco.sh")
             except Exception as e:
                 logWrite(e)
@@ -1106,8 +1141,7 @@ class Playback_Screen(Screen):
         global p2, runningDemo
         if not runningDemo:
             try:
-                #p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/demoOrbit.sh")
-                p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/OFT2"])
+                p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/Standard"])
             except Exception as e:
                 logWrite(e)
             runningDemo = True
@@ -1126,7 +1160,7 @@ class Playback_Screen(Screen):
         global p2, runningDemo
         if not runningDemo:
             try:
-                p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/demoHTVOrbit.sh")
+                p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/OFT2"])
             except Exception as e:
                 logWrite(e)
             runningDemo = True
@@ -1480,9 +1514,7 @@ class MainApp(App):
 
         if arduino_count > 0:
             self.mimic_screen.ids.mimicstartbutton.disabled = False
-            self.playback_screen.ids.DemoStart.disabled = False
-            self.playback_screen.ids.HTVDemoStart.disabled = False
-            self.playback_screen.ids.OFT2DemoStart.disabled = False
+            self.playback_screen.ids.start.disabled = False
             self.control_screen.ids.set90.disabled = False
             self.control_screen.ids.set0.disabled = False
             if mimicbutton:
@@ -1492,9 +1524,7 @@ class MainApp(App):
         else:
             self.mimic_screen.ids.mimicstartbutton.disabled = True
             self.mimic_screen.ids.mimicstartbutton.text = "Transmit"
-            self.playback_screen.ids.DemoStart.disabled = True
-            self.playback_screen.ids.HTVDemoStart.disabled = True
-            self.playback_screen.ids.OFT2DemoStart.disabled = True
+            self.playback_screen.ids.start.disabled = True
             self.control_screen.ids.set90.disabled = True
             self.control_screen.ids.set0.disabled = True
 
@@ -2408,12 +2438,8 @@ class MainApp(App):
         global old_mt_timestamp, old_mt_position, mt_speed
 
         if runningDemo:
-            self.playback_screen.ids.DemoStart.disabled = True
-            self.playback_screen.ids.HTVDemoStart.disabled = True
-            self.playback_screen.ids.DemoStop.disabled = False
-            self.playback_screen.ids.HTVDemoStop.disabled = False
-            self.playback_screen.ids.OFT2DemoStart.disabled = True
-            self.playback_screen.ids.OFT2DemoStop.disabled = False
+            self.playback_screen.ids.start.disabled = True
+            self.playback_screen.ids.stop.disabled = False
             self.playback_screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
 
         c.execute('select Value from telemetry')
