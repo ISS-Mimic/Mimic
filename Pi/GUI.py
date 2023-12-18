@@ -1048,9 +1048,13 @@ class ManualControlScreen(Screen):
 
 class Playback_Screen(Screen):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    playback = ""
+    time_factor = 60
     
     def __init__(self, **kwargs):
         super(Playback_Screen, self).__init__(**kwargs)
+        self.playback = ""
+        self.time_factor = 60
         self.usb_drives = self.get_mount_points()  # Initialize with already connected drives
         self.start_usb_monitoring()
         Clock.schedule_once(self.update_dropdown)  # Update dropdown with initial drives
@@ -1084,117 +1088,68 @@ class Playback_Screen(Screen):
         thread.start()
 
     def on_dropdown_select(self, value):
-        global playback
-        playback = value
-        print(playback)
+        self.playback = value
         
+    def on_disco_select(self, value):
+        self.playback = value
 
     def start_press(self):
-        global playback
-        if playback == "OFT-2":
-            print("oft2")
-            self.startOFT2Demo()
-        elif playback == "HTV":
-            print("htv")
-            self.startHTVDemo()
-        elif playback == "Standard":
-            print("standard")
+        if self.playback == "OFT-2":
             self.startDemo()
-        elif playback == "Disco":
-            print("disco")
-            self.startDisco()
-
+        elif self.playback == "HTV":
+            self.startDemo()
+        elif self.playback == "Standard":
+            self.startDemo()
+        elif self.playback == "Disco":
+            self.startDemo()
 
     def stop_press(self):
-        global playback
-        if playback == "OFT-2":
-            print("oft2")
-            self.stopOFT2Demo()
-        elif playback == "HTV":
-            print("htv")
-            self.stopHTVDemo()
-        elif playback == "Standard":
-            print("standard")
-            self.stopDemo()
-        elif playback == "Disco":
-            print("disco")
-            self.stopDisco()
-
+        global p2, runningDemo
+        try:
+            p2.kill()
+        except Exception as e:
+            logWrite(e)
+        else:
+            runningDemo = False
+        finally:
+            logWrite("attempted to stop" + str(self.playback))
 
     def changeDemoBoolean(self, *args):
         global demoboolean
         demoboolean = args[0]
 
-    def startDisco(*args):
-        global p2, runningDemo, Disco
+    def increment_time(self):
+        self.time_factor += 5
+        if self.time_factor > 90:
+            self.time_factor = 90
+        elif self.time_factor == 1:
+            self.time_factor = 5
+        self.ids.time_factor_label.text = str(self.time_factor) + "x" 
+        
+    def decrement_time(self):
+        self.time_factor -= 5
+        if self.time_factor < 1:
+            self.time_factor = 1
+        self.ids.time_factor_label.text = str(self.time_factor) + "x" 
+
+    def startDemo(self):
+        global p2, playback, runningDemo
         if not runningDemo:
             try:
-                #p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/Disco"])
-                p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/disco.sh")
+                if self.playback == "OFT-2":
+                    p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/Standard"])
+                elif self.playback == "HTV":
+                    p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/HTV"])
+                elif self.playback == "Standard":
+                    p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/OFT2"])
+                elif self.playback == "Disco":
+                    #p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/Disco"])
+                    p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/disco.sh")
             except Exception as e:
                 logWrite(e)
             runningDemo = True
-            Disco = True
-            logWrite("Successfully started Disco script")
+            logWrite("started playback of " + str(self.playback))
 
-    def startDemo(*args):
-        global p2, runningDemo
-        if not runningDemo:
-            try:
-                p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/Standard"])
-            except Exception as e:
-                logWrite(e)
-            runningDemo = True
-            logWrite("Successfully started Demo Orbit script")
-
-    def stopDemo(*args):
-        global p2, runningDemo
-        try:
-            p2.kill()
-        except Exception as e:
-            logWrite(e)
-        else:
-            runningDemo = False
-
-    def startHTVDemo(*args):
-        global p2, runningDemo
-        if not runningDemo:
-            try:
-                p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/OFT2"])
-            except Exception as e:
-                logWrite(e)
-            runningDemo = True
-            logWrite("Successfully started Demo HTV Orbit script")
-
-    def stopHTVDemo(*args):
-        global p2, runningDemo
-        try:
-            p2.kill()
-        except Exception as e:
-            logWrite(e)
-        else:
-            logWrite("Successfully stopped Demo HTV Orbit script")
-            runningDemo = False
-                
-    def startOFT2Demo(*args):
-        global p2, runningDemo
-        if not runningDemo:
-            try:
-                p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/demoOFT2.sh")
-            except Exception as e:
-                logWrite(e)
-            runningDemo = True
-            logWrite("Successfully started Demo OFT2 Orbit script")
-
-    def stopOFT2Demo(*args):
-        global p2, runningDemo
-        try:
-            p2.kill()
-        except Exception as e:
-            logWrite(e)
-        else:
-            logWrite("Successfully stopped Demo OFT2 Orbit script")
-            runningDemo = False
 
 class Settings_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
