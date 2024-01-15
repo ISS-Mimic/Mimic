@@ -2474,7 +2474,7 @@ class MainApp(App):
             sasa_xmit = True
         else:
             sasa_xmit = False
-        sgant_elevation = float((values[15])[0])
+        sgant_elevation = float((values[15])[0]) 
         sgant_xelevation = float((values[17])[0])
         sgant_transmit = float((values[41])[0])
         uhf1_power = int((values[233])[0]) #0 = off, 1 = on, 3 = failed
@@ -3089,7 +3089,7 @@ class MainApp(App):
             self.eps_screen.ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
 
         ##-------------------C&T Functionality-------------------##
-        self.ct_sgant_screen.ids.sgant_dish.angle = float(sgant_elevation)
+        self.ct_sgant_screen.ids.sgant_dish.angle = float(sgant_elevation) + " deg"
         self.ct_sgant_screen.ids.sgant_elevation.text = "{:.2f}".format(float(sgant_elevation))
 
         #make sure radio animations turn off when no signal or no transmit
