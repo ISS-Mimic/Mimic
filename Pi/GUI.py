@@ -3089,7 +3089,7 @@ class MainApp(App):
             self.eps_screen.ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
 
         ##-------------------C&T Functionality-------------------##
-        self.ct_sgant_screen.ids.sgant_dish.angle = float(sgant_elevation) + " deg"
+        self.ct_sgant_screen.ids.sgant_dish.angle = float(sgant_elevation)
         self.ct_sgant_screen.ids.sgant_elevation.text = "{:.2f}".format(float(sgant_elevation))
 
         #make sure radio animations turn off when no signal or no transmit
