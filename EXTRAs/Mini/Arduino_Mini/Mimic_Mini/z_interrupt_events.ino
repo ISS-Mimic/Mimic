@@ -78,6 +78,12 @@ void checkSerial()
       Serial.print("--- Setting all Servos to maximum position ---");
     }
     
+    else if (test2.substring(0, delimeter) == "Mini_ServosInstallPos")
+    {
+      Mini_ServosInstallPos_Flag = 1;
+      //      MiniAllServoVals= (test2.substring(delimeter + 1)).toFloat();
+      Serial.println("--- Setting BGA & SARJ servos to Min, TRRJ to Mid ---");
+    }
     
     else if (test2.substring(0, delimeter) == "SSARJ")
     {
