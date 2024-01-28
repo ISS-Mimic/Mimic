@@ -3,6 +3,7 @@
 from datetime import datetime, timedelta #used for time conversions and logging timestamps
 import datetime as dtime #this is different from above for... reasons?
 import os # used to remove database on program exit; also used for importing config.json
+import getpass #used to get username for directories
 from subprocess import Popen #, PIPE, STDOUT #used to start/stop Javascript telemetry program and TDRS script and orbitmap
 import threading #used for background monitoring of USB ports for playback data
 import time #used for time
@@ -1050,18 +1051,20 @@ class Playback_Screen(Screen):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     playback = ""
     time_factor = 60
+    usb_path = "/media/pi"
     
     def __init__(self, **kwargs):
         super(Playback_Screen, self).__init__(**kwargs)
         self.playback = ""
         self.time_factor = 60
+        self.usb_path = os.path.join('/media',getpass.getuser())
         self.usb_drives = self.get_mount_points()  # Initialize with already connected drives
         self.start_usb_monitoring()
         Clock.schedule_once(self.update_dropdown)  # Update dropdown with initial drives
 
     def get_mount_points(self):
         # This function returns a set of current mount points
-        return set(os.listdir('/media/pi'))
+        return set(os.listdir(self.usb_path))
 
     def usb_monitoring_task(self):
         initial_mounts = self.get_mount_points()
