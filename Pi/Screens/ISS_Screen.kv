@@ -193,6 +193,21 @@
             size_hint_y: 0.4
             font_size: self.height * 0.08
         ToggleButton:
+            id: NRAL_button
+            size_hint: 0.25,0.2
+            pos_hint: {"center_x": 0.1, "center_y": 0.55}
+            group: "modules"
+            opacity: 0.0
+            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_NRAL.png"
+            on_release: root.selectModule("SM")
+        Label:
+            pos_hint: {"center_x": 0.6, "center_y": 0.85}
+            text: 'NRAL'
+            markup: True
+            color: 0,0,0
+            size_hint_y: 0.4
+            font_size: self.height * 0.08
+        ToggleButton:
             id: clear_module_button
             size_hint: 0.15,0.18
             pos_hint: {"center_x": 0.07, "center_y": 0.25}
