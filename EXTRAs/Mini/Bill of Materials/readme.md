@@ -51,7 +51,7 @@
 | stick  (Maker Beam 200/10/10mm) | 4 | N/A | N/A |  [  ]() |  |  | 
 | stick  (Maker Beam 100/10/10mm) | 1 | N/A | N/A |  [  ]() |  |  | 
 | stick  (Maker Beam  60/10/10mm) | 1 | N/A | N/A |  [  ]() |  |  | 
-| MakerBeam corner bracket (L shape) (100315) | 5 | N/A | N/A |  [  ]() |  |  | 
+| MakerBeam corner bracket (L shape) (100315) | 5 | N/A | N/A |  [  ]() | Can alternatively print your own:https://www.tinkercad.com/things/hA3l493foaQ-mini-iss-mimic-05-scale-model-simple-corner-bracket |  | 
 | MakerBeam M3 square headed bolt (100359) - screws | 34 | N/A | N/A |  [  ]() |  |  | 
 | MakerBeam M3 square headed bolt (101013)  - longer screws | 4 | N/A | N/A |  [  ]() |  |  | 
 | MakerBeam M3 nut (100416) | 38 | N/A | N/A |  [  ]() |  |  | 
