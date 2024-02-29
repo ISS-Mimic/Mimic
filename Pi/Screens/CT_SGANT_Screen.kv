@@ -23,7 +23,15 @@
             font_size: self.height * 0.14
         Label:
             id: sgant_elevation
-            pos_hint: {"center_x": 0.7, "center_y": 0.2}
+            pos_hint: {"center_x": 0.65, "center_y": 0.2}
+            text: ''
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: self.height * 0.10
+        Label:
+            id: sgant_transmit
+            pos_hint: {"center_x": 0.75, "center_y": 0.2}
             text: ''
             markup: True
             color: root.signalcolor
