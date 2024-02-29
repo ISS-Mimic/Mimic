@@ -3803,6 +3803,14 @@ class MainApp(App):
             self.ct_uhf_screen.ids.UHFframeSync.text = "Locked"
         else:
             self.iss_screen.ids.UHFframeSync.text = "n/a"
+
+            self.ct_sgant_screen.ids.sgant_transmit.text = str(sgant_transmit)
+        if int(sgant_transmit) == 0:
+            self.ct_sgant_screen.ids.sgant_transmit.text = "RESET"
+        elif int(sgant_transmit) == 1:
+            self.ct_sgant_screen.ids.sgant_transmit.text = "NORMAL"
+        else:
+            self.ct_sasa.ids.sgant_transmit.text = "n/a"
         
         self.ct_sasa_screen.ids.ActiveString.text = str(ActiveString)
         self.ct_sasa_screen.ids.RFG1status.text = str(RFG1status)
