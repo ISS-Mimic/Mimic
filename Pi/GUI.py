@@ -2873,6 +2873,7 @@ class MainApp(App):
         dragon7_1 = 0+dragon7count.days
         dragon7_2 = 834+dragon7count.days
         dragon7_3 = 237+dragon7count.days
+        dragon7_4 = 0+dragon7count.days
 
         #Identify variables for Crew_screen
         self.crew_screen.ids.dragon7_1.text = str(dragon7_1)
