@@ -2867,7 +2867,7 @@ class MainApp(App):
         dragon7launch = datetime(2023, 8, 26) 
 
         # Calculate Days since crew launch
-        dragon7count = relativedelta(crew_now, dragon7launch) 
+        dragon7count = relativedelta(crew_now, dragon7launch)
 
         # Calculate Cumulative Days for each astro
         dragon7_1 = 0+dragon7count.days
@@ -2875,7 +2875,7 @@ class MainApp(App):
         dragon7_3 = 237+dragon7count.days
 
         #Identify variable for Crew_screen
-        self.crew_screen.ids.dragon7count.text = str(difference.days)
+        self.crew_screen.ids.dragon7count.text = str(dragon7count.days)
 
         self.crew_screen.ids.dragon7_1.text = str(dragon7_1)
         self.crew_screen.ids.dragon7_2.text = str(dragon7_2)
