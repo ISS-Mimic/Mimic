@@ -6,6 +6,14 @@
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/crew/Crewbackground.png'
             fit_mode: "fill"
         Label:
+            id: ISS_crewed_time
+            pos_hint: {"center_x": 0.85, "center_y": 0.85}
+            text: '0:0:0:0:0:0'
+            markup: True
+            color: 1,1,1
+            font_size: self.height * 0.09
+            size_hint_y: 0.4        
+        Label:
             id: ISS_crewed_years
             pos_hint: {"center_x": 0.715, "center_y": 0.91}
             text: '23'
