@@ -2870,9 +2870,9 @@ class MainApp(App):
         dragon7count = relativedelta(crew_now, dragon7launch) 
 
         # Calculate Cumulative Days for each astro
-        7dragon1 = 0+dragon7count
-        7dragon2 = 834+dragon7count
-        7dragon3 = 237+dragon7count
+        7dragon1 = 0 + dragon7count
+        7dragon2 = 834 + dragon7count
+        7dragon3 = 237 + dragon7count
 
         #Identify variable for Crew_screen
         self.crew_screen.ids.dragon7count.text = str(difference.days)
