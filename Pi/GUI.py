@@ -2863,6 +2863,25 @@ class MainApp(App):
         
         self.crew_screen.ids.ISS_crewed_time.text = (f"{years_timedelta}:{months_timedelta:02}:{days_timedelta:02}/{hours_timedelta:02}:{minutes_timedelta:02}:{seconds_timedelta:02}")
 
+        # Crew-7 Launch Date
+        dragon7launch = datetime(2023, 8, 26) 
+
+        # Calculate Days since crew launch
+        dragon7count = relativedelta(crew_now, dragon7launch) 
+
+        # Calculate Cumulative Days for each astro
+        7dragon1 = 0+dragon7count
+        7dragon2 = 834+dragon7count
+        7dragon3 = 237+dragon7count
+
+        #Identify variable for Crew_screen
+        self.crew_screen.ids.dragon7count.text = str(difference.days)
+
+        self.crew_screen.ids.7dragon1.text = str(7dragon1)
+        self.crew_screen.ids.7dragon2.text = str(7dragon2)
+        self.crew_screen.ids.7dragon3.text = str(7dragon3)
+        self.crew_screen.ids.7dragon4.text = str(7dragon4)
+
             
         ## ISS Potential Problems ##
         #ISS Leak - Check Pressure Levels
