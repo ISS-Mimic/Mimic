@@ -2871,8 +2871,8 @@ class MainApp(App):
 
         # Calculate Cumulative Days for each astro
         dragon7_1 = 0+dragon7count
-        dragon7_2 = 834+dragon7count
-        dragon7_3 = 237+dragon7count
+        dragon7_2 = 9+dragon7count
+        dragon7_3 = 165+dragon7count
         dragon7_4 = 0+dragon7count
 
         #Identify variables for Crew_screen
