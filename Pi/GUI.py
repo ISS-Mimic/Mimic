@@ -2836,6 +2836,33 @@ class MainApp(App):
         else:
             self.iss_screen.ids.stationmode_value.text = "n/a"
 
+            
+        #Crew Screen Stuff
+        
+        #ISS has been crewed since 9:23 Nov 2nd 2000 UTC
+        ISS_Expedition_1_Start = datetime(2000, 11, 2, 9, 23, 0)
+
+        # Get the current date and time
+        crew_now = datetime.now()
+
+        # Calculate the difference including years, months, days, hours, minutes, and seconds
+        crew_difference = relativedelta(crew_now, ISS_Expedition_1_Start)
+        
+        years_timedelta = crew_difference.years
+        months_timedelta = crew_difference.months
+        days_timedelta = crew_difference.days
+        hours_timedelta = crew_difference.hours
+        minutes_timedelta = crew_difference.minutes
+        seconds_timedelta = crew_difference.seconds
+
+        # Extract years, months, days, hours, minutes, and seconds
+        self.crew_screen.ids.ISS_crewed_years.text = str(years_timedelta)
+        self.crew_screen.ids.ISS_crewed_months.text = str(months_timedelta)
+        self.crew_screen.ids.ISS_crewed_days.text = str(days_timedelta)
+        
+        self.crew_screen.ids.ISS_crewed_time.text = (f"{years_timedelta}:{months_timedelta:02}:{days_timedelta:02}/{hours_timedelta:02}:{minutes_timedelta:02}:{seconds_timedelta:02}")
+
+            
         ## ISS Potential Problems ##
         #ISS Leak - Check Pressure Levels
         #Number of CMGs online could reveal CMG failure
