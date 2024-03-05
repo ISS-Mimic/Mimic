@@ -2877,10 +2877,10 @@ class MainApp(App):
         #Identify variable for Crew_screen
         self.crew_screen.ids.dragon7count.text = str(difference.days)
 
-        self.crew_screen.ids.7dragon1.text = str(dragon7_1)
-        self.crew_screen.ids.7dragon2.text = str(dragon7_2)
-        self.crew_screen.ids.7dragon3.text = str(dragon7_3)
-        self.crew_screen.ids.7dragon4.text = str(dragon7_4)
+        self.crew_screen.ids.dragon7_1.text = str(dragon7_1)
+        self.crew_screen.ids.dragon7_2.text = str(dragon7_2)
+        self.crew_screen.ids.dragon7_3.text = str(dragon7_3)
+        self.crew_screen.ids.dragon7_4.text = str(dragon7_4)
 
             
         ## ISS Potential Problems ##
