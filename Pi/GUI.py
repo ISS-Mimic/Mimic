@@ -2856,6 +2856,69 @@ class MainApp(App):
         else:
             self.iss_screen.ids.stationmode_value.text = "n/a"
 
+
+        #Crew Screen Stuff
+        
+        #ISS has been crewed since 9:23 Nov 2nd 2000 UTC
+        ISS_Expedition_1_Start = datetime(2000, 11, 2, 9, 23, 0)
+
+        # Get the current date and time
+        crew_now = datetime.now()
+
+        # Calculate the difference including years, months, days, hours, minutes, and seconds
+        crew_difference = relativedelta(crew_now, ISS_Expedition_1_Start)
+        
+        years_timedelta = crew_difference.years
+        months_timedelta = crew_difference.months
+        days_timedelta = crew_difference.days
+        hours_timedelta = crew_difference.hours
+        minutes_timedelta = crew_difference.minutes
+        seconds_timedelta = crew_difference.seconds
+
+        # Extract years, months, days, hours, minutes, and seconds
+        self.crew_screen.ids.ISS_crewed_years.text = str(years_timedelta)
+        self.crew_screen.ids.ISS_crewed_months.text = str(months_timedelta)
+        self.crew_screen.ids.ISS_crewed_days.text = str(days_timedelta)
+        
+        self.crew_screen.ids.ISS_crewed_time.text = (f"{years_timedelta}:{months_timedelta:02}:{days_timedelta:02}/{hours_timedelta:02}:{minutes_timedelta:02}:{seconds_timedelta:02}")
+
+        # Crew Launch Dates
+        dragon7launch = datetime(2023, 8, 26) 
+        soyuz70launch = datetime(2023, 9, 15) 
+        dragon8launch = datetime(2024, 3, 2) 
+
+        # Calculate Days since crew launch
+        dragon7count = (crew_now - dragon7launch).days
+        soyuz70count = (crew_now - soyuz70launch).days
+        dragon8count = (crew_now - dragon8launch).days
+
+        # Calculate Cumulative Days for each astro
+        dragon7_1 = 0+dragon7count
+        dragon7_2 = 9+dragon7count
+        dragon7_3 = 165+dragon7count
+        dragon7_4 = 0+dragon7count
+        soyuz70_1 = 737+soyuz70count
+        soyuz70_2 = 0+soyuz70count
+        soyuz70_3 = 0+soyuz70count
+        dragon8_1 = 0+dragon8count
+        dragon8_2 = 211+dragon8count
+        dragon8_3 = 0+dragon8count
+        dragon8_4 = 0+dragon8count
+
+        #Identify variables for Crew_screen
+        self.crew_screen.ids.dragon7_1.text = str(dragon7count) + " / " + str(dragon7_1)
+        self.crew_screen.ids.dragon7_2.text = str(dragon7count) + " / " + str(dragon7_2)
+        self.crew_screen.ids.dragon7_3.text = str(dragon7count) + " / " + str(dragon7_3)
+        self.crew_screen.ids.dragon7_4.text = str(dragon7count) + " / " + str(dragon7_4)
+        self.crew_screen.ids.soyuz70_1.text = str(soyuz70count) + " / " + str(soyuz70_1)
+        self.crew_screen.ids.soyuz70_2.text = str(soyuz70count) + " / " + str(soyuz70_2)
+        self.crew_screen.ids.soyuz70_3.text = str(soyuz70count) + " / " + str(soyuz70_3)
+        self.crew_screen.ids.dragon8_1.text = str(dragon8count) + " / " + str(dragon8_1)
+        self.crew_screen.ids.dragon8_2.text = str(dragon8count) + " / " + str(dragon8_2)
+        self.crew_screen.ids.dragon8_3.text = str(dragon8count) + " / " + str(dragon8_3)
+        self.crew_screen.ids.dragon8_4.text = str(dragon8count) + " / " + str(dragon8_4)
+
+
         ## ISS Potential Problems ##
         #ISS Leak - Check Pressure Levels
         #Number of CMGs online could reveal CMG failure
