@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from datetime import datetime, timedelta #used for time conversions and logging timestamps
+from dateutil.relativedelta import relativedelta
 import datetime as dtime #this is different from above for... reasons?
 import os # used to remove database on program exit; also used for importing config.json
 from subprocess import Popen #, PIPE, STDOUT #used to start/stop Javascript telemetry program and TDRS script and orbitmap
