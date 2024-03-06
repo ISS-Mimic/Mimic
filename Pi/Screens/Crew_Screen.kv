@@ -69,14 +69,6 @@
             color: 1,1,1
             font_size: self.height * 0.09
             size_hint_y: 0.3    
-        Image:
-            id: signal
-            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/signalred.zip"
-            size_hint_y: 0.112
-            anim_delay: 0.05
-            anim_loop: 0
-            fit_mode: "scale-down"
-            pos_hint: {"center_x": 0.05, "center_y": 0.07}
         Label:
             id: soyuz70_1
             pos_hint: {"center_x": 0.285, "center_y": 0.42}
@@ -133,6 +125,14 @@
             color: 1,1,1
             font_size: self.height * 0.09
             size_hint_y: 0.3     
+        Image:
+            id: signal
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/signalred.zip"
+            size_hint_y: 0.112
+            anim_delay: 0.05
+            anim_loop: 0
+            fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.05, "center_y": 0.07}
         Image:
             id: arduino
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
