@@ -1215,6 +1215,22 @@ class Science_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
+class Science_EXT_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class Science_INT_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class Science_NRAL_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class Science_JEF_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
 class USOS_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
@@ -1338,6 +1354,10 @@ class MainApp(App):
         self.mss_mt_screen = MSS_MT_Screen(name='mt')
         self.cdh_screen = CDH_Screen(name = 'cdh')
         self.science_screen = Science_Screen(name = 'science')
+        self.ext_science_screen = Science_EXT_Screen(name = 'ext_science')
+        self.int_science_screen = Science_INT_Screen(name = 'int_science')
+        self.nral_science_screen = Science_NRAL_Screen(name = 'nral_science')
+        self.jef_science_screen = Science_JEF_Screen(name = 'jef_science')
         self.usos_screen = USOS_Screen(name = 'usos')
         self.vv_screen = VV_Screen(name = 'vv')
         self.eva_main = EVA_Main_Screen(name='eva_main')
@@ -1365,6 +1385,10 @@ class MainApp(App):
         root.add_widget(self.eclss_iatcs_screen)
         root.add_widget(self.cdh_screen)
         root.add_widget(self.science_screen)
+        root.add_widget(self.ext_science_screen)
+        root.add_widget(self.int_science_screen)
+        root.add_widget(self.nral_science_screen)
+        root.add_widget(self.jef_science_screen)
         root.add_widget(self.usos_screen)
         root.add_widget(self.vv_screen)
         root.add_widget(self.eps_screen)
@@ -3980,6 +4004,10 @@ Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/CT_Camera_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/GNC_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/CDH_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Science_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Science_EXT_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Science_INT_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Science_NRAL_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Science_JEF_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/USOS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/VV_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/TCS_Screen.kv')
