@@ -2888,20 +2888,14 @@ class MainApp(App):
         self.crew_screen.ids.ISS_crewed_time.text = (f"{years_timedelta}:{months_timedelta:02}:{days_timedelta:02}/{hours_timedelta:02}:{minutes_timedelta:02}:{seconds_timedelta:02}")
 
         # Crew Launch Dates
-        dragon7launch = datetime(2023, 8, 26) 
         soyuz70launch = datetime(2023, 9, 15) 
         dragon8launch = datetime(2024, 3, 2) 
 
         # Calculate Days since crew launch
-        dragon7count = (crew_now - dragon7launch).days
         soyuz70count = (crew_now - soyuz70launch).days
         dragon8count = (crew_now - dragon8launch).days
 
         # Calculate Cumulative Days for each astro
-        dragon7_1 = 0+dragon7count
-        dragon7_2 = 9+dragon7count
-        dragon7_3 = 165+dragon7count
-        dragon7_4 = 0+dragon7count
         soyuz70_1 = 737+soyuz70count
         soyuz70_2 = 0+soyuz70count
         soyuz70_3 = 0+soyuz70count
@@ -2911,10 +2905,6 @@ class MainApp(App):
         dragon8_4 = 0+dragon8count
 
         #Identify variables for Crew_screen
-        self.crew_screen.ids.dragon7_1.text = str(dragon7count) + " / " + str(dragon7_1)
-        self.crew_screen.ids.dragon7_2.text = str(dragon7count) + " / " + str(dragon7_2)
-        self.crew_screen.ids.dragon7_3.text = str(dragon7count) + " / " + str(dragon7_3)
-        self.crew_screen.ids.dragon7_4.text = str(dragon7count) + " / " + str(dragon7_4)
         self.crew_screen.ids.soyuz70_1.text = str(soyuz70count) + " / " + str(soyuz70_1)
         self.crew_screen.ids.soyuz70_2.text = str(soyuz70count) + " / " + str(soyuz70_2)
         self.crew_screen.ids.soyuz70_3.text = str(soyuz70count) + " / " + str(soyuz70_3)
