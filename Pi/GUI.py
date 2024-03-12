@@ -1272,6 +1272,10 @@ class EVA_Main_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
+class EVA_EMU_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
 class EVA_US_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
@@ -1389,6 +1393,7 @@ class MainApp(App):
         self.usos_screen = USOS_Screen(name = 'usos')
         self.vv_screen = VV_Screen(name = 'vv')
         self.eva_main = EVA_Main_Screen(name='eva_main')
+        self.eva_emu = EVA_EMU_Screen(name='eva_emu')
         self.eva_pictures = EVA_Pictures(name='eva_pictures')
 
         #Add all new telemetry screens to this list, this is used for the signal status icon and telemetry value colors and arduino icon
@@ -1396,7 +1401,7 @@ class MainApp(App):
                       'eclss_iatcs_screen', 'main_screen', 'control_screen', 'settings_screen',
                       'ct_screen', 'ct_sasa_screen', 'ct_sgant_screen', 'ct_uhf_screen',
                       'ct_camera_screen', 'gnc_screen', 'orbit_screen', 'us_eva', 'rs_eva',
-                      'eva_main', 'mimic_screen', 'robo_screen', 'mss_mt_screen', 'ssrms_screen', 
+                      'eva_main', 'eva_emu', 'mimic_screen', 'robo_screen', 'mss_mt_screen', 'ssrms_screen', 
                       'spdm1_screen','orbit_pass', 'orbit_data', 'crew_screen', 'playback_screen']
 
         root = MainScreenManager(transition=SwapTransition())
@@ -1436,6 +1441,7 @@ class MainApp(App):
         root.add_widget(self.spdm1_screen)
         root.add_widget(self.mss_mt_screen)
         root.add_widget(self.eva_main)
+        root.add_widget(self.eva_emu)
         root.add_widget(self.eva_pictures)
         root.add_widget(self.tcs_screen)
         root.add_widget(self.crew_screen)
@@ -4037,6 +4043,7 @@ Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/TCS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EVA_US_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EVA_RS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EVA_Main_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EVA_EMU_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EVA_Pictures.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Crew_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/RS_Screen.kv')
