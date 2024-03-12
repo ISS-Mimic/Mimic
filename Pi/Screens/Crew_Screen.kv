@@ -37,8 +37,10 @@
             color: 1,1,1
             font_size: self.height * 0.09
             size_hint_y: 0.4
+        
+        #---Start of Individual Crewmember Calculated Days
         Label:
-            id: dragon7_1
+            id: soyuz70_1
             pos_hint: {"center_x": 0.135, "center_y": 0.58}
             text: '23'
             markup: True
@@ -46,7 +48,7 @@
             font_size: self.height * 0.09
             size_hint_y: 0.3
         Label:
-            id: dragon7_2
+            id: soyuz70_2
             pos_hint: {"center_x": 0.135, "center_y": 0.42}
             text: '23'
             markup: True
@@ -54,7 +56,7 @@
             font_size: self.height * 0.09
             size_hint_y: 0.3
         Label:
-            id: dragon7_3
+            id: soyuz70_3
             pos_hint: {"center_x": 0.135, "center_y": 0.265}
             text: '23'
             markup: True
@@ -62,7 +64,7 @@
             font_size: self.height * 0.09
             size_hint_y: 0.3     
         Label:
-            id: dragon7_4
+            id: dragon8_1
             pos_hint: {"center_x": 0.285, "center_y": 0.58}
             text: '23'
             markup: True
@@ -70,7 +72,7 @@
             font_size: self.height * 0.09
             size_hint_y: 0.3    
         Label:
-            id: soyuz70_1
+            id: dragon8_2
             pos_hint: {"center_x": 0.285, "center_y": 0.42}
             text: '23'
             markup: True
@@ -78,7 +80,7 @@
             font_size: self.height * 0.09
             size_hint_y: 0.3
         Label:
-            id: soyuz70_2
+            id: dragon8_3
             pos_hint: {"center_x": 0.285, "center_y": 0.265}
             text: '23'
             markup: True
@@ -86,45 +88,15 @@
             font_size: self.height * 0.09
             size_hint_y: 0.3
         Label:
-            id: soyuz70_3
+            id: dragon8_4
             pos_hint: {"center_x": 0.44, "center_y": 0.58}
             text: '23'
             markup: True
             color: 1,1,1
             font_size: self.height * 0.09
             size_hint_y: 0.3
-        Label:
-            id: dragon8_1
-            pos_hint: {"center_x": 0.44, "center_y": 0.42}
-            text: '23'
-            markup: True
-            color: 1,1,1
-            font_size: self.height * 0.09
-            size_hint_y: 0.3     
-        Label:
-            id: dragon8_2
-            pos_hint: {"center_x": 0.44, "center_y": 0.265}
-            text: '23'
-            markup: True
-            color: 1,1,1
-            font_size: self.height * 0.09
-            size_hint_y: 0.3     
-        Label:
-            id: dragon8_3
-            pos_hint: {"center_x": 0.59, "center_y": 0.58}
-            text: '23'
-            markup: True
-            color: 1,1,1
-            font_size: self.height * 0.09
-            size_hint_y: 0.3     
-        Label:
-            id: dragon8_4
-            pos_hint: {"center_x": 0.59, "center_y": 0.42}
-            text: '23'
-            markup: True
-            color: 1,1,1
-            font_size: self.height * 0.09
-            size_hint_y: 0.3    
+        #---End of Individual Crewmember Calculated Days
+
         Image:
             id: signal
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/signalred.zip"
