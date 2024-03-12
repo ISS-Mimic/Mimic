@@ -17,6 +17,12 @@
             pos_hint: {"center_x": 0.31, "center_y": 0.23}
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/GenericEVArsButton.png'
             on_release: app.root.current = 'rs_eva'
+        Button:
+            id: EVA_EMU_Button
+            size_hint: 0.15,0.13
+            pos_hint: {"center_x": 0.91, "center_y": 0.23}
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/EMUunlit.png'
+            on_release: app.root.current = 'eva_emu'
         Image:
             id: signal
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
