@@ -3874,15 +3874,15 @@ class MainApp(App):
         self.spdm1_screen.ids.Wrist2Yaw.text = str(Wrist2Yaw)
         self.spdm1_screen.ids.Wrist2Pitch.text = str(Wrist2Pitch)
 
-        self.eva_emu.ids.UIApowerEMU1.text = str(UIApowerEMU1)
-        self.eva_emu.ids.UIApowerEMU2.text = str(UIApowerEMU2)
-        self.eva_emu.ids.UIAcurrentEMU1.text = str(UIAcurrentEMU1)
-        self.eva_emu.ids.UIAcurrentEMU2.text = str(UIAcurrentEMU2)  
-        self.eva_emu.ids.PSApowerEMU1.text = str(PSApowerEMU1)
-        self.eva_emu.ids.PSApowerEMU2.text = str(PSApowerEMU2)
-        self.eva_emu.ids.PSAcurrentEMU1.text = str(PSAcurrentEMU1)
-        self.eva_emu.ids.PSAcurrentEMU2.text = str(PSAcurrentEMU2)
-        self.eva_emu.ids.IRUvoltage.text = str(IRUvoltage)
+        self.eva_emu.ids.UIApowerEMU1.text = str(UIApowerEMU1) + " V"
+        self.eva_emu.ids.UIApowerEMU2.text = str(UIApowerEMU2) + " V"
+        self.eva_emu.ids.UIAcurrentEMU1.text = str(UIAcurrentEMU1) + " A"
+        self.eva_emu.ids.UIAcurrentEMU2.text = str(UIAcurrentEMU2)  + " A" 
+        self.eva_emu.ids.PSApowerEMU1.text = str(PSApowerEMU1) + " V"
+        self.eva_emu.ids.PSApowerEMU2.text = str(PSApowerEMU2) + " V"
+        self.eva_emu.ids.PSAcurrentEMU1.text = str(PSAcurrentEMU1) + " A"
+        self.eva_emu.ids.PSAcurrentEMU2.text = str(PSAcurrentEMU2) + " A"
+        self.eva_emu.ids.IRUvoltage.text = str(IRUvoltage) + " V"
         self.eva_emu.ids.IRUcurrent.text = str(IRUcurrent)
         
         #self.ct_uhf_screen.ids.UHF1pwr.text = str(UHF1pwr)
