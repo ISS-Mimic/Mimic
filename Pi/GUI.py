@@ -3375,9 +3375,9 @@ class MainApp(App):
         UIAcurrentEMU2 = "{:.2f}".format(float((values[64])[0]))
         PSApowerEMU1 = "{:.2f}".format(float((values[67])[0]))
         PSApowerEMU2 = "{:.2f}".format(float((values[69])[0]))
-        PSAcurrentEMU1 = "{:.2f}".format(float((values[68])[0])
-        PSAcurrentEMU2 = "{:.2f}".format(float((values[70])[0])
-        IRUvoltage = "{:.2f}".format(float((values[65])[0])
+        PSAcurrentEMU1 = "{:.2f}".format(float((values[68])[0]))
+        PSAcurrentEMU2 = "{:.2f}".format(float((values[70])[0]))
+        IRUvoltage = "{:.2f}".format(float((values[65])[0]))
         IRUcurrent = "{:.2f}".format(float((values[66])[0]))
         #--------------------EVA EMU Telemetry End------------------#
 
