@@ -3883,7 +3883,7 @@ class MainApp(App):
         self.eva_emu.ids.PSAcurrentEMU1.text = str(PSAcurrentEMU1) + " A"
         self.eva_emu.ids.PSAcurrentEMU2.text = str(PSAcurrentEMU2) + " A"
         self.eva_emu.ids.IRUvoltage.text = str(IRUvoltage) + " V"
-        self.eva_emu.ids.IRUcurrent.text = str(IRUcurrent)
+        self.eva_emu.ids.IRUcurrent.text = str(IRUcurrent) + " A"
         
         #self.ct_uhf_screen.ids.UHF1pwr.text = str(UHF1pwr)
         if int(UHF1pwr) == 0:
