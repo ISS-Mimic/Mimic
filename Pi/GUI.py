@@ -3368,6 +3368,19 @@ class MainApp(App):
 
         ##-------------------EVA Functionality End-------------------##
 
+        #----------------------EVA EMU Telemetry-------------------#
+        UIApowerEMU1 = "{:.2f}".format(float((values[61])[0]))
+        UIApowerEMU2 = "{:.2f}".format(float((values[63])[0]))
+        UIAcurrentEMU1 = "{:.2f}".format(float((values[62])[0]))
+        UIAcurrentEMU2 = "{:.2f}".format(float((values[64])[0]))
+        PSApowerEMU1 = "{:.2f}".format(float((values[67])[0]))
+        PSApowerEMU2 = "{:.2f}".format(float((values[69])[0]))
+        PSAcurrentEMU1 = "{:.2f}".format(float((values[68])[0])
+        PSAcurrentEMU2 = "{:.2f}".format(float((values[70])[0]))
+        IRUvoltage = "{:.2f}".format(float((values[65])[0])
+        IRUcurrent = "{:.2f}".format(float((values[66])[0]))
+        #--------------------EVA EMU Telemetry End------------------#
+
 #        if (difference > -10) and (isinstance(App.get_running_app().root_window.children[0], Popup)==False):
 #            LOSpopup = Popup(title='Loss of Signal', content=Label(text='Possible LOS Soon'), size_hint=(0.3, 0.2), auto_dismiss=True)
 #            LOSpopup.open()
@@ -3860,6 +3873,17 @@ class MainApp(App):
         self.spdm1_screen.ids.Wrist2Roll.text = str(Wrist2Roll)
         self.spdm1_screen.ids.Wrist2Yaw.text = str(Wrist2Yaw)
         self.spdm1_screen.ids.Wrist2Pitch.text = str(Wrist2Pitch)
+
+        self.eva_emu.ids.UIApowerEMU1.text = str(UIApowerEMU1)
+        self.eva_emu.ids.UIApowerEMU2.text = str(UIApowerEMU2)
+        self.eva_emu.ids.UIAcurrentEMU1.text = str(UIAcurrentEMU1)
+        self.eva_emu.ids.UIAcurrentEMU2.text = str(UIAcurrentEMU2)  
+        self.eva_emu.ids.PSApowerEMU1.text = str(PSApowerEMU1)
+        self.eva_emu.ids.PSApowerEMU2.text = str(PSApowerEMU2)
+        self.eva_emu.ids.PSAcurrentEMU1.text = str(PSAcurrentEMU1)
+        self.eva_emu.ids.PSAcurrentEMU2.text = str(PSAcurrentEMU2)
+        self.eva_emu.ids.IRUvoltage.text = str(IRUvoltage)
+        self.eva_emu.ids.IRUcurrent.text = str(IRUcurrent)
         
         #self.ct_uhf_screen.ids.UHF1pwr.text = str(UHF1pwr)
         if int(UHF1pwr) == 0:
