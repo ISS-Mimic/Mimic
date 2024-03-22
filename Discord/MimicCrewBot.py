@@ -4,12 +4,7 @@ import time
 import json
 import os
 from datetime import datetime, timedelta
-
-#mimic server
-WEBHOOK_URL = ""
-
-#my test server
-#WEBHOOK_URL = ""
+from config import TEST_WEBHOOK_URL, MIMIC_WEBHOOK_URL
 
 def get_iss_crew_info():
     print("getting ISS crew")
@@ -36,7 +31,7 @@ def get_iss_crew_info():
         if "Expedition" in spaceship:
             expedition = spaceship
             continue
-        if "SpaceX" in spaceship or "Soyuz" in spaceship:
+        if "SpaceX" in spaceship or "Soyuz" in spaceship or "Axiom" in spaceship or "Boeing" in spaceship:
             current_ship = spaceship
             continue
         else:
@@ -82,13 +77,19 @@ def format_message(crew_info_list):
     return message
 
 def send_discord_message(crew_info_list):
+    global discord_webhook_url
     """Send the crew information as a single message."""
     formatted_info = format_message(crew_info_list)
     data = {'content': formatted_info}
-    response = requests.post(WEBHOOK_URL, json=data)
+    response = requests.post(discord_webhook_url, json=data)
     return response.status_code
 
 def main():
+    global discord_webhook_url
+    
+    #discord_webhook_url = TEST_WEBHOOK_URL
+    discord_webhook_url = MIMIC_WEBHOOK_URL
+    
     # Load previous data if exists
     if os.path.exists('previous_data.json'):
         with open('previous_data.json', 'r') as f:
