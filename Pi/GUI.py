@@ -2896,10 +2896,12 @@ class MainApp(App):
         # Crew Launch Dates
         soyuz70launch = datetime(2023, 9, 15) 
         dragon8launch = datetime(2024, 3, 2) 
+        soyuz71launch = datetime(2024, 3, 23) 
 
         # Calculate Days since crew launch
         soyuz70count = (crew_now - soyuz70launch).days
         dragon8count = (crew_now - dragon8launch).days
+        soyuz71count = (crew_now - soyuz71launch).days
 
         # Calculate Cumulative Days for each astro
         soyuz70_1 = 737+soyuz70count
@@ -2909,6 +2911,7 @@ class MainApp(App):
         dragon8_2 = 211+dragon8count
         dragon8_3 = 0+dragon8count
         dragon8_4 = 0+dragon8count
+        soyuz71_1 = 188+soyuz71count
 
         #Identify variables for Crew_screen
         self.crew_screen.ids.soyuz70_1.text = str(soyuz70count) + " / " + str(soyuz70_1)
@@ -2918,6 +2921,7 @@ class MainApp(App):
         self.crew_screen.ids.dragon8_2.text = str(dragon8count) + " / " + str(dragon8_2)
         self.crew_screen.ids.dragon8_3.text = str(dragon8count) + " / " + str(dragon8_3)
         self.crew_screen.ids.dragon8_4.text = str(dragon8count) + " / " + str(dragon8_4)
+        self.crew_screen.ids.soyuz71_1.text = str(soyuz71count) + " / " + str(soyuz71_1)
             
         ## ISS Potential Problems ##
         #ISS Leak - Check Pressure Levels
