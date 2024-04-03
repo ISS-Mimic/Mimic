@@ -2931,7 +2931,7 @@ class MainApp(App):
         dragon8_2 = 211+dragon8count
         dragon8_3 = 0+dragon8count
         dragon8_4 = 0+dragon8count
-        soyuz71_1 = 188+soyuz71count
+        soyuz71_1 = 189+soyuz71count
 
         #Identify variables for Crew_screen
         self.crew_screen.ids.soyuz70_1.text = str(soyuz70count) + " / " + str(soyuz70_1)
