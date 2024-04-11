@@ -2906,7 +2906,6 @@ class MainApp(App):
         # Calculate Cumulative Days for each astro
         soyuz70_1 = 737+soyuz70count
         soyuz70_2 = 0+soyuz70count
-        soyuz70_3 = 0+soyuz70count
         dragon8_1 = 0+dragon8count
         dragon8_2 = 211+dragon8count
         dragon8_3 = 0+dragon8count
@@ -2916,7 +2915,6 @@ class MainApp(App):
         #Identify variables for Crew_screen
         self.crew_screen.ids.soyuz70_1.text = str(soyuz70count) + " / " + str(soyuz70_1)
         self.crew_screen.ids.soyuz70_2.text = str(soyuz70count) + " / " + str(soyuz70_2)
-        self.crew_screen.ids.soyuz70_3.text = str(soyuz70count) + " / " + str(soyuz70_3)
         self.crew_screen.ids.dragon8_1.text = str(dragon8count) + " / " + str(dragon8_1)
         self.crew_screen.ids.dragon8_2.text = str(dragon8count) + " / " + str(dragon8_2)
         self.crew_screen.ids.dragon8_3.text = str(dragon8count) + " / " + str(dragon8_3)
