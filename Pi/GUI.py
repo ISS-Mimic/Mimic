@@ -2939,7 +2939,6 @@ class MainApp(App):
         #Identify variables for Crew_screen
         self.crew_screen.ids.soyuz70_1.text = str(soyuz70count) + " / " + str(soyuz70_1)
         self.crew_screen.ids.soyuz70_2.text = str(soyuz70count) + " / " + str(soyuz70_2)
-        self.crew_screen.ids.soyuz70_3.text = str(soyuz70count) + " / " + str(soyuz70_3)
         self.crew_screen.ids.dragon8_1.text = str(dragon8count) + " / " + str(dragon8_1)
         self.crew_screen.ids.dragon8_2.text = str(dragon8count) + " / " + str(dragon8_2)
         self.crew_screen.ids.dragon8_3.text = str(dragon8count) + " / " + str(dragon8_3)
