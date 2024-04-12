@@ -2753,6 +2753,7 @@ class MainApp(App):
 
             inc = math.acos(h_mom[2]/h_mom_mag)
             self.orbit_data.ids.inc.text = "{:.2f}".format(math.degrees(inc))
+            self.orbit_screen.ids.inc.text = "{:.2f}".format(math.degrees(inc)) + " deg"
 
             node_vec = cross([0,0,1],h_mom)
             node_mag = math.sqrt(dot(node_vec,node_vec))
@@ -2788,6 +2789,7 @@ class MainApp(App):
             period = (2*math.pi/math.sqrt(mu))*math.pow(sma,3/2) #seconds
             self.orbit_data.ids.apogee_height.text = str("{:.2f}".format(apogee_height))
             self.orbit_data.ids.perigee_height.text = str("{:.2f}".format(perigee_height))
+            self.orbit_screen.ids.period.text = str("{:.2f}".format(period))
 
         cmg1_active = int((values[145])[0])
         cmg2_active = int((values[146])[0])
@@ -2843,6 +2845,7 @@ class MainApp(App):
         USOS_Power = power_1a + power_1b + power_2a + power_2b + power_3a + power_3b + power_4a + power_4b
         self.eps_screen.ids.usos_power.text = str("{:.0f}".format(USOS_Power*-1.0)) + " W"
         self.eps_screen.ids.solarbeta.text = str(solarbeta)
+        self.orbit_screen.ids.solarbeta.text = str(solarbeta) + " deg"
 
         avg_total_voltage = (float(v1a)+float(v1b)+float(v2a)+float(v2b)+float(v3a)+float(v3b)+float(v4a)+float(v4b))/8.0
 
@@ -4008,6 +4011,7 @@ class MainApp(App):
         self.eps_screen.ids.c4b_value.text = c4b + "A"
         self.eps_screen.ids.v4b_value.text = v4b + "V"
         self.iss_screen.ids.altitude_value.text = str(altitude) + " km"
+        self.orbit_screen.ids.altitude.text = str(altitude) + " km"
         self.iss_screen.ids.velocity_value.text = str(velocity) + " m/s"
         self.iss_screen.ids.stationmass_value.text = str(iss_mass) + " kg"
 
