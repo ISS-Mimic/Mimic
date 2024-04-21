@@ -6,40 +6,88 @@ import os
 from datetime import datetime, timedelta
 from config import TEST_WEBHOOK_URL, MIMIC_WEBHOOK_URL
 
+#def get_iss_crew_info():
+#    print("getting ISS crew")
+#    url = "https://en.wikipedia.org/w/api.php?action=parse&page=Template:People_currently_in_space&prop=wikitext&format=json"
+#    response = requests.get(url)
+#    data = response.json()
+#
+#    template_content = data['parse']['wikitext']['*']
+#    iss_match = re.search(r'International Space Station.*?(?=Tiangong space station)', template_content, re.DOTALL)
+#
+#    if not iss_match:
+#        return []
+#
+#    iss_section = iss_match.group(0)
+#    spaceships = re.findall(r'\[\[([^\]]+)\]\]', iss_section)
+#    countries = re.findall(r'size=15px\|([^}]+)', iss_section)
+#
+#    crew_info = []
+#    current_ship = ''
+#    expedition = ''
+#    idx = 0
+#
+#    for spaceship in spaceships:
+#        if "Expedition" in spaceship:
+#            expedition = spaceship
+#            continue
+#        if "SpaceX" in spaceship or "Soyuz" in spaceship or "Axiom" in spaceship or "Boeing" in spaceship:
+#            current_ship = spaceship
+#            continue
+#        else:
+#            crew_info.append(
+#                {'name': spaceship, 'spaceship': current_ship, 'country': countries[idx], 'expedition': expedition})
+#            idx += 1
+#
+#    return crew_info
+
+
 def get_iss_crew_info():
-    print("getting ISS crew")
+    print("Getting ISS crew information...")
     url = "https://en.wikipedia.org/w/api.php?action=parse&page=Template:People_currently_in_space&prop=wikitext&format=json"
-    response = requests.get(url)
-    data = response.json()
+    max_attempts = 3  # Maximum number of attempts to try fetching the data
 
-    template_content = data['parse']['wikitext']['*']
-    iss_match = re.search(r'International Space Station.*?(?=Tiangong space station)', template_content, re.DOTALL)
+    for attempt in range(max_attempts):
+        try:
+            response = requests.get(url)
+            data = response.json()  # Parse the JSON returned from the request
 
-    if not iss_match:
-        return []
+            template_content = data['parse']['wikitext']['*']
+            iss_match = re.search(r'International Space Station.*?(?=Tiangong space station)', template_content, re.DOTALL)
 
-    iss_section = iss_match.group(0)
-    spaceships = re.findall(r'\[\[([^\]]+)\]\]', iss_section)
-    countries = re.findall(r'size=15px\|([^}]+)', iss_section)
+            if not iss_match:
+                return []  # Return an empty list if no match is found
 
-    crew_info = []
-    current_ship = ''
-    expedition = ''
-    idx = 0
+            iss_section = iss_match.group(0)
+            spaceships = re.findall(r'\[\[([^\]]+)\]\]', iss_section)
+            countries = re.findall(r'size=15px\|([^}]+)', iss_section)
 
-    for spaceship in spaceships:
-        if "Expedition" in spaceship:
-            expedition = spaceship
-            continue
-        if "SpaceX" in spaceship or "Soyuz" in spaceship or "Axiom" in spaceship or "Boeing" in spaceship:
-            current_ship = spaceship
-            continue
-        else:
-            crew_info.append(
-                {'name': spaceship, 'spaceship': current_ship, 'country': countries[idx], 'expedition': expedition})
-            idx += 1
+            crew_info = []
+            current_ship = ''
+            expedition = ''
+            idx = 0
 
-    return crew_info
+            for spaceship in spaceships:
+                if "Expedition" in spaceship:
+                    expedition = spaceship
+                    continue
+                if "SpaceX" in spaceship or "Soyuz" in spaceship or "Axiom" in spaceship or "Boeing" in spaceship:
+                    current_ship = spaceship
+                    continue
+                else:
+                    crew_info.append(
+                        {'name': spaceship, 'spaceship': current_ship, 'country': countries[idx], 'expedition': expedition})
+                    idx += 1
+
+            return crew_info
+
+        except requests.exceptions.RequestException as e:
+            print(f"Attempt {attempt + 1} failed with error: {e}")
+            time.sleep(5)  # Wait for 5 seconds before retrying
+
+    # Log or raise an appropriate error if all attempts fail
+    print("Failed to fetch data after several attempts.")
+    return []  # Return an empty list or handle it appropriately based on your application's needs
 
 
 def format_message(crew_info_list):

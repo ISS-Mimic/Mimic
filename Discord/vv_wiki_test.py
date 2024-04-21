@@ -167,6 +167,13 @@ def main():
     # Fetch current data
     current_data = fetch_iss_data()
     
+    if current_data is None:
+        current_data = []
+    if previous_data is None:
+        previous_data = []
+
+
+
     # For testing only
     #with open('VV_current_data.json', 'r') as f:
     #    current_data = json.load(f)

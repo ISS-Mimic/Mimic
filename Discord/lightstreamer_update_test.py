@@ -465,6 +465,9 @@ class MainListener:
                                 print(message)
                             else:
                                 print("    message is none")
+                                print("    "+str(item_name))
+                                print("    "+str(value))
+                                print("    "+str(type(value)))
                             last_update = ts
                         else:
                             print("    failed ts check: " + str(ts-last_update))

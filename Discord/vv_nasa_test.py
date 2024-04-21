@@ -166,6 +166,11 @@ def main():
         # Load previous data
         previous_vehicles = load_from_json(json_file)
 
+        if current_vehicles is None:
+            current_vehicles = []
+        if previous_vehicles is None:
+            previous_vehicles = []
+
         # Check if there is any change in the data
         if current_vehicles != previous_vehicles:
             print("diff")
