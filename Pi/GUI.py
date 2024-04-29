@@ -1064,8 +1064,13 @@ class Playback_Screen(Screen):
         Clock.schedule_once(self.update_dropdown)  # Update dropdown with initial drives
 
     def get_mount_points(self):
-        # This function returns a set of current mount points
-        return set(os.listdir(self.usb_path))
+        try:
+            # Attempt to list the directory contents
+            return set(os.listdir(self.usb_path))
+        except Exception as e:
+            # Handle any exception (e.g., FileNotFoundError, PermissionError)
+            logWrite(f"Error accessing USB path {self.usb_path}: {e}")
+            return set()  # Return an empty set if there's an error
 
     def usb_monitoring_task(self):
         initial_mounts = self.get_mount_points()
@@ -1141,11 +1146,11 @@ class Playback_Screen(Screen):
         if not runningDemo:
             try:
                 if self.playback == "OFT-2":
-                    p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/Standard"])
+                    p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/OFT2"])
                 elif self.playback == "HTV":
                     p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/HTV"])
                 elif self.playback == "Standard":
-                    p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/OFT2"])
+                    p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/Standard"])
                 elif self.playback == "Disco":
                     #p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/Disco"])
                     p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/disco.sh")
