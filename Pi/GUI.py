@@ -1128,6 +1128,7 @@ class Playback_Screen(Screen):
         demoboolean = args[0]
 
     def increment_time(self):
+        #still need to figure out how to implement time factors in code - recompile for one time changes but real time active control?
         self.time_factor += 5
         if self.time_factor > 90:
             self.time_factor = 90
@@ -1143,17 +1144,35 @@ class Playback_Screen(Screen):
 
     def startDemo(self):
         global p2, playback, runningDemo
+        executable_path = mimic_directory + "/Mimic/Pi/RecordedData/playback.out"
+        data_path_oft2 = mimic_directory + "/Mimic/Pi/RecordedData/OFT2"
+        data_path_htv = mimic_directory + "/Mimic/Pi/RecordedData/HTV"
+        data_path_standard = mimic_directory + "/Mimic/Pi/RecordedData/Standard"
+        data_path_disco = mimic_directory + "/Mimic/Pi/RecordedData/Disco"
+
         if not runningDemo:
             try:
                 if self.playback == "OFT-2":
-                    p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/OFT2"])
+                    try:
+                        p2 = Popen([executable_path, data_path_oft2])
+                    except Exception as e:
+                        print("Failed to start the process:", e)
                 elif self.playback == "HTV":
-                    p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/HTV"])
+                    try:
+                        p2 = Popen([executable_path, data_path_htv])
+                    except Exception as e:
+                        print("Failed to start the process:", e)
                 elif self.playback == "Standard":
-                    p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/Standard"])
+                    try:
+                        p2 = Popen([executable_path, data_path_standard])
+                    except Exception as e:
+                        print("Failed to start the process:", e)
                 elif self.playback == "Disco":
-                    #p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/Disco"])
-                    p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/disco.sh")
+                    try:
+                        #p2 = Popen([executable_path, data_path_oft2])
+                        p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/disco.sh")
+                    except Exception as e:
+                        print("Failed to start the process:", e)
             except Exception as e:
                 logWrite(e)
             runningDemo = True
