@@ -1497,28 +1497,7 @@ class MainApp(App):
         self.orbit_screen.ids.orbit3d.reload()
 
     def updateOrbitGlobe(self, dt):
-        self.lock_file_path = "/dev/shm/orbitGlobe_lock.lock"  # Path to the lock file
-        # Check if the lock file exists
-        if os.path.exists(self.lock_file_path):
-            print("Previous process is still running. Waiting...")
-            return  # Wait for the previous process to finish
-
-        try:
-            # Create the lock file
-            with open(self.lock_file_path, "w"):
-                pass
-
-            # Spawn the subprocess
-            proc = Popen(["python", mimic_directory + "/Mimic/Pi/orbitGlobe.py"])
-
-            # Wait for the subprocess to finish
-            proc.wait()
-        finally:
-            # Remove the lock file after the process finishes
-            print("process finished")
-            os.remove(self.lock_file_path)
-                
-        #proc = Popen(["python", mimic_directory + "/Mimic/Pi/orbitGlobe.py"])
+        proc = Popen(["python", mimic_directory + "/Mimic/Pi/orbitGlobe.py"])
 
     def updateNightShade(self, dt):
         proc = Popen(["python", mimic_directory + "/Mimic/Pi/NightShade.py"])
