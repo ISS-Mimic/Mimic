@@ -1,4 +1,5 @@
-g++ -std=c++11 -lsqlite3 mimic-fakedata.cpp
+#g++ -std=c++11 -lsqlite3 mimic-fakedata.cpp
+g++ -std=c++11 mimic-fakedata.cpp -o playback.out -lsqlite3
 
 add file names of all telemetry identifiers to code
 change time factor if desired
