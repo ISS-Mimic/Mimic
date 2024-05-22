@@ -44,9 +44,11 @@ def parse_events(text):
             "HP (KM)": float(match[4])
         }
         cleaned_events.append(cleaned_event)
+    cleaned_events.sort(key=lambda x: x["TIG"])  # Sort events by TIG
     return cleaned_events
 
 def save_events(events):
+    events.sort(key=lambda x: x["TIG"])  # Ensure events are sorted before saving
     with open("events.json", "w") as file:
         json.dump(events, file)
 
@@ -100,8 +102,6 @@ def detect_changes(new_events):
     else:
         save_events(old_events + changed_events)
 
-    print("Changed events:", changed_events)
-    print("Updated events:", updated_events)
     return changed_events, updated_events
 
 def send_discord_message(message):
@@ -138,7 +138,7 @@ def schedule_event_checks():
         send_discord_message(message)
 
 if __name__ == "__main__":
-    schedule.every(1).minutes.do(schedule_event_checks)
+    schedule.every(10).minutes.do(schedule_event_checks)
     schedule.every(4).minutes.do(check_and_send_event_reminders, load_events())  # Reminder check every minute
     while True:
         schedule.run_pending()
