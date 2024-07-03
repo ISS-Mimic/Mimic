@@ -1,41 +1,31 @@
+import sqlite3
 import requests
 from bs4 import BeautifulSoup
 import re
 import pandas as pd
 
+# URL Constants
 wikiurl = 'https://en.wikipedia.org/wiki/International_Space_Station'
 nasaurl = 'https://www.nasa.gov/international-space-station/space-station-visiting-vehicles/'
+vv_db_path = '/dev/shm/vv.db'
 
-
+# Function to get NASA data
 def get_nasa_data(url):
-    # Send a GET request to the URL
     response = requests.get(nasaurl)
-
-    # Check if the request was successful
     if response.status_code == 200:
-        # Parse the HTML content of the page
         soup = BeautifulSoup(response.content, 'html.parser')
-
-        # Find all paragraph tags
         paragraphs = soup.find_all('p')
+        #print(paragraphs)
         nasa_data = []
-
-        # Regular expression to detect dates in m/d/yy or m/d/yyyy format
         date_pattern = re.compile(r'\b\d{1,2}/\d{1,2}/\d{2,4}\b')
-
-        # Extract text from each paragraph
         for paragraph in paragraphs:
             for event in paragraph:
                 if date_pattern.search(event.get_text()):
+                    #print(event.get_text())
                     nasa_data.append(event.get_text())
-
     else:
         print(f"Failed to retrieve the webpage. Status code: {response.status_code}")
-
-    # print(nasa_data)
-
     return nasa_data
-
 
 # Function to standardize dates
 def standardize_date(date_str):
@@ -45,60 +35,44 @@ def standardize_date(date_str):
         date_str = re.sub(r'(\d{1,2}/\d{1,2}/)(\d{2})$', r'\g<1>20\2', date_str)
         return pd.to_datetime(date_str, errors='coerce')
 
-
 # Function to parse NASA data
 def parse_nasa_data(data):
     dock_events = []
     undock_events = []
-
     for line in data:
-        # Use regex to extract date and event
-        match = re.search(r'(\b\d{1,2}/\d{1,2}/\d{2,4}\b)\s*–\s*(.*)', line)
+        match = re.search(r'(\b\d{1,2}/\d{1,2}/\d{2,4}\b)\s*[\u002D\u2013\u2014]\s*(.*)', line)
         if match:
             date = match.group(1)
             event = match.group(2)
-
             if any(keyword in event for keyword in ['Dock', 'Capture']):
                 dock_events.append({'Date': standardize_date(date.strip()), 'Event': event.strip()})
             elif any(keyword in event for keyword in ['Undock', 'Release', 'Splashdown']):
                 undock_events.append({'Date': standardize_date(date.strip()), 'Event': event.strip()})
-
     dock_df = pd.DataFrame(dock_events)
     undock_df = pd.DataFrame(undock_events)
-
     return dock_df, undock_df
-
 
 # Parse the NASA data
 nasa_dock_df, nasa_undock_df = parse_nasa_data(get_nasa_data(nasaurl))
-
-#print(nasa_dock_df)
 
 
 # Function to identify current docked spacecraft
 def identify_current_docked(dock_df, undock_df):
     current_docked = dock_df.copy()
     current_docked['Status'] = 'Docked'
-
     for index, row in undock_df.iterrows():
         event = row['Event'].replace('Undock', 'Dock').replace('Release', 'Capture').replace('Splashdown', 'Dock')
         current_docked = current_docked[~current_docked['Event'].str.contains(event)]
-
     return current_docked
-
 
 # Identify current docked spacecraft
 current_docked_df = identify_current_docked(nasa_dock_df, nasa_undock_df)
 
-
-#print(current_docked_df)
-
-
+# Function to get Wikipedia data
 def get_wikipedia_data(wikiurl):
     tables = pd.read_html(wikiurl)
     df = tables[2]
     return df
-
 
 # Function to convert 'NET' dates to approximate dates
 def convert_net_date(date_str):
@@ -116,10 +90,8 @@ def convert_net_date(date_str):
     except ValueError:
         return pd.to_datetime(f"{date_str.split()[-1]}-{date_str.split()[-2]}-01", format='%Y-%B-%d', errors='coerce')
 
-
-# Function to standardize date formats and clean data
+# Function to clean Wikipedia data
 def clean_wikipedia_data(df):
-    # Standardize location names
     location_replacements = {
         'Harmony': 'Node 2',
         'Poisk': 'MRM-2',
@@ -133,44 +105,34 @@ def clean_wikipedia_data(df):
         'nadir': 'Nadir',
     }
     df['Location'] = df['Location'].replace(location_replacements, regex=True)
-
-    # Replace mission names in the 'Mission' column
     df['Mission'] = df['Mission'].apply(lambda x: f'Cygnus {x}' if x.startswith('NG-') else x)
     df['Mission'] = df['Mission'].apply(lambda x: f'SpaceX {x}' if x.startswith('Crew-') else x)
     df['Mission'] = df['Mission'].apply(lambda x: f'SpaceX {x}' if x.startswith('Cargo-') else x)
-
-    # Convert date columns to datetime
     df['Arrival (UTC)'] = pd.to_datetime(df['Arrival (UTC)'], errors='coerce')
     df['Departure (planned)'] = df['Departure (planned)'].apply(
         lambda x: convert_net_date(x) if 'NET' in x or 'early' in x or 'mid' in x or 'late' in x
         else pd.to_datetime(x, errors='coerce'))
     return df
 
-
-# Function to clean up citations
+# Function to clean citations
 def clean_citations(text):
-    if isinstance(text, str):  # Check if text is a string
-        return re.sub(r'\[\d+\]', '', text)  # Remove citations
+    if isinstance(text, str):
+        return re.sub(r'\[\d+\]', '', text)
     else:
-        return text  # Return non-string values as-is
-
+        return text
 
 # Obtain the table of current visiting vehicles
 wikipedia_df = get_wikipedia_data(wikiurl)
 
 # Remove the citation text that gets added
-wikipedia_df = wikipedia_df.map(clean_citations)
+wikipedia_df = wikipedia_df.applymap(clean_citations)
 
-# Rename stuff from the Wikipedia data
+# Clean the Wikipedia data
 wikipedia_df = clean_wikipedia_data(wikipedia_df)
 
-
-# print(wikipedia_df["Departure (planned)"])
-
-# Assuming you have the NASA data already parsed, correlate the data
+# Function to correlate data
 def correlate_data(nasa_df, wiki_df):
     correlated_data = []
-
     for _, nasa_row in nasa_df.iterrows():
         matching_wiki_rows = wiki_df[wiki_df['Arrival (UTC)'] == nasa_row['Date']]
         for _, wiki_row in matching_wiki_rows.iterrows():
@@ -184,17 +146,56 @@ def correlate_data(nasa_df, wiki_df):
                 'Arrival': wiki_row['Arrival (UTC)'],
                 'Departure': wiki_row['Departure (planned)']
             })
-
     return pd.DataFrame(correlated_data)
 
-
-# Assuming you have the NASA data already in 'current_docked_df'
+# Correlate the data
 correlated_df = correlate_data(current_docked_df, wikipedia_df)
 
-# Display the correlated data with altered names
-print("Correlated Data:")
-print(correlated_df["Mission"])
-print(correlated_df["Type"])
-print(correlated_df["Location"])
-print(correlated_df["Arrival"])
-print(correlated_df["Departure"])
+# Function to update SQLite3 database
+def update_database(correlated_df, db_path='iss_vehicles.db'):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    # Create table if not exists
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS vehicles (
+            Spacecraft TEXT,
+            Type TEXT,
+            Mission TEXT,
+            Event TEXT,
+            Date DATE,
+            Location TEXT,
+            Arrival TEXT,
+            Departure TEXT
+        )
+    ''')
+
+    # Remove vehicles that are no longer docked
+    cursor.execute('DELETE FROM vehicles')
+
+    # Insert new data
+    for _, row in correlated_df.iterrows():
+        cursor.execute('''
+            INSERT INTO vehicles (Spacecraft, Type, Mission, Event, Date, Location, Arrival, Departure)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            row['Spacecraft'],
+            row['Type'],
+            row['Mission'],
+            row['Event'],
+            row['Date'].strftime('%Y-%m-%d %H:%M:%S') if pd.notnull(row['Date']) else None,
+            row['Location'],
+            row['Arrival'].strftime('%Y-%m-%d %H:%M:%S') if pd.notnull(row['Arrival']) else None,
+            row['Departure'].strftime('%Y-%m-%d %H:%M:%S') if pd.notnull(row['Departure']) else None
+        ))
+
+    # Commit changes and close the connection
+    conn.commit()
+    conn.close()
+
+# Update the database with correlated data
+update_database(correlated_df,db_path=vv_db_path)
+
+#print(correlated_df)
+
+print("Database updated successfully.")

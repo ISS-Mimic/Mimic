@@ -197,10 +197,13 @@ if not USE_CONFIG_JSON:
     print(log_str)
     logWrite(log_str)
 
-#-------------------------TDRS Checking Database-----------------------------------------
+#-----------------------------Checking Databases-----------------------------------------
 TDRSconn = sqlite3.connect('/dev/shm/tdrs.db')
 TDRSconn.isolation_level = None
 TDRScursor = TDRSconn.cursor()
+VVconn = sqlite3.connect('/dev/shm/vv.db')
+VVconn.isolation_level = None
+VVcursor = VVconn.cursor()
 conn = sqlite3.connect('/dev/shm/iss_telemetry.db')
 conn.isolation_level = None
 c = conn.cursor()
@@ -1460,15 +1463,18 @@ class MainApp(App):
         Clock.schedule_once(self.updateISS_TLE, 15)
         Clock.schedule_once(self.updateTDRS_TLE, 15)
         Clock.schedule_once(self.updateOrbitGlobe, 15)
-        Clock.schedule_once(self.TDRSupdate, 30)
+        #Clock.schedule_once(self.TDRSupdate, 30)
         Clock.schedule_once(self.updateNightShade, 20)
+        Clock.schedule_once(self.updateVV, 10)
 
         Clock.schedule_interval(self.updateISS_TLE, 300)
         Clock.schedule_interval(self.updateTDRS_TLE, 300)
         Clock.schedule_interval(self.updateOrbitGlobe, 10)
-        Clock.schedule_interval(self.TDRSupdate, 600)
+        #Clock.schedule_interval(self.TDRSupdate, 600) #this is not working and the site isnt updating anyway
         Clock.schedule_interval(self.check_internet, 1)
         Clock.schedule_interval(self.updateArduinoCount, 5)
+        Clock.schedule_interval(self.updateVV, 500)
+        Clock.schedule_interval(self.update_vv_values, 40)
 
         #schedule the orbitmap to update with shadow every 5 mins
         Clock.schedule_interval(self.updateNightShade, 120)
@@ -1567,6 +1573,9 @@ class MainApp(App):
 
     def updateNightShade(self, dt):
         proc = Popen(["python", mimic_directory + "/Mimic/Pi/NightShade.py"])
+
+    def updateVV(self, dt):
+        proc = Popen(["python", mimic_directory + "/Mimic/Pi/VVcheck.py"])
 
     def updateISS_TLE(self, dt):
         proc = Popen(["python", mimic_directory + "/Mimic/Pi/getTLE_ISS.py"])
@@ -2433,6 +2442,25 @@ class MainApp(App):
             getattr(self, x).ids.signal.anim_delay = 0.12
         for x in ScreenList:
             getattr(self, x).ids.signal.size_hint_y = 0.112
+    
+    def update_vv_values(self, dt):
+        print("fetching VVs")
+        VVcursor.execute('select Mission from vehicles')
+        mission = VVcursor.fetchall()
+        VVcursor.execute('select Type from vehicles')
+        mission_type = VVcursor.fetchall()
+        VVcursor.execute('select Location from vehicles')
+        location = VVcursor.fetchall()
+        VVcursor.execute('select Arrival from vehicles')
+        arrival = VVcursor.fetchall()
+        VVcursor.execute('select Departure from vehicles')
+        departure = VVcursor.fetchall()
+        VVcursor.execute('select Spacecraft from vehicles')
+        spacecraft = VVcursor.fetchall()
+
+        print(f"Spaceship 1 = {str((spacecraft[0])[0])}")
+        #sub_status = str((values[255])[0]) #lightstreamer subscript checker
+        #client_status = str((values[256])[0]) #lightstreamer client checker
 
     def update_labels(self, dt): #THIS IS THE IMPORTANT FUNCTION
         global mimicbutton, switchtofake, demoboolean, runningDemo, playbackboolean, psarj2, ssarj2, manualcontrol, aos, los, oldLOS, psarjmc, ssarjmc, ptrrjmc, strrjmc, beta1bmc, beta1amc, beta2bmc, beta2amc, beta3bmc, beta3amc, beta4bmc, beta4amc, US_EVAinProgress, position_x, position_y, position_z, velocity_x, velocity_y, velocity_z, altitude, velocity, iss_mass, testvalue, testfactor, airlock_pump, crewlockpres, leak_hold, firstcrossing, EVA_activities, repress, depress, oldAirlockPump, obtained_EVA_crew, EVAstartTime
