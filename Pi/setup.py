@@ -111,6 +111,7 @@ def main():
     run_install("python3-sdl2", "sudo apt-get") #required for kivy window
     run_install("python3-cartopy", "sudo apt-get") #required for nightshade
     run_install("python3-scipy", "sudo apt-get") #required for nightshade
+    run_install("python3-pandas", "sudo apt-get") #pandas is used for correlating the NASA VV page with wiki
     run_install("libatlas-base-dev", "sudo apt-get") #fix numpy issue
     run_install("python3-ephem", "sudo apt-get") #python libs for mimic
     if bullseye:
@@ -121,6 +122,11 @@ def main():
     run_install("python3-pyudev", "sudo apt-get") #python libs for mimic
     run_install("lightstreamer-client-lib", "python -m pip") #iss telemetry service
 
+    # C++ stuff for recorded data playback
+    run_install("libsqlite3", "sudo apt-get") #c++ libs for recorded data playbackls
+    run_install("libboost-dev-all", "sudo apt-get") #c++ libs for recorded data playbackls
+
+    # Kivy install
     print("\nInstalling Kivy requirements and package.")
     if bullseye:
         run_install("kivy", "python -m pip") #iss telemetry service
