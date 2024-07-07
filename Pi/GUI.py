@@ -38,7 +38,7 @@ from kivy.network.urlrequest import UrlRequest #using this to request webpages
 from kivy.clock import Clock
 from kivy.event import EventDispatcher
 from kivy.properties import ObjectProperty
-from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
+from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition, NoTransition
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 
@@ -1179,18 +1179,8 @@ class Settings_Screen(Screen, EventDispatcher):
         else:
             serialWrite("SmartRolloverBGA=0 ")
 
-class Orbit_Screen(Screen, EventDispatcher):
+class LED_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    mimic_data_directory = Path.home() / '.mimic_data'
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class Orbit_Pass(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class Orbit_Data(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
 
 class ISS_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
@@ -1198,131 +1188,6 @@ class ISS_Screen(Screen, EventDispatcher):
     def selectModule(*args): #used for choosing a module on screen to light up
         global module
         module = str(args[1])
-
-class ECLSS_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class ECLSS_WRM_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class ECLSS_IATCS_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class EPS_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class CT_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class CT_SASA_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class CT_Camera_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class CT_UHF_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class CT_SGANT_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class GNC_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class CDH_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class Science_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class Science_EXT_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class Science_INT_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class Science_NRAL_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class Science_JEF_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class USOS_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class VV_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class EVA_Main_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class EVA_EMU_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class EVA_US_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class EVA_RS_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class EVA_Pictures(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-
-class TCS_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class LED_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-
-class RS_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class RS_Dock_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class Crew_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-
-class Robo_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class SSRMS_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class SPDM1_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class MSS_MT_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
 
 class MimicScreen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
@@ -1335,7 +1200,7 @@ class MimicScreen(Screen, EventDispatcher):
         global p,TDRSproc
         logWrite("Telemetry Subprocess start")
         p = Popen(["python", mimic_directory + "/Mimic/Pi/iss_telemetry.py"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
-        TDRSproc = Popen(["python", mimic_directory + "/Mimic/Pi/TDRScheck.py"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
+        #TDRSproc = Popen(["python", mimic_directory + "/Mimic/Pi/TDRScheck.py"]) #uncomment if TDRS site comes back and fixed code
         #p = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/Data"])
 
     def killproc(*args):
@@ -1348,6 +1213,148 @@ class MimicScreen(Screen, EventDispatcher):
         except Exception as e:
             logWrite(e)
 
+class CDH_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class Crew_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class CT_Camera_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class CT_SASA_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class CT_SGANT_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class CT_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class CT_UHF_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class ECLSS_IATCS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class ECLSS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class ECLSS_WRM_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class EPS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class EVA_EMU_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class EVA_Main_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class EVA_Pictures(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class EVA_RS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class EVA_US_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class GNC_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class MSS_MT_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class Orbit_Data(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class Orbit_Pass(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class Orbit_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    mimic_data_directory = Path.home() / '.mimic_data'
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class Robo_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class RS_Dock_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class RS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class Science_EXT_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class Science_INT_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class Science_JEF_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class Science_NRAL_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class Science_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class SPDM1_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class SSRMS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class TCS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class USOS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class VV_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class VV_Image(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    mimic_data_directory = Path.home() / '.mimic_data'
+    signalcolor = ObjectProperty([1, 1, 1])
+
 class MainScreenManager(ScreenManager):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
@@ -1358,97 +1365,101 @@ class MainApp(App):
         global startup, ScreenList, stopAnimation
 
         self.main_screen = MainScreen(name = 'main')
-        self.mimic_screen = MimicScreen(name = 'mimic')
-        self.iss_screen = ISS_Screen(name = 'iss')
-        self.eclss_screen = ECLSS_Screen(name = 'eclss')
-        self.eclss_wrm_screen = ECLSS_WRM_Screen(name = 'wrm')
-        self.eclss_iatcs_screen = ECLSS_IATCS_Screen(name = 'iatcs')
         self.control_screen = ManualControlScreen(name = 'manualcontrol')
         self.led_screen = LED_Screen(name = 'led')
-        self.orbit_screen = Orbit_Screen(name = 'orbit')
-        self.orbit_pass = Orbit_Pass(name = 'orbit_pass')
-        self.orbit_data = Orbit_Data(name = 'orbit_data')
         self.playback_screen = Playback_Screen(name = 'playback')
-        self.eps_screen = EPS_Screen(name = 'eps')
-        self.ct_screen = CT_Screen(name = 'ct')
-        self.ct_sasa_screen = CT_SASA_Screen(name = 'ct_sasa')
-        self.ct_uhf_screen = CT_UHF_Screen(name = 'ct_uhf')
-        self.ct_camera_screen = CT_Camera_Screen(name = 'ct_camera')
-        self.ct_sgant_screen = CT_SGANT_Screen(name = 'ct_sgant')
-        self.gnc_screen = GNC_Screen(name = 'gnc')
-        self.tcs_screen = TCS_Screen(name = 'tcs')
-        self.crew_screen = Crew_Screen(name = 'crew')
         self.settings_screen = Settings_Screen(name = 'settings')
-        self.us_eva = EVA_US_Screen(name='us_eva')
+        self.mimic_screen = MimicScreen(name = 'mimic')
+        self.iss_screen = ISS_Screen(name = 'iss')
+        self.cdh_screen = CDH_Screen(name = 'cdh')
+        self.crew_screen = Crew_Screen(name = 'crew')
+        self.ct_camera_screen = CT_Camera_Screen(name = 'ct_camera')
+        self.ct_sasa_screen = CT_SASA_Screen(name = 'ct_sasa')
+        self.ct_sgant_screen = CT_SGANT_Screen(name = 'ct_sgant')
+        self.ct_screen = CT_Screen(name = 'ct')
+        self.ct_uhf_screen = CT_UHF_Screen(name = 'ct_uhf')
+        self.eclss_iatcs_screen = ECLSS_IATCS_Screen(name = 'iatcs')
+        self.eclss_screen = ECLSS_Screen(name = 'eclss')
+        self.eclss_wrm_screen = ECLSS_WRM_Screen(name = 'wrm')
+        self.eps_screen = EPS_Screen(name = 'eps')
+        self.eva_emu = EVA_EMU_Screen(name='eva_emu')
+        self.eva_main = EVA_Main_Screen(name='eva_main')
+        self.eva_pictures = EVA_Pictures(name='eva_pictures')
+        self.ext_science_screen = Science_EXT_Screen(name = 'ext_science')
+        self.gnc_screen = GNC_Screen(name = 'gnc')
+        self.int_science_screen = Science_INT_Screen(name = 'int_science')
+        self.jef_science_screen = Science_JEF_Screen(name = 'jef_science')
+        self.mss_mt_screen = MSS_MT_Screen(name='mt')
+        self.nral_science_screen = Science_NRAL_Screen(name = 'nral_science')
+        self.orbit_data = Orbit_Data(name = 'orbit_data')
+        self.orbit_pass = Orbit_Pass(name = 'orbit_pass')
+        self.orbit_screen = Orbit_Screen(name = 'orbit')
+        self.robo_screen = Robo_Screen(name='robo')
+        self.rs_dock = RS_Dock_Screen(name='rs_dock')
         self.rs_eva = EVA_RS_Screen(name='rs_eva')
         self.rs_screen = RS_Screen(name='rs')
-        self.rs_dock = RS_Dock_Screen(name='rs_dock')
-        self.robo_screen = Robo_Screen(name='robo')
-        self.ssrms_screen = SSRMS_Screen(name='ssrms')
-        self.spdm1_screen = SPDM1_Screen(name='spdm1')
-        self.mss_mt_screen = MSS_MT_Screen(name='mt')
-        self.cdh_screen = CDH_Screen(name = 'cdh')
         self.science_screen = Science_Screen(name = 'science')
-        self.ext_science_screen = Science_EXT_Screen(name = 'ext_science')
-        self.int_science_screen = Science_INT_Screen(name = 'int_science')
-        self.nral_science_screen = Science_NRAL_Screen(name = 'nral_science')
-        self.jef_science_screen = Science_JEF_Screen(name = 'jef_science')
+        self.spdm1_screen = SPDM1_Screen(name='spdm1')
+        self.ssrms_screen = SSRMS_Screen(name='ssrms')
+        self.tcs_screen = TCS_Screen(name = 'tcs')
+        self.us_eva = EVA_US_Screen(name='us_eva')
         self.usos_screen = USOS_Screen(name = 'usos')
+        self.vv_image = VV_Image(name = 'vv_image')
         self.vv_screen = VV_Screen(name = 'vv')
-        self.eva_main = EVA_Main_Screen(name='eva_main')
-        self.eva_emu = EVA_EMU_Screen(name='eva_emu')
-        self.eva_pictures = EVA_Pictures(name='eva_pictures')
 
         #Add all new telemetry screens to this list, this is used for the signal status icon and telemetry value colors and arduino icon
-        ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen', 'eclss_wrm_screen', 
-                      'eclss_iatcs_screen', 'main_screen', 'control_screen', 'settings_screen',
-                      'ct_screen', 'ct_sasa_screen', 'ct_sgant_screen', 'ct_uhf_screen',
-                      'ct_camera_screen', 'gnc_screen', 'orbit_screen', 'us_eva', 'rs_eva',
-                      'eva_main', 'eva_emu', 'mimic_screen', 'robo_screen', 'mss_mt_screen', 'ssrms_screen', 
-                      'spdm1_screen','orbit_pass', 'orbit_data', 'crew_screen', 'playback_screen']
+        ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen', 
+                      'eclss_wrm_screen', 'eclss_iatcs_screen', 'main_screen', 
+                      'control_screen', 'settings_screen', 'ct_screen', 'ct_sasa_screen', 
+                      'ct_sgant_screen', 'ct_uhf_screen', 'ct_camera_screen', 'gnc_screen', 
+                      'orbit_screen', 'us_eva', 'rs_eva', 'eva_main', 'eva_emu', 
+                      'mimic_screen', 'robo_screen', 'mss_mt_screen', 'ssrms_screen', 
+                      'spdm1_screen','orbit_pass', 'orbit_data', 'crew_screen', 
+                      'playback_screen', 'vv_screen', 'vv_image', 'usos_screen']
 
-        root = MainScreenManager(transition=SwapTransition())
+        root = MainScreenManager(transition=NoTransition())
         root.add_widget(self.main_screen)
         root.add_widget(self.control_screen)
-        root.add_widget(self.mimic_screen)
         root.add_widget(self.led_screen)
         root.add_widget(self.playback_screen)
-        root.add_widget(self.orbit_screen)
-        root.add_widget(self.orbit_pass)
-        root.add_widget(self.orbit_data)
-        root.add_widget(self.iss_screen)
+        root.add_widget(self.settings_screen)
+        root.add_widget(self.mimic_screen)
+        root.add_widget(self.cdh_screen)
+        root.add_widget(self.crew_screen)
+        root.add_widget(self.ct_camera_screen)
+        root.add_widget(self.ct_sasa_screen)
+        root.add_widget(self.ct_sgant_screen)
+        root.add_widget(self.ct_screen)
+        root.add_widget(self.ct_uhf_screen)
+        root.add_widget(self.eclss_iatcs_screen)
         root.add_widget(self.eclss_screen)
         root.add_widget(self.eclss_wrm_screen)
-        root.add_widget(self.eclss_iatcs_screen)
-        root.add_widget(self.cdh_screen)
-        root.add_widget(self.science_screen)
-        root.add_widget(self.ext_science_screen)
-        root.add_widget(self.int_science_screen)
-        root.add_widget(self.nral_science_screen)
-        root.add_widget(self.jef_science_screen)
-        root.add_widget(self.usos_screen)
-        root.add_widget(self.vv_screen)
         root.add_widget(self.eps_screen)
-        root.add_widget(self.ct_screen)
-        root.add_widget(self.ct_sasa_screen)
-        root.add_widget(self.ct_uhf_screen)
-        root.add_widget(self.ct_camera_screen)
-        root.add_widget(self.ct_sgant_screen)
+        root.add_widget(self.eva_emu)
+        root.add_widget(self.eva_main)
+        root.add_widget(self.eva_pictures)
+        root.add_widget(self.ext_science_screen)
         root.add_widget(self.gnc_screen)
-        root.add_widget(self.us_eva)
+        root.add_widget(self.int_science_screen)
+        root.add_widget(self.iss_screen)
+        root.add_widget(self.jef_science_screen)
+        root.add_widget(self.mss_mt_screen)
+        root.add_widget(self.nral_science_screen)
+        root.add_widget(self.orbit_data)
+        root.add_widget(self.orbit_pass)
+        root.add_widget(self.orbit_screen)
+        root.add_widget(self.robo_screen)
+        root.add_widget(self.rs_dock)
         root.add_widget(self.rs_eva)
         root.add_widget(self.rs_screen)
-        root.add_widget(self.rs_dock)
-        root.add_widget(self.robo_screen)
-        root.add_widget(self.ssrms_screen)
+        root.add_widget(self.science_screen)
         root.add_widget(self.spdm1_screen)
-        root.add_widget(self.mss_mt_screen)
-        root.add_widget(self.eva_main)
-        root.add_widget(self.eva_emu)
-        root.add_widget(self.eva_pictures)
+        root.add_widget(self.ssrms_screen)
         root.add_widget(self.tcs_screen)
-        root.add_widget(self.crew_screen)
-        root.add_widget(self.settings_screen)
+        root.add_widget(self.us_eva)
+        root.add_widget(self.usos_screen)
+        root.add_widget(self.vv_image)
+        root.add_widget(self.vv_screen)
         root.current = 'main' #change this back to main when done with eva setup
 
         Clock.schedule_interval(self.update_labels, 1) #all telemetry wil refresh and get pushed to arduinos every half second!
@@ -1463,7 +1474,7 @@ class MainApp(App):
         Clock.schedule_once(self.updateISS_TLE, 15)
         Clock.schedule_once(self.updateTDRS_TLE, 15)
         Clock.schedule_once(self.updateOrbitGlobe, 15)
-        #Clock.schedule_once(self.TDRSupdate, 30)
+        #Clock.schedule_once(self.TDRSupdate, 30) #this is not working and the site isnt updating anyway
         Clock.schedule_once(self.updateNightShade, 20)
         Clock.schedule_once(self.updateVV, 10)
 
@@ -1559,6 +1570,10 @@ class MainApp(App):
         urlindex = urlindex + 1
         if urlindex > urlsize-1:
             urlindex = 0
+
+    def updateNASAVVImage(self, dt):
+        self.vv_screen.ids.orbit3d.source = str(mimic_data_directory) + '/globe.png'
+        self.vv_screen.ids.OrbitMap.reload()
                 
     def updateOrbitMap(self, dt):
         self.orbit_screen.ids.OrbitMap.source = str(mimic_data_directory) + '/map.jpg'
@@ -2365,6 +2380,7 @@ class MainApp(App):
 
         if not internet:
             for x in ScreenList:
+                #print(x)
                 getattr(self, x).ids.signal.source = mimic_directory + '/Mimic/Pi/imgs/signal/offline.png'
             self.changeColors(0.5, 0.5, 0.5)
         else:
@@ -2443,24 +2459,43 @@ class MainApp(App):
         for x in ScreenList:
             getattr(self, x).ids.signal.size_hint_y = 0.112
     
-    def update_vv_values(self, dt):
-        print("fetching VVs")
-        VVcursor.execute('select Mission from vehicles')
-        mission = VVcursor.fetchall()
-        VVcursor.execute('select Type from vehicles')
-        mission_type = VVcursor.fetchall()
-        VVcursor.execute('select Location from vehicles')
-        location = VVcursor.fetchall()
-        VVcursor.execute('select Arrival from vehicles')
-        arrival = VVcursor.fetchall()
-        VVcursor.execute('select Departure from vehicles')
-        departure = VVcursor.fetchall()
-        VVcursor.execute('select Spacecraft from vehicles')
-        spacecraft = VVcursor.fetchall()
 
-        print(f"Spaceship 1 = {str((spacecraft[0])[0])}")
-        #sub_status = str((values[255])[0]) #lightstreamer subscript checker
-        #client_status = str((values[256])[0]) #lightstreamer client checker
+    def update_vv_values(self, dt):
+        #print("fetching VVs")
+        try:
+            # Check if the table exists before querying
+            VVcursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='vehicles'")
+            if VVcursor.fetchone() is not None:
+                VVcursor.execute('SELECT Mission FROM vehicles')
+                mission = VVcursor.fetchall()
+                VVcursor.execute('SELECT Type FROM vehicles')
+                mission_type = VVcursor.fetchall()
+                VVcursor.execute('SELECT Location FROM vehicles')
+                location = VVcursor.fetchall()
+                VVcursor.execute('SELECT Arrival FROM vehicles')
+                arrival = VVcursor.fetchall()
+                VVcursor.execute('SELECT Departure FROM vehicles')
+                departure = VVcursor.fetchall()
+                VVcursor.execute('SELECT Spacecraft FROM vehicles')
+                spacecraft = VVcursor.fetchall()
+
+                for i, port in enumerate(location):
+                    port = port[0]  # Extract the port name from the tuple
+
+                    # Check if the current port matches the desired location
+                    if port == "Node 2 Forward":
+                        self.usos_screen.ids.n2f_vehicle.text = str(spacecraft[i][0])  # Get the spacecraft name
+                    elif port == "Node 2 Zenith":
+                        self.usos_screen.ids.n2z_vehicle.text = str(spacecraft[i][0])  # Get the spacecraft name
+
+                #print(f"Spaceship 1 = {str((spacecraft[0])[0])}")
+            else:
+                logWrite("Table 'vehicles' does not exist.")
+        except sqlite3.Error as e:
+            logWrite(f"SQLite error: {e}")
+        except Exception as e:
+            logWrite(f"General error: {e}")
+
 
     def update_labels(self, dt): #THIS IS THE IMPORTANT FUNCTION
         global mimicbutton, switchtofake, demoboolean, runningDemo, playbackboolean, psarj2, ssarj2, manualcontrol, aos, los, oldLOS, psarjmc, ssarjmc, ptrrjmc, strrjmc, beta1bmc, beta1amc, beta2bmc, beta2amc, beta3bmc, beta3amc, beta4bmc, beta4amc, US_EVAinProgress, position_x, position_y, position_z, velocity_x, velocity_y, velocity_z, altitude, velocity, iss_mass, testvalue, testfactor, airlock_pump, crewlockpres, leak_hold, firstcrossing, EVA_activities, repress, depress, oldAirlockPump, obtained_EVA_crew, EVAstartTime
@@ -4073,13 +4108,16 @@ class MainApp(App):
             serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + str(v1as) + " " + "V2A=" + str(v2as) + " " + "V3A=" + str(v3as) + " " + "V4A=" + str(v4as) + " " + "V1B=" + str(v1bs) + " " + "V2B=" + str(v2bs) + " " + "V3B=" + str(v3bs) + " " + "V4B=" + str(v4bs) + " " + "ISS=" + module + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
 
 #All GUI Screens are on separate kv files
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Settings_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Playback_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MainScreen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ManualControlScreen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/LED_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Playback_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Settings_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MimicScreen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ISS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Orbit_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Orbit_Pass.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Orbit_Data.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ISS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ECLSS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ECLSS_WRM_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ECLSS_IATCS_Screen.kv')
@@ -4106,23 +4144,24 @@ Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EVA_EMU_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EVA_Pictures.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Crew_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/RS_Screen.kv')
-
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ManualControlScreen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Robo_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/SSRMS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/SPDM1_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MSS_MT_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MimicScreen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MainScreen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/RS_Dock_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/VV_Image.kv')
 Builder.load_string('''
 #:kivy 1.8
 #:import kivy kivy
 #:import win kivy.core.window
 ScreenManager:
-    Settings_Screen:
-    Playback_Screen:
+    MainScreen:
+    ManualControlScreen:
     LED_Screen:
+    Playback_Screen:
+    Settings_Screen:
+    MimicScreen:
+    ISS_Screen:
     Orbit_Screen:
     Orbit_Pass:
     Orbit_Data:
@@ -4132,7 +4171,6 @@ ScreenManager:
     CT_UHF_Screen:
     CT_Camera_Screen:
     CT_SGANT_Screen:
-    ISS_Screen:
     ECLSS_Screen:
     GNC_Screen:
     TCS_Screen:
@@ -4142,10 +4180,9 @@ ScreenManager:
     EVA_Pictures:
     RS_Screen:
     Crew_Screen:
-    ManualControlScreen:
     MSS_MT_Screen:
-    MimicScreen:
-    MainScreen:
+    VV_Screen:
+    VV_Image:
 ''')
 
 if __name__ == '__main__':

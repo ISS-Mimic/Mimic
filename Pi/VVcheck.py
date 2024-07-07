@@ -1,13 +1,55 @@
 import sqlite3
 import requests
+import urllib.request
 from bs4 import BeautifulSoup
 import re
+import ssl
 import pandas as pd
+from pathlib import Path
+
+mimic_data_directory = Path.home() / '.mimic_data'
 
 # URL Constants
 wikiurl = 'https://en.wikipedia.org/wiki/International_Space_Station'
 nasaurl = 'https://www.nasa.gov/international-space-station/space-station-visiting-vehicles/'
 vv_db_path = '/dev/shm/vv.db'
+output_file = str(mimic_data_directory) + '/vv.png'
+
+def getVV_Image(page_url,output):
+    # Fetch the page content
+    response = requests.get(page_url)
+    soup = BeautifulSoup(response.content, 'html.parser')
+
+    # Find all image tags
+    image_tags = soup.find_all('img')
+
+    # List to hold filtered image URLs
+    filtered_image_urls = []
+
+    # Extract all image URLs that match the pattern
+    for image_tag in image_tags:
+        image_url = image_tag.get('src')
+        if not image_url.startswith('http'):
+            image_url = 'https://www.nasa.gov' + image_url
+
+        # Filter URLs that match the specific pattern
+        if re.search(r'/wp-content/uploads/\d{4}/\d{2}/iss-\d{2}-\d{2}-\d{2}\.png', image_url):
+            filtered_image_urls.append(image_url)
+
+    # Select the most recent image URL (assuming the naming convention ensures chronological order)
+    if filtered_image_urls:
+        target_image_url = sorted(filtered_image_urls)[-1]  # Sort and take the latest one
+        context = ssl._create_unverified_context()
+
+        # Download the image using urlopen with the context
+        with urllib.request.urlopen(target_image_url, context=context) as response, open(output_file, 'wb') as out_file:
+            data = response.read()
+            out_file.write(data)
+
+        print(f"Downloaded image from {target_image_url} to {output_file}")
+    else:
+        print("No matching image URL found.")
+
 
 # Function to get NASA data
 def get_nasa_data(url):
@@ -51,6 +93,9 @@ def parse_nasa_data(data):
     dock_df = pd.DataFrame(dock_events)
     undock_df = pd.DataFrame(undock_events)
     return dock_df, undock_df
+
+# Get the NASA VV image
+getVV_Image(nasaurl,output_file)
 
 # Parse the NASA data
 nasa_dock_df, nasa_undock_df = parse_nasa_data(get_nasa_data(nasaurl))

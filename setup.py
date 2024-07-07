@@ -7,6 +7,15 @@ import argparse
 import shutil
 from pathlib import Path
 
+# ANSI escape codes for some colors
+RED = '\033[91m'
+GREEN = '\033[92m'
+YELLOW = '\033[93m'
+BLUE = '\033[94m'
+MAGENTA = '\033[95m'
+CYAN = '\033[96m'
+RESET = '\033[0m'  # Reset color to default
+
 # Get the user's home directory
 home_dir = Path.home()
 
@@ -28,7 +37,7 @@ if current_dir.name != expected_dir_name:
 
     # Check if a directory with the expected name already exists
     if new_dir.exists():
-        print(f"Error: A directory named '{expected_dir_name}' already exists.")
+        print(f"{RED}Error: A directory named '{expected_dir_name}' already exists.{RESET}")
         sys.exit(1)
 
     # Rename the current directory
@@ -42,7 +51,7 @@ else:
 # Create the destination directory if it doesn't exist
 destination_dir.mkdir(exist_ok=True)
 
-print("--------ISS MIMIC Automatic Install--------")
+print(f"{CYAN}--------ISS MIMIC Automatic Install--------{RESET}")
 print("\n This install takes between 10-30 minutes on average \n")
 print("If you encounter an error, try re-running the script and ensure a stable internet connection. If the problem persists, file an issue on github and/or contact the mimic team on discord")
 
@@ -144,7 +153,7 @@ def main():
     os.system('python Pi/NightShade.py')
     print("running orbitGlobe to populate the initial 3d orbit map")
     os.system('python Pi/orbitGlobe.py')
-    print("--------Install Complete--------")
+    print(f"{CYAN}--------Install Complete--------{RESET}")
 
 if __name__ == '__main__':
     main()

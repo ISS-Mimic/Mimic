@@ -6,6 +6,11 @@
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/vv/VVbackground.png"
             fit_mode: "fill"
         Button:
+            size_hint: 0.2,0.11
+            text: "NASA VV"
+            pos_hint: {"center_x": 0.9375, "center_y": 0.2}
+            on_release: app.root.current = 'vv_image'
+        Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
