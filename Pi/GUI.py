@@ -1572,8 +1572,8 @@ class MainApp(App):
             urlindex = 0
 
     def updateNASAVVImage(self, dt):
-        self.vv_screen.ids.orbit3d.source = str(mimic_data_directory) + '/globe.png'
-        self.vv_screen.ids.OrbitMap.reload()
+        #self.vv_image.ids.VVimage.source = str(mimic_data_directory) + '/vv.png'
+        self.vv_image.ids.VVimage.reload()
                 
     def updateOrbitMap(self, dt):
         self.orbit_screen.ids.OrbitMap.source = str(mimic_data_directory) + '/map.jpg'
@@ -2481,12 +2481,64 @@ class MainApp(App):
 
                 for i, port in enumerate(location):
                     port = port[0]  # Extract the port name from the tuple
+                    sc_check = spacecraft[i][0]
+                    if "SC" in sc_check or "Boeing" in sc_check or "CST" in sc_check:
+                        sc_name = "CST-100 Starliner"
+                    elif "Crew" in spacecraft[i][0]:
+                        sc_name = "Crew Dragon"
+                    elif "Soyuz" in spacecraft[i][0]:
+                        sc_name = "Soyuz"
+                    elif "Progress" in spacecraft[i][0]:
+                        sc_name = "Progress"
+                    elif "NG" in mission[i][0]:
+                        sc_name = "Cygnus"
+                    else:
+                        sc_name = "n/a"
+                    
+                    if arrival[i][0] is None:
+                        arrival_date = "n/a"
+                    else:
+                        arrival_date = str(arrival[i][0])[:10]
+                    
+                    if departure[i][0] is None:
+                        departure_date = "n/a"
+                    else:
+                        departure_date = str(departure[i][0])[:10]
+
+                    if str(mission_type[i][0]) == "Crewed":
+                        type_edit = "Crewed Mission"
+                    else:
+                        type_edit = "Cargo Mission"
 
                     # Check if the current port matches the desired location
                     if port == "Node 2 Forward":
-                        self.usos_screen.ids.n2f_vehicle.text = str(spacecraft[i][0])  # Get the spacecraft name
+                        self.usos_screen.ids.n2f_type.text = type_edit
+                        self.usos_screen.ids.n2f_mission.text = str(mission[i][0])
+                        self.usos_screen.ids.n2f_vehicle.text = sc_name
+                        self.usos_screen.ids.n2f_spacecraft.text = str(spacecraft[i][0])
+                        self.usos_screen.ids.n2f_arrival.text = arrival_date
+                        self.usos_screen.ids.n2f_departure.text = departure_date
                     elif port == "Node 2 Zenith":
-                        self.usos_screen.ids.n2z_vehicle.text = str(spacecraft[i][0])  # Get the spacecraft name
+                        self.usos_screen.ids.n2z_type.text = type_edit
+                        self.usos_screen.ids.n2z_mission.text = str(mission[i][0])
+                        self.usos_screen.ids.n2z_vehicle.text = sc_name
+                        self.usos_screen.ids.n2z_spacecraft.text = str(spacecraft[i][0])
+                        self.usos_screen.ids.n2z_arrival.text = arrival_date
+                        self.usos_screen.ids.n2z_departure.text = departure_date
+                    elif port == "Node 2 Nadir":
+                        self.usos_screen.ids.n2n_type.text = type_edit
+                        self.usos_screen.ids.n2n_mission.text = str(mission[i][0])
+                        self.usos_screen.ids.n2n_vehicle.text = sc_name
+                        self.usos_screen.ids.n2n_spacecraft.text = str(spacecraft[i][0])
+                        self.usos_screen.ids.n2n_arrival.text = arrival_date
+                        self.usos_screen.ids.n2n_departure.text = departure_date
+                    elif port == "Node 1 Nadir":
+                        self.usos_screen.ids.n1n_type.text = type_edit
+                        self.usos_screen.ids.n1n_mission.text = str(mission[i][0])
+                        self.usos_screen.ids.n1n_vehicle.text = sc_name
+                        self.usos_screen.ids.n1n_spacecraft.text = str(spacecraft[i][0])
+                        self.usos_screen.ids.n1n_arrival.text = arrival_date
+                        self.usos_screen.ids.n1n_departure.text = departure_date
 
                 #print(f"Spaceship 1 = {str((spacecraft[0])[0])}")
             else:
