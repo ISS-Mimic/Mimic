@@ -2487,9 +2487,11 @@ class MainApp(App):
                     elif "Crew" in spacecraft[i][0]:
                         sc_name = "Crew Dragon"
                     elif "Soyuz" in spacecraft[i][0]:
-                        sc_name = "Soyuz"
+                        sc_name = "Soyuz MS"
+                        sc_name2 = str(spacecraft[i][0]).replace(sc_name+" ","")
                     elif "Progress" in spacecraft[i][0]:
-                        sc_name = "Progress"
+                        sc_name = "Progress MS"
+                        sc_name2 = str(spacecraft[i][0]).replace(sc_name+" ","")
                     elif "NG" in mission[i][0]:
                         sc_name = "Cygnus"
                     else:
@@ -2539,6 +2541,34 @@ class MainApp(App):
                         self.usos_screen.ids.n1n_spacecraft.text = str(spacecraft[i][0])
                         self.usos_screen.ids.n1n_arrival.text = arrival_date
                         self.usos_screen.ids.n1n_departure.text = departure_date
+                    elif port == "Service Module Aft":
+                        self.rs_screen.ids.sm_type.text = type_edit
+                        self.rs_screen.ids.sm_mission.text = str(mission[i][0])
+                        self.rs_screen.ids.sm_vehicle.text = sc_name
+                        self.rs_screen.ids.sm_spacecraft.text = sc_name2
+                        self.rs_screen.ids.sm_arrival.text = arrival_date
+                        self.rs_screen.ids.sm_departure.text = departure_date
+                    elif port == "MRM-2 Zenith":
+                        self.rs_screen.ids.mrm2_type.text = type_edit
+                        self.rs_screen.ids.mrm2_mission.text = str(mission[i][0])
+                        self.rs_screen.ids.mrm2_vehicle.text = sc_name
+                        self.rs_screen.ids.mrm2_spacecraft.text = sc_name2
+                        self.rs_screen.ids.mrm2_arrival.text = arrival_date
+                        self.rs_screen.ids.mrm2_departure.text = departure_date
+                    elif port == "MRM-1 Nadir":
+                        self.rs_screen.ids.mrm1_type.text = type_edit
+                        self.rs_screen.ids.mrm1_mission.text = str(mission[i][0])
+                        self.rs_screen.ids.mrm1_vehicle.text = sc_name
+                        self.rs_screen.ids.mrm1_spacecraft.text = sc_name2
+                        self.rs_screen.ids.mrm1_arrival.text = arrival_date
+                        self.rs_screen.ids.mrm1_departure.text = departure_date
+                    elif port == "RS Node Nadir":
+                        self.rs_screen.ids.rsn_type.text = type_edit
+                        self.rs_screen.ids.rsn_mission.text = str(mission[i][0])
+                        self.rs_screen.ids.rsn_vehicle.text = sc_name
+                        self.rs_screen.ids.rsn_spacecraft.text = sc_name2
+                        self.rs_screen.ids.rsn_arrival.text = arrival_date
+                        self.rs_screen.ids.rsn_departure.text = departure_date
 
                 #print(f"Spaceship 1 = {str((spacecraft[0])[0])}")
             else:
