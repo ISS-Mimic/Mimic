@@ -2520,6 +2520,13 @@ class MainApp(App):
                         self.usos_screen.ids.n2f_spacecraft.text = str(spacecraft[i][0])
                         self.usos_screen.ids.n2f_arrival.text = arrival_date
                         self.usos_screen.ids.n2f_departure.text = departure_date
+                        if "Dragon" in sc_name:
+                            self.usos_screen.ids.usos_n2f_dragon.opacity = 1.0
+                            self.usos_screen.ids.usos_n2f_starliner.opacity = 0.0
+                        elif sc_name == "CST-100 Starliner":
+                            self.usos_screen.ids.usos_n2f_starliner.opacity = 1.0
+                            self.usos_screen.ids.usos_n2f_dragon.opacity = 0.0
+                        # TODO adjust this for dreamchaser if needed in future
                     elif port == "Node 2 Zenith":
                         self.usos_screen.ids.n2z_type.text = type_edit
                         self.usos_screen.ids.n2z_mission.text = str(mission[i][0])
@@ -2527,6 +2534,13 @@ class MainApp(App):
                         self.usos_screen.ids.n2z_spacecraft.text = str(spacecraft[i][0])
                         self.usos_screen.ids.n2z_arrival.text = arrival_date
                         self.usos_screen.ids.n2z_departure.text = departure_date
+                        if "Dragon" in sc_name:
+                            self.usos_screen.ids.usos_n2z_dragon.opacity = 1.0
+                            self.usos_screen.ids.usos_n2z_starliner.opacity = 0.0
+                        elif sc_name == "CST-100 Starliner":
+                            self.usos_screen.ids.usos_n2z_starliner.opacity = 1.0
+                            self.usos_screen.ids.usos_n2z_dragon.opacity = 0.0
+                        # TODO adjust this for dreamchaser if needed in future
                     elif port == "Node 2 Nadir":
                         self.usos_screen.ids.n2n_type.text = type_edit
                         self.usos_screen.ids.n2n_mission.text = str(mission[i][0])
@@ -2534,6 +2548,7 @@ class MainApp(App):
                         self.usos_screen.ids.n2n_spacecraft.text = str(spacecraft[i][0])
                         self.usos_screen.ids.n2n_arrival.text = arrival_date
                         self.usos_screen.ids.n2n_departure.text = departure_date
+                        # TODO add N2N vehicles - Cygnus / Dreamchaser / HTV-X?
                     elif port == "Node 1 Nadir":
                         self.usos_screen.ids.n1n_type.text = type_edit
                         self.usos_screen.ids.n1n_mission.text = str(mission[i][0])
@@ -2541,6 +2556,9 @@ class MainApp(App):
                         self.usos_screen.ids.n1n_spacecraft.text = str(spacecraft[i][0])
                         self.usos_screen.ids.n1n_arrival.text = arrival_date
                         self.usos_screen.ids.n1n_departure.text = departure_date
+                        if sc_name == "Cygnus":
+                            self.usos_screen.ids.usos_n1n_cygnus.opacity = 1.0
+                        # TODO adjust this for dreamchaser /HTV-X if needed in future
                     elif port == "Service Module Aft":
                         self.rs_screen.ids.sm_type.text = type_edit
                         self.rs_screen.ids.sm_mission.text = str(mission[i][0])
