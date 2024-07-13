@@ -1490,7 +1490,7 @@ class MainApp(App):
         #schedule the orbitmap to update with shadow every 5 mins
         Clock.schedule_interval(self.updateNightShade, 120)
         Clock.schedule_interval(self.updateOrbitMap, 31)
-        Clock.schedule_interval(self.updateNASAVVImage, 67):
+        Clock.schedule_interval(self.updateNASAVVImage, 67)
         Clock.schedule_interval(self.updateOrbitGlobeImage, 10)
         Clock.schedule_interval(self.checkTDRS, 5)
         return root
