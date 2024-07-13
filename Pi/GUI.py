@@ -1471,16 +1471,16 @@ class MainApp(App):
 
         #Clock.schedule_once(self.checkCrew, 30) #disabling for now issue #407
         #Clock.schedule_once(self.checkBlogforEVA, 30) #disabling for now issue #407
-        Clock.schedule_once(self.updateISS_TLE, 15)
-        Clock.schedule_once(self.updateTDRS_TLE, 15)
-        Clock.schedule_once(self.updateOrbitGlobe, 15)
+        Clock.schedule_once(self.updateISS_TLE, 14)
+        Clock.schedule_once(self.updateTDRS_TLE, 60)
+        Clock.schedule_once(self.updateOrbitGlobe, 17)
         #Clock.schedule_once(self.TDRSupdate, 30) #this is not working and the site isnt updating anyway
         Clock.schedule_once(self.updateNightShade, 20)
         Clock.schedule_once(self.updateVV, 10)
 
-        Clock.schedule_interval(self.updateISS_TLE, 300)
-        Clock.schedule_interval(self.updateTDRS_TLE, 300)
-        Clock.schedule_interval(self.updateOrbitGlobe, 10)
+        Clock.schedule_interval(self.updateISS_TLE, 302)
+        Clock.schedule_interval(self.updateTDRS_TLE, 290)
+        Clock.schedule_interval(self.updateOrbitGlobe, 11)
         #Clock.schedule_interval(self.TDRSupdate, 600) #this is not working and the site isnt updating anyway
         Clock.schedule_interval(self.check_internet, 1)
         Clock.schedule_interval(self.updateArduinoCount, 5)
@@ -1489,7 +1489,8 @@ class MainApp(App):
 
         #schedule the orbitmap to update with shadow every 5 mins
         Clock.schedule_interval(self.updateNightShade, 120)
-        Clock.schedule_interval(self.updateOrbitMap, 30)
+        Clock.schedule_interval(self.updateOrbitMap, 31)
+        Clock.schedule_interval(self.updateNASAVVImage, 67):
         Clock.schedule_interval(self.updateOrbitGlobeImage, 10)
         Clock.schedule_interval(self.checkTDRS, 5)
         return root
@@ -1572,7 +1573,7 @@ class MainApp(App):
             urlindex = 0
 
     def updateNASAVVImage(self, dt):
-        #self.vv_image.ids.VVimage.source = str(mimic_data_directory) + '/vv.png'
+        self.vv_image.ids.VVimage.source = str(mimic_data_directory) + '/vv.png'
         self.vv_image.ids.VVimage.reload()
                 
     def updateOrbitMap(self, dt):
@@ -2330,22 +2331,22 @@ class MainApp(App):
                 self.orbit_screen.ids.iss_next_pass1.text = "n/a"
                 self.orbit_screen.ids.iss_next_pass2.text = "n/a"
                 self.orbit_screen.ids.countdown.text = "n/a"
-        else:
-            nextpassdatetime = datetime.strptime(str(nextpassinfo[0]), '%Y/%m/%d %H:%M:%S') #convert to datetime object for timezone conversion
-            nextpassinfo_format = nextpassdatetime.replace(tzinfo=pytz.utc)
-            localtimezone = pytz.timezone('America/Chicago')
-            localnextpass = nextpassinfo_format.astimezone(localtimezone)
-            self.orbit_screen.ids.iss_next_pass1.text = str(localnextpass).split()[0] #display next pass time
-            self.orbit_screen.ids.iss_next_pass2.text = str(localnextpass).split()[1].split('-')[0] #display next pass time
-            timeuntilnextpass = nextpassinfo[0] - location.date
-            nextpasshours = timeuntilnextpass*24.0
-            nextpassmins = (nextpasshours-math.floor(nextpasshours))*60
-            nextpassseconds = (nextpassmins-math.floor(nextpassmins))*60
-            if isVisible(nextpassinfo):
-                self.orbit_screen.ids.ISSvisible.text = "Visible Pass!"
             else:
-                self.orbit_screen.ids.ISSvisible.text = "Not Visible"
-            self.orbit_screen.ids.countdown.text = str("{:.0f}".format(math.floor(nextpasshours))) + ":" + str("{:.0f}".format(math.floor(nextpassmins))) + ":" + str("{:.0f}".format(math.floor(nextpassseconds))) #display time until next pass
+                nextpassdatetime = datetime.strptime(str(nextpassinfo[0]), '%Y/%m/%d %H:%M:%S') #convert to datetime object for timezone conversion
+                nextpassinfo_format = nextpassdatetime.replace(tzinfo=pytz.utc)
+                localtimezone = pytz.timezone('America/Chicago')
+                localnextpass = nextpassinfo_format.astimezone(localtimezone)
+                self.orbit_screen.ids.iss_next_pass1.text = str(localnextpass).split()[0] #display next pass time
+                self.orbit_screen.ids.iss_next_pass2.text = str(localnextpass).split()[1].split('-')[0] #display next pass time
+                timeuntilnextpass = nextpassinfo[0] - location.date
+                nextpasshours = timeuntilnextpass*24.0
+                nextpassmins = (nextpasshours-math.floor(nextpasshours))*60
+                nextpassseconds = (nextpassmins-math.floor(nextpassmins))*60
+                if isVisible(nextpassinfo):
+                    self.orbit_screen.ids.ISSvisible.text = "Visible Pass!"
+                else:
+                    self.orbit_screen.ids.ISSvisible.text = "Not Visible"
+                self.orbit_screen.ids.countdown.text = str("{:.0f}".format(math.floor(nextpasshours))) + ":" + str("{:.0f}".format(math.floor(nextpassmins))) + ":" + str("{:.0f}".format(math.floor(nextpassseconds))) #display time until next pass
 
 
     def map_rotation(self, args):
@@ -2874,6 +2875,12 @@ class MainApp(App):
             c = (a[0]*b[0])+(a[1]*b[1])+(a[2]*b[2])
             return c
 
+        def safe_divide(numerator, denominator):
+            if denominator == 0:
+                return 1
+            else:
+                return numerator / denominator
+
         def cross(a,b):
             c = [a[1]*b[2] - a[2]*b[1],
                  a[2]*b[0] - a[0]*b[2],
@@ -2909,19 +2916,19 @@ class MainApp(App):
             pos_mag = math.sqrt(dot(pos_vec,pos_vec))
             vel_mag = math.sqrt(dot(vel_vec,vel_vec))
 
-            v_radial = dot(vel_vec, pos_vec)/pos_mag
+            v_radial = safe_divide(dot(vel_vec, pos_vec),pos_mag)
 
             h_mom = cross(pos_vec,vel_vec)
             h_mom_mag = math.sqrt(dot(h_mom,h_mom))
 
-            inc = math.acos(h_mom[2]/h_mom_mag)
+            inc = math.acos(safe_divide(h_mom[2],h_mom_mag))
             self.orbit_data.ids.inc.text = "{:.2f}".format(math.degrees(inc))
             self.orbit_screen.ids.inc.text = "{:.2f}".format(math.degrees(inc)) + " deg"
 
             node_vec = cross([0,0,1],h_mom)
             node_mag = math.sqrt(dot(node_vec,node_vec))
 
-            raan = math.acos(node_vec[0]/node_mag)
+            raan = math.acos(safe_divide(node_vec[0],node_mag))
             if node_vec[1] < 0:
                 raan = math.radians(360) - raan
             self.orbit_data.ids.raan.text = "{:.2f}".format(math.degrees(raan))
@@ -2934,12 +2941,12 @@ class MainApp(App):
             e_mag = math.sqrt(dot(e_vec,e_vec))
             self.orbit_data.ids.e.text = "{:.4f}".format(e_mag)
 
-            arg_per = math.acos(dot(node_vec,e_vec)/(node_mag*e_mag))
+            arg_per = math.acos(safe_divide(dot(node_vec,e_vec),(node_mag*e_mag)))
             if e_vec[2] <= 0:
                 arg_per = math.radians(360) - arg_per
             self.orbit_data.ids.arg_per.text = "{:.2f}".format(math.degrees(arg_per))
 
-            ta = math.acos(dot(e_vec,pos_vec)/(e_mag*pos_mag))
+            ta = math.acos(safe_divide(dot(e_vec,pos_vec),(e_mag*pos_mag)))
             if v_radial <= 0:
                 ta = math.radians(360) - ta
             self.orbit_data.ids.true_anomaly.text = "{:.2f}".format(math.degrees(ta))

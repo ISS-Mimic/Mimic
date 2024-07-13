@@ -15,61 +15,55 @@ nasaurl = 'https://www.nasa.gov/international-space-station/space-station-visiti
 vv_db_path = '/dev/shm/vv.db'
 output_file = str(mimic_data_directory) + '/vv.png'
 
-def getVV_Image(page_url,output):
-    # Fetch the page content
+# Define a mapping to standardize mission names
+mission_name_mapping = {
+    'Cygnus CRS-20': 'Cygnus NG-20',
+    # Add other mappings as necessary
+}
+
+
+def getVV_Image(page_url, output):
     response = requests.get(page_url)
     soup = BeautifulSoup(response.content, 'html.parser')
 
-    # Find all image tags
     image_tags = soup.find_all('img')
-
-    # List to hold filtered image URLs
     filtered_image_urls = []
 
-    # Extract all image URLs that match the pattern
     for image_tag in image_tags:
         image_url = image_tag.get('src')
         if not image_url.startswith('http'):
             image_url = 'https://www.nasa.gov' + image_url
 
-        # Filter URLs that match the specific pattern
         if re.search(r'/wp-content/uploads/\d{4}/\d{2}/iss-\d{2}-\d{2}-\d{2}\.png', image_url):
             filtered_image_urls.append(image_url)
 
-    # Select the most recent image URL (assuming the naming convention ensures chronological order)
     if filtered_image_urls:
-        target_image_url = sorted(filtered_image_urls)[-1]  # Sort and take the latest one
+        target_image_url = sorted(filtered_image_urls)[-1]
         context = ssl._create_unverified_context()
 
-        # Download the image using urlopen with the context
-        with urllib.request.urlopen(target_image_url, context=context) as response, open(output_file, 'wb') as out_file:
+        with urllib.request.urlopen(target_image_url, context=context) as response, open(output, 'wb') as out_file:
             data = response.read()
             out_file.write(data)
 
-        print(f"Downloaded image from {target_image_url} to {output_file}")
+        print(f"Downloaded image from {target_image_url} to {output}")
     else:
         print("No matching image URL found.")
 
-
-# Function to get NASA data
 def get_nasa_data(url):
     response = requests.get(nasaurl)
     if response.status_code == 200:
         soup = BeautifulSoup(response.content, 'html.parser')
         paragraphs = soup.find_all('p')
-        #print(paragraphs)
         nasa_data = []
         date_pattern = re.compile(r'\b\d{1,2}/\d{1,2}/\d{2,4}\b')
         for paragraph in paragraphs:
             for event in paragraph:
                 if date_pattern.search(event.get_text()):
-                    #print(event.get_text())
                     nasa_data.append(event.get_text())
     else:
         print(f"Failed to retrieve the webpage. Status code: {response.status_code}")
     return nasa_data
 
-# Function to standardize dates
 def standardize_date(date_str):
     try:
         return pd.to_datetime(date_str, errors='coerce')
@@ -77,7 +71,13 @@ def standardize_date(date_str):
         date_str = re.sub(r'(\d{1,2}/\d{1,2}/)(\d{2})$', r'\g<1>20\2', date_str)
         return pd.to_datetime(date_str, errors='coerce')
 
-# Function to parse NASA data
+def standardize_mission_names(event, mapping):
+    for key, value in mapping.items():
+        event = event.replace(key, value)
+    return event
+
+
+
 def parse_nasa_data(data):
     dock_events = []
     undock_events = []
@@ -94,14 +94,13 @@ def parse_nasa_data(data):
     undock_df = pd.DataFrame(undock_events)
     return dock_df, undock_df
 
-# Get the NASA VV image
-getVV_Image(nasaurl,output_file)
-
-# Parse the NASA data
+getVV_Image(nasaurl, output_file)
 nasa_dock_df, nasa_undock_df = parse_nasa_data(get_nasa_data(nasaurl))
 
+# Apply the mapping to standardize mission names in both DataFrames
+nasa_dock_df['Event'] = nasa_dock_df['Event'].apply(lambda x: standardize_mission_names(x, mission_name_mapping))
+nasa_undock_df['Event'] = nasa_undock_df['Event'].apply(lambda x: standardize_mission_names(x, mission_name_mapping))
 
-# Function to identify current docked spacecraft
 def identify_current_docked(dock_df, undock_df):
     current_docked = dock_df.copy()
     current_docked['Status'] = 'Docked'
@@ -110,16 +109,13 @@ def identify_current_docked(dock_df, undock_df):
         current_docked = current_docked[~current_docked['Event'].str.contains(event)]
     return current_docked
 
-# Identify current docked spacecraft
 current_docked_df = identify_current_docked(nasa_dock_df, nasa_undock_df)
 
-# Function to get Wikipedia data
 def get_wikipedia_data(wikiurl):
     tables = pd.read_html(wikiurl)
     df = tables[2]
     return df
 
-# Function to convert 'NET' dates to approximate dates
 def convert_net_date(date_str):
     if 'early' in date_str.lower():
         day = 5
@@ -135,7 +131,6 @@ def convert_net_date(date_str):
     except ValueError:
         return pd.to_datetime(f"{date_str.split()[-1]}-{date_str.split()[-2]}-01", format='%Y-%B-%d', errors='coerce')
 
-# Function to clean Wikipedia data
 def clean_wikipedia_data(df):
     location_replacements = {
         'Harmony': 'Node 2',
@@ -159,23 +154,16 @@ def clean_wikipedia_data(df):
         else pd.to_datetime(x, errors='coerce'))
     return df
 
-# Function to clean citations
 def clean_citations(text):
     if isinstance(text, str):
         return re.sub(r'\[\d+\]', '', text)
     else:
         return text
 
-# Obtain the table of current visiting vehicles
 wikipedia_df = get_wikipedia_data(wikiurl)
-
-# Remove the citation text that gets added
 wikipedia_df = wikipedia_df.applymap(clean_citations)
-
-# Clean the Wikipedia data
 wikipedia_df = clean_wikipedia_data(wikipedia_df)
 
-# Function to correlate data
 def correlate_data(nasa_df, wiki_df):
     correlated_data = []
     for _, nasa_row in nasa_df.iterrows():
@@ -193,30 +181,53 @@ def correlate_data(nasa_df, wiki_df):
             })
     return pd.DataFrame(correlated_data)
 
-# Correlate the data
 correlated_df = correlate_data(current_docked_df, wikipedia_df)
 
-# Function to update SQLite3 database
-def update_database(correlated_df, db_path='iss_vehicles.db'):
+def print_database_events(db_path='iss_vehicles.db'):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute('SELECT Event FROM vehicles')
+    rows = cursor.fetchall()
+    for row in rows:
+        print(row[0])
+    conn.close()
+
+#print("Existing events in the database:")
+#print_database_events(db_path=vv_db_path)
+
+def update_database(correlated_df, undock_df, db_path='iss_vehicles.db'):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
-    # Create table if not exists
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS vehicles (
             Spacecraft TEXT,
             Type TEXT,
             Mission TEXT,
             Event TEXT,
-            Date DATE,
+            Date TEXT,
             Location TEXT,
             Arrival TEXT,
             Departure TEXT
         )
     ''')
 
-    # Remove vehicles that are no longer docked
+    # Clear the database first
     cursor.execute('DELETE FROM vehicles')
+
+    # Print existing events before deletion for debugging
+    #print("Existing events in the database before deletion:")
+    #cursor.execute('SELECT Event FROM vehicles')
+    #rows = cursor.fetchall()
+    #for row in rows:
+    #    print(row[0])
+
+    # Remove vehicles that are no longer docked based on the undock events
+    for _, row in undock_df.iterrows():
+        event = row['Event']
+        #print(f"Attempting to remove event: {event}")
+        cursor.execute('DELETE FROM vehicles WHERE Event LIKE ?', ('%' + event + '%',))
+        #print(f"Rows affected: {cursor.rowcount}")
 
     # Insert new data
     for _, row in correlated_df.iterrows():
@@ -234,13 +245,37 @@ def update_database(correlated_df, db_path='iss_vehicles.db'):
             row['Departure'].strftime('%Y-%m-%d %H:%M:%S') if pd.notnull(row['Departure']) else None
         ))
 
-    # Commit changes and close the connection
     conn.commit()
     conn.close()
 
-# Update the database with correlated data
-update_database(correlated_df,db_path=vv_db_path)
+update_database(correlated_df, nasa_undock_df, db_path=vv_db_path)
 
-#print(correlated_df)
+
+# Function to verify and display data from the database
+def verify_database(db_path='iss_vehicles.db'):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    # Query to select all data from the vehicles table
+    cursor.execute('SELECT * FROM vehicles')
+
+    # Fetch all results
+    rows = cursor.fetchall()
+
+    # Check if there are any results
+    if rows:
+        # Print the results
+        for row in rows:
+            print(row)
+    else:
+        print("No data found in the database.")
+
+    # Close the connection
+    conn.close()
+
+# Call the function to verify data
+#verify_database(db_path=vv_db_path)
+
+
 
 print("Database updated successfully.")
