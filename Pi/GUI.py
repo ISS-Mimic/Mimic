@@ -2460,7 +2460,199 @@ class MainApp(App):
             getattr(self, x).ids.signal.anim_delay = 0.12
         for x in ScreenList:
             getattr(self, x).ids.signal.size_hint_y = 0.112
-    
+
+    def update_vv_values(self, dt):
+    try:
+        # Check if the table exists before querying
+        VVcursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='vehicles'")
+        if VVcursor.fetchone() is not None:
+            VVcursor.execute('SELECT Mission FROM vehicles')
+            mission = VVcursor.fetchall()
+            VVcursor.execute('SELECT Type FROM vehicles')
+            mission_type = VVcursor.fetchall()
+            VVcursor.execute('SELECT Location FROM vehicles')
+            location = VVcursor.fetchall()
+            VVcursor.execute('SELECT Arrival FROM vehicles')
+            arrival = VVcursor.fetchall()
+            VVcursor.execute('SELECT Departure FROM vehicles')
+            departure = VVcursor.fetchall()
+            VVcursor.execute('SELECT Spacecraft FROM vehicles')
+            spacecraft = VVcursor.fetchall()
+
+            all_ports = {
+                "Node 2 Forward",
+                "Node 2 Zenith",
+                "Node 2 Nadir",
+                "Node 1 Nadir",
+                "Service Module Aft",
+                "MRM-2 Zenith",
+                "MRM-1 Nadir",
+                "RS Node Nadir"
+            }
+
+            occupied_ports = set()
+
+            for i, port in enumerate(location):
+                port = port[0]  # Extract the port name from the tuple
+                occupied_ports.add(port)
+                sc_check = spacecraft[i][0]
+                if "SC" in sc_check or "Boeing" in sc_check or "CST" in sc_check:
+                    sc_name = "CST-100 Starliner"
+                elif "Crew" in spacecraft[i][0]:
+                    sc_name = "Crew Dragon"
+                elif "Soyuz" in spacecraft[i][0]:
+                    sc_name = "Soyuz MS"
+                    sc_name2 = str(spacecraft[i][0]).replace(sc_name+" ","")
+                elif "Progress" in spacecraft[i][0]:
+                    sc_name = "Progress MS"
+                    sc_name2 = str(spacecraft[i][0]).replace(sc_name+" ","")
+                elif "NG" in mission[i][0]:
+                    sc_name = "Cygnus"
+                else:
+                    sc_name = "n/a"
+                
+                if arrival[i][0] is None:
+                    arrival_date = "n/a"
+                else:
+                    arrival_date = str(arrival[i][0])[:10]
+                
+                if departure[i][0] is None:
+                    departure_date = "n/a"
+                else:
+                    departure_date = str(departure[i][0])[:10]
+
+                if str(mission_type[i][0]) == "Crewed":
+                    type_edit = " (Crewed)"
+                else:
+                    type_edit = " (Cargo)"
+
+                if port == "Node 2 Forward":
+                    self.usos_screen.ids.n2f_mission.text = str(mission[i][0]) + type_edit
+                    self.usos_screen.ids.n2f_vehicle.text = sc_name
+                    self.usos_screen.ids.n2f_spacecraft.text = str(spacecraft[i][0])
+                    self.usos_screen.ids.n2f_arrival.text = "Arrival: " + arrival_date
+                    self.usos_screen.ids.n2f_departure.text = "Departure: " + departure_date
+                    if "Dragon" in sc_name:
+                        self.usos_screen.ids.usos_n2f_dragon.opacity = 1.0
+                        self.usos_screen.ids.usos_n2f_starliner.opacity = 0.0
+                    elif sc_name == "CST-100 Starliner":
+                        self.usos_screen.ids.usos_n2f_starliner.opacity = 1.0
+                        self.usos_screen.ids.usos_n2f_dragon.opacity = 0.0
+                elif port == "Node 2 Zenith":
+                    self.usos_screen.ids.n2z_mission.text = str(mission[i][0]) + type_edit
+                    self.usos_screen.ids.n2z_vehicle.text = sc_name
+                    self.usos_screen.ids.n2z_spacecraft.text = str(spacecraft[i][0])
+                    self.usos_screen.ids.n2z_arrival.text = arrival_date
+                    self.usos_screen.ids.n2z_departure.text = departure_date
+                    if "Dragon" in sc_name:
+                        self.usos_screen.ids.usos_n2z_dragon.opacity = 1.0
+                        self.usos_screen.ids.usos_n2z_starliner.opacity = 0.0
+                    elif sc_name == "CST-100 Starliner":
+                        self.usos_screen.ids.usos_n2z_starliner.opacity = 1.0
+                        self.usos_screen.ids.usos_n2z_dragon.opacity = 0.0
+                elif port == "Node 2 Nadir":
+                    self.usos_screen.ids.n2n_mission.text = str(mission[i][0]) + type_edit
+                    self.usos_screen.ids.n2n_vehicle.text = sc_name
+                    self.usos_screen.ids.n2n_spacecraft.text = str(spacecraft[i][0])
+                    self.usos_screen.ids.n2n_arrival.text = arrival_date
+                    self.usos_screen.ids.n2n_departure.text = departure_date
+                elif port == "Node 1 Nadir":
+                    self.usos_screen.ids.n1n_mission.text = str(mission[i][0]) + type_edit
+                    self.usos_screen.ids.n1n_vehicle.text = sc_name
+                    self.usos_screen.ids.n1n_spacecraft.text = str(spacecraft[i][0])
+                    self.usos_screen.ids.n1n_arrival.text = arrival_date
+                    self.usos_screen.ids.n1n_departure.text = departure_date
+                    if sc_name == "Cygnus":
+                        self.usos_screen.ids.usos_n1n_cygnus.opacity = 1.0
+                elif port == "Service Module Aft":
+                    self.rs_screen.ids.sm_mission.text = str(mission[i][0]) + type_edit
+                    self.rs_screen.ids.sm_vehicle.text = sc_name
+                    self.rs_screen.ids.sm_spacecraft.text = sc_name2
+                    self.rs_screen.ids.sm_arrival.text = arrival_date
+                    self.rs_screen.ids.sm_departure.text = departure_date
+                elif port == "MRM-2 Zenith":
+                    self.rs_screen.ids.mrm2_mission.text = str(mission[i][0]) + type_edit
+                    self.rs_screen.ids.mrm2_vehicle.text = sc_name
+                    self.rs_screen.ids.mrm2_spacecraft.text = sc_name2
+                    self.rs_screen.ids.mrm2_arrival.text = arrival_date
+                    self.rs_screen.ids.mrm2_departure.text = departure_date
+                elif port == "MRM-1 Nadir":
+                    self.rs_screen.ids.mrm1_mission.text = str(mission[i][0]) + type_edit
+                    self.rs_screen.ids.mrm1_vehicle.text = sc_name
+                    self.rs_screen.ids.mrm1_spacecraft.text = sc_name2
+                    self.rs_screen.ids.mrm1_arrival.text = arrival_date
+                    self.rs_screen.ids.mrm1_departure.text = departure_date
+                elif port == "RS Node Nadir":
+                    self.rs_screen.ids.rsn_mission.text = str(mission[i][0]) + type_edit
+                    self.rs_screen.ids.rsn_vehicle.text = sc_name
+                    self.rs_screen.ids.rsn_spacecraft.text = sc_name2
+                    self.rs_screen.ids.rsn_arrival.text = arrival_date
+                    self.rs_screen.ids.rsn_departure.text = departure_date
+
+            unoccupied_ports = all_ports - occupied_ports
+
+            # Handle unoccupied ports
+            for port in unoccupied_ports:
+                if port == "Node 2 Forward":
+                    self.usos_screen.ids.n2f_mission.text = ""
+                    self.usos_screen.ids.n2f_vehicle.text = ""
+                    self.usos_screen.ids.n2f_spacecraft.text = ""
+                    self.usos_screen.ids.n2f_arrival.text = ""
+                    self.usos_screen.ids.n2f_departure.text = ""
+                    self.usos_screen.ids.usos_n2f_dragon.opacity = 0.0
+                    self.usos_screen.ids.usos_n2f_starliner.opacity = 0.0
+                elif port == "Node 2 Zenith":
+                    self.usos_screen.ids.n2z_mission.text = ""
+                    self.usos_screen.ids.n2z_vehicle.text = ""
+                    self.usos_screen.ids.n2z_spacecraft.text = ""
+                    self.usos_screen.ids.n2z_arrival.text = ""
+                    self.usos_screen.ids.n2z_departure.text = ""
+                    self.usos_screen.ids.usos_n2z_dragon.opacity = 0.0
+                    self.usos_screen.ids.usos_n2z_starliner.opacity = 0.0
+                elif port == "Node 2 Nadir":
+                    self.usos_screen.ids.n2n_mission.text = ""
+                    self.usos_screen.ids.n2n_vehicle.text = ""
+                    self.usos_screen.ids.n2n_spacecraft.text = ""
+                    self.usos_screen.ids.n2n_arrival.text = ""
+                    self.usos_screen.ids.n2n_departure.text = ""
+                elif port == "Node 1 Nadir":
+                    self.usos_screen.ids.n1n_mission.text = ""
+                    self.usos_screen.ids.n1n_vehicle.text = ""
+                    self.usos_screen.ids.n1n_spacecraft.text = ""
+                    self.usos_screen.ids.n1n_arrival.text = ""
+                    self.usos_screen.ids.n1n_departure.text = ""
+                    self.usos_screen.ids.usos_n1n_cygnus.opacity = 0.0
+                elif port == "Service Module Aft":
+                    self.rs_screen.ids.sm_mission.text = ""
+                    self.rs_screen.ids.sm_vehicle.text = ""
+                    self.rs_screen.ids.sm_spacecraft.text = ""
+                    self.rs_screen.ids.sm_arrival.text = ""
+                    self.rs_screen.ids.sm_departure.text = ""
+                elif port == "MRM-2 Zenith":
+                    self.rs_screen.ids.mrm2_mission.text = ""
+                    self.rs_screen.ids.mrm2_vehicle.text = ""
+                    self.rs_screen.ids.mrm2_spacecraft.text = ""
+                    self.rs_screen.ids.mrm2_arrival.text = ""
+                    self.rs_screen.ids.mrm2_departure.text = ""
+                elif port == "MRM-1 Nadir":
+                    self.rs_screen.ids.mrm1_mission.text = ""
+                    self.rs_screen.ids.mrm1_vehicle.text = ""
+                    self.rs_screen.ids.mrm1_spacecraft.text = ""
+                    self.rs_screen.ids.mrm1_arrival.text = ""
+                    self.rs_screen.ids.mrm1_departure.text = ""
+                elif port == "RS Node Nadir":
+                    self.rs_screen.ids.rsn_mission.text = ""
+                    self.rs_screen.ids.rsn_vehicle.text = ""
+                    self.rs_screen.ids.rsn_spacecraft.text = ""
+                    self.rs_screen.ids.rsn_arrival.text = ""
+                    self.rs_screen.ids.rsn_departure.text = ""
+
+        else:
+            logWrite("Table 'vehicles' does not exist.")
+    except sqlite3.Error as e:
+        logWrite(f"SQLite error: {e}")
+    except Exception as e:
+        logWrite(f"General error: {e}")
 
     def update_vv_values(self, dt):
         #print("fetching VVs")
