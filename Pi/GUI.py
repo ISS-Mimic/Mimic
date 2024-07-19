@@ -2592,17 +2592,25 @@ class MainApp(App):
                         if sc_name == "Cygnus":
                             self.usos_screen.ids.usos_n1n_cygnus.opacity = 1.0
                             #self.vv_screen.ids.vv_n1n_cygnus.opacity = 1.0
+                        else:
+                            self.usos_screen.ids.usos_n1n_cygnus.opacity = 0.0
+                            #self.vv_screen.ids.vv_n1n_cygnus.opacity = 0.0
+
                     elif port == "Service Module Aft":
-                        self.rs_screen.ids.sm_mission.text = str(mission[i][0]) + type_edit
-                        self.rs_screen.ids.sm_vehicle.text = sc_name
-                        self.rs_screen.ids.sm_spacecraft.text = sc_name2
-                        self.rs_screen.ids.sm_arrival.text = "Arrival: " + arrival_date
-                        self.rs_screen.ids.sm_departure.text = "Departure: " + departure_date
-                        #if sc_name == "Soyuz":
-                            #self.rs_screen.ids.rs_sma_soyuz.opacity = 1.0
+                        self.rs_screen.ids.sma_mission.text = str(mission[i][0]) + type_edit
+                        self.rs_screen.ids.sma_vehicle.text = sc_name
+                        self.rs_screen.ids.sma_spacecraft.text = sc_name2
+                        self.rs_screen.ids.sma_arrival.text = "Arrival: " + arrival_date
+                        self.rs_screen.ids.sma_departure.text = "Departure: " + departure_date
+                        if "Soyuz" in sc_name:
+                            self.rs_screen.ids.rs_sma_soyuz.opacity = 1.0
+                            self.rs_screen.ids.rs_sma_progress.opacity = 0.0
+                            #self.vv_screen.ids.vv_sma_soyuz.opacity = 1.0
                             #self.vv_screen.ids.vv_sma_progress.opacity = 0.0
-                        #elif sc_name == "Progress":
-                            #self.rs_screen.ids.rs_sma_soyuz.opacity = 0.0
+                        elif "Progress" in sc_name:
+                            self.rs_screen.ids.rs_sma_soyuz.opacity = 0.0
+                            self.rs_screen.ids.rs_sma_progress.opacity = 1.0
+                            #self.vv_screen.ids.vv_sma_soyuz.opacity = 0.0
                             #self.vv_screen.ids.vv_sma_progress.opacity = 1.0
                     elif port == "MRM-2 Zenith":
                         self.rs_screen.ids.mrm2_mission.text = str(mission[i][0]) + type_edit
@@ -2610,11 +2618,15 @@ class MainApp(App):
                         self.rs_screen.ids.mrm2_spacecraft.text = sc_name2
                         self.rs_screen.ids.mrm2_arrival.text = "Arrival: " + arrival_date
                         self.rs_screen.ids.mrm2_departure.text = "Departure: " + departure_date
-                        #if sc_name == "Soyuz":
-                            #self.rs_screen.ids.rs_mrm2_soyuz.opacity = 1.0
+                        if "Soyuz" in sc_name:
+                            self.rs_screen.ids.rs_mrm2_soyuz.opacity = 1.0
+                            self.rs_screen.ids.rs_mrm2_progress.opacity = 0.0
+                            #self.vv_screen.ids.vv_mrm2_soyuz.opacity = 1.0
                             #self.vv_screen.ids.vv_mrm2_progress.opacity = 0.0
-                        #elif sc_name == "Progress":
-                            #self.rs_screen.ids.rs_mrm2_soyuz.opacity = 0.0
+                        elif "Progress" in sc_name:
+                            self.rs_screen.ids.rs_mrm2_soyuz.opacity = 0.0
+                            self.rs_screen.ids.rs_mrm2_progress.opacity = 1.0
+                            #self.vv_screen.ids.vv_mrm2_soyuz.opacity = 0.0
                             #self.vv_screen.ids.vv_mrm2_progress.opacity = 1.0
                     elif port == "MRM-1 Nadir":
                         self.rs_screen.ids.mrm1_mission.text = str(mission[i][0]) + type_edit
@@ -2622,11 +2634,15 @@ class MainApp(App):
                         self.rs_screen.ids.mrm1_spacecraft.text = sc_name2
                         self.rs_screen.ids.mrm1_arrival.text = "Arrival: " + arrival_date
                         self.rs_screen.ids.mrm1_departure.text = "Departure: " + departure_date
-                        #if sc_name == "Soyuz":
-                            #self.rs_screen.ids.rs_mrm1_soyuz.opacity = 1.0
+                        if "Soyuz" in sc_name:
+                            self.rs_screen.ids.rs_mrm1_soyuz.opacity = 1.0
+                            self.rs_screen.ids.rs_mrm1_progress.opacity = 0.0
+                            #self.vv_screen.ids.vv_mrm1_soyuz.opacity = 1.0
                             #self.vv_screen.ids.vv_mrm1_progress.opacity = 0.0
-                        #elif sc_name == "Progress":
-                            #self.rs_screen.ids.rs_mrm1_soyuz.opacity = 0.0
+                        elif "Progress" in sc_name:
+                            self.rs_screen.ids.rs_mrm1_soyuz.opacity = 0.0
+                            self.rs_screen.ids.rs_mrm1_progress.opacity = 1.0
+                            #self.vv_screen.ids.vv_mrm1_soyuz.opacity = 0.0
                             #self.vv_screen.ids.vv_mrm1_progress.opacity = 1.0
                     elif port == "RS Node Nadir":
                         self.rs_screen.ids.rsn_mission.text = str(mission[i][0]) + type_edit
@@ -2634,11 +2650,15 @@ class MainApp(App):
                         self.rs_screen.ids.rsn_spacecraft.text = sc_name2
                         self.rs_screen.ids.rsn_arrival.text = "Arrival: " + arrival_date
                         self.rs_screen.ids.rsn_departure.text = "Departure: " + departure_date
-                        #if sc_name == "Soyuz":
-                            #self.rs_screen.ids.rs_rsn_soyuz.opacity = 1.0
+                        if "Soyuz" in sc_name:
+                            self.rs_screen.ids.rs_rsn_soyuz.opacity = 1.0
+                            self.rs_screen.ids.rs_rsn_progress.opacity = 0.0
+                            #self.vv_screen.ids.vv_rsn_soyuz.opacity = 1.0
                             #self.vv_screen.ids.vv_rsn_progress.opacity = 0.0
-                        #elif sc_name == "Progress":
-                            #self.rs_screen.ids.rs_rsn_soyuz.opacity = 0.0
+                        elif "Progress" in sc_name:
+                            self.rs_screen.ids.rs_rsn_soyuz.opacity = 0.0
+                            self.rs_screen.ids.rs_rsn_progress.opacity = 1.0
+                            #self.vv_screen.ids.vv_rsn_soyuz.opacity = 0.0
                             #self.vv_screen.ids.vv_rsn_progress.opacity = 1.0
 
                 unoccupied_ports = all_ports - occupied_ports
@@ -2680,13 +2700,13 @@ class MainApp(App):
                         self.usos_screen.ids.usos_n1n_cygnus.opacity = 0.0
                         #self.vv_screen.ids.vv_n1n_cygnus.opacity = 0.0
                     elif port == "Service Module Aft":
-                        self.rs_screen.ids.sm_mission.text = "-"
-                        self.rs_screen.ids.sm_vehicle.text = "-"
-                        self.rs_screen.ids.sm_spacecraft.text = "-"
-                        self.rs_screen.ids.sm_arrival.text = "-"
-                        self.rs_screen.ids.sm_departure.text = "-"
-                        #self.rs_screen.ids.rs_sma_soyuz.opacity = 0.0
-                        #self.rs_screen.ids.rs_sma_progress.opacity = 0.0
+                        self.rs_screen.ids.sma_mission.text = "-"
+                        self.rs_screen.ids.sma_vehicle.text = "-"
+                        self.rs_screen.ids.sma_spacecraft.text = "-"
+                        self.rs_screen.ids.sma_arrival.text = "-"
+                        self.rs_screen.ids.sma_departure.text = "-"
+                        self.rs_screen.ids.rs_sma_soyuz.opacity = 0.0
+                        self.rs_screen.ids.rs_sma_progress.opacity = 0.0
                         #self.vv_screen.ids.vv_sma_soyuz.opacity = 0.0
                         #self.vv_screen.ids.vv_sma_progress.opacity = 0.0
                     elif port == "MRM-2 Zenith":
@@ -2695,8 +2715,8 @@ class MainApp(App):
                         self.rs_screen.ids.mrm2_spacecraft.text = "-"
                         self.rs_screen.ids.mrm2_arrival.text = "-"
                         self.rs_screen.ids.mrm2_departure.text = "-"
-                        #self.rs_screen.ids.rs_mrm2_soyuz.opacity = 0.0
-                        #self.rs_screen.ids.rs_mrm2_progress.opacity = 0.0
+                        self.rs_screen.ids.rs_mrm2_soyuz.opacity = 0.0
+                        self.rs_screen.ids.rs_mrm2_progress.opacity = 0.0
                         #self.vv_screen.ids.vv_mrm2_soyuz.opacity = 0.0
                         #self.vv_screen.ids.vv_mrm2_progress.opacity = 0.0
                     elif port == "MRM-1 Nadir":
@@ -2705,8 +2725,8 @@ class MainApp(App):
                         self.rs_screen.ids.mrm1_spacecraft.text = "-"
                         self.rs_screen.ids.mrm1_arrival.text = "-"
                         self.rs_screen.ids.mrm1_departure.text = "-"
-                        #self.rs_screen.ids.rs_mrm1_soyuz.opacity = 0.0
-                        #self.rs_screen.ids.rs_mrm1_progress.opacity = 0.0
+                        self.rs_screen.ids.rs_mrm1_soyuz.opacity = 0.0
+                        self.rs_screen.ids.rs_mrm1_progress.opacity = 0.0
                         #self.vv_screen.ids.vv_mrm1_soyuz.opacity = 0.0
                         #self.vv_screen.ids.vv_mrm1_progress.opacity = 0.0
                     elif port == "RS Node Nadir":
@@ -2715,8 +2735,8 @@ class MainApp(App):
                         self.rs_screen.ids.rsn_spacecraft.text = "-"
                         self.rs_screen.ids.rsn_arrival.text = "-"
                         self.rs_screen.ids.rsn_departure.text = "-"
-                        #self.rs_screen.ids.rs_rsn_soyuz.opacity = 0.0
-                        #self.rs_screen.ids.rs_rsn_progress.opacity = 0.0
+                        self.rs_screen.ids.rs_rsn_soyuz.opacity = 0.0
+                        self.rs_screen.ids.rs_rsn_progress.opacity = 0.0
                         #self.vv_screen.ids.vv_rsn_soyuz.opacity = 0.0
                         #self.vv_screen.ids.vv_rsn_progress.opacity = 0.0
 

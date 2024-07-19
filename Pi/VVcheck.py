@@ -92,6 +92,9 @@ def parse_nasa_data(data):
                 undock_events.append({'Date': standardize_date(date.strip()), 'Event': event.strip()})
     dock_df = pd.DataFrame(dock_events)
     undock_df = pd.DataFrame(undock_events)
+    #print("---NASA DFs---")
+    #print(dock_df)
+    #print(undock_df)
     return dock_df, undock_df
 
 getVV_Image(nasaurl, output_file)
@@ -113,8 +116,13 @@ current_docked_df = identify_current_docked(nasa_dock_df, nasa_undock_df)
 
 def get_wikipedia_data(wikiurl):
     tables = pd.read_html(wikiurl)
-    df = tables[2]
-    return df
+    
+    # Iterate through all tables to find the one with "Arrival (UTC)" column
+    for table in tables:
+        if 'Arrival (UTC)' in table.columns: # Using "Arrival (UTC)" as the unique identifier of the table we want (sometimes the table # changes)
+            return table
+    
+    raise ValueError("Mission table not found on the Wikipedia page.")
 
 def convert_net_date(date_str):
     if 'early' in date_str.lower():
@@ -231,6 +239,7 @@ def update_database(correlated_df, undock_df, db_path='iss_vehicles.db'):
 
     # Insert new data
     for _, row in correlated_df.iterrows():
+        #print(row['Location'])
         cursor.execute('''
             INSERT INTO vehicles (Spacecraft, Type, Mission, Event, Date, Location, Arrival, Departure)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -245,8 +254,10 @@ def update_database(correlated_df, undock_df, db_path='iss_vehicles.db'):
             row['Departure'].strftime('%Y-%m-%d %H:%M:%S') if pd.notnull(row['Departure']) else None
         ))
 
+    
     conn.commit()
     conn.close()
+
 
 update_database(correlated_df, nasa_undock_df, db_path=vv_db_path)
 
