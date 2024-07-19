@@ -6,29 +6,39 @@
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/usos/USOSbackground.png"
             fit_mode: "fill"
         Image:
-            id: usos_n1n_cygnus
+            id: n1n_cygnus
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/usos/N1NcygnusUSOS.png"
             opacity: 0.0
         Image:
-            id: usos_n2n_cygnus
+            id: n2n_cygnus
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/usos/N1NcygnusUSOS.png"
             opacity: 0.0
         Image:
-            id: usos_n2f_dragon
+            id: n2f_dragon
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/usos/N2FdragonUSOS.png"
             opacity: 0.0
         Image:
-            id: usos_n2z_dragon
+            id: n2z_dragon
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/usos/N2ZdragonUSOS.png"
             opacity: 0.0
         Image:
-            id: usos_n2f_starliner
+            id: n2f_starliner
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/usos/N2FcstUSOS.png"
             opacity: 0.0
         Image:
-            id: usos_n2z_starliner
+            id: n2z_starliner
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/usos/N2ZcstUSOS.png"
             opacity: 0.0
+        Label:
+            id: n2z_label
+            pos_hint: {"center_x": 0.295, "center_y": 0.66}
+            text: ''
+            font_size: 10
+            text_size: 200,None
+            halign: 'center'
+            bold: True
+            markup: True
+            color: 0,0,1
         Label:
             id: n2z_mission
             pos_hint: {"center_x": 0.65, "center_y": 0.35}
@@ -75,6 +85,16 @@
             markup: True
             color: 1,1,1
         Label:
+            id: n2f_label
+            pos_hint: {"center_x": 0.5, "center_y": 0.45}
+            text: ''
+            font_size: 10
+            text_size: 200,None
+            halign: 'left'
+            bold: True
+            markup: True
+            color: 0,0,1
+        Label:
             id: n2f_mission
             pos_hint: {"center_x": 0.65, "center_y": 0.71}
             text: '-'
@@ -120,6 +140,16 @@
             markup: True
             color: 1,1,1
         Label:
+            id: n1n_label
+            pos_hint: {"center_x": 0.24, "center_y": 0.2}
+            text: ''
+            font_size: 10
+            text_size: 200,None
+            halign: 'left'
+            bold: True
+            markup: True
+            color: 0,0,1
+        Label:
             id: n1n_mission
             pos_hint: {"center_x": 0.92, "center_y": 0.35}
             text: '-'
@@ -164,6 +194,16 @@
             bold: True
             markup: True
             color: 1,1,1
+        Label:
+            id: n2n_label
+            pos_hint: {"center_x": 0.46, "center_y": 0.2}
+            text: ''
+            font_size: 10
+            text_size: 200,None
+            halign: 'left'
+            bold: True
+            markup: True
+            color: 0,0,1
         Label:
             id: n2n_mission
             pos_hint: {"center_x": 0.92, "center_y": 0.71}

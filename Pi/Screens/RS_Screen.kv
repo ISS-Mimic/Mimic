@@ -5,37 +5,47 @@
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/russian/ROSbackground.png'
             fit_mode: "fill"
         Image:
-            id: rs_sma_soyuz
+            id: sma_soyuz
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/russian/SMAsoyuzROS.png"
             opacity: 0.0
         Image:
-            id: rs_sma_progress
+            id: sma_progress
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/russian/SMAprogressROS.png"
             opacity: 0.0
         Image:
-            id: rs_mrm2_soyuz
+            id: mrm2_soyuz
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/russian/MRM2soyuzROS.png"
             opacity: 0.0
         Image:
-            id: rs_mrm2_progress
+            id: mrm2_progress
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/russian/MRM2progressROS.png"
             opacity: 0.0
         Image:
-            id: rs_mrm1_soyuz
+            id: mrm1_soyuz
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/russian/MRM1soyuzROS.png"
             opacity: 0.0
         Image:
-            id: rs_mrm1_progress
+            id: mrm1_progress
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/russian/MRM1progressROS.png"
             opacity: 0.0
         Image:
-            id: rs_rsn_soyuz
+            id: rsn_soyuz
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/russian/RSNsoyuzROS.png"
             opacity: 0.0
         Image:
-            id: rs_rsn_progress
+            id: rsn_progress
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/russian/RSNprogressROS.png"
             opacity: 0.0
+        Label:
+            id: rsn_label
+            pos_hint: {"center_x": 0.37, "center_y": 0.2}
+            text: ''
+            font_size: 10
+            text_size: 200,None
+            halign: 'left'
+            bold: True
+            markup: True
+            color: 1,0,0
         Label:
             id: rsn_mission
             pos_hint: {"center_x": 0.65, "center_y": 0.39}
@@ -82,6 +92,16 @@
             markup: True
             color: 1,1,1
         Label:
+            id: sma_label
+            pos_hint: {"center_x": 0.15, "center_y": 0.71}
+            text: ''
+            font_size: 10
+            text_size: 200,None
+            halign: 'left'
+            bold: True
+            markup: True
+            color: 1,0,0
+        Label:
             id: sma_mission
             pos_hint: {"center_x": 0.65, "center_y": 0.75}
             text: '-'
@@ -127,6 +147,16 @@
             markup: True
             color: 1,1,1
         Label:
+            id: mrm1_label
+            pos_hint: {"center_x": 0.435, "center_y": 0.3}
+            text: ''
+            font_size: 10
+            text_size: 200,None
+            halign: 'left'
+            bold: True
+            markup: True
+            color: 1,0,0
+        Label:
             id: mrm1_mission
             pos_hint: {"center_x": 0.92, "center_y": 0.39}
             text: '-'
@@ -171,6 +201,16 @@
             bold: True
             markup: True
             color: 1,1,1
+        Label:
+            id: mrm2_label
+            pos_hint: {"center_x": 0.37, "center_y": 0.82}
+            text: ''
+            font_size: 10
+            text_size: 200,None
+            halign: 'left'
+            bold: True
+            markup: True
+            color: 1,0,0
         Label:
             id: mrm2_mission
             pos_hint: {"center_x": 0.92, "center_y": 0.75}
