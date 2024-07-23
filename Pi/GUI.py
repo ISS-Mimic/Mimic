@@ -1415,7 +1415,8 @@ class MainApp(App):
                       'orbit_screen', 'us_eva', 'rs_eva', 'eva_main', 'eva_emu', 
                       'mimic_screen', 'robo_screen', 'mss_mt_screen', 'ssrms_screen', 
                       'spdm1_screen','orbit_pass', 'orbit_data', 'crew_screen', 
-                      'playback_screen', 'vv_screen', 'vv_image', 'usos_screen']
+                      'playback_screen', 'vv_screen', 'vv_image', 'usos_screen',
+                      'rs_screen', 'rs_dock']
 
         root = MainScreenManager(transition=NoTransition())
         root.add_widget(self.main_screen)
@@ -2906,6 +2907,135 @@ class MainApp(App):
         NH3outletPress_loopB = "{:.2f}".format(float((values[20])[0]))
         NH3outletTemp_loopA = "{:.2f}".format(float((values[24])[0]))
         NH3outletTemp_loopB = "{:.2f}".format(float((values[21])[0]))
+
+        #Russian Telemetry
+        ros_mode = int((values[46])[0])
+
+        ros_mode_texts = {
+            1.0: "Crew Rescue",
+            2.0: "Survival",
+            3.0: "Reboost",
+            4.0: "Proximity Operations",
+            5.0: "EVA",
+            6.0: "Microgravity",
+            7.0: "Standard"
+        }
+
+        self.rs_dock.ids.ros_mode.text = ros_mode_texts.get(ros_mode, "n/a")
+
+        self.rs_dock.ids.sm_range.text = f"{float((values[110])[0]):0.2f} m"
+        self.rs_dock.ids.sm_rate.text = f"{float((values[111])[0]):0.2f} m/s"
+        
+        rs_att_mode = int((values[126])[0])
+        rs_motion_control = int((values[127])[0])
+        rs_prep_free_drift = int((values[128])[0])
+        rs_thruster_operation = int((values[129])[0])
+        rs_current_dynamic = int((values[130])[0]) 
+        rs_kurs1_op = int((values[107])[0]) # 1 or 0
+        rs_kurs2_op = int((values[108])[0]) # 1 or 0
+        rs_p1p2_failure = int((values[109])[0]) # 1 or 0
+        rs_kursp_test = int((values[112])[0]) # 1 or 0
+        rs_functional_mode = int((values[115])[0]) # 1 or 0
+        rs_standby_mode = int((values[116])[0]) # 1 or 0
+        rs_sm_capture_signal = int((values[113])[0]) # 1 or 0
+        rs_target_acquisition = int((values[114])[0]) # 1 or 0
+        rs_sm_fwd_dock = int((values[118])[0]) # 1 or 0
+        rs_sm_aft_dock = int((values[119])[0]) # 1 or 0
+        rs_sm_nadir_dock = int((values[120])[0]) # missing from screen?
+        rs_fgb_nadir_dock = int((values[121])[0]) # 1 or 0
+        rs_sm_udm_dock = int((values[122])[0]) # 1 or 0
+        rs_mrm1_dock = int((values[123])[0]) # 1 or 0
+        rs_mrm2_dock = int((values[124])[0]) # 1 or 0
+        rs_sm_docking_flag = int((values[117])[0]) # 1 or 0
+        rs_sm_hooks = int((values[125])[0]) # 1 or 0
+
+        rs_att_mode_texts = {
+            0.0: "Inertial",
+            1.0: "LVLH SM",
+            2.0: "Solar Orientation",
+            3.0: "Current LVLH",
+            4.0: "Current Inertial Attitude",
+            5.0: "Damping",
+            6.0: "TEA",
+            7.0: "X-POP"
+        }
+        
+        rs_motion_control_texts = {
+            0.0: "Undetermined State",
+            1.0: "RS Master"
+        }
+
+        rs_prep_free_drift_texts = {
+            0.0: "Undetermined State",
+            1.0: "Prepared to Free Drift"
+        }
+
+        rs_thruster_operation_texts = {
+            0.0: "Pre-Starting Procedure",
+            1.0: "Thruster Operation Terminated"
+        }
+
+        rs_current_dynamic_texts = {
+            0.0: "Reserve",
+            1.0: "Thrusters",
+            2.0: "Gyrodines",
+            3.0: "Gyrodines Desat (US Method)",
+            4.0: "Gyrodines Desat (RS Method)",
+            5.0: "Translational Thrusters",
+            6.0: "Thrusters help CMG",
+            7.0: "Free Drift"
+        }
+
+        rs_docking_port_texts = {
+            0.0: "Undetermined State",
+            1.0: "Docking Port Engaged"
+        }
+        
+        rs_vv_docking_port_texts = {
+            0.0: "Undetermined State",
+            1.0: "Soyuz/Progress Docked"
+        }
+
+        rs_signal_texts = {
+            0.0: "Undetermined State",
+            1.0: "Yes"
+        }
+        
+        rs_hooks_texts = {
+            0.0: "Undetermined State",
+            1.0: "Hooks Closed"
+        }
+        
+        rs_sm_docking_flag_texts = {
+            0.0: "Undetermined State",
+            1.0: "Docking Flag Active"
+        }
+        
+        self.rs_dock.ids.active_attitude.text = rs_att_mode_texts.get(rs_att_mode, "n/a")
+        self.rs_dock.ids.motion_control.text = rs_motion_control_texts.get(rs_motion_control, "n/a")
+        self.rs_dock.ids.prep_free_drift.text = rs_prep_free_drift_texts.get(rs_prep_free_drift, "n/a")
+        self.rs_dock.ids.thruster_operation.text = rs_thruster_operation_texts.get(rs_thruster_operation, "n/a")
+        self.rs_dock.ids.current_dynamic.text = rs_current_dynamic_texts.get(rs_current_dynamic, "n/a")
+        
+        self.rs_dock.ids.kurs1_operating.text = rs_signal_texts.get(rs_kurs1_op, "n/a")
+        self.rs_dock.ids.kurs2_operating.text = rs_signal_texts.get(rs_kurs2_op, "n/a")
+        self.rs_dock.ids.p1p2_failure.text = rs_signal_texts.get(rs_p1p2_failure, "n/a")
+        self.rs_dock.ids.kursp_test_mode.text = rs_signal_texts.get(rs_kursp_test, "n/a")
+        self.rs_dock.ids.functional_mode.text = rs_signal_texts.get(rs_functional_mode, "n/a")
+        self.rs_dock.ids.standby_mode.text = rs_signal_texts.get(rs_standby_mode, "n/a")
+        self.rs_dock.ids.sm_capture_signal.text = rs_signal_texts.get(rs_sm_capture_signal, "n/a")
+        self.rs_dock.ids.target_acquisition.text = rs_signal_texts.get(rs_target_acquisition, "n/a")
+        
+        self.rs_dock.ids.sm_fwd_dock.text = rs_docking_port_texts.get(rs_sm_fwd_dock, "n/a")
+        self.rs_dock.ids.sm_aft_dock.text = rs_vv_docking_port_texts.get(rs_sm_aft_dock, "n/a")
+        #self.rs_dock.ids.sm_nadir_dock.text = rs_docking_port_texts.get(rs_sm_nadir_dock, "n/a")
+        self.rs_dock.ids.fgb_nadir_dock.text = rs_docking_port_texts.get(rs_fgb_nadir_dock, "n/a")
+        self.rs_dock.ids.sm_udm_dock.text = rs_vv_docking_port_texts.get(rs_sm_udm_dock, "n/a")
+        self.rs_dock.ids.mrm1_dock.text = rs_vv_docking_port_texts.get(rs_mrm1_dock, "n/a")
+        self.rs_dock.ids.mrm2_dock.text = rs_vv_docking_port_texts.get(rs_mrm2_dock, "n/a")
+        
+        self.rs_dock.ids.sm_docking_flag.text = rs_sm_docking_flag_texts.get(rs_sm_docking_flag, "n/a")
+        self.rs_dock.ids.sm_hooks.text = rs_hooks_texts.get(rs_sm_hooks, "n/a")
 
         #MBS and MT telemetry
         mt_worksite = int((values[258])[0])
