@@ -3026,10 +3026,10 @@ class MainApp(App):
         self.rs_dock.ids.sm_capture_signal.text = rs_signal_texts.get(rs_sm_capture_signal, "n/a")
         self.rs_dock.ids.target_acquisition.text = rs_signal_texts.get(rs_target_acquisition, "n/a")
         
-        self.rs_dock.ids.sm_fwd_dock.text = rs_docking_port_texts.get(rs_sm_fwd_dock, "n/a")
+        self.rs_dock.ids.sm_fwd_dock.text = rs_docking_port_texts.get(rs_sm_fwd_dock, "n/a") + " (FGB)"
         self.rs_dock.ids.sm_aft_dock.text = rs_vv_docking_port_texts.get(rs_sm_aft_dock, "n/a")
-        #self.rs_dock.ids.sm_nadir_dock.text = rs_docking_port_texts.get(rs_sm_nadir_dock, "n/a")
-        self.rs_dock.ids.fgb_nadir_dock.text = rs_docking_port_texts.get(rs_fgb_nadir_dock, "n/a")
+        self.rs_dock.ids.sm_nadir_dock.text = rs_docking_port_texts.get(rs_sm_nadir_dock, "n/a") + " (MLM)"
+        self.rs_dock.ids.fgb_nadir_dock.text = rs_docking_port_texts.get(rs_fgb_nadir_dock, "n/a") + " (MRM-1)"
         self.rs_dock.ids.sm_udm_dock.text = rs_vv_docking_port_texts.get(rs_sm_udm_dock, "n/a")
         self.rs_dock.ids.mrm1_dock.text = rs_vv_docking_port_texts.get(rs_mrm1_dock, "n/a")
         self.rs_dock.ids.mrm2_dock.text = rs_vv_docking_port_texts.get(rs_mrm2_dock, "n/a")

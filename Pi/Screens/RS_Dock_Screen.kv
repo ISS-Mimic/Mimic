@@ -132,7 +132,7 @@
             color: root.signalcolor
         Label:
             id: sm_fwd_dock
-            pos_hint: {"center_x": 0.7, "center_y": 0.74}
+            pos_hint: {"center_x": 0.757, "center_y": 0.74}
             text: '-'
             font_size: 16
             text_size: 300,None
@@ -141,7 +141,16 @@
             color: root.signalcolor
         Label:
             id: sm_aft_dock
-            pos_hint: {"center_x": 0.69, "center_y": 0.702}
+            pos_hint: {"center_x": 0.747, "center_y": 0.702}
+            text: '-'
+            font_size: 16
+            text_size: 300,None
+            halign: 'left'
+            markup: True
+            color: root.signalcolor
+        Label:
+            id: sm_nadir_dock
+            pos_hint: {"center_x": 0.769, "center_y": 0.662}
             text: '-'
             font_size: 16
             text_size: 300,None
@@ -150,7 +159,7 @@
             color: root.signalcolor
         Label:
             id: fgb_nadir_dock
-            pos_hint: {"center_x": 0.722, "center_y": 0.661}
+            pos_hint: {"center_x": 0.779, "center_y": 0.621}
             text: '-'
             font_size: 16
             text_size: 300,None
@@ -159,7 +168,7 @@
             color: root.signalcolor
         Label:
             id: sm_udm_dock
-            pos_hint: {"center_x": 0.712, "center_y": 0.623}
+            pos_hint: {"center_x": 0.769, "center_y": 0.583}
             text: '-'
             font_size: 16
             text_size: 300,None
@@ -168,7 +177,7 @@
             color: root.signalcolor
         Label:
             id: mrm1_dock
-            pos_hint: {"center_x": 0.695, "center_y": 0.585}
+            pos_hint: {"center_x": 0.752, "center_y": 0.545}
             text: '-'
             font_size: 16
             text_size: 300,None
@@ -177,7 +186,7 @@
             color: root.signalcolor
         Label:
             id: mrm2_dock
-            pos_hint: {"center_x": 0.695, "center_y": 0.545}
+            pos_hint: {"center_x": 0.752, "center_y": 0.505}
             text: '-'
             font_size: 16
             text_size: 300,None
@@ -186,7 +195,7 @@
             color: root.signalcolor
         Label:
             id: sm_docking_flag
-            pos_hint: {"center_x": 0.79, "center_y": 0.447}
+            pos_hint: {"center_x": 0.847, "center_y": 0.447}
             text: '-'
             font_size: 16
             text_size: 300,None
@@ -195,7 +204,7 @@
             color: root.signalcolor
         Label:
             id: sm_hooks
-            pos_hint: {"center_x": 0.95, "center_y": 0.405}
+            pos_hint: {"center_x": 0.99, "center_y": 0.405}
             text: '-'
             font_size: 16
             text_size: 300,None
@@ -204,7 +213,7 @@
             color: root.signalcolor
         Label:
             id: sm_range
-            pos_hint: {"center_x": 0.775, "center_y": 0.366}
+            pos_hint: {"center_x": 0.832, "center_y": 0.366}
             text: '-'
             font_size: 16
             text_size: 300,None
@@ -213,13 +222,21 @@
             color: root.signalcolor
         Label:
             id: sm_rate
-            pos_hint: {"center_x": 0.955, "center_y": 0.366}
+            pos_hint: {"center_x": 0.99, "center_y": 0.366}
             text: '-'
             font_size: 16
             text_size: 200,None
             halign: 'left'
             markup: True
             color: root.signalcolor
+        Label:
+            id: dock_in_progress
+            pos_hint: {"center_x": 0.65, "center_y": 0.28}
+            text: 'DOCKING IN PROGRESS'
+            font_size: 20
+            bold: True
+            markup: True
+            color: 0,1,0,1
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
