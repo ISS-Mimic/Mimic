@@ -1360,6 +1360,7 @@ class MainScreenManager(ScreenManager):
 
 class MainApp(App):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    ros_data = []
 
     def build(self):
         global startup, ScreenList, stopAnimation
@@ -2760,6 +2761,12 @@ class MainApp(App):
         except Exception as e:
             logWrite(f"General error: {e}")
 
+    def ros_range_moving_average(self, new_value, window_size):
+        self.ros_data.append(new_value)
+        if len(self.ros_data) > window_size:
+            self.ros_data.pop(0) 
+        return sum(self.ros_data) / len(self.ros_data)
+
     def update_labels(self, dt): #THIS IS THE IMPORTANT FUNCTION
         global mimicbutton, switchtofake, demoboolean, runningDemo, playbackboolean, psarj2, ssarj2, manualcontrol, aos, los, oldLOS, psarjmc, ssarjmc, ptrrjmc, strrjmc, beta1bmc, beta1amc, beta2bmc, beta2amc, beta3bmc, beta3amc, beta4bmc, beta4amc, US_EVAinProgress, position_x, position_y, position_z, velocity_x, velocity_y, velocity_z, altitude, velocity, iss_mass, testvalue, testfactor, airlock_pump, crewlockpres, leak_hold, firstcrossing, EVA_activities, repress, depress, oldAirlockPump, obtained_EVA_crew, EVAstartTime
         global holdstartTime, LS_Subscription
@@ -2922,9 +2929,7 @@ class MainApp(App):
         }
 
         self.rs_dock.ids.ros_mode.text = ros_mode_texts.get(ros_mode, "n/a")
-
-        self.rs_dock.ids.sm_range.text = f"{float((values[110])[0]):0.2f} m"
-        self.rs_dock.ids.sm_rate.text = f"{float((values[111])[0]):0.2f} m/s"
+        
         
         rs_att_mode = int((values[126])[0])
         rs_motion_control = int((values[127])[0])
@@ -2948,6 +2953,15 @@ class MainApp(App):
         rs_mrm2_dock = int((values[124])[0]) # 1 or 0
         rs_sm_docking_flag = int((values[117])[0]) # 1 or 0
         rs_sm_hooks = int((values[125])[0]) # 1 or 0
+        
+        ros_docking_range = float((values[110])[0])
+        if rs_target_acquisition: 
+            self.rs_dock.ids.sm_range.text = f"{ros_docking_range:0.2f} m"
+            self.rs_dock.ids.sm_rate.text = f"{float((values[111])[0]):0.2f} m/s"
+        else:
+            self.rs_dock.ids.sm_range.text = "n/a"
+            self.rs_dock.ids.sm_rate.text = "n/a"
+
 
         rs_att_mode_texts = {
             0.0: "Inertial",
@@ -3036,6 +3050,23 @@ class MainApp(App):
         
         self.rs_dock.ids.sm_docking_flag.text = rs_sm_docking_flag_texts.get(rs_sm_docking_flag, "n/a")
         self.rs_dock.ids.sm_hooks.text = rs_hooks_texts.get(rs_sm_hooks, "n/a")
+
+
+        #ros_docking_range = float((values[110])[0])
+        ros_docking_avg = self.ros_range_moving_average(ros_docking_range,10)
+
+        if rs_target_acquisition and ros_docking_avg < 80000:
+            self.rs_dock.ids.dock_in_progress.text = "DOCKING IN PROGRESS"
+            if rs_sm_docking_flag:
+                self.rs_dock.ids.dock_in_progress.text = "DOCKING COMPLETE!"
+        else:
+            self.rs_dock.ids.dock_in_progress.color = (0,0,0,0)
+         
+
+        value = 1
+        #self.rs_dock.update_progress(value)
+        print(self.rs_dock.ids.dock_layout.width)
+        #self.rs_dock.ids.docking_bar.size = (self.rs_dock.ids.dock_layout.width * value * 0.325, self.rs_dock.ids.dock_layout.height * 0.04)
 
         #MBS and MT telemetry
         mt_worksite = int((values[258])[0])
