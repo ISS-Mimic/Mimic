@@ -37,6 +37,7 @@ from kivy.lang import Builder
 from kivy.network.urlrequest import UrlRequest #using this to request webpages
 from kivy.clock import Clock
 from kivy.event import EventDispatcher
+from kivy.core.window import Window
 from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition, NoTransition
 from kivy.uix.popup import Popup
@@ -1305,6 +1306,33 @@ class Robo_Screen(Screen, EventDispatcher):
 class RS_Dock_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        Window.bind(on_resize=self.update_docking_bar)
+        self.bind(size=self.update_docking_bar)
+        self.bind(pos=self.update_docking_bar)
+        Clock.schedule_once(self.update_docking_bar, 0)  # Ensure the method is called after initialization
+
+    def update_docking_bar(self, *args):
+        width, height = Window.size
+        #print(f"Window size: width={width}, height={height}")  # Debug print
+        #print(f"Before update: docking_bar size={self.ids.docking_bar.size}, pos={self.ids.docking_bar.pos}")  # Debug print
+
+        self.ids.docking_bar.size = (width * 0.325, height * 0.04)  # Smaller size
+        self.ids.docking_bar.pos = (width * 0.53, height * 0.205)  # Adjusted position
+        self.ids.docking_bar.size_hint = None, None  # Ensure size_hint is not interfering
+
+        # Force the layout to update
+        self.ids.dock_layout.do_layout()
+        #print(f"After update: docking_bar size={self.ids.docking_bar.size}, pos={self.ids.docking_bar.pos}")  # Debug print 
+
+    def update_docking_bar_width(self, value):
+        width, height = Window.size
+        mapped_value = 1 - (value / 80000)  # Inverted mapping from 0-80000 to 1-0
+        new_width = width * 0.325 * mapped_value  # Adjust the width based on the value (0 to 1)
+        self.ids.docking_bar.size = (new_width, self.ids.docking_bar.height)
+        self.ids.dock_layout.do_layout()  # Force the layout to update
 
 class RS_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
@@ -3055,18 +3083,18 @@ class MainApp(App):
         #ros_docking_range = float((values[110])[0])
         ros_docking_avg = self.ros_range_moving_average(ros_docking_range,10)
 
-        if rs_target_acquisition and ros_docking_avg < 80000:
+        if rs_target_acquisition and ros_docking_avg <= 80000:
             self.rs_dock.ids.dock_in_progress.text = "DOCKING IN PROGRESS"
+            self.rs_dock.update_docking_bar_width(rs_docking_avg)
             if rs_sm_docking_flag:
                 self.rs_dock.ids.dock_in_progress.text = "DOCKING COMPLETE!"
         else:
             self.rs_dock.ids.dock_in_progress.color = (0,0,0,0)
          
+        # Docking progress bar testing
+        #value = 15000 
+        #self.rs_dock.update_docking_bar_width(value)
 
-        value = 1
-        #self.rs_dock.update_progress(value)
-        print(self.rs_dock.ids.dock_layout.width)
-        #self.rs_dock.ids.docking_bar.size = (self.rs_dock.ids.dock_layout.width * value * 0.325, self.rs_dock.ids.dock_layout.height * 0.04)
 
         #MBS and MT telemetry
         mt_worksite = int((values[258])[0])

@@ -269,16 +269,14 @@
             size_hint_y: 0.5
         Widget:
             id: docking_bar
-            on_size: root.getSize(docking_bar)
-            #size_hint: 0.5,0.5
-            #pos_hint: {'center_x':0.6,'center_y':0.6}
-            #pos: 800 * 0.53, 600 * 0.205
-            #size: 800 * 0.325, 600 * 0.04
-            pos: 400,400
-            size: 600,10
-            canvas.after:
+            #size_hint: 0.5, 0.5
+            #pos_hint: {'center_x': 0.6, 'center_y': 0.6}
+            size_hint: None,None
+            pos: 0, 0
+            size: 100, 10
+            canvas:
                 Color:
                     rgba: 0, 1, 0, 0.5
                 Rectangle:
-		    pos: self.pos
-		    size: self.size
+                    pos: self.pos
+                    size: self.size
