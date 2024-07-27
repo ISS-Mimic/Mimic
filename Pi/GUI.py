@@ -20,6 +20,8 @@ import argparse
 import sys
 import os.path as op #use for getting mimic directory
 from pathlib import Path
+import logging
+from logging.handlers import RotatingFileHandler
 
 # This is here because Kivy gets upset if you pass in your own non-Kivy args
 CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), "config.json")
@@ -54,17 +56,34 @@ SERIAL_SPEED = 9600
 
 os.environ['KIVY_GL_BACKEND'] = 'gl' #need this to fix a kivy segfault that occurs with python3 for some reason
 
-# Create Program Logs
-mimiclog = open(mimic_directory + '/Mimic/Pi/Logs/mimiclog.txt', 'w')
+# Set up basic configuration for the logging system
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s: %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
 
-def logWrite(*args):
-    mimiclog.write(str(datetime.utcnow()))
-    mimiclog.write(' ')
-    mimiclog.write(str(args[0]))
-    mimiclog.write('\n')
-    mimiclog.flush()
+log_file_path = mimic_directory + '/Mimic/Pi/Logs/mimiclog.log'
 
-logWrite("Initialized Mimic Program Log")
+try:
+    handler = RotatingFileHandler(log_file_path, maxBytes=1048576, backupCount=5)
+    handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
+    logger = logging.getLogger('MyLogger')
+    logger.setLevel(logging.INFO)  # Set logger to INFO level
+    handler.setLevel(logging.INFO)  # Set handler to INFO level
+    logger.addHandler(handler)
+except Exception as e:
+    log_error(f"Failed to set up logging: {e}")
+
+logger.info("This is a test INFO message right after logger setup.")
+
+def log_info(message):
+    logger.info(message)
+
+def log_error(message):
+    logger.error(message)
+
+log_info("Initialized Mimic Program Log")
+log_info("About to log an INFO message.")
+log_info("Important info-level log message.")
 
 #-------------------------Look for a connected arduino-----------------------------------
 
@@ -80,8 +99,8 @@ def remove_tty_device(name_to_remove):
         if idx_to_remove != -1:
             del OPEN_SERIAL_PORTS[idx_to_remove]
             log_str = "Removed %s." % name_to_remove
-            logWrite(log_str)
-            print(log_str)
+            log_info(log_str)
+            log_info(log_str)
     except ValueError:
         # Not printing anything because it sometimes tries too many times and is irrelevant
         pass
@@ -94,8 +113,7 @@ def add_tty_device(name_to_add):
             SERIAL_PORTS.append(name_to_add)
             OPEN_SERIAL_PORTS.append(serial.Serial(SERIAL_PORTS[-1], SERIAL_SPEED, write_timeout=0, timeout=0))
             log_str = "Added and opened %s." % name_to_add
-            logWrite(log_str)
-            print(log_str)
+            log_info(log_str)
         except IOError as e:
             # Not printing anything because sometimes it successfully opens soon after
             remove_tty_device(name_to_add) # don't leave it in the list if it didn't open
@@ -130,7 +148,7 @@ def parse_tty_name(device, val):
     if is_arduino_id_vendor_string(val):
         name = str(device).split('/')[-1:][0][:-2] # to get ttyACM0, etc.
         return '/dev/' + name
-    logWrite("Skipping serial device:\n%s" % str(device))
+    log_info("Skipping serial device:\n%s" % str(device))
 
 def get_tty_dev_names(context):
     """ Checks ID_VENDOR string of tty devices to identify Arduinos. """
@@ -169,17 +187,17 @@ def open_serial_ports(serial_ports):
             OPEN_SERIAL_PORTS.append(serial.Serial(s, SERIAL_SPEED, write_timeout=0, timeout=0))
     except (OSError, serial.SerialException) as e:
         if USE_CONFIG_JSON:
-            print("\nNot all serial ports were detected. Check config.json for accuracy.\n\n%s" % e)
+            log_info("\nNot all serial ports were detected. Check config.json for accuracy.\n\n%s" % e)
         raise Exception(e)
 
 def serialWrite(*args):
     """ Writes to serial ports in list. """
-    logWrite("Function call - serial write: " + str(*args))
+    log_info("Function call - serial write: " + str(*args))
     for s in OPEN_SERIAL_PORTS:
         try:
             s.write(str.encode(*args))
         except (OSError, serial.SerialException) as e:
-            logWrite(e)
+            log_error(e)
 
 context = Context()
 if not USE_CONFIG_JSON:
@@ -190,13 +208,12 @@ SERIAL_PORTS = get_serial_ports(context, USE_CONFIG_JSON)
 OPEN_SERIAL_PORTS = []
 open_serial_ports(SERIAL_PORTS)
 log_str = "Serial ports opened: %s" % str(SERIAL_PORTS)
-logWrite(log_str)
-print(log_str)
+log_info(log_str)
 if not USE_CONFIG_JSON:
     TTY_OBSERVER.start()
     log_str = "Started monitoring serial ports."
-    print(log_str)
-    logWrite(log_str)
+    log_info(log_str)
+    log_info(log_str)
 
 #-----------------------------Checking Databases-----------------------------------------
 TDRSconn = sqlite3.connect('/dev/shm/tdrs.db')
@@ -349,16 +366,15 @@ class MainScreen(Screen):
         if not USE_CONFIG_JSON:
             TTY_OBSERVER.stop()
             log_str = "Stopped monitoring serial ports."
-            logWrite(log_str)
-            print(log_str)
+            log_info(log_str)
         try:
             p.kill()
             p2.kill()
         except Exception as e:
-            logWrite(e)
+            log_error(e)
         os.system('rm /dev/shm/*.db*') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
         staleTelemetry()
-        logWrite("Successfully stopped ISS telemetry javascript and removed database")
+        log_info("Successfully stopped ISS telemetry javascript and removed database")
 
 class ManualControlScreen(Screen):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
@@ -830,62 +846,62 @@ class ManualControlScreen(Screen):
             try:
                 self.sendBeta4B(float(args[0]))
             except Exception as e:
-                logWrite(e)
+                log_error(e)
         if Beta3Bcontrol:
             try:
                 self.sendBeta3B(float(args[0]))
             except Exception as e:
-                logWrite(e)
+                log_error(e)
         if Beta2Bcontrol:
             try:
                 self.sendBeta2B(float(args[0]))
             except Exception as e:
-                logWrite(e)
+                log_error(e)
         if Beta1Bcontrol:
             try:
                 self.sendBeta1B(float(args[0]))
             except Exception as e:
-                logWrite(e)
+                log_error(e)
         if Beta4Acontrol:
             try:
                 self.sendBeta4A(float(args[0]))
             except Exception as e:
-                logWrite(e)
+                log_error(e)
         if Beta3Acontrol:
             try:
                 self.sendBeta3A(float(args[0]))
             except Exception as e:
-                logWrite(e)
+                log_error(e)
         if Beta2Acontrol:
             try:
                 self.sendBeta2A(float(args[0]))
             except Exception as e:
-                logWrite(e)
+                log_errpr(e)
         if Beta1Acontrol:
             try:
                 self.sendBeta1A(float(args[0]))
             except Exception as e:
-                logWrite(e)
+                log_error(e)
         if PTRRJcontrol:
             try:
                 self.sendPTRRJ(float(args[0]))
             except Exception as e:
-                logWrite(e)
+                log_error(e)
         if STRRJcontrol:
             try:
                 self.sendSTRRJ(float(args[0]))
             except Exception as e:
-                logWrite(e)
+                log_error(e)
         if PSARJcontrol:
             try:
                 self.sendPSARJ(float(args[0]))
             except Exception as e:
-                logWrite(e)
+                log_error(e)
         if SSARJcontrol:
             try:
                 self.sendSSARJ(float(args[0]))
             except Exception as e:
-                logWrite(e)
+                log_error(e)
 
     def sendPSARJ(self, *args):
         global psarjmc
@@ -1066,7 +1082,7 @@ class Playback_Screen(Screen):
         try:
             mount_points = set(os.listdir('/media/pi'))
         except Exception as e:
-            logWrite(e)
+            log_error(e)
         return mount_points
 
     def usb_monitoring_task(self):
@@ -1095,7 +1111,7 @@ class Playback_Screen(Screen):
 
     def on_dropdown_select(self, value):
         playback = value
-        print(playback)
+        log_info(playback)
 
     def changeDemoBoolean(self, *args):
         global demoboolean
@@ -1107,10 +1123,10 @@ class Playback_Screen(Screen):
             try:
                 p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/disco.sh")
             except Exception as e:
-                logWrite(e)
+                log_error(e)
             runningDemo = True
             Disco = True
-            logWrite("Successfully started Disco script")
+            log_info("Successfully started Disco script")
 
     def startDemo(*args):
         global p2, runningDemo
@@ -1119,16 +1135,16 @@ class Playback_Screen(Screen):
                 #p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/demoOrbit.sh")
                 p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/OFT2"])
             except Exception as e:
-                logWrite(e)
+                log_error(e)
             runningDemo = True
-            logWrite("Successfully started Demo Orbit script")
+            log_info("Successfully started Demo Orbit script")
 
     def stopDemo(*args):
         global p2, runningDemo
         try:
             p2.kill()
         except Exception as e:
-            logWrite(e)
+            log_error(e)
         else:
             runningDemo = False
 
@@ -1138,18 +1154,18 @@ class Playback_Screen(Screen):
             try:
                 p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/demoHTVOrbit.sh")
             except Exception as e:
-                logWrite(e)
+                log_error(e)
             runningDemo = True
-            logWrite("Successfully started Demo HTV Orbit script")
+            log_info("Successfully started Demo HTV Orbit script")
 
     def stopHTVDemo(*args):
         global p2, runningDemo
         try:
             p2.kill()
         except Exception as e:
-            logWrite(e)
+            log_error(e)
         else:
-            logWrite("Successfully stopped Demo HTV Orbit script")
+            log_info("Successfully stopped Demo HTV Orbit script")
             runningDemo = False
                 
     def startOFT2Demo(*args):
@@ -1158,18 +1174,18 @@ class Playback_Screen(Screen):
             try:
                 p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/demoOFT2.sh")
             except Exception as e:
-                logWrite(e)
+                log_error(e)
             runningDemo = True
-            logWrite("Successfully started Demo OFT2 Orbit script")
+            log_info("Successfully started Demo OFT2 Orbit script")
 
     def stopOFT2Demo(*args):
         global p2, runningDemo
         try:
             p2.kill()
         except Exception as e:
-            logWrite(e)
+            log_error(e)
         else:
-            logWrite("Successfully stopped Demo OFT2 Orbit script")
+            log_error("Successfully stopped Demo OFT2 Orbit script")
             runningDemo = False
 
 class Settings_Screen(Screen, EventDispatcher):
@@ -1199,7 +1215,7 @@ class MimicScreen(Screen, EventDispatcher):
 
     def startproc(self):
         global p,TDRSproc
-        logWrite("Telemetry Subprocess start")
+        log_info("Telemetry Subprocess start")
         p = Popen(["python", mimic_directory + "/Mimic/Pi/iss_telemetry.py"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
         #TDRSproc = Popen(["python", mimic_directory + "/Mimic/Pi/TDRScheck.py"]) #uncomment if TDRS site comes back and fixed code
         #p = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/Data"])
@@ -1212,7 +1228,7 @@ class MimicScreen(Screen, EventDispatcher):
             p2.kill()
             TDRSproc.kill()
         except Exception as e:
-            logWrite(e)
+            log_error(e)
 
 class CDH_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
@@ -1316,8 +1332,8 @@ class RS_Dock_Screen(Screen, EventDispatcher):
 
     def update_docking_bar(self, *args):
         width, height = Window.size
-        #print(f"Window size: width={width}, height={height}")  # Debug print
-        #print(f"Before update: docking_bar size={self.ids.docking_bar.size}, pos={self.ids.docking_bar.pos}")  # Debug print
+        #log_info(f"Window size: width={width}, height={height}")  # Debug print
+        #log_info(f"Before update: docking_bar size={self.ids.docking_bar.size}, pos={self.ids.docking_bar.pos}")  # Debug print
 
         self.ids.docking_bar.size = (width * 0.325, height * 0.04)  # Smaller size
         self.ids.docking_bar.pos = (width * 0.53, height * 0.205)  # Adjusted position
@@ -1325,7 +1341,7 @@ class RS_Dock_Screen(Screen, EventDispatcher):
 
         # Force the layout to update
         self.ids.dock_layout.do_layout()
-        #print(f"After update: docking_bar size={self.ids.docking_bar.size}, pos={self.ids.docking_bar.pos}")  # Debug print 
+        #log_info(f"After update: docking_bar size={self.ids.docking_bar.size}, pos={self.ids.docking_bar.pos}")  # Debug print 
 
     def update_docking_bar_width(self, value):
         width, height = Window.size
@@ -1585,13 +1601,13 @@ class MainApp(App):
             self.control_screen.ids.set0.disabled = True
 
     def deleteURLPictures(self, dt):
-        logWrite("Function call - deleteURLPictures")
+        log_info("Function call - deleteURLPictures")
         global EVA_picture_urls
         del EVA_picture_urls[:]
         EVA_picture_urls[:] = []
 
     def changePictures(self, dt):
-        logWrite("Function call - changeURLPictures")
+        log_info("Function call - changeURLPictures")
         global EVA_picture_urls
         global urlindex
         urlsize = len(EVA_picture_urls)
@@ -1637,11 +1653,11 @@ class MainApp(App):
 
     def check_EVA_stats(self, lastname1, firstname1, lastname2, firstname2):
         global numEVAs1, EVAtime_hours1, EVAtime_minutes1, numEVAs2, EVAtime_hours2, EVAtime_minutes2
-        logWrite("Function call - check EVA stats")
+        log_info("Function call - check EVA stats")
         eva_url = 'http://www.spacefacts.de/eva/e_eva_az.htm'
 
         def on_success(req, result):
-            logWrite("Check EVA Stats - Successs")
+            log_info("Check EVA Stats - Successs")
             soup = BeautifulSoup(result, 'html.parser') #using bs4 to parse website
             numEVAs1 = 0
             EVAtime_hours1 = 0
@@ -1686,13 +1702,13 @@ class MainApp(App):
             self.us_eva.ids.EV2_EVAtime.text = "Total EVA Time = " + str(EV2_hours) + "h " + str(EV2_minutes) + "m"
 
         def on_redirect(req, result):
-            logWrite("Warning - EVA stats failure (redirect)")
+            log_info("Warning - EVA stats failure (redirect)")
 
         def on_failure(req, result):
-            logWrite("Warning - EVA stats failure (url failure)")
+            log_info("Warning - EVA stats failure (url failure)")
 
         def on_error(req, result):
-            logWrite("Warning - EVA stats failure (url error)")
+            log_info("Warning - EVA stats failure (url error)")
 
         #obtain eva statistics web page for parsing
         req = UrlRequest(eva_url, on_success, on_redirect, on_failure, on_error, timeout=1)
@@ -1700,7 +1716,7 @@ class MainApp(App):
     def checkBlogforEVA(self, dt):
         iss_blog_url =  'https://blogs.nasa.gov/spacestation/tag/spacewalk/'
         def on_success(req, data): #if blog data is successfully received, it is processed here
-            logWrite("Blog Success")
+            log_info("Blog Success")
             soup = BeautifulSoup(data, "lxml")
             blog_entries = soup.find("div", {"class": "entry-content"})
             blog_text = blog_entries.get_text()
@@ -1708,7 +1724,7 @@ class MainApp(App):
             iss_EVcrew_url = 'https://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'
 
             def on_success2(req2, data2):
-                logWrite("Successfully fetched EV crew JSON")
+                log_info("Successfully fetched EV crew JSON")
                 number_of_space = int(data2['number'])
                 names = []
                 for num in range(0, number_of_space):
@@ -1717,28 +1733,28 @@ class MainApp(App):
                 try:
                     self.checkBlog(names,blog_text)
                 except Exception as e:
-                    logWrite("Error checking blog: " + str(e))
+                    log_error("Error checking blog: " + str(e))
 
             def on_redirect2(req, result):
-                logWrite("Warning - Get EVA crew failure (redirect)")
-                logWrite(result)
+                log_error("Warning - Get EVA crew failure (redirect)")
+                log_error(result)
 
             def on_failure2(req, result):
-                logWrite("Warning - Get EVA crew failure (url failure)")
+                log_error("Warning - Get EVA crew failure (url failure)")
 
             def on_error2(req, result):
-                logWrite("Warning - Get EVA crew failure (url error)")
+                log_error("Warning - Get EVA crew failure (url error)")
 
             req2 = UrlRequest(iss_EVcrew_url, on_success2, on_redirect2, on_failure2, on_error2, timeout=1)
 
         def on_redirect(req, result):
-            logWrite("Warning - Get nasa blog failure (redirect)")
+            log_error("Warning - Get nasa blog failure (redirect)")
 
         def on_failure(req, result):
-            logWrite("Warning - Get nasa blog failure (url failure)")
+            log_error("Warning - Get nasa blog failure (url failure)")
 
         def on_error(req, result):
-            logWrite("Warning - Get nasa blog failure (url error)")
+            log_error("Warning - Get nasa blog failure (url error)")
 
         req = UrlRequest(iss_blog_url, on_success, on_redirect, on_failure, on_error, timeout=1)
 
@@ -1765,8 +1781,8 @@ class MainApp(App):
                     name_position = blog_text.find(name)
                     ev2name = name
 
-        logWrite("Likely EV1: "+ev1name)
-        logWrite("Likely EV2: "+ev2name)
+        log_info("Likely EV1: "+ev1name)
+        log_info("Likely EV2: "+ev2name)
 
         ev1_surname = ev1name.split()[-1]
         ev1_firstname = ev1name.split()[0]
@@ -1776,10 +1792,10 @@ class MainApp(App):
         try:
             self.check_EVA_stats(ev1_surname,ev1_firstname,ev2_surname,ev2_firstname)
         except Exception as e:
-            logWrite("Error retrieving EVA stats: " + str(e))
+            log_error("Error retrieving EVA stats: " + str(e))
 
     def flashROBObutton(self, instance):
-        logWrite("Function call - flashRobo")
+        #log_info("Function call - flashRobo")
 
         self.mimic_screen.ids.Robo_button.background_color = (0, 0, 1, 1)
         def reset_color(*args):
@@ -1787,7 +1803,7 @@ class MainApp(App):
         Clock.schedule_once(reset_color, 0.5)
     
     def flashUS_EVAbutton(self, instance):
-        logWrite("Function call - flashUS_EVA")
+        #log_info("Function call - flashUS_EVA")
 
         self.eva_main.ids.US_EVA_Button.background_color = (0, 0, 1, 1)
         def reset_color(*args):
@@ -1795,7 +1811,7 @@ class MainApp(App):
         Clock.schedule_once(reset_color, 0.5)
 
     def flashRS_EVAbutton(self, instance):
-        logWrite("Function call - flashRS_EVA")
+        #log_info("Function call - flashRS_EVA")
 
         self.eva_main.ids.RS_EVA_Button.background_color = (0, 0, 1, 1)
         def reset_color(*args):
@@ -1803,7 +1819,7 @@ class MainApp(App):
         Clock.schedule_once(reset_color, 0.5)
 
     def flashEVAbutton(self, instance):
-        logWrite("Function call - flashEVA")
+        #log_info("Function call - flashEVA")
 
         self.mimic_screen.ids.EVA_button.background_color = (0, 0, 1, 1)
         def reset_color(*args):
@@ -1872,7 +1888,7 @@ class MainApp(App):
             # You should have keys like 'TDRS12_TLE', 'TDRS6_TLE', etc. in your TDRS_TLEs dictionary.
         except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
             # Handle the error: if the config is missing or corrupt, TDRS TLEs can't be updated.
-            print(f"Error loading TDRS TLE data: {e}")
+            log_error(f"Error loading TDRS TLE data: {e}")
             return  # Exit the function if we can't get the TLE data
 
         TDRS12_TLE = ephem.readtle("TDRS 12", tdrs_tles.get('TDRS 12')[0], tdrs_tles.get('TDRS 12')[1])
@@ -2081,7 +2097,7 @@ class MainApp(App):
                 ISS_TLE = ephem.readtle("ISS (ZARYA)",config['ISS_TLE_Line1'],config['ISS_TLE_Line2'])
         except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
             # If any error occurs, we assume we need to fetch a new TLE
-            print(e)
+            log_info(e)
             return
 
         def scaleLatLon(latitude, longitude):
@@ -2354,9 +2370,9 @@ class MainApp(App):
         try:    
             nextpassinfo = location.next_pass(ISS_TLE)
         except Exception as e:
-            logWrite("Orbit Update error: " + str(e))
+            log_error("Orbit Update error: " + str(e))
         else:
-            logWrite("Successfull pass prediction update")
+            log_info("Successfull pass prediction update")
 
         if 'nextpassinfo' in locals(): # check for existence of nextpassinfo first
             if nextpassinfo[0] is None:
@@ -2398,7 +2414,7 @@ class MainApp(App):
 
     def hold_timer(self, dt):
         global seconds2, holdstartTime
-        logWrite("Function Call - hold timer")
+        log_info("Function Call - hold timer")
         unixconvert = time.gmtime(time.time())
         currenthours = float(unixconvert[7])*24+unixconvert[3]+float(unixconvert[4])/60+float(unixconvert[5])/3600
         seconds2 = (currenthours-EVAstartTime)*3600
@@ -2414,7 +2430,7 @@ class MainApp(App):
 
         if not internet:
             for x in ScreenList:
-                #print(x)
+                #log_info(x)
                 getattr(self, x).ids.signal.source = mimic_directory + '/Mimic/Pi/imgs/signal/offline.png'
             self.changeColors(0.5, 0.5, 0.5)
         else:
@@ -2785,11 +2801,11 @@ class MainApp(App):
                         #self.vv_screen.ids.rsn_progress.opacity = 0.0
 
             else:
-                logWrite("Table 'vehicles' does not exist.")
+                log_error("Table 'vehicles' does not exist.")
         except sqlite3.Error as e:
-            logWrite(f"SQLite error: {e}")
+            log_error(f"SQLite error: {e}")
         except Exception as e:
-            logWrite(f"General error: {e}")
+            log_error(f"General error: {e}")
 
     def ros_range_moving_average(self, new_value, window_size):
         self.ros_data.append(new_value)
