@@ -1330,6 +1330,8 @@ class RS_Dock_Screen(Screen, EventDispatcher):
     def update_docking_bar_width(self, value):
         width, height = Window.size
         mapped_value = 1 - (value / 80000)  # Inverted mapping from 0-80000 to 1-0
+        if mapped_value < 0:
+            mapped_value = 0
         new_width = width * 0.325 * mapped_value  # Adjust the width based on the value (0 to 1)
         self.ids.docking_bar.size = (new_width, self.ids.docking_bar.height)
         self.ids.dock_layout.do_layout()  # Force the layout to update
@@ -3085,11 +3087,12 @@ class MainApp(App):
 
         if rs_target_acquisition and ros_docking_avg <= 80000:
             self.rs_dock.ids.dock_in_progress.text = "DOCKING IN PROGRESS"
-            self.rs_dock.update_docking_bar_width(rs_docking_avg)
+            self.rs_dock.update_docking_bar_width(ros_docking_avg)
             if rs_sm_docking_flag:
                 self.rs_dock.ids.dock_in_progress.text = "DOCKING COMPLETE!"
         else:
             self.rs_dock.ids.dock_in_progress.color = (0,0,0,0)
+            self.rs_dock.update_docking_bar_width(ros_docking_avg)
          
         # Docking progress bar testing
         #value = 15000 
