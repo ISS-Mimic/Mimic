@@ -61,20 +61,90 @@
         #    id: rsn_progress
         #    source: f"{root.mimic_directory}/Mimic/Pi/imgs/vv/RSNprogressVV.png"
         Label:
-            id: rsn_label
-            pos_hint: {"center_x": 0.37, "center_y": 0.2}
-            text: 'Progress MS-88'
+            id: sma_label
+            pos_hint: {"center_x": 0.43, "center_y": 0.6}
+            text: 'Progress \nMS-88'
             font_size: 10
             text_size: 200,None
             halign: 'left'
             bold: True
             markup: True
             color: 1,0,0
+        Label:
+            id: mrm2_label
+            pos_hint: {"center_x": 0.63, "center_y": 0.85}
+            text: 'Progress \n MS-88'
+            font_size: 10
+            text_size: 200,None
+            halign: 'left'
+            bold: True
+            markup: True
+            color: 1,0,0
+        Label:
+            id: rsn_label
+            pos_hint: {"center_x": 0.63, "center_y": 0.25}
+            text: 'Progress \n MS-88'
+            font_size: 10
+            text_size: 200,None
+            halign: 'left'
+            bold: True
+            markup: True
+            color: 1,0,0
+        Label:
+            id: mrm1_label
+            pos_hint: {"center_x": 0.69, "center_y": 0.37}
+            text: 'Progress \n MS-88'
+            font_size: 10
+            text_size: 200,None
+            halign: 'left'
+            bold: True
+            markup: True
+            color: 1,0,0
+        Label:
+            id: n1n_label
+            pos_hint: {"center_x": 0.79, "center_y": 0.45}
+            text: 'Cygnus \n NG-20'
+            font_size: 10
+            text_size: 200,None
+            halign: 'left'
+            bold: True
+            markup: True
+            color: 0,0,1
+        Label:
+            id: n2n_label
+            pos_hint: {"center_x": 0.97, "center_y": 0.45}
+            text: 'Sierra \n DCC-1'
+            font_size: 10
+            text_size: 200,None
+            halign: 'left'
+            bold: True
+            markup: True
+            color: 0,0,1
+        Label:
+            id: n2f_label
+            pos_hint: {"center_x": 0.99, "center_y": 0.55}
+            text: 'Starliner \n CFT Crew-9'
+            font_size: 10
+            text_size: 150,None
+            halign: 'left'
+            bold: True
+            markup: True
+            color: 0,0,1
+        Label:
+            id: n2z_label
+            pos_hint: {"center_x": 0.99, "center_y": 0.8}
+            text: 'N2Z Crew-9'
+            font_size: 10
+            text_size: 150,None
+            halign: 'left'
+            bold: True
+            markup: True
+            color: 0,0,1
         Button:
-            size_hint: 0.2,0.11
+            size_hint: 0.3,0.11
             text: "NASA VV Image"
             font_size: 16
-            pos_hint: {"center_x": 0.9375, "center_y": 0.2}
+            pos_hint: {"center_x": 0.85, "center_y": 0.2}
             on_release: app.root.current = 'vv_image'
         Button:
             size_hint: 0.1,0.11
