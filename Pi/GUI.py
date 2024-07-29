@@ -2589,7 +2589,8 @@ class MainApp(App):
                         self.usos_screen.ids.n2f_spacecraft.text = sc_name2
                         self.usos_screen.ids.n2f_arrival.text = "Arrival: " + arrival_date
                         self.usos_screen.ids.n2f_departure.text = "Departure: " + departure_date
-                        self.usos_screen.ids.n2f_label.text = str(mission[i][0])
+                        self.usos_screen.ids.n2f_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.vv_screen.ids.n2f_label.text = sc_name + "\n" + str(mission[i][0])
                         if "Dragon" in sc_name:
                             self.usos_screen.ids.n2f_dragon.opacity = 1.0
                             self.usos_screen.ids.n2f_starliner.opacity = 0.0
@@ -2606,7 +2607,8 @@ class MainApp(App):
                         self.usos_screen.ids.n2z_spacecraft.text = sc_name2
                         self.usos_screen.ids.n2z_arrival.text = "Arrival: " + arrival_date
                         self.usos_screen.ids.n2z_departure.text = "Departure: " + departure_date
-                        self.usos_screen.ids.n2z_label.text = str(mission[i][0])
+                        self.usos_screen.ids.n2z_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.vv_screen.ids.n2z_label.text = sc_name + "\n" + str(mission[i][0])
                         if "Dragon" in sc_name:
                             self.usos_screen.ids.n2z_dragon.opacity = 1.0
                             self.usos_screen.ids.n2z_starliner.opacity = 0.0
@@ -2623,7 +2625,8 @@ class MainApp(App):
                         self.usos_screen.ids.n2n_spacecraft.text = sc_name2
                         self.usos_screen.ids.n2n_arrival.text = "Arrival: " + arrival_date
                         self.usos_screen.ids.n2n_departure.text = "Departure: " + departure_date
-                        self.usos_screen.ids.n2n_label.text = str(mission[i][0])
+                        self.usos_screen.ids.n2n_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.vv_screen.ids.n2n_label.text = sc_name + "\n" + str(mission[i][0])
                         #if "Dream" in sc_name:
                             #self.usos_screen.ids.n2n_dreamchaser.opacity = 1.0
                             #self.usos_screen.ids.n2n_htvx.opacity = 0.0
@@ -2640,21 +2643,22 @@ class MainApp(App):
                         self.usos_screen.ids.n1n_spacecraft.text = sc_name2
                         self.usos_screen.ids.n1n_arrival.text = "Arrival: " + arrival_date
                         self.usos_screen.ids.n1n_departure.text = "Departure: " + departure_date
-                        self.usos_screen.ids.n1n_label.text = str(mission[i][0])
+                        self.usos_screen.ids.n1n_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.vv_screen.ids.n1n_label.text = sc_name + "\n" + str(mission[i][0])
                         if sc_name == "Cygnus":
                             self.usos_screen.ids.n1n_cygnus.opacity = 1.0
                             #self.vv_screen.ids.n1n_cygnus.opacity = 1.0
                         else:
                             self.usos_screen.ids.n1n_cygnus.opacity = 0.0
                             #self.vv_screen.ids.n1n_cygnus.opacity = 0.0
-
                     elif port == "Service Module Aft":
                         self.rs_screen.ids.sma_mission.text = str(mission[i][0]) + type_edit
                         self.rs_screen.ids.sma_vehicle.text = sc_name
                         self.rs_screen.ids.sma_spacecraft.text = sc_name2
                         self.rs_screen.ids.sma_arrival.text = "Arrival: " + arrival_date
                         self.rs_screen.ids.sma_departure.text = "Departure: " + departure_date
-                        self.rs_screen.ids.sma_label.text = str(mission[i][0])
+                        self.rs_screen.ids.sma_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.vv_screen.ids.sma_label.text = sc_name + "\n" + str(mission[i][0])
                         if "Soyuz" in sc_name:
                             self.rs_screen.ids.sma_soyuz.opacity = 1.0
                             self.rs_screen.ids.sma_progress.opacity = 0.0
@@ -2671,7 +2675,8 @@ class MainApp(App):
                         self.rs_screen.ids.mrm2_spacecraft.text = sc_name2
                         self.rs_screen.ids.mrm2_arrival.text = "Arrival: " + arrival_date
                         self.rs_screen.ids.mrm2_departure.text = "Departure: " + departure_date
-                        self.rs_screen.ids.mrm2_label.text = str(mission[i][0])
+                        self.rs_screen.ids.mrm2_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.vv_screen.ids.mrm2_label.text = sc_name + "\n" + str(mission[i][0])
                         if "Soyuz" in sc_name:
                             self.rs_screen.ids.mrm2_soyuz.opacity = 1.0
                             self.rs_screen.ids.mrm2_progress.opacity = 0.0
@@ -2688,7 +2693,8 @@ class MainApp(App):
                         self.rs_screen.ids.mrm1_spacecraft.text = sc_name2
                         self.rs_screen.ids.mrm1_arrival.text = "Arrival: " + arrival_date
                         self.rs_screen.ids.mrm1_departure.text = "Departure: " + departure_date
-                        self.rs_screen.ids.mrm1_label.text = str(mission[i][0])
+                        self.rs_screen.ids.mrm1_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.vv_screen.ids.mrm1_label.text = sc_name + "\n" + str(mission[i][0])
                         if "Soyuz" in sc_name:
                             self.rs_screen.ids.mrm1_soyuz.opacity = 1.0
                             self.rs_screen.ids.mrm1_progress.opacity = 0.0
@@ -2705,7 +2711,8 @@ class MainApp(App):
                         self.rs_screen.ids.rsn_spacecraft.text = sc_name2
                         self.rs_screen.ids.rsn_arrival.text = "Arrival: " + arrival_date
                         self.rs_screen.ids.rsn_departure.text = "Departure: " + departure_date
-                        self.rs_screen.ids.rsn_label.text = str(mission[i][0])
+                        self.rs_screen.ids.rsn_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.vv_screen.ids.rsn_label.text = sc_name + "\n" + str(mission[i][0])
                         if "Soyuz" in sc_name:
                             self.rs_screen.ids.rsn_soyuz.opacity = 1.0
                             self.rs_screen.ids.rsn_progress.opacity = 0.0
@@ -2729,6 +2736,8 @@ class MainApp(App):
                         self.usos_screen.ids.n2f_departure.text = "-"
                         self.usos_screen.ids.n2f_dragon.opacity = 0.0
                         self.usos_screen.ids.n2f_starliner.opacity = 0.0
+                        self.usos_screen.ids.n2f_label.text = ""
+                        self.vv_screen.ids.n2f_label.text = ""
                         #self.vv_screen.ids.n2f_dragon.opacity = 0.0
                         #self.vv_screen.ids.n2f_starliner.opacity = 0.0
                     elif port == "Node 2 Zenith":
@@ -2739,6 +2748,8 @@ class MainApp(App):
                         self.usos_screen.ids.n2z_departure.text = "-"
                         self.usos_screen.ids.n2z_dragon.opacity = 0.0
                         self.usos_screen.ids.n2z_starliner.opacity = 0.0
+                        self.usos_screen.ids.n2z_label.text = ""
+                        self.vv_screen.ids.n2z_label.text = ""
                         #self.vv_screen.ids.n2z_dragon.opacity = 0.0
                         #self.vv_screen.ids.n2z_starliner.opacity = 0.0
                     elif port == "Node 2 Nadir":
@@ -2747,6 +2758,8 @@ class MainApp(App):
                         self.usos_screen.ids.n2n_spacecraft.text = "-"
                         self.usos_screen.ids.n2n_arrival.text = "-"
                         self.usos_screen.ids.n2n_departure.text = "-"
+                        self.usos_screen.ids.n2n_label.text = ""
+                        self.vv_screen.ids.n2n_label.text = ""
                     elif port == "Node 1 Nadir":
                         self.usos_screen.ids.n1n_mission.text = "-"
                         self.usos_screen.ids.n1n_vehicle.text = "-"
@@ -2754,6 +2767,8 @@ class MainApp(App):
                         self.usos_screen.ids.n1n_arrival.text = "-"
                         self.usos_screen.ids.n1n_departure.text = "-"
                         self.usos_screen.ids.n1n_cygnus.opacity = 0.0
+                        self.usos_screen.ids.n1n_label.text = ""
+                        self.vv_screen.ids.n1n_label.text = ""
                         #self.vv_screen.ids.n1n_cygnus.opacity = 0.0
                     elif port == "Service Module Aft":
                         self.rs_screen.ids.sma_mission.text = "-"
@@ -2762,6 +2777,7 @@ class MainApp(App):
                         self.rs_screen.ids.sma_arrival.text = "-"
                         self.rs_screen.ids.sma_departure.text = "-"
                         self.rs_screen.ids.sma_label.text = ""
+                        self.vv_screen.ids.sma_label.text = ""
                         self.rs_screen.ids.sma_soyuz.opacity = 0.0
                         self.rs_screen.ids.sma_progress.opacity = 0.0
                         #self.vv_screen.ids.sma_soyuz.opacity = 0.0
@@ -2772,9 +2788,10 @@ class MainApp(App):
                         self.rs_screen.ids.mrm2_spacecraft.text = "-"
                         self.rs_screen.ids.mrm2_arrival.text = "-"
                         self.rs_screen.ids.mrm2_departure.text = "-"
+                        self.rs_screen.ids.mrm2_label.text = ""
+                        self.vv_screen.ids.mrm2_label.text = ""
                         self.rs_screen.ids.mrm2_soyuz.opacity = 0.0
                         self.rs_screen.ids.mrm2_progress.opacity = 0.0
-                        self.rs_screen.ids.mrm2_label.text = ""
                         #self.vv_screen.ids.mrm2_soyuz.opacity = 0.0
                         #self.vv_screen.ids.mrm2_progress.opacity = 0.0
                     elif port == "MRM-1 Nadir":
@@ -2784,6 +2801,7 @@ class MainApp(App):
                         self.rs_screen.ids.mrm1_arrival.text = "-"
                         self.rs_screen.ids.mrm1_departure.text = "-"
                         self.rs_screen.ids.mrm1_label.text = ""
+                        self.vv_screen.ids.mrm1_label.text = ""
                         self.rs_screen.ids.mrm1_soyuz.opacity = 0.0
                         self.rs_screen.ids.mrm1_progress.opacity = 0.0
                         #self.vv_screen.ids.mrm1_soyuz.opacity = 0.0
@@ -2795,6 +2813,7 @@ class MainApp(App):
                         self.rs_screen.ids.rsn_arrival.text = "-"
                         self.rs_screen.ids.rsn_departure.text = "-"
                         self.rs_screen.ids.rsn_label.text = ""
+                        self.vv_screen.ids.rsn_label.text = ""
                         self.rs_screen.ids.rsn_soyuz.opacity = 0.0
                         self.rs_screen.ids.rsn_progress.opacity = 0.0
                         #self.vv_screen.ids.rsn_soyuz.opacity = 0.0
