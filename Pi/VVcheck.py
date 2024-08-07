@@ -6,8 +6,40 @@ import re
 import ssl
 import pandas as pd
 from pathlib import Path
+import os.path as op #use for getting mimic directory
+import hashlib
+import logging
+from logging.handlers import RotatingFileHandler
 
 mimic_data_directory = Path.home() / '.mimic_data'
+mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+
+# Set up basic configuration for the logging system
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s: %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
+
+log_file_path = mimic_directory + '/Mimic/Pi/Logs/mimiclog_vvcheck.log'
+
+try:
+    handler = RotatingFileHandler(log_file_path, maxBytes=1048576, backupCount=5)
+    handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
+    logger = logging.getLogger('MyLogger')
+    logger.setLevel(logging.INFO)  # Set logger to INFO level
+    handler.setLevel(logging.INFO)  # Set handler to INFO level
+    logger.addHandler(handler)
+except Exception as e:
+    log_error(f"Failed to set up logging: {e}")
+
+logger.info("This is a test INFO message right after logger setup.")
+
+def log_info(message):
+    logger.info(message)
+
+def log_error(message):
+    logger.error(message)
+
+log_info("Initialized VVcheck Log")
 
 # URL Constants
 wikiurl = 'https://en.wikipedia.org/wiki/International_Space_Station'
@@ -21,6 +53,13 @@ mission_name_mapping = {
     # Add other mappings as necessary
 }
 
+
+def get_image_hash(image_path):
+    hasher = hashlib.md5()
+    with open(image_path, 'rb') as img_file:
+        buf = img_file.read()
+        hasher.update(buf)
+    return hasher.hexdigest()
 
 def getVV_Image(page_url, output):
     response = requests.get(page_url)
@@ -41,13 +80,24 @@ def getVV_Image(page_url, output):
         target_image_url = sorted(filtered_image_urls)[-1]
         context = ssl._create_unverified_context()
 
-        with urllib.request.urlopen(target_image_url, context=context) as response, open(output, 'wb') as out_file:
-            data = response.read()
-            out_file.write(data)
+        with urllib.request.urlopen(target_image_url, context=context) as response:
+            new_image_data = response.read()
 
-        print(f"Downloaded image from {target_image_url} to {output}")
+        new_image_hash = hashlib.md5(new_image_data).hexdigest()
+
+        if Path(output).exists():
+            current_image_hash = get_image_hash(output)
+        else:
+            current_image_hash = None
+
+        if new_image_hash != current_image_hash:
+            with open(output, 'wb') as out_file:
+                out_file.write(new_image_data)
+            log_info(f"Downloaded image from {target_image_url} to {output}")
+        else:
+            log_info("Image has not changed, not downloading.")
     else:
-        print("No matching image URL found.")
+        log_error("No matching image URL found.")
 
 def get_nasa_data(url):
     response = requests.get(nasaurl)
@@ -61,7 +111,7 @@ def get_nasa_data(url):
                 if date_pattern.search(event.get_text()):
                     nasa_data.append(event.get_text())
     else:
-        print(f"Failed to retrieve the webpage. Status code: {response.status_code}")
+        log_error(f"Failed to retrieve the webpage. Status code: {response.status_code}")
     return nasa_data
 
 def standardize_date(date_str):
@@ -75,7 +125,6 @@ def standardize_mission_names(event, mapping):
     for key, value in mapping.items():
         event = event.replace(key, value)
     return event
-
 
 
 def parse_nasa_data(data):
@@ -117,9 +166,9 @@ current_docked_df = identify_current_docked(nasa_dock_df, nasa_undock_df)
 def get_wikipedia_data(wikiurl):
     tables = pd.read_html(wikiurl)
     
-    # Iterate through all tables to find the one with "Arrival (UTC)" column
+    # Iterate through all tables to find the one with "Arrival" column
     for table in tables:
-        if 'Arrival (UTC)' in table.columns: # Using "Arrival (UTC)" as the unique identifier of the table we want (sometimes the table # changes)
+        if 'Arrival' in table.columns: # Using "Arrival" as the unique identifier of the table we want (sometimes the table # changes)
             return table
     
     raise ValueError("Mission table not found on the Wikipedia page.")
@@ -156,8 +205,8 @@ def clean_wikipedia_data(df):
     df['Mission'] = df['Mission'].apply(lambda x: f'Cygnus {x}' if x.startswith('NG-') else x)
     df['Mission'] = df['Mission'].apply(lambda x: f'SpaceX {x}' if x.startswith('Crew-') else x)
     df['Mission'] = df['Mission'].apply(lambda x: f'SpaceX {x}' if x.startswith('Cargo-') else x)
-    df['Arrival (UTC)'] = pd.to_datetime(df['Arrival (UTC)'], errors='coerce')
-    df['Departure (planned)'] = df['Departure (planned)'].apply(
+    df['Arrival'] = pd.to_datetime(df['Arrival'], errors='coerce')
+    df['Departure'] = df['Departure'].apply(
         lambda x: convert_net_date(x) if 'NET' in x or 'early' in x or 'mid' in x or 'late' in x
         else pd.to_datetime(x, errors='coerce'))
     return df
@@ -175,7 +224,7 @@ wikipedia_df = clean_wikipedia_data(wikipedia_df)
 def correlate_data(nasa_df, wiki_df):
     correlated_data = []
     for _, nasa_row in nasa_df.iterrows():
-        matching_wiki_rows = wiki_df[wiki_df['Arrival (UTC)'] == nasa_row['Date']]
+        matching_wiki_rows = wiki_df[wiki_df['Arrival'] == nasa_row['Date']]
         for _, wiki_row in matching_wiki_rows.iterrows():
             correlated_data.append({
                 'Spacecraft': wiki_row['Spacecraft'],
@@ -184,8 +233,8 @@ def correlate_data(nasa_df, wiki_df):
                 'Event': nasa_row['Event'],
                 'Date': nasa_row['Date'],
                 'Location': wiki_row['Location'],
-                'Arrival': wiki_row['Arrival (UTC)'],
-                'Departure': wiki_row['Departure (planned)']
+                'Arrival': wiki_row['Arrival'],
+                'Departure': wiki_row['Departure']
             })
     return pd.DataFrame(correlated_data)
 
@@ -288,5 +337,4 @@ def verify_database(db_path='iss_vehicles.db'):
 #verify_database(db_path=vv_db_path)
 
 
-
-print("Database updated successfully.")
+log_info("Database updated successfully.")
