@@ -25,7 +25,7 @@ mission_name_mapping = {
 
 # Function to send a Discord message
 def send_discord_message(webhook_url, message, file_path=None):
-    data = {"content": message} 
+    data = {"content": message}
     files = {"file": open(file_path, "rb")} if file_path else None
     response = requests.post(webhook_url, data=data, files=files)
     if response.status_code in (200, 204):
@@ -129,11 +129,17 @@ def identify_current_docked(dock_df, undock_df):
         current_docked = current_docked[~current_docked['Event'].str.contains(event)]
     return current_docked
 
-# Function to get Wikipedia data
+
 def get_wikipedia_data(wikiurl):
     tables = pd.read_html(wikiurl)
-    df = tables[2]
-    return df
+
+    # Iterate through all tables to find the one with "Arrival" column
+    for table in tables:
+        if 'Arrival' in table.columns: # Using "Arrival" as the unique identifier of the table we want (sometimes the table # changes)
+            return table
+
+    raise ValueError("Mission table not found on the Wikipedia page.")
+
 
 # Function to convert 'NET' dates to approximate dates
 def convert_net_date(date_str):
@@ -169,8 +175,8 @@ def clean_wikipedia_data(df):
     df['Mission'] = df['Mission'].apply(lambda x: f'Cygnus {x}' if x.startswith('NG-') else x)
     df['Mission'] = df['Mission'].apply(lambda x: f'SpaceX {x}' if x.startswith('Crew-') else x)
     df['Mission'] = df['Mission'].apply(lambda x: f'SpaceX {x}' if x.startswith('Cargo-') else x)
-    df['Arrival (UTC)'] = pd.to_datetime(df['Arrival (UTC)'], errors='coerce')
-    df['Departure (planned)'] = df['Departure (planned)'].apply(
+    df['Arrival'] = pd.to_datetime(df['Arrival'], errors='coerce')
+    df['Departure'] = df['Departure'].apply(
         lambda x: convert_net_date(x) if 'NET' in x or 'early' in x or 'mid' in x or 'late' in x
         else pd.to_datetime(x, errors='coerce'))
     return df
@@ -186,7 +192,7 @@ def clean_citations(text):
 def correlate_data(nasa_df, wiki_df):
     correlated_data = []
     for _, nasa_row in nasa_df.iterrows():
-        matching_wiki_rows = wiki_df[wiki_df['Arrival (UTC)'] == nasa_row['Date']]
+        matching_wiki_rows = wiki_df[wiki_df['Arrival'] == nasa_row['Date']]
         for _, wiki_row in matching_wiki_rows.iterrows():
             correlated_data.append({
                 'Spacecraft': wiki_row['Spacecraft'],
@@ -195,8 +201,8 @@ def correlate_data(nasa_df, wiki_df):
                 'Event': nasa_row['Event'],
                 'Date': nasa_row['Date'],
                 'Location': wiki_row['Location'],
-                'Arrival': wiki_row['Arrival (UTC)'],
-                'Departure': wiki_row['Departure (planned)']
+                'Arrival': wiki_row['Arrival'],
+                'Departure': wiki_row['Departure']
             })
     return pd.DataFrame(correlated_data)
 
@@ -288,11 +294,18 @@ while True:
         getVV_Image(nasaurl, output_file)
         nasa_data = get_nasa_data(nasaurl)
         nasa_dock_df, nasa_undock_df = parse_nasa_data(nasa_data)
+        #print(nasa_dock_df)
 
         # Get and process Wikipedia data
         wikipedia_df = get_wikipedia_data(wikiurl)
+        #print("----------------------------------------")
+        #print(wikipedia_df)
         wikipedia_df = wikipedia_df.applymap(clean_citations)
+        #print("----------------------------------------")
+        #print(wikipedia_df)
         wikipedia_df = clean_wikipedia_data(wikipedia_df)
+        #print("----------------------------------------")
+        #print(wikipedia_df)
 
         # Correlate data
         current_docked_df = identify_current_docked(nasa_dock_df, nasa_undock_df)
@@ -306,7 +319,7 @@ while True:
 
     except Exception as e:
         print(f"An error occurred: {e}")
+        #print(correlated_df['Location'])
 
     # Sleep for 5 minutes before checking again
     time.sleep(300)
-
