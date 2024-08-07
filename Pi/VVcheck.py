@@ -15,21 +15,19 @@ mimic_data_directory = Path.home() / '.mimic_data'
 mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
 # Set up basic configuration for the logging system
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)s: %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S')
-
 log_file_path = mimic_directory + '/Mimic/Pi/Logs/mimiclog_vvcheck.log'
 
-try:
-    handler = RotatingFileHandler(log_file_path, maxBytes=1048576, backupCount=5)
-    handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
-    logger = logging.getLogger('MyLogger')
-    logger.setLevel(logging.INFO)  # Set logger to INFO level
-    handler.setLevel(logging.INFO)  # Set handler to INFO level
+logger = logging.getLogger('MyLogger')
+logger.setLevel(logging.INFO)  # Set logger to INFO level
+
+# Create handler
+handler = RotatingFileHandler(log_file_path, maxBytes=1048576, backupCount=5)
+handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
+handler.setLevel(logging.INFO)  # Set handler to INFO level
+
+# Add handler to logger
+if not logger.hasHandlers():
     logger.addHandler(handler)
-except Exception as e:
-    log_error(f"Failed to set up logging: {e}")
 
 logger.info("This is a test INFO message right after logger setup.")
 
