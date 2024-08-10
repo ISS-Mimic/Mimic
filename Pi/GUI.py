@@ -51,8 +51,8 @@ mimic_data_directory = Path.home() / '.mimic_data'
 mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
 print("Starting ISS Mimic Program")
-print("Mimic Program Directory: " + mimic_directory)
-print("Mimic Data Directory: " + mimic_directory)
+print("Mimic Program Directory: " + mimic_directory + "/Mimic/Pi")
+print("Mimic Data Directory: " + str(mimic_data_directory))
 
 # Constants
 SERIAL_SPEED = 9600
@@ -1511,7 +1511,7 @@ class MainApp(App):
         root.add_widget(self.usos_screen)
         root.add_widget(self.vv_image)
         root.add_widget(self.vv_screen)
-        root.current = 'main' #change this back to main when done with eva setup
+        root.current = 'main'
 
         Clock.schedule_interval(self.update_labels, 1) #all telemetry wil refresh and get pushed to arduinos every half second!
         Clock.schedule_interval(self.animate3, 0.1)
@@ -1525,14 +1525,14 @@ class MainApp(App):
         Clock.schedule_once(self.updateISS_TLE, 14)
         Clock.schedule_once(self.updateTDRS_TLE, 60)
         Clock.schedule_once(self.updateOrbitGlobe, 17)
-        #Clock.schedule_once(self.TDRSupdate, 30) #this is not working and the site isnt updating anyway
+        Clock.schedule_once(self.TDRSupdate, 30)
         Clock.schedule_once(self.updateNightShade, 20)
         Clock.schedule_once(self.updateVV, 10)
 
         Clock.schedule_interval(self.updateISS_TLE, 302)
         Clock.schedule_interval(self.updateTDRS_TLE, 290)
         Clock.schedule_interval(self.updateOrbitGlobe, 11)
-        #Clock.schedule_interval(self.TDRSupdate, 600) #this is not working and the site isnt updating anyway
+        Clock.schedule_interval(self.TDRSupdate, 600)
         Clock.schedule_interval(self.check_internet, 1)
         Clock.schedule_interval(self.updateArduinoCount, 5)
         Clock.schedule_interval(self.updateVV, 500)
@@ -2091,9 +2091,9 @@ class MainApp(App):
         self.orbit_screen.ids.TDRS10.pos = (scaleLatLon2(TDRS10lat, TDRS10lon)['new_x']-((self.orbit_screen.ids.TDRS10.width/2)*normalizedX),scaleLatLon2(TDRS10lat, TDRS10lon)['new_y']-((self.orbit_screen.ids.TDRS10.height/2)*normalizedY))
         self.orbit_screen.ids.TDRS7.pos = (scaleLatLon2(TDRS7lat, TDRS7lon)['new_x']-((self.orbit_screen.ids.TDRS7.width/2)*normalizedX),scaleLatLon2(TDRS7lat, TDRS7lon)['new_y']-((self.orbit_screen.ids.TDRS7.height/2)*normalizedY))
         #add labels and ZOE
-        self.orbit_screen.ids.TDRSeLabel.pos_hint = {"center_x": scaleLatLon(0, -41)['newLon']+0.06, "center_y": scaleLatLon(0, -41)['newLat']}
-        self.orbit_screen.ids.TDRSwLabel.pos_hint = {"center_x": scaleLatLon(0, -174)['newLon']+0.06, "center_y": scaleLatLon(0, -174)['newLat']}
-        self.orbit_screen.ids.TDRSzLabel.pos_hint = {"center_x": scaleLatLon(0, 85)['newLon']+0.05, "center_y": scaleLatLon(0, 85)['newLat']}
+        self.orbit_screen.ids.TDRSeLabel.pos_hint = {"center_x": scaleLatLon(0, -36)['newLon']+0.06, "center_y": scaleLatLon(0, -41)['newLat']}
+        self.orbit_screen.ids.TDRSwLabel.pos_hint = {"center_x": scaleLatLon(0, -166)['newLon']+0.06, "center_y": scaleLatLon(0, -174)['newLat']}
+        self.orbit_screen.ids.TDRSzLabel.pos_hint = {"center_x": scaleLatLon(0, 87)['newLon']+0.05, "center_y": scaleLatLon(0, 85)['newLat']}
         self.orbit_screen.ids.ZOE.pos_hint = {"center_x": scaleLatLon(0, 77)['newLon'], "center_y": scaleLatLon(0, 77)['newLat']}
         self.orbit_screen.ids.ZOElabel.pos_hint = {"center_x": scaleLatLon(0, 77)['newLon'], "center_y": scaleLatLon(0, 77)['newLat']+0.1}
 
@@ -3354,10 +3354,10 @@ class MainApp(App):
             apogee_height = apogee - 6371.00
             perigee_height = perigee - 6371.00
             sma = 0.5*(apogee+perigee) #km
-            period = (2*math.pi/math.sqrt(mu))*math.pow(sma,3/2) #seconds
+            period = ((2*math.pi/math.sqrt(mu))*math.pow(sma,3/2))/60 # minutes
             self.orbit_data.ids.apogee_height.text = str("{:.2f}".format(apogee_height))
             self.orbit_data.ids.perigee_height.text = str("{:.2f}".format(perigee_height))
-            self.orbit_screen.ids.period.text = str("{:.2f}".format(period))
+            self.orbit_screen.ids.period.text = str("{:.2f}".format(period)) + "m"
 
         cmg1_active = int((values[145])[0])
         cmg2_active = int((values[146])[0])
