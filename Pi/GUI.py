@@ -49,7 +49,10 @@ import database_initialize # create and populate database script
 
 mimic_data_directory = Path.home() / '.mimic_data'
 mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-print("Mimic Directory: " + mimic_directory)
+
+print("Starting ISS Mimic Program")
+print("Mimic Program Directory: " + mimic_directory)
+print("Mimic Data Directory: " + mimic_directory)
 
 # Constants
 SERIAL_SPEED = 9600
@@ -1629,8 +1632,15 @@ class MainApp(App):
         self.orbit_screen.ids.OrbitMap.reload()
 
     def updateOrbitGlobeImage(self, dt):
-        self.orbit_screen.ids.orbit3d.source = str(mimic_data_directory) + '/globe.png'
-        self.orbit_screen.ids.orbit3d.reload()
+        globe_image_path = mimic_data_directory / 'globe.png'
+        try:
+            if globe_image_path.exists():
+                self.orbit_screen.ids.orbit3d.source = globe_image_path
+                self.orbit_screen.ids.orbit3d.reload()
+            else:
+                log_error("Globe image does not exist.")
+        except Exception as e:
+            log_error(f"Error loading globe image: {e}")
 
     def updateOrbitGlobe(self, dt):
         proc = Popen(["python", mimic_directory + "/Mimic/Pi/orbitGlobe.py"])

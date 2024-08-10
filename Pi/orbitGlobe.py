@@ -1,4 +1,5 @@
 import numpy as np
+import os
 import matplotlib.pyplot as plt
 import ephem
 import json
@@ -7,8 +8,9 @@ import cartopy.feature as cfeature
 import os.path as op
 from pathlib import Path
 
-home_dir = Path.home()
-mimic_data_path = home_dir / '.mimic_data'
+mimic_data_path = Path.home() / '.mimic_data'
+temp_image_path = mimic_data_path / 'globe_tmp.png'
+final_image_path = mimic_data_path / 'globe.png'
 
 # Assuming the __file__ is defined in your context
 mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
@@ -53,7 +55,14 @@ def plot_earth_no_color():
     # Plot the current location of the ISS
     ax.plot(longitude, latitude, 'ro', markersize=15, transform=ccrs.Geodetic())
 
-    plt.savefig(mimic_data_path / 'globe.png', dpi=100, transparent=True)
+    plt.savefig(temp_image_path, dpi=100, transparent=True)
 
+    # Ensure the file is fully written to disk
+    with open(temp_image_path, 'rb+') as f:
+        f.flush()
+        os.fsync(f.fileno())
+
+    # Atomically rename the temporary file to the final filename
+    os.replace(temp_image_path, final_image_path)
 
 plot_earth_no_color()
