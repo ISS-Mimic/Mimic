@@ -367,9 +367,16 @@ class MainScreen(Screen):
     def killproc(*args):
         global p,p2
         if not USE_CONFIG_JSON:
-            TTY_OBSERVER.stop()
-            log_str = "Stopped monitoring serial ports."
-            log_info(log_str)
+            try:
+                if TTY_OBSERVER and hasattr(TTY_OBSERVER, 'monitor'):
+                    # Try stopping the observer; handle any potential errors
+                    TTY_OBSERVER.stop()
+                    log_info("TTY_OBSERVER stopped successfully.")
+                else:
+                    log_info("TTY_OBSERVER is not initialized or already stopped.")
+            except Exception as e:
+                log_error(f"Error while stopping TTY_OBSERVER: {e}")
+
         try:
             p.kill()
             p2.kill()
@@ -378,6 +385,8 @@ class MainScreen(Screen):
         os.system('rm /dev/shm/*.db*') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
         staleTelemetry()
         log_info("Successfully stopped ISS telemetry javascript and removed database")
+        log_info("App Exit")
+        print("Mimic App Exited")
 
 class ManualControlScreen(Screen):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
@@ -3349,8 +3358,8 @@ class MainApp(App):
                 ta = math.radians(360) - ta
             self.orbit_data.ids.true_anomaly.text = "{:.2f}".format(math.degrees(ta))
 
-            apogee = (math.pow(h_mom_mag,2)/mu)*(1/(1+e_mag*math.cos(math.radians(180))))
-            perigee = (math.pow(h_mom_mag,2)/mu)*(1/(1+e_mag*math.cos(0)))
+            apogee = (math.pow(h_mom_mag,2)/mu)*(safe_divide(1,(1+e_mag*math.cos(math.radians(180)))))
+            perigee = (math.pow(h_mom_mag,2)/mu)*(safe_divide(1,(1+e_mag*math.cos(0))))
             apogee_height = apogee - 6371.00
             perigee_height = perigee - 6371.00
             sma = 0.5*(apogee+perigee) #km

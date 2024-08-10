@@ -2,10 +2,40 @@
 
 from datetime import datetime, timedelta, timezone
 import sqlite3
+import os.path as op #use for getting mimic directory
+import logging
+from logging.handlers import RotatingFileHandler
 
 from lightstreamer.client import LightstreamerClient, ConsoleLoggerProvider, ConsoleLogLevel, Subscription
 
 from telemetry_ids import IDENTIFIERS
+
+mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+
+# Set up basic configuration for the logging system
+log_file_path = mimic_directory + '/Mimic/Pi/Logs/mimiclog_telemetry.log'
+
+logger = logging.getLogger('MyLogger')
+logger.setLevel(logging.INFO)  # Set logger to INFO level
+
+# Create handler
+handler = RotatingFileHandler(log_file_path, maxBytes=1048576, backupCount=5)
+handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
+handler.setLevel(logging.INFO)  # Set handler to INFO level
+
+# Add handler to logger
+if not logger.hasHandlers():
+    logger.addHandler(handler)
+
+logger.info("This is a test INFO message right after logger setup.")
+
+def log_info(message):
+    logger.info(message)
+
+def log_error(message):
+    logger.error(message)
+
+log_info("Initialized Telemetry Log")
 
 FIVE_SECONDS_AS_HOURS = 5.0 / 3600  # 3600 seconds/hr
 
@@ -53,7 +83,7 @@ class StatusUpdater:  # extend lightstreamer_client.ClientListener? or custom?
         self.db = db
 
     def onStatusChange(self, newStatus):
-        print(f"Client status: {newStatus}")
+        log_info(f"Client status: {newStatus}")
         self.db.execute("UPDATE telemetry SET Value = ? WHERE Label = ?", (newStatus, "ClientStatus"))
 
 
@@ -63,11 +93,11 @@ class MainListener(LSSubscriptionListener):
         self.db = db
 
     def onSubscription(self):
-        print("Subscribed!")
+        log_info("Subscribed!")
         self.db.execute("UPDATE telemetry SET Value = ? WHERE Label = ?", ("Subscribed", "Lightstreamer"))
 
     def onUnsubscription(self):
-        print("Unsubscribed!")
+        log_info("Unsubscribed!")
         self.db.execute("UPDATE telemetry SET Value = ? WHERE Label = ?", ("Unsubscribed", "Lightstreamer"))
 
     def onItemUpdate(self, update):
@@ -92,18 +122,18 @@ class TimeListener(LSSubscriptionListener):
 
         if status == "24":
             if difference > FIVE_SECONDS_AS_HOURS:
-                print(f"Signal Error!     @ {AOStimestamp}")
+                log_info(f"Signal Error!     @ {AOStimestamp}")
                 self.AOSnum = 2
             else:
                 if self.AOSnum != 1:
-                    print(f"Connected to the ISS!     @ {AOStimestamp}")
+                    log_info(f"Connected to the ISS!     @ {AOStimestamp}")
                 self.AOSnum = 1
         else:
             if difference > FIVE_SECONDS_AS_HOURS:
-                print(f"Signal Error!     @ {AOStimestamp}")
+                log_info(f"Signal Error!     @ {AOStimestamp}")
                 self.AOSnum = 2
             else:
-                print(f"Signal Lost!     @ {AOStimestamp}")
+                log_info(f"Signal Lost!     @ {AOStimestamp}")
                 self.AOSnum = 0
 
         self.db.execute("UPDATE telemetry SET Value = ?, Timestamp = ? WHERE Label = ?",
@@ -115,6 +145,7 @@ def wait_for_input():
 
 def main():
     print('ISS Telemetry script active')
+    log_info('ISS Telemetry script active')
 
     #loggerProvider = ConsoleLoggerProvider(ConsoleLogLevel.WARN)
     #LightstreamerClient.setLoggerProvider(loggerProvider)
@@ -139,12 +170,14 @@ def main():
     try:
         ls_client.connect()
         print(ls_client.getStatus())
+        log_info(ls_client.getStatus())
         wait_for_input()
     finally:
         ls_client.unsubscribe(main_sub)
         ls_client.unsubscribe(time_sub)
         ls_client.disconnect()
         db.close()
+        log_info("DB closed - app exit")
 
 
 if __name__ == '__main__':
