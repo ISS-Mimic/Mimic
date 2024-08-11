@@ -1915,21 +1915,17 @@ class MainApp(App):
         TDRS10_TLE = ephem.readtle("TDRS 10", tdrs_tles.get('TDRS 10')[0], tdrs_tles.get('TDRS 10')[1])
         TDRS11_TLE = ephem.readtle("TDRS 11", tdrs_tles.get('TDRS 11')[0], tdrs_tles.get('TDRS 11')[1])
         TDRS7_TLE = ephem.readtle("TDRS 7", tdrs_tles.get('TDRS 7')[0], tdrs_tles.get('TDRS 7')[1])
-
-        #TEMP FIX TO ERROR DO NOT MERGE THESE LINES       
-        if self.orbit_screen.ids.OrbitMap.texture_size[0] == 0: #temp fix to ensure no divide by 0
-            normalizedX = 1
-        else:
-            normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
-
-        if self.orbit_screen.ids.OrbitMap.texture_size[1] == 0:
-            normalizedY = 1
-        else:
-            normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
         
-        #normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
-        #normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
-
+        def safe_divide(numerator, denominator):
+            if denominator == 0:
+                return 1
+            else:
+                return numerator / denominator
+        
+        # added safe divide to fix #378
+        normalizedX = safe_divide(self.orbit_screen.ids.OrbitMap.norm_image_size[0],self.orbit_screen.ids.OrbitMap.texture_size[0])
+        normalizedY = safe_divide(self.orbit_screen.ids.OrbitMap.norm_image_size[1],self.orbit_screen.ids.OrbitMap.texture_size[1])
+        
         def scaleLatLon(latitude, longitude):
             #converting lat lon to x, y for orbit map
             fromLatSpan = 180.0
@@ -3363,7 +3359,10 @@ class MainApp(App):
             apogee_height = apogee - 6371.00
             perigee_height = perigee - 6371.00
             sma = 0.5*(apogee+perigee) #km
-            period = ((2*math.pi/math.sqrt(mu))*math.pow(sma,3/2))/60 # minutes
+            if sma>=0:
+                period = ((safe_divide(2*math.pi,math.sqrt(mu)))*math.pow(sma,3/2))/60 # minutes
+            else:
+                period = 0
             self.orbit_data.ids.apogee_height.text = str("{:.2f}".format(apogee_height))
             self.orbit_data.ids.perigee_height.text = str("{:.2f}".format(perigee_height))
             self.orbit_screen.ids.period.text = str("{:.2f}".format(period)) + "m"
