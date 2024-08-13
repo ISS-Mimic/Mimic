@@ -11,6 +11,8 @@ import hashlib
 import logging
 from logging.handlers import RotatingFileHandler
 
+pd.set_option('display.max_columns',None)
+
 mimic_data_directory = Path.home() / '.mimic_data'
 mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
@@ -166,6 +168,7 @@ def get_wikipedia_data(wikiurl):
     # Iterate through all tables to find the one with "Arrival" column
     for table in tables:
         if 'Arrival' in table.columns: # Using "Arrival" as the unique identifier of the table we want (sometimes the table # changes)
+            #print(table)
             return table
     
     raise ValueError("Mission table not found on the Wikipedia page.")
@@ -198,7 +201,7 @@ def clean_wikipedia_data(df):
         'zenith': 'Zenith',
         'nadir': 'Nadir',
     }
-    df['Location'] = df['Location'].replace(location_replacements, regex=True)
+    df['Port'] = df['Port'].replace(location_replacements, regex=True)
     df['Mission'] = df['Mission'].apply(lambda x: f'Cygnus {x}' if x.startswith('NG-') else x)
     df['Mission'] = df['Mission'].apply(lambda x: f'SpaceX {x}' if x.startswith('Crew-') else x)
     df['Mission'] = df['Mission'].apply(lambda x: f'SpaceX {x}' if x.startswith('Cargo-') else x)
@@ -229,7 +232,7 @@ def correlate_data(nasa_df, wiki_df):
                 'Mission': wiki_row['Mission'],
                 'Event': nasa_row['Event'],
                 'Date': nasa_row['Date'],
-                'Location': wiki_row['Location'],
+                'Location': wiki_row['Port'],
                 'Arrival': wiki_row['Arrival'],
                 'Departure': wiki_row['Departure']
             })
@@ -285,7 +288,7 @@ def update_database(correlated_df, undock_df, db_path='iss_vehicles.db'):
 
     # Insert new data
     for _, row in correlated_df.iterrows():
-        #print(row['Location'])
+        #print(row['Port'])
         cursor.execute('''
             INSERT INTO vehicles (Spacecraft, Type, Mission, Event, Date, Location, Arrival, Departure)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
