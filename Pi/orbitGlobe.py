@@ -32,7 +32,7 @@ handler.setLevel(logging.INFO)  # Set handler to INFO level
 if not logger.hasHandlers():
     logger.addHandler(handler)
 
-logger.info("This is a test INFO message right after logger setup.")
+logger.info("Running Orbit Globe.")
 
 def log_info(message):
     logger.info(message)
@@ -81,17 +81,18 @@ def plot_earth_no_color():
     # Plot the current location of the ISS
     ax.plot(longitude, latitude, 'ro', markersize=15, transform=ccrs.Geodetic())
 
-    plt.savefig(temp_image_path, dpi=100, transparent=True)
+    #plt.savefig(temp_image_path, dpi=100, transparent=True)
+    plt.savefig(final_image_path, dpi=100, transparent=True)
 
     # Ensure the file is fully written to disk
-    try:
-        with open(temp_image_path, 'rb+') as f:
-            f.flush()
-            os.fsync(f.fileno())
-    except Exception as e:
-        log_error(e)
+    #try:
+    #    with open(temp_image_path, 'rb+') as f:
+    #        f.flush()
+    #        os.fsync(f.fileno())
+    #except Exception as e:
+    #    log_error(e)
 
     # Atomically rename the temporary file to the final filename
-    os.replace(temp_image_path, final_image_path)
+    #os.replace(temp_image_path, final_image_path)
 
 plot_earth_no_color()

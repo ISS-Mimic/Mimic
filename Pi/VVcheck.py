@@ -29,7 +29,7 @@ handler.setLevel(logging.INFO)  # Set handler to INFO level
 if not logger.hasHandlers():
     logger.addHandler(handler)
 
-logger.info("This is a test INFO message right after logger setup.")
+logger.info("Running VV Check")
 
 def log_info(message):
     logger.info(message)
@@ -37,7 +37,6 @@ def log_info(message):
 def log_error(message):
     logger.error(message)
 
-log_info("Initialized VVcheck Log")
 
 # URL Constants
 wikiurl = 'https://en.wikipedia.org/wiki/International_Space_Station'

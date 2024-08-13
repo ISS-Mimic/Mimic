@@ -76,7 +76,7 @@ try:
 except Exception as e:
     log_error(f"Failed to set up logging: {e}")
 
-logger.info("This is a test INFO message right after logger setup.")
+logger.info("Mimic App Running.")
 
 def log_info(message):
     logger.info(message)
@@ -85,8 +85,6 @@ def log_error(message):
     logger.error(message)
 
 log_info("Initialized Mimic Program Log")
-log_info("About to log an INFO message.")
-log_info("Important info-level log message.")
 
 #-------------------------Look for a connected arduino-----------------------------------
 
@@ -1552,7 +1550,6 @@ class MainApp(App):
         Clock.schedule_interval(self.updateOrbitMap, 31)
         Clock.schedule_interval(self.updateNASAVVImage, 67)
         Clock.schedule_interval(self.updateOrbitGlobeImage, 10)
-        Clock.schedule_interval(self.checkTDRS, 5)
         return root
 
     def check_internet(self, dt):
@@ -1644,7 +1641,7 @@ class MainApp(App):
         globe_image_path = mimic_data_directory / 'globe.png'
         try:
             if globe_image_path.exists():
-                self.orbit_screen.ids.orbit3d.source = globe_image_path
+                self.orbit_screen.ids.orbit3d.source = str(globe_image_path)
                 self.orbit_screen.ids.orbit3d.reload()
             else:
                 log_error("Globe image does not exist.")
@@ -1665,10 +1662,6 @@ class MainApp(App):
 
     def updateTDRS_TLE(self, dt):
         proc = Popen(["python", mimic_directory + "/Mimic/Pi/getTLE_TDRS.py"])
-
-    def checkTDRS(self, dt):
-        global activeTDRS1
-        global activeTDRS2
 
     def check_EVA_stats(self, lastname1, firstname1, lastname2, firstname2):
         global numEVAs1, EVAtime_hours1, EVAtime_minutes1, numEVAs2, EVAtime_hours2, EVAtime_minutes2
@@ -3797,15 +3790,14 @@ class MainApp(App):
             self.eps_screen.ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
             v4as = 4
         
-        #4b has a lower setpoint voltage for now - reverted back as of US EVA 63
-        if float(v4b) < 141.5: #discharging
+        if float(v4b) < 151.5: #discharging
             self.eps_screen.ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
             v4bs = 1
             #self.eps_screen.ids.array_4b.color = 1, 1, 1, 0.8
-        elif float(v4b) > 150.0: #charged
+        elif float(v4b) > 160.0: #charged
             self.eps_screen.ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
             v4bs = 3
-        elif float(v4b) >= 141.5:  #charging
+        elif float(v4b) >= 151.5:  #charging
             self.eps_screen.ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_4b.color = 1, 1, 1, 1.0
             v4bs = 2
