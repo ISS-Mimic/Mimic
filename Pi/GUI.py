@@ -1531,15 +1531,14 @@ class MainApp(App):
         #Clock.schedule_once(self.checkBlogforEVA, 30) #disabling for now issue #407
         Clock.schedule_once(self.updateISS_TLE, 14)
         Clock.schedule_once(self.updateTDRS_TLE, 60)
-        Clock.schedule_once(self.updateOrbitGlobe, 17)
         Clock.schedule_once(self.TDRSupdate, 30)
         Clock.schedule_once(self.updateNightShade, 20)
         Clock.schedule_once(self.updateVV, 10)
 
         Clock.schedule_interval(self.updateISS_TLE, 302)
         Clock.schedule_interval(self.updateTDRS_TLE, 290)
-        Clock.schedule_interval(self.updateOrbitGlobe, 11)
-        Clock.schedule_interval(self.TDRSupdate, 600)
+        Clock.schedule_interval(self.updateOrbitGlobe, 31)
+        Clock.schedule_interval(self.TDRSupdate, 607)
         Clock.schedule_interval(self.check_internet, 1)
         Clock.schedule_interval(self.updateArduinoCount, 5)
         Clock.schedule_interval(self.updateVV, 500)
@@ -1549,7 +1548,7 @@ class MainApp(App):
         Clock.schedule_interval(self.updateNightShade, 120)
         Clock.schedule_interval(self.updateOrbitMap, 31)
         Clock.schedule_interval(self.updateNASAVVImage, 67)
-        Clock.schedule_interval(self.updateOrbitGlobeImage, 10)
+        Clock.schedule_interval(self.updateOrbitGlobeImage, 55)
         return root
 
     def check_internet(self, dt):
@@ -1639,14 +1638,21 @@ class MainApp(App):
 
     def updateOrbitGlobeImage(self, dt):
         globe_image_path = mimic_data_directory / 'globe.png'
+        
         try:
-            if globe_image_path.exists():
-                self.orbit_screen.ids.orbit3d.source = str(globe_image_path)
-                self.orbit_screen.ids.orbit3d.reload()
-            else:
-                log_error("Globe image does not exist.")
+            self.orbit_screen.ids.orbit3d.source = str(globe_image_path)
+            self.orbit_screen.ids.orbit3d.reload()
         except Exception as e:
             log_error(f"Error loading globe image: {e}")
+        
+        #try:
+        #    if globe_image_path.exists():
+        #        self.orbit_screen.ids.orbit3d.source = str(globe_image_path)
+        #        self.orbit_screen.ids.orbit3d.reload()
+        #    else:
+        #        log_error("Globe image does not exist.")
+        #except Exception as e:
+        #    log_error(f"Error loading globe image: {e}")
 
     def updateOrbitGlobe(self, dt):
         proc = Popen(["python", mimic_directory + "/Mimic/Pi/orbitGlobe.py"])

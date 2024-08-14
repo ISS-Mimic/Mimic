@@ -72,7 +72,8 @@ def getVV_Image(page_url, output):
         if not image_url.startswith('http'):
             image_url = 'https://www.nasa.gov' + image_url
 
-        if re.search(r'/wp-content/uploads/\d{4}/\d{2}/iss-\d{2}-\d{2}-\d{2}\.png', image_url):
+        # Adjusted regular expression to allow additional characters after the date string
+        if re.search(r'/wp-content/uploads/\d{4}/\d{2}/iss-\d{2}-\d{2}-\d{2}(-\d)?\.png', image_url):
             filtered_image_urls.append(image_url)
 
     if filtered_image_urls:
