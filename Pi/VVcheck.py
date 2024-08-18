@@ -20,12 +20,12 @@ mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 log_file_path = mimic_directory + '/Mimic/Pi/Logs/mimiclog_vvcheck.log'
 
 logger = logging.getLogger('MyLogger')
-logger.setLevel(logging.INFO)  # Set logger to INFO level
+logger.setLevel(logging.ERROR)  # Set logger to INFO level
 
 # Create handler
 handler = RotatingFileHandler(log_file_path, maxBytes=1048576, backupCount=5)
 handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
-handler.setLevel(logging.INFO)  # Set handler to INFO level
+handler.setLevel(logging.ERROR)  # Set handler to INFO level
 
 # Add handler to logger
 if not logger.hasHandlers():
@@ -169,7 +169,7 @@ def get_wikipedia_data(wikiurl):
     # Iterate through all tables to find the one with "Arrival" column
     for table in tables:
         if 'Arrival' in table.columns: # Using "Arrival" as the unique identifier of the table we want (sometimes the table # changes)
-            #print(table)
+            print(table)
             return table
     
     raise ValueError("Mission table not found on the Wikipedia page.")
@@ -219,8 +219,11 @@ def clean_citations(text):
         return text
 
 wikipedia_df = get_wikipedia_data(wikiurl)
+#print(wikipedia_df)
 wikipedia_df = wikipedia_df.applymap(clean_citations)
+#print(wikipedia_df)
 wikipedia_df = clean_wikipedia_data(wikipedia_df)
+#print(wikipedia_df)
 
 def correlate_data(nasa_df, wiki_df):
     correlated_data = []
@@ -240,6 +243,7 @@ def correlate_data(nasa_df, wiki_df):
     return pd.DataFrame(correlated_data)
 
 correlated_df = correlate_data(current_docked_df, wikipedia_df)
+#print(correlated_df)
 
 def print_database_events(db_path='iss_vehicles.db'):
     conn = sqlite3.connect(db_path)

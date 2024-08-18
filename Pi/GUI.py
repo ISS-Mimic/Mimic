@@ -70,8 +70,8 @@ try:
     handler = RotatingFileHandler(log_file_path, maxBytes=1048576, backupCount=5)
     handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
     logger = logging.getLogger('MyLogger')
-    logger.setLevel(logging.INFO)  # Set logger to INFO level
-    handler.setLevel(logging.INFO)  # Set handler to INFO level
+    logger.setLevel(logging.ERROR)  # Set logger to INFO level
+    handler.setLevel(logging.ERROR)  # Set handler to INFO level
     logger.addHandler(handler)
 except Exception as e:
     log_error(f"Failed to set up logging: {e}")
@@ -112,7 +112,7 @@ def add_tty_device(name_to_add):
     if name_to_add not in SERIAL_PORTS:
         try:
             SERIAL_PORTS.append(name_to_add)
-            OPEN_SERIAL_PORTS.append(serial.Serial(SERIAL_PORTS[-1], SERIAL_SPEED, write_timeout=0, timeout=0))
+            OPEN_SERIAL_PORTS.append(serial.Serial(SERIAL_PORTS[-1], SERIAL_SPEED, write_timeout=0.5, timeout=0))
             log_str = "Added and opened %s." % name_to_add
             log_info(log_str)
         except IOError as e:
@@ -190,16 +190,55 @@ def open_serial_ports(serial_ports):
         if USE_CONFIG_JSON:
             log_info("\nNot all serial ports were detected. Check config.json for accuracy.\n\n%s" % e)
         raise Exception(e)
+#def serialWrite(*args):
+#    """ Writes to serial ports in list with retries. """
+#    log_info("Function call - serial write: " + str(*args))
+#    for s in OPEN_SERIAL_PORTS:
+#        try:
+#            s.write(str.encode(*args))
+#        except (OSError, serial.SerialException) as e:
+#            log_error(f"Error writing to {s.port}: {e}")
+#            try:
+#                log_info(f"Retrying write to {s.port}")
+#                time.sleep(0.1)
+#                s.write(str.encode(*args))
+#            except Exception as retry_error:
+#                log_error(f"Retry failed for {s.port}: {retry_error}")
+#                continue
+
 
 def serialWrite(*args):
-    """ Writes to serial ports in list. """
+    """ Writes to serial ports in list with retries on EAGAIN error. """
     log_info("Function call - serial write: " + str(*args))
     for s in OPEN_SERIAL_PORTS:
+        if not s.is_open:
+            log_error(f"Serial port {s.port} is not open.")
+            continue
         try:
             s.write(str.encode(*args))
         except (OSError, serial.SerialException) as e:
-            log_error(e)
+            if e.errno == 11:  # EAGAIN
+                log_info(f"EAGAIN error on {s.port}, retrying...")
+                time.sleep(0.1)
+                try:
+                    s.write(str.encode(*args))
+                except Exception as retry_error:
+                    log_error(f"Retry failed for {s.port}: {retry_error}")
+                    continue
+            else:
+                log_error(f"Error writing to {s.port}: {e}")
 
+
+#def serialWrite(*args):
+#    """ Writes to serial ports in list. """
+#    log_info("Function call - serial write: " + str(*args))
+#    for s in OPEN_SERIAL_PORTS:
+#        try:
+#            s.write(str.encode(*args))
+#            #print(len(str.encode(*args)))
+#        except (OSError, serial.SerialException) as e:
+#            log_error(e)
+#
 context = Context()
 if not USE_CONFIG_JSON:
     MONITOR = Monitor.from_netlink(context)
@@ -3136,9 +3175,11 @@ class MainApp(App):
 
         if rs_target_acquisition and ros_docking_avg <= 80000:
             self.rs_dock.ids.dock_in_progress.text = "DOCKING IN PROGRESS"
+            self.rs_dock.ids.dock_in_progress.color = (0,0,1,1)
             self.rs_dock.update_docking_bar_width(ros_docking_avg)
             if rs_sm_docking_flag:
                 self.rs_dock.ids.dock_in_progress.text = "DOCKING COMPLETE!"
+                self.rs_dock.ids.dock_in_progress.color = (0,1,0,1)
         else:
             self.rs_dock.ids.dock_in_progress.color = (0,0,0,0)
             self.rs_dock.update_docking_bar_width(ros_docking_avg)

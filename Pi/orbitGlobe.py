@@ -21,12 +21,12 @@ mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 log_file_path = mimic_directory + '/Mimic/Pi/Logs/mimiclog_orbitGlobe.log'
 
 logger = logging.getLogger('MyLogger')
-logger.setLevel(logging.INFO)  # Set logger to INFO level
+logger.setLevel(logging.ERROR)  # Set logger to INFO level
 
 # Create handler
 handler = RotatingFileHandler(log_file_path, maxBytes=1048576, backupCount=5)
 handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
-handler.setLevel(logging.INFO)  # Set handler to INFO level
+handler.setLevel(logging.ERROR)  # Set handler to INFO level
 
 # Add handler to logger
 if not logger.hasHandlers():
