@@ -122,9 +122,11 @@ def main():
     run_install("python3-pyudev", "sudo apt-get") #python libs for mimic
     run_install("lightstreamer-client-lib", "python -m pip") #iss telemetry service
 
-    # C++ stuff for recorded data playback
-    run_install("libsqlite3", "sudo apt-get") #c++ libs for recorded data playbackls
-    run_install("libboost-dev-all", "sudo apt-get") #c++ libs for recorded data playbackls
+    # C++ stuff for recorded data playback - are these pre-installed now?
+    #run_install("libsqlite3", "sudo apt-get") #outdated?
+    #run_install("libboost-dev-all", "sudo apt-get") #outdated
+    #run_install("libsqlite3-0", "sudo apt-get") #c++ libs for recorded data playbackls
+    #run_install("libboost-all-dev", "sudo apt-get") #c++ libs for recorded data playbackls
 
     # Kivy install
     print("\nInstalling Kivy requirements and package.")
