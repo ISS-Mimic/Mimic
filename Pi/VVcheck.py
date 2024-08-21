@@ -1,7 +1,7 @@
 import sqlite3
 import requests
 import urllib.request
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString
 import re
 import ssl
 import pandas as pd
