@@ -112,8 +112,8 @@ def get_nasa_data(url):
                     search_string = event.get_text()
                     if date_pattern.search(search_string):
                         nasa_data.append(search_string)
-                except NavigableString: 
-                    pass 
+                except Exception as e:
+                    log_error(e)
                 
     else:
         log_error(f"Failed to retrieve the webpage. Status code: {response.status_code}")
