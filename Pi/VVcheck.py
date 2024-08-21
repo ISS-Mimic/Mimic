@@ -108,8 +108,13 @@ def get_nasa_data(url):
         date_pattern = re.compile(r'\b\d{1,2}/\d{1,2}/\d{2,4}\b')
         for paragraph in paragraphs:
             for event in paragraph:
-                if date_pattern.search(event.get_text()):
-                    nasa_data.append(event.get_text())
+                try:
+                    search_string = event.get_text()):
+                    if date_pattern.search(search_string):
+                        nasa_data.append(search_string)
+                except NavigableString: 
+                    pass 
+                
     else:
         log_error(f"Failed to retrieve the webpage. Status code: {response.status_code}")
     return nasa_data
