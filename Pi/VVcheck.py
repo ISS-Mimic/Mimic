@@ -109,7 +109,7 @@ def get_nasa_data(url):
         for paragraph in paragraphs:
             for event in paragraph:
                 try:
-                    search_string = event.get_text()):
+                    search_string = event.get_text():
                     if date_pattern.search(search_string):
                         nasa_data.append(search_string)
                 except NavigableString: 
