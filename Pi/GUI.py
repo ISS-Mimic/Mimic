@@ -1093,21 +1093,28 @@ class ManualControlScreen(Screen):
 
 class Playback_Screen(Screen):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    playback = ""
+    time_factor = 60
+    usb_path = "/media/pi"
     
     def __init__(self, **kwargs):
         super(Playback_Screen, self).__init__(**kwargs)
+        self.playback = ""
+        self.time_factor = 60
+        self.usb_path = glob.glob('/media/*')
+        print(self.usb_path)
         self.usb_drives = self.get_mount_points()  # Initialize with already connected drives
         self.start_usb_monitoring()
         Clock.schedule_once(self.update_dropdown)  # Update dropdown with initial drives
 
     def get_mount_points(self):
-        # This function returns a set of current mount points
-        mount_points = []
         try:
-            mount_points = set(os.listdir('/media/pi'))
+            # Attempt to list the directory contents
+            return set(os.listdir(self.usb_path))
         except Exception as e:
-            log_error(e)
-        return mount_points
+            # Handle any exception (e.g., FileNotFoundError, PermissionError)
+            log_error(f"Error accessing USB path {self.usb_path}: {e}")
+            return set()  # Return an empty set if there's an error
 
     def usb_monitoring_task(self):
         initial_mounts = self.get_mount_points()
@@ -1125,7 +1132,7 @@ class Playback_Screen(Screen):
         # Get the Spinner widget from your layout
         dropdown = self.ids.playback_dropdown  # Adjust this according to your KV layout
         formatted_drives = [f"{drive} (USB)" for drive in self.usb_drives]
-        dropdown.values = formatted_drives + ['HTV','OFT-2']
+        dropdown.values = formatted_drives + ['HTV','OFT-2','Standard']
 
     def start_usb_monitoring(self):
         # Start the monitoring in a background thread
@@ -1134,83 +1141,87 @@ class Playback_Screen(Screen):
         thread.start()
 
     def on_dropdown_select(self, value):
-        playback = value
-        log_info(playback)
+        self.playback = value
+        
+    def on_disco_select(self, value):
+        self.playback = value
+
+    def start_press(self):
+        if self.playback == "OFT-2":
+            self.startDemo()
+        elif self.playback == "HTV":
+            self.startDemo()
+        elif self.playback == "Standard":
+            self.startDemo()
+        elif self.playback == "Disco":
+            self.startDemo()
+
+    def stop_press(self):
+        global p2, runningDemo
+        try:
+            p2.kill()
+        except Exception as e:
+            log_error(e)
+        else:
+            runningDemo = False
+        finally:
+            log_info("attempted to stop" + str(self.playback))
 
     def changeDemoBoolean(self, *args):
         global demoboolean
         demoboolean = args[0]
 
-    def startDisco(*args):
-        global p2, runningDemo, Disco
+    def increment_time(self):
+        #still need to figure out how to implement time factors in code - recompile for one time changes but real time active control?
+        self.time_factor += 5
+        if self.time_factor > 90:
+            self.time_factor = 90
+        elif self.time_factor == 1:
+            self.time_factor = 5
+        self.ids.time_factor_label.text = str(self.time_factor) + "x" 
+        
+    def decrement_time(self):
+        self.time_factor -= 5
+        if self.time_factor < 1:
+            self.time_factor = 1
+        self.ids.time_factor_label.text = str(self.time_factor) + "x" 
+
+    def startDemo(self):
+        global p2, playback, runningDemo
+        executable_path = mimic_directory + "/Mimic/Pi/RecordedData/playback.out"
+        data_path_oft2 = mimic_directory + "/Mimic/Pi/RecordedData/OFT2"
+        data_path_htv = mimic_directory + "/Mimic/Pi/RecordedData/HTV"
+        data_path_standard = mimic_directory + "/Mimic/Pi/RecordedData/Standard"
+        data_path_disco = mimic_directory + "/Mimic/Pi/RecordedData/Disco"
+
         if not runningDemo:
             try:
-                p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/disco.sh")
+                if self.playback == "OFT-2":
+                    try:
+                        p2 = Popen([executable_path, data_path_oft2])
+                    except Exception as e:
+                        log_error("Failed to start the process:", e)
+                elif self.playback == "HTV":
+                    try:
+                        p2 = Popen([executable_path, data_path_htv])
+                    except Exception as e:
+                        log_error("Failed to start the process:", e)
+                elif self.playback == "Standard":
+                    try:
+                        p2 = Popen([executable_path, data_path_standard])
+                    except Exception as e:
+                        log_error("Failed to start the process:", e)
+                elif self.playback == "Disco":
+                    try:
+                        #p2 = Popen([executable_path, data_path_oft2]) # want to replace disco script with recorded data folder
+                        p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/disco.sh")
+                    except Exception as e:
+                        log_error("Failed to start the process:", e)
             except Exception as e:
                 log_error(e)
             runningDemo = True
-            Disco = True
-            log_info("Successfully started Disco script")
+            log_info("started playback of " + str(self.playback))
 
-    def startDemo(*args):
-        global p2, runningDemo
-        if not runningDemo:
-            try:
-                #p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/demoOrbit.sh")
-                p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/OFT2"])
-            except Exception as e:
-                log_error(e)
-            runningDemo = True
-            log_info("Successfully started Demo Orbit script")
-
-    def stopDemo(*args):
-        global p2, runningDemo
-        try:
-            p2.kill()
-        except Exception as e:
-            log_error(e)
-        else:
-            runningDemo = False
-
-    def startHTVDemo(*args):
-        global p2, runningDemo
-        if not runningDemo:
-            try:
-                p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/demoHTVOrbit.sh")
-            except Exception as e:
-                log_error(e)
-            runningDemo = True
-            log_info("Successfully started Demo HTV Orbit script")
-
-    def stopHTVDemo(*args):
-        global p2, runningDemo
-        try:
-            p2.kill()
-        except Exception as e:
-            log_error(e)
-        else:
-            log_info("Successfully stopped Demo HTV Orbit script")
-            runningDemo = False
-                
-    def startOFT2Demo(*args):
-        global p2, runningDemo
-        if not runningDemo:
-            try:
-                p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/demoOFT2.sh")
-            except Exception as e:
-                log_error(e)
-            runningDemo = True
-            log_info("Successfully started Demo OFT2 Orbit script")
-
-    def stopOFT2Demo(*args):
-        global p2, runningDemo
-        try:
-            p2.kill()
-        except Exception as e:
-            log_error(e)
-        else:
-            log_error("Successfully stopped Demo OFT2 Orbit script")
-            runningDemo = False
 
 class Settings_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
@@ -1603,9 +1614,7 @@ class MainApp(App):
 
         if arduino_count > 0:
             self.mimic_screen.ids.mimicstartbutton.disabled = False
-            self.playback_screen.ids.DemoStart.disabled = False
-            self.playback_screen.ids.HTVDemoStart.disabled = False
-            self.playback_screen.ids.OFT2DemoStart.disabled = False
+            self.playback_screen.ids.start.disabled = False
             self.control_screen.ids.set90.disabled = False
             self.control_screen.ids.set0.disabled = False
             if mimicbutton:
@@ -1615,9 +1624,7 @@ class MainApp(App):
         else:
             self.mimic_screen.ids.mimicstartbutton.disabled = True
             self.mimic_screen.ids.mimicstartbutton.text = "Transmit"
-            self.playback_screen.ids.DemoStart.disabled = True
-            self.playback_screen.ids.HTVDemoStart.disabled = True
-            self.playback_screen.ids.OFT2DemoStart.disabled = True
+            self.playback_screen.ids.start.disabled = True
             self.control_screen.ids.set90.disabled = True
             self.control_screen.ids.set0.disabled = True
 

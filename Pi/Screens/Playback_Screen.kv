@@ -10,7 +10,6 @@
             do_scroll_x: False  # Disabling horizontal scrolling
             do_scroll_y: True   # Enabling vertical scrolling
 
-            # You can add your content inside this GridLayout
             GridLayout:
                 cols: 1
                 size_hint_y: None
@@ -83,24 +82,25 @@
             fit_mode: "fill"
         Spinner:
             id: playback_dropdown
-            size_hint: 0.2, 0.1
-            pos_hint: {"center_x": 0.5, "center_y": 0.5}
-            text: 'Select Playback Data'
+            size_hint: 0.175, 0.1
+            pos_hint: {"center_x": 0.155, "center_y": 0.55}
+            text: 'Select Data'
             values: ['HTV','OFT-2']
             on_text: root.on_dropdown_select(self.text)
+            on_release: start.background_color = 0,1,0,1
         Label:
             id: playbackstatus
             text: ''
             size_hint_y: 0.4
             font_size: self.height * 0.2
-            pos_hint: {"center_x": 0.5, "center_y": 0.1}
+            pos_hint: {"center_x": 0.5, "center_y": 0.08}
             markup: True
             color: 1,1,1
         Button:
             id: popup
             text: ''
             size_hint: 0.1,0.1
-            pos_hint: {"center_x": 0.5, "center_y": 0.8}
+            pos_hint: {"center_x": 0.25, "center_y": 0.8}
             background_color: 0,0,0,0
             on_release: Factory.DescriptionPopup().open()
             Image:
@@ -112,120 +112,75 @@
             size_hint: 0.14,0.115
             text: "Disco!"
             font_size: dp(30)
-            pos_hint: {"center_x": 0.85, "center_y": 0.47}
-            on_release: playbackstatus.text = 'Transmitting Disco Orbit'
-            on_release: root.changeDemoBoolean(True)
-            on_release: root.startDisco()
+            pos_hint: {"center_x": 0.8, "center_y": 0.55}
+            on_release: playbackstatus.text = 'Ready to Disco'
+            on_release: root.on_disco_select("Disco")
+            on_release: start.background_color = 0,1,0,1
         Button:
-            id: DemoStart
-            size_hint: 0.14,0.115
-            pos_hint: {"center_x": 0.15, "center_y": 0.54}
+            id: start
+            size_hint: 0.1,0.115
+            pos_hint: {"center_x": 0.2, "center_y": 0.25}
+            background_color: 1,0.3,0.4,0.85
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StartUnlit.png'
             background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StartDown.png'
-            on_release: DemoStop.disabled = False
-            on_release: playbackstatus.text = 'Transmitting Demo Orbit'
+            on_release: stop.background_color = 1,0,0,1
+            on_release: playback_dropdown.disabled = True
+            on_release: stop.disabled = False
+            on_release: playbackstatus.text = 'Beginning Playback'
             on_release: root.changeDemoBoolean(True)
             on_release: self.disabled = True
-            on_release: root.startDemo()
+            on_release: root.start_press()
         Button:
-            id: DemoStop
-            size_hint: 0.14,0.115
-            pos_hint: {"center_x": 0.15, "center_y": 0.40}
+            id: stop
+            size_hint: 0.1,0.115
+            pos_hint: {"center_x": 0.8, "center_y": 0.25}
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StopUnlit.png'
             background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StopDown.png'
             disabled: True
-            on_release: DemoStart.disabled = False
+            on_release: start.background_color = 0,0,0,0
+            on_release: self.background_color = 0,0,0,0
+            on_release: playback_dropdown.disabled = False
+            on_release: start.disabled = False
             on_release: playbackstatus.text = 'Stopped'
             on_release: root.changeDemoBoolean(False)
             on_release: self.disabled = True
-            on_release: root.stopDemo()
+            on_release: root.stop_press()
+        Label:
+            id: time_factor_label
+            #text: str(root.time_factor) + "x"
+            text: "Disabled for now"
+            size_hint_y: 0.3
+            #font_size: self.height * 0.2
+            font_size: 10
+            pos_hint: {"center_x": 0.48, "center_y": 0.55}
+            markup: True
+            color: 1,1,1
+            
         Button:
-            id: HTVDemoStart
-            size_hint: 0.14,0.115
-            pos_hint: {"center_x": 0.38, "center_y": 0.54}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StartUnlit.png'
-            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StartDown.png'
-            on_release: HTVDemoStop.disabled = False
-            on_release: playbackstatus.text = 'Transmitting HTV Demo Orbit'
-            on_release: root.changeDemoBoolean(True)
-            on_release: self.disabled = True
-            on_release: root.startHTVDemo()
-        Button:
-            id: HTVDemoStop
-            size_hint: 0.14,0.115
-            pos_hint: {"center_x": 0.38, "center_y": 0.40}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StopUnlit.png'
-            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StopDown.png'
+            id: time_plus
+            size_hint: 0.08,0.12
+            pos_hint: {"center_x": 0.54, "center_y": 0.45}
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/PBplusUnlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/PBplusDown.png'
+            on_release: root.increment_time()
             disabled: True
-            on_release: HTVDemoStart.disabled = False
-            on_release: playbackstatus.text = 'Stopped'
-            on_release: root.changeDemoBoolean(False)
-            on_release: self.disabled = True
         Button:
-            id: OFT2DemoStart
-            size_hint: 0.14,0.115
-            pos_hint: {"center_x": 0.15, "center_y": 0.54}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StartUnlit.png'
-            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StartDown.png'
-            on_release: OFT2DemoStop.disabled = False
-            on_release: playbackstatus.text = 'Transmitting OFT2 Demo'
-            on_release: root.changeDemoBoolean(True)
-            on_release: self.disabled = True
-            on_release: root.startOFT2Demo()
-        Button:
-            id: OFT2DemoStop
-            size_hint: 0.14,0.115
-            pos_hint: {"center_x": 0.15, "center_y": 0.40}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StopUnlit.png'
-            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StopDown.png'
+            id: time_minus
+            size_hint: 0.09,0.07
+            pos_hint: {"center_x": 0.44, "center_y": 0.45}
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/PBminusUnlit.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/PBminusDown.png'
+            on_release: root.decrement_time()
             disabled: True
-            on_release: OFT2DemoStart.disabled = False
-            on_release: playbackstatus.text = 'Stopped'
-            on_release: root.changeDemoBoolean(False)
-            on_release: self.disabled = True
-        Button:
-            id: LoadDemoStart
-            disabled: True
-            size_hint: 0.14,0.115
-            pos_hint: {"center_x": 0.615, "center_y": 0.54}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StartUnlit.png'
-            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StartDown.png'
-            on_release: LoadDemoStop.disabled = False
-            on_release: playbackstatus.text = 'Sending Demo'
-            on_release: root.changeDemoBoolean(True)
-            on_release: self.disabled = True
-            on_release: root.startLoadDemo()
-        Button:
-            id: LoadDemoStop
-            size_hint: 0.14,0.115
-            pos_hint: {"center_x": 0.615, "center_y": 0.40}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StopUnlit.png'
-            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StopDown.png'
-            disabled: True
-            on_release: LoadDemoStart.disabled = False
-            on_release: playbackstatus.text = 'Stopped'
-            on_release: root.changeDemoBoolean(False)
-            on_release: self.disabled = True
-        Button:
-            id: OFT2loop
-            text: 'OFT2 Loop'
-            size_hint: 0.1,0.1
-            font_size: dp(20)
-            pos_hint: {"center_x": 0.15, "center_y": 0.23}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StopUnlit.png'
-            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StopDown.png'
-            disabled: True
-            on_release: playbackstatus.text = 'Looping'
-            on_release: root.changeDemoBoolean(False)
-            on_release: self.disabled = True
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
-            on_release: DemoStart.disabled = False
-            on_release: DemoStop.disabled = True
+            on_release: start.background_color = 0,0,0,0
+            on_release: start.disabled = False
+            on_release: stop.disabled = True
             on_release: root.changeDemoBoolean(False)
-            on_release: root.stopDemo()
+            on_release: root.stop_press()
             on_release: root.manager.current = 'main'
         Image:
             id: signal
