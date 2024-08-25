@@ -190,21 +190,6 @@ def open_serial_ports(serial_ports):
         if USE_CONFIG_JSON:
             log_info("\nNot all serial ports were detected. Check config.json for accuracy.\n\n%s" % e)
         raise Exception(e)
-#def serialWrite(*args):
-#    """ Writes to serial ports in list with retries. """
-#    log_info("Function call - serial write: " + str(*args))
-#    for s in OPEN_SERIAL_PORTS:
-#        try:
-#            s.write(str.encode(*args))
-#        except (OSError, serial.SerialException) as e:
-#            log_error(f"Error writing to {s.port}: {e}")
-#            try:
-#                log_info(f"Retrying write to {s.port}")
-#                time.sleep(0.1)
-#                s.write(str.encode(*args))
-#            except Exception as retry_error:
-#                log_error(f"Retry failed for {s.port}: {retry_error}")
-#                continue
 
 
 def serialWrite(*args):
@@ -229,16 +214,6 @@ def serialWrite(*args):
                 log_error(f"Error writing to {s.port}: {e}")
 
 
-#def serialWrite(*args):
-#    """ Writes to serial ports in list. """
-#    log_info("Function call - serial write: " + str(*args))
-#    for s in OPEN_SERIAL_PORTS:
-#        try:
-#            s.write(str.encode(*args))
-#            #print(len(str.encode(*args)))
-#        except (OSError, serial.SerialException) as e:
-#            log_error(e)
-#
 context = Context()
 if not USE_CONFIG_JSON:
     MONITOR = Monitor.from_netlink(context)
@@ -1567,7 +1542,6 @@ class MainApp(App):
             startup = False
 
         #Clock.schedule_once(self.checkCrew, 30) #disabling for now issue #407
-        #Clock.schedule_once(self.checkBlogforEVA, 30) #disabling for now issue #407
         Clock.schedule_once(self.updateISS_TLE, 14)
         Clock.schedule_once(self.updateTDRS_TLE, 60)
         Clock.schedule_once(self.TDRSupdate, 30)

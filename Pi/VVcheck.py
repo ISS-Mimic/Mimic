@@ -2,6 +2,7 @@ import sqlite3
 import requests
 import urllib.request
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 import re
 import ssl
 import pandas as pd
@@ -100,19 +101,23 @@ def getVV_Image(page_url, output):
         log_error("No matching image URL found.")
 
 def get_nasa_data(url):
-    response = requests.get(nasaurl)
+    response = requests.get(url)
     if response.status_code == 200:
         soup = BeautifulSoup(response.content, 'html.parser')
         paragraphs = soup.find_all('p')
         nasa_data = []
         date_pattern = re.compile(r'\b\d{1,2}/\d{1,2}/\d{2,4}\b')
+        
         for paragraph in paragraphs:
             for event in paragraph:
-                if date_pattern.search(event.get_text()):
-                    nasa_data.append(event.get_text())
+                if isinstance(event, Tag):
+                    if date_pattern.search(event.get_text()):
+                        nasa_data.append(event.get_text())
     else:
         log_error(f"Failed to retrieve the webpage. Status code: {response.status_code}")
+    
     return nasa_data
+
 
 def standardize_date(date_str):
     try:
@@ -169,7 +174,7 @@ def get_wikipedia_data(wikiurl):
     # Iterate through all tables to find the one with "Arrival" column
     for table in tables:
         if 'Arrival' in table.columns: # Using "Arrival" as the unique identifier of the table we want (sometimes the table # changes)
-            print(table)
+            #print(table)
             return table
     
     raise ValueError("Mission table not found on the Wikipedia page.")
