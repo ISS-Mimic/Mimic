@@ -300,6 +300,71 @@ telemetry_data = [
     ('MSS OCS Payload Status MBS POA2', '0', '0', 'CSAMBA00004', 295),
 ]
 
+def create_vv_database(database_path, table_name):
+    # Open a connection to the database
+    with sqlite3.connect(database_path) as conn:
+        conn.isolation_level = None
+        c = conn.cursor()
+
+        # Set the journal mode to WAL
+        c.execute("PRAGMA journal_mode=WAL")
+
+        # Drop the table if it exists
+        c.execute(f"DROP TABLE IF EXISTS {table_name}")
+
+        # Create the table with the correct structure
+        c.execute(f'''
+            CREATE TABLE IF NOT EXISTS {table_name} (
+                Spacecraft TEXT,
+                Type TEXT,
+                Mission TEXT,
+                Event TEXT,
+                Date DATE,
+                Location TEXT,
+                Arrival TEXT,
+                Departure TEXT
+            )
+        ''')
+
+        # Insert initial data if the table is empty
+        c.execute(f"INSERT OR IGNORE INTO {table_name} (Spacecraft, Type, Mission, Event, Date, Location, Arrival, Departure) VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
+                  ('0', '0', '0', '0', '0', '0', '0', '0'))
+    
+        # Close the connection to the database
+        conn.close()
+
+def create_vv_database(database_path, table_name):
+    # Open a connection to the database
+    conn = sqlite3.connect(database_path)
+    conn.isolation_level = None
+    c = conn.cursor()
+
+    # Set the journal mode to WAL
+    c.execute("PRAGMA journal_mode=WAL")
+
+    # Drop the table if it exists
+    c.execute(f"DROP TABLE IF EXISTS {table_name}")
+
+    # Create the table with the correct structure
+    c.execute(f'''
+        CREATE TABLE IF NOT EXISTS {table_name} (
+            Spacecraft TEXT,
+            Type TEXT,
+            Mission TEXT,
+            Event TEXT,
+            Date DATE,
+            Location TEXT,
+            Arrival TEXT,
+            Departure TEXT
+        )
+    ''')
+
+    c.execute(f"INSERT OR IGNORE INTO {table_name} (Spacecraft, Type, Mission, Event, Date, Location, Arrival, Departure) VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
+                      ('0', '0', '0', '0', '0', '0', '0', '0'))
+
+    # Close the connection to the database
+    conn.close()
+
 def create_tdrs_database(database_path, table_name):
     # Open a connection to the database
     conn = sqlite3.connect(database_path)
@@ -331,6 +396,7 @@ def create_iss_telemetry_database(database_path, table_name, data):
 # Define the paths to the databases
 iss_telemetry_db_path = '/dev/shm/iss_telemetry.db'
 tdrs_db_path = '/dev/shm/tdrs.db'
+vv_db_path = '/dev/shm/vv.db'
 
 # Remove any existing databases at startup
 if os.path.exists(iss_telemetry_db_path):
@@ -338,6 +404,9 @@ if os.path.exists(iss_telemetry_db_path):
 
 if os.path.exists(tdrs_db_path):
     os.remove(tdrs_db_path)
+
+# Create the VV database and table
+create_vv_database(vv_db_path, 'vv')
 
 # Create the TDRS database and table
 create_tdrs_database(tdrs_db_path, 'tdrs')

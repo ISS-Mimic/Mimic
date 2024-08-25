@@ -20,6 +20,8 @@ import argparse
 import sys
 import os.path as op #use for getting mimic directory
 from pathlib import Path
+import logging
+from logging.handlers import RotatingFileHandler
 
 # This is here because Kivy gets upset if you pass in your own non-Kivy args
 CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), "config.json")
@@ -37,8 +39,9 @@ from kivy.lang import Builder
 from kivy.network.urlrequest import UrlRequest #using this to request webpages
 from kivy.clock import Clock
 from kivy.event import EventDispatcher
+from kivy.core.window import Window
 from kivy.properties import ObjectProperty
-from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
+from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition, NoTransition
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 
@@ -46,24 +49,42 @@ import database_initialize # create and populate database script
 
 mimic_data_directory = Path.home() / '.mimic_data'
 mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-print("Mimic Directory: " + mimic_directory)
+
+print("Starting ISS Mimic Program")
+print("Mimic Program Directory: " + mimic_directory + "/Mimic/Pi")
+print("Mimic Data Directory: " + str(mimic_data_directory))
 
 # Constants
 SERIAL_SPEED = 9600
 
 os.environ['KIVY_GL_BACKEND'] = 'gl' #need this to fix a kivy segfault that occurs with python3 for some reason
 
-# Create Program Logs
-mimiclog = open(mimic_directory + '/Mimic/Pi/Logs/mimiclog.txt', 'w')
+# Set up basic configuration for the logging system
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s: %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
 
-def logWrite(*args):
-    mimiclog.write(str(datetime.utcnow()))
-    mimiclog.write(' ')
-    mimiclog.write(str(args[0]))
-    mimiclog.write('\n')
-    mimiclog.flush()
+log_file_path = mimic_directory + '/Mimic/Pi/Logs/mimiclog.log'
 
-logWrite("Initialized Mimic Program Log")
+try:
+    handler = RotatingFileHandler(log_file_path, maxBytes=1048576, backupCount=5)
+    handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
+    logger = logging.getLogger('MyLogger')
+    logger.setLevel(logging.ERROR)  # Set logger to INFO level
+    handler.setLevel(logging.ERROR)  # Set handler to INFO level
+    logger.addHandler(handler)
+except Exception as e:
+    log_error(f"Failed to set up logging: {e}")
+
+logger.info("Mimic App Running.")
+
+def log_info(message):
+    logger.info(message)
+
+def log_error(message):
+    logger.error(message)
+
+log_info("Initialized Mimic Program Log")
 
 #-------------------------Look for a connected arduino-----------------------------------
 
@@ -79,8 +100,8 @@ def remove_tty_device(name_to_remove):
         if idx_to_remove != -1:
             del OPEN_SERIAL_PORTS[idx_to_remove]
             log_str = "Removed %s." % name_to_remove
-            logWrite(log_str)
-            print(log_str)
+            log_info(log_str)
+            log_info(log_str)
     except ValueError:
         # Not printing anything because it sometimes tries too many times and is irrelevant
         pass
@@ -91,10 +112,9 @@ def add_tty_device(name_to_add):
     if name_to_add not in SERIAL_PORTS:
         try:
             SERIAL_PORTS.append(name_to_add)
-            OPEN_SERIAL_PORTS.append(serial.Serial(SERIAL_PORTS[-1], SERIAL_SPEED, write_timeout=0, timeout=0))
+            OPEN_SERIAL_PORTS.append(serial.Serial(SERIAL_PORTS[-1], SERIAL_SPEED, write_timeout=0.5, timeout=0))
             log_str = "Added and opened %s." % name_to_add
-            logWrite(log_str)
-            print(log_str)
+            log_info(log_str)
         except IOError as e:
             # Not printing anything because sometimes it successfully opens soon after
             remove_tty_device(name_to_add) # don't leave it in the list if it didn't open
@@ -129,7 +149,7 @@ def parse_tty_name(device, val):
     if is_arduino_id_vendor_string(val):
         name = str(device).split('/')[-1:][0][:-2] # to get ttyACM0, etc.
         return '/dev/' + name
-    logWrite("Skipping serial device:\n%s" % str(device))
+    log_info("Skipping serial device:\n%s" % str(device))
 
 def get_tty_dev_names(context):
     """ Checks ID_VENDOR string of tty devices to identify Arduinos. """
@@ -168,17 +188,31 @@ def open_serial_ports(serial_ports):
             OPEN_SERIAL_PORTS.append(serial.Serial(s, SERIAL_SPEED, write_timeout=0, timeout=0))
     except (OSError, serial.SerialException) as e:
         if USE_CONFIG_JSON:
-            print("\nNot all serial ports were detected. Check config.json for accuracy.\n\n%s" % e)
+            log_info("\nNot all serial ports were detected. Check config.json for accuracy.\n\n%s" % e)
         raise Exception(e)
 
+
 def serialWrite(*args):
-    """ Writes to serial ports in list. """
-    logWrite("Function call - serial write: " + str(*args))
+    """ Writes to serial ports in list with retries on EAGAIN error. """
+    log_info("Function call - serial write: " + str(*args))
     for s in OPEN_SERIAL_PORTS:
+        if not s.is_open:
+            log_error(f"Serial port {s.port} is not open.")
+            continue
         try:
             s.write(str.encode(*args))
         except (OSError, serial.SerialException) as e:
-            logWrite(e)
+            if e.errno == 11:  # EAGAIN
+                log_info(f"EAGAIN error on {s.port}, retrying...")
+                time.sleep(0.1)
+                try:
+                    s.write(str.encode(*args))
+                except Exception as retry_error:
+                    log_error(f"Retry failed for {s.port}: {retry_error}")
+                    continue
+            else:
+                log_error(f"Error writing to {s.port}: {e}")
+
 
 context = Context()
 if not USE_CONFIG_JSON:
@@ -189,18 +223,20 @@ SERIAL_PORTS = get_serial_ports(context, USE_CONFIG_JSON)
 OPEN_SERIAL_PORTS = []
 open_serial_ports(SERIAL_PORTS)
 log_str = "Serial ports opened: %s" % str(SERIAL_PORTS)
-logWrite(log_str)
-print(log_str)
+log_info(log_str)
 if not USE_CONFIG_JSON:
     TTY_OBSERVER.start()
     log_str = "Started monitoring serial ports."
-    print(log_str)
-    logWrite(log_str)
+    log_info(log_str)
+    log_info(log_str)
 
-#-------------------------TDRS Checking Database-----------------------------------------
+#-----------------------------Checking Databases-----------------------------------------
 TDRSconn = sqlite3.connect('/dev/shm/tdrs.db')
 TDRSconn.isolation_level = None
 TDRScursor = TDRSconn.cursor()
+VVconn = sqlite3.connect('/dev/shm/vv.db')
+VVconn.isolation_level = None
+VVcursor = VVconn.cursor()
 conn = sqlite3.connect('/dev/shm/iss_telemetry.db')
 conn.isolation_level = None
 c = conn.cursor()
@@ -343,18 +379,26 @@ class MainScreen(Screen):
     def killproc(*args):
         global p,p2
         if not USE_CONFIG_JSON:
-            TTY_OBSERVER.stop()
-            log_str = "Stopped monitoring serial ports."
-            logWrite(log_str)
-            print(log_str)
+            try:
+                if TTY_OBSERVER and hasattr(TTY_OBSERVER, 'monitor'):
+                    # Try stopping the observer; handle any potential errors
+                    TTY_OBSERVER.stop()
+                    log_info("TTY_OBSERVER stopped successfully.")
+                else:
+                    log_info("TTY_OBSERVER is not initialized or already stopped.")
+            except Exception as e:
+                log_error(f"Error while stopping TTY_OBSERVER: {e}")
+
         try:
             p.kill()
             p2.kill()
         except Exception as e:
-            logWrite(e)
+            log_error(e)
         os.system('rm /dev/shm/*.db*') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
         staleTelemetry()
-        logWrite("Successfully stopped ISS telemetry javascript and removed database")
+        log_info("Successfully stopped ISS telemetry javascript and removed database")
+        log_info("App Exit")
+        print("Mimic App Exited")
 
 class ManualControlScreen(Screen):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
@@ -826,62 +870,62 @@ class ManualControlScreen(Screen):
             try:
                 self.sendBeta4B(float(args[0]))
             except Exception as e:
-                logWrite(e)
+                log_error(e)
         if Beta3Bcontrol:
             try:
                 self.sendBeta3B(float(args[0]))
             except Exception as e:
-                logWrite(e)
+                log_error(e)
         if Beta2Bcontrol:
             try:
                 self.sendBeta2B(float(args[0]))
             except Exception as e:
-                logWrite(e)
+                log_error(e)
         if Beta1Bcontrol:
             try:
                 self.sendBeta1B(float(args[0]))
             except Exception as e:
-                logWrite(e)
+                log_error(e)
         if Beta4Acontrol:
             try:
                 self.sendBeta4A(float(args[0]))
             except Exception as e:
-                logWrite(e)
+                log_error(e)
         if Beta3Acontrol:
             try:
                 self.sendBeta3A(float(args[0]))
             except Exception as e:
-                logWrite(e)
+                log_error(e)
         if Beta2Acontrol:
             try:
                 self.sendBeta2A(float(args[0]))
             except Exception as e:
-                logWrite(e)
+                log_errpr(e)
         if Beta1Acontrol:
             try:
                 self.sendBeta1A(float(args[0]))
             except Exception as e:
-                logWrite(e)
+                log_error(e)
         if PTRRJcontrol:
             try:
                 self.sendPTRRJ(float(args[0]))
             except Exception as e:
-                logWrite(e)
+                log_error(e)
         if STRRJcontrol:
             try:
                 self.sendSTRRJ(float(args[0]))
             except Exception as e:
-                logWrite(e)
+                log_error(e)
         if PSARJcontrol:
             try:
                 self.sendPSARJ(float(args[0]))
             except Exception as e:
-                logWrite(e)
+                log_error(e)
         if SSARJcontrol:
             try:
                 self.sendSSARJ(float(args[0]))
             except Exception as e:
-                logWrite(e)
+                log_error(e)
 
     def sendPSARJ(self, *args):
         global psarjmc
@@ -1062,7 +1106,7 @@ class Playback_Screen(Screen):
         try:
             mount_points = set(os.listdir('/media/pi'))
         except Exception as e:
-            logWrite(e)
+            log_error(e)
         return mount_points
 
     def usb_monitoring_task(self):
@@ -1091,7 +1135,7 @@ class Playback_Screen(Screen):
 
     def on_dropdown_select(self, value):
         playback = value
-        print(playback)
+        log_info(playback)
 
     def changeDemoBoolean(self, *args):
         global demoboolean
@@ -1103,10 +1147,10 @@ class Playback_Screen(Screen):
             try:
                 p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/disco.sh")
             except Exception as e:
-                logWrite(e)
+                log_error(e)
             runningDemo = True
             Disco = True
-            logWrite("Successfully started Disco script")
+            log_info("Successfully started Disco script")
 
     def startDemo(*args):
         global p2, runningDemo
@@ -1115,16 +1159,16 @@ class Playback_Screen(Screen):
                 #p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/demoOrbit.sh")
                 p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/OFT2"])
             except Exception as e:
-                logWrite(e)
+                log_error(e)
             runningDemo = True
-            logWrite("Successfully started Demo Orbit script")
+            log_info("Successfully started Demo Orbit script")
 
     def stopDemo(*args):
         global p2, runningDemo
         try:
             p2.kill()
         except Exception as e:
-            logWrite(e)
+            log_error(e)
         else:
             runningDemo = False
 
@@ -1134,18 +1178,18 @@ class Playback_Screen(Screen):
             try:
                 p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/demoHTVOrbit.sh")
             except Exception as e:
-                logWrite(e)
+                log_error(e)
             runningDemo = True
-            logWrite("Successfully started Demo HTV Orbit script")
+            log_info("Successfully started Demo HTV Orbit script")
 
     def stopHTVDemo(*args):
         global p2, runningDemo
         try:
             p2.kill()
         except Exception as e:
-            logWrite(e)
+            log_error(e)
         else:
-            logWrite("Successfully stopped Demo HTV Orbit script")
+            log_info("Successfully stopped Demo HTV Orbit script")
             runningDemo = False
                 
     def startOFT2Demo(*args):
@@ -1154,18 +1198,18 @@ class Playback_Screen(Screen):
             try:
                 p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/demoOFT2.sh")
             except Exception as e:
-                logWrite(e)
+                log_error(e)
             runningDemo = True
-            logWrite("Successfully started Demo OFT2 Orbit script")
+            log_info("Successfully started Demo OFT2 Orbit script")
 
     def stopOFT2Demo(*args):
         global p2, runningDemo
         try:
             p2.kill()
         except Exception as e:
-            logWrite(e)
+            log_error(e)
         else:
-            logWrite("Successfully stopped Demo OFT2 Orbit script")
+            log_error("Successfully stopped Demo OFT2 Orbit script")
             runningDemo = False
 
 class Settings_Screen(Screen, EventDispatcher):
@@ -1176,18 +1220,8 @@ class Settings_Screen(Screen, EventDispatcher):
         else:
             serialWrite("SmartRolloverBGA=0 ")
 
-class Orbit_Screen(Screen, EventDispatcher):
+class LED_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    mimic_data_directory = Path.home() / '.mimic_data'
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class Orbit_Pass(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class Orbit_Data(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
 
 class ISS_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
@@ -1195,6 +1229,62 @@ class ISS_Screen(Screen, EventDispatcher):
     def selectModule(*args): #used for choosing a module on screen to light up
         global module
         module = str(args[1])
+
+class MimicScreen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+    def changeMimicBoolean(self, *args):
+        global mimicbutton
+        mimicbutton = args[0]
+
+    def startproc(self):
+        global p,TDRSproc
+        log_info("Telemetry Subprocess start")
+        p = Popen(["python", mimic_directory + "/Mimic/Pi/iss_telemetry.py"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
+        #TDRSproc = Popen(["python", mimic_directory + "/Mimic/Pi/TDRScheck.py"]) #uncomment if TDRS site comes back and fixed code
+        #p = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/Data"])
+
+    def killproc(*args):
+        global p,p2,c
+        c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer', '0', 'Unsubscribed', '0', 0)")
+        try:
+            p.kill()
+            p2.kill()
+            TDRSproc.kill()
+        except Exception as e:
+            log_error(e)
+
+class CDH_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class Crew_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class CT_Camera_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class CT_SASA_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class CT_SGANT_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class CT_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class CT_UHF_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class ECLSS_IATCS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
 
 class ECLSS_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
@@ -1204,31 +1294,27 @@ class ECLSS_WRM_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
-class ECLSS_IATCS_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
 class EPS_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
-class CT_Screen(Screen, EventDispatcher):
+class EVA_EMU_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
-class CT_SASA_Screen(Screen, EventDispatcher):
+class EVA_Main_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
-class CT_Camera_Screen(Screen, EventDispatcher):
+class EVA_Pictures(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
-class CT_UHF_Screen(Screen, EventDispatcher):
+class EVA_RS_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
-class CT_SGANT_Screen(Screen, EventDispatcher):
+class EVA_US_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
@@ -1236,11 +1322,61 @@ class GNC_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
-class CDH_Screen(Screen, EventDispatcher):
+class MSS_MT_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
-class Science_Screen(Screen, EventDispatcher):
+class Orbit_Data(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class Orbit_Pass(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class Orbit_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    mimic_data_directory = Path.home() / '.mimic_data'
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class Robo_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class RS_Dock_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        Window.bind(on_resize=self.update_docking_bar)
+        self.bind(size=self.update_docking_bar)
+        self.bind(pos=self.update_docking_bar)
+        Clock.schedule_once(self.update_docking_bar, 0)  # Ensure the method is called after initialization
+
+    def update_docking_bar(self, *args):
+        width, height = Window.size
+        #log_info(f"Window size: width={width}, height={height}")  # Debug print
+        #log_info(f"Before update: docking_bar size={self.ids.docking_bar.size}, pos={self.ids.docking_bar.pos}")  # Debug print
+
+        self.ids.docking_bar.size = (width * 0.325, height * 0.04)  # Smaller size
+        self.ids.docking_bar.pos = (width * 0.53, height * 0.205)  # Adjusted position
+        self.ids.docking_bar.size_hint = None, None  # Ensure size_hint is not interfering
+
+        # Force the layout to update
+        self.ids.dock_layout.do_layout()
+        #log_info(f"After update: docking_bar size={self.ids.docking_bar.size}, pos={self.ids.docking_bar.pos}")  # Debug print 
+
+    def update_docking_bar_width(self, value):
+        width, height = Window.size
+        mapped_value = 1 - (value / 80000)  # Inverted mapping from 0-80000 to 1-0
+        if mapped_value < 0:
+            mapped_value = 0
+        new_width = width * 0.325 * mapped_value  # Adjust the width based on the value (0 to 1)
+        self.ids.docking_bar.size = (new_width, self.ids.docking_bar.height)
+        self.ids.dock_layout.do_layout()  # Force the layout to update
+
+class RS_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
@@ -1252,11 +1388,27 @@ class Science_INT_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
+class Science_JEF_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
 class Science_NRAL_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
-class Science_JEF_Screen(Screen, EventDispatcher):
+class Science_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class SPDM1_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class SSRMS_Screen(Screen, EventDispatcher):
+    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    signalcolor = ObjectProperty([1, 1, 1])
+
+class TCS_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
@@ -1268,185 +1420,119 @@ class VV_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
 
-class EVA_Main_Screen(Screen, EventDispatcher):
+class VV_Image(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    mimic_data_directory = Path.home() / '.mimic_data'
     signalcolor = ObjectProperty([1, 1, 1])
-
-class EVA_EMU_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class EVA_US_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class EVA_RS_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class EVA_Pictures(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-
-class TCS_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class LED_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-
-class RS_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class RS_Dock_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class Crew_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-
-class Robo_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class SSRMS_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class SPDM1_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class MSS_MT_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class MimicScreen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-    def changeMimicBoolean(self, *args):
-        global mimicbutton
-        mimicbutton = args[0]
-
-    def startproc(self):
-        global p,TDRSproc
-        logWrite("Telemetry Subprocess start")
-        p = Popen(["python", mimic_directory + "/Mimic/Pi/iss_telemetry.py"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
-        TDRSproc = Popen(["python", mimic_directory + "/Mimic/Pi/TDRScheck.py"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
-        #p = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/Data"])
-
-    def killproc(*args):
-        global p,p2,c
-        c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer', '0', 'Unsubscribed', '0', 0)")
-        try:
-            p.kill()
-            p2.kill()
-            TDRSproc.kill()
-        except Exception as e:
-            logWrite(e)
 
 class MainScreenManager(ScreenManager):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
 class MainApp(App):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
+    ros_data = []
 
     def build(self):
         global startup, ScreenList, stopAnimation
 
         self.main_screen = MainScreen(name = 'main')
-        self.mimic_screen = MimicScreen(name = 'mimic')
-        self.iss_screen = ISS_Screen(name = 'iss')
-        self.eclss_screen = ECLSS_Screen(name = 'eclss')
-        self.eclss_wrm_screen = ECLSS_WRM_Screen(name = 'wrm')
-        self.eclss_iatcs_screen = ECLSS_IATCS_Screen(name = 'iatcs')
         self.control_screen = ManualControlScreen(name = 'manualcontrol')
         self.led_screen = LED_Screen(name = 'led')
-        self.orbit_screen = Orbit_Screen(name = 'orbit')
-        self.orbit_pass = Orbit_Pass(name = 'orbit_pass')
-        self.orbit_data = Orbit_Data(name = 'orbit_data')
         self.playback_screen = Playback_Screen(name = 'playback')
-        self.eps_screen = EPS_Screen(name = 'eps')
-        self.ct_screen = CT_Screen(name = 'ct')
-        self.ct_sasa_screen = CT_SASA_Screen(name = 'ct_sasa')
-        self.ct_uhf_screen = CT_UHF_Screen(name = 'ct_uhf')
-        self.ct_camera_screen = CT_Camera_Screen(name = 'ct_camera')
-        self.ct_sgant_screen = CT_SGANT_Screen(name = 'ct_sgant')
-        self.gnc_screen = GNC_Screen(name = 'gnc')
-        self.tcs_screen = TCS_Screen(name = 'tcs')
-        self.crew_screen = Crew_Screen(name = 'crew')
         self.settings_screen = Settings_Screen(name = 'settings')
-        self.us_eva = EVA_US_Screen(name='us_eva')
+        self.mimic_screen = MimicScreen(name = 'mimic')
+        self.iss_screen = ISS_Screen(name = 'iss')
+        self.cdh_screen = CDH_Screen(name = 'cdh')
+        self.crew_screen = Crew_Screen(name = 'crew')
+        self.ct_camera_screen = CT_Camera_Screen(name = 'ct_camera')
+        self.ct_sasa_screen = CT_SASA_Screen(name = 'ct_sasa')
+        self.ct_sgant_screen = CT_SGANT_Screen(name = 'ct_sgant')
+        self.ct_screen = CT_Screen(name = 'ct')
+        self.ct_uhf_screen = CT_UHF_Screen(name = 'ct_uhf')
+        self.eclss_iatcs_screen = ECLSS_IATCS_Screen(name = 'iatcs')
+        self.eclss_screen = ECLSS_Screen(name = 'eclss')
+        self.eclss_wrm_screen = ECLSS_WRM_Screen(name = 'wrm')
+        self.eps_screen = EPS_Screen(name = 'eps')
+        self.eva_emu = EVA_EMU_Screen(name='eva_emu')
+        self.eva_main = EVA_Main_Screen(name='eva_main')
+        self.eva_pictures = EVA_Pictures(name='eva_pictures')
+        self.ext_science_screen = Science_EXT_Screen(name = 'ext_science')
+        self.gnc_screen = GNC_Screen(name = 'gnc')
+        self.int_science_screen = Science_INT_Screen(name = 'int_science')
+        self.jef_science_screen = Science_JEF_Screen(name = 'jef_science')
+        self.mss_mt_screen = MSS_MT_Screen(name='mt')
+        self.nral_science_screen = Science_NRAL_Screen(name = 'nral_science')
+        self.orbit_data = Orbit_Data(name = 'orbit_data')
+        self.orbit_pass = Orbit_Pass(name = 'orbit_pass')
+        self.orbit_screen = Orbit_Screen(name = 'orbit')
+        self.robo_screen = Robo_Screen(name='robo')
+        self.rs_dock = RS_Dock_Screen(name='rs_dock')
         self.rs_eva = EVA_RS_Screen(name='rs_eva')
         self.rs_screen = RS_Screen(name='rs')
-        self.rs_dock = RS_Dock_Screen(name='rs_dock')
-        self.robo_screen = Robo_Screen(name='robo')
-        self.ssrms_screen = SSRMS_Screen(name='ssrms')
-        self.spdm1_screen = SPDM1_Screen(name='spdm1')
-        self.mss_mt_screen = MSS_MT_Screen(name='mt')
-        self.cdh_screen = CDH_Screen(name = 'cdh')
         self.science_screen = Science_Screen(name = 'science')
-        self.ext_science_screen = Science_EXT_Screen(name = 'ext_science')
-        self.int_science_screen = Science_INT_Screen(name = 'int_science')
-        self.nral_science_screen = Science_NRAL_Screen(name = 'nral_science')
-        self.jef_science_screen = Science_JEF_Screen(name = 'jef_science')
+        self.spdm1_screen = SPDM1_Screen(name='spdm1')
+        self.ssrms_screen = SSRMS_Screen(name='ssrms')
+        self.tcs_screen = TCS_Screen(name = 'tcs')
+        self.us_eva = EVA_US_Screen(name='us_eva')
         self.usos_screen = USOS_Screen(name = 'usos')
+        self.vv_image = VV_Image(name = 'vv_image')
         self.vv_screen = VV_Screen(name = 'vv')
-        self.eva_main = EVA_Main_Screen(name='eva_main')
-        self.eva_emu = EVA_EMU_Screen(name='eva_emu')
-        self.eva_pictures = EVA_Pictures(name='eva_pictures')
 
         #Add all new telemetry screens to this list, this is used for the signal status icon and telemetry value colors and arduino icon
-        ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen', 'eclss_wrm_screen', 
-                      'eclss_iatcs_screen', 'main_screen', 'control_screen', 'settings_screen',
-                      'ct_screen', 'ct_sasa_screen', 'ct_sgant_screen', 'ct_uhf_screen',
-                      'ct_camera_screen', 'gnc_screen', 'orbit_screen', 'us_eva', 'rs_eva',
-                      'eva_main', 'eva_emu', 'mimic_screen', 'robo_screen', 'mss_mt_screen', 'ssrms_screen', 
-                      'spdm1_screen','orbit_pass', 'orbit_data', 'crew_screen', 'playback_screen']
+        ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen', 
+                      'eclss_wrm_screen', 'eclss_iatcs_screen', 'main_screen', 
+                      'control_screen', 'settings_screen', 'ct_screen', 'ct_sasa_screen', 
+                      'ct_sgant_screen', 'ct_uhf_screen', 'ct_camera_screen', 'gnc_screen', 
+                      'orbit_screen', 'us_eva', 'rs_eva', 'eva_main', 'eva_emu', 
+                      'mimic_screen', 'robo_screen', 'mss_mt_screen', 'ssrms_screen', 
+                      'spdm1_screen','orbit_pass', 'orbit_data', 'crew_screen', 
+                      'playback_screen', 'vv_screen', 'vv_image', 'usos_screen',
+                      'rs_screen', 'rs_dock']
 
-        root = MainScreenManager(transition=SwapTransition())
+        root = MainScreenManager(transition=NoTransition())
         root.add_widget(self.main_screen)
         root.add_widget(self.control_screen)
-        root.add_widget(self.mimic_screen)
         root.add_widget(self.led_screen)
         root.add_widget(self.playback_screen)
-        root.add_widget(self.orbit_screen)
-        root.add_widget(self.orbit_pass)
-        root.add_widget(self.orbit_data)
-        root.add_widget(self.iss_screen)
+        root.add_widget(self.settings_screen)
+        root.add_widget(self.mimic_screen)
+        root.add_widget(self.cdh_screen)
+        root.add_widget(self.crew_screen)
+        root.add_widget(self.ct_camera_screen)
+        root.add_widget(self.ct_sasa_screen)
+        root.add_widget(self.ct_sgant_screen)
+        root.add_widget(self.ct_screen)
+        root.add_widget(self.ct_uhf_screen)
+        root.add_widget(self.eclss_iatcs_screen)
         root.add_widget(self.eclss_screen)
         root.add_widget(self.eclss_wrm_screen)
-        root.add_widget(self.eclss_iatcs_screen)
-        root.add_widget(self.cdh_screen)
-        root.add_widget(self.science_screen)
-        root.add_widget(self.ext_science_screen)
-        root.add_widget(self.int_science_screen)
-        root.add_widget(self.nral_science_screen)
-        root.add_widget(self.jef_science_screen)
-        root.add_widget(self.usos_screen)
-        root.add_widget(self.vv_screen)
         root.add_widget(self.eps_screen)
-        root.add_widget(self.ct_screen)
-        root.add_widget(self.ct_sasa_screen)
-        root.add_widget(self.ct_uhf_screen)
-        root.add_widget(self.ct_camera_screen)
-        root.add_widget(self.ct_sgant_screen)
+        root.add_widget(self.eva_emu)
+        root.add_widget(self.eva_main)
+        root.add_widget(self.eva_pictures)
+        root.add_widget(self.ext_science_screen)
         root.add_widget(self.gnc_screen)
-        root.add_widget(self.us_eva)
+        root.add_widget(self.int_science_screen)
+        root.add_widget(self.iss_screen)
+        root.add_widget(self.jef_science_screen)
+        root.add_widget(self.mss_mt_screen)
+        root.add_widget(self.nral_science_screen)
+        root.add_widget(self.orbit_data)
+        root.add_widget(self.orbit_pass)
+        root.add_widget(self.orbit_screen)
+        root.add_widget(self.robo_screen)
+        root.add_widget(self.rs_dock)
         root.add_widget(self.rs_eva)
         root.add_widget(self.rs_screen)
-        root.add_widget(self.rs_dock)
-        root.add_widget(self.robo_screen)
-        root.add_widget(self.ssrms_screen)
+        root.add_widget(self.science_screen)
         root.add_widget(self.spdm1_screen)
-        root.add_widget(self.mss_mt_screen)
-        root.add_widget(self.eva_main)
-        root.add_widget(self.eva_emu)
-        root.add_widget(self.eva_pictures)
+        root.add_widget(self.ssrms_screen)
         root.add_widget(self.tcs_screen)
-        root.add_widget(self.crew_screen)
-        root.add_widget(self.settings_screen)
-        root.current = 'main' #change this back to main when done with eva setup
+        root.add_widget(self.us_eva)
+        root.add_widget(self.usos_screen)
+        root.add_widget(self.vv_image)
+        root.add_widget(self.vv_screen)
+        root.current = 'main'
 
         Clock.schedule_interval(self.update_labels, 1) #all telemetry wil refresh and get pushed to arduinos every half second!
         Clock.schedule_interval(self.animate3, 0.1)
@@ -1456,25 +1542,26 @@ class MainApp(App):
             startup = False
 
         #Clock.schedule_once(self.checkCrew, 30) #disabling for now issue #407
-        #Clock.schedule_once(self.checkBlogforEVA, 30) #disabling for now issue #407
-        Clock.schedule_once(self.updateISS_TLE, 15)
-        Clock.schedule_once(self.updateTDRS_TLE, 15)
-        Clock.schedule_once(self.updateOrbitGlobe, 15)
+        Clock.schedule_once(self.updateISS_TLE, 14)
+        Clock.schedule_once(self.updateTDRS_TLE, 60)
         Clock.schedule_once(self.TDRSupdate, 30)
         Clock.schedule_once(self.updateNightShade, 20)
+        Clock.schedule_once(self.updateVV, 10)
 
-        Clock.schedule_interval(self.updateISS_TLE, 300)
-        Clock.schedule_interval(self.updateTDRS_TLE, 300)
-        Clock.schedule_interval(self.updateOrbitGlobe, 10)
-        Clock.schedule_interval(self.TDRSupdate, 600)
+        Clock.schedule_interval(self.updateISS_TLE, 302)
+        Clock.schedule_interval(self.updateTDRS_TLE, 290)
+        Clock.schedule_interval(self.updateOrbitGlobe, 31)
+        Clock.schedule_interval(self.TDRSupdate, 607)
         Clock.schedule_interval(self.check_internet, 1)
         Clock.schedule_interval(self.updateArduinoCount, 5)
+        Clock.schedule_interval(self.updateVV, 500)
+        Clock.schedule_interval(self.update_vv_values, 40)
 
         #schedule the orbitmap to update with shadow every 5 mins
         Clock.schedule_interval(self.updateNightShade, 120)
-        Clock.schedule_interval(self.updateOrbitMap, 30)
-        Clock.schedule_interval(self.updateOrbitGlobeImage, 10)
-        Clock.schedule_interval(self.checkTDRS, 5)
+        Clock.schedule_interval(self.updateOrbitMap, 31)
+        Clock.schedule_interval(self.updateNASAVVImage, 67)
+        Clock.schedule_interval(self.updateOrbitGlobeImage, 55)
         return root
 
     def check_internet(self, dt):
@@ -1535,13 +1622,13 @@ class MainApp(App):
             self.control_screen.ids.set0.disabled = True
 
     def deleteURLPictures(self, dt):
-        logWrite("Function call - deleteURLPictures")
+        log_info("Function call - deleteURLPictures")
         global EVA_picture_urls
         del EVA_picture_urls[:]
         EVA_picture_urls[:] = []
 
     def changePictures(self, dt):
-        logWrite("Function call - changeURLPictures")
+        log_info("Function call - changeURLPictures")
         global EVA_picture_urls
         global urlindex
         urlsize = len(EVA_picture_urls)
@@ -1553,14 +1640,32 @@ class MainApp(App):
         urlindex = urlindex + 1
         if urlindex > urlsize-1:
             urlindex = 0
+
+    def updateNASAVVImage(self, dt):
+        self.vv_image.ids.VVimage.source = str(mimic_data_directory) + '/vv.png'
+        self.vv_image.ids.VVimage.reload()
                 
     def updateOrbitMap(self, dt):
         self.orbit_screen.ids.OrbitMap.source = str(mimic_data_directory) + '/map.jpg'
         self.orbit_screen.ids.OrbitMap.reload()
 
     def updateOrbitGlobeImage(self, dt):
-        self.orbit_screen.ids.orbit3d.source = str(mimic_data_directory) + '/globe.png'
-        self.orbit_screen.ids.orbit3d.reload()
+        globe_image_path = mimic_data_directory / 'globe.png'
+        
+        try:
+            self.orbit_screen.ids.orbit3d.source = str(globe_image_path)
+            self.orbit_screen.ids.orbit3d.reload()
+        except Exception as e:
+            log_error(f"Error loading globe image: {e}")
+        
+        #try:
+        #    if globe_image_path.exists():
+        #        self.orbit_screen.ids.orbit3d.source = str(globe_image_path)
+        #        self.orbit_screen.ids.orbit3d.reload()
+        #    else:
+        #        log_error("Globe image does not exist.")
+        #except Exception as e:
+        #    log_error(f"Error loading globe image: {e}")
 
     def updateOrbitGlobe(self, dt):
         proc = Popen(["python", mimic_directory + "/Mimic/Pi/orbitGlobe.py"])
@@ -1568,23 +1673,22 @@ class MainApp(App):
     def updateNightShade(self, dt):
         proc = Popen(["python", mimic_directory + "/Mimic/Pi/NightShade.py"])
 
+    def updateVV(self, dt):
+        proc = Popen(["python", mimic_directory + "/Mimic/Pi/VVcheck.py"])
+
     def updateISS_TLE(self, dt):
         proc = Popen(["python", mimic_directory + "/Mimic/Pi/getTLE_ISS.py"])
 
     def updateTDRS_TLE(self, dt):
         proc = Popen(["python", mimic_directory + "/Mimic/Pi/getTLE_TDRS.py"])
 
-    def checkTDRS(self, dt):
-        global activeTDRS1
-        global activeTDRS2
-
     def check_EVA_stats(self, lastname1, firstname1, lastname2, firstname2):
         global numEVAs1, EVAtime_hours1, EVAtime_minutes1, numEVAs2, EVAtime_hours2, EVAtime_minutes2
-        logWrite("Function call - check EVA stats")
+        log_info("Function call - check EVA stats")
         eva_url = 'http://www.spacefacts.de/eva/e_eva_az.htm'
 
         def on_success(req, result):
-            logWrite("Check EVA Stats - Successs")
+            log_info("Check EVA Stats - Successs")
             soup = BeautifulSoup(result, 'html.parser') #using bs4 to parse website
             numEVAs1 = 0
             EVAtime_hours1 = 0
@@ -1629,13 +1733,13 @@ class MainApp(App):
             self.us_eva.ids.EV2_EVAtime.text = "Total EVA Time = " + str(EV2_hours) + "h " + str(EV2_minutes) + "m"
 
         def on_redirect(req, result):
-            logWrite("Warning - EVA stats failure (redirect)")
+            log_info("Warning - EVA stats failure (redirect)")
 
         def on_failure(req, result):
-            logWrite("Warning - EVA stats failure (url failure)")
+            log_info("Warning - EVA stats failure (url failure)")
 
         def on_error(req, result):
-            logWrite("Warning - EVA stats failure (url error)")
+            log_info("Warning - EVA stats failure (url error)")
 
         #obtain eva statistics web page for parsing
         req = UrlRequest(eva_url, on_success, on_redirect, on_failure, on_error, timeout=1)
@@ -1643,7 +1747,7 @@ class MainApp(App):
     def checkBlogforEVA(self, dt):
         iss_blog_url =  'https://blogs.nasa.gov/spacestation/tag/spacewalk/'
         def on_success(req, data): #if blog data is successfully received, it is processed here
-            logWrite("Blog Success")
+            log_info("Blog Success")
             soup = BeautifulSoup(data, "lxml")
             blog_entries = soup.find("div", {"class": "entry-content"})
             blog_text = blog_entries.get_text()
@@ -1651,7 +1755,7 @@ class MainApp(App):
             iss_EVcrew_url = 'https://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'
 
             def on_success2(req2, data2):
-                logWrite("Successfully fetched EV crew JSON")
+                log_info("Successfully fetched EV crew JSON")
                 number_of_space = int(data2['number'])
                 names = []
                 for num in range(0, number_of_space):
@@ -1660,28 +1764,28 @@ class MainApp(App):
                 try:
                     self.checkBlog(names,blog_text)
                 except Exception as e:
-                    logWrite("Error checking blog: " + str(e))
+                    log_error("Error checking blog: " + str(e))
 
             def on_redirect2(req, result):
-                logWrite("Warning - Get EVA crew failure (redirect)")
-                logWrite(result)
+                log_error("Warning - Get EVA crew failure (redirect)")
+                log_error(result)
 
             def on_failure2(req, result):
-                logWrite("Warning - Get EVA crew failure (url failure)")
+                log_error("Warning - Get EVA crew failure (url failure)")
 
             def on_error2(req, result):
-                logWrite("Warning - Get EVA crew failure (url error)")
+                log_error("Warning - Get EVA crew failure (url error)")
 
             req2 = UrlRequest(iss_EVcrew_url, on_success2, on_redirect2, on_failure2, on_error2, timeout=1)
 
         def on_redirect(req, result):
-            logWrite("Warning - Get nasa blog failure (redirect)")
+            log_error("Warning - Get nasa blog failure (redirect)")
 
         def on_failure(req, result):
-            logWrite("Warning - Get nasa blog failure (url failure)")
+            log_error("Warning - Get nasa blog failure (url failure)")
 
         def on_error(req, result):
-            logWrite("Warning - Get nasa blog failure (url error)")
+            log_error("Warning - Get nasa blog failure (url error)")
 
         req = UrlRequest(iss_blog_url, on_success, on_redirect, on_failure, on_error, timeout=1)
 
@@ -1708,8 +1812,8 @@ class MainApp(App):
                     name_position = blog_text.find(name)
                     ev2name = name
 
-        logWrite("Likely EV1: "+ev1name)
-        logWrite("Likely EV2: "+ev2name)
+        log_info("Likely EV1: "+ev1name)
+        log_info("Likely EV2: "+ev2name)
 
         ev1_surname = ev1name.split()[-1]
         ev1_firstname = ev1name.split()[0]
@@ -1719,10 +1823,10 @@ class MainApp(App):
         try:
             self.check_EVA_stats(ev1_surname,ev1_firstname,ev2_surname,ev2_firstname)
         except Exception as e:
-            logWrite("Error retrieving EVA stats: " + str(e))
+            log_error("Error retrieving EVA stats: " + str(e))
 
     def flashROBObutton(self, instance):
-        logWrite("Function call - flashRobo")
+        #log_info("Function call - flashRobo")
 
         self.mimic_screen.ids.Robo_button.background_color = (0, 0, 1, 1)
         def reset_color(*args):
@@ -1730,7 +1834,7 @@ class MainApp(App):
         Clock.schedule_once(reset_color, 0.5)
     
     def flashUS_EVAbutton(self, instance):
-        logWrite("Function call - flashUS_EVA")
+        #log_info("Function call - flashUS_EVA")
 
         self.eva_main.ids.US_EVA_Button.background_color = (0, 0, 1, 1)
         def reset_color(*args):
@@ -1738,7 +1842,7 @@ class MainApp(App):
         Clock.schedule_once(reset_color, 0.5)
 
     def flashRS_EVAbutton(self, instance):
-        logWrite("Function call - flashRS_EVA")
+        #log_info("Function call - flashRS_EVA")
 
         self.eva_main.ids.RS_EVA_Button.background_color = (0, 0, 1, 1)
         def reset_color(*args):
@@ -1746,7 +1850,7 @@ class MainApp(App):
         Clock.schedule_once(reset_color, 0.5)
 
     def flashEVAbutton(self, instance):
-        logWrite("Function call - flashEVA")
+        #log_info("Function call - flashEVA")
 
         self.mimic_screen.ids.EVA_button.background_color = (0, 0, 1, 1)
         def reset_color(*args):
@@ -1815,7 +1919,7 @@ class MainApp(App):
             # You should have keys like 'TDRS12_TLE', 'TDRS6_TLE', etc. in your TDRS_TLEs dictionary.
         except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
             # Handle the error: if the config is missing or corrupt, TDRS TLEs can't be updated.
-            print(f"Error loading TDRS TLE data: {e}")
+            log_error(f"Error loading TDRS TLE data: {e}")
             return  # Exit the function if we can't get the TLE data
 
         TDRS12_TLE = ephem.readtle("TDRS 12", tdrs_tles.get('TDRS 12')[0], tdrs_tles.get('TDRS 12')[1])
@@ -1823,21 +1927,17 @@ class MainApp(App):
         TDRS10_TLE = ephem.readtle("TDRS 10", tdrs_tles.get('TDRS 10')[0], tdrs_tles.get('TDRS 10')[1])
         TDRS11_TLE = ephem.readtle("TDRS 11", tdrs_tles.get('TDRS 11')[0], tdrs_tles.get('TDRS 11')[1])
         TDRS7_TLE = ephem.readtle("TDRS 7", tdrs_tles.get('TDRS 7')[0], tdrs_tles.get('TDRS 7')[1])
-
-        #TEMP FIX TO ERROR DO NOT MERGE THESE LINES       
-        if self.orbit_screen.ids.OrbitMap.texture_size[0] == 0: #temp fix to ensure no divide by 0
-            normalizedX = 1
-        else:
-            normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
-
-        if self.orbit_screen.ids.OrbitMap.texture_size[1] == 0:
-            normalizedY = 1
-        else:
-            normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
         
-        #normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
-        #normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
-
+        def safe_divide(numerator, denominator):
+            if denominator == 0:
+                return 1
+            else:
+                return numerator / denominator
+        
+        # added safe divide to fix #378
+        normalizedX = safe_divide(self.orbit_screen.ids.OrbitMap.norm_image_size[0],self.orbit_screen.ids.OrbitMap.texture_size[0])
+        normalizedY = safe_divide(self.orbit_screen.ids.OrbitMap.norm_image_size[1],self.orbit_screen.ids.OrbitMap.texture_size[1])
+        
         def scaleLatLon(latitude, longitude):
             #converting lat lon to x, y for orbit map
             fromLatSpan = 180.0
@@ -2008,9 +2108,9 @@ class MainApp(App):
         self.orbit_screen.ids.TDRS10.pos = (scaleLatLon2(TDRS10lat, TDRS10lon)['new_x']-((self.orbit_screen.ids.TDRS10.width/2)*normalizedX),scaleLatLon2(TDRS10lat, TDRS10lon)['new_y']-((self.orbit_screen.ids.TDRS10.height/2)*normalizedY))
         self.orbit_screen.ids.TDRS7.pos = (scaleLatLon2(TDRS7lat, TDRS7lon)['new_x']-((self.orbit_screen.ids.TDRS7.width/2)*normalizedX),scaleLatLon2(TDRS7lat, TDRS7lon)['new_y']-((self.orbit_screen.ids.TDRS7.height/2)*normalizedY))
         #add labels and ZOE
-        self.orbit_screen.ids.TDRSeLabel.pos_hint = {"center_x": scaleLatLon(0, -41)['newLon']+0.06, "center_y": scaleLatLon(0, -41)['newLat']}
-        self.orbit_screen.ids.TDRSwLabel.pos_hint = {"center_x": scaleLatLon(0, -174)['newLon']+0.06, "center_y": scaleLatLon(0, -174)['newLat']}
-        self.orbit_screen.ids.TDRSzLabel.pos_hint = {"center_x": scaleLatLon(0, 85)['newLon']+0.05, "center_y": scaleLatLon(0, 85)['newLat']}
+        self.orbit_screen.ids.TDRSeLabel.pos_hint = {"center_x": scaleLatLon(0, -36)['newLon']+0.06, "center_y": scaleLatLon(0, -41)['newLat']}
+        self.orbit_screen.ids.TDRSwLabel.pos_hint = {"center_x": scaleLatLon(0, -166)['newLon']+0.06, "center_y": scaleLatLon(0, -174)['newLat']}
+        self.orbit_screen.ids.TDRSzLabel.pos_hint = {"center_x": scaleLatLon(0, 87)['newLon']+0.05, "center_y": scaleLatLon(0, 85)['newLat']}
         self.orbit_screen.ids.ZOE.pos_hint = {"center_x": scaleLatLon(0, 77)['newLon'], "center_y": scaleLatLon(0, 77)['newLat']}
         self.orbit_screen.ids.ZOElabel.pos_hint = {"center_x": scaleLatLon(0, 77)['newLon'], "center_y": scaleLatLon(0, 77)['newLat']+0.1}
 
@@ -2024,7 +2124,7 @@ class MainApp(App):
                 ISS_TLE = ephem.readtle("ISS (ZARYA)",config['ISS_TLE_Line1'],config['ISS_TLE_Line2'])
         except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
             # If any error occurs, we assume we need to fetch a new TLE
-            print(e)
+            log_info(e)
             return
 
         def scaleLatLon(latitude, longitude):
@@ -2297,30 +2397,31 @@ class MainApp(App):
         try:    
             nextpassinfo = location.next_pass(ISS_TLE)
         except Exception as e:
-            logWrite("Orbit Update error: " + str(e))
+            log_error("Orbit Update error: " + str(e))
         else:
-            logWrite("Successfull pass prediction update")
+            log_info("Successfull pass prediction update")
 
-        if nextpassinfo[0] is None:
-            self.orbit_screen.ids.iss_next_pass1.text = "n/a"
-            self.orbit_screen.ids.iss_next_pass2.text = "n/a"
-            self.orbit_screen.ids.countdown.text = "n/a"
-        else:
-            nextpassdatetime = datetime.strptime(str(nextpassinfo[0]), '%Y/%m/%d %H:%M:%S') #convert to datetime object for timezone conversion
-            nextpassinfo_format = nextpassdatetime.replace(tzinfo=pytz.utc)
-            localtimezone = pytz.timezone('America/Chicago')
-            localnextpass = nextpassinfo_format.astimezone(localtimezone)
-            self.orbit_screen.ids.iss_next_pass1.text = str(localnextpass).split()[0] #display next pass time
-            self.orbit_screen.ids.iss_next_pass2.text = str(localnextpass).split()[1].split('-')[0] #display next pass time
-            timeuntilnextpass = nextpassinfo[0] - location.date
-            nextpasshours = timeuntilnextpass*24.0
-            nextpassmins = (nextpasshours-math.floor(nextpasshours))*60
-            nextpassseconds = (nextpassmins-math.floor(nextpassmins))*60
-            if isVisible(nextpassinfo):
-                self.orbit_screen.ids.ISSvisible.text = "Visible Pass!"
+        if 'nextpassinfo' in locals(): # check for existence of nextpassinfo first
+            if nextpassinfo[0] is None:
+                self.orbit_screen.ids.iss_next_pass1.text = "n/a"
+                self.orbit_screen.ids.iss_next_pass2.text = "n/a"
+                self.orbit_screen.ids.countdown.text = "n/a"
             else:
-                self.orbit_screen.ids.ISSvisible.text = "Not Visible"
-            self.orbit_screen.ids.countdown.text = str("{:.0f}".format(math.floor(nextpasshours))) + ":" + str("{:.0f}".format(math.floor(nextpassmins))) + ":" + str("{:.0f}".format(math.floor(nextpassseconds))) #display time until next pass
+                nextpassdatetime = datetime.strptime(str(nextpassinfo[0]), '%Y/%m/%d %H:%M:%S') #convert to datetime object for timezone conversion
+                nextpassinfo_format = nextpassdatetime.replace(tzinfo=pytz.utc)
+                localtimezone = pytz.timezone('America/Chicago')
+                localnextpass = nextpassinfo_format.astimezone(localtimezone)
+                self.orbit_screen.ids.iss_next_pass1.text = str(localnextpass).split()[0] #display next pass time
+                self.orbit_screen.ids.iss_next_pass2.text = str(localnextpass).split()[1].split('-')[0] #display next pass time
+                timeuntilnextpass = nextpassinfo[0] - location.date
+                nextpasshours = timeuntilnextpass*24.0
+                nextpassmins = (nextpasshours-math.floor(nextpasshours))*60
+                nextpassseconds = (nextpassmins-math.floor(nextpassmins))*60
+                if isVisible(nextpassinfo):
+                    self.orbit_screen.ids.ISSvisible.text = "Visible Pass!"
+                else:
+                    self.orbit_screen.ids.ISSvisible.text = "Not Visible"
+                self.orbit_screen.ids.countdown.text = str("{:.0f}".format(math.floor(nextpasshours))) + ":" + str("{:.0f}".format(math.floor(nextpassmins))) + ":" + str("{:.0f}".format(math.floor(nextpassseconds))) #display time until next pass
 
 
     def map_rotation(self, args):
@@ -2340,7 +2441,7 @@ class MainApp(App):
 
     def hold_timer(self, dt):
         global seconds2, holdstartTime
-        logWrite("Function Call - hold timer")
+        log_info("Function Call - hold timer")
         unixconvert = time.gmtime(time.time())
         currenthours = float(unixconvert[7])*24+unixconvert[3]+float(unixconvert[4])/60+float(unixconvert[5])/3600
         seconds2 = (currenthours-EVAstartTime)*3600
@@ -2356,6 +2457,7 @@ class MainApp(App):
 
         if not internet:
             for x in ScreenList:
+                #log_info(x)
                 getattr(self, x).ids.signal.source = mimic_directory + '/Mimic/Pi/imgs/signal/offline.png'
             self.changeColors(0.5, 0.5, 0.5)
         else:
@@ -2433,6 +2535,329 @@ class MainApp(App):
             getattr(self, x).ids.signal.anim_delay = 0.12
         for x in ScreenList:
             getattr(self, x).ids.signal.size_hint_y = 0.112
+
+    def update_vv_values(self, dt):
+        try:
+            # Check if the table exists before querying
+            VVcursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='vehicles'")
+            if VVcursor.fetchone() is not None:
+                VVcursor.execute('SELECT Mission FROM vehicles')
+                mission = VVcursor.fetchall()
+                VVcursor.execute('SELECT Type FROM vehicles')
+                mission_type = VVcursor.fetchall()
+                VVcursor.execute('SELECT Location FROM vehicles')
+                location = VVcursor.fetchall()
+                VVcursor.execute('SELECT Arrival FROM vehicles')
+                arrival = VVcursor.fetchall()
+                VVcursor.execute('SELECT Departure FROM vehicles')
+                departure = VVcursor.fetchall()
+                VVcursor.execute('SELECT Spacecraft FROM vehicles')
+                spacecraft = VVcursor.fetchall()
+
+                all_ports = {
+                    "Node 2 Forward",
+                    "Node 2 Zenith",
+                    "Node 2 Nadir",
+                    "Node 1 Nadir",
+                    "Service Module Aft",
+                    "MRM-2 Zenith",
+                    "MRM-1 Nadir",
+                    "RS Node Nadir"
+                }
+
+                occupied_ports = set()
+
+                for i, port in enumerate(location):
+                    port = port[0]  # Extract the port name from the tuple
+                    occupied_ports.add(port)
+                    sc_check = spacecraft[i][0].strip()
+                    sc_check = spacecraft[i][0].replace('\xa0', ' ')  # Replace non-breaking space with a regular space
+
+                    if "SC" in sc_check or "Boeing" in sc_check or "CST" in sc_check:
+                        sc_name = "CST-100 Starliner"
+                        sc_name2 = sc_check
+                    elif "Crew" in sc_check:
+                        sc_name = "Crew Dragon"
+                        sc_name2 = sc_check.replace(sc_name + " ", "").strip()
+                    elif "Cargo" in sc_check:
+                        sc_name = "Cargo Dragon"
+                        sc_name2 = sc_check.replace(sc_name+" ","")
+                    elif "Soyuz" in sc_check:
+                        sc_name = "Soyuz MS"
+                        sc_name2 = sc_check.replace(sc_name+" ","")
+                    elif "Progress" in sc_check:
+                        sc_name = "Progress MS"
+                        sc_name2 = sc_check.replace(sc_name+" ","")
+                    elif "NG" in mission[i][0]:
+                        sc_name = "Cygnus"
+                        sc_name2 = sc_check
+                    else:
+                        sc_name = "n/a"
+                        sc_name2 = "n/a"
+
+                    if arrival[i][0] is None:
+                        arrival_date = "n/a"
+                    else:
+                        arrival_date = str(arrival[i][0])[:10]
+                    
+                    if departure[i][0] is None:
+                        departure_date = "n/a"
+                    else:
+                        departure_date = str(departure[i][0])[:10]
+
+                    if str(mission_type[i][0]) == "Crewed":
+                        type_edit = " (Crewed)"
+                    else:
+                        type_edit = " (Cargo)"
+
+                    if port == "Node 2 Forward":
+                        self.usos_screen.ids.n2f_mission.text = str(mission[i][0]) + type_edit
+                        self.usos_screen.ids.n2f_vehicle.text = sc_name
+                        self.usos_screen.ids.n2f_spacecraft.text = sc_name2
+                        self.usos_screen.ids.n2f_arrival.text = "Arrival: " + arrival_date
+                        self.usos_screen.ids.n2f_departure.text = "Departure: " + departure_date
+                        self.usos_screen.ids.n2f_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.vv_screen.ids.n2f_label.text = sc_name + "\n" + str(mission[i][0])
+                        if "Dragon" in sc_name:
+                            self.usos_screen.ids.n2f_dragon.opacity = 1.0
+                            self.usos_screen.ids.n2f_starliner.opacity = 0.0
+                            self.vv_screen.ids.n2f_dragon.opacity = 1.0
+                            self.vv_screen.ids.n2f_starliner.opacity = 0.0
+                        elif sc_name == "CST-100 Starliner":
+                            self.usos_screen.ids.n2f_starliner.opacity = 1.0
+                            self.usos_screen.ids.n2f_dragon.opacity = 0.0
+                            self.vv_screen.ids.n2f_dragon.opacity = 0.0
+                            self.vv_screen.ids.n2f_starliner.opacity = 1.0
+                    elif port == "Node 2 Zenith":
+                        self.usos_screen.ids.n2z_mission.text = str(mission[i][0]) + type_edit
+                        self.usos_screen.ids.n2z_vehicle.text = sc_name
+                        self.usos_screen.ids.n2z_spacecraft.text = sc_name2
+                        self.usos_screen.ids.n2z_arrival.text = "Arrival: " + arrival_date
+                        self.usos_screen.ids.n2z_departure.text = "Departure: " + departure_date
+                        self.usos_screen.ids.n2z_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.vv_screen.ids.n2z_label.text = sc_name + "\n" + str(mission[i][0])
+                        if "Dragon" in sc_name:
+                            self.usos_screen.ids.n2z_dragon.opacity = 1.0
+                            self.usos_screen.ids.n2z_starliner.opacity = 0.0
+                            self.vv_screen.ids.n2z_dragon.opacity = 1.0
+                            self.vv_screen.ids.n2z_starliner.opacity = 0.0
+                        elif sc_name == "CST-100 Starliner":
+                            self.usos_screen.ids.n2z_starliner.opacity = 1.0
+                            self.usos_screen.ids.n2z_dragon.opacity = 0.0
+                            self.vv_screen.ids.n2z_dragon.opacity = 0.0
+                            self.vv_screen.ids.n2z_starliner.opacity = 1.0
+                    elif port == "Node 2 Nadir":
+                        self.usos_screen.ids.n2n_mission.text = str(mission[i][0]) + type_edit
+                        self.usos_screen.ids.n2n_vehicle.text = sc_name
+                        self.usos_screen.ids.n2n_spacecraft.text = sc_name2
+                        self.usos_screen.ids.n2n_arrival.text = "Arrival: " + arrival_date
+                        self.usos_screen.ids.n2n_departure.text = "Departure: " + departure_date
+                        self.usos_screen.ids.n2n_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.vv_screen.ids.n2n_label.text = sc_name + "\n" + str(mission[i][0])
+                        #if "Dream" in sc_name:
+                            #self.usos_screen.ids.n2n_dreamchaser.opacity = 1.0
+                            #self.usos_screen.ids.n2n_htvx.opacity = 0.0
+                            #self.vv_screen.ids.n2n_dreamchaser.opacity = 1.0
+                            #self.vv_screen.ids.n2n_htvx.opacity = 0.0
+                        #elif "HTV" in sc_name:
+                            #self.usos_screen.ids.n2n_dreamchaser.opacity = 0.0
+                            #self.usos_screen.ids.n2n_htvx.opacity = 1.0
+                            #self.vv_screen.ids.n2n_dreamchaser.opacity = 0.0
+                            #self.vv_screen.ids.n2n_htvx.opacity = 1.0
+                    elif port == "Node 1 Nadir":
+                        self.usos_screen.ids.n1n_mission.text = str(mission[i][0]) + type_edit
+                        self.usos_screen.ids.n1n_vehicle.text = sc_name
+                        self.usos_screen.ids.n1n_spacecraft.text = sc_name2
+                        self.usos_screen.ids.n1n_arrival.text = "Arrival: " + arrival_date
+                        self.usos_screen.ids.n1n_departure.text = "Departure: " + departure_date
+                        self.usos_screen.ids.n1n_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.vv_screen.ids.n1n_label.text = sc_name + "\n" + str(mission[i][0])
+                        if sc_name == "Cygnus":
+                            self.usos_screen.ids.n1n_cygnus.opacity = 1.0
+                            self.vv_screen.ids.n1n_cygnus.opacity = 1.0
+                        else:
+                            self.usos_screen.ids.n1n_cygnus.opacity = 0.0
+                            self.vv_screen.ids.n1n_cygnus.opacity = 0.0
+                    elif port == "Service Module Aft":
+                        self.rs_screen.ids.sma_mission.text = str(mission[i][0]) + type_edit
+                        self.rs_screen.ids.sma_vehicle.text = sc_name
+                        self.rs_screen.ids.sma_spacecraft.text = sc_name2
+                        self.rs_screen.ids.sma_arrival.text = "Arrival: " + arrival_date
+                        self.rs_screen.ids.sma_departure.text = "Departure: " + departure_date
+                        self.rs_screen.ids.sma_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.vv_screen.ids.sma_label.text = sc_name + "\n" + str(mission[i][0])
+                        if "Soyuz" in sc_name:
+                            self.rs_screen.ids.sma_soyuz.opacity = 1.0
+                            self.rs_screen.ids.sma_progress.opacity = 0.0
+                            self.vv_screen.ids.sma_soyuz.opacity = 1.0
+                            self.vv_screen.ids.sma_progress.opacity = 0.0
+                        elif "Progress" in sc_name:
+                            self.rs_screen.ids.sma_soyuz.opacity = 0.0
+                            self.rs_screen.ids.sma_progress.opacity = 1.0
+                            self.vv_screen.ids.sma_soyuz.opacity = 0.0
+                            self.vv_screen.ids.sma_progress.opacity = 1.0
+                    elif port == "MRM-2 Zenith":
+                        self.rs_screen.ids.mrm2_mission.text = str(mission[i][0]) + type_edit
+                        self.rs_screen.ids.mrm2_vehicle.text = sc_name
+                        self.rs_screen.ids.mrm2_spacecraft.text = sc_name2
+                        self.rs_screen.ids.mrm2_arrival.text = "Arrival: " + arrival_date
+                        self.rs_screen.ids.mrm2_departure.text = "Departure: " + departure_date
+                        self.rs_screen.ids.mrm2_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.vv_screen.ids.mrm2_label.text = sc_name + "\n" + str(mission[i][0])
+                        if "Soyuz" in sc_name:
+                            self.rs_screen.ids.mrm2_soyuz.opacity = 1.0
+                            self.rs_screen.ids.mrm2_progress.opacity = 0.0
+                            self.vv_screen.ids.mrm2_soyuz.opacity = 1.0
+                            self.vv_screen.ids.mrm2_progress.opacity = 0.0
+                        elif "Progress" in sc_name:
+                            self.rs_screen.ids.mrm2_soyuz.opacity = 0.0
+                            self.rs_screen.ids.mrm2_progress.opacity = 1.0
+                            self.vv_screen.ids.mrm2_soyuz.opacity = 0.0
+                            self.vv_screen.ids.mrm2_progress.opacity = 1.0
+                    elif port == "MRM-1 Nadir":
+                        self.rs_screen.ids.mrm1_mission.text = str(mission[i][0]) + type_edit
+                        self.rs_screen.ids.mrm1_vehicle.text = sc_name
+                        self.rs_screen.ids.mrm1_spacecraft.text = sc_name2
+                        self.rs_screen.ids.mrm1_arrival.text = "Arrival: " + arrival_date
+                        self.rs_screen.ids.mrm1_departure.text = "Departure: " + departure_date
+                        self.rs_screen.ids.mrm1_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.vv_screen.ids.mrm1_label.text = sc_name + "\n" + str(mission[i][0])
+                        if "Soyuz" in sc_name:
+                            self.rs_screen.ids.mrm1_soyuz.opacity = 1.0
+                            self.rs_screen.ids.mrm1_progress.opacity = 0.0
+                            self.vv_screen.ids.mrm1_soyuz.opacity = 1.0
+                            self.vv_screen.ids.mrm1_progress.opacity = 0.0
+                        elif "Progress" in sc_name:
+                            self.rs_screen.ids.mrm1_soyuz.opacity = 0.0
+                            self.rs_screen.ids.mrm1_progress.opacity = 1.0
+                            self.vv_screen.ids.mrm1_soyuz.opacity = 0.0
+                            self.vv_screen.ids.mrm1_progress.opacity = 1.0
+                    elif port == "RS Node Nadir":
+                        self.rs_screen.ids.rsn_mission.text = str(mission[i][0]) + type_edit
+                        self.rs_screen.ids.rsn_vehicle.text = sc_name
+                        self.rs_screen.ids.rsn_spacecraft.text = sc_name2
+                        self.rs_screen.ids.rsn_arrival.text = "Arrival: " + arrival_date
+                        self.rs_screen.ids.rsn_departure.text = "Departure: " + departure_date
+                        self.rs_screen.ids.rsn_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.vv_screen.ids.rsn_label.text = sc_name + "\n" + str(mission[i][0])
+                        if "Soyuz" in sc_name:
+                            self.rs_screen.ids.rsn_soyuz.opacity = 1.0
+                            self.rs_screen.ids.rsn_progress.opacity = 0.0
+                            self.vv_screen.ids.rsn_soyuz.opacity = 1.0
+                            self.vv_screen.ids.rsn_progress.opacity = 0.0
+                        elif "Progress" in sc_name:
+                            self.rs_screen.ids.rsn_soyuz.opacity = 0.0
+                            self.rs_screen.ids.rsn_progress.opacity = 1.0
+                            self.vv_screen.ids.rsn_soyuz.opacity = 0.0
+                            self.vv_screen.ids.rsn_progress.opacity = 1.0
+
+                unoccupied_ports = all_ports - occupied_ports
+
+                # Handle unoccupied ports
+                for port in unoccupied_ports:
+                    if port == "Node 2 Forward":
+                        self.usos_screen.ids.n2f_mission.text = "-"
+                        self.usos_screen.ids.n2f_vehicle.text = "-"
+                        self.usos_screen.ids.n2f_spacecraft.text = "-"
+                        self.usos_screen.ids.n2f_arrival.text = "-"
+                        self.usos_screen.ids.n2f_departure.text = "-"
+                        self.usos_screen.ids.n2f_dragon.opacity = 0.0
+                        self.usos_screen.ids.n2f_starliner.opacity = 0.0
+                        self.usos_screen.ids.n2f_label.text = ""
+                        self.vv_screen.ids.n2f_label.text = ""
+                        self.vv_screen.ids.n2f_dragon.opacity = 0.0
+                        self.vv_screen.ids.n2f_starliner.opacity = 0.0
+                    elif port == "Node 2 Zenith":
+                        self.usos_screen.ids.n2z_mission.text = "-"
+                        self.usos_screen.ids.n2z_vehicle.text = "-"
+                        self.usos_screen.ids.n2z_spacecraft.text = "-"
+                        self.usos_screen.ids.n2z_arrival.text = "-"
+                        self.usos_screen.ids.n2z_departure.text = "-"
+                        self.usos_screen.ids.n2z_dragon.opacity = 0.0
+                        self.usos_screen.ids.n2z_starliner.opacity = 0.0
+                        self.usos_screen.ids.n2z_label.text = ""
+                        self.vv_screen.ids.n2z_label.text = ""
+                        self.vv_screen.ids.n2z_dragon.opacity = 0.0
+                        self.vv_screen.ids.n2z_starliner.opacity = 0.0
+                    elif port == "Node 2 Nadir":
+                        self.usos_screen.ids.n2n_mission.text = "-"
+                        self.usos_screen.ids.n2n_vehicle.text = "-"
+                        self.usos_screen.ids.n2n_spacecraft.text = "-"
+                        self.usos_screen.ids.n2n_arrival.text = "-"
+                        self.usos_screen.ids.n2n_departure.text = "-"
+                        self.usos_screen.ids.n2n_label.text = ""
+                        self.vv_screen.ids.n2n_label.text = ""
+                    elif port == "Node 1 Nadir":
+                        self.usos_screen.ids.n1n_mission.text = "-"
+                        self.usos_screen.ids.n1n_vehicle.text = "-"
+                        self.usos_screen.ids.n1n_spacecraft.text = "-"
+                        self.usos_screen.ids.n1n_arrival.text = "-"
+                        self.usos_screen.ids.n1n_departure.text = "-"
+                        self.usos_screen.ids.n1n_cygnus.opacity = 0.0
+                        self.usos_screen.ids.n1n_label.text = ""
+                        self.vv_screen.ids.n1n_label.text = ""
+                        self.vv_screen.ids.n1n_cygnus.opacity = 0.0
+                    elif port == "Service Module Aft":
+                        self.rs_screen.ids.sma_mission.text = "-"
+                        self.rs_screen.ids.sma_vehicle.text = "-"
+                        self.rs_screen.ids.sma_spacecraft.text = "-"
+                        self.rs_screen.ids.sma_arrival.text = "-"
+                        self.rs_screen.ids.sma_departure.text = "-"
+                        self.rs_screen.ids.sma_label.text = ""
+                        self.vv_screen.ids.sma_label.text = ""
+                        self.rs_screen.ids.sma_soyuz.opacity = 0.0
+                        self.rs_screen.ids.sma_progress.opacity = 0.0
+                        self.vv_screen.ids.sma_soyuz.opacity = 0.0
+                        self.vv_screen.ids.sma_progress.opacity = 0.0
+                    elif port == "MRM-2 Zenith":
+                        self.rs_screen.ids.mrm2_mission.text = "-"
+                        self.rs_screen.ids.mrm2_vehicle.text = "-"
+                        self.rs_screen.ids.mrm2_spacecraft.text = "-"
+                        self.rs_screen.ids.mrm2_arrival.text = "-"
+                        self.rs_screen.ids.mrm2_departure.text = "-"
+                        self.rs_screen.ids.mrm2_label.text = ""
+                        self.vv_screen.ids.mrm2_label.text = ""
+                        self.rs_screen.ids.mrm2_soyuz.opacity = 0.0
+                        self.rs_screen.ids.mrm2_progress.opacity = 0.0
+                        self.vv_screen.ids.mrm2_soyuz.opacity = 0.0
+                        self.vv_screen.ids.mrm2_progress.opacity = 0.0
+                    elif port == "MRM-1 Nadir":
+                        self.rs_screen.ids.mrm1_mission.text = "-"
+                        self.rs_screen.ids.mrm1_vehicle.text = "-"
+                        self.rs_screen.ids.mrm1_spacecraft.text = "-"
+                        self.rs_screen.ids.mrm1_arrival.text = "-"
+                        self.rs_screen.ids.mrm1_departure.text = "-"
+                        self.rs_screen.ids.mrm1_label.text = ""
+                        self.vv_screen.ids.mrm1_label.text = ""
+                        self.rs_screen.ids.mrm1_soyuz.opacity = 0.0
+                        self.rs_screen.ids.mrm1_progress.opacity = 0.0
+                        self.vv_screen.ids.mrm1_soyuz.opacity = 0.0
+                        self.vv_screen.ids.mrm1_progress.opacity = 0.0
+                    elif port == "RS Node Nadir":
+                        self.rs_screen.ids.rsn_mission.text = "-"
+                        self.rs_screen.ids.rsn_vehicle.text = "-"
+                        self.rs_screen.ids.rsn_spacecraft.text = "-"
+                        self.rs_screen.ids.rsn_arrival.text = "-"
+                        self.rs_screen.ids.rsn_departure.text = "-"
+                        self.rs_screen.ids.rsn_label.text = ""
+                        self.vv_screen.ids.rsn_label.text = ""
+                        self.rs_screen.ids.rsn_soyuz.opacity = 0.0
+                        self.rs_screen.ids.rsn_progress.opacity = 0.0
+                        self.vv_screen.ids.rsn_soyuz.opacity = 0.0
+                        self.vv_screen.ids.rsn_progress.opacity = 0.0
+
+            else:
+                log_error("Table 'vehicles' does not exist.")
+        except sqlite3.Error as e:
+            log_error(f"SQLite error: {e}")
+        except Exception as e:
+            log_error(f"General error: {e}")
+
+    def ros_range_moving_average(self, new_value, window_size):
+        self.ros_data.append(new_value)
+        if len(self.ros_data) > window_size:
+            self.ros_data.pop(0) 
+        return sum(self.ros_data) / len(self.ros_data)
 
     def update_labels(self, dt): #THIS IS THE IMPORTANT FUNCTION
         global mimicbutton, switchtofake, demoboolean, runningDemo, playbackboolean, psarj2, ssarj2, manualcontrol, aos, los, oldLOS, psarjmc, ssarjmc, ptrrjmc, strrjmc, beta1bmc, beta1amc, beta2bmc, beta2amc, beta3bmc, beta3amc, beta4bmc, beta4amc, US_EVAinProgress, position_x, position_y, position_z, velocity_x, velocity_y, velocity_z, altitude, velocity, iss_mass, testvalue, testfactor, airlock_pump, crewlockpres, leak_hold, firstcrossing, EVA_activities, repress, depress, oldAirlockPump, obtained_EVA_crew, EVAstartTime
@@ -2582,6 +3007,162 @@ class MainApp(App):
         NH3outletTemp_loopA = "{:.2f}".format(float((values[24])[0]))
         NH3outletTemp_loopB = "{:.2f}".format(float((values[21])[0]))
 
+        #Russian Telemetry
+        ros_mode = int((values[46])[0])
+
+        ros_mode_texts = {
+            1.0: "Crew Rescue",
+            2.0: "Survival",
+            3.0: "Reboost",
+            4.0: "Proximity Operations",
+            5.0: "EVA",
+            6.0: "Microgravity",
+            7.0: "Standard"
+        }
+
+        self.rs_dock.ids.ros_mode.text = ros_mode_texts.get(ros_mode, "n/a")
+        
+        
+        rs_att_mode = int((values[126])[0])
+        rs_motion_control = int((values[127])[0])
+        rs_prep_free_drift = int((values[128])[0])
+        rs_thruster_operation = int((values[129])[0])
+        rs_current_dynamic = int((values[130])[0]) 
+        rs_kurs1_op = int((values[107])[0]) # 1 or 0
+        rs_kurs2_op = int((values[108])[0]) # 1 or 0
+        rs_p1p2_failure = int((values[109])[0]) # 1 or 0
+        rs_kursp_test = int((values[112])[0]) # 1 or 0
+        rs_functional_mode = int((values[115])[0]) # 1 or 0
+        rs_standby_mode = int((values[116])[0]) # 1 or 0
+        rs_sm_capture_signal = int((values[113])[0]) # 1 or 0
+        rs_target_acquisition = int((values[114])[0]) # 1 or 0
+        rs_sm_fwd_dock = int((values[118])[0]) # 1 or 0
+        rs_sm_aft_dock = int((values[119])[0]) # 1 or 0
+        rs_sm_nadir_dock = int((values[120])[0]) # missing from screen?
+        rs_fgb_nadir_dock = int((values[121])[0]) # 1 or 0
+        rs_sm_udm_dock = int((values[122])[0]) # 1 or 0
+        rs_mrm1_dock = int((values[123])[0]) # 1 or 0
+        rs_mrm2_dock = int((values[124])[0]) # 1 or 0
+        rs_sm_docking_flag = int((values[117])[0]) # 1 or 0
+        rs_sm_hooks = int((values[125])[0]) # 1 or 0
+        
+        ros_docking_range = float((values[110])[0])
+        if rs_target_acquisition: 
+            self.rs_dock.ids.sm_range.text = f"{ros_docking_range:0.2f} m"
+            self.rs_dock.ids.sm_rate.text = f"{float((values[111])[0]):0.2f} m/s"
+        else:
+            self.rs_dock.ids.sm_range.text = "n/a"
+            self.rs_dock.ids.sm_rate.text = "n/a"
+
+
+        rs_att_mode_texts = {
+            0.0: "Inertial",
+            1.0: "LVLH SM",
+            2.0: "Solar Orientation",
+            3.0: "Current LVLH",
+            4.0: "Current Inertial Attitude",
+            5.0: "Damping",
+            6.0: "TEA",
+            7.0: "X-POP"
+        }
+        
+        rs_motion_control_texts = {
+            0.0: "Undetermined State",
+            1.0: "RS Master"
+        }
+
+        rs_prep_free_drift_texts = {
+            0.0: "Undetermined State",
+            1.0: "Prepared to Free Drift"
+        }
+
+        rs_thruster_operation_texts = {
+            0.0: "Pre-Starting Procedure",
+            1.0: "Thruster Operation Terminated"
+        }
+
+        rs_current_dynamic_texts = {
+            0.0: "Reserve",
+            1.0: "Thrusters",
+            2.0: "Gyrodines",
+            3.0: "Gyrodines Desat (US Method)",
+            4.0: "Gyrodines Desat (RS Method)",
+            5.0: "Translational Thrusters",
+            6.0: "Thrusters help CMG",
+            7.0: "Free Drift"
+        }
+
+        rs_docking_port_texts = {
+            0.0: "Undetermined State",
+            1.0: "Docking Port Engaged"
+        }
+        
+        rs_vv_docking_port_texts = {
+            0.0: "Undetermined State",
+            1.0: "Soyuz/Progress Docked"
+        }
+
+        rs_signal_texts = {
+            0.0: "Undetermined State",
+            1.0: "Yes"
+        }
+        
+        rs_hooks_texts = {
+            0.0: "Undetermined State",
+            1.0: "Hooks Closed"
+        }
+        
+        rs_sm_docking_flag_texts = {
+            0.0: "Undetermined State",
+            1.0: "Docking Flag Active"
+        }
+        
+        self.rs_dock.ids.active_attitude.text = rs_att_mode_texts.get(rs_att_mode, "n/a")
+        self.rs_dock.ids.motion_control.text = rs_motion_control_texts.get(rs_motion_control, "n/a")
+        self.rs_dock.ids.prep_free_drift.text = rs_prep_free_drift_texts.get(rs_prep_free_drift, "n/a")
+        self.rs_dock.ids.thruster_operation.text = rs_thruster_operation_texts.get(rs_thruster_operation, "n/a")
+        self.rs_dock.ids.current_dynamic.text = rs_current_dynamic_texts.get(rs_current_dynamic, "n/a")
+        
+        self.rs_dock.ids.kurs1_operating.text = rs_signal_texts.get(rs_kurs1_op, "n/a")
+        self.rs_dock.ids.kurs2_operating.text = rs_signal_texts.get(rs_kurs2_op, "n/a")
+        self.rs_dock.ids.p1p2_failure.text = rs_signal_texts.get(rs_p1p2_failure, "n/a")
+        self.rs_dock.ids.kursp_test_mode.text = rs_signal_texts.get(rs_kursp_test, "n/a")
+        self.rs_dock.ids.functional_mode.text = rs_signal_texts.get(rs_functional_mode, "n/a")
+        self.rs_dock.ids.standby_mode.text = rs_signal_texts.get(rs_standby_mode, "n/a")
+        self.rs_dock.ids.sm_capture_signal.text = rs_signal_texts.get(rs_sm_capture_signal, "n/a")
+        self.rs_dock.ids.target_acquisition.text = rs_signal_texts.get(rs_target_acquisition, "n/a")
+        
+        self.rs_dock.ids.sm_fwd_dock.text = rs_docking_port_texts.get(rs_sm_fwd_dock, "n/a") + " (FGB)"
+        self.rs_dock.ids.sm_aft_dock.text = rs_vv_docking_port_texts.get(rs_sm_aft_dock, "n/a")
+        self.rs_dock.ids.sm_nadir_dock.text = rs_docking_port_texts.get(rs_sm_nadir_dock, "n/a") + " (MLM)"
+        self.rs_dock.ids.fgb_nadir_dock.text = rs_docking_port_texts.get(rs_fgb_nadir_dock, "n/a") + " (MRM-1)"
+        self.rs_dock.ids.sm_udm_dock.text = rs_vv_docking_port_texts.get(rs_sm_udm_dock, "n/a")
+        self.rs_dock.ids.mrm1_dock.text = rs_vv_docking_port_texts.get(rs_mrm1_dock, "n/a")
+        self.rs_dock.ids.mrm2_dock.text = rs_vv_docking_port_texts.get(rs_mrm2_dock, "n/a")
+        
+        self.rs_dock.ids.sm_docking_flag.text = rs_sm_docking_flag_texts.get(rs_sm_docking_flag, "n/a")
+        self.rs_dock.ids.sm_hooks.text = rs_hooks_texts.get(rs_sm_hooks, "n/a")
+
+
+        #ros_docking_range = float((values[110])[0])
+        ros_docking_avg = self.ros_range_moving_average(ros_docking_range,10)
+
+        if rs_target_acquisition and ros_docking_avg <= 80000:
+            self.rs_dock.ids.dock_in_progress.text = "DOCKING IN PROGRESS"
+            self.rs_dock.ids.dock_in_progress.color = (0,0,1,1)
+            self.rs_dock.update_docking_bar_width(ros_docking_avg)
+            if rs_sm_docking_flag:
+                self.rs_dock.ids.dock_in_progress.text = "DOCKING COMPLETE!"
+                self.rs_dock.ids.dock_in_progress.color = (0,1,0,1)
+        else:
+            self.rs_dock.ids.dock_in_progress.color = (0,0,0,0)
+            self.rs_dock.update_docking_bar_width(ros_docking_avg)
+         
+        # Docking progress bar testing
+        #value = 15000 
+        #self.rs_dock.update_docking_bar_width(value)
+
+
         #MBS and MT telemetry
         mt_worksite = int((values[258])[0])
         self.mss_mt_screen.ids.mt_ws_value.text = str(mt_worksite)
@@ -2711,6 +3292,12 @@ class MainApp(App):
             c = (a[0]*b[0])+(a[1]*b[1])+(a[2]*b[2])
             return c
 
+        def safe_divide(numerator, denominator):
+            if denominator == 0:
+                return 1
+            else:
+                return numerator / denominator
+
         def cross(a,b):
             c = [a[1]*b[2] - a[2]*b[1],
                  a[2]*b[0] - a[0]*b[2],
@@ -2746,19 +3333,19 @@ class MainApp(App):
             pos_mag = math.sqrt(dot(pos_vec,pos_vec))
             vel_mag = math.sqrt(dot(vel_vec,vel_vec))
 
-            v_radial = dot(vel_vec, pos_vec)/pos_mag
+            v_radial = safe_divide(dot(vel_vec, pos_vec),pos_mag)
 
             h_mom = cross(pos_vec,vel_vec)
             h_mom_mag = math.sqrt(dot(h_mom,h_mom))
 
-            inc = math.acos(h_mom[2]/h_mom_mag)
+            inc = math.acos(safe_divide(h_mom[2],h_mom_mag))
             self.orbit_data.ids.inc.text = "{:.2f}".format(math.degrees(inc))
             self.orbit_screen.ids.inc.text = "{:.2f}".format(math.degrees(inc)) + " deg"
 
             node_vec = cross([0,0,1],h_mom)
             node_mag = math.sqrt(dot(node_vec,node_vec))
 
-            raan = math.acos(node_vec[0]/node_mag)
+            raan = math.acos(safe_divide(node_vec[0],node_mag))
             if node_vec[1] < 0:
                 raan = math.radians(360) - raan
             self.orbit_data.ids.raan.text = "{:.2f}".format(math.degrees(raan))
@@ -2771,25 +3358,28 @@ class MainApp(App):
             e_mag = math.sqrt(dot(e_vec,e_vec))
             self.orbit_data.ids.e.text = "{:.4f}".format(e_mag)
 
-            arg_per = math.acos(dot(node_vec,e_vec)/(node_mag*e_mag))
+            arg_per = math.acos(safe_divide(dot(node_vec,e_vec),(node_mag*e_mag)))
             if e_vec[2] <= 0:
                 arg_per = math.radians(360) - arg_per
             self.orbit_data.ids.arg_per.text = "{:.2f}".format(math.degrees(arg_per))
 
-            ta = math.acos(dot(e_vec,pos_vec)/(e_mag*pos_mag))
+            ta = math.acos(safe_divide(dot(e_vec,pos_vec),(e_mag*pos_mag)))
             if v_radial <= 0:
                 ta = math.radians(360) - ta
             self.orbit_data.ids.true_anomaly.text = "{:.2f}".format(math.degrees(ta))
 
-            apogee = (math.pow(h_mom_mag,2)/mu)*(1/(1+e_mag*math.cos(math.radians(180))))
-            perigee = (math.pow(h_mom_mag,2)/mu)*(1/(1+e_mag*math.cos(0)))
+            apogee = (math.pow(h_mom_mag,2)/mu)*(safe_divide(1,(1+e_mag*math.cos(math.radians(180)))))
+            perigee = (math.pow(h_mom_mag,2)/mu)*(safe_divide(1,(1+e_mag*math.cos(0))))
             apogee_height = apogee - 6371.00
             perigee_height = perigee - 6371.00
             sma = 0.5*(apogee+perigee) #km
-            period = (2*math.pi/math.sqrt(mu))*math.pow(sma,3/2) #seconds
+            if sma>=0:
+                period = ((safe_divide(2*math.pi,math.sqrt(mu)))*math.pow(sma,3/2))/60 # minutes
+            else:
+                period = 0
             self.orbit_data.ids.apogee_height.text = str("{:.2f}".format(apogee_height))
             self.orbit_data.ids.perigee_height.text = str("{:.2f}".format(perigee_height))
-            self.orbit_screen.ids.period.text = str("{:.2f}".format(period))
+            self.orbit_screen.ids.period.text = str("{:.2f}".format(period)) + "m"
 
         cmg1_active = int((values[145])[0])
         cmg2_active = int((values[146])[0])
@@ -3221,15 +3811,14 @@ class MainApp(App):
             self.eps_screen.ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
             v4as = 4
         
-        #4b has a lower setpoint voltage for now - reverted back as of US EVA 63
-        if float(v4b) < 141.5: #discharging
+        if float(v4b) < 151.5: #discharging
             self.eps_screen.ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
             v4bs = 1
             #self.eps_screen.ids.array_4b.color = 1, 1, 1, 0.8
-        elif float(v4b) > 150.0: #charged
+        elif float(v4b) > 160.0: #charged
             self.eps_screen.ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
             v4bs = 3
-        elif float(v4b) >= 141.5:  #charging
+        elif float(v4b) >= 151.5:  #charging
             self.eps_screen.ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
             self.eps_screen.ids.array_4b.color = 1, 1, 1, 1.0
             v4bs = 2
@@ -4045,13 +4634,16 @@ class MainApp(App):
             serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + str(v1as) + " " + "V2A=" + str(v2as) + " " + "V3A=" + str(v3as) + " " + "V4A=" + str(v4as) + " " + "V1B=" + str(v1bs) + " " + "V2B=" + str(v2bs) + " " + "V3B=" + str(v3bs) + " " + "V4B=" + str(v4bs) + " " + "ISS=" + module + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
 
 #All GUI Screens are on separate kv files
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Settings_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Playback_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MainScreen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ManualControlScreen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/LED_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Playback_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Settings_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MimicScreen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ISS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Orbit_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Orbit_Pass.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Orbit_Data.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ISS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ECLSS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ECLSS_WRM_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ECLSS_IATCS_Screen.kv')
@@ -4078,23 +4670,24 @@ Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EVA_EMU_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EVA_Pictures.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Crew_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/RS_Screen.kv')
-
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ManualControlScreen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Robo_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/SSRMS_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/SPDM1_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MSS_MT_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MimicScreen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MainScreen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/RS_Dock_Screen.kv')
+Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/VV_Image.kv')
 Builder.load_string('''
 #:kivy 1.8
 #:import kivy kivy
 #:import win kivy.core.window
 ScreenManager:
-    Settings_Screen:
-    Playback_Screen:
+    MainScreen:
+    ManualControlScreen:
     LED_Screen:
+    Playback_Screen:
+    Settings_Screen:
+    MimicScreen:
+    ISS_Screen:
     Orbit_Screen:
     Orbit_Pass:
     Orbit_Data:
@@ -4104,7 +4697,6 @@ ScreenManager:
     CT_UHF_Screen:
     CT_Camera_Screen:
     CT_SGANT_Screen:
-    ISS_Screen:
     ECLSS_Screen:
     GNC_Screen:
     TCS_Screen:
@@ -4114,10 +4706,9 @@ ScreenManager:
     EVA_Pictures:
     RS_Screen:
     Crew_Screen:
-    ManualControlScreen:
     MSS_MT_Screen:
-    MimicScreen:
-    MainScreen:
+    VV_Screen:
+    VV_Image:
 ''')
 
 if __name__ == '__main__':
