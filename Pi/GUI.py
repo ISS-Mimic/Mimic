@@ -1101,9 +1101,10 @@ class Playback_Screen(Screen):
         super(Playback_Screen, self).__init__(**kwargs)
         self.playback = ""
         self.time_factor = 60
-        self.usb_path = glob.glob('/media/*')
+        self.usb_path = '/media/' + str(os.getlogin())
         print(self.usb_path)
         self.usb_drives = self.get_mount_points()  # Initialize with already connected drives
+        self.demo_playing = False
         self.start_usb_monitoring()
         Clock.schedule_once(self.update_dropdown)  # Update dropdown with initial drives
 
@@ -1113,7 +1114,7 @@ class Playback_Screen(Screen):
             return set(os.listdir(self.usb_path))
         except Exception as e:
             # Handle any exception (e.g., FileNotFoundError, PermissionError)
-            log_error(f"Error accessing USB path {self.usb_path}: {e}")
+            log_info(f"Error accessing USB path {self.usb_path}: {e}")
             return set()  # Return an empty set if there's an error
 
     def usb_monitoring_task(self):
@@ -1164,6 +1165,7 @@ class Playback_Screen(Screen):
             log_error(e)
         else:
             runningDemo = False
+            self.demo_playing = False
         finally:
             log_info("attempted to stop" + str(self.playback))
 
@@ -1220,6 +1222,7 @@ class Playback_Screen(Screen):
             except Exception as e:
                 log_error(e)
             runningDemo = True
+            self.demo_playing = True
             log_info("started playback of " + str(self.playback))
 
 
@@ -1603,30 +1606,30 @@ class MainApp(App):
 
         for screen_name in ScreenList:
             screen = getattr(self, screen_name)
-            if arduino_count > 0:
-                screen.ids.arduino_count.text = str(arduino_count)
-                screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/arduino_notransmit.png"
-                if mimicbutton:
-                    screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
-            else:
-                screen.ids.arduino_count.text = ""
-                screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/arduino_offline.png"
 
-        if arduino_count > 0:
-            self.mimic_screen.ids.mimicstartbutton.disabled = False
-            self.playback_screen.ids.start.disabled = False
-            self.control_screen.ids.set90.disabled = False
-            self.control_screen.ids.set0.disabled = False
-            if mimicbutton:
-                self.mimic_screen.ids.mimicstartbutton.disabled = True
+            # Update arduino count text
+            screen.ids.arduino_count.text = str(arduino_count) if arduino_count > 0 else ""
+           
+            if arduino_count > 0:
+                if mimicbutton or (isinstance(screen, Playback_Screen) and screen.demo_playing):
+                    screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
+                else:
+                    screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/arduino_notransmit.png"
             else:
-                self.mimic_screen.ids.mimicstartbutton.disabled = False
-        else:
-            self.mimic_screen.ids.mimicstartbutton.disabled = True
-            self.mimic_screen.ids.mimicstartbutton.text = "Transmit"
-            self.playback_screen.ids.start.disabled = True
-            self.control_screen.ids.set90.disabled = True
-            self.control_screen.ids.set0.disabled = True
+                screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/arduino_offline.png"
+            
+
+            # Check the specific screen and conditionally enable or disable buttons
+            if isinstance(screen, Playback_Screen):
+                if screen.demo_playing:
+                    screen.ids.start.disabled = True  # Ensure playback start button remains disabled if a demo is playing
+                else:
+                    screen.ids.start.disabled = arduino_count == 0  # Enable or disable based on arduino_count
+            elif isinstance(screen, MimicScreen):  # Assuming this is another screen type in your application
+                screen.ids.mimicstartbutton.disabled = arduino_count == 0 or mimicbutton
+            elif isinstance(screen, ManualControlScreen):  # Assuming this is another screen type
+                screen.ids.set90.disabled = arduino_count == 0
+                screen.ids.set0.disabled = arduino_count == 0
 
     def deleteURLPictures(self, dt):
         log_info("Function call - deleteURLPictures")
@@ -2876,12 +2879,8 @@ class MainApp(App):
         global old_mt_timestamp, old_mt_position, mt_speed
 
         if runningDemo:
-            self.playback_screen.ids.DemoStart.disabled = True
-            self.playback_screen.ids.HTVDemoStart.disabled = True
-            self.playback_screen.ids.DemoStop.disabled = False
-            self.playback_screen.ids.HTVDemoStop.disabled = False
-            self.playback_screen.ids.OFT2DemoStart.disabled = True
-            self.playback_screen.ids.OFT2DemoStop.disabled = False
+            self.playback_screen.ids.start.disabled = True
+            self.playback_screen.ids.stop.disabled = False
             self.playback_screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
 
         c.execute('select Value from telemetry')
@@ -4035,18 +4034,6 @@ class MainApp(App):
 #        if (difference > -10) and (isinstance(App.get_running_app().root_window.children[0], Popup)==False):
 #            LOSpopup = Popup(title='Loss of Signal', content=Label(text='Possible LOS Soon'), size_hint=(0.3, 0.2), auto_dismiss=True)
 #            LOSpopup.open()
-
-        ##-------------------Fake Orbit Simulator-------------------##
-        #self.playback_screen.ids.psarj.text = str(psarj)
-        #self.playback_screen.ids.ssarj.text = str(ssarj)
-        #self.playback_screen.ids.beta1a.text = str(beta1a)
-        #self.playback_screen.ids.beta1b.text = str(beta1b)
-        #self.playback_screen.ids.beta2a.text = str(beta2a)
-        #self.playback_screen.ids.beta2b.text = str(beta2b)
-        #self.playback_screen.ids.beta3a.text = str(beta3a)
-        #self.playback_screen.ids.beta3b.text = str(beta3b)
-        #self.playback_screen.ids.beta4a.text = str(beta4a)
-        #self.playback_screen.ids.beta4b.text = str(beta4b)
 
         if demoboolean:
             if Disco:
