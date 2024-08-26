@@ -1133,7 +1133,7 @@ class Playback_Screen(Screen):
         # Get the Spinner widget from your layout
         dropdown = self.ids.playback_dropdown  # Adjust this according to your KV layout
         formatted_drives = [f"{drive} (USB)" for drive in self.usb_drives]
-        dropdown.values = formatted_drives + ['HTV','OFT-2','Standard']
+        dropdown.values = formatted_drives + ['HTV', 'OFT-2', 'Standard']
 
     def start_usb_monitoring(self):
         # Start the monitoring in a background thread
@@ -1143,18 +1143,12 @@ class Playback_Screen(Screen):
 
     def on_dropdown_select(self, value):
         self.playback = value
-        
+
     def on_disco_select(self, value):
         self.playback = value
 
     def start_press(self):
-        if self.playback == "OFT-2":
-            self.startDemo()
-        elif self.playback == "HTV":
-            self.startDemo()
-        elif self.playback == "Standard":
-            self.startDemo()
-        elif self.playback == "Disco":
+        if self.playback in ["OFT-2", "HTV", "Standard", "Disco"]:
             self.startDemo()
 
     def stop_press(self):
@@ -1167,64 +1161,64 @@ class Playback_Screen(Screen):
             runningDemo = False
             self.demo_playing = False
         finally:
-            log_info("attempted to stop" + str(self.playback))
+            log_info("Attempted to stop " + str(self.playback))
 
     def changeDemoBoolean(self, *args):
         global demoboolean
         demoboolean = args[0]
 
     def increment_time(self):
-        #still need to figure out how to implement time factors in code - recompile for one time changes but real time active control?
         self.time_factor += 5
         if self.time_factor > 90:
             self.time_factor = 90
         elif self.time_factor == 1:
             self.time_factor = 5
-        self.ids.time_factor_label.text = str(self.time_factor) + "x" 
-        
+        self.ids.time_factor_label.text = str(self.time_factor) + "x"
+
     def decrement_time(self):
         self.time_factor -= 5
         if self.time_factor < 1:
             self.time_factor = 1
-        self.ids.time_factor_label.text = str(self.time_factor) + "x" 
+        self.ids.time_factor_label.text = str(self.time_factor) + "x"
 
     def startDemo(self):
         global p2, playback, runningDemo
-        executable_path = mimic_directory + "/Mimic/Pi/RecordedData/playback.out"
-        data_path_oft2 = mimic_directory + "/Mimic/Pi/RecordedData/OFT2"
-        data_path_htv = mimic_directory + "/Mimic/Pi/RecordedData/HTV"
-        data_path_standard = mimic_directory + "/Mimic/Pi/RecordedData/Standard"
-        data_path_disco = mimic_directory + "/Mimic/Pi/RecordedData/Disco"
+        executable_path = self.mimic_directory + "/Mimic/Pi/RecordedData/playback.out"
+        data_paths = {
+            "OFT-2": self.mimic_directory + "/Mimic/Pi/RecordedData/OFT2",
+            "HTV": self.mimic_directory + "/Mimic/Pi/RecordedData/HTV",
+            "Standard": self.mimic_directory + "/Mimic/Pi/RecordedData/Standard",
+            "Disco": self.mimic_directory + "/Mimic/Pi/RecordedData/disco.sh"
+        }
 
         if not runningDemo:
             try:
-                if self.playback == "OFT-2":
-                    try:
-                        p2 = Popen([executable_path, data_path_oft2])
-                    except Exception as e:
-                        log_error("Failed to start the process:", e)
-                elif self.playback == "HTV":
-                    try:
-                        p2 = Popen([executable_path, data_path_htv])
-                    except Exception as e:
-                        log_error("Failed to start the process:", e)
-                elif self.playback == "Standard":
-                    try:
-                        p2 = Popen([executable_path, data_path_standard])
-                    except Exception as e:
-                        log_error("Failed to start the process:", e)
-                elif self.playback == "Disco":
-                    try:
-                        #p2 = Popen([executable_path, data_path_oft2]) # want to replace disco script with recorded data folder
-                        p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/disco.sh")
-                    except Exception as e:
-                        log_error("Failed to start the process:", e)
+                if self.playback in data_paths:
+                    if self.playback == "Disco":
+                        p2 = Popen(data_paths[self.playback], shell=True)
+                    else:
+                        p2 = Popen([executable_path, data_paths[self.playback]])
+                    
+                    # Start a thread to monitor the subprocess
+                    threading.Thread(target=self.monitor_subprocess, args=(p2,)).start()
+                    
+                    runningDemo = True
+                    self.demo_playing = True
+                    log_info("Started playback of " + str(self.playback))
             except Exception as e:
                 log_error(e)
-            runningDemo = True
-            self.demo_playing = True
-            log_info("started playback of " + str(self.playback))
 
+    def monitor_subprocess(self, process):
+        process.wait()  # Wait for the subprocess to finish
+        Clock.schedule_once(self.on_demo_finished)  # Schedule the callback on the main thread
+
+    def on_demo_finished(self, *args):
+        global runningDemo
+        runningDemo = False
+        self.demo_playing = False  # Reset the demo_playing flag
+        self.ids.start.disabled = False  # Re-enable the start button
+        log_info("Demo script finished")
+            
 
 class Settings_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
