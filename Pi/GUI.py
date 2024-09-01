@@ -1445,8 +1445,24 @@ class MainApp(App):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     ros_data = []
 
+    def _maintain_aspect_ratio(self, window, *args):
+        width,height = window.size        
+
+        # Calculate the desired aspect ratio
+        aspect_ratio = 800 / 480 # Original Raspi 7" Screen AR
+
+        # Adjust width and height based on the aspect ratio
+        if width / height > aspect_ratio:
+            window.size = (int(height * aspect_ratio), height)
+            #print(f"Setting window size to {window.size}")
+        #else:
+        #    print(f"All good")
+
     def build(self):
         global startup, ScreenList, stopAnimation
+        
+        #maintain aspect ratio
+        Window.bind(on_draw=self._maintain_aspect_ratio)
 
         self.main_screen = MainScreen(name = 'main')
         self.control_screen = ManualControlScreen(name = 'manualcontrol')
