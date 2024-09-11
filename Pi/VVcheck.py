@@ -198,6 +198,7 @@ def clean_wikipedia_data(df):
     location_replacements = {
         'Harmony': 'Node 2',
         'Poisk': 'MRM-2',
+        'Rassvet': 'MRM-1',
         'Prichal': 'RS Node',
         'Zvezda': 'Service Module',
         'Unity': 'Node 1',
