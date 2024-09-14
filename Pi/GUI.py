@@ -70,7 +70,7 @@ try:
     handler = RotatingFileHandler(log_file_path, maxBytes=1048576, backupCount=5)
     handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
     logger = logging.getLogger('MyLogger')
-    logger.setLevel(logging.ERROR)  # Set logger to INFO level
+    logger.setLevel(logging.INFO)  # Set logger to INFO level
     handler.setLevel(logging.ERROR)  # Set handler to INFO level
     logger.addHandler(handler)
 except Exception as e:
@@ -1096,6 +1096,8 @@ class Playback_Screen(Screen):
     playback = ""
     time_factor = 60
     usb_path = "/media/pi"
+    p2 = None
+    runningDemo = False
     
     def __init__(self, **kwargs):
         super(Playback_Screen, self).__init__(**kwargs)
@@ -1158,13 +1160,23 @@ class Playback_Screen(Screen):
 
     def stop_press(self):
         global p2, runningDemo
+        print("trying to stop press")
         try:
-            p2.kill()
+            if p2 is not None:
+                print("p2 is real")
+                p2.kill()
+                p2 = None
+            else:
+                log_info("No process running to stop")
         except Exception as e:
+            print(e)
             log_error(e)
         else:
+            print("in else")
             runningDemo = False
             self.demo_playing = False
+            self.playback.ids.start.disabled = False
+            print("enabled start from class")
         finally:
             log_info("attempted to stop" + str(self.playback))
 
@@ -1638,8 +1650,10 @@ class MainApp(App):
             if isinstance(screen, Playback_Screen):
                 if screen.demo_playing:
                     screen.ids.start.disabled = True  # Ensure playback start button remains disabled if a demo is playing
+                    print("disabled start from func")
                 else:
                     screen.ids.start.disabled = arduino_count == 0  # Enable or disable based on arduino_count
+                    print("enabled start from func")
             elif isinstance(screen, MimicScreen):  # Assuming this is another screen type in your application
                 screen.ids.mimicstartbutton.disabled = arduino_count == 0 or mimicbutton
             elif isinstance(screen, ManualControlScreen):  # Assuming this is another screen type
