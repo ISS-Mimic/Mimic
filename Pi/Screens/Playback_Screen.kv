@@ -120,10 +120,9 @@
             id: start
             size_hint: 0.1,0.115
             pos_hint: {"center_x": 0.2, "center_y": 0.25}
-            background_color: 1,0.3,0.4,0.85
+            #background_color: 1,0.3,0.4,0.85
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StartUnlit.png'
             background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StartDown.png'
-            on_release: stop.background_color = 1,0,0,1
             on_release: playback_dropdown.disabled = True
             on_release: stop.disabled = False
             on_release: playbackstatus.text = 'Beginning Playback'
@@ -137,8 +136,6 @@
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StopUnlit.png'
             background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StopDown.png'
             disabled: True
-            on_release: start.background_color = 0,0,0,0
-            on_release: self.background_color = 0,0,0,0
             on_release: playback_dropdown.disabled = False
             on_release: start.disabled = False
             on_release: playbackstatus.text = 'Stopped'

@@ -369,6 +369,48 @@ internet = False
 old_mt_timestamp = 0.00
 old_mt_position = 0.00
 
+class ProcessManager:
+    p1 = None
+    p2 = None
+
+    @staticmethod
+    def start_p2(process_command):
+        try:
+            ProcessManager.p2 = Popen(process_command)
+            log_info("Started process p2.")
+        except Exception as e:
+            log_error(f"Failed to start process p2: {e}")
+
+    @staticmethod
+    def stop_p2():
+        if ProcessManager.p2 is not None:
+            try:
+                ProcessManager.p2.kill()
+                log_info("Stopped process p2.")
+                ProcessManager.p2 = None
+            except Exception as e:
+                log_error(f"Failed to stop process p2: {e}")
+        else:
+            log_info("No process p2 to stop.")
+
+    @staticmethod
+    def stop_all():
+        # To stop both processes (p1 and p2), if needed
+        if ProcessManager.p1 is not None:
+            try:
+                ProcessManager.p1.kill()
+                log_info("Stopped process p1.")
+                ProcessManager.p1 = None
+            except Exception as e:
+                log_error(f"Failed to stop process p1: {e}")
+        
+        ProcessManager.stop_p2()
+
+    @staticmethod
+    def is_p2_running():
+        return ProcessManager.p2 is not None
+
+
 class MainScreen(Screen):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     
@@ -376,29 +418,24 @@ class MainScreen(Screen):
         global manualcontrol
         manualcontrol = args[0]
 
-    def killproc(*args):
-        global p,p2
-        if not USE_CONFIG_JSON:
-            try:
-                if TTY_OBSERVER and hasattr(TTY_OBSERVER, 'monitor'):
-                    # Try stopping the observer; handle any potential errors
-                    TTY_OBSERVER.stop()
-                    log_info("TTY_OBSERVER stopped successfully.")
-                else:
-                    log_info("TTY_OBSERVER is not initialized or already stopped.")
-            except Exception as e:
-                log_error(f"Error while stopping TTY_OBSERVER: {e}")
-
+    def killproc(self, *args):
         try:
-            p.kill()
-            p2.kill()
+            if TTY_OBSERVER and hasattr(TTY_OBSERVER, 'monitor'):
+                TTY_OBSERVER.stop()
+                log_info("TTY_OBSERVER stopped successfully.")
+            else:
+                log_info("TTY_OBSERVER is not initialized or already stopped.")
         except Exception as e:
-            log_error(e)
-        os.system('rm /dev/shm/*.db*') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
+            log_error(f"Error while stopping TTY_OBSERVER: {e}")
+
+        ProcessManager.stop_all()  # Stop all running processes
+
+        os.system('rm /dev/shm/*.db*')  # Delete sqlite database on exit
         staleTelemetry()
         log_info("Successfully stopped ISS telemetry javascript and removed database")
         log_info("App Exit")
         print("Mimic App Exited")
+
 
 class ManualControlScreen(Screen):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
@@ -1096,8 +1133,6 @@ class Playback_Screen(Screen):
     playback = ""
     time_factor = 60
     usb_path = "/media/pi"
-    p2 = None
-    runningDemo = False
     
     def __init__(self, **kwargs):
         super(Playback_Screen, self).__init__(**kwargs)
@@ -1149,6 +1184,8 @@ class Playback_Screen(Screen):
         self.playback = value
 
     def start_press(self):
+        self.ids.start.disabled = True
+        self.ids.stop.disabled = False
         if self.playback == "OFT-2":
             self.startDemo()
         elif self.playback == "HTV":
@@ -1159,26 +1196,11 @@ class Playback_Screen(Screen):
             self.startDemo()
 
     def stop_press(self):
-        global p2, runningDemo
-        print("trying to stop press")
-        try:
-            if p2 is not None:
-                print("p2 is real")
-                p2.kill()
-                p2 = None
-            else:
-                log_info("No process running to stop")
-        except Exception as e:
-            print(e)
-            log_error(e)
-        else:
-            print("in else")
-            runningDemo = False
-            self.demo_playing = False
-            self.playback.ids.start.disabled = False
-            print("enabled start from class")
-        finally:
-            log_info("attempted to stop" + str(self.playback))
+        ProcessManager.stop_p2()
+        self.demo_playing = False
+        self.ids.start.disabled = False
+        self.ids.stop.disabled = True
+        log_info("Attempted to stop " + str(self.playback))
 
     def changeDemoBoolean(self, *args):
         global demoboolean
@@ -1200,42 +1222,28 @@ class Playback_Screen(Screen):
         self.ids.time_factor_label.text = str(self.time_factor) + "x" 
 
     def startDemo(self):
-        global p2, playback, runningDemo
-        executable_path = mimic_directory + "/Mimic/Pi/RecordedData/playback.out"
-        data_path_oft2 = mimic_directory + "/Mimic/Pi/RecordedData/OFT2"
-        data_path_htv = mimic_directory + "/Mimic/Pi/RecordedData/HTV"
-        data_path_standard = mimic_directory + "/Mimic/Pi/RecordedData/Standard"
-        data_path_disco = mimic_directory + "/Mimic/Pi/RecordedData/Disco"
+        executable_path = self.mimic_directory + "/Mimic/Pi/RecordedData/playback.out"
+        data_path_oft2 = self.mimic_directory + "/Mimic/Pi/RecordedData/OFT2"
+        data_path_htv = self.mimic_directory + "/Mimic/Pi/RecordedData/HTV"
+        data_path_standard = self.mimic_directory + "/Mimic/Pi/RecordedData/Standard"
+        data_path_disco = self.mimic_directory + "/Mimic/Pi/RecordedData/Disco"
 
-        if not runningDemo:
+        if not ProcessManager.is_p2_running():
             try:
                 if self.playback == "OFT-2":
-                    try:
-                        p2 = Popen([executable_path, data_path_oft2])
-                    except Exception as e:
-                        log_error("Failed to start the process:", e)
+                    ProcessManager.start_p2([executable_path, data_path_oft2])
                 elif self.playback == "HTV":
-                    try:
-                        p2 = Popen([executable_path, data_path_htv])
-                    except Exception as e:
-                        log_error("Failed to start the process:", e)
+                    ProcessManager.start_p2([executable_path, data_path_htv])
                 elif self.playback == "Standard":
-                    try:
-                        p2 = Popen([executable_path, data_path_standard])
-                    except Exception as e:
-                        log_error("Failed to start the process:", e)
+                    ProcessManager.start_p2([executable_path, data_path_standard])
                 elif self.playback == "Disco":
-                    try:
-                        #p2 = Popen([executable_path, data_path_oft2]) # want to replace disco script with recorded data folder
-                        p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/disco.sh")
-                    except Exception as e:
-                        log_error("Failed to start the process:", e)
+                    ProcessManager.start_p2([self.mimic_directory + "/Mimic/Pi/RecordedData/disco.sh"])
             except Exception as e:
                 log_error(e)
-            runningDemo = True
-            self.demo_playing = True
-            log_info("started playback of " + str(self.playback))
-            
+            else:
+                self.demo_playing = True
+                log_info("Started playback of " + str(self.playback))
+
 
 class Settings_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
@@ -1258,26 +1266,39 @@ class ISS_Screen(Screen, EventDispatcher):
 class MimicScreen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
+
     def changeMimicBoolean(self, *args):
         global mimicbutton
         mimicbutton = args[0]
 
     def startproc(self):
-        global p,TDRSproc
         log_info("Telemetry Subprocess start")
-        p = Popen(["python", mimic_directory + "/Mimic/Pi/iss_telemetry.py"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
-        #TDRSproc = Popen(["python", mimic_directory + "/Mimic/Pi/TDRScheck.py"]) #uncomment if TDRS site comes back and fixed code
-        #p = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/Data"])
+        try:
+            # Start the telemetry process using the ProcessManager
+            ProcessManager.p1 = Popen(["python", self.mimic_directory + "/Mimic/Pi/iss_telemetry.py"])
+            log_info("Started iss_telemetry process.")
 
-    def killproc(*args):
-        global p,p2,c
+            # Uncomment if TDRS site comes back and fixed code
+            # ProcessManager.p2 = Popen(["python", self.mimic_directory + "/Mimic/Pi/TDRScheck.py"])
+        except Exception as e:
+            log_error(f"Failed to start telemetry subprocess: {e}")
+
+    def killproc(self, *args):
+        # Assuming `c` is your database cursor object.
         c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer', '0', 'Unsubscribed', '0', 0)")
         try:
-            p.kill()
-            p2.kill()
-            TDRSproc.kill()
+            # Use ProcessManager to stop the processes
+            if ProcessManager.p1:
+                ProcessManager.p1.kill()
+                ProcessManager.p1 = None
+                log_info("Killed iss_telemetry process.")
+
+            if ProcessManager.p2:
+                ProcessManager.p2.kill()
+                ProcessManager.p2 = None
+                log_info("Killed TDRScheck process.")
         except Exception as e:
-            log_error(e)
+            log_error(f"Failed to kill processes: {e}")
 
 class CDH_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
@@ -1584,19 +1605,19 @@ class MainApp(App):
 
         #Clock.schedule_once(self.checkCrew, 30) #disabling for now issue #407
         Clock.schedule_once(self.updateISS_TLE, 14)
-        Clock.schedule_once(self.updateTDRS_TLE, 60)
-        Clock.schedule_once(self.TDRSupdate, 30)
-        Clock.schedule_once(self.updateNightShade, 20)
+        Clock.schedule_once(self.updateTDRS_TLE, 61)
+        Clock.schedule_once(self.TDRSupdate, 32)
+        Clock.schedule_once(self.updateNightShade, 25)
         Clock.schedule_once(self.updateVV, 10)
 
         Clock.schedule_interval(self.updateISS_TLE, 302)
-        Clock.schedule_interval(self.updateTDRS_TLE, 290)
+        Clock.schedule_interval(self.updateTDRS_TLE, 291)
         Clock.schedule_interval(self.updateOrbitGlobe, 31)
         Clock.schedule_interval(self.TDRSupdate, 607)
         Clock.schedule_interval(self.check_internet, 1)
         Clock.schedule_interval(self.updateArduinoCount, 5)
-        Clock.schedule_interval(self.updateVV, 500)
-        Clock.schedule_interval(self.update_vv_values, 40)
+        Clock.schedule_interval(self.updateVV, 503)
+        Clock.schedule_interval(self.update_vv_values, 42)
 
         #schedule the orbitmap to update with shadow every 5 mins
         Clock.schedule_interval(self.updateNightShade, 120)
@@ -1648,12 +1669,8 @@ class MainApp(App):
 
             # Check the specific screen and conditionally enable or disable buttons
             if isinstance(screen, Playback_Screen):
-                if screen.demo_playing:
-                    screen.ids.start.disabled = True  # Ensure playback start button remains disabled if a demo is playing
-                    print("disabled start from func")
-                else:
+                if not screen.demo_playing:
                     screen.ids.start.disabled = arduino_count == 0  # Enable or disable based on arduino_count
-                    print("enabled start from func")
             elif isinstance(screen, MimicScreen):  # Assuming this is another screen type in your application
                 screen.ids.mimicstartbutton.disabled = arduino_count == 0 or mimicbutton
             elif isinstance(screen, ManualControlScreen):  # Assuming this is another screen type
@@ -4064,11 +4081,10 @@ class MainApp(App):
 #            LOSpopup = Popup(title='Loss of Signal', content=Label(text='Possible LOS Soon'), size_hint=(0.3, 0.2), auto_dismiss=True)
 #            LOSpopup.open()
 
-        if demoboolean:
+        if demoboolean: #this just writes out the telemetry as normal but the telem is being modified by an external script
             if Disco:
-                serialWrite("Disco ")
-                Disco = False
-            #serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "V1A=" + v1a + " " + "V2A=" + v2a + " " + "V3A=" + v3a + " " + "V4A=" + v4a + " " + "V1B=" + v1b + " " + "V2B=" + v2b + " " + "V3B=" + v3b + " " + "V4B=" + v4b + " ")
+                serialWrite("Disco ") # tells the microcontrollers to execute Disco mode
+                Disco = False # only need to write out Disco once, MCs execute until done
             serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + str(v1as) + " " + "V2A=" + str(v2as) + " " + "V3A=" + str(v3as) + " " + "V4A=" + str(v4as) + " " + "V1B=" + str(v1bs) + " " + "V2B=" + str(v2bs) + " " + "V3B=" + str(v3bs) + " " + "V4B=" + str(v4bs) + " " + "ISS=" + module + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
 
         self.orbit_data.ids.position_x.text = str("{:.2f}".format(position_x))
