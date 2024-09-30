@@ -1128,13 +1128,9 @@
   <div class="desc">DLCC COUNT</div>
   <div class="val" id="USLAB000083">NO DATA</div>
 </div>
-<div class="ODIN pui" title="ISS Command and Control Multiplexer/Demultiplexer Onboard Time (course)">
-  <div class="desc">ISS TIME COURSE</div>
+<div class="ODIN pui" title="ISS Command and Control Multiplexer/Demultiplexer Onboard Time (coarse)">
+  <div class="desc">ISS TIME COARSE</div>
   <div class="val" id="USLAB000084">NO DATA</div>
-</div>
-<div class="ODIN pui" title="ISS Command and Control Multiplexer/Demultiplexer Onboard Time (fine)">
-  <div class="desc">ISS TIME FINE</div>
-  <div class="val" id="USLAB000085">NO DATA</div>
 </div>
 <div class="ODIN-VVO pui" title="ISS Station Mode">
   <div class="desc">STATION MODE</div>
@@ -1902,14 +1898,17 @@ var Decoder =
 			else if (item === "USLAB000032")
 			{
 				xState = update.getValue("Value");
+				selector.text(+Math.round(update.getValue("Value")*1000000)/1000000);
 			}
 			else if (item === "USLAB000033")
 			{
 				yState = update.getValue("Value");
+				selector.text(+Math.round(update.getValue("Value")*1000000)/1000000);
 			}
 			else if (item === "USLAB000034")
 			{
 				zState = update.getValue("Value");
+				selector.text(+Math.round(update.getValue("Value")*1000000)/1000000);
 			}
 			else
 			{
