@@ -220,7 +220,8 @@ def clean_wikipedia_data(df):
 
 def clean_citations(text):
     if isinstance(text, str):
-        return re.sub(r'\[\d+\]', '', text)
+        # This will remove anything inside square brackets, including [i] and citation references like [1]
+        return re.sub(r'\[.*?\]', '', text).strip()
     else:
         return text
 
