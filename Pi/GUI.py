@@ -3526,8 +3526,8 @@ class MainApp(App):
         dragon9_2 = 0+dragon9count
 
         #Identify variables for Crew_screen
-        self.crew_screen.ids.soyuz72_1.text = str(soyuz72count) + " / " + str(soyuz70_1)
-        self.crew_screen.ids.soyuz72_2.text = str(soyuz72count) + " / " + str(soyuz70_2)
+        self.crew_screen.ids.soyuz72_1.text = str(soyuz72count) + " / " + str(soyuz72_1)
+        self.crew_screen.ids.soyuz72_2.text = str(soyuz72count) + " / " + str(soyuz72_2)
         self.crew_screen.ids.soyuz72_3.text = str(soyuz72count) + " / " + str(soyuz72_3)
         self.crew_screen.ids.starlinerCFT_1.text = str(starlinerCFTcount) + " / " + str(starlinerCFT_1)
         self.crew_screen.ids.starlinerCFT_2.text = str(starlinerCFTcount) + " / " + str(starlinerCFT_2)
