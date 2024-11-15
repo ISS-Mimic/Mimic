@@ -3507,33 +3507,32 @@ class MainApp(App):
         self.crew_screen.ids.ISS_crewed_time.text = (f"{years_timedelta}:{months_timedelta:02}:{days_timedelta:02}/{hours_timedelta:02}:{minutes_timedelta:02}:{seconds_timedelta:02}")
 
         # Crew Launch Dates
-        soyuz70launch = datetime(2023, 9, 15) 
-        dragon8launch = datetime(2024, 3, 2) 
-        soyuz71launch = datetime(2024, 3, 23) 
+        soyuz72launch = datetime(2024, 9, 11) 
+        starlinerCFTlaunch = datetime(2024, 6, 5) 
+        dragon9launch = datetime(2024, 9, 28) 
 
         # Calculate Days since crew launch
-        soyuz70count = (crew_now - soyuz70launch).days
-        dragon8count = (crew_now - dragon8launch).days
-        soyuz71count = (crew_now - soyuz71launch).days
+        soyuz72count = (crew_now - soyuz72launch).days
+        starlinerCFTcount = (crew_now - starlinerCFTlaunch).days
+        dragon9count = (crew_now - dragon9launch).days
 
         # Calculate Cumulative Days for each astro
-        soyuz70_1 = 737+soyuz70count
-        soyuz70_2 = 0+soyuz70count
-        soyuz70_3 = 0+soyuz70count
-        dragon8_1 = 0+dragon8count
-        dragon8_2 = 211+dragon8count
-        dragon8_3 = 0+dragon8count
-        dragon8_4 = 0+dragon8count
-        soyuz71_1 = 189+soyuz71count
+        soyuz72_1 = 375+soyuz72count
+        soyuz72_2 = 196+soyuz72count
+        soyuz72_3 = 370+soyuz72count
+        starlinerCFT_1 = 179+dragon8count
+        starkinerCFT_2 = 322+dragon8count
+        dragon9_1 =203+dragon8count
+        dragon9_2 = 0+dragon8count
 
         #Identify variables for Crew_screen
-        self.crew_screen.ids.soyuz70_1.text = str(soyuz70count) + " / " + str(soyuz70_1)
-        self.crew_screen.ids.soyuz70_2.text = str(soyuz70count) + " / " + str(soyuz70_2)
-        self.crew_screen.ids.dragon8_1.text = str(dragon8count) + " / " + str(dragon8_1)
-        self.crew_screen.ids.dragon8_2.text = str(dragon8count) + " / " + str(dragon8_2)
-        self.crew_screen.ids.dragon8_3.text = str(dragon8count) + " / " + str(dragon8_3)
-        self.crew_screen.ids.dragon8_4.text = str(dragon8count) + " / " + str(dragon8_4)
-        self.crew_screen.ids.soyuz71_1.text = str(soyuz71count) + " / " + str(soyuz71_1)
+        self.crew_screen.ids.soyuz72_1.text = str(soyuz72count) + " / " + str(soyuz70_1)
+        self.crew_screen.ids.soyuz72_2.text = str(soyuz72count) + " / " + str(soyuz70_2)
+        self.crew_screen.ids.soyuz72_3.text = str(soyuz72count) + " / " + str(soyuz72_3)
+        self.crew_screen.ids.starlinerCFT_1.text = str(starlinerCFTcount) + " / " + str(starlinerCFT_1)
+        self.crew_screen.ids.starlinerCFT_2.text = str(starlinerCFTcount) + " / " + str(starlinerCFT_2)
+        self.crew_screen.ids.dragon9_1.text = str(dragon9count) + " / " + str(dragon9_1)
+        self.crew_screen.ids.dragon9_2.text = str(dragon9count) + " / " + str(dragon9_2)
 
 
         ## ISS Potential Problems ##
