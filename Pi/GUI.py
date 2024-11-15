@@ -3521,7 +3521,7 @@ class MainApp(App):
         soyuz72_2 = 196+soyuz72count
         soyuz72_3 = 370+soyuz72count
         starlinerCFT_1 = 179+starlinerCFTcount
-        starkinerCFT_2 = 322+starlinerCFTcount
+        starlinerCFT_2 = 322+starlinerCFTcount
         dragon9_1 =203+dragon9count
         dragon9_2 = 0+dragon9count
 
