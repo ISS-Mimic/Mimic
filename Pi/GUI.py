@@ -3520,10 +3520,10 @@ class MainApp(App):
         soyuz72_1 = 375+soyuz72count
         soyuz72_2 = 196+soyuz72count
         soyuz72_3 = 370+soyuz72count
-        starlinerCFT_1 = 179+dragon8count
-        starkinerCFT_2 = 322+dragon8count
-        dragon9_1 =203+dragon8count
-        dragon9_2 = 0+dragon8count
+        starlinerCFT_1 = 179+starlinerCFTcount
+        starkinerCFT_2 = 322+starlinerCFTcount
+        dragon9_1 =203+dragon9count
+        dragon9_2 = 0+dragon9count
 
         #Identify variables for Crew_screen
         self.crew_screen.ids.soyuz72_1.text = str(soyuz72count) + " / " + str(soyuz70_1)
