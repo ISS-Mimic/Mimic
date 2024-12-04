@@ -4599,7 +4599,7 @@ class MainApp(App):
         self.eps_screen.ids.v4b_value.text = v4b + "V"
         self.iss_screen.ids.altitude_value.text = str(altitude) + " km"
         self.orbit_screen.ids.altitude.text = str(altitude) + " km"
-        self.iss_screen.ids.velocity_value.text = str(velocity) + " m/s"
+        self.iss_screen.ids.velocity_value.text = str(velocity) + " km/s"
         self.iss_screen.ids.stationmass_value.text = str(iss_mass) + " kg"
 
         self.us_eva.ids.EVA_needle.angle = float(self.map_rotation(0.0193368*float(crewlockpres)))
