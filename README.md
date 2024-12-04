@@ -41,6 +41,8 @@ You can view a video showing some of our project here:https://youtu.be/W9iZBjzOE
 
 The software is pretty cool and provides even more in-depth functionality than isslive.com. We'll be adding videos and pictures soon to show off the software capabilities.
 
+The Mimic Telemetry Screens are explained in detail here:
+https://docs.google.com/presentation/d/11LBGKdbBd1ZbKKpKJ8Y54hAPogtyMLfRmvKoN2bRaHQ/edit?usp=sharing
 
 # Status/Priorities
 We are currently focused on refining the CAD model and splitting out all the STL files for printing. All of the STL files currently in this repo are likely outdated or currently changing. We will also release the raw CAD once finished.
