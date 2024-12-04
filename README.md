@@ -29,6 +29,9 @@ The telemetry is awesome in and of itself. But we wanted to do something more wi
 
 The project is still a work in progress. We have a fully functioning model that works with all 12 motors turning correctly and able to sync with live data. However, we want to increase the fidelity. Our low-fidelity model is completely finished and available here: [STL Files](https://github.com/ISS-Mimic/Mimic/tree/main/3D_Printing). We are still working on the high fidelity upgrade (help us!) and trying to make the ISS look as detailed as possible while still being printable. The software is still a work in progress, too. But from the standpoint of receiving telemetry and transmitting it to the Arduinos, the basic functionality is finished. The finishing touches on the software are all for visualizing the telemetry.
 
+![PXL_20231210_020001606 (1)](https://github.com/user-attachments/assets/8388209c-8a53-43a8-90d4-c8f7b5d9cac5)
+
+
 ![Functional but not pretty model!](https://i.imgur.com/OlkpRSA.jpg)
 
 DISCLAIMER - We are not professional programmers. We are just a group of dedicated ISS program employees and enthusiasts trying to share our love of the space program through this awesome project. All the code maintained here was created to work toward our specific goal, and much of it was using languages that none of us had used before. You may find the structure, style, and lack of comments to be completely novice and infuriating. You may scream out in frustration, laugh in disgust, or even weep at the obfuscated nonsense appearing before your eyes. 
