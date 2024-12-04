@@ -4059,8 +4059,23 @@ class MainApp(App):
         self.tcs_screen.ids.ptrrj_value.text = ptrrj + "deg"
         self.tcs_screen.ids.strrj_value.text = strrj + "deg"
 
-        self.tcs_screen.ids.SWmode_loopA.text = str(SWmode_loopA)
-        self.tcs_screen.ids.SWmode_loopB.text = str(SWmode_loopB)
+        SW_MODE_MAP = {
+            1: "STANDBY",
+            2: "RESTART",
+            3: "CHECKOUT",
+            4: "DIRECTED POS",
+            5: "AUTOTRACK",
+            6: "BLIND",
+            7: "SHUTDOWN",
+            8: "SWITCHOVER"
+        }
+        
+        self.tcs_screen.ids.SWmode_loopA.text = SW_MODE_MAP.get(SWmode_loopA, "UNKNOWN")
+        self.tcs_screen.ids.SWmode_loopB.text = SW_MODE_MAP.get(SWmode_loopB, "UNKNOWN")
+
+            
+        #self.tcs_screen.ids.SWmode_loopA.text = str(SWmode_loopA)
+        #self.tcs_screen.ids.SWmode_loopB.text = str(SWmode_loopB)
         self.tcs_screen.ids.NH3flow_loopA.text = str(NH3flow_loopA)
         self.tcs_screen.ids.NH3flow_loopB.text = str(NH3flow_loopB)
         self.tcs_screen.ids.NH3outletPress_loopA.text = str(NH3outletPress_loopA)
