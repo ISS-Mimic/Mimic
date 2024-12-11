@@ -57,7 +57,7 @@ class Component(ApplicationSession):
                 if ts:
                     timestamp = ts
 
-            print(f"Active TDRS: {active_tdrs}, Timestamp: {timestamp}")
+            #print(f"Active TDRS: {active_tdrs}, Timestamp: {timestamp}")
             update_database(active_tdrs, timestamp)
 
         yield self.subscribe(onevent, u'gov.nasa.gsfc.scan_now.sn.activity')
