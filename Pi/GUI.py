@@ -1241,11 +1241,11 @@ class MimicScreen(Screen, EventDispatcher):
         global p,TDRSproc
         log_info("Telemetry Subprocess start")
         p = Popen(["python", mimic_directory + "/Mimic/Pi/iss_telemetry.py"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
-        #TDRSproc = Popen(["python", mimic_directory + "/Mimic/Pi/TDRScheck.py"]) #uncomment if TDRS site comes back and fixed code
+        TDRSproc = Popen(["python", mimic_directory + "/Mimic/Pi/TDRScheck.py"]) #uncomment if TDRS site comes back and fixed code
         #p = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/Data"])
 
     def killproc(*args):
-        global p,p2,c
+        global p,p2,c,TDRSproc
         c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer', '0', 'Unsubscribed', '0', 0)")
         try:
             p.kill()
