@@ -113,6 +113,8 @@ def main():
     run_install("python3-scipy", "sudo apt-get") #required for nightshade
     run_install("python3-pandas", "sudo apt-get") #pandas is used for correlating the NASA VV page with wiki
     run_install("libatlas-base-dev", "sudo apt-get") #fix numpy issue
+    run_install("python3-twisted", "sudo apt-get") #websocket stuff for the TDRS status - ONE OPF THESE CAUSED A PROBLEM BEFORE
+    run_install("python3-autobahn", "sudo apt-get") #websocket stuff for the TDRS status - ONE OPF THESE CAUSED A PROBLEM BEFORE
     run_install("python3-ephem", "sudo apt-get") #python libs for mimic
     if bullseye:
         run_install("pytz", "python -m pip") #python libs for mimic
