@@ -1248,11 +1248,23 @@ class MimicScreen(Screen, EventDispatcher):
         global p,p2,c,TDRSproc
         c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer', '0', 'Unsubscribed', '0', 0)")
         try:
-            p.kill()
-            p2.kill()
-            TDRSproc.kill()
+            if p:
+                p.kill()
         except Exception as e:
-            log_error(e)
+            log_error(f"Failed to kill p: {e}")
+        
+        try:
+            if p2:
+                p2.kill()
+        except Exception as e:
+            log_error(f"Failed to kill p2: {e}")
+        
+        try:
+            if TDRSproc:
+                TDRSproc.kill()
+        except Exception as e:
+            log_error(f"Failed to kill TDRSproc: {e}")
+
 
 class CDH_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
