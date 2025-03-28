@@ -135,7 +135,8 @@ def main():
     if bullseye:
         run_install("kivy", "python -m pip") #iss telemetry service
     else:
-        run_install("python3-kivy", "sudo apt-get")
+        run_install("kivy", "python -m pip")
+        #run_install("python3-kivy", "sudo apt-get") # using default pip install because latest kivy is not present in apt
     run_command("python -c 'import kivy'") # run kivy init to create the config.ini file
     print("Replacing Kivy config file")
     replace_kivy_config(username)
