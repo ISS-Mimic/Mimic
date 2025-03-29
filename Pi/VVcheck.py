@@ -235,7 +235,12 @@ wikipedia_df = clean_wikipedia_data(wikipedia_df)
 def correlate_data(nasa_df, wiki_df):
     correlated_data = []
     for _, nasa_row in nasa_df.iterrows():
-        matching_wiki_rows = wiki_df[wiki_df['Arrival'] == nasa_row['Date']]
+        if pd.isnull(nasa_row['Date']):
+            continue
+        # Allow a tolerance of +/- 1 day when matching dates
+        start_date = nasa_row['Date'] - pd.Timedelta(days=1)
+        end_date = nasa_row['Date'] + pd.Timedelta(days=1)
+        matching_wiki_rows = wiki_df[wiki_df['Arrival'].between(start_date, end_date)]
         for _, wiki_row in matching_wiki_rows.iterrows():
             correlated_data.append({
                 'Spacecraft': wiki_row['Spacecraft'],
@@ -248,6 +253,7 @@ def correlate_data(nasa_df, wiki_df):
                 'Departure': wiki_row['Departure']
             })
     return pd.DataFrame(correlated_data)
+
 
 correlated_df = correlate_data(current_docked_df, wikipedia_df)
 #print(correlated_df)
