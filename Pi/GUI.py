@@ -3520,32 +3520,37 @@ class MainApp(App):
 
         # Crew Launch Dates
         soyuz72launch = datetime(2024, 9, 11) 
-        starlinerCFTlaunch = datetime(2024, 6, 5) 
-        dragon9launch = datetime(2024, 9, 28) 
+        dragon10launch = datetime(2025, 3, 13) 
+        soyuz73launch = datetime(2025, 4, 8) 
 
         # Calculate Days since crew launch
         soyuz72count = (crew_now - soyuz72launch).days
-        starlinerCFTcount = (crew_now - starlinerCFTlaunch).days
-        dragon9count = (crew_now - dragon9launch).days
+        dragon10count = (crew_now - dragon10launch).days
+        soyuz73count = (crew_now - soyuz73launch).days
 
         # Calculate Cumulative Days for each astro
         soyuz72_1 = 375+soyuz72count
         soyuz72_2 = 196+soyuz72count
         soyuz72_3 = 370+soyuz72count
-        starlinerCFT_1 = 179+starlinerCFTcount
-        starlinerCFT_2 = 322+starlinerCFTcount
-        dragon9_1 =203+dragon9count
-        dragon9_2 = 0+dragon9count
+        dragon10_1 = 205+dragon10count
+        dragon10_2 = 0+dragon10count
+        dragon10_3 = 115+dragon10count
+        dragon10_4 = 0+dragon10count
+        soyuz73_1 = 357+soyuz73count
+        soyuz73_2 = 0+soyuz73count
+        soyuz74_3 = 0+soyuz73count
 
         #Identify variables for Crew_screen
         self.crew_screen.ids.soyuz72_1.text = str(soyuz72count) + " / " + str(soyuz72_1)
         self.crew_screen.ids.soyuz72_2.text = str(soyuz72count) + " / " + str(soyuz72_2)
         self.crew_screen.ids.soyuz72_3.text = str(soyuz72count) + " / " + str(soyuz72_3)
-        self.crew_screen.ids.starlinerCFT_1.text = str(starlinerCFTcount) + " / " + str(starlinerCFT_1)
-        self.crew_screen.ids.starlinerCFT_2.text = str(starlinerCFTcount) + " / " + str(starlinerCFT_2)
-        self.crew_screen.ids.dragon9_1.text = str(dragon9count) + " / " + str(dragon9_1)
-        self.crew_screen.ids.dragon9_2.text = str(dragon9count) + " / " + str(dragon9_2)
-
+        self.crew_screen.ids.dragon10_1.text = str(dragon10count) + " / " + str(dragon10_1)
+        self.crew_screen.ids.dragon10_2.text = str(dragon10count) + " / " + str(dragon10_2)
+        self.crew_screen.ids.dragon10_3.text = str(dragon10count) + " / " + str(dragon10_3)
+        self.crew_screen.ids.dragon10_4.text = str(dragon10count) + " / " + str(dragon10_4)
+        self.crew_screen.ids.soyuz73_1.text = str(soyuz73count) + " / " + str(soyuz73_1)
+        self.crew_screen.ids.soyuz73_2.text = str(soyuz73count) + " / " + str(soyuz73_2)
+        self.crew_screen.ids.soyuz73_3.text = str(soyuz73count) + " / " + str(soyuz73_3)        
 
         ## ISS Potential Problems ##
         #ISS Leak - Check Pressure Levels
