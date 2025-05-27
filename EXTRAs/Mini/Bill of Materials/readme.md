@@ -7,8 +7,8 @@
 | Pi micro HDMI to HDMI cable | 1 | N/A | N/A |  [  ]() | Note : from kit above |  | 
 | Pi SD card | 1 | N/A | N/A |  [  ]() | Note : from kit above |  | 
 | Pi Switch (optional) | 1 | $6.99 | N/A |  [ Amazon ](https://www.amazon.com/LoveRPi-MicroUSB-Switch-Raspberry-Female/dp/B018BFWLRU/ref=sr_1_3?crid=2B6BAVTULFIHY&keywords=pi%2Bpower%2Bswitch&qid=1693777916&s=electronics&sprefix=pi%2Bpower%2Bswitch%2Celectronics%2C145&sr=1-3&th=1) | Completely optional, only if needing a power button option to turn on the Pi without unplugging and re-plugging | ![image](https://m.media-amazon.com/images/I/31h-+zNDQQL.jpg) | 
-| screen | 1 | $239.99 | $239.99 |  [ Amazon ](https://www.amazon.com/dp/B08778F756?ref_=cm_sw_r_apan_dp_42NR1TACEGAQ6Z8WAE2F&th=1) | Any standard monitor, TV or touch screen will do. Here is an option of touch screen for consideration if budget allows | ![image](https://m.media-amazon.com/images/I/61ZOhSHPTPL._AC_SY355_.jpg) | 
-
+| screen (option 1) | 1 | $239.99 | $239.99 |  [ Amazon ](https://www.amazon.com/dp/B08778F756?ref_=cm_sw_r_apan_dp_42NR1TACEGAQ6Z8WAE2F&th=1) | Any standard monitor, TV or touch screen will do. Here is an option of touch screen for consideration if budget allows | ![image](https://m.media-amazon.com/images/I/61ZOhSHPTPL._AC_SY355_.jpg) | 
+| screen (option 2) | 1 | ~$50.00 |  ~$50.00 |  [ Amazon ](https://www.amazon.com/HMTECH-Raspberry-Touchscreen-1024x600-Portable/dp/B0987468N2/ref=pd_ci_mcx_di_int_sccai_cn_d_sccl_2_1/137-5719944-4945863?pd_rd_w=ZgkJo&content-id=amzn1.sym.751acc83-5c05-42d0-a15e-303622651e1e&pf_rd_p=751acc83-5c05-42d0-a15e-303622651e1e&pf_rd_r=T1K7Z16QM24SRNHTSY3E&pd_rd_wg=uyplb&pd_rd_r=fa203240-eb69-43c6-b2e1-43f4f8e8bcdc&pd_rd_i=B0987468N2&th=1) | Any standard monitor, TV or touch screen will do. Here is an option of touch screen for consideration if budget allows | ![image](https://github.com/user-attachments/assets/741e4b82-2c63-4afd-8cca-3c831ba79926)| 
 
 
 ### Essential Part
@@ -28,7 +28,7 @@
 ### Modelling (3D Printing/Module Connections/Aesthetics)
 |  **Part** | **Quantity** | **Cost Per Unit** | **Total Cost** | **URL** | **Notes** | **Image** |
 | --- | :--: | :--: | :--: | --- | --- | --- |
-| #4-40 x 1/2 in. Combo Round Head Machine Screw (8-Pack) | 1 | $1.38 | $1.38 |  [ Home Depot ](https://www.homedepot.com/p/4-40-x-1-2-in-Zinc-Plated-Combo-Round-Head-Machine-Screw-8-Pack-831381/317479028) |  |  | ![image](https://github.com/ISS-Mimic/Mimic/assets/58833710/c09acc73-69b8-437d-8e55-0c9478e6dc50)| 
+| #4-40 x 1/2 in. Combo Round Head Machine Screw (8-Pack) | 1 | $1.38 | $1.38 |  [ Home Depot ](https://www.homedepot.com/p/4-40-x-1-2-in-Zinc-Plated-Combo-Round-Head-Machine-Screw-8-Pack-831381/317479028) |  | *Could replace with screw and nut from MakerBeam | ![image](https://github.com/ISS-Mimic/Mimic/assets/58833710/c09acc73-69b8-437d-8e55-0c9478e6dc50)| 
 | twist tie (optional) or supper glue | 4 | $ | $0 |  [ Amazon ](https://www.amazon.com/dp/B006R86DE6/ref=pe_386300_440135490_TE_simp_item_image?th=1) | Used to twist tie 2 halves of USOS together (any twist tie will work, recycle what's around the house.  But if you need to buy, here is link amazon.  Other option is just glue them.   | ![image](https://github.com/ISS-Mimic/Mimic/assets/58833710/9fccf510-d119-489e-9fc1-cafa7986576f) | 
 | Paper Clip (Large) | 4 | $ | $0 |  [ Amazon ](https://www.amazon.com/dp/B08SQ7PMYQ/ref=pe_386300_440135490_TE_simp_item_image) | Straighten out Large paper clip are used to pin Russian Segment together with FGB and SM arrays.  Any large paper clip around the house, school or office will work | ![image](https://github.com/ISS-Mimic/Mimic/assets/58833710/0f29197f-a76a-489a-b614-92c9742419e9)| 
 | drill bit + / or pin vice kit | 1 | $9 | $9 |  [ Amazon ](https://www.amazon.com/dp/B09ZHDS95S/ref=sspa_dk_detail_4?ie=UTF8&pd_rd_i=B082823TZ9p13NParams&s=hi&sp_csd=d2lkZ2V0TmFtZT1zcF9kZXRhaWxfdGhlbWF0aWM&th=1) | used to clean prints on connection points   | ![image](https://github.com/ISS-Mimic/Mimic/assets/58833710/04f016a0-8793-4b24-92b4-7fe2c3a0a48d)| 
@@ -38,7 +38,8 @@
 | vinyl - Chrome Metallic Gold | 1 | $12 | $12 |  [ Amazon ](https://www.amazon.com/gp/product/B07XZ3XY42/?th=1) | Vinyl are used as decorative item on all arrays in model to give the iconic solar panel look.  Vinyl requires access to a vinyl cutter such as  a [Cricut](https://cricut.com/en-us/cutting-machines), not listed on this BOM.  | ![image](https://github.com/ISS-Mimic/Mimic/assets/58833710/750e47e4-dc7f-4284-a8db-40095b4a3950) | 
 | vinyl - Ultraviolet | 1 | $12.69 | $12.69 |  [ Amazon ](https://www.amazon.com/gp/product/B07QYXHM9H/?th=1) |  | ![image](https://github.com/ISS-Mimic/Mimic/assets/58833710/439b91ce-d4f8-4166-ab04-51e6a84cf48a) | 
 | vinyl - Matte Metallic Champagne Gold | 1 | $12.29 | $12.29 |  [ Amazon ](https://www.amazon.com/gp/product/B088TMQ3Q6/?th=1) |  | ![image](https://github.com/ISS-Mimic/Mimic/assets/58833710/eb220287-962f-4183-beac-2b004cbefee1) | 
-
+| Cable Wrap - Alex Tech 10ft - 1.25 inch Cord Protector Wire Loom Tubing Cable Sleeve Split Sleeving for USB Cable Power Cord Audio Video Cable – Protect Cat from Chewing Cords - Black | 1 | $13.99 | $13.99 |  [ Amazon ](https://www.amazon.com/Alex-Tech-10ft-Protector-Sleeving/dp/B08NT43H29/ref=asc_df_B08NT43H29?mcid=ba6701c1f01c34eabbe918c636c2d20c&hvocijid=7615137694133085786-B08NT43H29-&hvexpln=73&tag=hyprod-20&linkCode=df0&hvadid=721245378154&hvpos=&hvnetw=g&hvrand=7615137694133085786&hvpone=&hvptwo=&hvqmt=&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9027633&hvtargid=pla-2281435180258&th=1) | Cut to length: 2 x 9inches, 1 x 17inches |![image](https://github.com/user-attachments/assets/c80eeb16-0f45-4c61-bee9-89e9b6f13273)
+  | 
 
 
 
@@ -52,14 +53,14 @@
 | stick  (Maker Beam 100/10/10mm) | 1 | N/A | N/A |  [  ]() |  |  | 
 | stick  (Maker Beam  60/10/10mm) | 1 | N/A | N/A |  [  ]() |  |  | 
 | MakerBeam corner bracket (L shape) (100315) | 5 | N/A | N/A |  [  ]() | Can alternatively print your own:https://www.tinkercad.com/things/hA3l493foaQ-mini-iss-mimic-05-scale-model-simple-corner-bracket |  | 
-| MakerBeam M3 square headed bolt (100359) - screws | 34 | N/A | N/A |  [  ]() |  |  | 
-| MakerBeam M3 square headed bolt (101013)  - longer screws | 4 | N/A | N/A |  [  ]() |  |  | 
-| MakerBeam M3 nut (100416) | 38 | N/A | N/A |  [  ]() |  |  | 
+| MakerBeam M3 square headed bolt (100359) - screws | 40 | N/A | N/A |  [  ]() |  |  | 
+| MakerBeam M3 square headed bolt (101013)  - longer screws | 4 | N/A | N/A |  [  ]() | Add one more if to use for screw replacment to attach USOS to S0 |  | 
+| MakerBeam M3 nut (100416) | 46 | N/A | N/A |  [  ]() |  |  | 
 | MakerBeam M3 hex nut driver (5.5) (100461) or a wrench | 1 | N/A | N/A |  [  ]() |  |  | 
 | MakerBeam 90 degree bracket (100304) (L-shape flat, 3 hole x 2 hole) | 2 | N/A | N/A |  [  ]() |  |  | 
 | MakerBeam right angle bracket (100326) (L-shape flat, 3 hole x 3 hole) | 2 | N/A | N/A |  [  ]() |  |  | 
 | MakerBeam straight bracket (100269)  | 1 | N/A | N/A |  [  ]() |  |  | 
-
+| MakerBeam T bracket (100337)  | 1 | N/A | N/A |  [  ]() |  |  | 
 
 
 ### Mini-Mimic Total Cost
