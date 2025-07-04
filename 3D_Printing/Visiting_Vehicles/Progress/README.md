@@ -60,5 +60,5 @@ The goal is a crisp 0.12 mm-layer display print that’s still sturdy enough to 
 |  | Remove small overhangs | ✓ |
 |  | Raft layers | 0 |
 
-> **Tip:** These numbers are tuned for Overture PLA on an enclosed Bambu H2B.  
+> **Tip:** These numbers are tuned for Overture PLA on an enclosed Bambu H2D.  
 > If you swap material, nozzle size, or printer, retune temps, cooling, and speeds accordingly.
