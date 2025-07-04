@@ -2,7 +2,7 @@
 
 # Soyuz-ISS Mimic Print Profile
 
-(![image](https://github.com/user-attachments/assets/58afe2f2-1ea9-4d8b-bb01-1b144c060601)
+![image](https://github.com/user-attachments/assets/58afe2f2-1ea9-4d8b-bb01-1b144c060601)
 
 Recommend a white PLA for printing, but if you won't be painting it black might be better since most of the vehicle is black. 
 
