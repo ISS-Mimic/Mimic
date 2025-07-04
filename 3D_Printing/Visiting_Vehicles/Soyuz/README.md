@@ -4,7 +4,7 @@
 
 ![image](https://github.com/user-attachments/assets/58afe2f2-1ea9-4d8b-bb01-1b144c060601)
 
-Recommend a white PLA for printing, but if you won't be painting it black might be better since most of the vehicle is black. 
+Recommend a white PLA for printing if you plan to paint it, but if you won't be painting it black might be better since most of the vehicle is black. 
 
 Most settings are default, really just need tree supports on build plate only. 
 
