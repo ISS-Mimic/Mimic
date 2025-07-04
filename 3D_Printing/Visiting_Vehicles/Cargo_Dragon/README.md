@@ -1,5 +1,5 @@
-### Crew Dragon
-HiFi Crew Dragon model from Nick Gust on [grabcad](https://grabcad.com/library/spacex-crew-capsule-dragon-1) modified for accuracy and interfacing with mimic components
+### Cargo Dragon
+HiFi Crew Dragon model from Nick Gust on [grabcad](https://grabcad.com/library/spacex-crew-capsule-dragon-1) modified to be cargo variant and for accuracy and interfacing with mimic components
 
 # Slicer Recommendation 
 
