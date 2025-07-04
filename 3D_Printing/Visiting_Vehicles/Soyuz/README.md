@@ -1,3 +1,9 @@
+# Attribution
+
+Model Credit: Canadian Space Agency, https://www.asc-csa.gc.ca/eng/multimedia/search/image/10190
+
+This was modified by srtreadgold for ISS MIMIC use.
+
 # Slicer Recommendation 
 
 # Soyuz-ISS Mimic Print Profile
