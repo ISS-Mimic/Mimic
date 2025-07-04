@@ -3,7 +3,7 @@ HiFi Crew Dragon model from Nick Gust on [grabcad](https://grabcad.com/library/s
 
 # Slicer Recommendation 
 
-# Cygnus-ISS Mimic Print Profile
+# Crew Dragon-ISS Mimic Print Profile
 
 ![image](https://github.com/user-attachments/assets/159392f6-4985-4a6d-8e4e-6c136d16cd93)
 
@@ -59,7 +59,7 @@ The goal is a crisp 0.12 mm-layer display print that’s still sturdy enough to 
 |  | Style | Default |
 |  | Threshold angle | 20 ° |
 |  | On build plate only | ✓ |
-|  | Support critical regions only | ✓ |
+|  | Support critical regions only | x |
 |  | Remove small overhangs | ✓ |
 |  | Raft layers | 0 |
 
