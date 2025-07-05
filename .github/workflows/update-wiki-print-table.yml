@@ -1,66 +1,70 @@
 name: 🛠️ Auto-refresh 3D-Print Checklist (Wiki)
 
 on:
-  # Run when any STL / 3MF in 3D_Printing/ changes…
   push:
     paths:
       - "3D_Printing/**"
-  # …and once nightly as a safety-net
   schedule:
-    - cron: "0 3 * * *"    # 03:00 UTC
-
-permissions:
-  contents: read            # checkout needs this
-  # we’ll push to the wiki with a PAT, not this token
+    - cron: "0 3 * * *"          # daily safety-net
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
 
     steps:
-    # 1️⃣ pull your repo so the script can see the files
+    # 1️⃣  Pull the main repo
     - name: Check out code
-      uses: actions/checkout@v4   # official action :contentReference[oaicite:0]{index=0}
+      uses: actions/checkout@v4
 
-    # 2️⃣ provision Python
+    # 2️⃣  Set up Python
     - name: Set up Python 3.11
       uses: actions/setup-python@v5
       with:
         python-version: "3.11"
 
-    # 3️⃣ install the tiny deps
-    - name: Install Python deps
+    # 3️⃣  Install tiny deps
+    - name: Install deps
       run: |
         python -m pip install --upgrade pip
         pip install PyGithub tabulate
-        
-    - name: Debug GH_PAT
-      run: |
-        if [ -z "$GH_PAT" ]; then echo "GH_PAT is not set"; else echo "GH_PAT is set"; fi
-      env:
-        GH_PAT: ${{ secrets.GH_PAT }}
-        
-    # 4️⃣ run the generator – it writes the markdown file
+
+    # 4️⃣  Generate the markdown once
     - name: Generate checklist markdown
       run: |
-        python scripts/make_print_table.py > "Build-Instruction:-3D-Printed-Parts.md"
+        python scripts/make_print_table.py \
+          > "Build-Instruction:-3D-Printed-Parts.md"
 
-    # 5️⃣ clone the wiki repo with the PAT
-    - name: Clone wiki repo
+    # 5️⃣  Verify the file exists (debug helper)
+    - name: Show generated file
+      run: |
+        ls -l "Build-Instruction:-3D-Printed-Parts.md" | cat
+        head -n 10 "Build-Instruction:-3D-Printed-Parts.md"
+
+    # 6️⃣  Clone the Wiki repo
+    - name: Clone wiki
       env:
         GH_PAT: ${{ secrets.GH_PAT }}
       run: |
-        git clone "https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}.wiki.git" wiki
+        git clone \
+          "https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}.wiki.git" \
+          wiki
 
-    # 6️⃣ copy new file into wiki, commit & push
-    - name: Update wiki page
+    # 7️⃣  Copy file, commit & push if it changed
+    - name: Copy into wiki and commit
       env:
         GH_PAT: ${{ secrets.GH_PAT }}
       run: |
-        python scripts/make_print_table.py > "Build-Instruction:-3D-Printed-Parts.md"
+        set -e
+        cp "Build-Instruction:-3D-Printed-Parts.md" wiki/
         cd wiki
-        git config user.name  "Mimic-CI Bot"
-        git config user.email "actions@github.com"
         git add "Build-Instruction:-3D-Printed-Parts.md"
-        git commit -m "docs: auto-refresh 3D-print checklist [skip ci]" || echo "No changes"
-        git push origin HEAD
+
+        # Only commit when the file differs
+        if git diff --cached --quiet; then
+          echo "No changes – wiki already up to date."
+        else
+          git config user.name  "Mimic-CI Bot"
+          git config user.email "actions@github.com"
+          git commit -m "docs: auto-refresh 3-D print checklist [skip ci]"
+          git push origin HEAD
+        fi
