@@ -1,0 +1,40 @@
+# .github/workflows/pages.yml
+name: Build & Deploy docs site
+on:
+  push:
+    branches: [main]        # branch that contains docs/
+    paths:
+      - "docs/**"           # only rebuild when anything under docs/ changes
+      - ".github/workflows/pages.yml"  # allow yourself to tweak the workflow
+  # optional: handle PR previews
+  # pull_request:
+  #   paths: ["docs/**"]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      # If you have a static-site generator, build it here…
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs                # directory to publish
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
