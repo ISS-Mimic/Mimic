@@ -9,6 +9,11 @@ import os
 from github import Github
 from tabulate import tabulate   # pip install tabulate
 import textwrap
+import sys
+
+if not os.environ.get("GH_PAT"):
+    print("ERROR: GH_PAT environment variable is not set.")
+    sys.exit(1)
 
 REPO   = "ISS-Mimic/Mimic"
 PATH   = "3D_Printing"
