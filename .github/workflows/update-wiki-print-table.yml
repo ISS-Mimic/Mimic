@@ -51,7 +51,7 @@ jobs:
       env:
         GH_PAT: ${{ secrets.GH_PAT }}
       run: |
-        cp "Build-Instruction:-3D-Printed-Parts.md" wiki/
+        python scripts/make_print_table.py > "Build-Instruction:-3D-Printed-Parts.md"
         cd wiki
         git config user.name  "Mimic-CI Bot"
         git config user.email "actions@github.com"
