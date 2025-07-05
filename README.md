@@ -101,10 +101,9 @@ Other help:
 -Feel free to suggest ideas! Best place to talk is out discord, or feel free to publish an issue
 
 ### Roadmap
-- [ ] Finish high-fidelity CAD & release STEP source  
-- [ ] Convert dashboard to KivyMD for dark-mode toggle  
-- [ ] Add MQTT bridge for external projects  
-- [ ] CI: nightly test against Lightstreamer endpoint
+- [ ] Finish high-fidelity CAD & release STEP source
+- [ ] Complete build guide
+- [ ] Finish Kivy telemetry screens  
 
 ### License
 This project is licensed under the MIT License – see [`LICENSE`](LICENSE) for details.
