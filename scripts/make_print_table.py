@@ -5,18 +5,14 @@ Requires: python-github-api  (pip install PyGithub)
 Usage:    python make_print_table.py > wiki/3d_print_checklist.md
 """
 
-import os
+
 from github import Github
 from tabulate import tabulate   # pip install tabulate
 import textwrap
+import os
 
-REPO = "ISS-Mimic/Mimic"
-PATH = "3D_Printing"
-
-# Prefer your own PAT if present, else fall back to the runner’s GITHUB_TOKEN,
-# else no token (very low rate-limit but fine for local runs).
-TOKEN = os.getenv("GH_PAT") or os.getenv("GITHUB_TOKEN")
-g = Github(TOKEN) if TOKEN else Github()
+TOKEN = os.getenv("GH_PAT", "")
+g = Github(TOKEN)
 
 tree = g.get_repo(REPO).get_git_tree("main", recursive=True).tree
 
