@@ -1,53 +1,116 @@
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-![Contributors](https://img.shields.io/github/contributors-anon/ISS-Mimic/Mimic)
-[![Discord](https://img.shields.io/discord/764217406041882684)](https://discord.gg/zPKyE6hBSe)
-![GitHub last commit](https://img.shields.io/github/last-commit/ISS-Mimic/Mimic)
-[![Twitter Follow](https://img.shields.io/twitter/follow/ISS_Mimic?style=social)](https://twitter.com/ISS_Mimic)
-[![YouTube Video Views](https://img.shields.io/youtube/views/W9iZBjzOEEQ?style=social)](https://www.youtube.com/watch?v=W9iZBjzOEEQ)
+<!-- =========================================================
+  ISS Mimic  •  Re-create the ISS attitude & telemetry in real-time
+  ========================================================= -->
 
-Welcome to the ISS Mimic project repository! We are developing a 3D printed model of the International Space Station that uses the actual ISS live telemetry to mimic the actual positioning of the ISS solar arrays and radiators! We are also developing tools to visualize all of the ISS public telemetry in informative ways! Join our discord to provide feedback, ask questions, or get involved! 
+<p align="center">
+  <img src="Pi/imgs/main/ISSmimicLogoPartsGroundtrack.png" width="420" alt="ISS Mimic logo">
+</p>
 
-https://discord.gg/zPKyE6hBSe
+<p align="center">
+  <a href="https://opensource.org/licenses/MIT"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
+  <img alt="Last commit" src="https://img.shields.io/github/last-commit/ISS-Mimic/Mimic">
+  <a href="https://discord.gg/zPKyE6hBSe"><img alt="Discord Chat" src="https://img.shields.io/discord/764217406041882684"></a>
+  <a href="https://www.youtube.com/watch?v=W9iZBjzOEEQ"><img alt="Demo" src="https://img.shields.io/badge/▶ Demo%20Video-red?logo=youtube&logoColor=white"></a>
+</p>
 
-We are always looking for people to help with the coding of our raspberry pi telemetry display program, the telemetry website, the creation of ISS CAD models, general project ideas, etc... 
+> **ISS Mimic** is an open-source mash-up of hardware + software that **mirrors the International Space Station’s solar-array and radiator motion** in real time.  
+> 🍓 Runs on Raspberry Pi • 🛠 12 motors drive a 3-D-printed ISS • 📈 Live telemetry visualizer
 
-If you want to build your own ISS Mimic, or just want to use the ISS telemetry in your own application, we are more than happy to help. 
+---
 
-Check out our youtube video:
+ISS Mimic is a 3D printed model of the International Space Station that connects to the actual live data from the real ISS to control a model that rotates solar panels and radiators to match the real one in real time. The goal of this project is to connect people with the ISS. There are three different mimic models: Mimic, Mini Mimic, and Edu Mimic. These models are designed for teachers, students, museums, hobbyists, and anyone who wants to learn more about the ISS. 
 
-[![ISS MIMIC!](https://img.youtube.com/vi/W9iZBjzOEEQ/0.jpg)](https://www.youtube.com/watch?v=W9iZBjzOEEQ)
+Join the discussion, help out, ask for help, chat about the ISS here: [Mimic Discord](https://discord.gg/zPKyE6hBSe)
 
-![ISS MIMIC!](https://github.com/ISS-Mimic/Mimic/blob/master/Pi/imgs/main/ISSmimicLogoPartsGroundtrack.png)
+![PXL_20231210_003701830](https://github.com/user-attachments/assets/27b69560-8007-48d9-a087-6f27fd00f06d)
 
-The International Space Station is constantly downlinking data (telemetry) for Mission Control to monitor. Several years ago, NASA provided some of the data to the public in order to spur interest in the ISS and space exploration under the (now defunct) ISSlive project using the lightstreamer service (http://demos.lightstreamer.com/ISSLive/). We saw this project and wanted to expand on its potential. Since the development of isslive.com, some more data was added to the public feed and was, sadly, never incorporated into the website. The current total epic and all inclusive list of public telemetry can be seen at our page here https://iss-mimic.github.io/Mimic/ and in an even cooler format here https://iss-mimic.github.io/Mimic/dashboard.html Sadly, ISSlive.com is no longer maintained, but thanks largely in part to our efforts, the telemetry is still being provided to the public through the same lightstreamer connection. 
+<details>
+<summary>Table of Contents</summary>
 
-You can find info on installing our (still heavily in development but with some pretty cool working features now) custom ISS telemetry display program here: https://github.com/ISS-Mimic/Mimic/wiki/Build-Instruction%3A-Mimic-Software-Setup-Instructions
+- [Features](#features)
+- [Quick Start (Raspberry Pi)](#quick-start-raspberry-pi)
+- [Project Architecture](#project-architecture)
+- [Build Your Own Model](#build-your-own-model)
+- [Screenshots](#screenshots)
+- [Contributing](#contributing)
+- [Roadmap](#roadmap)
+- [License](#license)
+</details>
 
-The telemetry is awesome in and of itself. But we wanted to do something more with the data, using it to drive software and hardware. Software - running a Raspberry Pi, we want to display all of the telemetry in an interesting and informative manner, enabling visualization of more than just boring numbers. Hardware - using Arduino related microcontrollers, receiving data from the Raspberry Pi, we want to control a 3D-printed model of the ISS and make it exactly match up with the actual ISS in real time. All of the solar arrays, radiators, and outboard truss will be able to rotate to match the ISS joint angles.
+---
 
-![Stuff that moves](http://i.imgur.com/ByhYKrL.png)
+### Features
+- **Live telemetry pull** from NASA’s Lightstreamer endpoint – no scraping needed  
+- **Interactive dashboards** (more capable than the original ISSLive site)  
+- **Real-time kinematics**: 12-axis motion matches α- and β-gimbal joint angles  
+- **Modular design**: Separate Pi (telemetry & UI) ↔ Arduino (motor control)  
+- **Low- / High-fidelity STLs** you can print today  
 
-The project is still a work in progress. We have a fully functioning model that works with all 12 motors turning correctly and able to sync with live data. However, we want to increase the fidelity. Our low-fidelity model is completely finished and available here: [STL Files](https://github.com/ISS-Mimic/Mimic/tree/main/3D_Printing). We are still working on the high fidelity upgrade (help us!) and trying to make the ISS look as detailed as possible while still being printable. The software is still a work in progress, too. But from the standpoint of receiving telemetry and transmitting it to the Arduinos, the basic functionality is finished. The finishing touches on the software are all for visualizing the telemetry.
+### Quick Start (Raspberry Pi)
+```bash
+# 1. Clone & install deps
+  git clone --depth 1 https://github.com/ISS-Mimic/Mimic.git/ 
+  cd ~/Mimic
+  python setup.py
 
-![PXL_20231210_020001606 (1)](https://github.com/user-attachments/assets/8388209c-8a53-43a8-90d4-c8f7b5d9cac5)
+# 2. Run the Mimic GUI dashboard
+  cd ~/Mimic/Pi/
+  python GUI.py
+```
+Full software guide: [Wiki » Software Setup Instructions](https://github.com/ISS-Mimic/Mimic/wiki/Build-Instruction%3A-Mimic-Software-Setup-Instructions).
 
+### Project Architecture
+```text
+┌──────────┐              ┌──────────────┐                ┌──────────────┐                 ┌──────────┐
+│ NASA LS  │────────────▶│ Raspberry Pi │───────────────▶│  Arduino(s)  │───────────────▶│  Motors  │
+└──────────┘  telemetry   └──────────────┘  joint angles  └──────────────┘  motor commands └──────────┘
+```
+*Pi side* (Python + Kivy) shows telemetry dashboards and forwards joint targets.  
+*Arduino side* (C++) drives stepper/servo motors in the 3-D-printed truss.
 
-![Functional but not pretty model!](https://i.imgur.com/OlkpRSA.jpg)
+### Build Your Own Model
+| Fidelity | STL pack | Status |
+|----------|----------|--------|
+| Low      | [`/3D_Printing`](3D_Printing) | ✔ Complete |
+| High     | `/3D_Printing/high_fidelity` | 🚧 In progress – contributors welcome! |
 
-DISCLAIMER - We are not professional programmers. We are just a group of dedicated ISS program employees and enthusiasts trying to share our love of the space program through this awesome project. All the code maintained here was created to work toward our specific goal, and much of it was using languages that none of us had used before. You may find the structure, style, and lack of comments to be completely novice and infuriating. You may scream out in frustration, laugh in disgust, or even weep at the obfuscated nonsense appearing before your eyes. 
+Mechanical details, BOM, and wiring live in the **[Hardware Wiki section](https://github.com/ISS-Mimic/Mimic/wiki/Hardware)**.
 
-That said, feel free to improve upon our caffeine-induced, late-night, insanity-plagued programming madness or even just scrap it all and make something better using our ideas.
+### Screenshots
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/071d90c0-504c-4c9c-95a2-5e7aa4a1db94" width="250" alt="Mimic1">
+  <img src="https://github.com/user-attachments/assets/2579f6cb-1be1-4827-b076-0dc5c3374468" width="250" alt="Mimic2">
+  <img src="https://github.com/user-attachments/assets/b616095f-93a2-427e-b801-ac2992f1a6f7" width="250" alt="Mimic3">
+  <br>
+  <img src="https://github.com/user-attachments/assets/737c447c-e9c7-4a40-9878-38ae68ba5e51" width="250" alt="Mimic4">
+  <img src="https://github.com/user-attachments/assets/92358d93-7acd-4216-acdd-765e4efc8fc7" width="250" alt="Mimic5">
+  <img src="https://github.com/user-attachments/assets/3afdb129-0f15-4075-b9af-4b07f93a4e77" width="250" alt="Mimic6">
+  <br>
+  <img src="https://github.com/user-attachments/assets/25cdaaa9-a04e-401b-a5d2-0039b911d47c" width="250" alt="Mimic7">
+  <img src="https://github.com/user-attachments/assets/c21a9d0b-10a5-4251-90ff-319e66b724d0" width="250" alt="Mimic8">
+  <img src="https://github.com/user-attachments/assets/5c7bd170-9f16-42e7-be29-4d884cc17b1a" width="250" alt="Mimic9">
+</p>
 
-Check out the wiki for more information.
+### Contributing
+We 💙 pull requests! Start by opening an issue or chatting on **[Discord](https://discord.gg/zPKyE6hBSe)**.  
+Coding guidelines:
+1. Follow **PEP 8** and keep GUI layout in **`.kv` files** (Kivy best practice).  
+2. Fix all our mistakes. 
 
-You can view a video showing some of our project here:https://youtu.be/W9iZBjzOEEQ. Here's an older video: https://www.youtube.com/watch?v=sbdHXjDQ-U8 .
+Other help:
+-Feel free to suggest ideas! Best place to talk is out discord, or feel free to publish an issue
 
-The software is pretty cool and provides even more in-depth functionality than isslive.com. We'll be adding videos and pictures soon to show off the software capabilities.
+### Roadmap
+- [ ] Finish high-fidelity CAD & release STEP source  
+- [ ] Convert dashboard to KivyMD for dark-mode toggle  
+- [ ] Add MQTT bridge for external projects  
+- [ ] CI: nightly test against Lightstreamer endpoint
 
-The Mimic Telemetry Screens are explained in detail here:
-https://docs.google.com/presentation/d/11LBGKdbBd1ZbKKpKJ8Y54hAPogtyMLfRmvKoN2bRaHQ/edit?usp=sharing
+### License
+This project is licensed under the MIT License – see [`LICENSE`](LICENSE) for details.
 
-# Status/Priorities
-We are currently focused on refining the CAD model and splitting out all the STL files for printing. All of the STL files currently in this repo are likely outdated or currently changing. We will also release the raw CAD once finished.
+<details>
+<summary>The code is ugly and awful but it works *mostly* (click to vent)</summary>
 
-We are also working on finishing the software.
+We’re hardware engineers moonlighting as coders. Expect caffeine-driven hacks and the occasional refactor fiasco. Contributions and constructive feedback are *super* welcome!
+</details>
