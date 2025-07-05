@@ -1,70 +1,74 @@
-name: 🛠️ Auto-refresh 3D-Print Checklist (Wiki)
+# .github/workflows/update-wiki-print-table.yml
+name: 🛠️ Auto-refresh 3-D-Print Checklist (Wiki)
 
 on:
+  # run every time anything in 3D_Printing/ changes…
   push:
-    paths:
-      - "3D_Printing/**"
+    paths: ["3D_Printing/**"]
+  # …plus a nightly safety-net
   schedule:
-    - cron: "0 3 * * *"          # daily safety-net
+    - cron: "0 3 * * *"     # 03:00 UTC
+
+permissions:
+  contents: read            # checkout needs this (wiki pushes use PAT below)
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
 
     steps:
-    # 1️⃣  Pull the main repo
+    # 1️⃣  Pull main repo — for the generator script & models
     - name: Check out code
       uses: actions/checkout@v4
 
-    # 2️⃣  Set up Python
+    # 2️⃣  Clone the Wiki repo (needs a token with *write* access)
+    - name: Clone wiki repo
+      env:
+        # Use your PAT if set, otherwise the built-in token
+        GH_PAT: ${{ secrets.GH_PAT }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        TOKEN="${GH_PAT:-$GITHUB_TOKEN}"
+        git clone "https://x-access-token:${TOKEN}@github.com/${{ github.repository }}.wiki.git" wiki
+
+    # 3️⃣  Set up Python
     - name: Set up Python 3.11
       uses: actions/setup-python@v5
       with:
         python-version: "3.11"
 
-    # 3️⃣  Install tiny deps
+    # 4️⃣  Install dependencies
     - name: Install deps
       run: |
         python -m pip install --upgrade pip
         pip install PyGithub tabulate markdown-it-py pyyaml
 
-    # 4️⃣  Generate the markdown once
+    # 5️⃣  Regenerate the table (preserve check-marks, merge .meta.yml)
     - name: Generate checklist markdown
+      env:
+        GH_PAT: ${{ secrets.GH_PAT }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         python scripts/make_print_table.py \
-          > "Build-Instruction:-3D-Printed-Parts.md"
+          --wiki-path wiki \
+          --page "Build-Instruction:-3D-Printed-Parts.md"
 
-    # 5️⃣  Verify the file exists (debug helper)
-    - name: Show generated file
-      run: |
-        ls -l "Build-Instruction:-3D-Printed-Parts.md" | cat
-        head -n 10 "Build-Instruction:-3D-Printed-Parts.md"
-
-    # 6️⃣  Clone the Wiki repo
-    - name: Clone wiki
+    # 6️⃣  Commit & push only if the file changed
+    - name: Commit & push update
       env:
         GH_PAT: ${{ secrets.GH_PAT }}
-      run: |
-        git clone \
-          "https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}.wiki.git" \
-          wiki
-
-    # 7️⃣  Copy file, commit & push if it changed
-    - name: Copy into wiki and commit
-      env:
-        GH_PAT: ${{ secrets.GH_PAT }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         set -e
-        cp "Build-Instruction:-3D-Printed-Parts.md" wiki/
         cd wiki
         git add "Build-Instruction:-3D-Printed-Parts.md"
 
-        # Only commit when the file differs
         if git diff --cached --quiet; then
           echo "No changes – wiki already up to date."
         else
           git config user.name  "Mimic-CI Bot"
           git config user.email "actions@github.com"
           git commit -m "docs: auto-refresh 3-D print checklist [skip ci]"
-          git push origin HEAD
+          TOKEN="${GH_PAT:-$GITHUB_TOKEN}"
+          git push "https://x-access-token:${TOKEN}@github.com/${{ github.repository }}.wiki.git" HEAD:master
         fi
