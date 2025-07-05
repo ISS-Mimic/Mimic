@@ -12,7 +12,7 @@ from markdown_it import MarkdownIt
 # ── config ────────────────────────────────────────────────
 REPO      = "ISS-Mimic/Mimic"
 PART_ROOT = "3D_Printing"
-EXCLUDE   = {"archive_lofi"}
+EXCLUDE   = {"archive_lofi","3D_Printing_SLA"}
 RAW_URL   = f"https://github.com/{REPO}/blob/main/"
 
 FRONT_MATTER = textwrap.dedent("""\
