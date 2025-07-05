@@ -9,17 +9,15 @@ import os
 from github import Github
 from tabulate import tabulate   # pip install tabulate
 import textwrap
-import sys
 
-if not os.environ.get("GH_PAT"):
-    print("ERROR: GH_PAT environment variable is not set.")
-    sys.exit(1)
+REPO = "ISS-Mimic/Mimic"
+PATH = "3D_Printing"
 
-REPO   = "ISS-Mimic/Mimic"
-PATH   = "3D_Printing"
-TOKEN  = ""          # Optional: set a GitHub PAT or leave blank for anonymous
+# Prefer your own PAT if present, else fall back to the runner’s GITHUB_TOKEN,
+# else no token (very low rate-limit but fine for local runs).
+TOKEN = os.getenv("GH_PAT") or os.getenv("GITHUB_TOKEN")
+g = Github(TOKEN) if TOKEN else Github()
 
-g = Github(TOKEN) if TOKEN else Github()   # ← REPLACE the old line
 tree = g.get_repo(REPO).get_git_tree("main", recursive=True).tree
 
 parts = [n.path for n in tree
