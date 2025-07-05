@@ -33,7 +33,13 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install PyGithub tabulate
-
+        
+    - name: Debug GH_PAT
+      run: |
+        if [ -z "$GH_PAT" ]; then echo "GH_PAT is not set"; else echo "GH_PAT is set"; fi
+      env:
+        GH_PAT: ${{ secrets.GH_PAT }}
+        
     # 4️⃣ run the generator – it writes the markdown file
     - name: Generate checklist markdown
       run: |
@@ -45,11 +51,7 @@ jobs:
         GH_PAT: ${{ secrets.GH_PAT }}
       run: |
         git clone "https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}.wiki.git" wiki
-    - name: Debug GH_PAT
-      run: |
-        if [ -z "$GH_PAT" ]; then echo "GH_PAT is not set"; else echo "GH_PAT is set"; fi
-      env:
-        GH_PAT: ${{ secrets.GH_PAT }}
+
     # 6️⃣ copy new file into wiki, commit & push
     - name: Update wiki page
       env:
