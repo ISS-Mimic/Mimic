@@ -4,8 +4,8 @@ from datetime import datetime, timedelta #used for time conversions and logging 
 from dateutil.relativedelta import relativedelta
 import datetime as dtime #this is different from above for... reasons?
 import os # used to remove database on program exit; also used for importing config.json
-from subprocess import Popen #, PIPE, STDOUT #used to start/stop Javascript telemetry program and TDRS script and orbitmap
-import threading #used for background monitoring of USB ports for playback data
+from subprocess import Popen #, PIPE, STDOUT #used to start/stop telemetry program and TDRS script and orbitmap
+import threading, subprocess #used for background monitoring of USB ports for playback data
 import time #used for time
 import math #used for math
 import glob #used to parse serial port names
@@ -406,16 +406,31 @@ class MainScreen(Screen):
 
     # ──────────────────────────────────────────────────────────────
     # EXIT button callback
-    # ──────────────────────────────────────────────────────────────
+    # ──────────────────────────────────────────────────────────────   
     def killproc(self, *_):
         """
-        Cleanly stop every helper process started elsewhere, clear tmp
-        sqlite caches, reset telemetry colours, then close the GUI.
+        EXIT button callback – now non-blocking.
+        Spawns a daemon thread that does all the heavy lifting, then
+        closes the window from the main thread.
         """
-
+    
+        if getattr(self, "_exiting", False):
+            return                      # guard against double-clicks
+        self._exiting = True
+    
+        threading.Thread(
+            target=self._cleanup_and_quit,
+            daemon=True
+        ).start()
+    
+    
+    # ──────────────────────────────────────────────────────────────
+    # helper runs in a background thread
+    # ──────────────────────────────────────────────────────────────
+    def _cleanup_and_quit(self):
         app = App.get_running_app()
-
-        # -------- 1. stop USB / TTY observer (if any) ---------------
+    
+        # 1. stop observer
         observer = getattr(app, "tty_observer", None)
         if observer:
             try:
@@ -423,52 +438,51 @@ class MainScreen(Screen):
                 log_info("TTY observer stopped.")
             except Exception as exc:
                 log_error(f"Error stopping observer: {exc}")
-
-        # -------- 2. terminate helper processes --------------------
-        #  Add new names to this tuple *only* when another screen
-        #  stores a Popen object on the App instance.
+    
+        # 2. terminate subprocesses
         for attr in (
-            "p",           # iss_telemetry.py
-            "TDRSproc",    # TDRS checker
-            "demo_proc",   # playback.out + orbit demo
-            "disco_proc",  # disco.sh
-            "htv_proc",    # HTV demo
-            "oft2_proc",   # OFT-2 demo
+            "p", "TDRSproc",
+            "demo_proc", "disco_proc",
+            "htv_proc", "oft2_proc",
         ):
             self._terminate_attr(app, attr)
-
-        # -------- 3. wipe tmp *.db* files --------------------------
+    
+        # 3. wipe tmp DBs
         for db in pathlib.Path("/dev/shm").glob("*.db*"):
             try:
                 db.unlink()
             except OSError as exc:
                 log_error(f"Could not remove {db}: {exc}")
-
-        # -------- 4. reset UI telemetry colours -------------------
+    
         staleTelemetry()
-
-        log_info("Cleanup complete – exiting application.")
-        app.stop()        # close window + event-loop
-        sys.exit(0)       # guarantee Python process ends
-
+        log_info("Cleanup complete – scheduling app.stop().")
+    
+        # 4. back to UI thread to close the window
+        Clock.schedule_once(lambda dt: app.stop())
+    
+    
     # ──────────────────────────────────────────────────────────────
-    # Helper: terminate a subprocess if present
+    # updated terminator: terminate → wait → kill
     # ──────────────────────────────────────────────────────────────
     @staticmethod
     def _terminate_attr(app: App, attr_name: str) -> None:
         proc = getattr(app, attr_name, None)
         if not proc:
-            return  # never started
-
+            return
+    
         try:
             proc.terminate()
             proc.wait(timeout=3)
-            log_info(f"{attr_name} terminated.")
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            proc.wait()
         except Exception as exc:
-            log_error(f"Failed to kill {attr_name}: {exc}")
+            log_error(f"Failed to terminate {attr_name}: {exc}")
         finally:
             setattr(app, attr_name, None)
-                
+            log_info(f"{attr_name} terminated.")
+    
+                    
 
 class ManualControlScreen(Screen):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
