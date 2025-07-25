@@ -1161,103 +1161,6 @@ class ManualControlScreen(Screen):
         serialWrite("STRRJ=90 ")
 
 class Playback_Screen(Screen):
-        def __init__(self, **kwargs):
-        super(Playback_Screen, self).__init__(**kwargs)
-        self.usb_drives = self.get_mount_points()  # Initialize with already connected drives
-        self.start_usb_monitoring()
-        Clock.schedule_once(self.update_dropdown)  # Update dropdown with initial drives
-
-    def get_mount_points(self):
-        # This function returns a set of current mount points
-        mount_points = []
-        try:
-            mount_points = set(os.listdir('/media/pi'))
-        except Exception as e:
-            log_error(e)
-        return mount_points
-
-    def usb_monitoring_task(self):
-        initial_mounts = self.get_mount_points()
-        while True:
-            current_mounts = self.get_mount_points()
-            if current_mounts != initial_mounts:
-                new_drive = current_mounts - initial_mounts
-                if new_drive:
-                    self.usb_drives.update(new_drive)
-                    Clock.schedule_once(self.update_dropdown)  # Schedule the update
-                initial_mounts = current_mounts
-            time.sleep(5)
-
-    def update_dropdown(self, dt):
-        # Get the Spinner widget from your layout
-        dropdown = self.ids.playback_dropdown  # Adjust this according to your KV layout
-        formatted_drives = [f"{drive} (USB)" for drive in self.usb_drives]
-        dropdown.values = formatted_drives + ['HTV','OFT-2']
-
-    def start_usb_monitoring(self):
-        # Start the monitoring in a background thread
-        thread = threading.Thread(target=self.usb_monitoring_task)
-        thread.daemon = True  # Daemonize thread
-        thread.start()
-
-    def on_dropdown_select(self, value):
-        playback = value
-        log_info(playback)
-            
-    def changeDemoBoolean(self, *args):
-        global demoboolean
-        demoboolean = args[0]
-
-    # helper
-    def _launch(self, command, attr_name, log_start, log_stop):
-        app = App.get_running_app()
-        if getattr(app, attr_name, None):          # already running
-            return
-        try:
-            setattr(app, attr_name, Popen(command))
-            log_info(log_start)
-        except Exception as exc:
-            log_error(f"Failed to launch {attr_name}: {exc}")
-            setattr(app, attr_name, None)
-
-    # DEMO SCRIPTS -------------------------------------------------------
-    def start_disco(self, *_):
-        self._launch(
-            [mimic_directory + "/Mimic/Pi/RecordedData/disco.sh"],
-            "p2",
-            "Disco script started.",
-            "Disco script stopped."
-        )
-
-    def stop_disco(self, *_):
-        self._terminate("p2", "Disco script stopped.")
-
-    def start_demo(self, *_):
-        self._launch(
-            [mimic_directory + "/Mimic/Pi/RecordedData/disco.sh"],
-            "p2",
-            "Demo script started.",
-            "Demo script stopped."
-        )
-
-    def stop_demo(self, *_):
-        self._terminate("p2", "Disco script stopped.")
-
-    # repeat for start_demo / stop_demo / start_htv / stop_htv …
-
-    # generic terminator
-    def _terminate(self, attr_name, log_msg):
-        proc = getattr(App.get_running_app(), attr_name, None)
-        if proc:
-            try:
-                proc.terminate()
-                proc.wait(timeout=3)
-                log_info(log_msg)
-            except Exception as exc:
-                log_error(f"Failed to terminate {attr_name}: {exc}")
-        setattr(App.get_running_app(), attr_name, None)
-
-class Playback_Screen(Screen):
     """
     Lets the user pick a USB stick / canned demo (HTV, OFT-2, Disco, …) and
     launches the corresponding playback script.
@@ -1276,10 +1179,24 @@ class Playback_Screen(Screen):
     # ──────────── USB monitoring — same logic, cleaner style ───────────────
     @staticmethod
     def _get_mount_points() -> set[str]:
+        """
+        Return a **set** of folder names under /media/pi.
+        If the directory doesn’t exist (no USB plugged in yet) just
+        return an empty set **without** logging an error.
+        """
+        media_dir = pathlib.Path("/media/pi")
+    
+        if not media_dir.is_dir():
+            # No USB devices mounted – stay silent
+            return set()
+    
+        # Only keep directories; ignore stray files
         try:
-            return set(os.listdir('/media/pi'))
+            return {p.name for p in media_dir.iterdir() if p.is_dir()}
         except Exception as exc:
-            log_error(f"USB ls failed: {exc}")
+            # Unexpected problem (permissions, I/O). Log once, but don’t
+            # raise – it will retry on the next poll.
+            log_error(f"USB scan failed: {exc}")
             return set()
 
     def _usb_monitor_loop(self) -> None:
