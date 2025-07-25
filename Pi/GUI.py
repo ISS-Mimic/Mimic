@@ -18,6 +18,7 @@ import json # used for serial port config and storing TLEs and crew info
 from pyudev import Context, Devices, Monitor, MonitorObserver # for automatically detecting Arduinos
 import argparse
 import sys
+from collections import deque # used for storing russian data at init
 import os.path as op #use for getting mimic directory
 from pathlib import Path
 import logging
@@ -44,7 +45,10 @@ from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition, NoTransition
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
+from functools import partial
+from kivy.network.urlrequest import UrlRequest
 
+#from screens import SCREEN_DEFS # import list of mimic screens
 import database_initialize # create and populate database script
 
 mimic_data_directory = Path.home() / '.mimic_data'
@@ -85,6 +89,25 @@ def log_error(message):
     logger.error(message)
 
 log_info("Initialized Mimic Program Log")
+
+#-------------------------Look for an internet connection-----------------------------------
+
+def probe_internet(callback, timeout=1.0) -> None:
+    """
+    Fire a single UrlRequest to `http://www.google.com/generate_204`.
+    Calls `callback(bool_is_up)` on completion.
+    """
+    url = "http://www.google.com/generate_204"  # cheap 204 response
+
+    def _done(req, *_):      # *_ swallows result / errors
+        callback(True)
+
+    def _fail(req, *_):
+        callback(False)
+
+    UrlRequest(url, on_success=_done, on_redirect=_done,
+               on_failure=_fail, on_error=_fail,
+               timeout=timeout)
 
 #-------------------------Look for a connected arduino-----------------------------------
 
@@ -253,7 +276,6 @@ playbackboolean = False
 demoboolean = False
 switchtofake = False
 manualcontrol = False
-startup = True
 isscrew = 0
 val = ""
 tdrs1 = 0
@@ -277,7 +299,6 @@ PSARJcontrol = False
 SSARJcontrol = False
 PTRRJcontrol = False
 STRRJcontrol = False
-stopAnimation = True
 startingAnim = True
 oldtdrs = "n/a"
 runningDemo = False
@@ -365,7 +386,6 @@ tdrs = ""
 EVA_picture_urls = []
 urlindex = 0
 module = ""
-internet = False
 old_mt_timestamp = 0.00
 old_mt_position = 0.00
 
@@ -1437,122 +1457,78 @@ class VV_Image(Screen, EventDispatcher):
     mimic_data_directory = Path.home() / '.mimic_data'
     signalcolor = ObjectProperty([1, 1, 1])
 
+SCREEN_DEFS = {
+    "main":            MainScreen,
+    "manualcontrol":   ManualControlScreen,
+    "led":             LED_Screen,
+    "playback":        Playback_Screen,
+    "settings":        Settings_Screen,
+    "mimic":           MimicScreen,
+    "iss":             ISS_Screen,
+    "cdh":             CDH_Screen,
+    "crew":            Crew_Screen,
+    "ct_camera":       CT_Camera_Screen,
+    "ct_sasa":         CT_SASA_Screen,
+    "ct_sgant":        CT_SGANT_Screen,
+    "ct":              CT_Screen,
+    "ct_uhf":          CT_UHF_Screen,
+    "iatcs":           ECLSS_IATCS_Screen,
+    "eclss":           ECLSS_Screen,
+    "wrm":             ECLSS_WRM_Screen,
+    "eps":             EPS_Screen,
+    "eva_emu":         EVA_EMU_Screen,
+    "eva_main":        EVA_Main_Screen,
+    "eva_pictures":    EVA_Pictures,
+    "ext_science":     Science_EXT_Screen,
+    "gnc":             GNC_Screen,
+    "int_science":     Science_INT_Screen,
+    "jef_science":     Science_JEF_Screen,
+    "mt":              MSS_MT_Screen,
+    "nral_science":    Science_NRAL_Screen,
+    "orbit_data":      Orbit_Data,
+    "orbit_pass":      Orbit_Pass,
+    "orbit":           Orbit_Screen,
+    "robo":            Robo_Screen,
+    "rs_dock":         RS_Dock_Screen,
+    "rs_eva":          EVA_RS_Screen,
+    "rs":              RS_Screen,
+    "science":         Science_Screen,
+    "spdm1":           SPDM1_Screen,
+    "ssrms":           SSRMS_Screen,
+    "tcs":             TCS_Screen,
+    "us_eva":          EVA_US_Screen,
+    "usos":            USOS_Screen,
+    "vv_image":        VV_Image,
+    "vv":              VV_Screen,
+}
+
+
 class MainScreenManager(ScreenManager):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
 class MainApp(App):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    ros_data = []
+    INTERNET_POLL_S = 1.0 # check internet connection every 1s
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.internet: bool | None = None # None = "unknown"
+        self.ros_data = deque(maxlen=60)   # keep only the latest 60 samples
 
     def build(self):
-        global startup, ScreenList, stopAnimation
+        # 1. instantiate once, store in a dict
+        self.screens = {sid: cls(name=sid) for sid, cls in SCREEN_DEFS.items()}
 
-        self.main_screen = MainScreen(name = 'main')
-        self.control_screen = ManualControlScreen(name = 'manualcontrol')
-        self.led_screen = LED_Screen(name = 'led')
-        self.playback_screen = Playback_Screen(name = 'playback')
-        self.settings_screen = Settings_Screen(name = 'settings')
-        self.mimic_screen = MimicScreen(name = 'mimic')
-        self.iss_screen = ISS_Screen(name = 'iss')
-        self.cdh_screen = CDH_Screen(name = 'cdh')
-        self.crew_screen = Crew_Screen(name = 'crew')
-        self.ct_camera_screen = CT_Camera_Screen(name = 'ct_camera')
-        self.ct_sasa_screen = CT_SASA_Screen(name = 'ct_sasa')
-        self.ct_sgant_screen = CT_SGANT_Screen(name = 'ct_sgant')
-        self.ct_screen = CT_Screen(name = 'ct')
-        self.ct_uhf_screen = CT_UHF_Screen(name = 'ct_uhf')
-        self.eclss_iatcs_screen = ECLSS_IATCS_Screen(name = 'iatcs')
-        self.eclss_screen = ECLSS_Screen(name = 'eclss')
-        self.eclss_wrm_screen = ECLSS_WRM_Screen(name = 'wrm')
-        self.eps_screen = EPS_Screen(name = 'eps')
-        self.eva_emu = EVA_EMU_Screen(name='eva_emu')
-        self.eva_main = EVA_Main_Screen(name='eva_main')
-        self.eva_pictures = EVA_Pictures(name='eva_pictures')
-        self.ext_science_screen = Science_EXT_Screen(name = 'ext_science')
-        self.gnc_screen = GNC_Screen(name = 'gnc')
-        self.int_science_screen = Science_INT_Screen(name = 'int_science')
-        self.jef_science_screen = Science_JEF_Screen(name = 'jef_science')
-        self.mss_mt_screen = MSS_MT_Screen(name='mt')
-        self.nral_science_screen = Science_NRAL_Screen(name = 'nral_science')
-        self.orbit_data = Orbit_Data(name = 'orbit_data')
-        self.orbit_pass = Orbit_Pass(name = 'orbit_pass')
-        self.orbit_screen = Orbit_Screen(name = 'orbit')
-        self.robo_screen = Robo_Screen(name='robo')
-        self.rs_dock = RS_Dock_Screen(name='rs_dock')
-        self.rs_eva = EVA_RS_Screen(name='rs_eva')
-        self.rs_screen = RS_Screen(name='rs')
-        self.science_screen = Science_Screen(name = 'science')
-        self.spdm1_screen = SPDM1_Screen(name='spdm1')
-        self.ssrms_screen = SSRMS_Screen(name='ssrms')
-        self.tcs_screen = TCS_Screen(name = 'tcs')
-        self.us_eva = EVA_US_Screen(name='us_eva')
-        self.usos_screen = USOS_Screen(name = 'usos')
-        self.vv_image = VV_Image(name = 'vv_image')
-        self.vv_screen = VV_Screen(name = 'vv')
-
-        #Add all new telemetry screens to this list, this is used for the signal status icon and telemetry value colors and arduino icon
-        ScreenList = ['tcs_screen', 'eps_screen', 'iss_screen', 'eclss_screen', 
-                      'eclss_wrm_screen', 'eclss_iatcs_screen', 'main_screen', 
-                      'control_screen', 'settings_screen', 'ct_screen', 'ct_sasa_screen', 
-                      'ct_sgant_screen', 'ct_uhf_screen', 'ct_camera_screen', 'gnc_screen', 
-                      'orbit_screen', 'us_eva', 'rs_eva', 'eva_main', 'eva_emu', 
-                      'mimic_screen', 'robo_screen', 'mss_mt_screen', 'ssrms_screen', 
-                      'spdm1_screen','orbit_pass', 'orbit_data', 'crew_screen', 
-                      'playback_screen', 'vv_screen', 'vv_image', 'usos_screen',
-                      'rs_screen', 'rs_dock']
-
+        # 2. ScreenManager wiring
         root = MainScreenManager(transition=NoTransition())
-        root.add_widget(self.main_screen)
-        root.add_widget(self.control_screen)
-        root.add_widget(self.led_screen)
-        root.add_widget(self.playback_screen)
-        root.add_widget(self.settings_screen)
-        root.add_widget(self.mimic_screen)
-        root.add_widget(self.cdh_screen)
-        root.add_widget(self.crew_screen)
-        root.add_widget(self.ct_camera_screen)
-        root.add_widget(self.ct_sasa_screen)
-        root.add_widget(self.ct_sgant_screen)
-        root.add_widget(self.ct_screen)
-        root.add_widget(self.ct_uhf_screen)
-        root.add_widget(self.eclss_iatcs_screen)
-        root.add_widget(self.eclss_screen)
-        root.add_widget(self.eclss_wrm_screen)
-        root.add_widget(self.eps_screen)
-        root.add_widget(self.eva_emu)
-        root.add_widget(self.eva_main)
-        root.add_widget(self.eva_pictures)
-        root.add_widget(self.ext_science_screen)
-        root.add_widget(self.gnc_screen)
-        root.add_widget(self.int_science_screen)
-        root.add_widget(self.iss_screen)
-        root.add_widget(self.jef_science_screen)
-        root.add_widget(self.mss_mt_screen)
-        root.add_widget(self.nral_science_screen)
-        root.add_widget(self.orbit_data)
-        root.add_widget(self.orbit_pass)
-        root.add_widget(self.orbit_screen)
-        root.add_widget(self.robo_screen)
-        root.add_widget(self.rs_dock)
-        root.add_widget(self.rs_eva)
-        root.add_widget(self.rs_screen)
-        root.add_widget(self.science_screen)
-        root.add_widget(self.spdm1_screen)
-        root.add_widget(self.ssrms_screen)
-        root.add_widget(self.tcs_screen)
-        root.add_widget(self.us_eva)
-        root.add_widget(self.usos_screen)
-        root.add_widget(self.vv_image)
-        root.add_widget(self.vv_screen)
-        root.current = 'main'
+        for scr in self.screens.values():
+            root.add_widget(scr)
+        root.current = "main"
 
         Clock.schedule_interval(self.update_labels, 1) #all telemetry wil refresh and get pushed to arduinos every half second!
         Clock.schedule_interval(self.animate3, 0.1)
         Clock.schedule_interval(self.orbitUpdate, 1)
         #Clock.schedule_interval(self.checkCrew, 600) #disabling for now issue #407
-        if startup:
-            startup = False
-
         #Clock.schedule_once(self.checkCrew, 30) #disabling for now issue #407
         Clock.schedule_once(self.updateISS_TLE, 14)
         Clock.schedule_once(self.updateTDRS_TLE, 60)
@@ -1564,7 +1540,10 @@ class MainApp(App):
         Clock.schedule_interval(self.updateTDRS_TLE, 290)
         Clock.schedule_interval(self.updateOrbitGlobe, 31)
         Clock.schedule_interval(self.TDRSupdate, 607)
-        Clock.schedule_interval(self.check_internet, 1)
+        
+        Clock.schedule_interval(self._schedule_internet_probe,
+                                self.INTERNET_POLL_S) # check for active internet connection
+
         Clock.schedule_interval(self.updateArduinoCount, 5)
         Clock.schedule_interval(self.updateVV, 500)
         Clock.schedule_interval(self.update_vv_values, 40)
@@ -1576,62 +1555,95 @@ class MainApp(App):
         Clock.schedule_interval(self.updateOrbitGlobeImage, 55)
         return root
 
-    def check_internet(self, dt):
-        global internet
+    def _schedule_internet_probe(self, _dt) -> None:
+        # Callbacks run async; keep lambda tiny.
+        probe_internet(self._on_internet_result)
 
-        def on_success(req, result):
-            global internet
-            internet = True
+    def _on_internet_result(self, is_up: bool) -> None:
+        if is_up == self.internet:
+            return  # state unchanged ? nothing to do
+        self.internet = is_up
 
-        def on_redirect(req, result):
-            global internet
-            internet = True
+        if is_up:
+            self.signal_acquired()
+        else:
+            self.signal_client_offline()
 
-        def on_failure(req, result):
-            global internet
-            internet = False
 
-        def on_error(req, result):
-            global internet
-            internet = False
+    def updateArduinoCount(self, dt) -> None:
+        """
+        Refresh the little Arduino-status icon and counter on every screen
+        that actually defines the two Image/Label widgets.
+        
+        - How it works now ----------------------------------------------
+        Reads the global variables
 
-        req = UrlRequest("http://google.com", on_success, on_redirect, on_failure, on_error, timeout=1)
+        - Migration Path ----------------------------------------------
+        1. when you create or update the serial port list elsewhere, also
+            set self.serial_ports (e.g. in the hot plug handler)
+        2. When the UI mimic button toggles, set self.mimicbutton
+        3. Delete the global fall bals below
+        """
+        
+        # ----------------------------------------------------------------
+        # Phase-1 (works today): fall back to the old globals
+        # ----------------------------------------------------------------
 
-    def updateArduinoCount(self, dt):
-        global ScreenList
+        arduino_count = (
+            len(getattr(self, "serial_ports", []))
+            if hasattr(self, "serial_ports")
+            else len(SERIAL_PORTS)         # ? existing global
+        )
 
-        arduino_count = len(SERIAL_PORTS)
+        mimic_is_tx = (
+            getattr(self, "mimicbutton", None)
+            if hasattr(self, "mimicbutton")
+            else mimicbutton               # ? existing global
+        )
 
-        for screen_name in ScreenList:
-            screen = getattr(self, screen_name)
+        """
+        Refresh the Arduino-status icon & counter on screens that have them.
+        """
+        
+        for scr in self.screens.values():
+            ids = scr.ids
+
+            # Skip screens without the widgets.
+            if "arduino_count" not in ids or "arduino" not in ids:
+                continue
+
             if arduino_count > 0:
-                screen.ids.arduino_count.text = str(arduino_count)
-                screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/arduino_notransmit.png"
-                if mimicbutton:
-                    screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
+                ids.arduino_count.text = str(arduino_count)
+                ids.arduino.source = (
+                    f"{self.mimic_directory}/Mimic/Pi/imgs/signal/"
+                    + ("Arduino_Transmit.zip" if mimicbutton
+                       else "arduino_notransmit.png")
+                )
             else:
-                screen.ids.arduino_count.text = ""
-                screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/arduino_offline.png"
+                ids.arduino_count.text = ""
+                ids.arduino.source = (
+                    f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
+                )
 
         if arduino_count > 0:
-            self.mimic_screen.ids.mimicstartbutton.disabled = False
-            self.playback_screen.ids.DemoStart.disabled = False
-            self.playback_screen.ids.HTVDemoStart.disabled = False
-            self.playback_screen.ids.OFT2DemoStart.disabled = False
-            self.control_screen.ids.set90.disabled = False
-            self.control_screen.ids.set0.disabled = False
+            self.screens["mimic"].ids.mimicstartbutton.disabled = False
+            self.screens["playback"].ids.DemoStart.disabled = False
+            self.screens["playback"].ids.HTVDemoStart.disabled = False
+            self.screens["playback"].ids.OFT2DemoStart.disabled = False
+            self.screens["manualcontrol"].ids.set90.disabled = False
+            self.screens["manualcontrol"].ids.set0.disabled = False
             if mimicbutton:
-                self.mimic_screen.ids.mimicstartbutton.disabled = True
+                self.screens["mimic"].ids.mimicstartbutton.disabled = True
             else:
-                self.mimic_screen.ids.mimicstartbutton.disabled = False
+                self.screens["mimic"].ids.mimicstartbutton.disabled = False
         else:
-            self.mimic_screen.ids.mimicstartbutton.disabled = True
-            self.mimic_screen.ids.mimicstartbutton.text = "Transmit"
-            self.playback_screen.ids.DemoStart.disabled = True
-            self.playback_screen.ids.HTVDemoStart.disabled = True
-            self.playback_screen.ids.OFT2DemoStart.disabled = True
-            self.control_screen.ids.set90.disabled = True
-            self.control_screen.ids.set0.disabled = True
+            self.screens["mimic"].ids.mimicstartbutton.disabled = True
+            self.screens["mimic"].ids.mimicstartbutton.text = "Transmit"
+            self.screens["playback"].ids.DemoStart.disabled = True
+            self.screens["playback"].ids.HTVDemoStart.disabled = True
+            self.screens["playback"].ids.OFT2DemoStart.disabled = True
+            self.screens["manualcontrol"].ids.set90.disabled = True
+            self.screens["manualcontrol"].ids.set0.disabled = True
 
     def deleteURLPictures(self, dt):
         log_info("Function call - deleteURLPictures")
@@ -1646,34 +1658,34 @@ class MainApp(App):
         urlsize = len(EVA_picture_urls)
 
         if urlsize > 0:
-            self.us_eva.ids.EVAimage.source = EVA_picture_urls[urlindex]
-            self.eva_pictures.ids.EVAimage.source = EVA_picture_urls[urlindex]
+            self.screens["us_eva"].ids.EVAimage.source = EVA_picture_urls[urlindex]
+            self.screens["eva_pictures"].ids.EVAimage.source = EVA_picture_urls[urlindex]
 
         urlindex = urlindex + 1
         if urlindex > urlsize-1:
             urlindex = 0
 
     def updateNASAVVImage(self, dt):
-        self.vv_image.ids.VVimage.source = str(mimic_data_directory) + '/vv.png'
-        self.vv_image.ids.VVimage.reload()
+        self.screens["vv_image"].ids.VVimage.source = str(mimic_data_directory) + '/vv.png'
+        self.screens["vv_image"].ids.VVimage.reload()
                 
     def updateOrbitMap(self, dt):
-        self.orbit_screen.ids.OrbitMap.source = str(mimic_data_directory) + '/map.jpg'
-        self.orbit_screen.ids.OrbitMap.reload()
+        self.screens["orbit"].ids.OrbitMap.source = str(mimic_data_directory) + '/map.jpg'
+        self.screens["orbit"].ids.OrbitMap.reload()
 
     def updateOrbitGlobeImage(self, dt):
         globe_image_path = mimic_data_directory / 'globe.png'
         
         try:
-            self.orbit_screen.ids.orbit3d.source = str(globe_image_path)
-            self.orbit_screen.ids.orbit3d.reload()
+            self.screens["orbit"].ids.orbit3d.source = str(globe_image_path)
+            self.screens["orbit"].ids.orbit3d.reload()
         except Exception as e:
             log_error(f"Error loading globe image: {e}")
         
         #try:
         #    if globe_image_path.exists():
-        #        self.orbit_screen.ids.orbit3d.source = str(globe_image_path)
-        #        self.orbit_screen.ids.orbit3d.reload()
+        #        self.screens["orbit"].ids.orbit3d.source = str(globe_image_path)
+        #        self.screens["orbit"].ids.orbit3d.reload()
         #    else:
         #        log_error("Globe image does not exist.")
         #except Exception as e:
@@ -1736,13 +1748,13 @@ class MainApp(App):
             EV1_hours = int(EV1_EVA_time/60)
             EV2_hours = int(EV2_EVA_time/60)
 
-            self.us_eva.ids.EV1.text = " (EV): " + str(firstname1) + " " + str(lastname1)
-            self.us_eva.ids.EV2.text = " (EV): " + str(firstname2) + " " + str(lastname2)
+            self.screens["us_eva"].ids.EV1.text = " (EV): " + str(firstname1) + " " + str(lastname1)
+            self.screens["us_eva"].ids.EV2.text = " (EV): " + str(firstname2) + " " + str(lastname2)
 
-            self.us_eva.ids.EV1_EVAnum.text = "Number of EVAs = " + str(EV1_EVA_number)
-            self.us_eva.ids.EV2_EVAnum.text = "Number of EVAs = " + str(EV2_EVA_number)
-            self.us_eva.ids.EV1_EVAtime.text = "Total EVA Time = " + str(EV1_hours) + "h " + str(EV1_minutes) + "m"
-            self.us_eva.ids.EV2_EVAtime.text = "Total EVA Time = " + str(EV2_hours) + "h " + str(EV2_minutes) + "m"
+            self.screens["us_eva"].ids.EV1_EVAnum.text = "Number of EVAs = " + str(EV1_EVA_number)
+            self.screens["us_eva"].ids.EV2_EVAnum.text = "Number of EVAs = " + str(EV2_EVA_number)
+            self.screens["us_eva"].ids.EV1_EVAtime.text = "Total EVA Time = " + str(EV1_hours) + "h " + str(EV1_minutes) + "m"
+            self.screens["us_eva"].ids.EV2_EVAtime.text = "Total EVA Time = " + str(EV2_hours) + "h " + str(EV2_minutes) + "m"
 
         def on_redirect(req, result):
             log_info("Warning - EVA stats failure (redirect)")
@@ -1840,33 +1852,33 @@ class MainApp(App):
     def flashROBObutton(self, instance):
         #log_info("Function call - flashRobo")
 
-        self.mimic_screen.ids.Robo_button.background_color = (0, 0, 1, 1)
+        self.screens["mimic"].ids.Robo_button.background_color = (0, 0, 1, 1)
         def reset_color(*args):
-            self.mimic_screen.ids.Robo_button.background_color = (1, 1, 1, 1)
+            self.screens["mimic"].ids.Robo_button.background_color = (1, 1, 1, 1)
         Clock.schedule_once(reset_color, 0.5)
     
     def flashUS_EVAbutton(self, instance):
         #log_info("Function call - flashUS_EVA")
 
-        self.eva_main.ids.US_EVA_Button.background_color = (0, 0, 1, 1)
+        self.screens["eva_main"].ids.US_EVA_Button.background_color = (0, 0, 1, 1)
         def reset_color(*args):
-            self.eva_main.ids.US_EVA_Button.background_color = (1, 1, 1, 1)
+            self.screens["eva_main"].ids.US_EVA_Button.background_color = (1, 1, 1, 1)
         Clock.schedule_once(reset_color, 0.5)
 
     def flashRS_EVAbutton(self, instance):
         #log_info("Function call - flashRS_EVA")
 
-        self.eva_main.ids.RS_EVA_Button.background_color = (0, 0, 1, 1)
+        self.screens["eva_main"].ids.RS_EVA_Button.background_color = (0, 0, 1, 1)
         def reset_color(*args):
-            self.eva_main.ids.RS_EVA_Button.background_color = (1, 1, 1, 1)
+            self.screens["eva_main"].ids.RS_EVA_Button.background_color = (1, 1, 1, 1)
         Clock.schedule_once(reset_color, 0.5)
 
     def flashEVAbutton(self, instance):
         #log_info("Function call - flashEVA")
 
-        self.mimic_screen.ids.EVA_button.background_color = (0, 0, 1, 1)
+        self.screens["mimic"].ids.EVA_button.background_color = (0, 0, 1, 1)
         def reset_color(*args):
-            self.mimic_screen.ids.EVA_button.background_color = (1, 1, 1, 1)
+            self.screens["mimic"].ids.EVA_button.background_color = (1, 1, 1, 1)
         Clock.schedule_once(reset_color, 0.5)
 
     def EVA_clock(self, dt):
@@ -1881,40 +1893,48 @@ class MainApp(App):
         minutes = int(minutes)
         seconds = int(seconds)
 
-        self.us_eva.ids.EVA_clock.text =(str(hours) + ":" + str(minutes).zfill(2) + ":" + str(int(seconds)).zfill(2))
-        self.us_eva.ids.EVA_clock.color = 0.33, 0.7, 0.18
+        self.screens["us_eva"].ids.EVA_clock.text =(str(hours) + ":" + str(minutes).zfill(2) + ":" + str(int(seconds)).zfill(2))
+        self.screens["us_eva"].ids.EVA_clock.color = 0.33, 0.7, 0.18
 
     def animate(self, instance):
         global new_x2, new_y2
-        self.main_screen.ids.ISStiny2.size_hint = 0.07, 0.07
+        self.screens["main"].ids.ISStiny2.size_hint = 0.07, 0.07
         new_x2 = new_x2+0.007
         new_y2 = (math.sin(new_x2*30)/18)+0.75
         if new_x2 > 1:
             new_x2 = new_x2-1.0
-        self.main_screen.ids.ISStiny2.pos_hint = {"center_x": new_x2, "center_y": new_y2}
+        self.screens["main"].ids.ISStiny2.pos_hint = {"center_x": new_x2, "center_y": new_y2}
 
     def animate3(self, instance):
         global new_x, new_y, sizeX, sizeY, startingAnim
         if new_x<0.886:
             new_x = new_x+0.007
             new_y = (math.sin(new_x*30)/18)+0.75
-            self.main_screen.ids.ISStiny.pos_hint = {"center_x": new_x, "center_y": new_y}
+            self.screens["main"].ids.ISStiny.pos_hint = {"center_x": new_x, "center_y": new_y}
         else:
             if sizeX <= 0.15:
                 sizeX = sizeX + 0.01
                 sizeY = sizeY + 0.01
-                self.main_screen.ids.ISStiny.size_hint = sizeX, sizeY
+                self.screens["main"].ids.ISStiny.size_hint = sizeX, sizeY
             else:
                 if startingAnim:
                     Clock.schedule_interval(self.animate, 0.1)
                     startingAnim = False
 
-    def changeColors(self, *args):   #this function sets all labels on mimic screen to a certain color based on signal status
-        #the signalcolor is a kv property that will update all signal status dependant values to whatever color is received by this function
-        global ScreenList
+    def changeColors(self, r, g, b, *_) -> None:
+        """
+        Update the Kivy `signalcolor` property on every screen.
 
-        for x in ScreenList:
-            getattr(self, x).signalcolor = args[0], args[1], args[2]
+        Parameters
+        ----------
+        r, g, b : float
+            Normalised RGB components (0-1) that the kv files bind to.
+        *_      : any
+            Extra positional args are ignored; they let the method still be
+            scheduled by `Clock` if you pass `(dt,)`.
+        """
+        for scr in self.screens.values():
+            scr.signalcolor = (r, g, b)
 
     def changeManualControlBoolean(self, *args):
         global manualcontrol
@@ -1947,8 +1967,8 @@ class MainApp(App):
                 return numerator / denominator
         
         # added safe divide to fix #378
-        normalizedX = safe_divide(self.orbit_screen.ids.OrbitMap.norm_image_size[0],self.orbit_screen.ids.OrbitMap.texture_size[0])
-        normalizedY = safe_divide(self.orbit_screen.ids.OrbitMap.norm_image_size[1],self.orbit_screen.ids.OrbitMap.texture_size[1])
+        normalizedX = safe_divide(self.screens["orbit"].ids.OrbitMap.norm_image_size[0],self.screens["orbit"].ids.OrbitMap.texture_size[0])
+        normalizedY = safe_divide(self.screens["orbit"].ids.OrbitMap.norm_image_size[1],self.screens["orbit"].ids.OrbitMap.texture_size[1])
         
         def scaleLatLon(latitude, longitude):
             #converting lat lon to x, y for orbit map
@@ -1963,8 +1983,8 @@ class MainApp(App):
             return {'newLat': newLat, 'newLon': newLon}
 
         def scaleLatLon2(in_latitude,in_longitude):
-            MAP_HEIGHT = self.orbit_screen.ids.OrbitMap.texture_size[1]
-            MAP_WIDTH = self.orbit_screen.ids.OrbitMap.texture_size[0]
+            MAP_HEIGHT = self.screens["orbit"].ids.OrbitMap.texture_size[1]
+            MAP_WIDTH = self.screens["orbit"].ids.OrbitMap.texture_size[0]
 
             new_x = ((MAP_WIDTH / 360.0) * (180 + in_longitude))
             new_y = ((MAP_HEIGHT / 180.0) * (90 + in_latitude))
@@ -1995,9 +2015,9 @@ class MainApp(App):
 
                 date_i += timedelta(minutes=10)
 
-            self.orbit_screen.ids.TDRS12groundtrack.width = 1
-            self.orbit_screen.ids.TDRS12groundtrack.col = (0,0,1,1)
-            self.orbit_screen.ids.TDRS12groundtrack.points = TDRS12_groundtrack
+            self.screens["orbit"].ids.TDRS12groundtrack.width = 1
+            self.screens["orbit"].ids.TDRS12groundtrack.col = (0,0,1,1)
+            self.screens["orbit"].ids.TDRS12groundtrack.points = TDRS12_groundtrack
 
         try:
             TDRS6_TLE.compute(datetime.utcnow()) #46 West
@@ -2023,9 +2043,9 @@ class MainApp(App):
 
                 date_i += timedelta(minutes=10)
 
-            self.orbit_screen.ids.TDRS6groundtrack.width = 1
-            self.orbit_screen.ids.TDRS6groundtrack.col = (0,0,1,1)
-            self.orbit_screen.ids.TDRS6groundtrack.points = TDRS6_groundtrack
+            self.screens["orbit"].ids.TDRS6groundtrack.width = 1
+            self.screens["orbit"].ids.TDRS6groundtrack.col = (0,0,1,1)
+            self.screens["orbit"].ids.TDRS6groundtrack.points = TDRS6_groundtrack
 
         #TDRS West 2 sats
         try:
@@ -2052,9 +2072,9 @@ class MainApp(App):
 
                 date_i += timedelta(minutes=10)
 
-            self.orbit_screen.ids.TDRS11groundtrack.width = 1
-            self.orbit_screen.ids.TDRS11groundtrack.col = (0,0,1,1)
-            self.orbit_screen.ids.TDRS11groundtrack.points = TDRS11_groundtrack
+            self.screens["orbit"].ids.TDRS11groundtrack.width = 1
+            self.screens["orbit"].ids.TDRS11groundtrack.col = (0,0,1,1)
+            self.screens["orbit"].ids.TDRS11groundtrack.points = TDRS11_groundtrack
 
         try:
             TDRS10_TLE.compute(datetime.utcnow()) #174 West
@@ -2080,9 +2100,9 @@ class MainApp(App):
 
                 date_i += timedelta(minutes=10)
 
-            self.orbit_screen.ids.TDRS10groundtrack.width = 1
-            self.orbit_screen.ids.TDRS10groundtrack.col = (0,0,1,1)
-            self.orbit_screen.ids.TDRS10groundtrack.points = TDRS10_groundtrack
+            self.screens["orbit"].ids.TDRS10groundtrack.width = 1
+            self.screens["orbit"].ids.TDRS10groundtrack.col = (0,0,1,1)
+            self.screens["orbit"].ids.TDRS10groundtrack.points = TDRS10_groundtrack
 
         #ZOE TDRS-Z
         try:
@@ -2109,22 +2129,22 @@ class MainApp(App):
 
                 date_i += timedelta(minutes=10)
 
-            self.orbit_screen.ids.TDRS7groundtrack.width = 1
-            self.orbit_screen.ids.TDRS7groundtrack.col = (0,0,1,1)
-            self.orbit_screen.ids.TDRS7groundtrack.points = TDRS7_groundtrack
+            self.screens["orbit"].ids.TDRS7groundtrack.width = 1
+            self.screens["orbit"].ids.TDRS7groundtrack.col = (0,0,1,1)
+            self.screens["orbit"].ids.TDRS7groundtrack.points = TDRS7_groundtrack
 
         #draw the TDRS satellite locations
-        self.orbit_screen.ids.TDRS12.pos = (scaleLatLon2(TDRS12lat, TDRS12lon)['new_x']-((self.orbit_screen.ids.TDRS12.width/2)*normalizedX),scaleLatLon2(TDRS12lat, TDRS12lon)['new_y']-((self.orbit_screen.ids.TDRS12.height/2)*normalizedY))
-        self.orbit_screen.ids.TDRS6.pos = (scaleLatLon2(TDRS6lat, TDRS6lon)['new_x']-((self.orbit_screen.ids.TDRS6.width/2)*normalizedX),scaleLatLon2(TDRS6lat, TDRS6lon)['new_y']-((self.orbit_screen.ids.TDRS6.height/2)*normalizedY))
-        self.orbit_screen.ids.TDRS11.pos = (scaleLatLon2(TDRS11lat, TDRS11lon)['new_x']-((self.orbit_screen.ids.TDRS11.width/2)*normalizedX),scaleLatLon2(TDRS11lat, TDRS11lon)['new_y']-((self.orbit_screen.ids.TDRS11.height/2)*normalizedY))
-        self.orbit_screen.ids.TDRS10.pos = (scaleLatLon2(TDRS10lat, TDRS10lon)['new_x']-((self.orbit_screen.ids.TDRS10.width/2)*normalizedX),scaleLatLon2(TDRS10lat, TDRS10lon)['new_y']-((self.orbit_screen.ids.TDRS10.height/2)*normalizedY))
-        self.orbit_screen.ids.TDRS7.pos = (scaleLatLon2(TDRS7lat, TDRS7lon)['new_x']-((self.orbit_screen.ids.TDRS7.width/2)*normalizedX),scaleLatLon2(TDRS7lat, TDRS7lon)['new_y']-((self.orbit_screen.ids.TDRS7.height/2)*normalizedY))
+        self.screens["orbit"].ids.TDRS12.pos = (scaleLatLon2(TDRS12lat, TDRS12lon)['new_x']-((self.screens["orbit"].ids.TDRS12.width/2)*normalizedX),scaleLatLon2(TDRS12lat, TDRS12lon)['new_y']-((self.screens["orbit"].ids.TDRS12.height/2)*normalizedY))
+        self.screens["orbit"].ids.TDRS6.pos = (scaleLatLon2(TDRS6lat, TDRS6lon)['new_x']-((self.screens["orbit"].ids.TDRS6.width/2)*normalizedX),scaleLatLon2(TDRS6lat, TDRS6lon)['new_y']-((self.screens["orbit"].ids.TDRS6.height/2)*normalizedY))
+        self.screens["orbit"].ids.TDRS11.pos = (scaleLatLon2(TDRS11lat, TDRS11lon)['new_x']-((self.screens["orbit"].ids.TDRS11.width/2)*normalizedX),scaleLatLon2(TDRS11lat, TDRS11lon)['new_y']-((self.screens["orbit"].ids.TDRS11.height/2)*normalizedY))
+        self.screens["orbit"].ids.TDRS10.pos = (scaleLatLon2(TDRS10lat, TDRS10lon)['new_x']-((self.screens["orbit"].ids.TDRS10.width/2)*normalizedX),scaleLatLon2(TDRS10lat, TDRS10lon)['new_y']-((self.screens["orbit"].ids.TDRS10.height/2)*normalizedY))
+        self.screens["orbit"].ids.TDRS7.pos = (scaleLatLon2(TDRS7lat, TDRS7lon)['new_x']-((self.screens["orbit"].ids.TDRS7.width/2)*normalizedX),scaleLatLon2(TDRS7lat, TDRS7lon)['new_y']-((self.screens["orbit"].ids.TDRS7.height/2)*normalizedY))
         #add labels and ZOE
-        self.orbit_screen.ids.TDRSeLabel.pos_hint = {"center_x": scaleLatLon(0, -36)['newLon']+0.06, "center_y": scaleLatLon(0, -41)['newLat']}
-        self.orbit_screen.ids.TDRSwLabel.pos_hint = {"center_x": scaleLatLon(0, -166)['newLon']+0.06, "center_y": scaleLatLon(0, -174)['newLat']}
-        self.orbit_screen.ids.TDRSzLabel.pos_hint = {"center_x": scaleLatLon(0, 87)['newLon']+0.05, "center_y": scaleLatLon(0, 85)['newLat']}
-        self.orbit_screen.ids.ZOE.pos_hint = {"center_x": scaleLatLon(0, 77)['newLon'], "center_y": scaleLatLon(0, 77)['newLat']}
-        self.orbit_screen.ids.ZOElabel.pos_hint = {"center_x": scaleLatLon(0, 77)['newLon'], "center_y": scaleLatLon(0, 77)['newLat']+0.1}
+        self.screens["orbit"].ids.TDRSeLabel.pos_hint = {"center_x": scaleLatLon(0, -36)['newLon']+0.06, "center_y": scaleLatLon(0, -41)['newLat']}
+        self.screens["orbit"].ids.TDRSwLabel.pos_hint = {"center_x": scaleLatLon(0, -166)['newLon']+0.06, "center_y": scaleLatLon(0, -174)['newLat']}
+        self.screens["orbit"].ids.TDRSzLabel.pos_hint = {"center_x": scaleLatLon(0, 87)['newLon']+0.05, "center_y": scaleLatLon(0, 85)['newLat']}
+        self.screens["orbit"].ids.ZOE.pos_hint = {"center_x": scaleLatLon(0, 77)['newLon'], "center_y": scaleLatLon(0, 77)['newLat']}
+        self.screens["orbit"].ids.ZOElabel.pos_hint = {"center_x": scaleLatLon(0, 77)['newLon'], "center_y": scaleLatLon(0, 77)['newLat']+0.1}
 
     def orbitUpdate(self, dt):
         iss_config_filename = mimic_data_directory / 'iss_tle_config.json'
@@ -2152,8 +2172,8 @@ class MainApp(App):
             return {'newLat': newLat, 'newLon': newLon}
 
         def scaleLatLon2(in_latitude,in_longitude):
-            MAP_HEIGHT = self.orbit_screen.ids.OrbitMap.texture_size[1]
-            MAP_WIDTH = self.orbit_screen.ids.OrbitMap.texture_size[0]
+            MAP_HEIGHT = self.screens["orbit"].ids.OrbitMap.texture_size[1]
+            MAP_WIDTH = self.screens["orbit"].ids.OrbitMap.texture_size[0]
 
             new_x = ((MAP_WIDTH / 360.0) * (180 + in_longitude))
             new_y = ((MAP_HEIGHT / 180.0) * (90 + in_latitude))
@@ -2224,20 +2244,20 @@ class MainApp(App):
         #inclination = ISS_TLE.inc
 
         #TEMP FIX TO ERROR DO NOT MERGE THESE LINES
-        if self.orbit_screen.ids.OrbitMap.texture_size[0] == 0: #temp fix to ensure no divide by 0
+        if self.screens["orbit"].ids.OrbitMap.texture_size[0] == 0: #temp fix to ensure no divide by 0
             normalizedX = 1
         else:
-            normalizedX = self.orbit_screen.ids.OrbitMap.norm_image_size[0] / self.orbit_screen.ids.OrbitMap.texture_size[0]
+            normalizedX = self.screens["orbit"].ids.OrbitMap.norm_image_size[0] / self.screens["orbit"].ids.OrbitMap.texture_size[0]
 
-        if self.orbit_screen.ids.OrbitMap.texture_size[1] == 0:
+        if self.screens["orbit"].ids.OrbitMap.texture_size[1] == 0:
             normalizedY = 1
         else:
-            normalizedY = self.orbit_screen.ids.OrbitMap.norm_image_size[1] / self.orbit_screen.ids.OrbitMap.texture_size[1]
+            normalizedY = self.screens["orbit"].ids.OrbitMap.norm_image_size[1] / self.screens["orbit"].ids.OrbitMap.texture_size[1]
 
 
-        self.orbit_screen.ids.OrbitISStiny.pos = (
-                scaleLatLon2(latitude, longitude)['new_x'] - (self.orbit_screen.ids.OrbitISStiny.width / 2),
-                scaleLatLon2(latitude, longitude)['new_y'] - (self.orbit_screen.ids.OrbitISStiny.height / 2))
+        self.screens["orbit"].ids.OrbitISStiny.pos = (
+                scaleLatLon2(latitude, longitude)['new_x'] - (self.screens["orbit"].ids.OrbitISStiny.width / 2),
+                scaleLatLon2(latitude, longitude)['new_y'] - (self.screens["orbit"].ids.OrbitISStiny.height / 2))
 
         #get the position of the sub solar point to add the sun icon to the map
         
@@ -2246,10 +2266,10 @@ class MainApp(App):
             scaled_coordinates = scaleLatLon2(int(sunlatitude),int(sunlongitude))
 
             #Adjust for centering of the sun image
-            sun_x = scaled_coordinates['new_x'] - (self.orbit_screen.ids.OrbitSun.width / 2)
-            sun_y = scaled_coordinates['new_y'] - (self.orbit_screen.ids.OrbitSun.height / 2)
+            sun_x = scaled_coordinates['new_x'] - (self.screens["orbit"].ids.OrbitSun.width / 2)
+            sun_y = scaled_coordinates['new_y'] - (self.screens["orbit"].ids.OrbitSun.height / 2)
 
-            self.orbit_screen.ids.OrbitSun.pos = (sun_x, sun_y)
+            self.screens["orbit"].ids.OrbitSun.pos = (sun_x, sun_y)
 
 
         update_sun_position(self)
@@ -2276,16 +2296,16 @@ class MainApp(App):
 
             date_i += timedelta(seconds=60)
 
-        self.orbit_screen.ids.ISSgroundtrack.width = 1
-        self.orbit_screen.ids.ISSgroundtrack.col = (1, 0, 0, 1)
-        self.orbit_screen.ids.ISSgroundtrack.points = ISS_groundtrack
+        self.screens["orbit"].ids.ISSgroundtrack.width = 1
+        self.screens["orbit"].ids.ISSgroundtrack.col = (1, 0, 0, 1)
+        self.screens["orbit"].ids.ISSgroundtrack.points = ISS_groundtrack
 
-        self.orbit_screen.ids.ISSgroundtrack2.width = 1
-        self.orbit_screen.ids.ISSgroundtrack2.col = (1, 0, 0, 1)
-        self.orbit_screen.ids.ISSgroundtrack2.points = ISS_groundtrack2
+        self.screens["orbit"].ids.ISSgroundtrack2.width = 1
+        self.screens["orbit"].ids.ISSgroundtrack2.col = (1, 0, 0, 1)
+        self.screens["orbit"].ids.ISSgroundtrack2.points = ISS_groundtrack2
 
-        self.orbit_screen.ids.latitude.text = str("{:.2f}".format(latitude))
-        self.orbit_screen.ids.longitude.text = str("{:.2f}".format(longitude))
+        self.screens["orbit"].ids.latitude.text = str("{:.2f}".format(latitude))
+        self.screens["orbit"].ids.longitude.text = str("{:.2f}".format(longitude))
 
         TDRScursor.execute('select TDRS1 from tdrs')
         tdrs1 = int(TDRScursor.fetchone()[0])
@@ -2296,75 +2316,75 @@ class MainApp(App):
 
         # THIS SECTION NEEDS IMPROVEMENT
         tdrs = "n/a"
-        self.ct_sgant_screen.ids.tdrs_east12.angle = (-1*longitude)-41
-        self.ct_sgant_screen.ids.tdrs_east6.angle = (-1*longitude)-46
-        self.ct_sgant_screen.ids.tdrs_z7.angle = ((-1*longitude)-41)+126
-        self.ct_sgant_screen.ids.tdrs_west11.angle = ((-1*longitude)-41)-133
-        self.ct_sgant_screen.ids.tdrs_west10.angle = ((-1*longitude)-41)-130
+        self.screens["ct_sgant"].ids.tdrs_east12.angle = (-1*longitude)-41
+        self.screens["ct_sgant"].ids.tdrs_east6.angle = (-1*longitude)-46
+        self.screens["ct_sgant"].ids.tdrs_z7.angle = ((-1*longitude)-41)+126
+        self.screens["ct_sgant"].ids.tdrs_west11.angle = ((-1*longitude)-41)-133
+        self.screens["ct_sgant"].ids.tdrs_west10.angle = ((-1*longitude)-41)-130
 
         if ((tdrs1 or tdrs2) == 12) and float(aos) == 1.0:
             tdrs = "east-12"
-            self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East-12"
+            self.screens["ct_sgant"].ids.tdrs_label.text = "TDRS-East-12"
         if ((tdrs1 or tdrs2) == 6) and float(aos) == 1.0:
             tdrs = "east-6"
-            self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-East-6"
+            self.screens["ct_sgant"].ids.tdrs_label.text = "TDRS-East-6"
         if ((tdrs1 or tdrs2) == 10) and float(aos) == 1.0:
             tdrs = "west-10"
-            self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West-10"
+            self.screens["ct_sgant"].ids.tdrs_label.text = "TDRS-West-10"
         if ((tdrs1 or tdrs2) == 11) and float(aos) == 1.0:
             tdrs = "west-11"
-            self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-West-11"
+            self.screens["ct_sgant"].ids.tdrs_label.text = "TDRS-West-11"
         if ((tdrs1 or tdrs2) == 7) and float(aos) == 1.0:
             tdrs = "z-7"
-            self.ct_sgant_screen.ids.tdrs_label.text = "TDRS-Z-7"
+            self.screens["ct_sgant"].ids.tdrs_label.text = "TDRS-Z-7"
         elif tdrs1 == 0 and tdrs2 == 0:
-            self.ct_sgant_screen.ids.tdrs_label.text = "-"
+            self.screens["ct_sgant"].ids.tdrs_label.text = "-"
             tdrs = "----"
 
-        self.ct_sgant_screen.ids.tdrs_z7.color = 1, 1, 1, 1
-        self.orbit_screen.ids.TDRSwLabel.color = (1,1,1,1)
-        self.orbit_screen.ids.TDRSeLabel.color = (1,1,1,1)
-        self.orbit_screen.ids.TDRSzLabel.color = (1,1,1,1)
-        self.orbit_screen.ids.TDRS11.col = (1,1,1,1)
-        self.orbit_screen.ids.TDRS10.col = (1,1,1,1)
-        self.orbit_screen.ids.TDRS12.col = (1,1,1,1)
-        self.orbit_screen.ids.TDRS6.col = (1,1,1,1)
-        self.orbit_screen.ids.TDRS7.col = (1,1,1,1)
-        self.orbit_screen.ids.ZOElabel.color = (1,1,1,1)
-        self.orbit_screen.ids.ZOE.col = (1,0.5,0,0.5)
+        self.screens["ct_sgant"].ids.tdrs_z7.color = 1, 1, 1, 1
+        self.screens["orbit"].ids.TDRSwLabel.color = (1,1,1,1)
+        self.screens["orbit"].ids.TDRSeLabel.color = (1,1,1,1)
+        self.screens["orbit"].ids.TDRSzLabel.color = (1,1,1,1)
+        self.screens["orbit"].ids.TDRS11.col = (1,1,1,1)
+        self.screens["orbit"].ids.TDRS10.col = (1,1,1,1)
+        self.screens["orbit"].ids.TDRS12.col = (1,1,1,1)
+        self.screens["orbit"].ids.TDRS6.col = (1,1,1,1)
+        self.screens["orbit"].ids.TDRS7.col = (1,1,1,1)
+        self.screens["orbit"].ids.ZOElabel.color = (1,1,1,1)
+        self.screens["orbit"].ids.ZOE.col = (1,0.5,0,0.5)
 
         if "10" in tdrs: #tdrs10 and 11 west
-            self.orbit_screen.ids.TDRSwLabel.color = (1,0,1,1)
-            self.orbit_screen.ids.TDRS10.col = (1,0,1,1)
+            self.screens["orbit"].ids.TDRSwLabel.color = (1,0,1,1)
+            self.screens["orbit"].ids.TDRS10.col = (1,0,1,1)
         if "11" in tdrs: #tdrs10 and 11 west
-            self.orbit_screen.ids.TDRSwLabel.color = (1,0,1,1)
-            self.orbit_screen.ids.TDRS11.col = (1,0,1,1)
-            self.orbit_screen.ids.TDRS10.col = (1,1,1,1)
+            self.screens["orbit"].ids.TDRSwLabel.color = (1,0,1,1)
+            self.screens["orbit"].ids.TDRS11.col = (1,0,1,1)
+            self.screens["orbit"].ids.TDRS10.col = (1,1,1,1)
         if "6" in tdrs: #tdrs6 and 12 east
-            self.orbit_screen.ids.TDRSeLabel.color = (1,0,1,1)
-            self.orbit_screen.ids.TDRS6.col = (1,0,1,1)
+            self.screens["orbit"].ids.TDRSeLabel.color = (1,0,1,1)
+            self.screens["orbit"].ids.TDRS6.col = (1,0,1,1)
         if "12" in tdrs: #tdrs6 and 12 east
-            self.orbit_screen.ids.TDRSeLabel.color = (1,0,1,1)
-            self.orbit_screen.ids.TDRS12.col = (1,0,1,1)
+            self.screens["orbit"].ids.TDRSeLabel.color = (1,0,1,1)
+            self.screens["orbit"].ids.TDRS12.col = (1,0,1,1)
         if "7" in tdrs: #tdrs7 z
-            self.ct_sgant_screen.ids.tdrs_z7.color = 1, 1, 1, 1
-            self.orbit_screen.ids.TDRSzLabel.color = (1,0,1,1)
-            self.orbit_screen.ids.TDRS7.col = (1,0,1,1)
-            self.orbit_screen.ids.ZOElabel.color = 0, 0, 0, 0
-            self.orbit_screen.ids.ZOE.col = (0,0,0,0)
+            self.screens["ct_sgant"].ids.tdrs_z7.color = 1, 1, 1, 1
+            self.screens["orbit"].ids.TDRSzLabel.color = (1,0,1,1)
+            self.screens["orbit"].ids.TDRS7.col = (1,0,1,1)
+            self.screens["orbit"].ids.ZOElabel.color = 0, 0, 0, 0
+            self.screens["orbit"].ids.ZOE.col = (0,0,0,0)
 
         #------------------Orbit Stuff---------------------------
         now = datetime.utcnow()
         mins = (now - now.replace(hour=0,minute=0,second=0,microsecond=0)).total_seconds()
         orbits_today = math.floor((float(mins)/60)/90)
-        self.orbit_screen.ids.dailyorbit.text = str(int(orbits_today)) #display number of orbits since utc midnight
+        self.screens["orbit"].ids.dailyorbit.text = str(int(orbits_today)) #display number of orbits since utc midnight
 
         year = int('20' + str(ISS_TLE_Line1[18:20]))
         decimal_days = float(ISS_TLE_Line1[20:32])
         converted_time = datetime(year, 1 ,1) + timedelta(decimal_days - 1)
         time_since_epoch = ((now - converted_time).total_seconds()) #convert time difference to hours
         totalorbits = int(ISS_TLE_Line2[63:68]) + 100000 + int(float(time_since_epoch)/(90*60)) #add number of orbits since the tle was generated
-        self.orbit_screen.ids.totalorbits.text = str(totalorbits) #display number of orbits since utc midnight
+        self.screens["orbit"].ids.totalorbits.text = str(totalorbits) #display number of orbits since utc midnight
         #------------------ISS Pass Detection---------------------------
         location = ephem.Observer()
         location.lon         = '-95:21:59' #will next to make these an input option
@@ -2378,8 +2398,8 @@ class MainApp(App):
         #use location to draw dot on orbit map
         mylatitude = float(str(location.lat).split(':')[0]) + float(str(location.lat).split(':')[1])/60 + float(str(location.lat).split(':')[2])/3600
         mylongitude = float(str(location.lon).split(':')[0]) + float(str(location.lon).split(':')[1])/60 + float(str(location.lon).split(':')[2])/3600
-        self.orbit_screen.ids.mylocation.col = (0,0,1,1)
-        self.orbit_screen.ids.mylocation.pos = (scaleLatLon2(mylatitude, mylongitude)['new_x']-((self.orbit_screen.ids.mylocation.width/2)*normalizedX),scaleLatLon2(mylatitude, mylongitude)['new_y']-((self.orbit_screen.ids.mylocation.height/2)*normalizedY))
+        self.screens["orbit"].ids.mylocation.col = (0,0,1,1)
+        self.screens["orbit"].ids.mylocation.pos = (scaleLatLon2(mylatitude, mylongitude)['new_x']-((self.screens["orbit"].ids.mylocation.width/2)*normalizedX),scaleLatLon2(mylatitude, mylongitude)['new_y']-((self.screens["orbit"].ids.mylocation.height/2)*normalizedY))
 
         def isVisible(pass_info):
             def seconds_between(d1, d2):
@@ -2415,25 +2435,25 @@ class MainApp(App):
 
         if 'nextpassinfo' in locals(): # check for existence of nextpassinfo first
             if nextpassinfo[0] is None:
-                self.orbit_screen.ids.iss_next_pass1.text = "n/a"
-                self.orbit_screen.ids.iss_next_pass2.text = "n/a"
-                self.orbit_screen.ids.countdown.text = "n/a"
+                self.screens["orbit"].ids.iss_next_pass1.text = "n/a"
+                self.screens["orbit"].ids.iss_next_pass2.text = "n/a"
+                self.screens["orbit"].ids.countdown.text = "n/a"
             else:
                 nextpassdatetime = datetime.strptime(str(nextpassinfo[0]), '%Y/%m/%d %H:%M:%S') #convert to datetime object for timezone conversion
                 nextpassinfo_format = nextpassdatetime.replace(tzinfo=pytz.utc)
                 localtimezone = pytz.timezone('America/Chicago')
                 localnextpass = nextpassinfo_format.astimezone(localtimezone)
-                self.orbit_screen.ids.iss_next_pass1.text = str(localnextpass).split()[0] #display next pass time
-                self.orbit_screen.ids.iss_next_pass2.text = str(localnextpass).split()[1].split('-')[0] #display next pass time
+                self.screens["orbit"].ids.iss_next_pass1.text = str(localnextpass).split()[0] #display next pass time
+                self.screens["orbit"].ids.iss_next_pass2.text = str(localnextpass).split()[1].split('-')[0] #display next pass time
                 timeuntilnextpass = nextpassinfo[0] - location.date
                 nextpasshours = timeuntilnextpass*24.0
                 nextpassmins = (nextpasshours-math.floor(nextpasshours))*60
                 nextpassseconds = (nextpassmins-math.floor(nextpassmins))*60
                 if isVisible(nextpassinfo):
-                    self.orbit_screen.ids.ISSvisible.text = "Visible Pass!"
+                    self.screens["orbit"].ids.ISSvisible.text = "Visible Pass!"
                 else:
-                    self.orbit_screen.ids.ISSvisible.text = "Not Visible"
-                self.orbit_screen.ids.countdown.text = str("{:.0f}".format(math.floor(nextpasshours))) + ":" + str("{:.0f}".format(math.floor(nextpassmins))) + ":" + str("{:.0f}".format(math.floor(nextpassseconds))) #display time until next pass
+                    self.screens["orbit"].ids.ISSvisible.text = "Not Visible"
+                self.screens["orbit"].ids.countdown.text = str("{:.0f}".format(math.floor(nextpasshours))) + ":" + str("{:.0f}".format(math.floor(nextpassmins))) + ":" + str("{:.0f}".format(math.floor(nextpassseconds))) #display time until next pass
 
 
     def map_rotation(self, args):
@@ -2460,93 +2480,69 @@ class MainApp(App):
         seconds2 = int(seconds2)
 
         new_bar_x = self.map_hold_bar(260-seconds2)
-        self.us_eva.ids.leak_timer.text = "~"+ str(int(seconds2)) + "s"
-        self.us_eva.ids.Hold_bar.pos_hint = {"center_x": new_bar_x, "center_y": 0.47}
-        self.us_eva.ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/LeakCheckLights.png'
+        self.screens["us_eva"].ids.leak_timer.text = "~"+ str(int(seconds2)) + "s"
+        self.screens["us_eva"].ids.Hold_bar.pos_hint = {"center_x": new_bar_x, "center_y": 0.47}
+        self.screens["us_eva"].ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/LeakCheckLights.png'
 
-    def signal_unsubscribed(self): #change images, used stale signal image
-        global internet, ScreenList
+    def _broadcast_signal(self,
+                          filename: str,
+                          rgb: tuple[float, float, float],
+                          anim_delay: float | None = None,
+                          size_hint_y: float = 0.112) -> None:
+        """
+        Apply the same signal icon + colour to every screen.
 
-        if not internet:
-            for x in ScreenList:
-                #log_info(x)
-                getattr(self, x).ids.signal.source = mimic_directory + '/Mimic/Pi/imgs/signal/offline.png'
-            self.changeColors(0.5, 0.5, 0.5)
+        Parameters
+        ----------
+        filename      : just the file name, e.g. "offline.png"
+        rgb           : (r, g, b) floats in 0-1 range
+        anim_delay    : None ? leave current delay unchanged
+        size_hint_y   : height of the Image widget
+        """
+        source_path = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/{filename}"
+
+        for scr in self.screens.values():
+            sig = scr.ids.signal
+            sig.source = source_path
+            sig.size_hint_y = size_hint_y
+            if anim_delay is not None:
+                sig.anim_delay = anim_delay
+
+        # update colour on every kv label bound to `signalcolor`
+        self.changeColors(*rgb)
+
+    def signal_unsubscribed(self):
+        if not self.internet:
+            self._broadcast_signal("offline.png", (0.5, 0.5, 0.5))
         else:
-            for x in ScreenList:
-                getattr(self, x).ids.signal.source = mimic_directory + '/Mimic/Pi/imgs/signal/SignalClientLost.png'
-            self.changeColors(1, 0.5, 0)
-
-        for x in ScreenList:
-            getattr(self, x).ids.signal.size_hint_y = 0.112
+            self._broadcast_signal("SignalClientLost.png", (1, 0.5, 0))
 
     def signal_lost(self):
-        global internet, ScreenList
-
-        if not internet:
-            for x in ScreenList:
-                getattr(self, x).ids.signal.source = mimic_directory + '/Mimic/Pi/imgs/signal/offline.png'
-            self.changeColors(0.5, 0.5, 0.5)
+        if not self.internet:
+            self._broadcast_signal("offline.png", (0.5, 0.5, 0.5))
         else:
-            for x in ScreenList:
-                getattr(self, x).ids.signal.source = mimic_directory + '/Mimic/Pi/imgs/signal/signalred.zip'
-            self.changeColors(1, 0, 0)
-
-        for x in ScreenList:
-            getattr(self, x).ids.signal.anim_delay = 0.4
-        for x in ScreenList:
-            getattr(self, x).ids.signal.size_hint_y = 0.112
+            self._broadcast_signal("signalred.zip", (1, 0, 0), anim_delay=0.4)
 
     def signal_acquired(self):
-        global internet, ScreenList
-
-        if not internet:
-            for x in ScreenList:
-                getattr(self, x).ids.signal.source = mimic_directory + '/Mimic/Pi/imgs/signal/offline.png'
-            self.changeColors(0.5, 0.5, 0.5)
+        if not self.internet:
+            self._broadcast_signal("offline.png", (0.5, 0.5, 0.5))
         else:
-            for x in ScreenList:
-                getattr(self, x).ids.signal.source = mimic_directory + '/Mimic/Pi/imgs/signal/pulse-transparent.zip'
-            self.changeColors(0, 1, 0)
-
-        for x in ScreenList:
-            getattr(self, x).ids.signal.anim_delay = 0.05
-        for x in ScreenList:
-            getattr(self, x).ids.signal.size_hint_y = 0.15
+            self._broadcast_signal("pulse-transparent.zip", (0, 1, 0),
+                                   anim_delay=0.05, size_hint_y=0.15)
 
     def signal_stale(self):
-        global internet, ScreenList
-
-        if not internet:
-            for x in ScreenList:
-                getattr(self, x).ids.signal.source = mimic_directory + '/Mimic/Pi/imgs/signal/offline.png'
-            self.changeColors(0.5, 0.5, 0.5)
+        if not self.internet:
+            self._broadcast_signal("offline.png", (0.5, 0.5, 0.5))
         else:
-            for x in ScreenList:
-                getattr(self, x).ids.signal.source = mimic_directory + '/Mimic/Pi/imgs/signal/SignalOrangeGray.png'
-            self.changeColors(1, 0.5, 0)
-
-        for x in ScreenList:
-            getattr(self, x).ids.signal.anim_delay = 0.12
-        for x in ScreenList:
-            getattr(self, x).ids.signal.size_hint_y = 0.112
+            self._broadcast_signal("SignalOrangeGray.png", (1, 0.5, 0),
+                                   anim_delay=0.12)
 
     def signal_client_offline(self):
-        global internet, ScreenList
-
-        if not internet:
-            for x in ScreenList:
-                getattr(self, x).ids.signal.source = mimic_directory + '/Mimic/Pi/imgs/signal/offline.png'
-            self.changeColors(0.5, 0.5, 0.5)
+        if not self.internet:
+            self._broadcast_signal("offline.png", (0.5, 0.5, 0.5))
         else:
-            for x in ScreenList:
-                getattr(self, x).ids.signal.source = mimic_directory + '/Mimic/Pi/imgs/signal/SignalClientLost.png'
-            self.changeColors(1, 0.5, 0)
-
-        for x in ScreenList:
-            getattr(self, x).ids.signal.anim_delay = 0.12
-        for x in ScreenList:
-            getattr(self, x).ids.signal.size_hint_y = 0.112
+            self._broadcast_signal("SignalClientLost.png", (1, 0.5, 0),
+                                   anim_delay=0.12)
 
     def update_vv_values(self, dt):
         try:
@@ -2623,240 +2619,240 @@ class MainApp(App):
                         type_edit = " (Cargo)"
 
                     if port == "Node 2 Forward":
-                        self.usos_screen.ids.n2f_mission.text = str(mission[i][0]) + type_edit
-                        self.usos_screen.ids.n2f_vehicle.text = sc_name
-                        self.usos_screen.ids.n2f_spacecraft.text = sc_name2
-                        self.usos_screen.ids.n2f_arrival.text = "Arrival: " + arrival_date
-                        self.usos_screen.ids.n2f_departure.text = "Departure: " + departure_date
-                        self.usos_screen.ids.n2f_label.text = sc_name + "\n" + str(mission[i][0])
-                        self.vv_screen.ids.n2f_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.screens["usos"].ids.n2f_mission.text = str(mission[i][0]) + type_edit
+                        self.screens["usos"].ids.n2f_vehicle.text = sc_name
+                        self.screens["usos"].ids.n2f_spacecraft.text = sc_name2
+                        self.screens["usos"].ids.n2f_arrival.text = "Arrival: " + arrival_date
+                        self.screens["usos"].ids.n2f_departure.text = "Departure: " + departure_date
+                        self.screens["usos"].ids.n2f_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.screens["vv"].ids.n2f_label.text = sc_name + "\n" + str(mission[i][0])
                         if "Dragon" in sc_name:
-                            self.usos_screen.ids.n2f_dragon.opacity = 1.0
-                            self.usos_screen.ids.n2f_starliner.opacity = 0.0
-                            self.vv_screen.ids.n2f_dragon.opacity = 1.0
-                            self.vv_screen.ids.n2f_starliner.opacity = 0.0
+                            self.screens["usos"].ids.n2f_dragon.opacity = 1.0
+                            self.screens["usos"].ids.n2f_starliner.opacity = 0.0
+                            self.screens["vv"].ids.n2f_dragon.opacity = 1.0
+                            self.screens["vv"].ids.n2f_starliner.opacity = 0.0
                         elif sc_name == "CST-100 Starliner":
-                            self.usos_screen.ids.n2f_starliner.opacity = 1.0
-                            self.usos_screen.ids.n2f_dragon.opacity = 0.0
-                            self.vv_screen.ids.n2f_dragon.opacity = 0.0
-                            self.vv_screen.ids.n2f_starliner.opacity = 1.0
+                            self.screens["usos"].ids.n2f_starliner.opacity = 1.0
+                            self.screens["usos"].ids.n2f_dragon.opacity = 0.0
+                            self.screens["vv"].ids.n2f_dragon.opacity = 0.0
+                            self.screens["vv"].ids.n2f_starliner.opacity = 1.0
                     elif port == "Node 2 Zenith":
-                        self.usos_screen.ids.n2z_mission.text = str(mission[i][0]) + type_edit
-                        self.usos_screen.ids.n2z_vehicle.text = sc_name
-                        self.usos_screen.ids.n2z_spacecraft.text = sc_name2
-                        self.usos_screen.ids.n2z_arrival.text = "Arrival: " + arrival_date
-                        self.usos_screen.ids.n2z_departure.text = "Departure: " + departure_date
-                        self.usos_screen.ids.n2z_label.text = sc_name + "\n" + str(mission[i][0])
-                        self.vv_screen.ids.n2z_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.screens["usos"].ids.n2z_mission.text = str(mission[i][0]) + type_edit
+                        self.screens["usos"].ids.n2z_vehicle.text = sc_name
+                        self.screens["usos"].ids.n2z_spacecraft.text = sc_name2
+                        self.screens["usos"].ids.n2z_arrival.text = "Arrival: " + arrival_date
+                        self.screens["usos"].ids.n2z_departure.text = "Departure: " + departure_date
+                        self.screens["usos"].ids.n2z_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.screens["vv"].ids.n2z_label.text = sc_name + "\n" + str(mission[i][0])
                         if "Dragon" in sc_name:
-                            self.usos_screen.ids.n2z_dragon.opacity = 1.0
-                            self.usos_screen.ids.n2z_starliner.opacity = 0.0
-                            self.vv_screen.ids.n2z_dragon.opacity = 1.0
-                            self.vv_screen.ids.n2z_starliner.opacity = 0.0
+                            self.screens["usos"].ids.n2z_dragon.opacity = 1.0
+                            self.screens["usos"].ids.n2z_starliner.opacity = 0.0
+                            self.screens["vv"].ids.n2z_dragon.opacity = 1.0
+                            self.screens["vv"].ids.n2z_starliner.opacity = 0.0
                         elif sc_name == "CST-100 Starliner":
-                            self.usos_screen.ids.n2z_starliner.opacity = 1.0
-                            self.usos_screen.ids.n2z_dragon.opacity = 0.0
-                            self.vv_screen.ids.n2z_dragon.opacity = 0.0
-                            self.vv_screen.ids.n2z_starliner.opacity = 1.0
+                            self.screens["usos"].ids.n2z_starliner.opacity = 1.0
+                            self.screens["usos"].ids.n2z_dragon.opacity = 0.0
+                            self.screens["vv"].ids.n2z_dragon.opacity = 0.0
+                            self.screens["vv"].ids.n2z_starliner.opacity = 1.0
                     elif port == "Node 2 Nadir":
-                        self.usos_screen.ids.n2n_mission.text = str(mission[i][0]) + type_edit
-                        self.usos_screen.ids.n2n_vehicle.text = sc_name
-                        self.usos_screen.ids.n2n_spacecraft.text = sc_name2
-                        self.usos_screen.ids.n2n_arrival.text = "Arrival: " + arrival_date
-                        self.usos_screen.ids.n2n_departure.text = "Departure: " + departure_date
-                        self.usos_screen.ids.n2n_label.text = sc_name + "\n" + str(mission[i][0])
-                        self.vv_screen.ids.n2n_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.screens["usos"].ids.n2n_mission.text = str(mission[i][0]) + type_edit
+                        self.screens["usos"].ids.n2n_vehicle.text = sc_name
+                        self.screens["usos"].ids.n2n_spacecraft.text = sc_name2
+                        self.screens["usos"].ids.n2n_arrival.text = "Arrival: " + arrival_date
+                        self.screens["usos"].ids.n2n_departure.text = "Departure: " + departure_date
+                        self.screens["usos"].ids.n2n_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.screens["vv"].ids.n2n_label.text = sc_name + "\n" + str(mission[i][0])
                         #if "Dream" in sc_name:
-                            #self.usos_screen.ids.n2n_dreamchaser.opacity = 1.0
-                            #self.usos_screen.ids.n2n_htvx.opacity = 0.0
-                            #self.vv_screen.ids.n2n_dreamchaser.opacity = 1.0
-                            #self.vv_screen.ids.n2n_htvx.opacity = 0.0
+                            #self.screens["usos"].ids.n2n_dreamchaser.opacity = 1.0
+                            #self.screens["usos"].ids.n2n_htvx.opacity = 0.0
+                            #self.screens["vv"].ids.n2n_dreamchaser.opacity = 1.0
+                            #self.screens["vv"].ids.n2n_htvx.opacity = 0.0
                         #elif "HTV" in sc_name:
-                            #self.usos_screen.ids.n2n_dreamchaser.opacity = 0.0
-                            #self.usos_screen.ids.n2n_htvx.opacity = 1.0
-                            #self.vv_screen.ids.n2n_dreamchaser.opacity = 0.0
-                            #self.vv_screen.ids.n2n_htvx.opacity = 1.0
+                            #self.screens["usos"].ids.n2n_dreamchaser.opacity = 0.0
+                            #self.screens["usos"].ids.n2n_htvx.opacity = 1.0
+                            #self.screens["vv"].ids.n2n_dreamchaser.opacity = 0.0
+                            #self.screens["vv"].ids.n2n_htvx.opacity = 1.0
                     elif port == "Node 1 Nadir":
-                        self.usos_screen.ids.n1n_mission.text = str(mission[i][0]) + type_edit
-                        self.usos_screen.ids.n1n_vehicle.text = sc_name
-                        self.usos_screen.ids.n1n_spacecraft.text = sc_name2
-                        self.usos_screen.ids.n1n_arrival.text = "Arrival: " + arrival_date
-                        self.usos_screen.ids.n1n_departure.text = "Departure: " + departure_date
-                        self.usos_screen.ids.n1n_label.text = sc_name + "\n" + str(mission[i][0])
-                        self.vv_screen.ids.n1n_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.screens["usos"].ids.n1n_mission.text = str(mission[i][0]) + type_edit
+                        self.screens["usos"].ids.n1n_vehicle.text = sc_name
+                        self.screens["usos"].ids.n1n_spacecraft.text = sc_name2
+                        self.screens["usos"].ids.n1n_arrival.text = "Arrival: " + arrival_date
+                        self.screens["usos"].ids.n1n_departure.text = "Departure: " + departure_date
+                        self.screens["usos"].ids.n1n_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.screens["vv"].ids.n1n_label.text = sc_name + "\n" + str(mission[i][0])
                         if sc_name == "Cygnus":
-                            self.usos_screen.ids.n1n_cygnus.opacity = 1.0
-                            self.vv_screen.ids.n1n_cygnus.opacity = 1.0
+                            self.screens["usos"].ids.n1n_cygnus.opacity = 1.0
+                            self.screens["vv"].ids.n1n_cygnus.opacity = 1.0
                         else:
-                            self.usos_screen.ids.n1n_cygnus.opacity = 0.0
-                            self.vv_screen.ids.n1n_cygnus.opacity = 0.0
+                            self.screens["usos"].ids.n1n_cygnus.opacity = 0.0
+                            self.screens["vv"].ids.n1n_cygnus.opacity = 0.0
                     elif port == "Service Module Aft":
-                        self.rs_screen.ids.sma_mission.text = str(mission[i][0]) + type_edit
-                        self.rs_screen.ids.sma_vehicle.text = sc_name
-                        self.rs_screen.ids.sma_spacecraft.text = sc_name2
-                        self.rs_screen.ids.sma_arrival.text = "Arrival: " + arrival_date
-                        self.rs_screen.ids.sma_departure.text = "Departure: " + departure_date
-                        self.rs_screen.ids.sma_label.text = sc_name + "\n" + str(mission[i][0])
-                        self.vv_screen.ids.sma_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.screens["rs"].ids.sma_mission.text = str(mission[i][0]) + type_edit
+                        self.screens["rs"].ids.sma_vehicle.text = sc_name
+                        self.screens["rs"].ids.sma_spacecraft.text = sc_name2
+                        self.screens["rs"].ids.sma_arrival.text = "Arrival: " + arrival_date
+                        self.screens["rs"].ids.sma_departure.text = "Departure: " + departure_date
+                        self.screens["rs"].ids.sma_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.screens["vv"].ids.sma_label.text = sc_name + "\n" + str(mission[i][0])
                         if "Soyuz" in sc_name:
-                            self.rs_screen.ids.sma_soyuz.opacity = 1.0
-                            self.rs_screen.ids.sma_progress.opacity = 0.0
-                            self.vv_screen.ids.sma_soyuz.opacity = 1.0
-                            self.vv_screen.ids.sma_progress.opacity = 0.0
+                            self.screens["rs"].ids.sma_soyuz.opacity = 1.0
+                            self.screens["rs"].ids.sma_progress.opacity = 0.0
+                            self.screens["vv"].ids.sma_soyuz.opacity = 1.0
+                            self.screens["vv"].ids.sma_progress.opacity = 0.0
                         elif "Progress" in sc_name:
-                            self.rs_screen.ids.sma_soyuz.opacity = 0.0
-                            self.rs_screen.ids.sma_progress.opacity = 1.0
-                            self.vv_screen.ids.sma_soyuz.opacity = 0.0
-                            self.vv_screen.ids.sma_progress.opacity = 1.0
+                            self.screens["rs"].ids.sma_soyuz.opacity = 0.0
+                            self.screens["rs"].ids.sma_progress.opacity = 1.0
+                            self.screens["vv"].ids.sma_soyuz.opacity = 0.0
+                            self.screens["vv"].ids.sma_progress.opacity = 1.0
                     elif port == "MRM-2 Zenith":
-                        self.rs_screen.ids.mrm2_mission.text = str(mission[i][0]) + type_edit
-                        self.rs_screen.ids.mrm2_vehicle.text = sc_name
-                        self.rs_screen.ids.mrm2_spacecraft.text = sc_name2
-                        self.rs_screen.ids.mrm2_arrival.text = "Arrival: " + arrival_date
-                        self.rs_screen.ids.mrm2_departure.text = "Departure: " + departure_date
-                        self.rs_screen.ids.mrm2_label.text = sc_name + "\n" + str(mission[i][0])
-                        self.vv_screen.ids.mrm2_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.screens["rs"].ids.mrm2_mission.text = str(mission[i][0]) + type_edit
+                        self.screens["rs"].ids.mrm2_vehicle.text = sc_name
+                        self.screens["rs"].ids.mrm2_spacecraft.text = sc_name2
+                        self.screens["rs"].ids.mrm2_arrival.text = "Arrival: " + arrival_date
+                        self.screens["rs"].ids.mrm2_departure.text = "Departure: " + departure_date
+                        self.screens["rs"].ids.mrm2_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.screens["vv"].ids.mrm2_label.text = sc_name + "\n" + str(mission[i][0])
                         if "Soyuz" in sc_name:
-                            self.rs_screen.ids.mrm2_soyuz.opacity = 1.0
-                            self.rs_screen.ids.mrm2_progress.opacity = 0.0
-                            self.vv_screen.ids.mrm2_soyuz.opacity = 1.0
-                            self.vv_screen.ids.mrm2_progress.opacity = 0.0
+                            self.screens["rs"].ids.mrm2_soyuz.opacity = 1.0
+                            self.screens["rs"].ids.mrm2_progress.opacity = 0.0
+                            self.screens["vv"].ids.mrm2_soyuz.opacity = 1.0
+                            self.screens["vv"].ids.mrm2_progress.opacity = 0.0
                         elif "Progress" in sc_name:
-                            self.rs_screen.ids.mrm2_soyuz.opacity = 0.0
-                            self.rs_screen.ids.mrm2_progress.opacity = 1.0
-                            self.vv_screen.ids.mrm2_soyuz.opacity = 0.0
-                            self.vv_screen.ids.mrm2_progress.opacity = 1.0
+                            self.screens["rs"].ids.mrm2_soyuz.opacity = 0.0
+                            self.screens["rs"].ids.mrm2_progress.opacity = 1.0
+                            self.screens["vv"].ids.mrm2_soyuz.opacity = 0.0
+                            self.screens["vv"].ids.mrm2_progress.opacity = 1.0
                     elif port == "MRM-1 Nadir":
-                        self.rs_screen.ids.mrm1_mission.text = str(mission[i][0]) + type_edit
-                        self.rs_screen.ids.mrm1_vehicle.text = sc_name
-                        self.rs_screen.ids.mrm1_spacecraft.text = sc_name2
-                        self.rs_screen.ids.mrm1_arrival.text = "Arrival: " + arrival_date
-                        self.rs_screen.ids.mrm1_departure.text = "Departure: " + departure_date
-                        self.rs_screen.ids.mrm1_label.text = sc_name + "\n" + str(mission[i][0])
-                        self.vv_screen.ids.mrm1_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.screens["rs"].ids.mrm1_mission.text = str(mission[i][0]) + type_edit
+                        self.screens["rs"].ids.mrm1_vehicle.text = sc_name
+                        self.screens["rs"].ids.mrm1_spacecraft.text = sc_name2
+                        self.screens["rs"].ids.mrm1_arrival.text = "Arrival: " + arrival_date
+                        self.screens["rs"].ids.mrm1_departure.text = "Departure: " + departure_date
+                        self.screens["rs"].ids.mrm1_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.screens["vv"].ids.mrm1_label.text = sc_name + "\n" + str(mission[i][0])
                         if "Soyuz" in sc_name:
-                            self.rs_screen.ids.mrm1_soyuz.opacity = 1.0
-                            self.rs_screen.ids.mrm1_progress.opacity = 0.0
-                            self.vv_screen.ids.mrm1_soyuz.opacity = 1.0
-                            self.vv_screen.ids.mrm1_progress.opacity = 0.0
+                            self.screens["rs"].ids.mrm1_soyuz.opacity = 1.0
+                            self.screens["rs"].ids.mrm1_progress.opacity = 0.0
+                            self.screens["vv"].ids.mrm1_soyuz.opacity = 1.0
+                            self.screens["vv"].ids.mrm1_progress.opacity = 0.0
                         elif "Progress" in sc_name:
-                            self.rs_screen.ids.mrm1_soyuz.opacity = 0.0
-                            self.rs_screen.ids.mrm1_progress.opacity = 1.0
-                            self.vv_screen.ids.mrm1_soyuz.opacity = 0.0
-                            self.vv_screen.ids.mrm1_progress.opacity = 1.0
+                            self.screens["rs"].ids.mrm1_soyuz.opacity = 0.0
+                            self.screens["rs"].ids.mrm1_progress.opacity = 1.0
+                            self.screens["vv"].ids.mrm1_soyuz.opacity = 0.0
+                            self.screens["vv"].ids.mrm1_progress.opacity = 1.0
                     elif port == "RS Node Nadir":
-                        self.rs_screen.ids.rsn_mission.text = str(mission[i][0]) + type_edit
-                        self.rs_screen.ids.rsn_vehicle.text = sc_name
-                        self.rs_screen.ids.rsn_spacecraft.text = sc_name2
-                        self.rs_screen.ids.rsn_arrival.text = "Arrival: " + arrival_date
-                        self.rs_screen.ids.rsn_departure.text = "Departure: " + departure_date
-                        self.rs_screen.ids.rsn_label.text = sc_name + "\n" + str(mission[i][0])
-                        self.vv_screen.ids.rsn_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.screens["rs"].ids.rsn_mission.text = str(mission[i][0]) + type_edit
+                        self.screens["rs"].ids.rsn_vehicle.text = sc_name
+                        self.screens["rs"].ids.rsn_spacecraft.text = sc_name2
+                        self.screens["rs"].ids.rsn_arrival.text = "Arrival: " + arrival_date
+                        self.screens["rs"].ids.rsn_departure.text = "Departure: " + departure_date
+                        self.screens["rs"].ids.rsn_label.text = sc_name + "\n" + str(mission[i][0])
+                        self.screens["vv"].ids.rsn_label.text = sc_name + "\n" + str(mission[i][0])
                         if "Soyuz" in sc_name:
-                            self.rs_screen.ids.rsn_soyuz.opacity = 1.0
-                            self.rs_screen.ids.rsn_progress.opacity = 0.0
-                            self.vv_screen.ids.rsn_soyuz.opacity = 1.0
-                            self.vv_screen.ids.rsn_progress.opacity = 0.0
+                            self.screens["rs"].ids.rsn_soyuz.opacity = 1.0
+                            self.screens["rs"].ids.rsn_progress.opacity = 0.0
+                            self.screens["vv"].ids.rsn_soyuz.opacity = 1.0
+                            self.screens["vv"].ids.rsn_progress.opacity = 0.0
                         elif "Progress" in sc_name:
-                            self.rs_screen.ids.rsn_soyuz.opacity = 0.0
-                            self.rs_screen.ids.rsn_progress.opacity = 1.0
-                            self.vv_screen.ids.rsn_soyuz.opacity = 0.0
-                            self.vv_screen.ids.rsn_progress.opacity = 1.0
+                            self.screens["rs"].ids.rsn_soyuz.opacity = 0.0
+                            self.screens["rs"].ids.rsn_progress.opacity = 1.0
+                            self.screens["vv"].ids.rsn_soyuz.opacity = 0.0
+                            self.screens["vv"].ids.rsn_progress.opacity = 1.0
 
                 unoccupied_ports = all_ports - occupied_ports
 
                 # Handle unoccupied ports
                 for port in unoccupied_ports:
                     if port == "Node 2 Forward":
-                        self.usos_screen.ids.n2f_mission.text = "-"
-                        self.usos_screen.ids.n2f_vehicle.text = "-"
-                        self.usos_screen.ids.n2f_spacecraft.text = "-"
-                        self.usos_screen.ids.n2f_arrival.text = "-"
-                        self.usos_screen.ids.n2f_departure.text = "-"
-                        self.usos_screen.ids.n2f_dragon.opacity = 0.0
-                        self.usos_screen.ids.n2f_starliner.opacity = 0.0
-                        self.usos_screen.ids.n2f_label.text = ""
-                        self.vv_screen.ids.n2f_label.text = ""
-                        self.vv_screen.ids.n2f_dragon.opacity = 0.0
-                        self.vv_screen.ids.n2f_starliner.opacity = 0.0
+                        self.screens["usos"].ids.n2f_mission.text = "-"
+                        self.screens["usos"].ids.n2f_vehicle.text = "-"
+                        self.screens["usos"].ids.n2f_spacecraft.text = "-"
+                        self.screens["usos"].ids.n2f_arrival.text = "-"
+                        self.screens["usos"].ids.n2f_departure.text = "-"
+                        self.screens["usos"].ids.n2f_dragon.opacity = 0.0
+                        self.screens["usos"].ids.n2f_starliner.opacity = 0.0
+                        self.screens["usos"].ids.n2f_label.text = ""
+                        self.screens["vv"].ids.n2f_label.text = ""
+                        self.screens["vv"].ids.n2f_dragon.opacity = 0.0
+                        self.screens["vv"].ids.n2f_starliner.opacity = 0.0
                     elif port == "Node 2 Zenith":
-                        self.usos_screen.ids.n2z_mission.text = "-"
-                        self.usos_screen.ids.n2z_vehicle.text = "-"
-                        self.usos_screen.ids.n2z_spacecraft.text = "-"
-                        self.usos_screen.ids.n2z_arrival.text = "-"
-                        self.usos_screen.ids.n2z_departure.text = "-"
-                        self.usos_screen.ids.n2z_dragon.opacity = 0.0
-                        self.usos_screen.ids.n2z_starliner.opacity = 0.0
-                        self.usos_screen.ids.n2z_label.text = ""
-                        self.vv_screen.ids.n2z_label.text = ""
-                        self.vv_screen.ids.n2z_dragon.opacity = 0.0
-                        self.vv_screen.ids.n2z_starliner.opacity = 0.0
+                        self.screens["usos"].ids.n2z_mission.text = "-"
+                        self.screens["usos"].ids.n2z_vehicle.text = "-"
+                        self.screens["usos"].ids.n2z_spacecraft.text = "-"
+                        self.screens["usos"].ids.n2z_arrival.text = "-"
+                        self.screens["usos"].ids.n2z_departure.text = "-"
+                        self.screens["usos"].ids.n2z_dragon.opacity = 0.0
+                        self.screens["usos"].ids.n2z_starliner.opacity = 0.0
+                        self.screens["usos"].ids.n2z_label.text = ""
+                        self.screens["vv"].ids.n2z_label.text = ""
+                        self.screens["vv"].ids.n2z_dragon.opacity = 0.0
+                        self.screens["vv"].ids.n2z_starliner.opacity = 0.0
                     elif port == "Node 2 Nadir":
-                        self.usos_screen.ids.n2n_mission.text = "-"
-                        self.usos_screen.ids.n2n_vehicle.text = "-"
-                        self.usos_screen.ids.n2n_spacecraft.text = "-"
-                        self.usos_screen.ids.n2n_arrival.text = "-"
-                        self.usos_screen.ids.n2n_departure.text = "-"
-                        self.usos_screen.ids.n2n_label.text = ""
-                        self.vv_screen.ids.n2n_label.text = ""
+                        self.screens["usos"].ids.n2n_mission.text = "-"
+                        self.screens["usos"].ids.n2n_vehicle.text = "-"
+                        self.screens["usos"].ids.n2n_spacecraft.text = "-"
+                        self.screens["usos"].ids.n2n_arrival.text = "-"
+                        self.screens["usos"].ids.n2n_departure.text = "-"
+                        self.screens["usos"].ids.n2n_label.text = ""
+                        self.screens["vv"].ids.n2n_label.text = ""
                     elif port == "Node 1 Nadir":
-                        self.usos_screen.ids.n1n_mission.text = "-"
-                        self.usos_screen.ids.n1n_vehicle.text = "-"
-                        self.usos_screen.ids.n1n_spacecraft.text = "-"
-                        self.usos_screen.ids.n1n_arrival.text = "-"
-                        self.usos_screen.ids.n1n_departure.text = "-"
-                        self.usos_screen.ids.n1n_cygnus.opacity = 0.0
-                        self.usos_screen.ids.n1n_label.text = ""
-                        self.vv_screen.ids.n1n_label.text = ""
-                        self.vv_screen.ids.n1n_cygnus.opacity = 0.0
+                        self.screens["usos"].ids.n1n_mission.text = "-"
+                        self.screens["usos"].ids.n1n_vehicle.text = "-"
+                        self.screens["usos"].ids.n1n_spacecraft.text = "-"
+                        self.screens["usos"].ids.n1n_arrival.text = "-"
+                        self.screens["usos"].ids.n1n_departure.text = "-"
+                        self.screens["usos"].ids.n1n_cygnus.opacity = 0.0
+                        self.screens["usos"].ids.n1n_label.text = ""
+                        self.screens["vv"].ids.n1n_label.text = ""
+                        self.screens["vv"].ids.n1n_cygnus.opacity = 0.0
                     elif port == "Service Module Aft":
-                        self.rs_screen.ids.sma_mission.text = "-"
-                        self.rs_screen.ids.sma_vehicle.text = "-"
-                        self.rs_screen.ids.sma_spacecraft.text = "-"
-                        self.rs_screen.ids.sma_arrival.text = "-"
-                        self.rs_screen.ids.sma_departure.text = "-"
-                        self.rs_screen.ids.sma_label.text = ""
-                        self.vv_screen.ids.sma_label.text = ""
-                        self.rs_screen.ids.sma_soyuz.opacity = 0.0
-                        self.rs_screen.ids.sma_progress.opacity = 0.0
-                        self.vv_screen.ids.sma_soyuz.opacity = 0.0
-                        self.vv_screen.ids.sma_progress.opacity = 0.0
+                        self.screens["rs"].ids.sma_mission.text = "-"
+                        self.screens["rs"].ids.sma_vehicle.text = "-"
+                        self.screens["rs"].ids.sma_spacecraft.text = "-"
+                        self.screens["rs"].ids.sma_arrival.text = "-"
+                        self.screens["rs"].ids.sma_departure.text = "-"
+                        self.screens["rs"].ids.sma_label.text = ""
+                        self.screens["vv"].ids.sma_label.text = ""
+                        self.screens["rs"].ids.sma_soyuz.opacity = 0.0
+                        self.screens["rs"].ids.sma_progress.opacity = 0.0
+                        self.screens["vv"].ids.sma_soyuz.opacity = 0.0
+                        self.screens["vv"].ids.sma_progress.opacity = 0.0
                     elif port == "MRM-2 Zenith":
-                        self.rs_screen.ids.mrm2_mission.text = "-"
-                        self.rs_screen.ids.mrm2_vehicle.text = "-"
-                        self.rs_screen.ids.mrm2_spacecraft.text = "-"
-                        self.rs_screen.ids.mrm2_arrival.text = "-"
-                        self.rs_screen.ids.mrm2_departure.text = "-"
-                        self.rs_screen.ids.mrm2_label.text = ""
-                        self.vv_screen.ids.mrm2_label.text = ""
-                        self.rs_screen.ids.mrm2_soyuz.opacity = 0.0
-                        self.rs_screen.ids.mrm2_progress.opacity = 0.0
-                        self.vv_screen.ids.mrm2_soyuz.opacity = 0.0
-                        self.vv_screen.ids.mrm2_progress.opacity = 0.0
+                        self.screens["rs"].ids.mrm2_mission.text = "-"
+                        self.screens["rs"].ids.mrm2_vehicle.text = "-"
+                        self.screens["rs"].ids.mrm2_spacecraft.text = "-"
+                        self.screens["rs"].ids.mrm2_arrival.text = "-"
+                        self.screens["rs"].ids.mrm2_departure.text = "-"
+                        self.screens["rs"].ids.mrm2_label.text = ""
+                        self.screens["vv"].ids.mrm2_label.text = ""
+                        self.screens["rs"].ids.mrm2_soyuz.opacity = 0.0
+                        self.screens["rs"].ids.mrm2_progress.opacity = 0.0
+                        self.screens["vv"].ids.mrm2_soyuz.opacity = 0.0
+                        self.screens["vv"].ids.mrm2_progress.opacity = 0.0
                     elif port == "MRM-1 Nadir":
-                        self.rs_screen.ids.mrm1_mission.text = "-"
-                        self.rs_screen.ids.mrm1_vehicle.text = "-"
-                        self.rs_screen.ids.mrm1_spacecraft.text = "-"
-                        self.rs_screen.ids.mrm1_arrival.text = "-"
-                        self.rs_screen.ids.mrm1_departure.text = "-"
-                        self.rs_screen.ids.mrm1_label.text = ""
-                        self.vv_screen.ids.mrm1_label.text = ""
-                        self.rs_screen.ids.mrm1_soyuz.opacity = 0.0
-                        self.rs_screen.ids.mrm1_progress.opacity = 0.0
-                        self.vv_screen.ids.mrm1_soyuz.opacity = 0.0
-                        self.vv_screen.ids.mrm1_progress.opacity = 0.0
+                        self.screens["rs"].ids.mrm1_mission.text = "-"
+                        self.screens["rs"].ids.mrm1_vehicle.text = "-"
+                        self.screens["rs"].ids.mrm1_spacecraft.text = "-"
+                        self.screens["rs"].ids.mrm1_arrival.text = "-"
+                        self.screens["rs"].ids.mrm1_departure.text = "-"
+                        self.screens["rs"].ids.mrm1_label.text = ""
+                        self.screens["vv"].ids.mrm1_label.text = ""
+                        self.screens["rs"].ids.mrm1_soyuz.opacity = 0.0
+                        self.screens["rs"].ids.mrm1_progress.opacity = 0.0
+                        self.screens["vv"].ids.mrm1_soyuz.opacity = 0.0
+                        self.screens["vv"].ids.mrm1_progress.opacity = 0.0
                     elif port == "RS Node Nadir":
-                        self.rs_screen.ids.rsn_mission.text = "-"
-                        self.rs_screen.ids.rsn_vehicle.text = "-"
-                        self.rs_screen.ids.rsn_spacecraft.text = "-"
-                        self.rs_screen.ids.rsn_arrival.text = "-"
-                        self.rs_screen.ids.rsn_departure.text = "-"
-                        self.rs_screen.ids.rsn_label.text = ""
-                        self.vv_screen.ids.rsn_label.text = ""
-                        self.rs_screen.ids.rsn_soyuz.opacity = 0.0
-                        self.rs_screen.ids.rsn_progress.opacity = 0.0
-                        self.vv_screen.ids.rsn_soyuz.opacity = 0.0
-                        self.vv_screen.ids.rsn_progress.opacity = 0.0
+                        self.screens["rs"].ids.rsn_mission.text = "-"
+                        self.screens["rs"].ids.rsn_vehicle.text = "-"
+                        self.screens["rs"].ids.rsn_spacecraft.text = "-"
+                        self.screens["rs"].ids.rsn_arrival.text = "-"
+                        self.screens["rs"].ids.rsn_departure.text = "-"
+                        self.screens["rs"].ids.rsn_label.text = ""
+                        self.screens["vv"].ids.rsn_label.text = ""
+                        self.screens["rs"].ids.rsn_soyuz.opacity = 0.0
+                        self.screens["rs"].ids.rsn_progress.opacity = 0.0
+                        self.screens["vv"].ids.rsn_soyuz.opacity = 0.0
+                        self.screens["vv"].ids.rsn_progress.opacity = 0.0
 
             else:
                 log_error("Table 'vehicles' does not exist.")
@@ -2865,10 +2861,15 @@ class MainApp(App):
         except Exception as e:
             log_error(f"General error: {e}")
 
-    def ros_range_moving_average(self, new_value, window_size):
-        self.ros_data.append(new_value)
-        if len(self.ros_data) > window_size:
-            self.ros_data.pop(0) 
+    def ros_range_moving_average(self, new_value, size: int) -> float:
+        """
+        Keep the last *size* samples and return their average.
+        The deque's maxlen enforces the window automatically.
+        """
+        if self.ros_data.maxlen != size:          # resize on the fly if needed
+            self.ros_data = deque(self.ros_data, maxlen=size)
+
+        self.ros_data.append(new_value)           # oldest item auto-drops here
         return sum(self.ros_data) / len(self.ros_data)
 
     def update_labels(self, dt): #THIS IS THE IMPORTANT FUNCTION
@@ -2881,13 +2882,13 @@ class MainApp(App):
         global old_mt_timestamp, old_mt_position, mt_speed
 
         if runningDemo:
-            self.playback_screen.ids.DemoStart.disabled = True
-            self.playback_screen.ids.HTVDemoStart.disabled = True
-            self.playback_screen.ids.DemoStop.disabled = False
-            self.playback_screen.ids.HTVDemoStop.disabled = False
-            self.playback_screen.ids.OFT2DemoStart.disabled = True
-            self.playback_screen.ids.OFT2DemoStop.disabled = False
-            self.playback_screen.ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
+            self.screens["playback"].ids.DemoStart.disabled = True
+            self.screens["playback"].ids.HTVDemoStart.disabled = True
+            self.screens["playback"].ids.DemoStop.disabled = False
+            self.screens["playback"].ids.HTVDemoStop.disabled = False
+            self.screens["playback"].ids.OFT2DemoStart.disabled = True
+            self.screens["playback"].ids.OFT2DemoStop.disabled = False
+            self.screens["playback"].ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
 
         c.execute('select Value from telemetry')
         values = c.fetchall()
@@ -3032,7 +3033,7 @@ class MainApp(App):
             7.0: "Standard"
         }
 
-        self.rs_dock.ids.ros_mode.text = ros_mode_texts.get(ros_mode, "n/a")
+        self.screens["rs_dock"].ids.ros_mode.text = ros_mode_texts.get(ros_mode, "n/a")
         
         
         rs_att_mode = int((values[126])[0])
@@ -3060,11 +3061,11 @@ class MainApp(App):
         
         ros_docking_range = float((values[110])[0])
         if rs_target_acquisition: 
-            self.rs_dock.ids.sm_range.text = f"{ros_docking_range:0.2f} m"
-            self.rs_dock.ids.sm_rate.text = f"{float((values[111])[0]):0.2f} m/s"
+            self.screens["rs_dock"].ids.sm_range.text = f"{ros_docking_range:0.2f} m"
+            self.screens["rs_dock"].ids.sm_rate.text = f"{float((values[111])[0]):0.2f} m/s"
         else:
-            self.rs_dock.ids.sm_range.text = "n/a"
-            self.rs_dock.ids.sm_rate.text = "n/a"
+            self.screens["rs_dock"].ids.sm_range.text = "n/a"
+            self.screens["rs_dock"].ids.sm_rate.text = "n/a"
 
 
         rs_att_mode_texts = {
@@ -3129,55 +3130,55 @@ class MainApp(App):
             1.0: "Docking Flag Active"
         }
         
-        self.rs_dock.ids.active_attitude.text = rs_att_mode_texts.get(rs_att_mode, "n/a")
-        self.rs_dock.ids.motion_control.text = rs_motion_control_texts.get(rs_motion_control, "n/a")
-        self.rs_dock.ids.prep_free_drift.text = rs_prep_free_drift_texts.get(rs_prep_free_drift, "n/a")
-        self.rs_dock.ids.thruster_operation.text = rs_thruster_operation_texts.get(rs_thruster_operation, "n/a")
-        self.rs_dock.ids.current_dynamic.text = rs_current_dynamic_texts.get(rs_current_dynamic, "n/a")
+        self.screens["rs_dock"].ids.active_attitude.text = rs_att_mode_texts.get(rs_att_mode, "n/a")
+        self.screens["rs_dock"].ids.motion_control.text = rs_motion_control_texts.get(rs_motion_control, "n/a")
+        self.screens["rs_dock"].ids.prep_free_drift.text = rs_prep_free_drift_texts.get(rs_prep_free_drift, "n/a")
+        self.screens["rs_dock"].ids.thruster_operation.text = rs_thruster_operation_texts.get(rs_thruster_operation, "n/a")
+        self.screens["rs_dock"].ids.current_dynamic.text = rs_current_dynamic_texts.get(rs_current_dynamic, "n/a")
         
-        self.rs_dock.ids.kurs1_operating.text = rs_signal_texts.get(rs_kurs1_op, "n/a")
-        self.rs_dock.ids.kurs2_operating.text = rs_signal_texts.get(rs_kurs2_op, "n/a")
-        self.rs_dock.ids.p1p2_failure.text = rs_signal_texts.get(rs_p1p2_failure, "n/a")
-        self.rs_dock.ids.kursp_test_mode.text = rs_signal_texts.get(rs_kursp_test, "n/a")
-        self.rs_dock.ids.functional_mode.text = rs_signal_texts.get(rs_functional_mode, "n/a")
-        self.rs_dock.ids.standby_mode.text = rs_signal_texts.get(rs_standby_mode, "n/a")
-        self.rs_dock.ids.sm_capture_signal.text = rs_signal_texts.get(rs_sm_capture_signal, "n/a")
-        self.rs_dock.ids.target_acquisition.text = rs_signal_texts.get(rs_target_acquisition, "n/a")
+        self.screens["rs_dock"].ids.kurs1_operating.text = rs_signal_texts.get(rs_kurs1_op, "n/a")
+        self.screens["rs_dock"].ids.kurs2_operating.text = rs_signal_texts.get(rs_kurs2_op, "n/a")
+        self.screens["rs_dock"].ids.p1p2_failure.text = rs_signal_texts.get(rs_p1p2_failure, "n/a")
+        self.screens["rs_dock"].ids.kursp_test_mode.text = rs_signal_texts.get(rs_kursp_test, "n/a")
+        self.screens["rs_dock"].ids.functional_mode.text = rs_signal_texts.get(rs_functional_mode, "n/a")
+        self.screens["rs_dock"].ids.standby_mode.text = rs_signal_texts.get(rs_standby_mode, "n/a")
+        self.screens["rs_dock"].ids.sm_capture_signal.text = rs_signal_texts.get(rs_sm_capture_signal, "n/a")
+        self.screens["rs_dock"].ids.target_acquisition.text = rs_signal_texts.get(rs_target_acquisition, "n/a")
         
-        self.rs_dock.ids.sm_fwd_dock.text = rs_docking_port_texts.get(rs_sm_fwd_dock, "n/a") + " (FGB)"
-        self.rs_dock.ids.sm_aft_dock.text = rs_vv_docking_port_texts.get(rs_sm_aft_dock, "n/a")
-        self.rs_dock.ids.sm_nadir_dock.text = rs_docking_port_texts.get(rs_sm_nadir_dock, "n/a") + " (MLM)"
-        self.rs_dock.ids.fgb_nadir_dock.text = rs_docking_port_texts.get(rs_fgb_nadir_dock, "n/a") + " (MRM-1)"
-        self.rs_dock.ids.sm_udm_dock.text = rs_vv_docking_port_texts.get(rs_sm_udm_dock, "n/a")
-        self.rs_dock.ids.mrm1_dock.text = rs_vv_docking_port_texts.get(rs_mrm1_dock, "n/a")
-        self.rs_dock.ids.mrm2_dock.text = rs_vv_docking_port_texts.get(rs_mrm2_dock, "n/a")
+        self.screens["rs_dock"].ids.sm_fwd_dock.text = rs_docking_port_texts.get(rs_sm_fwd_dock, "n/a") + " (FGB)"
+        self.screens["rs_dock"].ids.sm_aft_dock.text = rs_vv_docking_port_texts.get(rs_sm_aft_dock, "n/a")
+        self.screens["rs_dock"].ids.sm_nadir_dock.text = rs_docking_port_texts.get(rs_sm_nadir_dock, "n/a") + " (MLM)"
+        self.screens["rs_dock"].ids.fgb_nadir_dock.text = rs_docking_port_texts.get(rs_fgb_nadir_dock, "n/a") + " (MRM-1)"
+        self.screens["rs_dock"].ids.sm_udm_dock.text = rs_vv_docking_port_texts.get(rs_sm_udm_dock, "n/a")
+        self.screens["rs_dock"].ids.mrm1_dock.text = rs_vv_docking_port_texts.get(rs_mrm1_dock, "n/a")
+        self.screens["rs_dock"].ids.mrm2_dock.text = rs_vv_docking_port_texts.get(rs_mrm2_dock, "n/a")
         
-        self.rs_dock.ids.sm_docking_flag.text = rs_sm_docking_flag_texts.get(rs_sm_docking_flag, "n/a")
-        self.rs_dock.ids.sm_hooks.text = rs_hooks_texts.get(rs_sm_hooks, "n/a")
+        self.screens["rs_dock"].ids.sm_docking_flag.text = rs_sm_docking_flag_texts.get(rs_sm_docking_flag, "n/a")
+        self.screens["rs_dock"].ids.sm_hooks.text = rs_hooks_texts.get(rs_sm_hooks, "n/a")
 
 
         #ros_docking_range = float((values[110])[0])
         ros_docking_avg = self.ros_range_moving_average(ros_docking_range,10)
 
         if rs_target_acquisition and ros_docking_avg <= 80000:
-            self.rs_dock.ids.dock_in_progress.text = "DOCKING IN PROGRESS"
-            self.rs_dock.ids.dock_in_progress.color = (0,0,1,1)
-            self.rs_dock.update_docking_bar_width(ros_docking_avg)
+            self.screens["rs_dock"].ids.dock_in_progress.text = "DOCKING IN PROGRESS"
+            self.screens["rs_dock"].ids.dock_in_progress.color = (0,0,1,1)
+            self.screens["rs_dock"].update_docking_bar_width(ros_docking_avg)
             if rs_sm_docking_flag:
-                self.rs_dock.ids.dock_in_progress.text = "DOCKING COMPLETE!"
-                self.rs_dock.ids.dock_in_progress.color = (0,1,0,1)
+                self.screens["rs_dock"].ids.dock_in_progress.text = "DOCKING COMPLETE!"
+                self.screens["rs_dock"].ids.dock_in_progress.color = (0,1,0,1)
         else:
-            self.rs_dock.ids.dock_in_progress.color = (0,0,0,0)
-            self.rs_dock.update_docking_bar_width(ros_docking_avg)
+            self.screens["rs_dock"].ids.dock_in_progress.color = (0,0,0,0)
+            self.screens["rs_dock"].update_docking_bar_width(ros_docking_avg)
          
         # Docking progress bar testing
         #value = 15000 
-        #self.rs_dock.update_docking_bar_width(value)
+        #self.screens["rs_dock"].update_docking_bar_width(value)
 
 
         #MBS and MT telemetry
         mt_worksite = int((values[258])[0])
-        self.mss_mt_screen.ids.mt_ws_value.text = str(mt_worksite)
+        self.screens["mt"].ids.mt_ws_value.text = str(mt_worksite)
         mt_position = float((values[257])[0])
         mt_position_timestamp = float((timestamps[257])[0])
 
@@ -3195,16 +3196,16 @@ class MainApp(App):
         
             return mt_mapped_value #this should be the new pos_hint_x value
         
-        self.mss_mt_screen.ids.FloatingMT.pos_hint = {"center_x": map_mt_value(mt_position),"center_y": 0.375}
+        self.screens["mt"].ids.FloatingMT.pos_hint = {"center_x": map_mt_value(mt_position),"center_y": 0.375}
             
-        self.mss_mt_screen.ids.mt_position_value.text = str(mt_position)
+        self.screens["mt"].ids.mt_position_value.text = str(mt_position)
 
         if (mt_position_timestamp - old_mt_timestamp) > 0:
             mt_speed = (mt_position - old_mt_position) / ((mt_position_timestamp - old_mt_timestamp)*3600)
             old_mt_timestamp = mt_position_timestamp
             old_mt_position = mt_position
             roboflashevent = Clock.schedule_once(self.flashROBObutton, 1)
-        self.mss_mt_screen.ids.mt_speed_value.text = "{:2.2f}".format(float(mt_speed)) + " cm/s"
+        self.screens["mt"].ids.mt_speed_value.text = "{:2.2f}".format(float(mt_speed)) + " cm/s"
 
         MCASpayload = int((values[292])[0])
         POApayload = int((values[294])[0])
@@ -3351,8 +3352,8 @@ class MainApp(App):
             h_mom_mag = math.sqrt(dot(h_mom,h_mom))
 
             inc = math.acos(safe_divide(h_mom[2],h_mom_mag))
-            self.orbit_data.ids.inc.text = "{:.2f}".format(math.degrees(inc))
-            self.orbit_screen.ids.inc.text = "{:.2f}".format(math.degrees(inc)) + " deg"
+            self.screens["orbit_data"].ids.inc.text = "{:.2f}".format(math.degrees(inc))
+            self.screens["orbit"].ids.inc.text = "{:.2f}".format(math.degrees(inc)) + " deg"
 
             node_vec = cross([0,0,1],h_mom)
             node_mag = math.sqrt(dot(node_vec,node_vec))
@@ -3360,7 +3361,7 @@ class MainApp(App):
             raan = math.acos(safe_divide(node_vec[0],node_mag))
             if node_vec[1] < 0:
                 raan = math.radians(360) - raan
-            self.orbit_data.ids.raan.text = "{:.2f}".format(math.degrees(raan))
+            self.screens["orbit_data"].ids.raan.text = "{:.2f}".format(math.degrees(raan))
 
             pvnew = [x * (math.pow(vel_mag,2)-(mu/pos_mag)) for x in pos_vec]
             vvnew = [x * (pos_mag*v_radial) for x in vel_vec]
@@ -3368,17 +3369,17 @@ class MainApp(App):
             e_vec2 = [(1/mu) * x for x in vvnew]
             e_vec = [e_vec1[0] - e_vec2[0],e_vec1[1] - e_vec2[1],e_vec1[2] - e_vec2[2] ]
             e_mag = math.sqrt(dot(e_vec,e_vec))
-            self.orbit_data.ids.e.text = "{:.4f}".format(e_mag)
+            self.screens["orbit_data"].ids.e.text = "{:.4f}".format(e_mag)
 
             arg_per = math.acos(safe_divide(dot(node_vec,e_vec),(node_mag*e_mag)))
             if e_vec[2] <= 0:
                 arg_per = math.radians(360) - arg_per
-            self.orbit_data.ids.arg_per.text = "{:.2f}".format(math.degrees(arg_per))
+            self.screens["orbit_data"].ids.arg_per.text = "{:.2f}".format(math.degrees(arg_per))
 
             ta = math.acos(safe_divide(dot(e_vec,pos_vec),(e_mag*pos_mag)))
             if v_radial <= 0:
                 ta = math.radians(360) - ta
-            self.orbit_data.ids.true_anomaly.text = "{:.2f}".format(math.degrees(ta))
+            self.screens["orbit_data"].ids.true_anomaly.text = "{:.2f}".format(math.degrees(ta))
 
             apogee = (math.pow(h_mom_mag,2)/mu)*(safe_divide(1,(1+e_mag*math.cos(math.radians(180)))))
             perigee = (math.pow(h_mom_mag,2)/mu)*(safe_divide(1,(1+e_mag*math.cos(0))))
@@ -3389,9 +3390,9 @@ class MainApp(App):
                 period = ((safe_divide(2*math.pi,math.sqrt(mu)))*math.pow(sma,3/2))/60 # minutes
             else:
                 period = 0
-            self.orbit_data.ids.apogee_height.text = str("{:.2f}".format(apogee_height))
-            self.orbit_data.ids.perigee_height.text = str("{:.2f}".format(perigee_height))
-            self.orbit_screen.ids.period.text = str("{:.2f}".format(period)) + "m"
+            self.screens["orbit_data"].ids.apogee_height.text = str("{:.2f}".format(apogee_height))
+            self.screens["orbit_data"].ids.perigee_height.text = str("{:.2f}".format(perigee_height))
+            self.screens["orbit"].ids.period.text = str("{:.2f}".format(period)) + "m"
 
         cmg1_active = int((values[145])[0])
         cmg2_active = int((values[146])[0])
@@ -3445,9 +3446,9 @@ class MainApp(App):
         power_4b = float(v4b) * float(c4b)
 
         USOS_Power = power_1a + power_1b + power_2a + power_2b + power_3a + power_3b + power_4a + power_4b
-        self.eps_screen.ids.usos_power.text = str("{:.0f}".format(USOS_Power*-1.0)) + " W"
-        self.eps_screen.ids.solarbeta.text = str(solarbeta)
-        self.orbit_screen.ids.solarbeta.text = str(solarbeta) + " deg"
+        self.screens["eps"].ids.usos_power.text = str("{:.0f}".format(USOS_Power*-1.0)) + " W"
+        self.screens["eps"].ids.solarbeta.text = str(solarbeta)
+        self.screens["orbit"].ids.solarbeta.text = str(solarbeta) + " deg"
 
         avg_total_voltage = (float(v1a)+float(v1b)+float(v2a)+float(v2b)+float(v3a)+float(v3b)+float(v4a)+float(v4b))/8.0
 
@@ -3476,21 +3477,21 @@ class MainApp(App):
         ## Station Mode ##
 
         if stationmode == 1.0:
-            self.iss_screen.ids.stationmode_value.text = "Crew Rescue"
+            self.screens["iss"].ids.stationmode_value.text = "Crew Rescue"
         elif stationmode == 2.0:
-            self.iss_screen.ids.stationmode_value.text = "Survival"
+            self.screens["iss"].ids.stationmode_value.text = "Survival"
         elif stationmode == 3.0:
-            self.iss_screen.ids.stationmode_value.text = "Reboost"
+            self.screens["iss"].ids.stationmode_value.text = "Reboost"
         elif stationmode == 4.0:
-            self.iss_screen.ids.stationmode_value.text = "Proximity Operations"
+            self.screens["iss"].ids.stationmode_value.text = "Proximity Operations"
         elif stationmode == 5.0:
-            self.iss_screen.ids.stationmode_value.text = "EVA"
+            self.screens["iss"].ids.stationmode_value.text = "EVA"
         elif stationmode == 6.0:
-            self.iss_screen.ids.stationmode_value.text = "Microgravity"
+            self.screens["iss"].ids.stationmode_value.text = "Microgravity"
         elif stationmode == 7.0:
-            self.iss_screen.ids.stationmode_value.text = "Standard"
+            self.screens["iss"].ids.stationmode_value.text = "Standard"
         else:
-            self.iss_screen.ids.stationmode_value.text = "n/a"
+            self.screens["iss"].ids.stationmode_value.text = "n/a"
 
 
         #Crew Screen Stuff
@@ -3512,11 +3513,11 @@ class MainApp(App):
         seconds_timedelta = crew_difference.seconds
 
         # Extract years, months, days, hours, minutes, and seconds
-        self.crew_screen.ids.ISS_crewed_years.text = str(years_timedelta)
-        self.crew_screen.ids.ISS_crewed_months.text = str(months_timedelta)
-        self.crew_screen.ids.ISS_crewed_days.text = str(days_timedelta)
+        self.screens["crew"].ids.ISS_crewed_years.text = str(years_timedelta)
+        self.screens["crew"].ids.ISS_crewed_months.text = str(months_timedelta)
+        self.screens["crew"].ids.ISS_crewed_days.text = str(days_timedelta)
         
-        self.crew_screen.ids.ISS_crewed_time.text = (f"{years_timedelta}:{months_timedelta:02}:{days_timedelta:02}/{hours_timedelta:02}:{minutes_timedelta:02}:{seconds_timedelta:02}")
+        self.screens["crew"].ids.ISS_crewed_time.text = (f"{years_timedelta}:{months_timedelta:02}:{days_timedelta:02}/{hours_timedelta:02}:{minutes_timedelta:02}:{seconds_timedelta:02}")
 
         # Crew Launch Dates
         dragon10launch = datetime(2025, 3, 13) 
@@ -3535,14 +3536,14 @@ class MainApp(App):
         soyuz73_2 = 0+soyuz73count
         soyuz73_3 = 0+soyuz73count
 
-        #Identify variables for Crew_screen
-        self.crew_screen.ids.dragon10_1.text = str(dragon10count) + " / " + str(dragon10_1)
-        self.crew_screen.ids.dragon10_2.text = str(dragon10count) + " / " + str(dragon10_2)
-        self.crew_screen.ids.dragon10_3.text = str(dragon10count) + " / " + str(dragon10_3)
-        self.crew_screen.ids.dragon10_4.text = str(dragon10count) + " / " + str(dragon10_4)
-        self.crew_screen.ids.soyuz73_1.text = str(soyuz73count) + " / " + str(soyuz73_1)
-        self.crew_screen.ids.soyuz73_2.text = str(soyuz73count) + " / " + str(soyuz73_2)
-        self.crew_screen.ids.soyuz73_3.text = str(soyuz73count) + " / " + str(soyuz73_3)        
+        #Identify variables for Crew Screen
+        self.screens["crew"].ids.dragon10_1.text = str(dragon10count) + " / " + str(dragon10_1)
+        self.screens["crew"].ids.dragon10_2.text = str(dragon10count) + " / " + str(dragon10_2)
+        self.screens["crew"].ids.dragon10_3.text = str(dragon10count) + " / " + str(dragon10_3)
+        self.screens["crew"].ids.dragon10_4.text = str(dragon10count) + " / " + str(dragon10_4)
+        self.screens["crew"].ids.soyuz73_1.text = str(soyuz73count) + " / " + str(soyuz73_1)
+        self.screens["crew"].ids.soyuz73_2.text = str(soyuz73count) + " / " + str(soyuz73_2)
+        self.screens["crew"].ids.soyuz73_3.text = str(soyuz73count) + " / " + str(soyuz73_3)        
 
         ## ISS Potential Problems ##
         #ISS Leak - Check Pressure Levels
@@ -3560,153 +3561,153 @@ class MainApp(App):
         pitch = math.degrees(math.asin(max(-1.0, min(1.0, 2.0 * (quaternion0 * quaternion2 - quaternion3 * quaternion1))))) + pitcherror
         yaw = math.degrees(math.atan2(2.0 * (quaternion0 * quaternion3 + quaternion1 * quaternion2), 1.0 - 2.0 * (quaternion2 * quaternion2 + quaternion3 * quaternion3))) + yawerror
 
-        self.gnc_screen.ids.yaw.text = str("{:.2f}".format(yaw))
-        self.gnc_screen.ids.pitch.text = str("{:.2f}".format(pitch))
-        self.gnc_screen.ids.roll.text = str("{:.2f}".format(roll))
+        self.screens["gnc"].ids.yaw.text = str("{:.2f}".format(yaw))
+        self.screens["gnc"].ids.pitch.text = str("{:.2f}".format(pitch))
+        self.screens["gnc"].ids.roll.text = str("{:.2f}".format(roll))
 
-        self.gnc_screen.ids.cmgsaturation.value = CMGmompercent
-        self.gnc_screen.ids.cmgsaturation_value.text = "CMG Saturation " + str("{:.1f}".format(CMGmompercent)) + "%"
+        self.screens["gnc"].ids.cmgsaturation.value = CMGmompercent
+        self.screens["gnc"].ids.cmgsaturation_value.text = "CMG Saturation " + str("{:.1f}".format(CMGmompercent)) + "%"
 
         if cmg1_active == 1:
-            self.gnc_screen.ids.cmg1.source = mimic_directory + "/Mimic/Pi/imgs/gnc/cmg.png"
+            self.screens["gnc"].ids.cmg1.source = mimic_directory + "/Mimic/Pi/imgs/gnc/cmg.png"
         else:
-            self.gnc_screen.ids.cmg1.source = mimic_directory + "/Mimic/Pi/imgs/gnc/cmg_offline.png"
+            self.screens["gnc"].ids.cmg1.source = mimic_directory + "/Mimic/Pi/imgs/gnc/cmg_offline.png"
 
         if cmg2_active == 1:
-            self.gnc_screen.ids.cmg2.source = mimic_directory + "/Mimic/Pi/imgs/gnc/cmg.png"
+            self.screens["gnc"].ids.cmg2.source = mimic_directory + "/Mimic/Pi/imgs/gnc/cmg.png"
         else:
-            self.gnc_screen.ids.cmg2.source = mimic_directory + "/Mimic/Pi/imgs/gnc/cmg_offline.png"
+            self.screens["gnc"].ids.cmg2.source = mimic_directory + "/Mimic/Pi/imgs/gnc/cmg_offline.png"
 
         if cmg3_active == 1:
-            self.gnc_screen.ids.cmg3.source = mimic_directory + "/Mimic/Pi/imgs/gnc/cmg.png"
+            self.screens["gnc"].ids.cmg3.source = mimic_directory + "/Mimic/Pi/imgs/gnc/cmg.png"
         else:
-            self.gnc_screen.ids.cmg3.source = mimic_directory + "/Mimic/Pi/imgs/gnc/cmg_offline.png"
+            self.screens["gnc"].ids.cmg3.source = mimic_directory + "/Mimic/Pi/imgs/gnc/cmg_offline.png"
 
         if cmg4_active == 1:
-            self.gnc_screen.ids.cmg4.source = mimic_directory + "/Mimic/Pi/imgs/gnc/cmg.png"
+            self.screens["gnc"].ids.cmg4.source = mimic_directory + "/Mimic/Pi/imgs/gnc/cmg.png"
         else:
-            self.gnc_screen.ids.cmg4.source = mimic_directory + "/Mimic/Pi/imgs/gnc/cmg_offline.png"
+            self.screens["gnc"].ids.cmg4.source = mimic_directory + "/Mimic/Pi/imgs/gnc/cmg_offline.png"
 
-        self.gnc_screen.ids.cmg1spintemp.text = "Spin Temp " + str("{:.1f}".format(cmg1_spintemp))
-        self.gnc_screen.ids.cmg1halltemp.text = "Hall Temp " + str("{:.1f}".format(cmg1_halltemp))
-        self.gnc_screen.ids.cmg1vibration.text = "Vibration " + str("{:.4f}".format(cmg1_vibration))
-        self.gnc_screen.ids.cmg1current.text = "Current " + str("{:.1f}".format(cmg1_motorcurrent))
-        self.gnc_screen.ids.cmg1speed.text = "Speed " + str("{:.1f}".format(cmg1_wheelspeed))
+        self.screens["gnc"].ids.cmg1spintemp.text = "Spin Temp " + str("{:.1f}".format(cmg1_spintemp))
+        self.screens["gnc"].ids.cmg1halltemp.text = "Hall Temp " + str("{:.1f}".format(cmg1_halltemp))
+        self.screens["gnc"].ids.cmg1vibration.text = "Vibration " + str("{:.4f}".format(cmg1_vibration))
+        self.screens["gnc"].ids.cmg1current.text = "Current " + str("{:.1f}".format(cmg1_motorcurrent))
+        self.screens["gnc"].ids.cmg1speed.text = "Speed " + str("{:.1f}".format(cmg1_wheelspeed))
 
-        self.gnc_screen.ids.cmg2spintemp.text = "Spin Temp " + str("{:.1f}".format(cmg2_spintemp))
-        self.gnc_screen.ids.cmg2halltemp.text = "Hall Temp " + str("{:.1f}".format(cmg2_halltemp))
-        self.gnc_screen.ids.cmg2vibration.text = "Vibration " + str("{:.4f}".format(cmg2_vibration))
-        self.gnc_screen.ids.cmg2current.text = "Current " + str("{:.1f}".format(cmg2_motorcurrent))
-        self.gnc_screen.ids.cmg2speed.text = "Speed " + str("{:.1f}".format(cmg2_wheelspeed))
+        self.screens["gnc"].ids.cmg2spintemp.text = "Spin Temp " + str("{:.1f}".format(cmg2_spintemp))
+        self.screens["gnc"].ids.cmg2halltemp.text = "Hall Temp " + str("{:.1f}".format(cmg2_halltemp))
+        self.screens["gnc"].ids.cmg2vibration.text = "Vibration " + str("{:.4f}".format(cmg2_vibration))
+        self.screens["gnc"].ids.cmg2current.text = "Current " + str("{:.1f}".format(cmg2_motorcurrent))
+        self.screens["gnc"].ids.cmg2speed.text = "Speed " + str("{:.1f}".format(cmg2_wheelspeed))
 
-        self.gnc_screen.ids.cmg3spintemp.text = "Spin Temp " + str("{:.1f}".format(cmg3_spintemp))
-        self.gnc_screen.ids.cmg3halltemp.text = "Hall Temp " + str("{:.1f}".format(cmg3_halltemp))
-        self.gnc_screen.ids.cmg3vibration.text = "Vibration " + str("{:.4f}".format(cmg3_vibration))
-        self.gnc_screen.ids.cmg3current.text = "Current " + str("{:.1f}".format(cmg3_motorcurrent))
-        self.gnc_screen.ids.cmg3speed.text = "Speed " + str("{:.1f}".format(cmg3_wheelspeed))
+        self.screens["gnc"].ids.cmg3spintemp.text = "Spin Temp " + str("{:.1f}".format(cmg3_spintemp))
+        self.screens["gnc"].ids.cmg3halltemp.text = "Hall Temp " + str("{:.1f}".format(cmg3_halltemp))
+        self.screens["gnc"].ids.cmg3vibration.text = "Vibration " + str("{:.4f}".format(cmg3_vibration))
+        self.screens["gnc"].ids.cmg3current.text = "Current " + str("{:.1f}".format(cmg3_motorcurrent))
+        self.screens["gnc"].ids.cmg3speed.text = "Speed " + str("{:.1f}".format(cmg3_wheelspeed))
 
-        self.gnc_screen.ids.cmg4spintemp.text = "Spin Temp " + str("{:.1f}".format(cmg4_spintemp))
-        self.gnc_screen.ids.cmg4halltemp.text = "Hall Temp " + str("{:.1f}".format(cmg4_halltemp))
-        self.gnc_screen.ids.cmg4vibration.text = "Vibration " + str("{:.4f}".format(cmg4_vibration))
-        self.gnc_screen.ids.cmg4current.text = "Current " + str("{:.1f}".format(cmg4_motorcurrent))
-        self.gnc_screen.ids.cmg4speed.text = "Speed " + str("{:.1f}".format(cmg4_wheelspeed))
+        self.screens["gnc"].ids.cmg4spintemp.text = "Spin Temp " + str("{:.1f}".format(cmg4_spintemp))
+        self.screens["gnc"].ids.cmg4halltemp.text = "Hall Temp " + str("{:.1f}".format(cmg4_halltemp))
+        self.screens["gnc"].ids.cmg4vibration.text = "Vibration " + str("{:.4f}".format(cmg4_vibration))
+        self.screens["gnc"].ids.cmg4current.text = "Current " + str("{:.1f}".format(cmg4_motorcurrent))
+        self.screens["gnc"].ids.cmg4speed.text = "Speed " + str("{:.1f}".format(cmg4_wheelspeed))
 
         ##-------------------EPS Stuff---------------------------##
 
         #if halfavg_1a < 151.5: #discharging
-        #    self.eps_screen.ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
-        #    #self.eps_screen.ids.array_1a.color = 1, 1, 1, 0.8
+        #    self.screens["eps"].ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
+        #    #self.screens["eps"].ids.array_1a.color = 1, 1, 1, 0.8
         #elif avg_1a > 160.0: #charged
-        #    self.eps_screen.ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
+        #    self.screens["eps"].ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
         #elif halfavg_1a >= 151.5:  #charging
-        #    self.eps_screen.ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-        #    self.eps_screen.ids.array_1a.color = 1, 1, 1, 1.0
+        #    self.screens["eps"].ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
+        #    self.screens["eps"].ids.array_1a.color = 1, 1, 1, 1.0
         #if float(c1a) > 0.0:    #power channel offline!
-        #    self.eps_screen.ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
+        #    self.screens["eps"].ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
 
         #if halfavg_1b < 151.5: #discharging
-        #    self.eps_screen.ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
-        #    #self.eps_screen.ids.array_1b.color = 1, 1, 1, 0.8
+        #    self.screens["eps"].ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
+        #    #self.screens["eps"].ids.array_1b.color = 1, 1, 1, 0.8
         #elif avg_1b > 160.0: #charged
-        #    self.eps_screen.ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
+        #    self.screens["eps"].ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
         #elif halfavg_1b >= 151.5:  #charging
-        #    self.eps_screen.ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-        #    self.eps_screen.ids.array_1b.color = 1, 1, 1, 1.0
+        #    self.screens["eps"].ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
+        #    self.screens["eps"].ids.array_1b.color = 1, 1, 1, 1.0
         #if float(c1b) > 0.0:                                  #power channel offline!
-        #    self.eps_screen.ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
+        #    self.screens["eps"].ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
 
         #if halfavg_2a < 151.5: #discharging
-        #    self.eps_screen.ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
-        #    #self.eps_screen.ids.array_2a.color = 1, 1, 1, 0.8
+        #    self.screens["eps"].ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
+        #    #self.screens["eps"].ids.array_2a.color = 1, 1, 1, 0.8
         #elif avg_2a > 160.0: #charged
-        #    self.eps_screen.ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
+        #    self.screens["eps"].ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
         #elif halfavg_2a >= 151.5:  #charging
-        #    self.eps_screen.ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-        #    self.eps_screen.ids.array_2a.color = 1, 1, 1, 1.0
+        #    self.screens["eps"].ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
+        #    self.screens["eps"].ids.array_2a.color = 1, 1, 1, 1.0
         #if float(c2a) > 0.0:                                  #power channel offline!
-        #    self.eps_screen.ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
+        #    self.screens["eps"].ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
 
         #if halfavg_2b < 151.5: #discharging
-        #    self.eps_screen.ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
-        #    #self.eps_screen.ids.array_2b.color = 1, 1, 1, 0.8
+        #    self.screens["eps"].ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
+        #    #self.screens["eps"].ids.array_2b.color = 1, 1, 1, 0.8
         #elif avg_2b > 160.0: #charged
-        #    self.eps_screen.ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
+        #    self.screens["eps"].ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
         #elif halfavg_2b >= 151.5:  #charging
-        #    self.eps_screen.ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-        #    self.eps_screen.ids.array_2b.color = 1, 1, 1, 1.0
+        #    self.screens["eps"].ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
+        #    self.screens["eps"].ids.array_2b.color = 1, 1, 1, 1.0
         #if float(c2b) > 0.0:                                  #power channel offline!
-        #    self.eps_screen.ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
+        #    self.screens["eps"].ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
 
         #if halfavg_3a < 151.5: #discharging
-        #    self.eps_screen.ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
-            #self.eps_screen.ids.array_3a.color = 1, 1, 1, 0.8
+        #    self.screens["eps"].ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
+            #self.screens["eps"].ids.array_3a.color = 1, 1, 1, 0.8
         #elif avg_3a > 160.0: #charged
-        #    self.eps_screen.ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
+        #    self.screens["eps"].ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
         #elif halfavg_3a >= 151.5:  #charging
-        #    self.eps_screen.ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-        #    self.eps_screen.ids.array_3a.color = 1, 1, 1, 1.0
+        #    self.screens["eps"].ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
+        #    self.screens["eps"].ids.array_3a.color = 1, 1, 1, 1.0
         #if float(c3a) > 0.0:                                  #power channel offline!
-        #    self.eps_screen.ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
+        #    self.screens["eps"].ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
 
         #if halfavg_3b < 151.5: #discharging
-        #    self.eps_screen.ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
-            #self.eps_screen.ids.array_3b.color = 1, 1, 1, 0.8
+        #    self.screens["eps"].ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
+            #self.screens["eps"].ids.array_3b.color = 1, 1, 1, 0.8
         #elif avg_3b > 160.0: #charged
-        #    self.eps_screen.ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
+        #    self.screens["eps"].ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
         #elif halfavg_3b >= 151.5:  #charging
-        #    self.eps_screen.ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-        #    self.eps_screen.ids.array_3b.color = 1, 1, 1, 1.0
+        #    self.screens["eps"].ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
+        #    self.screens["eps"].ids.array_3b.color = 1, 1, 1, 1.0
         #if float(c3b) > 0.0:                                  #power channel offline!
-        #    self.eps_screen.ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
+        #    self.screens["eps"].ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
 
         #if halfavg_4a < 151.5: #discharging
-        #    self.eps_screen.ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
-        #    #self.eps_screen.ids.array_4a.color = 1, 1, 1, 0.8
+        #    self.screens["eps"].ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
+        #    #self.screens["eps"].ids.array_4a.color = 1, 1, 1, 0.8
         #elif avg_4a > 160.0: #charged
-        #    self.eps_screen.ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
+        #    self.screens["eps"].ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
         #elif halfavg_4a >= 151.5:  #charging
-        #    self.eps_screen.ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-        #    self.eps_screen.ids.array_4a.color = 1, 1, 1, 1.0
+        #    self.screens["eps"].ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
+        #    self.screens["eps"].ids.array_4a.color = 1, 1, 1, 1.0
         #if float(c4a) > 0.0:                                  #power channel offline!
-        #    self.eps_screen.ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
+        #    self.screens["eps"].ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
 
         #if halfavg_4b < 151.5: #discharging
-        #    self.eps_screen.ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
-        #    #self.eps_screen.ids.array_4b.color = 1, 1, 1, 0.8
+        #    self.screens["eps"].ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
+        #    #self.screens["eps"].ids.array_4b.color = 1, 1, 1, 0.8
         #elif avg_4b > 160.0: #charged
-        #    self.eps_screen.ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
+        #    self.screens["eps"].ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
         #elif halfavg_4b >= 151.5:  #charging
-        #    self.eps_screen.ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-        #    self.eps_screen.ids.array_4b.color = 1, 1, 1, 1.0
+        #    self.screens["eps"].ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
+        #    self.screens["eps"].ids.array_4b.color = 1, 1, 1, 1.0
         #if float(c4b) > 0.0:                                  #power channel offline!
-        #    self.eps_screen.ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
+        #    self.screens["eps"].ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
         #if avg_total_voltage > 151.5:
         #else:
 
         if float(v1a) >= 151.5 or float(v1b) >= 151.5 or float(v2a) >= 151.5 or float(v2b) >= 151.5 or float(v3a) >= 151.5 or float(v3b) >= 151.5 or float(v4a) >= 151.5 or float(v4b) >= 151.5:
-            self.eps_screen.ids.eps_sun.color = 1, 1, 1, 1
+            self.screens["eps"].ids.eps_sun.color = 1, 1, 1, 1
         else:
-            self.eps_screen.ids.eps_sun.color = 1, 1, 1, 0.1
+            self.screens["eps"].ids.eps_sun.color = 1, 1, 1, 0.1
 
         # array status numbers to be sent to arduino
         # 1 = discharging
@@ -3715,233 +3716,233 @@ class MainApp(App):
         # 4 = offline
 
         if float(v1a) < 151.5: #discharging
-            self.eps_screen.ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
+            self.screens["eps"].ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
             v1as = 1
-            #self.eps_screen.ids.array_1a.color = 1, 1, 1, 0.8
+            #self.screens["eps"].ids.array_1a.color = 1, 1, 1, 0.8
         elif float(v1a) > 160.0: #charged
-            self.eps_screen.ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
+            self.screens["eps"].ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
             v1as = 3
         elif float(v1a) >= 151.5:  #charging
-            self.eps_screen.ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-            self.eps_screen.ids.array_1a.color = 1, 1, 1, 1.0
+            self.screens["eps"].ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
+            self.screens["eps"].ids.array_1a.color = 1, 1, 1, 1.0
             v1as = 2
         if float(c1a) > 0.0:    #power channel offline!
-            self.eps_screen.ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
+            self.screens["eps"].ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
             v1as = 4
 
         if float(v1b) < 151.5: #discharging
-            self.eps_screen.ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
+            self.screens["eps"].ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
             v1bs = 1
-            #self.eps_screen.ids.array_1b.color = 1, 1, 1, 0.8
+            #self.screens["eps"].ids.array_1b.color = 1, 1, 1, 0.8
         elif float(v1b) > 160.0: #charged
-            self.eps_screen.ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
+            self.screens["eps"].ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
             v1bs = 3
         elif float(v1b) >= 151.5:  #charging
-            self.eps_screen.ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-            self.eps_screen.ids.array_1b.color = 1, 1, 1, 1.0
+            self.screens["eps"].ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
+            self.screens["eps"].ids.array_1b.color = 1, 1, 1, 1.0
             v1bs = 2
         if float(c1b) > 0.0:                                  #power channel offline!
-            self.eps_screen.ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
+            self.screens["eps"].ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
             v1bs = 4
 
         if float(v2a) < 151.5: #discharging
-            self.eps_screen.ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
+            self.screens["eps"].ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
             v2as = 1
-            #self.eps_screen.ids.array_2a.color = 1, 1, 1, 0.8
+            #self.screens["eps"].ids.array_2a.color = 1, 1, 1, 0.8
         elif float(v2a) > 160.0: #charged
-            self.eps_screen.ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
+            self.screens["eps"].ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
             v2as = 3
         elif float(v2a) >= 151.5:  #charging
-            self.eps_screen.ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-            self.eps_screen.ids.array_2a.color = 1, 1, 1, 1.0
+            self.screens["eps"].ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
+            self.screens["eps"].ids.array_2a.color = 1, 1, 1, 1.0
             v2as = 2
         if float(c2a) > 0.0:                                  #power channel offline!
-            self.eps_screen.ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
+            self.screens["eps"].ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
             v2as = 4
 
         if float(v2b) < 151.5: #discharging
-            self.eps_screen.ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
+            self.screens["eps"].ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
             v2bs = 1
-            #self.eps_screen.ids.array_2b.color = 1, 1, 1, 0.8
+            #self.screens["eps"].ids.array_2b.color = 1, 1, 1, 0.8
         elif float(v2b) > 160.0: #charged
-            self.eps_screen.ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
+            self.screens["eps"].ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
             v2bs = 3
         elif float(v2b) >= 151.5:  #charging
-            self.eps_screen.ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-            self.eps_screen.ids.array_2b.color = 1, 1, 1, 1.0
+            self.screens["eps"].ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
+            self.screens["eps"].ids.array_2b.color = 1, 1, 1, 1.0
             v2bs = 2
         if float(c2b) > 0.0:                                  #power channel offline!
-            self.eps_screen.ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
+            self.screens["eps"].ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
             v2bs = 4
 
         if float(v3a) < 151.5: #discharging
-            self.eps_screen.ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
+            self.screens["eps"].ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
             v3as = 1
-            #self.eps_screen.ids.array_3a.color = 1, 1, 1, 0.8
+            #self.screens["eps"].ids.array_3a.color = 1, 1, 1, 0.8
         elif float(v3a) > 160.0: #charged
-            self.eps_screen.ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
+            self.screens["eps"].ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
             v3as = 3
         elif float(v3a) >= 151.5:  #charging
-            self.eps_screen.ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-            self.eps_screen.ids.array_3a.color = 1, 1, 1, 1.0
+            self.screens["eps"].ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
+            self.screens["eps"].ids.array_3a.color = 1, 1, 1, 1.0
             v3as = 2
         if float(c3a) > 0.0:                                  #power channel offline!
-            self.eps_screen.ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
+            self.screens["eps"].ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
             v3as = 4
 
         if float(v3b) < 151.5: #discharging
-            self.eps_screen.ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
+            self.screens["eps"].ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
             v3bs = 1
-            #self.eps_screen.ids.array_3b.color = 1, 1, 1, 0.8
+            #self.screens["eps"].ids.array_3b.color = 1, 1, 1, 0.8
         elif float(v3b) > 160.0: #charged
-            self.eps_screen.ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
+            self.screens["eps"].ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
             v3bs = 3
         elif float(v3b) >= 151.5:  #charging
-            self.eps_screen.ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-            self.eps_screen.ids.array_3b.color = 1, 1, 1, 1.0
+            self.screens["eps"].ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
+            self.screens["eps"].ids.array_3b.color = 1, 1, 1, 1.0
             v3bs = 2
         if float(c3b) > 0.0:                                  #power channel offline!
-            self.eps_screen.ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
+            self.screens["eps"].ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
             v3bs = 4
 
         if float(v4a) < 151.5: #discharging
-            self.eps_screen.ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
+            self.screens["eps"].ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
             v4as = 1
-            #self.eps_screen.ids.array_4a.color = 1, 1, 1, 0.8
+            #self.screens["eps"].ids.array_4a.color = 1, 1, 1, 0.8
         elif float(v4a) > 160.0: #charged
-            self.eps_screen.ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
+            self.screens["eps"].ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
             v4as = 3
         elif float(v4a) >= 151.5:  #charging
-            self.eps_screen.ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-            self.eps_screen.ids.array_4a.color = 1, 1, 1, 1.0
+            self.screens["eps"].ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
+            self.screens["eps"].ids.array_4a.color = 1, 1, 1, 1.0
             v4as = 2
         if float(c4a) > 0.0:                                  #power channel offline!
-            self.eps_screen.ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
+            self.screens["eps"].ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
             v4as = 4
         
         if float(v4b) < 151.5: #discharging
-            self.eps_screen.ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
+            self.screens["eps"].ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
             v4bs = 1
-            #self.eps_screen.ids.array_4b.color = 1, 1, 1, 0.8
+            #self.screens["eps"].ids.array_4b.color = 1, 1, 1, 0.8
         elif float(v4b) > 160.0: #charged
-            self.eps_screen.ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
+            self.screens["eps"].ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
             v4bs = 3
         elif float(v4b) >= 151.5:  #charging
-            self.eps_screen.ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-            self.eps_screen.ids.array_4b.color = 1, 1, 1, 1.0
+            self.screens["eps"].ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
+            self.screens["eps"].ids.array_4b.color = 1, 1, 1, 1.0
             v4bs = 2
         if float(c4b) > 0.0:                                  #power channel offline!
-            self.eps_screen.ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
+            self.screens["eps"].ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
             v4bs = 4
 
         ##-------------------C&T Functionality-------------------##
-        self.ct_sgant_screen.ids.sgant_dish.angle = float(sgant_elevation)
-        self.ct_sgant_screen.ids.sgant_elevation.text = "{:.2f}".format(float(sgant_elevation))
+        self.screens["ct_sgant"].ids.sgant_dish.angle = float(sgant_elevation)
+        self.screens["ct_sgant"].ids.sgant_elevation.text = "{:.2f}".format(float(sgant_elevation))
 
         #make sure radio animations turn off when no signal or no transmit
         if float(sgant_transmit) == 1.0 and float(aos) == 1.0:
-            self.ct_sgant_screen.ids.radio_up.color = 1, 1, 1, 1
+            self.screens["ct_sgant"].ids.radio_up.color = 1, 1, 1, 1
             if "10" in tdrs:
-                self.ct_sgant_screen.ids.tdrs_west10.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.zip"
-                self.ct_sgant_screen.ids.tdrs_west11.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.ct_sgant_screen.ids.tdrs_east12.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.ct_sgant_screen.ids.tdrs_east6.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.ct_sgant_screen.ids.tdrs_z7.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+                self.screens["ct_sgant"].ids.tdrs_west10.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.zip"
+                self.screens["ct_sgant"].ids.tdrs_west11.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+                self.screens["ct_sgant"].ids.tdrs_east12.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+                self.screens["ct_sgant"].ids.tdrs_east6.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+                self.screens["ct_sgant"].ids.tdrs_z7.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
             if "11" in tdrs:
-                self.ct_sgant_screen.ids.tdrs_west11.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.zip"
-                self.ct_sgant_screen.ids.tdrs_west10.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.ct_sgant_screen.ids.tdrs_east12.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.ct_sgant_screen.ids.tdrs_east6.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.ct_sgant_screen.ids.tdrs_z7.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+                self.screens["ct_sgant"].ids.tdrs_west11.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.zip"
+                self.screens["ct_sgant"].ids.tdrs_west10.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+                self.screens["ct_sgant"].ids.tdrs_east12.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+                self.screens["ct_sgant"].ids.tdrs_east6.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+                self.screens["ct_sgant"].ids.tdrs_z7.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
             if "12" in tdrs:
-                self.ct_sgant_screen.ids.tdrs_west11.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.ct_sgant_screen.ids.tdrs_west10.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.ct_sgant_screen.ids.tdrs_east12.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.zip"
-                self.ct_sgant_screen.ids.tdrs_east6.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.ct_sgant_screen.ids.tdrs_z7.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+                self.screens["ct_sgant"].ids.tdrs_west11.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+                self.screens["ct_sgant"].ids.tdrs_west10.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+                self.screens["ct_sgant"].ids.tdrs_east12.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.zip"
+                self.screens["ct_sgant"].ids.tdrs_east6.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+                self.screens["ct_sgant"].ids.tdrs_z7.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
             if "6" in tdrs:
-                self.ct_sgant_screen.ids.tdrs_west11.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.ct_sgant_screen.ids.tdrs_west10.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.ct_sgant_screen.ids.tdrs_east6.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.zip"
-                self.ct_sgant_screen.ids.tdrs_east12.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.ct_sgant_screen.ids.tdrs_z7.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+                self.screens["ct_sgant"].ids.tdrs_west11.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+                self.screens["ct_sgant"].ids.tdrs_west10.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+                self.screens["ct_sgant"].ids.tdrs_east6.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.zip"
+                self.screens["ct_sgant"].ids.tdrs_east12.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+                self.screens["ct_sgant"].ids.tdrs_z7.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
             if "7" in tdrs:
-                self.ct_sgant_screen.ids.tdrs_west11.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.ct_sgant_screen.ids.tdrs_west10.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.ct_sgant_screen.ids.tdrs_east6.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.ct_sgant_screen.ids.tdrs_east12.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.ct_sgant_screen.ids.tdrs_z7.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.zip"
+                self.screens["ct_sgant"].ids.tdrs_west11.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+                self.screens["ct_sgant"].ids.tdrs_west10.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+                self.screens["ct_sgant"].ids.tdrs_east6.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+                self.screens["ct_sgant"].ids.tdrs_east12.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+                self.screens["ct_sgant"].ids.tdrs_z7.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.zip"
 
         elif float(aos) == 0.0 and (float(sgant_transmit) == 0.0 or float(sgant_transmit) == 1.0):
-            self.ct_sgant_screen.ids.radio_up.color = 0, 0, 0, 0
-            self.ct_sgant_screen.ids.tdrs_east12.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-            self.ct_sgant_screen.ids.tdrs_east6.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-            self.ct_sgant_screen.ids.tdrs_west11.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-            self.ct_sgant_screen.ids.tdrs_west10.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-            self.ct_sgant_screen.ids.tdrs_z7.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+            self.screens["ct_sgant"].ids.radio_up.color = 0, 0, 0, 0
+            self.screens["ct_sgant"].ids.tdrs_east12.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+            self.screens["ct_sgant"].ids.tdrs_east6.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+            self.screens["ct_sgant"].ids.tdrs_west11.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+            self.screens["ct_sgant"].ids.tdrs_west10.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
+            self.screens["ct_sgant"].ids.tdrs_z7.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
 
         #now check main CT screen radio signal
         if float(sgant_transmit) == 1.0 and float(aos) == 1.0:
-            self.ct_screen.ids.sgant1_radio.color = 1, 1, 1, 1
-            self.ct_screen.ids.sgant2_radio.color = 1, 1, 1, 1
+            self.screens["ct"].ids.sgant1_radio.color = 1, 1, 1, 1
+            self.screens["ct"].ids.sgant2_radio.color = 1, 1, 1, 1
         elif float(sgant_transmit) == 1.0 and float(aos) == 0.0:
-            self.ct_screen.ids.sgant1_radio.color = 0, 0, 0, 0
-            self.ct_screen.ids.sgant2_radio.color = 0, 0, 0, 0
+            self.screens["ct"].ids.sgant1_radio.color = 0, 0, 0, 0
+            self.screens["ct"].ids.sgant2_radio.color = 0, 0, 0, 0
         elif float(sgant_transmit) == 0.0:
-            self.ct_screen.ids.sgant1_radio.color = 0, 0, 0, 0
-            self.ct_screen.ids.sgant2_radio.color = 0, 0, 0, 0
+            self.screens["ct"].ids.sgant1_radio.color = 0, 0, 0, 0
+            self.screens["ct"].ids.sgant2_radio.color = 0, 0, 0, 0
         elif float(aos) == 0.0:
-            self.ct_screen.ids.sgant1_radio.color = 0, 0, 0, 0
-            self.ct_screen.ids.sgant2_radio.color = 0, 0, 0, 0
+            self.screens["ct"].ids.sgant1_radio.color = 0, 0, 0, 0
+            self.screens["ct"].ids.sgant2_radio.color = 0, 0, 0, 0
 
         if float(sasa1_active) == 1.0 and float(aos) == 1.0:
-            self.ct_screen.ids.sasa1_radio.color = 1, 1, 1, 1
+            self.screens["ct"].ids.sasa1_radio.color = 1, 1, 1, 1
         elif float(sasa1_active) == 1.0 and float(aos) == 0.0:
-            self.ct_screen.ids.sasa1_radio.color = 0, 0, 0, 0
+            self.screens["ct"].ids.sasa1_radio.color = 0, 0, 0, 0
         elif float(sasa1_active) == 0.0:
-            self.ct_screen.ids.sasa1_radio.color = 0, 0, 0, 0
+            self.screens["ct"].ids.sasa1_radio.color = 0, 0, 0, 0
         elif float(aos) == 0.0:
-            self.ct_screen.ids.sasa1_radio.color = 0, 0, 0, 0
+            self.screens["ct"].ids.sasa1_radio.color = 0, 0, 0, 0
 
 
         if float(sasa2_active) == 1.0 and float(aos) == 1.0:
-            self.ct_screen.ids.sasa2_radio.color = 1, 1, 1, 1
+            self.screens["ct"].ids.sasa2_radio.color = 1, 1, 1, 1
         elif float(sasa2_active) == 1.0 and float(aos) == 0.0:
-            self.ct_screen.ids.sasa2_radio.color = 0, 0, 0, 0
+            self.screens["ct"].ids.sasa2_radio.color = 0, 0, 0, 0
         elif float(sasa2_active) == 0.0:
-            self.ct_screen.ids.sasa2_radio.color = 0, 0, 0, 0
+            self.screens["ct"].ids.sasa2_radio.color = 0, 0, 0, 0
         elif float(aos) == 0.0:
-            self.ct_screen.ids.sasa2_radio.color = 0, 0, 0, 0
+            self.screens["ct"].ids.sasa2_radio.color = 0, 0, 0, 0
 
         if float(uhf1_power) == 1.0 and float(aos) == 1.0:
-            self.ct_screen.ids.uhf1_radio.color = 1, 1, 1, 1
+            self.screens["ct"].ids.uhf1_radio.color = 1, 1, 1, 1
         elif float(uhf1_power) == 1.0 and float(aos) == 0.0:
-            self.ct_screen.ids.uhf1_radio.color = 1, 0, 0, 1
+            self.screens["ct"].ids.uhf1_radio.color = 1, 0, 0, 1
         elif float(uhf1_power) == 0.0:
-            self.ct_screen.ids.uhf1_radio.color = 0, 0, 0, 0
+            self.screens["ct"].ids.uhf1_radio.color = 0, 0, 0, 0
 
         if float(uhf2_power) == 1.0 and float(aos) == 1.0:
-            self.ct_screen.ids.uhf2_radio.color = 1, 1, 1, 1
+            self.screens["ct"].ids.uhf2_radio.color = 1, 1, 1, 1
         elif float(uhf2_power) == 1.0 and float(aos) == 0.0:
-            self.ct_screen.ids.uhf2_radio.color = 1, 0, 0, 1
+            self.screens["ct"].ids.uhf2_radio.color = 1, 0, 0, 1
         elif float(uhf2_power) == 0.0:
-            self.ct_screen.ids.uhf2_radio.color = 0, 0, 0, 0
+            self.screens["ct"].ids.uhf2_radio.color = 0, 0, 0, 0
 
         ##-------------------US EVA Functionality-------------------##
 
         if airlock_pump_voltage == 1:
-            self.us_eva.ids.pumpvoltage.text = "Airlock Pump Power On!"
-            self.us_eva.ids.pumpvoltage.color = 0.33, 0.7, 0.18
+            self.screens["us_eva"].ids.pumpvoltage.text = "Airlock Pump Power On!"
+            self.screens["us_eva"].ids.pumpvoltage.color = 0.33, 0.7, 0.18
         else:
-            self.us_eva.ids.pumpvoltage.text = "Airlock Pump Power Off"
-            self.us_eva.ids.pumpvoltage.color = 0, 0, 0
+            self.screens["us_eva"].ids.pumpvoltage.text = "Airlock Pump Power Off"
+            self.screens["us_eva"].ids.pumpvoltage.color = 0, 0, 0
 
         if airlock_pump_switch == 1:
-            self.us_eva.ids.pumpswitch.text = "Airlock Pump Active!"
-            self.us_eva.ids.pumpswitch.color = 0.33, 0.7, 0.18
+            self.screens["us_eva"].ids.pumpswitch.text = "Airlock Pump Active!"
+            self.screens["us_eva"].ids.pumpswitch.color = 0.33, 0.7, 0.18
         else:
-            self.us_eva.ids.pumpswitch.text = "Airlock Pump Inactive"
-            self.us_eva.ids.pumpswitch.color = 0, 0, 0
+            self.screens["us_eva"].ids.pumpswitch.text = "Airlock Pump Inactive"
+            self.screens["us_eva"].ids.pumpswitch.color = 0, 0, 0
 
         ##activate EVA button flash
         if (airlock_pump_voltage == 1 or crewlockpres < 734):
@@ -3950,36 +3951,36 @@ class MainApp(App):
         ##No EVA Currently
         if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and crewlockpres > 737 and airlockpres > 740:
             eva = False
-            self.us_eva.ids.leak_timer.text = ""
-            self.us_eva.ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/BlankLights.png'
-            self.us_eva.ids.EVA_occuring.color = 1, 0, 0
-            self.us_eva.ids.EVA_occuring.text = "Currently No EVA"
+            self.screens["us_eva"].ids.leak_timer.text = ""
+            self.screens["us_eva"].ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/BlankLights.png'
+            self.screens["us_eva"].ids.EVA_occuring.color = 1, 0, 0
+            self.screens["us_eva"].ids.EVA_occuring.text = "Currently No EVA"
 
         ##EVA Standby - NOT UNIQUE
         if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres > 740 and airlockpres > 740:
             standby = True
-            self.us_eva.ids.leak_timer.text = "~160s Leak Check"
-            self.us_eva.ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/StandbyLights.png'
-            self.us_eva.ids.EVA_occuring.color = 0, 0, 1
-            self.us_eva.ids.EVA_occuring.text = "EVA Standby"
+            self.screens["us_eva"].ids.leak_timer.text = "~160s Leak Check"
+            self.screens["us_eva"].ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/StandbyLights.png'
+            self.screens["us_eva"].ids.EVA_occuring.color = 0, 0, 1
+            self.screens["us_eva"].ids.EVA_occuring.text = "EVA Standby"
         else:
             standby = False
 
         ##EVA Prebreath Pressure
         if airlock_pump_voltage == 1 and crewlockpres > 740 and airlockpres > 740:
             prebreath1 = True
-            self.us_eva.ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/PreBreatheLights.png'
-            self.us_eva.ids.leak_timer.text = "~160s Leak Check"
-            self.us_eva.ids.EVA_occuring.color = 0, 0, 1
-            self.us_eva.ids.EVA_occuring.text = "Pre-EVA Nitrogen Purge"
+            self.screens["us_eva"].ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/PreBreatheLights.png'
+            self.screens["us_eva"].ids.leak_timer.text = "~160s Leak Check"
+            self.screens["us_eva"].ids.EVA_occuring.color = 0, 0, 1
+            self.screens["us_eva"].ids.EVA_occuring.text = "Pre-EVA Nitrogen Purge"
 
         ##EVA Depress1
         if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres < 740 and airlockpres > 740:
             depress1 = True
-            self.us_eva.ids.leak_timer.text = "~160s Leak Check"
-            self.us_eva.ids.EVA_occuring.text = "Crewlock Depressurizing"
-            self.us_eva.ids.EVA_occuring.color = 0, 0, 1
-            self.us_eva.ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/DepressLights.png'
+            self.screens["us_eva"].ids.leak_timer.text = "~160s Leak Check"
+            self.screens["us_eva"].ids.EVA_occuring.text = "Crewlock Depressurizing"
+            self.screens["us_eva"].ids.EVA_occuring.color = 0, 0, 1
+            self.screens["us_eva"].ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/DepressLights.png'
 
         ##EVA Leakcheck
         if airlock_pump_voltage == 1 and crewlockpres < 260 and crewlockpres > 250 and (depress1 or leakhold):
@@ -3987,36 +3988,36 @@ class MainApp(App):
                 holdstartTime = float(unixconvert[7])*24+unixconvert[3]+float(unixconvert[4])/60+float(unixconvert[5])/3600
             leakhold = True
             depress1 = False
-            self.us_eva.ids.EVA_occuring.text = "Leak Check in Progress!"
-            self.us_eva.ids.EVA_occuring.color = 0, 0, 1
+            self.screens["us_eva"].ids.EVA_occuring.text = "Leak Check in Progress!"
+            self.screens["us_eva"].ids.EVA_occuring.color = 0, 0, 1
             Clock.schedule_once(self.hold_timer, 1)
-            self.us_eva.ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/LeakCheckLights.png'
+            self.screens["us_eva"].ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/LeakCheckLights.png'
         else:
             leakhold = False
 
         ##EVA Depress2
         if airlock_pump_voltage == 1 and crewlockpres <= 250 and crewlockpres > 3:
             leakhold = False
-            self.us_eva.ids.leak_timer.text = "Complete"
-            self.us_eva.ids.EVA_occuring.text = "Crewlock Depressurizing"
-            self.us_eva.ids.EVA_occuring.color = 0, 0, 1
-            self.us_eva.ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/DepressLights.png'
+            self.screens["us_eva"].ids.leak_timer.text = "Complete"
+            self.screens["us_eva"].ids.EVA_occuring.text = "Crewlock Depressurizing"
+            self.screens["us_eva"].ids.EVA_occuring.color = 0, 0, 1
+            self.screens["us_eva"].ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/DepressLights.png'
 
         ##EVA in progress
         if crewlockpres < 2.5:
             eva = True
-            self.us_eva.ids.EVA_occuring.text = "EVA In Progress!!!"
-            self.us_eva.ids.EVA_occuring.color = 0.33, 0.7, 0.18
-            self.us_eva.ids.leak_timer.text = "Complete"
-            self.us_eva.ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/InProgressLights.png'
+            self.screens["us_eva"].ids.EVA_occuring.text = "EVA In Progress!!!"
+            self.screens["us_eva"].ids.EVA_occuring.color = 0.33, 0.7, 0.18
+            self.screens["us_eva"].ids.leak_timer.text = "Complete"
+            self.screens["us_eva"].ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/InProgressLights.png'
             evatimerevent = Clock.schedule_once(self.EVA_clock, 1)
 
         ##Repress - this one still did not work with the code changes I did for eva88 (June 2023)
         if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres >= 3 and airlockpres < 734:
             eva = False
-            self.us_eva.ids.EVA_occuring.color = 0, 0, 1
-            self.us_eva.ids.EVA_occuring.text = "Crewlock Repressurizing"
-            self.us_eva.ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/RepressLights.png'
+            self.screens["us_eva"].ids.EVA_occuring.color = 0, 0, 1
+            self.screens["us_eva"].ids.EVA_occuring.text = "Crewlock Repressurizing"
+            self.screens["us_eva"].ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/RepressLights.png'
 
         ##-------------------EVA Functionality End-------------------##
 
@@ -4038,16 +4039,16 @@ class MainApp(App):
 #            LOSpopup.open()
 
         ##-------------------Fake Orbit Simulator-------------------##
-        #self.playback_screen.ids.psarj.text = str(psarj)
-        #self.playback_screen.ids.ssarj.text = str(ssarj)
-        #self.playback_screen.ids.beta1a.text = str(beta1a)
-        #self.playback_screen.ids.beta1b.text = str(beta1b)
-        #self.playback_screen.ids.beta2a.text = str(beta2a)
-        #self.playback_screen.ids.beta2b.text = str(beta2b)
-        #self.playback_screen.ids.beta3a.text = str(beta3a)
-        #self.playback_screen.ids.beta3b.text = str(beta3b)
-        #self.playback_screen.ids.beta4a.text = str(beta4a)
-        #self.playback_screen.ids.beta4b.text = str(beta4b)
+        #self.screens["playback"].ids.psarj.text = str(psarj)
+        #self.screens["playback"].ids.ssarj.text = str(ssarj)
+        #self.screens["playback"].ids.beta1a.text = str(beta1a)
+        #self.screens["playback"].ids.beta1b.text = str(beta1b)
+        #self.screens["playback"].ids.beta2a.text = str(beta2a)
+        #self.screens["playback"].ids.beta2b.text = str(beta2b)
+        #self.screens["playback"].ids.beta3a.text = str(beta3a)
+        #self.screens["playback"].ids.beta3b.text = str(beta3b)
+        #self.screens["playback"].ids.beta4a.text = str(beta4a)
+        #self.screens["playback"].ids.beta4b.text = str(beta4b)
 
         if demoboolean:
             if Disco:
@@ -4056,17 +4057,17 @@ class MainApp(App):
             #serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "V1A=" + v1a + " " + "V2A=" + v2a + " " + "V3A=" + v3a + " " + "V4A=" + v4a + " " + "V1B=" + v1b + " " + "V2B=" + v2b + " " + "V3B=" + v3b + " " + "V4B=" + v4b + " ")
             serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + str(v1as) + " " + "V2A=" + str(v2as) + " " + "V3A=" + str(v3as) + " " + "V4A=" + str(v4as) + " " + "V1B=" + str(v1bs) + " " + "V2B=" + str(v2bs) + " " + "V3B=" + str(v3bs) + " " + "V4B=" + str(v4bs) + " " + "ISS=" + module + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
 
-        self.orbit_data.ids.position_x.text = str("{:.2f}".format(position_x))
-        self.orbit_data.ids.position_y.text = str("{:.2f}".format(position_y))
-        self.orbit_data.ids.position_z.text = str("{:.2f}".format(position_z))
-        self.orbit_data.ids.velocity_x.text = str("{:.2f}".format(velocity_x))
-        self.orbit_data.ids.velocity_y.text = str("{:.2f}".format(velocity_y))
-        self.orbit_data.ids.velocity_z.text = str("{:.2f}".format(velocity_z))
+        self.screens["orbit_data"].ids.position_x.text = str("{:.2f}".format(position_x))
+        self.screens["orbit_data"].ids.position_y.text = str("{:.2f}".format(position_y))
+        self.screens["orbit_data"].ids.position_z.text = str("{:.2f}".format(position_z))
+        self.screens["orbit_data"].ids.velocity_x.text = str("{:.2f}".format(velocity_x))
+        self.screens["orbit_data"].ids.velocity_y.text = str("{:.2f}".format(velocity_y))
+        self.screens["orbit_data"].ids.velocity_z.text = str("{:.2f}".format(velocity_z))
  
-        self.eps_screen.ids.psarj_value.text = psarj + "deg"
-        self.eps_screen.ids.ssarj_value.text = ssarj + "deg"
-        self.tcs_screen.ids.ptrrj_value.text = ptrrj + "deg"
-        self.tcs_screen.ids.strrj_value.text = strrj + "deg"
+        self.screens["eps"].ids.psarj_value.text = psarj + "deg"
+        self.screens["eps"].ids.ssarj_value.text = ssarj + "deg"
+        self.screens["tcs"].ids.ptrrj_value.text = ptrrj + "deg"
+        self.screens["tcs"].ids.strrj_value.text = strrj + "deg"
 
         SW_MODE_MAP = {
             1: "STANDBY",
@@ -4079,559 +4080,559 @@ class MainApp(App):
             8: "SWITCHOVER"
         }
         
-        self.tcs_screen.ids.SWmode_loopA.text = SW_MODE_MAP.get(SWmode_loopA, "UNKNOWN")
-        self.tcs_screen.ids.SWmode_loopB.text = SW_MODE_MAP.get(SWmode_loopB, "UNKNOWN")
+        self.screens["tcs"].ids.SWmode_loopA.text = SW_MODE_MAP.get(SWmode_loopA, "UNKNOWN")
+        self.screens["tcs"].ids.SWmode_loopB.text = SW_MODE_MAP.get(SWmode_loopB, "UNKNOWN")
 
             
-        #self.tcs_screen.ids.SWmode_loopA.text = str(SWmode_loopA)
-        #self.tcs_screen.ids.SWmode_loopB.text = str(SWmode_loopB)
-        self.tcs_screen.ids.NH3flow_loopA.text = str(NH3flow_loopA)
-        self.tcs_screen.ids.NH3flow_loopB.text = str(NH3flow_loopB)
-        self.tcs_screen.ids.NH3outletPress_loopA.text = str(NH3outletPress_loopA)
-        self.tcs_screen.ids.NH3outletPress_loopB.text = str(NH3outletPress_loopB)
-        self.tcs_screen.ids.NH3outletTemp_loopA.text = str(NH3outletTemp_loopA)
-        self.tcs_screen.ids.NH3outletTemp_loopB.text = str(NH3outletTemp_loopB)
+        #self.screens["tcs"].ids.SWmode_loopA.text = str(SWmode_loopA)
+        #self.screens["tcs"].ids.SWmode_loopB.text = str(SWmode_loopB)
+        self.screens["tcs"].ids.NH3flow_loopA.text = str(NH3flow_loopA)
+        self.screens["tcs"].ids.NH3flow_loopB.text = str(NH3flow_loopB)
+        self.screens["tcs"].ids.NH3outletPress_loopA.text = str(NH3outletPress_loopA)
+        self.screens["tcs"].ids.NH3outletPress_loopB.text = str(NH3outletPress_loopB)
+        self.screens["tcs"].ids.NH3outletTemp_loopA.text = str(NH3outletTemp_loopA)
+        self.screens["tcs"].ids.NH3outletTemp_loopB.text = str(NH3outletTemp_loopB)
         
-        self.eclss_screen.ids.CabinTemp.text = str(CabinTemp)
-        self.eclss_screen.ids.CabinPress.text = str(CabinPress)
-        self.eclss_screen.ids.CrewlockPress.text = str(CrewlockPress)
-        self.eclss_screen.ids.AirlockPress.text = str(AirlockPress)
-        self.eclss_screen.ids.CleanWater.text = str(CleanWater)
-        self.eclss_screen.ids.WasteWater.text = str(WasteWater)
-        self.eclss_screen.ids.O2prodRate.text = str(O2prodRate)
+        self.screens["eclss"].ids.CabinTemp.text = str(CabinTemp)
+        self.screens["eclss"].ids.CabinPress.text = str(CabinPress)
+        self.screens["eclss"].ids.CrewlockPress.text = str(CrewlockPress)
+        self.screens["eclss"].ids.AirlockPress.text = str(AirlockPress)
+        self.screens["eclss"].ids.CleanWater.text = str(CleanWater)
+        self.screens["eclss"].ids.WasteWater.text = str(WasteWater)
+        self.screens["eclss"].ids.O2prodRate.text = str(O2prodRate)
         
-        #self.eclss_screen.ids.O2genState.text = str(O2genState)
+        #self.screens["eclss"].ids.O2genState.text = str(O2genState)
         if int(O2genState) == 1:
-            self.eclss_screen.ids.O2genState.text = "PROCESS"
+            self.screens["eclss"].ids.O2genState.text = "PROCESS"
         elif int(O2genState) == 2:
-            self.eclss_screen.ids.O2genState.text = "STANDBY"
+            self.screens["eclss"].ids.O2genState.text = "STANDBY"
         elif int(O2genState) == 3:
-            self.eclss_screen.ids.O2genState.text = "SHUTDOWN"
+            self.screens["eclss"].ids.O2genState.text = "SHUTDOWN"
         elif int(O2genState) == 4:
-            self.eclss_screen.ids.O2genState.text = "STOP"
+            self.screens["eclss"].ids.O2genState.text = "STOP"
         elif int(O2genState) == 5:
-            self.eclss_screen.ids.O2genState.text = "VENT DOME"
+            self.screens["eclss"].ids.O2genState.text = "VENT DOME"
         elif int(O2genState) == 6:
-            self.eclss_screen.ids.O2genState.text = "INERT DOME"
+            self.screens["eclss"].ids.O2genState.text = "INERT DOME"
         elif int(O2genState) == 7:
-            self.eclss_screen.ids.O2genState.text = "FAST SHTDWN"
+            self.screens["eclss"].ids.O2genState.text = "FAST SHTDWN"
         elif int(O2genState) == 8:
-            self.eclss_screen.ids.O2genState.text = "N2 PURGE SHTDWN"
+            self.screens["eclss"].ids.O2genState.text = "N2 PURGE SHTDWN"
         else:
-            self.eclss_screen.ids.O2genState.text = "n/a"
+            self.screens["eclss"].ids.O2genState.text = "n/a"
         
-        #self.eclss_screen.ids.VRSvlvPosition.text = str(VRSvlvPosition)
+        #self.screens["eclss"].ids.VRSvlvPosition.text = str(VRSvlvPosition)
         if int(VRSvlvPosition) == 0:
-            self.eclss_screen.ids.VRSvlvPosition.text = "FAIL"
+            self.screens["eclss"].ids.VRSvlvPosition.text = "FAIL"
         elif int(VRSvlvPosition) == 1:
-            self.eclss_screen.ids.VRSvlvPosition.text = "OPEN"
+            self.screens["eclss"].ids.VRSvlvPosition.text = "OPEN"
         elif int(VRSvlvPosition) == 2:
-            self.eclss_screen.ids.VRSvlvPosition.text = "CLSD"
+            self.screens["eclss"].ids.VRSvlvPosition.text = "CLSD"
         elif int(VRSvlvPosition) == 3:
-            self.eclss_screen.ids.VRSvlvPosition.text = "TRNS"
+            self.screens["eclss"].ids.VRSvlvPosition.text = "TRNS"
         else:
-            self.eclss_screen.ids.VESvlvPosition.text = "n/a"
+            self.screens["eclss"].ids.VESvlvPosition.text = "n/a"
         
-        #self.eclss_screen.ids.VESvlvPosition.text = str(VESvlvPosition)
+        #self.screens["eclss"].ids.VESvlvPosition.text = str(VESvlvPosition)
         if int(VESvlvPosition) == 0:
-            self.eclss_screen.ids.VESvlvPosition.text = "FAIL"
+            self.screens["eclss"].ids.VESvlvPosition.text = "FAIL"
         elif int(VESvlvPosition) == 1:
-            self.eclss_screen.ids.VESvlvPosition.text = "OPEN"
+            self.screens["eclss"].ids.VESvlvPosition.text = "OPEN"
         elif int(VESvlvPosition) == 2:
-            self.eclss_screen.ids.VESvlvPosition.text = "CLSD"
+            self.screens["eclss"].ids.VESvlvPosition.text = "CLSD"
         elif int(VESvlvPosition) == 3:
-            self.eclss_screen.ids.VESvlvPosition.text = "TRNS"
+            self.screens["eclss"].ids.VESvlvPosition.text = "TRNS"
         else:
-            self.eclss_screen.ids.VESvlvPosition.text = "n/a"
+            self.screens["eclss"].ids.VESvlvPosition.text = "n/a"
         
-        self.eclss_wrm_screen.ids.UrineTank.text = str(UrineTank)
-        self.eclss_wrm_screen.ids.CleanWater.text = str(CleanWater)
-        self.eclss_wrm_screen.ids.WasteWater.text = str(WasteWater)
+        self.screens["wrm"].ids.UrineTank.text = str(UrineTank)
+        self.screens["wrm"].ids.CleanWater.text = str(CleanWater)
+        self.screens["wrm"].ids.WasteWater.text = str(WasteWater)
         
-        #self.eclss_wrm_screen.ids.UrineProcessState.text = str(UrineProcessState)
+        #self.screens["wrm"].ids.UrineProcessState.text = str(UrineProcessState)
         if int(UrineProcessState) == 2:
-            self.eclss_wrm_screen.ids.UrineProcessState.text = "STOP"
+            self.screens["wrm"].ids.UrineProcessState.text = "STOP"
         elif int(UrineProcessState) == 4:
-            self.eclss_wrm_screen.ids.UrineProcessState.text = "SHTDWN"
+            self.screens["wrm"].ids.UrineProcessState.text = "SHTDWN"
         elif int(UrineProcessState) == 8:
-            self.eclss_wrm_screen.ids.UrineProcessState.text = "MAINT"
+            self.screens["wrm"].ids.UrineProcessState.text = "MAINT"
         elif int(UrineProcessState) == 16:
-            self.eclss_wrm_screen.ids.UrineProcessState.text = "NORM"
+            self.screens["wrm"].ids.UrineProcessState.text = "NORM"
         elif int(UrineProcessState) == 32:
-            self.eclss_wrm_screen.ids.UrineProcessState.text = "STBY"
+            self.screens["wrm"].ids.UrineProcessState.text = "STBY"
         elif int(UrineProcessState) == 64:
-            self.eclss_wrm_screen.ids.UrineProcessState.text = "IDLE"
+            self.screens["wrm"].ids.UrineProcessState.text = "IDLE"
         elif int(UrineProcessState) == 128:
-            self.eclss_wrm_screen.ids.UrineProcessState.text = "INIT"
+            self.screens["wrm"].ids.UrineProcessState.text = "INIT"
         else:
-            self.eclss_wrm_screen.ids.UrineProcessState.text = "n/a"
+            self.screens["wrm"].ids.UrineProcessState.text = "n/a"
         
-        #self.eclss_wrm_screen.ids.WaterProcessState.text = str(WaterProcessState)
+        #self.screens["wrm"].ids.WaterProcessState.text = str(WaterProcessState)
         if int(WaterProcessState) == 1:
-            self.eclss_wrm_screen.ids.WaterProcessState.text = "STOP"
+            self.screens["wrm"].ids.WaterProcessState.text = "STOP"
         elif int(WaterProcessState) == 2:
-            self.eclss_wrm_screen.ids.WaterProcessState.text = "SHTDWN"
+            self.screens["wrm"].ids.WaterProcessState.text = "SHTDWN"
         elif int(WaterProcessState) == 3:
-            self.eclss_wrm_screen.ids.WaterProcessState.text = "STBY"
+            self.screens["wrm"].ids.WaterProcessState.text = "STBY"
         elif int(WaterProcessState) == 4:
-            self.eclss_wrm_screen.ids.WaterProcessState.text = "PROC"
+            self.screens["wrm"].ids.WaterProcessState.text = "PROC"
         elif int(WaterProcessState) == 5:
-            self.eclss_wrm_screen.ids.WaterProcessState.text = "HOT SVC"
+            self.screens["wrm"].ids.WaterProcessState.text = "HOT SVC"
         elif int(WaterProcessState) == 6:
-            self.eclss_wrm_screen.ids.WaterProcessState.text = "FLUSH"
+            self.screens["wrm"].ids.WaterProcessState.text = "FLUSH"
         elif int(WaterProcessState) == 7:
-            self.eclss_wrm_screen.ids.WaterProcessState.text = "WARM SHTDWN"
+            self.screens["wrm"].ids.WaterProcessState.text = "WARM SHTDWN"
         else:
-            self.eclss_wrm_screen.ids.WaterProcessState.text = "n/a"
+            self.screens["wrm"].ids.WaterProcessState.text = "n/a"
         
-        #self.eclss_wrm_screen.ids.WaterProcessStep.text = str(WaterProcessStep)
+        #self.screens["wrm"].ids.WaterProcessStep.text = str(WaterProcessStep)
         if int(WaterProcessStep) == 0:
-            self.eclss_wrm_screen.ids.WaterProcessStep.text = "NONE"
+            self.screens["wrm"].ids.WaterProcessStep.text = "NONE"
         elif int(WaterProcessStep) == 1:
-            self.eclss_wrm_screen.ids.WaterProcessStep.text = "VENT"
+            self.screens["wrm"].ids.WaterProcessStep.text = "VENT"
         elif int(WaterProcessStep) == 2:
-            self.eclss_wrm_screen.ids.WaterProcessStep.text = "HEATUP"
+            self.screens["wrm"].ids.WaterProcessStep.text = "HEATUP"
         elif int(WaterProcessStep) == 3:
-            self.eclss_wrm_screen.ids.WaterProcessStep.text = "OURGE"
+            self.screens["wrm"].ids.WaterProcessStep.text = "OURGE"
         elif int(WaterProcessStep) == 4:
-            self.eclss_wrm_screen.ids.WaterProcessStep.text = "FLOW"
+            self.screens["wrm"].ids.WaterProcessStep.text = "FLOW"
         elif int(WaterProcessStep) == 5:
-            self.eclss_wrm_screen.ids.WaterProcessStep.text = "TEST"
+            self.screens["wrm"].ids.WaterProcessStep.text = "TEST"
         elif int(WaterProcessStep) == 6:
-            self.eclss_wrm_screen.ids.WaterProcessStep.text = "TEST SV 1"
+            self.screens["wrm"].ids.WaterProcessStep.text = "TEST SV 1"
         elif int(WaterProcessStep) == 7:
-            self.eclss_wrm_screen.ids.WaterProcessStep.text = "TEST SV 2"
+            self.screens["wrm"].ids.WaterProcessStep.text = "TEST SV 2"
         elif int(WaterProcessStep) == 8:
-            self.eclss_wrm_screen.ids.WaterProcessStep.text = "SERVICE"
+            self.screens["wrm"].ids.WaterProcessStep.text = "SERVICE"
         else:
-            self.eclss_wrm_screen.ids.WaterProcessStep.text = "n/a"
+            self.screens["wrm"].ids.WaterProcessStep.text = "n/a"
         
-        self.eclss_iatcs_screen.ids.LTwater_Lab.text = str(LTwater_Lab)
-        self.eclss_iatcs_screen.ids.MTwater_Lab.text = str(MTwater_Lab)
-        self.eclss_iatcs_screen.ids.FluidTempAir_Lab.text = str(FluidTempAir_Lab)
-        self.eclss_iatcs_screen.ids.FluidTempAv_Lab.text = str(FluidTempAv_Lab)
-        self.eclss_iatcs_screen.ids.LTwater_Node2.text = str(LTwater_Node2)
-        self.eclss_iatcs_screen.ids.MTwater_Node2.text = str(MTwater_Node2)
-        self.eclss_iatcs_screen.ids.FluidTempAir_Node2.text = str(FluidTempAir_Node2)
-        self.eclss_iatcs_screen.ids.FluidTempAv_Node2.text = str(FluidTempAv_Node2)
-        self.eclss_iatcs_screen.ids.LTwater_Node3.text = str(LTwater_Node3)
-        self.eclss_iatcs_screen.ids.MTwater_Node3.text = str(MTwater_Node3)
-        self.eclss_iatcs_screen.ids.FluidTempAir_Node3.text = str(FluidTempAir_Node3)
-        self.eclss_iatcs_screen.ids.FluidTempAv_Node3.text = str(FluidTempAv_Node3)
+        self.screens["iatcs"].ids.LTwater_Lab.text = str(LTwater_Lab)
+        self.screens["iatcs"].ids.MTwater_Lab.text = str(MTwater_Lab)
+        self.screens["iatcs"].ids.FluidTempAir_Lab.text = str(FluidTempAir_Lab)
+        self.screens["iatcs"].ids.FluidTempAv_Lab.text = str(FluidTempAv_Lab)
+        self.screens["iatcs"].ids.LTwater_Node2.text = str(LTwater_Node2)
+        self.screens["iatcs"].ids.MTwater_Node2.text = str(MTwater_Node2)
+        self.screens["iatcs"].ids.FluidTempAir_Node2.text = str(FluidTempAir_Node2)
+        self.screens["iatcs"].ids.FluidTempAv_Node2.text = str(FluidTempAv_Node2)
+        self.screens["iatcs"].ids.LTwater_Node3.text = str(LTwater_Node3)
+        self.screens["iatcs"].ids.MTwater_Node3.text = str(MTwater_Node3)
+        self.screens["iatcs"].ids.FluidTempAir_Node3.text = str(FluidTempAir_Node3)
+        self.screens["iatcs"].ids.FluidTempAv_Node3.text = str(FluidTempAv_Node3)
         
-        #self.eclss_iatcs_screen.ids.AC_LabPort.text = str(WaterProcessStep)
+        #self.screens["iatcs"].ids.AC_LabPort.text = str(WaterProcessStep)
         if int(AC_LabPort) == 0:
-            self.eclss_iatcs_screen.ids.AC_LabPort.text = "RESET"
+            self.screens["iatcs"].ids.AC_LabPort.text = "RESET"
         elif int(AC_LabPort) == 1:
-            self.eclss_iatcs_screen.ids.AC_LabPort.text = "DRAIN"
+            self.screens["iatcs"].ids.AC_LabPort.text = "DRAIN"
         elif int(AC_LabPort) == 2:
-            self.eclss_iatcs_screen.ids.AC_LabPort.text = "DRYOUT"
+            self.screens["iatcs"].ids.AC_LabPort.text = "DRYOUT"
         elif int(AC_LabPort) == 3:
-            self.eclss_iatcs_screen.ids.AC_LabPort.text = "EIB OFF"
+            self.screens["iatcs"].ids.AC_LabPort.text = "EIB OFF"
         elif int(AC_LabPort) == 4:
-            self.eclss_iatcs_screen.ids.AC_LabPort.text = "OFF"
+            self.screens["iatcs"].ids.AC_LabPort.text = "OFF"
         elif int(AC_LabPort) == 5:
-            self.eclss_iatcs_screen.ids.AC_LabPort.text = "ON"
+            self.screens["iatcs"].ids.AC_LabPort.text = "ON"
         elif int(AC_LabPort) == 6:
-            self.eclss_iatcs_screen.ids.AC_LabPort.text = "STARTUP"
+            self.screens["iatcs"].ids.AC_LabPort.text = "STARTUP"
         elif int(AC_LabPort) == 7:
-            self.eclss_iatcs_screen.ids.AC_LabPort.text = "TEST2"
+            self.screens["iatcs"].ids.AC_LabPort.text = "TEST2"
         else:
-            self.eclss_iatcs_screen.ids.AC_LabPort.text = "n/a"
+            self.screens["iatcs"].ids.AC_LabPort.text = "n/a"
         
-        #self.eclss_iatcs_screen.ids.AC_LabStbd.text = str(WaterProcessStep)
+        #self.screens["iatcs"].ids.AC_LabStbd.text = str(WaterProcessStep)
         if int(AC_LabStbd) == 0:
-            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "RESET"
+            self.screens["iatcs"].ids.AC_LabStbd.text = "RESET"
         elif int(AC_LabStbd) == 1:
-            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "DRAIN"
+            self.screens["iatcs"].ids.AC_LabStbd.text = "DRAIN"
         elif int(AC_LabStbd) == 2:
-            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "DRYOUT"
+            self.screens["iatcs"].ids.AC_LabStbd.text = "DRYOUT"
         elif int(AC_LabStbd) == 3:
-            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "EIB OFF"
+            self.screens["iatcs"].ids.AC_LabStbd.text = "EIB OFF"
         elif int(AC_LabStbd) == 4:
-            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "OFF"
+            self.screens["iatcs"].ids.AC_LabStbd.text = "OFF"
         elif int(AC_LabStbd) == 5:
-            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "ON"
+            self.screens["iatcs"].ids.AC_LabStbd.text = "ON"
         elif int(AC_LabStbd) == 6:
-            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "STARTUP"
+            self.screens["iatcs"].ids.AC_LabStbd.text = "STARTUP"
         elif int(AC_LabStbd) == 7:
-            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "TEST2"
+            self.screens["iatcs"].ids.AC_LabStbd.text = "TEST2"
         else:
-            self.eclss_iatcs_screen.ids.AC_LabStbd.text = "n/a"
+            self.screens["iatcs"].ids.AC_LabStbd.text = "n/a"
         
-        #self.eclss_iatcs_screen.ids.AC_Node2.text = str(WaterProcessStep)
+        #self.screens["iatcs"].ids.AC_Node2.text = str(WaterProcessStep)
         if int(AC_Node2) == 0:
-            self.eclss_iatcs_screen.ids.AC_Node2.text = "RESET"
+            self.screens["iatcs"].ids.AC_Node2.text = "RESET"
         elif int(AC_Node2) == 1:
-            self.eclss_iatcs_screen.ids.AC_Node2.text = "DRAIN"
+            self.screens["iatcs"].ids.AC_Node2.text = "DRAIN"
         elif int(AC_Node2) == 2:
-            self.eclss_iatcs_screen.ids.AC_Node2.text = "DRYOUT"
+            self.screens["iatcs"].ids.AC_Node2.text = "DRYOUT"
         elif int(AC_Node2) == 3:
-            self.eclss_iatcs_screen.ids.AC_Node2.text = "EIB OFF"
+            self.screens["iatcs"].ids.AC_Node2.text = "EIB OFF"
         elif int(AC_Node2) == 4:
-            self.eclss_iatcs_screen.ids.AC_Node2.text = "OFF"
+            self.screens["iatcs"].ids.AC_Node2.text = "OFF"
         elif int(AC_Node2) == 5:
-            self.eclss_iatcs_screen.ids.AC_Node2.text = "ON"
+            self.screens["iatcs"].ids.AC_Node2.text = "ON"
         elif int(AC_Node2) == 6:
-            self.eclss_iatcs_screen.ids.AC_Node2.text = "STARTUP"
+            self.screens["iatcs"].ids.AC_Node2.text = "STARTUP"
         elif int(AC_Node2) == 7:
-            self.eclss_iatcs_screen.ids.AC_Node2.text = "TEST2"
+            self.screens["iatcs"].ids.AC_Node2.text = "TEST2"
         else:
-            self.eclss_iatcs_screen.ids.AC_Node2.text = "n/a"
+            self.screens["iatcs"].ids.AC_Node2.text = "n/a"
         
-        #self.eclss_iatcs_screen.ids.AC_Node3.text = str(WaterProcessStep)
+        #self.screens["iatcs"].ids.AC_Node3.text = str(WaterProcessStep)
         if int(AC_Node3) == 0:
-            self.eclss_iatcs_screen.ids.AC_Node3.text = "RESET"
+            self.screens["iatcs"].ids.AC_Node3.text = "RESET"
         elif int(AC_Node3) == 1:
-            self.eclss_iatcs_screen.ids.AC_Node3.text = "DRAIN"
+            self.screens["iatcs"].ids.AC_Node3.text = "DRAIN"
         elif int(AC_Node3) == 2:
-            self.eclss_iatcs_screen.ids.AC_Node3.text = "DRYOUT"
+            self.screens["iatcs"].ids.AC_Node3.text = "DRYOUT"
         elif int(AC_Node3) == 3:
-            self.eclss_iatcs_screen.ids.AC_Node3.text = "EIB OFF"
+            self.screens["iatcs"].ids.AC_Node3.text = "EIB OFF"
         elif int(AC_Node3) == 4:
-            self.eclss_iatcs_screen.ids.AC_Node3.text = "OFF"
+            self.screens["iatcs"].ids.AC_Node3.text = "OFF"
         elif int(AC_Node3) == 5:
-            self.eclss_iatcs_screen.ids.AC_Node3.text = "ON"
+            self.screens["iatcs"].ids.AC_Node3.text = "ON"
         elif int(AC_Node3) == 6:
-            self.eclss_iatcs_screen.ids.AC_Node3.text = "STARTUP"
+            self.screens["iatcs"].ids.AC_Node3.text = "STARTUP"
         elif int(AC_Node3) == 7:
-            self.eclss_iatcs_screen.ids.AC_Node3.text = "TEST2"
+            self.screens["iatcs"].ids.AC_Node3.text = "TEST2"
         else:
-            self.eclss_iatcs_screen.ids.AC_Node3.text = "n/a"
+            self.screens["iatcs"].ids.AC_Node3.text = "n/a"
         
         ##Summary Telemetery on Robo Screen
-        self.robo_screen.ids.mt_worksite.text = str(mt_worksite)
+        self.screens["robo"].ids.mt_worksite.text = str(mt_worksite)
         
-        #self.robo_screen.ids.OperatingBase.text = str(OperatingBase)
+        #self.screens["robo"].ids.OperatingBase.text = str(OperatingBase)
         if int(OperatingBase) == 0:
-            self.robo_screen.ids.OperatingBase.text = "A"
+            self.screens["robo"].ids.OperatingBase.text = "A"
         elif int(OperatingBase) == 5:
-            self.robo_screen.ids.OperatingBase.text = "B"
+            self.screens["robo"].ids.OperatingBase.text = "B"
         else:
-            self.robo_screen.ids.OperatingBase.text = "n/a"
+            self.screens["robo"].ids.OperatingBase.text = "n/a"
         
-        #self.robo_screen.ids.BaseLocation.text = str(BaseLocation)
+        #self.screens["robo"].ids.BaseLocation.text = str(BaseLocation)
         if int(BaseLocation) == 1:
-            self.robo_screen.ids.BaseLocation.text = "Lab"
+            self.screens["robo"].ids.BaseLocation.text = "Lab"
         elif int(BaseLocation) == 2:
-            self.robo_screen.ids.BaseLocation.text = "Node 3"
+            self.screens["robo"].ids.BaseLocation.text = "Node 3"
         elif int(BaseLocation) == 4:
-            self.robo_screen.ids.BaseLocation.text = "Node 2"
+            self.screens["robo"].ids.BaseLocation.text = "Node 2"
         elif int(BaseLocation) == 7:
-            self.robo_screen.ids.BaseLocation.text = "MBS PDGF 1"
+            self.screens["robo"].ids.BaseLocation.text = "MBS PDGF 1"
         elif int(BaseLocation) == 8:
-            self.robo_screen.ids.BaseLocation.text = "MBS PDGF 2"
+            self.screens["robo"].ids.BaseLocation.text = "MBS PDGF 2"
         elif int(BaseLocation) == 11:
-            self.robo_screen.ids.BaseLocation.text = "MBS PDGF 3"
+            self.screens["robo"].ids.BaseLocation.text = "MBS PDGF 3"
         elif int(BaseLocation) == 13:
-            self.robo_screen.ids.BaseLocation.text = "MBS PDGF 4"
+            self.screens["robo"].ids.BaseLocation.text = "MBS PDGF 4"
         elif int(BaseLocation) == 14:
-            self.robo_screen.ids.BaseLocation.text = "FGB"
+            self.screens["robo"].ids.BaseLocation.text = "FGB"
         elif int(BaseLocation) == 16:
-            self.robo_screen.ids.BaseLocation.text = "POA"
+            self.screens["robo"].ids.BaseLocation.text = "POA"
         elif int(BaseLocation) == 19:
-            self.robo_screen.ids.BaseLocation.text = "SSRMS Tip LEE"
+            self.screens["robo"].ids.BaseLocation.text = "SSRMS Tip LEE"
         elif int(BaseLocation) == 63:
-            self.robo_screen.ids.BaseLocation.text = "Undefined"
+            self.screens["robo"].ids.BaseLocation.text = "Undefined"
         else:
-            self.robo_screen.ids.BaseLocation.text = "n/a"
+            self.screens["robo"].ids.BaseLocation.text = "n/a"
         
-        #self.robo_screen.ids.SPDMbase.text = str(SPDMbase)
+        #self.screens["robo"].ids.SPDMbase.text = str(SPDMbase)
         if int(SPDMbase) == 1:
-            self.robo_screen.ids.SPDMbase.text = "US Lab"
+            self.screens["robo"].ids.SPDMbase.text = "US Lab"
         elif int(SPDMbase) == 2:
-            self.robo_screen.ids.SPDMbase.text = "Node 3"
+            self.screens["robo"].ids.SPDMbase.text = "Node 3"
         elif int(SPDMbase) == 4:
-            self.robo_screen.ids.SPDMbase.text = "Node 2"
+            self.screens["robo"].ids.SPDMbase.text = "Node 2"
         elif int(SPDMbase) == 7:
-            self.robo_screen.ids.SPDMbase.text = "MBS PDGF 1"
+            self.screens["robo"].ids.SPDMbase.text = "MBS PDGF 1"
         elif int(SPDMbase) == 8:
-            self.robo_screen.ids.SPDMbase.text = "MBS PDGF 2"
+            self.screens["robo"].ids.SPDMbase.text = "MBS PDGF 2"
         elif int(SPDMbase) == 11:
-            self.robo_screen.ids.SPDMbase.text = "MBS PDGF 3"
+            self.screens["robo"].ids.SPDMbase.text = "MBS PDGF 3"
         elif int(SPDMbase) == 13:
-            self.robo_screen.ids.SPDMbase.text = "MBS PDGF 4"
+            self.screens["robo"].ids.SPDMbase.text = "MBS PDGF 4"
         elif int(SPDMbase) ==14:
-            self.robo_screen.ids.SPDMbase.text = "FGB"
+            self.screens["robo"].ids.SPDMbase.text = "FGB"
         elif int(SPDMbase) == 16:
-            self.robo_screen.ids.SPDMbase.text = "POA"
+            self.screens["robo"].ids.SPDMbase.text = "POA"
         elif int(SPDMbase) == 19:
-            self.robo_screen.ids.SPDMbase.text = "SSRMS Tip LEE"
+            self.screens["robo"].ids.SPDMbase.text = "SSRMS Tip LEE"
         elif int(SPDMbase) == 63:
-            self.robo_screen.ids.SPDMbase.text = "Undefined"
+            self.screens["robo"].ids.SPDMbase.text = "Undefined"
         else:
-            self.robo_screen.ids.SPDMbase.text = "n/a"
+            self.screens["robo"].ids.SPDMbase.text = "n/a"
         
-        #self.robo_screen.ids.SPDMoperatingBase.text = str(SPDMoperatingBase)
+        #self.screens["robo"].ids.SPDMoperatingBase.text = str(SPDMoperatingBase)
         if int(SPDMoperatingBase) == 1:
-            self.robo_screen.ids.SPDMoperatingBase.text = "SPDM Body LEE"
+            self.screens["robo"].ids.SPDMoperatingBase.text = "SPDM Body LEE"
         elif int(SPDMoperatingBase) == 2:
-            self.robo_screen.ids.SPDMoperatingBase.text = "SPDM Body PDGF"
+            self.screens["robo"].ids.SPDMoperatingBase.text = "SPDM Body PDGF"
         else:
-            self.robo_screen.ids.SPDMoperatingBase.text = "n/a"
+            self.screens["robo"].ids.SPDMoperatingBase.text = "n/a"
 
-        #self.mss_mt_screen.ids.MCASpayload.text = str(MCASpayload)
+        #self.screens["mt"].ids.MCASpayload.text = str(MCASpayload)
         if int(MCASpayload) == 0:
-            self.mss_mt_screen.ids.MCASpayload.text = "Released"
+            self.screens["mt"].ids.MCASpayload.text = "Released"
         elif int(MCASpayload) == 1:
-            self.mss_mt_screen.ids.MCASpayload.text = "Captured"
+            self.screens["mt"].ids.MCASpayload.text = "Captured"
         else:
-            self.mss_mt_screen.ids.MCASpayload.text = "n/a"   
-        #self.mss_mt_screen.ids.POApayload.text = str(POApayload)
+            self.screens["mt"].ids.MCASpayload.text = "n/a"   
+        #self.screens["mt"].ids.POApayload.text = str(POApayload)
         if int(POApayload) == 0:
-            self.mss_mt_screen.ids.POApayload.text = "Released"
+            self.screens["mt"].ids.POApayload.text = "Released"
         elif int(POApayload) == 1:
-            self.mss_mt_screen.ids.POApayload.text = "Captive"
+            self.screens["mt"].ids.POApayload.text = "Captive"
         elif int(POApayload) == 2:
-            self.mss_mt_screen.ids.POApayload.text = "Captured"
+            self.screens["mt"].ids.POApayload.text = "Captured"
         else:
-            self.mss_mt_screen.ids.POApayload.text = "n/a" 
+            self.screens["mt"].ids.POApayload.text = "n/a" 
         
-        #self.ssrms_screen.ids.OperatingBase.text = str(OperatingBase)
+        #self.screens["ssrms"].ids.OperatingBase.text = str(OperatingBase)
         if int(OperatingBase) == 0:
-            self.ssrms_screen.ids.OperatingBase.text = "A"
+            self.screens["ssrms"].ids.OperatingBase.text = "A"
         elif int(OperatingBase) == 5:
-            self.ssrms_screen.ids.OperatingBase.text = "B"
+            self.screens["ssrms"].ids.OperatingBase.text = "B"
         else:
-            self.ssrms_screen.ids.OperatingBase.text = "n/a"
+            self.screens["ssrms"].ids.OperatingBase.text = "n/a"
                                       
-        #self.ssrms_screen.ids.TipLEEstatus.text = str(TipLEEstatus)
+        #self.screens["ssrms"].ids.TipLEEstatus.text = str(TipLEEstatus)
         if int(TipLEEstatus) == 0:
-            self.ssrms_screen.ids.TipLEEstatus.text = "Released"
+            self.screens["ssrms"].ids.TipLEEstatus.text = "Released"
         elif int(TipLEEstatus) == 1:
-            self.ssrms_screen.ids.TipLEEstatus.text = "Captive"
+            self.screens["ssrms"].ids.TipLEEstatus.text = "Captive"
         elif int(TipLEEstatus) == 2:
-            self.ssrms_screen.ids.TipLEEstatus.text = "Captured"
+            self.screens["ssrms"].ids.TipLEEstatus.text = "Captured"
         else:
-            self.ssrms_screen.ids.TipLEEstatus.text = "n/a"
+            self.screens["ssrms"].ids.TipLEEstatus.text = "n/a"
         
-         #self.ssrms_screen.ids.SACSopBase.text = str(SACSopBase)
+         #self.screens["ssrms"].ids.SACSopBase.text = str(SACSopBase)
         if int(SACSopBase) == 0:
-            self.ssrms_screen.ids.SACSopBase.text = "A"
+            self.screens["ssrms"].ids.SACSopBase.text = "A"
         elif int(SACSopBase) == 5:
-            self.ssrms_screen.ids.SACSopBase.text = "B"
+            self.screens["ssrms"].ids.SACSopBase.text = "B"
         else:
-            self.ssrms_screen.ids.OperatingBase.text = "n/a"
+            self.screens["ssrms"].ids.OperatingBase.text = "n/a"
         
-        self.ssrms_screen.ids.ShoulderRoll.text = str(ShoulderRoll) + " deg"
-        self.ssrms_screen.ids.ShoulderYaw.text = str(ShoulderYaw) + " deg"
-        self.ssrms_screen.ids.ShoulderPitch.text = str(ShoulderPitch) + " deg"
-        self.ssrms_screen.ids.ElbowPitch.text = str(ElbowPitch) + " deg"
-        self.ssrms_screen.ids.WristRoll.text = str(WristRoll) + " deg"
-        self.ssrms_screen.ids.WristYaw.text = str(WristYaw) + " deg"
-        self.ssrms_screen.ids.WristPitch.text = str(WristPitch) + " deg"
+        self.screens["ssrms"].ids.ShoulderRoll.text = str(ShoulderRoll) + " deg"
+        self.screens["ssrms"].ids.ShoulderYaw.text = str(ShoulderYaw) + " deg"
+        self.screens["ssrms"].ids.ShoulderPitch.text = str(ShoulderPitch) + " deg"
+        self.screens["ssrms"].ids.ElbowPitch.text = str(ElbowPitch) + " deg"
+        self.screens["ssrms"].ids.WristRoll.text = str(WristRoll) + " deg"
+        self.screens["ssrms"].ids.WristYaw.text = str(WristYaw) + " deg"
+        self.screens["ssrms"].ids.WristPitch.text = str(WristPitch) + " deg"
         
-        #self.ssrms_screen.ids.BaseLocation.text = str(BaseLocation)
+        #self.screens["ssrms"].ids.BaseLocation.text = str(BaseLocation)
         if int(BaseLocation) == 1:
-            self.ssrms_screen.ids.BaseLocation.text = "Lab"
+            self.screens["ssrms"].ids.BaseLocation.text = "Lab"
         elif int(BaseLocation) == 2:
-            self.ssrms_screen.ids.BaseLocation.text = "Node 3"
+            self.screens["ssrms"].ids.BaseLocation.text = "Node 3"
         elif int(BaseLocation) == 4:
-            self.ssrms_screen.ids.BaseLocation.text = "Node 2"
+            self.screens["ssrms"].ids.BaseLocation.text = "Node 2"
         elif int(BaseLocation) == 7:
-            self.ssrms_screen.ids.BaseLocation.text = "MBS PDGF 1"
+            self.screens["ssrms"].ids.BaseLocation.text = "MBS PDGF 1"
         elif int(BaseLocation) == 8:
-            self.ssrms_screen.ids.BaseLocation.text = "MBS PDGF 2"
+            self.screens["ssrms"].ids.BaseLocation.text = "MBS PDGF 2"
         elif int(BaseLocation) == 11:
-            self.ssrms_screen.ids.BaseLocation.text = "MBS PDGF 3"
+            self.screens["ssrms"].ids.BaseLocation.text = "MBS PDGF 3"
         elif int(BaseLocation) == 13:
-            self.ssrms_screen.ids.BaseLocation.text = "MBS PDGF 4"
+            self.screens["ssrms"].ids.BaseLocation.text = "MBS PDGF 4"
         elif int(BaseLocation) ==14:
-            self.ssrms_screen.ids.BaseLocation.text = "FGB"
+            self.screens["ssrms"].ids.BaseLocation.text = "FGB"
         elif int(BaseLocation) == 16:
-            self.ssrms_screen.ids.BaseLocation.text = "POA"
+            self.screens["ssrms"].ids.BaseLocation.text = "POA"
         elif int(BaseLocation) == 19:
-            self.ssrms_screen.ids.BaseLocation.text = "SSRMS Tip LEE"
+            self.screens["ssrms"].ids.BaseLocation.text = "SSRMS Tip LEE"
         elif int(BaseLocation) == 63:
-            self.ssrms_screen.ids.BaseLocation.text = "Undefined"
+            self.screens["ssrms"].ids.BaseLocation.text = "Undefined"
         else:
-            self.ssrms_screen.ids.BaseLocation.text = "n/a"
+            self.screens["ssrms"].ids.BaseLocation.text = "n/a"
         
-        #self.spdm1_screen.ids.SPDMbase.text = str(SPDMbase)
+        #self.screens["spdm1"].ids.SPDMbase.text = str(SPDMbase)
         if int(SPDMbase) == 1:
-            self.spdm1_screen.ids.SPDMbase.text = "Lab"
+            self.screens["spdm1"].ids.SPDMbase.text = "Lab"
         elif int(SPDMbase) == 2:
-            self.spdm1_screen.ids.SPDMbase.text = "Node 3"
+            self.screens["spdm1"].ids.SPDMbase.text = "Node 3"
         elif int(SPDMbase) == 4:
-            self.spdm1_screen.ids.SPDMbase.text = "Node 2"
+            self.screens["spdm1"].ids.SPDMbase.text = "Node 2"
         elif int(SPDMbase) == 7:
-            self.spdm1_screen.ids.SPDMbase.text = "MBS PDGF 1"
+            self.screens["spdm1"].ids.SPDMbase.text = "MBS PDGF 1"
         elif int(SPDMbase) == 8:
-            self.spdm1_screen.ids.SPDMbase.text = "MBS PDGF 2"
+            self.screens["spdm1"].ids.SPDMbase.text = "MBS PDGF 2"
         elif int(SPDMbase) == 11:
-            self.spdm1_screen.ids.SPDMbase.text = "MBS PDGF 3"
+            self.screens["spdm1"].ids.SPDMbase.text = "MBS PDGF 3"
         elif int(SPDMbase) == 13:
-            self.spdm1_screen.ids.SPDMbase.text = "MBS PDGF 4"
+            self.screens["spdm1"].ids.SPDMbase.text = "MBS PDGF 4"
         elif int(SPDMbase) ==14:
-            self.spdm1_screen.ids.SPDMbase.text = "FGB"
+            self.screens["spdm1"].ids.SPDMbase.text = "FGB"
         elif int(SPDMbase) == 16:
-            self.spdm1_screen.ids.SPDMbase.text = "POA"
+            self.screens["spdm1"].ids.SPDMbase.text = "POA"
         elif int(SPDMbase) == 19:
-            self.spdm1_screen.ids.SPDMbase.text = "SSRMS Tip LEE"
+            self.screens["spdm1"].ids.SPDMbase.text = "SSRMS Tip LEE"
         elif int(SPDMbase) == 63:
-            self.spdm1_screen.ids.SPDMbase.text = "Undefined"
+            self.screens["spdm1"].ids.SPDMbase.text = "Undefined"
         else:
-            self.spdm1_screen.ids.SPDMbase.text = "n/a"
+            self.screens["spdm1"].ids.SPDMbase.text = "n/a"
         
-         #self.spdm1_screen.ids.SPDMoperatingBase.text = str(SPDMoperatingBase)
+         #self.screens["spdm1"].ids.SPDMoperatingBase.text = str(SPDMoperatingBase)
         if int(SPDMoperatingBase) == 1:
-            self.spdm1_screen.ids.SPDMoperatingBase.text = "SPDM Body LEE"
+            self.screens["spdm1"].ids.SPDMoperatingBase.text = "SPDM Body LEE"
         elif int(SPDMoperatingBase) == 2:
-            self.spdm1_screen.ids.SPDMoperatingBase.text = "SPDM Body PDGF"
+            self.screens["spdm1"].ids.SPDMoperatingBase.text = "SPDM Body PDGF"
         else:
-            self.spdm1_screen.ids.SPDMoperatingBase.text = "n/a"
+            self.screens["spdm1"].ids.SPDMoperatingBase.text = "n/a"
         
-        #self.spdm1_screen.ids.Arm1OTCM.text = str(Arm1OTCM)
+        #self.screens["spdm1"].ids.Arm1OTCM.text = str(Arm1OTCM)
         if int(Arm1OTCM) == 0:
-            self.spdm1_screen.ids.Arm1OTCM.text = "Released"
+            self.screens["spdm1"].ids.Arm1OTCM.text = "Released"
         elif int(Arm1OTCM) == 1:
-            self.spdm1_screen.ids.Arm1OTCM.text = "Captive"
+            self.screens["spdm1"].ids.Arm1OTCM.text = "Captive"
         elif int(Arm1OTCM) == 2:
-            self.spdm1_screen.ids.Arm1OTCM.text = "Captured"
+            self.screens["spdm1"].ids.Arm1OTCM.text = "Captured"
         else:
-            self.spdm1_screen.ids.Arm1OTCM.text = "n/a"
+            self.screens["spdm1"].ids.Arm1OTCM.text = "n/a"
         
-        #self.spdm1_screen.ids.Arm2OTCM.text = str(Arm1OTCM)
+        #self.screens["spdm1"].ids.Arm2OTCM.text = str(Arm1OTCM)
         if int(Arm2OTCM) == 0:
-            self.spdm1_screen.ids.Arm2OTCM.text = "Released"
+            self.screens["spdm1"].ids.Arm2OTCM.text = "Released"
         elif int(Arm2OTCM) == 1:
-            self.spdm1_screen.ids.Arm2OTCM.text = "Captive"
+            self.screens["spdm1"].ids.Arm2OTCM.text = "Captive"
         elif int(Arm2OTCM) == 2:
-            self.spdm1_screen.ids.Arm2OTCM.text = "Captured"
+            self.screens["spdm1"].ids.Arm2OTCM.text = "Captured"
         else:
-            self.spdm1_screen.ids.Arm2OTCM.text = "n/a"
+            self.screens["spdm1"].ids.Arm2OTCM.text = "n/a"
         
-        #self.spdm1_screen.ids.BodyPayload.text = str(BodyPayload)
+        #self.screens["spdm1"].ids.BodyPayload.text = str(BodyPayload)
         if int(BodyPayload) == 0:
-            self.spdm1_screen.ids.BodyPayload.text = "Released"
+            self.screens["spdm1"].ids.BodyPayload.text = "Released"
         elif int(BodyPayload) == 1:
-            self.spdm1_screen.ids.BodyPayload.text = "Captive"
+            self.screens["spdm1"].ids.BodyPayload.text = "Captive"
         elif int(BodyPayload) == 2:
-            self.spdm1_screen.ids.BodyPayload.text = "Captured"
+            self.screens["spdm1"].ids.BodyPayload.text = "Captured"
         else:
-            self.spdm1_screen.ids.BodyPayload.text = "n/a"
+            self.screens["spdm1"].ids.BodyPayload.text = "n/a"
         
-        self.spdm1_screen.ids.BodyRoll.text = str(BodyRoll)
-        self.spdm1_screen.ids.Shoulder1Roll.text = str(Shoulder1Roll)
-        self.spdm1_screen.ids.Shoulder1Yaw.text = str(Shoulder1Yaw)
-        self.spdm1_screen.ids.Shoulder1Pitch.text = str(Shoulder1Pitch)
-        self.spdm1_screen.ids.Elbow1Pitch.text = str(Elbow1Pitch)
-        self.spdm1_screen.ids.Wrist1Roll.text = str(Wrist1Roll)
-        self.spdm1_screen.ids.Wrist1Yaw.text = str(Wrist1Yaw)
-        self.spdm1_screen.ids.Wrist1Pitch.text = str(Wrist1Pitch)
-        self.spdm1_screen.ids.Shoulder2Roll.text = str(Shoulder2Roll)
-        self.spdm1_screen.ids.Shoulder2Yaw.text = str(Shoulder2Yaw)
-        self.spdm1_screen.ids.Shoulder2Pitch.text = str(Shoulder2Pitch)
-        self.spdm1_screen.ids.Elbow2Pitch.text = str(Elbow2Pitch)
-        self.spdm1_screen.ids.Wrist2Roll.text = str(Wrist2Roll)
-        self.spdm1_screen.ids.Wrist2Yaw.text = str(Wrist2Yaw)
-        self.spdm1_screen.ids.Wrist2Pitch.text = str(Wrist2Pitch)
+        self.screens["spdm1"].ids.BodyRoll.text = str(BodyRoll)
+        self.screens["spdm1"].ids.Shoulder1Roll.text = str(Shoulder1Roll)
+        self.screens["spdm1"].ids.Shoulder1Yaw.text = str(Shoulder1Yaw)
+        self.screens["spdm1"].ids.Shoulder1Pitch.text = str(Shoulder1Pitch)
+        self.screens["spdm1"].ids.Elbow1Pitch.text = str(Elbow1Pitch)
+        self.screens["spdm1"].ids.Wrist1Roll.text = str(Wrist1Roll)
+        self.screens["spdm1"].ids.Wrist1Yaw.text = str(Wrist1Yaw)
+        self.screens["spdm1"].ids.Wrist1Pitch.text = str(Wrist1Pitch)
+        self.screens["spdm1"].ids.Shoulder2Roll.text = str(Shoulder2Roll)
+        self.screens["spdm1"].ids.Shoulder2Yaw.text = str(Shoulder2Yaw)
+        self.screens["spdm1"].ids.Shoulder2Pitch.text = str(Shoulder2Pitch)
+        self.screens["spdm1"].ids.Elbow2Pitch.text = str(Elbow2Pitch)
+        self.screens["spdm1"].ids.Wrist2Roll.text = str(Wrist2Roll)
+        self.screens["spdm1"].ids.Wrist2Yaw.text = str(Wrist2Yaw)
+        self.screens["spdm1"].ids.Wrist2Pitch.text = str(Wrist2Pitch)
 
-        self.eva_emu.ids.UIApowerEMU1.text = str(UIApowerEMU1) + " V"
-        self.eva_emu.ids.UIApowerEMU2.text = str(UIApowerEMU2) + " V"
-        self.eva_emu.ids.UIAcurrentEMU1.text = str(UIAcurrentEMU1) + " A"
-        self.eva_emu.ids.UIAcurrentEMU2.text = str(UIAcurrentEMU2)  + " A" 
-        self.eva_emu.ids.PSApowerEMU1.text = str(PSApowerEMU1) + " V"
-        self.eva_emu.ids.PSApowerEMU2.text = str(PSApowerEMU2) + " V"
-        self.eva_emu.ids.PSAcurrentEMU1.text = str(PSAcurrentEMU1) + " A"
-        self.eva_emu.ids.PSAcurrentEMU2.text = str(PSAcurrentEMU2) + " A"
-        self.eva_emu.ids.IRUvoltage.text = str(IRUvoltage) + " V"
-        self.eva_emu.ids.IRUcurrent.text = str(IRUcurrent) + " A"
+        self.screens["eva_emu"].ids.UIApowerEMU1.text = str(UIApowerEMU1) + " V"
+        self.screens["eva_emu"].ids.UIApowerEMU2.text = str(UIApowerEMU2) + " V"
+        self.screens["eva_emu"].ids.UIAcurrentEMU1.text = str(UIAcurrentEMU1) + " A"
+        self.screens["eva_emu"].ids.UIAcurrentEMU2.text = str(UIAcurrentEMU2)  + " A" 
+        self.screens["eva_emu"].ids.PSApowerEMU1.text = str(PSApowerEMU1) + " V"
+        self.screens["eva_emu"].ids.PSApowerEMU2.text = str(PSApowerEMU2) + " V"
+        self.screens["eva_emu"].ids.PSAcurrentEMU1.text = str(PSAcurrentEMU1) + " A"
+        self.screens["eva_emu"].ids.PSAcurrentEMU2.text = str(PSAcurrentEMU2) + " A"
+        self.screens["eva_emu"].ids.IRUvoltage.text = str(IRUvoltage) + " V"
+        self.screens["eva_emu"].ids.IRUcurrent.text = str(IRUcurrent) + " A"
         
-        #self.ct_uhf_screen.ids.UHF1pwr.text = str(UHF1pwr)
+        #self.screens["ct_uhf"].ids.UHF1pwr.text = str(UHF1pwr)
         if int(UHF1pwr) == 0:
-            self.ct_uhf_screen.ids.UHF1pwr.text = "Off-Ok"
+            self.screens["ct_uhf"].ids.UHF1pwr.text = "Off-Ok"
         elif int(UHF1pwr) == 1:
-            self.ct_uhf_screen.ids.UHF1pwr.text = "Not Off-Ok"
+            self.screens["ct_uhf"].ids.UHF1pwr.text = "Not Off-Ok"
         elif int(UHF1pwr) == 2:
-            self.ct_uhf_screen.ids.UHF1pwr.text = "Not Off-Failed"
+            self.screens["ct_uhf"].ids.UHF1pwr.text = "Not Off-Failed"
         else:
-            self.ct_uhf_screen.ids.UHF1pwr.text = "n/a"        
-        #self.ct_uhf_screen.ids.UHF2pwr.text = str(UHF2pwr)
+            self.screens["ct_uhf"].ids.UHF1pwr.text = "n/a"        
+        #self.screens["ct_uhf"].ids.UHF2pwr.text = str(UHF2pwr)
         if int(UHF2pwr) == 0:
-            self.ct_uhf_screen.ids.UHF2pwr.text = "Off-Ok"
+            self.screens["ct_uhf"].ids.UHF2pwr.text = "Off-Ok"
         elif int(UHF2pwr) == 1:
-            self.ct_uhf_screen.ids.UHF2pwr.text = "Not Off-Ok"
+            self.screens["ct_uhf"].ids.UHF2pwr.text = "Not Off-Ok"
         elif int(UHF2pwr) == 2:
-            self.ct_uhf_screen.ids.UHF2pwr.text = "Not Off-Failed"
+            self.screens["ct_uhf"].ids.UHF2pwr.text = "Not Off-Failed"
         else:
-            self.ct_uhf_screen.ids.UHF2pwr.text = "n/a"
-        #self.ct_uhf_screen.ids.UHFframeSync.text = str(UHFframeSync)
+            self.screens["ct_uhf"].ids.UHF2pwr.text = "n/a"
+        #self.screens["ct_uhf"].ids.UHFframeSync.text = str(UHFframeSync)
         if int(UHFframeSync) == 0:
-            self.ct_uhf_screen.ids.UHFframeSync.text = "Unlocked"
+            self.screens["ct_uhf"].ids.UHFframeSync.text = "Unlocked"
         elif int(UHFframeSync) == 1:
-            self.ct_uhf_screen.ids.UHFframeSync.text = "Locked"
+            self.screens["ct_uhf"].ids.UHFframeSync.text = "Locked"
         else:
-            self.iss_screen.ids.UHFframeSync.text = "n/a"
+            self.screens["iss"].ids.UHFframeSync.text = "n/a"
 
-            self.ct_sgant_screen.ids.sgant_transmit.text = str(sgant_transmit)
+            self.screens["ct_sgant"].ids.sgant_transmit.text = str(sgant_transmit)
         if int(sgant_transmit) == 0:
-            self.ct_sgant_screen.ids.sgant_transmit.text = "RESET"
+            self.screens["ct_sgant"].ids.sgant_transmit.text = "RESET"
         elif int(sgant_transmit) == 1:
-            self.ct_sgant_screen.ids.sgant_transmit.text = "NORMAL"
+            self.screens["ct_sgant"].ids.sgant_transmit.text = "NORMAL"
         else:
-            self.ct_sgant_screen.ids.sgant_transmit.text = "n/a"
+            self.screens["ct_sgant"].ids.sgant_transmit.text = "n/a"
         
-        self.ct_sasa_screen.ids.ActiveString.text = str(ActiveString)
-        self.ct_sasa_screen.ids.RFG1status.text = str(RFG1status)
+        self.screens["ct_sasa"].ids.ActiveString.text = str(ActiveString)
+        self.screens["ct_sasa"].ids.RFG1status.text = str(RFG1status)
         if int(RFG1status) == 0:
-            self.ct_sasa_screen.ids.RFG1status.text = "Off-Ok"
+            self.screens["ct_sasa"].ids.RFG1status.text = "Off-Ok"
         elif int(RFG1status) == 1:
-            self.ct_sasa_screen.ids.RFG1status.text = "Not Off-Ok"
+            self.screens["ct_sasa"].ids.RFG1status.text = "Not Off-Ok"
         elif int(RFG1status) == 2:
-            self.ct_sasa_screen.ids.RFG1status.text = "Not Off-Failed"
+            self.screens["ct_sasa"].ids.RFG1status.text = "Not Off-Failed"
         else:
-            self.ct_sasa_screen.ids.RFG1status.text = "n/a"
-        self.ct_sasa_screen.ids.RFG1azimuth.text = str(RFG1azimuth)
-        self.ct_sasa_screen.ids.RFG1elev.text = str(RFG1elev)
+            self.screens["ct_sasa"].ids.RFG1status.text = "n/a"
+        self.screens["ct_sasa"].ids.RFG1azimuth.text = str(RFG1azimuth)
+        self.screens["ct_sasa"].ids.RFG1elev.text = str(RFG1elev)
         
-        self.ct_sasa_screen.ids.RFG2status.text = str(RFG2status)
+        self.screens["ct_sasa"].ids.RFG2status.text = str(RFG2status)
         if int(RFG2status) == 0:
-            self.ct_sasa_screen.ids.RFG2status.text = "Off-Ok"
+            self.screens["ct_sasa"].ids.RFG2status.text = "Off-Ok"
         elif int(RFG2status) == 1:
-            self.ct_sasa_screen.ids.RFG2status.text = "Not Off-Ok"
+            self.screens["ct_sasa"].ids.RFG2status.text = "Not Off-Ok"
         elif int(RFG2status) == 2:
-            self.ct_sasa_screen.ids.RFG2status.text = "Not Off-Failed"
+            self.screens["ct_sasa"].ids.RFG2status.text = "Not Off-Failed"
         else:
-            self.ct_sasa.ids.RFG2status.text = "n/a"
-        self.ct_sasa_screen.ids.RFG2azimuth.text = str(RFG2azimuth)
-        self.ct_sasa_screen.ids.RFG2elev.text = str(RFG2elev)        
+            self.screens["ct_sasa"].ids.RFG2status.text = "n/a"
+        self.screens["ct_sasa"].ids.RFG2azimuth.text = str(RFG2azimuth)
+        self.screens["ct_sasa"].ids.RFG2elev.text = str(RFG2elev)        
 
-        self.eps_screen.ids.beta1b_value.text = beta1b
-        self.eps_screen.ids.beta1a_value.text = beta1a
-        self.eps_screen.ids.beta2b_value.text = beta2b
-        self.eps_screen.ids.beta2a_value.text = beta2a
-        self.eps_screen.ids.beta3b_value.text = beta3b
-        self.eps_screen.ids.beta3a_value.text = beta3a
-        self.eps_screen.ids.beta4b_value.text = beta4b
-        self.eps_screen.ids.beta4a_value.text = beta4a
-        self.eps_screen.ids.c1a_value.text = c1a + "A"
-        self.eps_screen.ids.v1a_value.text = v1a + "V"
-        self.eps_screen.ids.c1b_value.text = c1b + "A"
-        self.eps_screen.ids.v1b_value.text = v1b + "V"
-        self.eps_screen.ids.c2a_value.text = c2a + "A"
-        self.eps_screen.ids.v2a_value.text = v2a + "V"
-        self.eps_screen.ids.c2b_value.text = c2b + "A"
-        self.eps_screen.ids.v2b_value.text = v2b + "V"
-        self.eps_screen.ids.c3a_value.text = c3a + "A"
-        self.eps_screen.ids.v3a_value.text = v3a + "V"
-        self.eps_screen.ids.c3b_value.text = c3b + "A"
-        self.eps_screen.ids.v3b_value.text = v3b + "V"
-        self.eps_screen.ids.c4a_value.text = c4a + "A"
-        self.eps_screen.ids.v4a_value.text = v4a + "V"
-        self.eps_screen.ids.c4b_value.text = c4b + "A"
-        self.eps_screen.ids.v4b_value.text = v4b + "V"
-        self.iss_screen.ids.altitude_value.text = str(altitude) + " km"
-        self.orbit_screen.ids.altitude.text = str(altitude) + " km"
-        self.iss_screen.ids.velocity_value.text = str(velocity) + " km/s"
-        self.iss_screen.ids.stationmass_value.text = str(iss_mass) + " kg"
+        self.screens["eps"].ids.beta1b_value.text = beta1b
+        self.screens["eps"].ids.beta1a_value.text = beta1a
+        self.screens["eps"].ids.beta2b_value.text = beta2b
+        self.screens["eps"].ids.beta2a_value.text = beta2a
+        self.screens["eps"].ids.beta3b_value.text = beta3b
+        self.screens["eps"].ids.beta3a_value.text = beta3a
+        self.screens["eps"].ids.beta4b_value.text = beta4b
+        self.screens["eps"].ids.beta4a_value.text = beta4a
+        self.screens["eps"].ids.c1a_value.text = c1a + "A"
+        self.screens["eps"].ids.v1a_value.text = v1a + "V"
+        self.screens["eps"].ids.c1b_value.text = c1b + "A"
+        self.screens["eps"].ids.v1b_value.text = v1b + "V"
+        self.screens["eps"].ids.c2a_value.text = c2a + "A"
+        self.screens["eps"].ids.v2a_value.text = v2a + "V"
+        self.screens["eps"].ids.c2b_value.text = c2b + "A"
+        self.screens["eps"].ids.v2b_value.text = v2b + "V"
+        self.screens["eps"].ids.c3a_value.text = c3a + "A"
+        self.screens["eps"].ids.v3a_value.text = v3a + "V"
+        self.screens["eps"].ids.c3b_value.text = c3b + "A"
+        self.screens["eps"].ids.v3b_value.text = v3b + "V"
+        self.screens["eps"].ids.c4a_value.text = c4a + "A"
+        self.screens["eps"].ids.v4a_value.text = v4a + "V"
+        self.screens["eps"].ids.c4b_value.text = c4b + "A"
+        self.screens["eps"].ids.v4b_value.text = v4b + "V"
+        self.screens["iss"].ids.altitude_value.text = str(altitude) + " km"
+        self.screens["orbit"].ids.altitude.text = str(altitude) + " km"
+        self.screens["iss"].ids.velocity_value.text = str(velocity) + " km/s"
+        self.screens["iss"].ids.stationmass_value.text = str(iss_mass) + " kg"
 
-        self.us_eva.ids.EVA_needle.angle = float(self.map_rotation(0.0193368*float(crewlockpres)))
-        self.us_eva.ids.crewlockpressure_value.text = "{:.2f}".format(0.0193368*float(crewlockpres))
+        self.screens["us_eva"].ids.EVA_needle.angle = float(self.map_rotation(0.0193368*float(crewlockpres)))
+        self.screens["us_eva"].ids.crewlockpressure_value.text = "{:.2f}".format(0.0193368*float(crewlockpres))
 
         psi_bar_x = self.map_psi_bar(0.0193368*float(crewlockpres)) #convert to torr
 
-        self.us_eva.ids.EVA_psi_bar.pos_hint = {"center_x": psi_bar_x, "center_y": 0.61}
+        self.screens["us_eva"].ids.EVA_psi_bar.pos_hint = {"center_x": psi_bar_x, "center_y": 0.61}
 
 
         ##-------------------Signal Status Check-------------------##
