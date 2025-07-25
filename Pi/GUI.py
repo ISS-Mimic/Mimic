@@ -1287,43 +1287,76 @@ class ISS_Screen(Screen, EventDispatcher):
         global module
         module = str(args[1])
 
+class MimicScreen(Screen):
+    """
+    Shows live ISS telemetry and controls the background collectors
+    (iss_telemetry.py + TDRScheck.py).  Completely self-contained—no
+    module-level globals required.
+    """
 
+    #— UI-bound properties —--------------------------------------------------
+    mimic_directory = pathlib.Path(__file__).resolve().parents[2]   # …/Mimic
+    signalcolor     = ObjectProperty([1, 1, 1])                    # kv binds
+    # (optional) expose mimicbutton to kv if you want two-way binding:
+    # mimicbutton  = BooleanProperty(False)
 
+    # -----------------------------------------------------------------------
+    # Toggle from the kv file
+    # -----------------------------------------------------------------------
+    def change_mimic_boolean(self, value: bool) -> None:
+        """Bound to the 'Mimic' button: True → transmit, False → idle."""
+        App.get_running_app().mimicbutton = value        # replaces global
 
-class MimicScreen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-    def changeMimicBoolean(self, *args):
-        global mimicbutton
-        mimicbutton = args[0]
+    changeMimicBoolean = change_mimic_boolean            # keep old name alive
 
-    def startproc(self):
+    # -----------------------------------------------------------------------
+    # Launch helper subprocesses
+    # -----------------------------------------------------------------------
+    def startproc(self) -> None:
+        app  = App.get_running_app()
+        base = self.mimic_directory / "Mimic" / "Pi"
+
+        log_info("Starting telemetry subprocesses")
+        try:
+            app.p = Popen(["python", str(base / "iss_telemetry.py")])
+            app.TDRSproc = Popen(["python", str(base / "TDRScheck.py")])
+        except Exception as exc:
+            log_error(f"Failed to start telemetry procs: {exc}")
+            app.p = app.TDRSproc = None
+
+    # -----------------------------------------------------------------------
+    # Stop helper subprocesses and tidy up
+    # -----------------------------------------------------------------------
+    def killproc(self, *_):
+        """
+        Called by MainScreen’s EXIT button or when switching to playback.
+        """
         app = App.get_running_app()
-        log_info("Telemetry Subprocess start")
-        app.p = subprocess.Popen(["python", mimic_directory + "/Mimic/Pi/iss_telemetry.py"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
-        app.TDRSproc = subprocess.Popen(["python", mimic_directory + "/Mimic/Pi/TDRScheck.py"]) #uncomment if TDRS site comes back and fixed code
 
-    def killproc(*args):
-        global p,p2,c,TDRSproc
-        c.execute("INSERT OR IGNORE INTO telemetry VALUES('Lightstreamer', '0', 'Unsubscribed', '0', 0)")
+        # optional: mark LS as unsubscribed in your DB
         try:
-            if p:
-                p.kill()
-        except Exception as e:
-            log_error(f"Failed to kill p: {e}")
-        
-        try:
-            if p2:
-                p2.kill()
-        except Exception as e:
-            log_error(f"Failed to kill p2: {e}")
-        
-        try:
-            if TDRSproc:
-                TDRSproc.kill()
-        except Exception as e:
-            log_error(f"Failed to kill TDRSproc: {e}")
+            if hasattr(app, "db_cursor"):
+                app.db_cursor.execute(
+                    "INSERT OR IGNORE INTO telemetry "
+                    "VALUES('Lightstreamer', '0', 'Unsubscribed', '0', 0)"
+                )
+        except Exception as exc:
+            log_error(f"DB write failed: {exc}")
 
+        for name in ("p", "TDRSproc"):
+            proc = getattr(app, name, None)
+            if not proc:
+                continue                                    # never started
+            try:
+                proc.terminate()
+                proc.wait(timeout=3)
+                log_info(f"{name} terminated.")
+            except Exception as exc:
+                log_error(f"Failed to kill {name}: {exc}")
+
+        # Tell the rest of the UI we’re no longer transmitting
+        app.mimicbutton = False
+            
 
 class CDH_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
