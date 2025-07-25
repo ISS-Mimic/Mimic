@@ -390,35 +390,64 @@ old_mt_timestamp = 0.00
 old_mt_position = 0.00
 
 class MainScreen(Screen):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    
-    def changeManualControlBoolean(self, *args):
-        global manualcontrol
-        manualcontrol = args[0]
+    """
+    Home screen.  Handles “Manual Control” toggle and an EXIT button that
+    should cleanly shut down helper processes + observers.
+    """
 
-    def killproc(*args):
-        global p,p2
-        if not USE_CONFIG_JSON:
+    # path needed by kv for <Image> sources etc.
+    mimic_directory = mimic_directory   # module-level constant is fine
+
+    # ------------------------------------------------------------
+    # manual-control toggle (called from kv)
+    # ------------------------------------------------------------
+    def change_manual_control(self, value: bool) -> None:
+        App.get_running_app().manual_control = value
+
+    # Backward-compat alias so other screens still compile
+    changeManualControlBoolean = change_manual_control
+
+    # ------------------------------------------------------------
+    # EXIT button callback
+    # ------------------------------------------------------------
+    def killproc(self, *_):
+        """
+        Called by the red EXIT button.  Stops observer, helper procs,
+        wipes tmp sqlite caches, closes telemetry subscription.
+        """
+        app = App.get_running_app()
+
+        # ---- stop USB observer -------------------------------------------------
+        observer = getattr(app, "tty_observer", None)
+        if observer:
             try:
-                if TTY_OBSERVER and hasattr(TTY_OBSERVER, 'monitor'):
-                    # Try stopping the observer; handle any potential errors
-                    TTY_OBSERVER.stop()
-                    log_info("TTY_OBSERVER stopped successfully.")
-                else:
-                    log_info("TTY_OBSERVER is not initialized or already stopped.")
-            except Exception as e:
-                log_error(f"Error while stopping TTY_OBSERVER: {e}")
+                observer.stop()
+                log_info("TTY observer stopped.")
+            except Exception as exc:
+                log_error(f"Error stopping observer: {exc}")
 
-        try:
-            p.kill()
-            p2.kill()
-        except Exception as e:
-            log_error(e)
-        os.system('rm /dev/shm/*.db*') #delete sqlite database on exit, db is recreated each time to avoid concurrency issues
-        staleTelemetry()
-        log_info("Successfully stopped ISS telemetry javascript and removed database")
-        log_info("App Exit")
-        print("Mimic App Exited")
+        # ---- kill helper subprocesses -----------------------------------------
+        for proc_name in ("p", "p2"):
+            proc = getattr(app, proc_name, None)
+            if proc and proc.poll() is None:       # still running?
+                try:
+                    proc.terminate()
+                    proc.wait(timeout=3)
+                except Exception:
+                    proc.kill()
+
+        # ---- clear tmp sqlite files -------------------------------------------
+        for db_file in pathlib.Path("/dev/shm").glob("*.db*"):
+            try:
+                db_file.unlink()
+            except OSError as exc:
+                log_error(f"Could not remove {db_file}: {exc}")
+
+        staleTelemetry()                           # reset LS flag in DB
+        log_info("Successfully stopped ISS telemetry & cleaned up. Exiting.")
+
+        # For clean shutdown use App.stop(); keep sys.exit for headless use
+        App.get_running_app().stop()
 
 class ManualControlScreen(Screen):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
