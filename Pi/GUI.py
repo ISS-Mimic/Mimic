@@ -21,6 +21,7 @@ import sys
 from collections import deque # used for storing russian data at init
 import os.path as op #use for getting mimic directory
 from pathlib import Path
+import pathlib, sys, signal
 import logging
 from logging.handlers import RotatingFileHandler
 
@@ -41,7 +42,7 @@ from kivy.network.urlrequest import UrlRequest #using this to request webpages
 from kivy.clock import Clock
 from kivy.event import EventDispatcher
 from kivy.core.window import Window
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition, NoTransition
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
@@ -275,7 +276,6 @@ mimicbutton = False
 playbackboolean = False
 demoboolean = False
 switchtofake = False
-manualcontrol = False
 isscrew = 0
 val = ""
 tdrs1 = 0
@@ -410,6 +410,7 @@ class MainScreen(Screen):
     # ------------------------------------------------------------
     # EXIT button callback
     # ------------------------------------------------------------
+
     def killproc(self, *_):
         """
         Called by the red EXIT button.  Stops observer, helper procs,
@@ -427,14 +428,21 @@ class MainScreen(Screen):
                 log_error(f"Error stopping observer: {exc}")
 
         # ---- kill helper subprocesses -----------------------------------------
-        for proc_name in ("p", "p2"):
-            proc = getattr(app, proc_name, None)
-            if proc and proc.poll() is None:       # still running?
-                try:
+        for name in ("p", "p2", "TDRSproc"):
+            proc = getattr(app, name, None)
+            if not proc:
+                continue
+            try:
+                # If it's a subprocess.Popen
+                if hasattr(proc, "terminate"):
                     proc.terminate()
                     proc.wait(timeout=3)
-                except Exception:
-                    proc.kill()
+                # If it's a threading.Thread
+                elif hasattr(proc, "join"):
+                    proc.join(timeout=3)
+                log_info(f"{name} terminated.")
+            except Exception as exc:
+                log_error(f"Failed to kill {name}: {exc}")
 
         # ---- clear tmp sqlite files -------------------------------------------
         for db_file in pathlib.Path("/dev/shm").glob("*.db*"):
@@ -447,7 +455,8 @@ class MainScreen(Screen):
         log_info("Successfully stopped ISS telemetry & cleaned up. Exiting.")
 
         # For clean shutdown use App.stop(); keep sys.exit for headless use
-        App.get_running_app().stop()
+        app.stop()
+        sys.exit(0)
 
 class ManualControlScreen(Screen):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
@@ -911,8 +920,7 @@ class ManualControlScreen(Screen):
         #self.ids.statusbar.text = "Beta4A Value Sent: " + str(beta4amc)
 
     def changeBoolean(self, *args):
-        global manualcontrol
-        manualcontrol = args[0]
+        App.get_running_app().manual_control = args[0]
 
     def sendActive(self, *args):
         if Beta4Bcontrol:
@@ -1279,6 +1287,9 @@ class ISS_Screen(Screen, EventDispatcher):
         global module
         module = str(args[1])
 
+
+
+
 class MimicScreen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     signalcolor = ObjectProperty([1, 1, 1])
@@ -1287,11 +1298,10 @@ class MimicScreen(Screen, EventDispatcher):
         mimicbutton = args[0]
 
     def startproc(self):
-        global p,TDRSproc
+        app = App.get_running_app()
         log_info("Telemetry Subprocess start")
-        p = Popen(["python", mimic_directory + "/Mimic/Pi/iss_telemetry.py"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
-        TDRSproc = Popen(["python", mimic_directory + "/Mimic/Pi/TDRScheck.py"]) #uncomment if TDRS site comes back and fixed code
-        #p = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/Data"])
+        app.p = subprocess.Popen(["python", mimic_directory + "/Mimic/Pi/iss_telemetry.py"]) #uncomment if live data comes back :D :D :D :D WE SAVED ISSLIVE
+        app.TDRSproc = subprocess.Popen(["python", mimic_directory + "/Mimic/Pi/TDRScheck.py"]) #uncomment if TDRS site comes back and fixed code
 
     def killproc(*args):
         global p,p2,c,TDRSproc
@@ -1538,11 +1548,18 @@ class MainScreenManager(ScreenManager):
 class MainApp(App):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     INTERNET_POLL_S = 1.0 # check internet connection every 1s
+    manual_control = BooleanProperty(False)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.internet: bool | None = None # None = "unknown"
         self.ros_data = deque(maxlen=60)   # keep only the latest 60 samples
+        self.manual_control: bool = False
+        self.p = None
+        self.p2 = None
+        self.tty_observer = None
+
+        self.mimic_directory = mimic_directory
 
     def build(self):
         # 1. instantiate once, store in a dict
@@ -1966,8 +1983,7 @@ class MainApp(App):
             scr.signalcolor = (r, g, b)
 
     def changeManualControlBoolean(self, *args):
-        global manualcontrol
-        manualcontrol = args[0]
+        App.get_running_app().manual_control = args[0]
 
     def TDRSupdate(self, dt):
         tdrs_config_filename = mimic_data_directory / 'tdrs_tle_config.json'
@@ -2902,7 +2918,7 @@ class MainApp(App):
         return sum(self.ros_data) / len(self.ros_data)
 
     def update_labels(self, dt): #THIS IS THE IMPORTANT FUNCTION
-        global mimicbutton, switchtofake, demoboolean, runningDemo, playbackboolean, psarj2, ssarj2, manualcontrol, aos, los, oldLOS, psarjmc, ssarjmc, ptrrjmc, strrjmc, beta1bmc, beta1amc, beta2bmc, beta2amc, beta3bmc, beta3amc, beta4bmc, beta4amc, US_EVAinProgress, position_x, position_y, position_z, velocity_x, velocity_y, velocity_z, altitude, velocity, iss_mass, testvalue, testfactor, airlock_pump, crewlockpres, leak_hold, firstcrossing, EVA_activities, repress, depress, oldAirlockPump, obtained_EVA_crew, EVAstartTime
+        global mimicbutton, switchtofake, demoboolean, runningDemo, playbackboolean, psarj2, ssarj2, aos, los, oldLOS, psarjmc, ssarjmc, ptrrjmc, strrjmc, beta1bmc, beta1amc, beta2bmc, beta2amc, beta3bmc, beta3amc, beta4bmc, beta4amc, US_EVAinProgress, position_x, position_y, position_z, velocity_x, velocity_y, velocity_z, altitude, velocity, iss_mass, testvalue, testfactor, airlock_pump, crewlockpres, leak_hold, firstcrossing, EVA_activities, repress, depress, oldAirlockPump, obtained_EVA_crew, EVAstartTime
         global holdstartTime, LS_Subscription
         global Disco, eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
         global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power
@@ -2930,58 +2946,58 @@ class MainApp(App):
         psarj = "{:.2f}".format(float((values[0])[0]))
         if not switchtofake:
             psarj2 = float(psarj)
-        if not manualcontrol:
+        if not App.get_running_app().manual_control:
             psarjmc = float(psarj)
         ssarj = "{:.2f}".format(float((values[1])[0]))
         if not switchtofake:
             ssarj2 = float(ssarj)
-        if not manualcontrol:
+        if not App.get_running_app().manual_control:
             ssarjmc = float(ssarj)
         ptrrj = "{:.2f}".format(float((values[2])[0]))
-        if not manualcontrol:
+        if not App.get_running_app().manual_control:
             ptrrjmc = float(ptrrj)
         strrj = "{:.2f}".format(float((values[3])[0]))
-        if not manualcontrol:
+        if not App.get_running_app().manual_control:
             strrjmc = float(strrj)
         beta1b = "{:.2f}".format(float((values[4])[0]))
         if not switchtofake:
             beta1b2 = float(beta1b)
-        if not manualcontrol:
+        if not App.get_running_app().manual_control:
             beta1bmc = float(beta1b)
         beta1a = "{:.2f}".format(float((values[5])[0]))
         if not switchtofake:
             beta1a2 = float(beta1a)
-        if not manualcontrol:
+        if not App.get_running_app().manual_control:
             beta1amc = float(beta1a)
         beta2b = "{:.2f}".format(float((values[6])[0]))
         if not switchtofake:
             beta2b2 = float(beta2b) #+ 20.00
-        if not manualcontrol:
+        if not App.get_running_app().manual_control:
             beta2bmc = float(beta2b)
         beta2a = "{:.2f}".format(float((values[7])[0]))
         if not switchtofake:
             beta2a2 = float(beta2a)
-        if not manualcontrol:
+        if not App.get_running_app().manual_control:
             beta2amc = float(beta2a)
         beta3b = "{:.2f}".format(float((values[8])[0]))
         if not switchtofake:
             beta3b2 = float(beta3b)
-        if not manualcontrol:
+        if not App.get_running_app().manual_control:
             beta3bmc = float(beta3b)
         beta3a = "{:.2f}".format(float((values[9])[0]))
         if not switchtofake:
             beta3a2 = float(beta3a)
-        if not manualcontrol:
+        if not App.get_running_app().manual_control:
             beta3amc = float(beta3a)
         beta4b = "{:.2f}".format(float((values[10])[0]))
         if not switchtofake:
             beta4b2 = float(beta4b)
-        if not manualcontrol:
+        if not App.get_running_app().manual_control:
             beta4bmc = float(beta4b)
         beta4a = "{:.2f}".format(float((values[11])[0]))
         if not switchtofake:
             beta4a2 = float(beta4a) #+ 20.00
-        if not manualcontrol:
+        if not App.get_running_app().manual_control:
             beta4amc = float(beta4a)
 
         aos = "{:.2f}".format(int((values[12])[0]))
