@@ -114,8 +114,7 @@
             font_size: dp(30)
             pos_hint: {"center_x": 0.85, "center_y": 0.47}
             on_release: playbackstatus.text = 'Transmitting Disco Orbit'
-            on_release: root.changeDemoBoolean(True)
-            on_release: root.startDisco()
+            on_release: root.start_disco()
         Button:
             id: DemoStart
             size_hint: 0.14,0.115
@@ -124,9 +123,8 @@
             background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StartDown.png'
             on_release: DemoStop.disabled = False
             on_release: playbackstatus.text = 'Transmitting Demo Orbit'
-            on_release: root.changeDemoBoolean(True)
             on_release: self.disabled = True
-            on_release: root.startDemo()
+            on_release: root.start_demo_orbit()
         Button:
             id: DemoStop
             size_hint: 0.14,0.115
@@ -136,9 +134,8 @@
             disabled: True
             on_release: DemoStart.disabled = False
             on_release: playbackstatus.text = 'Stopped'
-            on_release: root.changeDemoBoolean(False)
             on_release: self.disabled = True
-            on_release: root.stopDemo()
+            on_release: root.stop_demo_orbit()
         Button:
             id: HTVDemoStart
             size_hint: 0.14,0.115
@@ -147,9 +144,8 @@
             background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StartDown.png'
             on_release: HTVDemoStop.disabled = False
             on_release: playbackstatus.text = 'Transmitting HTV Demo Orbit'
-            on_release: root.changeDemoBoolean(True)
             on_release: self.disabled = True
-            on_release: root.startHTVDemo()
+            on_release: root.start_htv()
         Button:
             id: HTVDemoStop
             size_hint: 0.14,0.115
@@ -159,8 +155,8 @@
             disabled: True
             on_release: HTVDemoStart.disabled = False
             on_release: playbackstatus.text = 'Stopped'
-            on_release: root.changeDemoBoolean(False)
             on_release: self.disabled = True
+            on_release: root.stop_htv()
         Button:
             id: OFT2DemoStart
             size_hint: 0.14,0.115
@@ -169,9 +165,8 @@
             background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StartDown.png'
             on_release: OFT2DemoStop.disabled = False
             on_release: playbackstatus.text = 'Transmitting OFT2 Demo'
-            on_release: root.changeDemoBoolean(True)
             on_release: self.disabled = True
-            on_release: root.startOFT2Demo()
+            on_release: root.start_oft2()
         Button:
             id: OFT2DemoStop
             size_hint: 0.14,0.115
@@ -181,8 +176,8 @@
             disabled: True
             on_release: OFT2DemoStart.disabled = False
             on_release: playbackstatus.text = 'Stopped'
-            on_release: root.changeDemoBoolean(False)
             on_release: self.disabled = True
+            on_release: root.stop_oft2()
         Button:
             id: LoadDemoStart
             disabled: True
@@ -192,7 +187,6 @@
             background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StartDown.png'
             on_release: LoadDemoStop.disabled = False
             on_release: playbackstatus.text = 'Sending Demo'
-            on_release: root.changeDemoBoolean(True)
             on_release: self.disabled = True
             on_release: root.startLoadDemo()
         Button:
@@ -204,7 +198,6 @@
             disabled: True
             on_release: LoadDemoStart.disabled = False
             on_release: playbackstatus.text = 'Stopped'
-            on_release: root.changeDemoBoolean(False)
             on_release: self.disabled = True
         Button:
             id: OFT2loop
@@ -216,7 +209,6 @@
             background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StopDown.png'
             disabled: True
             on_release: playbackstatus.text = 'Looping'
-            on_release: root.changeDemoBoolean(False)
             on_release: self.disabled = True
         Button:
             size_hint: 0.1,0.11
@@ -224,7 +216,6 @@
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: DemoStart.disabled = False
             on_release: DemoStop.disabled = True
-            on_release: root.changeDemoBoolean(False)
             on_release: root.stopDemo()
             on_release: root.manager.current = 'main'
         Image:
