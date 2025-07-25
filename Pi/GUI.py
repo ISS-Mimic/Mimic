@@ -391,34 +391,31 @@ old_mt_position = 0.00
 
 class MainScreen(Screen):
     """
-    Home screen.  Handles “Manual Control” toggle and an EXIT button that
-    should cleanly shut down helper processes + observers.
+    Home screen. Handles the manual-control toggle and the red EXIT button.
     """
 
-    # path needed by kv for <Image> sources etc.
-    mimic_directory = mimic_directory   # module-level constant is fine
+    mimic_directory = pathlib.Path(__file__).resolve().parents[2]   # …/Mimic
 
-    # ------------------------------------------------------------
-    # manual-control toggle (called from kv)
-    # ------------------------------------------------------------
+    # ──────────────────────────────────────────────────────────────
+    # Manual-control toggle (called from kv)
+    # ──────────────────────────────────────────────────────────────
     def change_manual_control(self, value: bool) -> None:
         App.get_running_app().manual_control = value
 
-    # Backward-compat alias so other screens still compile
-    changeManualControlBoolean = change_manual_control
+    changeManualControlBoolean = change_manual_control   # ← kv compatibility
 
-    # ------------------------------------------------------------
+    # ──────────────────────────────────────────────────────────────
     # EXIT button callback
-    # ------------------------------------------------------------
-
+    # ──────────────────────────────────────────────────────────────
     def killproc(self, *_):
         """
-        Called by the red EXIT button.  Stops observer, helper procs,
-        wipes tmp sqlite caches, closes telemetry subscription.
+        Cleanly stop every helper process started elsewhere, clear tmp
+        sqlite caches, reset telemetry colours, then close the GUI.
         """
+
         app = App.get_running_app()
 
-        # ---- stop USB observer -------------------------------------------------
+        # -------- 1. stop USB / TTY observer (if any) ---------------
         observer = getattr(app, "tty_observer", None)
         if observer:
             try:
@@ -427,36 +424,51 @@ class MainScreen(Screen):
             except Exception as exc:
                 log_error(f"Error stopping observer: {exc}")
 
-        # ---- kill helper subprocesses -----------------------------------------
-        for name in ("p", "p2", "TDRSproc"):
-            proc = getattr(app, name, None)
-            if not proc:
-                continue
-            try:
-                # If it's a subprocess.Popen
-                if hasattr(proc, "terminate"):
-                    proc.terminate()
-                    proc.wait(timeout=3)
-                # If it's a threading.Thread
-                elif hasattr(proc, "join"):
-                    proc.join(timeout=3)
-                log_info(f"{name} terminated.")
-            except Exception as exc:
-                log_error(f"Failed to kill {name}: {exc}")
+        # -------- 2. terminate helper processes --------------------
+        #  Add new names to this tuple *only* when another screen
+        #  stores a Popen object on the App instance.
+        for attr in (
+            "p",           # iss_telemetry.py
+            "TDRSproc",    # TDRS checker
+            "demo_proc",   # playback.out + orbit demo
+            "disco_proc",  # disco.sh
+            "htv_proc",    # HTV demo
+            "oft2_proc",   # OFT-2 demo
+        ):
+            self._terminate_attr(app, attr)
 
-        # ---- clear tmp sqlite files -------------------------------------------
-        for db_file in pathlib.Path("/dev/shm").glob("*.db*"):
+        # -------- 3. wipe tmp *.db* files --------------------------
+        for db in pathlib.Path("/dev/shm").glob("*.db*"):
             try:
-                db_file.unlink()
+                db.unlink()
             except OSError as exc:
-                log_error(f"Could not remove {db_file}: {exc}")
+                log_error(f"Could not remove {db}: {exc}")
 
-        staleTelemetry()                           # reset LS flag in DB
-        log_info("Successfully stopped ISS telemetry & cleaned up. Exiting.")
+        # -------- 4. reset UI telemetry colours -------------------
+        staleTelemetry()
 
-        # For clean shutdown use App.stop(); keep sys.exit for headless use
-        app.stop()
-        sys.exit(0)
+        log_info("Cleanup complete – exiting application.")
+        app.stop()        # close window + event-loop
+        sys.exit(0)       # guarantee Python process ends
+
+    # ──────────────────────────────────────────────────────────────
+    # Helper: terminate a subprocess if present
+    # ──────────────────────────────────────────────────────────────
+    @staticmethod
+    def _terminate_attr(app: App, attr_name: str) -> None:
+        proc = getattr(app, attr_name, None)
+        if not proc:
+            return  # never started
+
+        try:
+            proc.terminate()
+            proc.wait(timeout=3)
+            log_info(f"{attr_name} terminated.")
+        except Exception as exc:
+            log_error(f"Failed to kill {attr_name}: {exc}")
+        finally:
+            setattr(app, attr_name, None)
+                
 
 class ManualControlScreen(Screen):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
@@ -1149,9 +1161,7 @@ class ManualControlScreen(Screen):
         serialWrite("STRRJ=90 ")
 
 class Playback_Screen(Screen):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    
-    def __init__(self, **kwargs):
+        def __init__(self, **kwargs):
         super(Playback_Screen, self).__init__(**kwargs)
         self.usb_drives = self.get_mount_points()  # Initialize with already connected drives
         self.start_usb_monitoring()
@@ -1193,81 +1203,168 @@ class Playback_Screen(Screen):
     def on_dropdown_select(self, value):
         playback = value
         log_info(playback)
-
+            
     def changeDemoBoolean(self, *args):
         global demoboolean
         demoboolean = args[0]
 
-    def startDisco(*args):
-        global p2, runningDemo, Disco
-        if not runningDemo:
-            try:
-                p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/disco.sh")
-            except Exception as e:
-                log_error(e)
-            runningDemo = True
-            Disco = True
-            log_info("Successfully started Disco script")
-
-    def startDemo(*args):
-        global p2, runningDemo
-        if not runningDemo:
-            try:
-                #p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/demoOrbit.sh")
-                p2 = Popen([mimic_directory + "/Mimic/Pi/RecordedData/playback.out",mimic_directory + "/Mimic/Pi/RecordedData/OFT2"])
-            except Exception as e:
-                log_error(e)
-            runningDemo = True
-            log_info("Successfully started Demo Orbit script")
-
-    def stopDemo(*args):
-        global p2, runningDemo
+    # helper
+    def _launch(self, command, attr_name, log_start, log_stop):
+        app = App.get_running_app()
+        if getattr(app, attr_name, None):          # already running
+            return
         try:
-            p2.kill()
-        except Exception as e:
-            log_error(e)
-        else:
-            runningDemo = False
+            setattr(app, attr_name, Popen(command))
+            log_info(log_start)
+        except Exception as exc:
+            log_error(f"Failed to launch {attr_name}: {exc}")
+            setattr(app, attr_name, None)
 
-    def startHTVDemo(*args):
-        global p2, runningDemo
-        if not runningDemo:
+    # DEMO SCRIPTS -------------------------------------------------------
+    def start_disco(self, *_):
+        self._launch(
+            [mimic_directory + "/Mimic/Pi/RecordedData/disco.sh"],
+            "p2",
+            "Disco script started.",
+            "Disco script stopped."
+        )
+
+    def stop_disco(self, *_):
+        self._terminate("p2", "Disco script stopped.")
+
+    def start_demo(self, *_):
+        self._launch(
+            [mimic_directory + "/Mimic/Pi/RecordedData/disco.sh"],
+            "p2",
+            "Demo script started.",
+            "Demo script stopped."
+        )
+
+    def stop_demo(self, *_):
+        self._terminate("p2", "Disco script stopped.")
+
+    # repeat for start_demo / stop_demo / start_htv / stop_htv …
+
+    # generic terminator
+    def _terminate(self, attr_name, log_msg):
+        proc = getattr(App.get_running_app(), attr_name, None)
+        if proc:
             try:
-                p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/demoHTVOrbit.sh")
-            except Exception as e:
-                log_error(e)
-            runningDemo = True
-            log_info("Successfully started Demo HTV Orbit script")
+                proc.terminate()
+                proc.wait(timeout=3)
+                log_info(log_msg)
+            except Exception as exc:
+                log_error(f"Failed to terminate {attr_name}: {exc}")
+        setattr(App.get_running_app(), attr_name, None)
 
-    def stopHTVDemo(*args):
-        global p2, runningDemo
-        try:
-            p2.kill()
-        except Exception as e:
-            log_error(e)
-        else:
-            log_info("Successfully stopped Demo HTV Orbit script")
-            runningDemo = False
-                
-    def startOFT2Demo(*args):
-        global p2, runningDemo
-        if not runningDemo:
-            try:
-                p2 = Popen(mimic_directory + "/Mimic/Pi/RecordedData/demoOFT2.sh")
-            except Exception as e:
-                log_error(e)
-            runningDemo = True
-            log_info("Successfully started Demo OFT2 Orbit script")
+class Playback_Screen(Screen):
+    """
+    Lets the user pick a USB stick / canned demo (HTV, OFT-2, Disco, …) and
+    launches the corresponding playback script.
+    """
 
-    def stopOFT2Demo(*args):
-        global p2, runningDemo
+    mimic_directory = pathlib.Path(__file__).resolve().parents[2]    # …/Mimic
+    usb_drives: set[str] = set()
+
+    # ──────────── initialisation ────────────────────────────────────────────
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.usb_drives = self._get_mount_points()
+        self._start_usb_monitor()
+        Clock.schedule_once(self._update_dropdown)
+
+    # ──────────── USB monitoring — same logic, cleaner style ───────────────
+    @staticmethod
+    def _get_mount_points() -> set[str]:
         try:
-            p2.kill()
-        except Exception as e:
-            log_error(e)
-        else:
-            log_error("Successfully stopped Demo OFT2 Orbit script")
-            runningDemo = False
+            return set(os.listdir('/media/pi'))
+        except Exception as exc:
+            log_error(f"USB ls failed: {exc}")
+            return set()
+
+    def _usb_monitor_loop(self) -> None:
+        prev = self._get_mount_points()
+        while True:
+            curr = self._get_mount_points()
+            if curr != prev:
+                self.usb_drives = curr
+                Clock.schedule_once(self._update_dropdown)
+                prev = curr
+            time.sleep(5)
+
+    def _start_usb_monitor(self) -> None:
+        t = threading.Thread(target=self._usb_monitor_loop, daemon=True)
+        t.start()
+
+    def _update_dropdown(self, _dt) -> None:
+        spinner = self.ids.playback_dropdown
+        spinner.values = [f"{d} (USB)" for d in sorted(self.usb_drives)] + ["HTV", "OFT-2"]
+
+    # Kivy binds directly to this
+    def on_dropdown_select(self, value: str) -> None:
+        log_info(f"Playback selected: {value}")
+        # You could auto-launch here if desired.
+
+    # ──────────── DEMO / PLAYBACK PROCESS MANAGEMENT ───────────────────────
+    # Centralised helper so all start/stop actions are one-liners
+    def _launch(self, script: list[str] | str, attr: str, nice_name: str) -> None:
+        app = App.get_running_app()
+        if getattr(app, attr, None):
+            log_info(f"{nice_name} already running.")
+            return
+        try:
+            cmd = [script] if isinstance(script, str) else script
+            setattr(app, attr, Popen(cmd))
+            log_info(f"{nice_name} started.")
+        except (OSError, CalledProcessError) as exc:
+            log_error(f"Failed to start {nice_name}: {exc}")
+            setattr(app, attr, None)
+
+    def _terminate(self, attr: str, nice_name: str) -> None:
+        proc: Optional[Popen] = getattr(App.get_running_app(), attr, None)
+        if not proc:
+            return
+        try:
+            proc.terminate()
+            proc.wait(timeout=3)
+            log_info(f"{nice_name} stopped.")
+        except Exception as exc:
+            log_error(f"Failed to stop {nice_name}: {exc}")
+        finally:
+            setattr(App.get_running_app(), attr, None)
+
+    # ──────────── public callbacks (KV buttons bind to these) ──────────────
+    def start_disco(self):       # Disco lights demo
+        script = self.mimic_directory / "Mimic/Pi/RecordedData/disco.sh"
+        self._launch(str(script), "disco_proc", "Disco demo")
+
+    def stop_disco(self):
+        self._terminate("disco_proc", "Disco demo")
+
+    def start_demo_orbit(self):
+        # playback.out + OFT2 directory
+        script = [
+            str(self.mimic_directory / "Mimic/Pi/RecordedData/playback.out"),
+            str(self.mimic_directory / "Mimic/Pi/RecordedData/OFT2")
+        ]
+        self._launch(script, "demo_proc", "Standard orbit demo")
+
+    def stop_demo_orbit(self):
+        self._terminate("demo_proc", "Standard orbit demo")
+
+    def start_htv(self):
+        script = self.mimic_directory / "Mimic/Pi/RecordedData/demoHTVOrbit.sh"
+        self._launch(str(script), "htv_proc", "HTV orbit demo")
+
+    def stop_htv(self):
+        self._terminate("htv_proc", "HTV orbit demo")
+
+    def start_oft2(self):
+        script = self.mimic_directory / "Mimic/Pi/RecordedData/demoOFT2.sh"
+        self._launch(str(script), "oft2_proc", "OFT-2 orbit demo")
+
+    def stop_oft2(self):
+        self._terminate("oft2_proc", "OFT-2 orbit demo")
 
 class Settings_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
@@ -1356,6 +1453,9 @@ class MimicScreen(Screen):
 
         # Tell the rest of the UI we’re no longer transmitting
         app.mimicbutton = False
+    
+    def on_pre_leave(self):        # fired by ScreenManager, automatically kill telemetry process when exiting mimic screen
+        self.killproc()
             
 
 class CDH_Screen(Screen, EventDispatcher):
