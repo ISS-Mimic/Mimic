@@ -6,6 +6,8 @@ from kivy.properties import StringProperty
 from kivy.lang import Builder
 from kivy.app import App
 
+from utils.serial import serialWrite
+
 # ------------------------------------------------------------------ logging ---
 log_info  = logging.getLogger("MyLogger").info
 log_error = logging.getLogger("MyLogger").error

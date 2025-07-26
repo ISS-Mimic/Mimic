@@ -9,6 +9,8 @@ from kivy.uix.screenmanager import Screen
 from kivy.app import App
 from kivy.lang import Builder
 
+from utils.serial import serialWrite
+
 log_info  = logging.getLogger("MyLogger").info
 log_error = logging.getLogger("MyLogger").error
 

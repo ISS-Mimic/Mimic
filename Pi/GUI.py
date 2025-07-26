@@ -53,6 +53,7 @@ from kivy.network.urlrequest import UrlRequest
 import database_initialize # create and populate database script
 from Screens import MainScreen
 from Screens import ManualControlScreen
+from utils.serial import serialWrite # custom Serial Write function
 
 mimic_data_directory = Path.home() / '.mimic_data'
 mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
@@ -216,29 +217,6 @@ def open_serial_ports(serial_ports):
         if USE_CONFIG_JSON:
             log_info("\nNot all serial ports were detected. Check config.json for accuracy.\n\n%s" % e)
         raise Exception(e)
-
-
-def serialWrite(*args):
-    """ Writes to serial ports in list with retries on EAGAIN error. """
-    log_info("Function call - serial write: " + str(*args))
-    for s in OPEN_SERIAL_PORTS:
-        if not s.is_open:
-            log_error(f"Serial port {s.port} is not open.")
-            continue
-        try:
-            s.write(str.encode(*args))
-        except (OSError, serial.SerialException) as e:
-            if e.errno == 11:  # EAGAIN
-                log_info(f"EAGAIN error on {s.port}, retrying...")
-                time.sleep(0.1)
-                try:
-                    s.write(str.encode(*args))
-                except Exception as retry_error:
-                    log_error(f"Retry failed for {s.port}: {retry_error}")
-                    continue
-            else:
-                log_error(f"Error writing to {s.port}: {e}")
-
 
 context = Context()
 if not USE_CONFIG_JSON:
