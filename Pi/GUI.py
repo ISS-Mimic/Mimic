@@ -404,20 +404,14 @@ class MainScreen(Screen):
 
     changeManualControlBoolean = change_manual_control   # ← kv compatibility
 
-    # ---------------------------------------------------------------------------
-    # EXIT button callback – non-blocking and thread-safe
-    # ---------------------------------------------------------------------------
     def killproc(self, *_):
         """
-        Called by the red “EXIT” button.
-    
-        1. Spawns a daemon thread so the UI never freezes.
-        2. Stops observer + helper subprocesses.
-        3. Schedules staleTelemetry() **and** app.stop() back on the
-           main Kivy thread to avoid cross-thread SQLite access.
+        EXIT button callback – never blocks the UI.
+        Spawns a daemon thread to do cleanup, then schedules both
+        `app.stop()` and `sys.exit(0)` back on the main thread.
         """
-        if getattr(self, "_exiting", False):   # guard against double-clicks
-            return
+        if getattr(self, "_exiting", False):
+            return                     # double-click guard
         self._exiting = True
     
         threading.Thread(
@@ -426,13 +420,13 @@ class MainScreen(Screen):
         ).start()
     
     
-    # ---------------------------------------------------------------------------
-    # Background worker  (runs in the daemon thread)
-    # ---------------------------------------------------------------------------
+    # ──────────────────────────────────────────────────────────────
+    # Background worker  (runs in a daemon thread)
+    # ──────────────────────────────────────────────────────────────
     def _cleanup_and_quit(self):
         app = App.get_running_app()
     
-        # 1) Stop USB / TTY observer (if any)
+        # 1) Stop observer
         observer = getattr(app, "tty_observer", None)
         if observer:
             try:
@@ -441,34 +435,39 @@ class MainScreen(Screen):
             except Exception as exc:
                 log_error(f"Error stopping observer: {exc}")
     
-        # 2) Terminate every helper subprocess
+        # 2) Terminate helper subprocesses
         for attr in (
-            "p", "TDRSproc",           # telemetry collectors
-            "demo_proc", "disco_proc", # playback demos
-            "htv_proc", "oft2_proc",   # more demos
+            "p", "TDRSproc",
+            "demo_proc", "disco_proc",
+            "htv_proc", "oft2_proc",
         ):
             self._terminate_attr(app, attr)
     
-        # 3) Wipe tmp SQLite caches
+        # 3) Wipe tmp *.db* files
         for db in pathlib.Path("/dev/shm").glob("*.db*"):
             try:
                 db.unlink()
             except OSError as exc:
                 log_error(f"Could not remove {db}: {exc}")
     
-        # 4) Schedule UI-thread tasks to avoid cross-thread SQLite errors
-        Clock.schedule_once(lambda dt: staleTelemetry())
-        Clock.schedule_once(lambda dt: app.stop())  # close the window
+        # 4) Back to the UI thread to finish up
+        def _finalise(_dt):
+            try:
+                staleTelemetry()          # touches SQLite → main thread safe
+            finally:
+                app.stop()                # close Kivy window / loop
+                sys.exit(0)               # TERMINATE Python – no hanging
+        Clock.schedule_once(_finalise)
     
     
-    # ---------------------------------------------------------------------------
-    # Helper: terminate Popen safely   (called from _cleanup_and_quit)
-    # ---------------------------------------------------------------------------
+    # ──────────────────────────────────────────────────────────────
+    # Helper: terminate a subprocess if present
+    # ──────────────────────────────────────────────────────────────
     @staticmethod
     def _terminate_attr(app: App, attr_name: str) -> None:
         proc = getattr(app, attr_name, None)
         if not proc:
-            return                                 # never started
+            return
     
         try:
             proc.terminate()
@@ -481,8 +480,7 @@ class MainScreen(Screen):
         finally:
             setattr(app, attr_name, None)
             log_info(f"{attr_name} terminated.")
-    
-                    
+                
 
 class ManualControlScreen(Screen):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
