@@ -42,7 +42,7 @@ from kivy.network.urlrequest import UrlRequest #using this to request webpages
 from kivy.clock import Clock
 from kivy.event import EventDispatcher
 from kivy.core.window import Window
-from kivy.properties import ObjectProperty, BooleanProperty
+from kivy.properties import ObjectProperty, BooleanProperty, StringProperty
 from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition, NoTransition
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
@@ -539,7 +539,7 @@ class ManualControlScreen(Screen):
     # ------------------------------------------------------------------
     # NEW: “Calibrate Zero”  — tell Arduino current pos = 0°
     # ------------------------------------------------------------------
-    def calibrate_zero(self):
+    def zero_joints(self):
         app = self._app()
         for key in app.mc_angles:
             # serial command that your Arduino interprets as
