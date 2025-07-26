@@ -403,30 +403,39 @@ class MainScreen(Screen):
         App.get_running_app().manual_control = value
 
     changeManualControlBoolean = change_manual_control   # ← kv compatibility
-
+    
     def killproc(self, *_):
         """
-        EXIT button callback – never blocks the UI.
-        Spawns a daemon thread to do cleanup, then schedules both
-        `app.stop()` and `sys.exit(0)` back on the main thread.
+        Red EXIT button callback — guaranteed to shut everything down.
+    
+        * UI thread:   closes the window right away (app.stop()).
+        * Worker thread: terminates helper processes, cleans temp files,
+          then forces *hard* interpreter exit via `os._exit(0)`.
         """
+    
         if getattr(self, "_exiting", False):
-            return                     # double-click guard
+            return                      # double-click guard
         self._exiting = True
     
+        app = App.get_running_app()
+        app.stop()                      # ⇢ window disappears instantly
+    
+        # ------------------------------------------------------------
+        # launch daemon thread to finish cleanup in background
+        # ------------------------------------------------------------
         threading.Thread(
-            target=self._cleanup_and_quit,
+            target=self._background_cleanup_and_exit,
             daemon=True
         ).start()
     
     
     # ──────────────────────────────────────────────────────────────
-    # Background worker  (runs in a daemon thread)
+    # runs in a daemon thread; UI already closed
     # ──────────────────────────────────────────────────────────────
-    def _cleanup_and_quit(self):
+    def _background_cleanup_and_exit(self):
         app = App.get_running_app()
     
-        # 1) Stop observer
+        # 1) stop observer
         observer = getattr(app, "tty_observer", None)
         if observer:
             try:
@@ -435,7 +444,7 @@ class MainScreen(Screen):
             except Exception as exc:
                 log_error(f"Error stopping observer: {exc}")
     
-        # 2) Terminate helper subprocesses
+        # 2) terminate helper subprocesses
         for attr in (
             "p", "TDRSproc",
             "demo_proc", "disco_proc",
@@ -443,32 +452,23 @@ class MainScreen(Screen):
         ):
             self._terminate_attr(app, attr)
     
-        # 3) Wipe tmp *.db* files
+        # 3) wipe temporary sqlite caches
         for db in pathlib.Path("/dev/shm").glob("*.db*"):
             try:
                 db.unlink()
             except OSError as exc:
                 log_error(f"Could not remove {db}: {exc}")
     
-        # 4) Back to the UI thread to finish up
-        def _finalise(_dt):
-            try:
-                staleTelemetry()          # touches SQLite → main thread safe
-            finally:
-                app.stop()                # close Kivy window / loop
-                sys.exit(0)               # TERMINATE Python – no hanging
-        Clock.schedule_once(_finalise)
+        # 4) done – force interpreter exit (bypasses lingering threads)
+        os._exit(0)                     # ← never returns
     
     
-    # ──────────────────────────────────────────────────────────────
-    # Helper: terminate a subprocess if present
-    # ──────────────────────────────────────────────────────────────
+    # helper stays unchanged
     @staticmethod
     def _terminate_attr(app: App, attr_name: str) -> None:
         proc = getattr(app, attr_name, None)
         if not proc:
             return
-    
         try:
             proc.terminate()
             proc.wait(timeout=3)
@@ -480,6 +480,7 @@ class MainScreen(Screen):
         finally:
             setattr(app, attr_name, None)
             log_info(f"{attr_name} terminated.")
+
                 
 
 class ManualControlScreen(Screen):
