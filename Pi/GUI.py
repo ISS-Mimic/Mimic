@@ -51,6 +51,8 @@ from kivy.network.urlrequest import UrlRequest
 
 #from screens import SCREEN_DEFS # import list of mimic screens
 import database_initialize # create and populate database script
+from Screens import MainScreen
+from Screens import ManualControlScreen
 
 mimic_data_directory = Path.home() / '.mimic_data'
 mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
@@ -287,22 +289,9 @@ obtained_EVA_crew = False
 unixconvert = time.gmtime(time.time())
 EVAstartTime = float(unixconvert[7])*24+unixconvert[3]+float(unixconvert[4])/60+float(unixconvert[5])/3600
 alternate = True
-Beta4Bcontrol = False
-Beta3Bcontrol = False
-Beta2Bcontrol = False
-Beta1Bcontrol = False
-Beta4Acontrol = False
-Beta3Acontrol = False
-Beta2Acontrol = False
-Beta1Acontrol = False
-PSARJcontrol = False
-SSARJcontrol = False
-PTRRJcontrol = False
-STRRJcontrol = False
 startingAnim = True
-oldtdrs = "n/a"
 runningDemo = False
-Disco = False
+oldtdrs = "n/a"
 logged = False
 mt_speed = 0.00
 #-----------EPS Variables----------------------
@@ -388,240 +377,6 @@ urlindex = 0
 module = ""
 old_mt_timestamp = 0.00
 old_mt_position = 0.00
-
-class MainScreen(Screen):
-    """
-    Home screen. Handles the manual-control toggle and the red EXIT button.
-    """
-
-    mimic_directory = pathlib.Path(__file__).resolve().parents[2]   # …/Mimic
-
-    # ──────────────────────────────────────────────────────────────
-    # Manual-control toggle (called from kv)
-    # ──────────────────────────────────────────────────────────────
-    def change_manual_control(self, value: bool) -> None:
-        App.get_running_app().manual_control = value
-
-    changeManualControlBoolean = change_manual_control   # ← kv compatibility
-    
-    def killproc(self, *_):
-        """
-        Red EXIT button callback — guaranteed to shut everything down.
-    
-        * UI thread:   closes the window right away (app.stop()).
-        * Worker thread: terminates helper processes, cleans temp files,
-          then forces *hard* interpreter exit via `os._exit(0)`.
-        """
-    
-        if getattr(self, "_exiting", False):
-            return                      # double-click guard
-        self._exiting = True
-    
-        app = App.get_running_app()
-        app.stop()                      # ⇢ window disappears instantly
-    
-        # ------------------------------------------------------------
-        # launch daemon thread to finish cleanup in background
-        # ------------------------------------------------------------
-        threading.Thread(
-            target=self._background_cleanup_and_exit,
-            daemon=True
-        ).start()
-    
-    
-    # ──────────────────────────────────────────────────────────────
-    # runs in a daemon thread; UI already closed
-    # ──────────────────────────────────────────────────────────────
-    def _background_cleanup_and_exit(self):
-        app = App.get_running_app()
-    
-        # 1) stop observer
-        observer = getattr(app, "tty_observer", None)
-        if observer:
-            try:
-                observer.stop()
-                log_info("TTY observer stopped.")
-            except Exception as exc:
-                log_error(f"Error stopping observer: {exc}")
-    
-        # 2) terminate helper subprocesses
-        for attr in (
-            "p", "TDRSproc",
-            "demo_proc", "disco_proc",
-            "htv_proc", "oft2_proc",
-        ):
-            self._terminate_attr(app, attr)
-    
-        # 3) wipe temporary sqlite caches
-        for db in pathlib.Path("/dev/shm").glob("*.db*"):
-            try:
-                db.unlink()
-            except OSError as exc:
-                log_error(f"Could not remove {db}: {exc}")
-    
-        # 4) done – force interpreter exit (bypasses lingering threads)
-        os._exit(0)                     # ← never returns
-    
-    
-    # helper stays unchanged
-    @staticmethod
-    def _terminate_attr(app: App, attr_name: str) -> None:
-        proc = getattr(app, attr_name, None)
-        if not proc:
-            return
-        try:
-            proc.terminate()
-            proc.wait(timeout=3)
-        except subprocess.TimeoutExpired:
-            proc.kill()
-            proc.wait()
-        except Exception as exc:
-            log_error(f"Failed to terminate {attr_name}: {exc}")
-        finally:
-            setattr(app, attr_name, None)
-            log_info(f"{attr_name} terminated.")
-
-            
-class ManualControlScreen(Screen):
-    """
-    Let the user pick an ISS joint, jog it, or calibrate its zero.
-    """
-
-    # make available to KV at parse-time
-    mimic_directory = StringProperty(
-        str(pathlib.Path(__file__).resolve().parents[2])
-    )
-
-    # colour constants
-    _default_color = (.3, .3, .3, 1)   # grey when inactive
-    _active_color  = (.1, .8, .1, 1)   # green when active
-
-    # currently selected joint label ('beta4b', 'psarj', …)
-    active_joint: str | None = None
-
-    # -------------------------------------------------------------------------
-    # shorthands
-    # -------------------------------------------------------------------------
-    @staticmethod
-    def _app():
-        return App.get_running_app()
-
-    # -------------------------------------------------------------------------
-    # Kivy life-cycle
-    # -------------------------------------------------------------------------
-    def on_pre_enter(self, *_):
-        self.refresh_buttons()         # text & colour on every visit
-
-    # -------------------------------------------------------------------------
-    # Public callbacks (bound in KV)
-    # -------------------------------------------------------------------------
-    def set_active(self, joint_key: str) -> None:
-        """Called when a tile is clicked."""
-        self.active_joint = joint_key
-        log_info(f"ManualControl: active → {joint_key}")
-        self._highlight_tiles()
-
-    def increment_active(self, delta: float) -> None:
-        if self.active_joint is None:
-            return
-        self._set_angle(self.active_joint, delta=delta)
-        self.refresh_buttons()
-
-    def set_zero(self) -> None:
-        for key in self._app().mc_angles:
-            self._set_angle(key, absolute=0)
-        self.refresh_buttons()
-
-    def set_ninety(self) -> None:
-        for key in self._app().mc_angles:
-            self._set_angle(key, absolute=90)
-        self.refresh_buttons()
-
-    def calibrate_zero(self) -> None:
-        """Tell controller current position = 0 for every joint."""
-        app = self._app()
-        for key in app.mc_angles:
-            try:
-                serialWrite("NULLIFY=1 ")
-            except Exception as exc:
-                log_error(f"Serial write failed ({key}): {exc}")
-            self._set_angle(key, absolute=0, emit=False)
-        self.refresh_buttons()
-        log_info("ManualControl: calibration sent for all joints.")
-
-    # -------------------------------------------------------------------------
-    # Core angle setter  (emit=False skips move cmd; used by calibration)
-    # -------------------------------------------------------------------------
-    def _set_angle(
-        self,
-        label: str,
-        *,
-        delta: float | None = None,
-        absolute: float | None = None,
-        emit: bool = True
-    ) -> None:
-        app = self._app()
-        new_val = absolute if absolute is not None else app.mc_angles[label] + delta
-        app.mc_angles[label] = new_val
-
-        if emit:
-            try:
-                serialWrite(f"{label.upper()}={new_val} ")
-            except Exception as exc:
-                log_error(f"Serial write failed ({label}): {exc}")
-
-        try:
-            app.db_cursor.execute(
-                "UPDATE telemetry SET Value = ? WHERE Label = ?",
-                (new_val, label)
-            )
-        except Exception as exc:
-            log_error(f"DB update failed ({label}): {exc}")
-
-    # -------------------------------------------------------------------------
-    # Visual helpers
-    # -------------------------------------------------------------------------
-    def refresh_buttons(self) -> None:
-        """Update angle text on every tile, then recolour."""
-        a: Dict[str, float] = self._app().mc_angles
-        ids = self.ids
-
-        ids.Beta4B_Button.text = f"4B\n{int(a['beta4b'])}"
-        ids.Beta4A_Button.text = f"4A\n{int(a['beta4a'])}"
-        ids.Beta3B_Button.text = f"3B\n{int(a['beta3b'])}"
-        ids.Beta3A_Button.text = f"3A\n{int(a['beta3a'])}"
-        ids.Beta2B_Button.text = f"2B\n{int(a['beta2b'])}"
-        ids.Beta2A_Button.text = f"2A\n{int(a['beta2a'])}"
-        ids.Beta1B_Button.text = f"1B\n{int(a['beta1b'])}"
-        ids.Beta1A_Button.text = f"1A\n{int(a['beta1a'])}"
-        ids.PSARJ_Button.text  = f"PSARJ {int(a['psarj'])}"
-        ids.SSARJ_Button.text  = f"SSARJ {int(a['ssarj'])}"
-        ids.PTRRJ_Button.text  = f"PTRRJ\n{int(a['ptrrj'])}"
-        ids.STRRJ_Button.text  = f"STRRJ\n{int(a['strrj'])}"
-
-        self._highlight_tiles()
-
-    def _highlight_tiles(self) -> None:
-        """Colour the active tile green, others grey."""
-        mapping = {
-            "beta4b":  "Beta4B_Button",
-            "beta4a":  "Beta4A_Button",
-            "beta3b":  "Beta3B_Button",
-            "beta3a":  "Beta3A_Button",
-            "beta2b":  "Beta2B_Button",
-            "beta2a":  "Beta2A_Button",
-            "beta1b":  "Beta1B_Button",
-            "beta1a":  "Beta1A_Button",
-            "psarj":   "PSARJ_Button",
-            "ssarj":   "SSARJ_Button",
-            "ptrrj":   "PTRRJ_Button",
-            "strrj":   "STRRJ_Button",
-        }
-        for joint, wid in mapping.items():
-            self.ids[wid].background_color = (
-                self._active_color if joint == self.active_joint
-                else self._default_color
-            )
 
 class Playback_Screen(Screen):
     """
@@ -4226,8 +3981,6 @@ class MainApp(App):
             serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + str(v1as) + " " + "V2A=" + str(v2as) + " " + "V3A=" + str(v3as) + " " + "V4A=" + str(v4as) + " " + "V1B=" + str(v1bs) + " " + "V2B=" + str(v2bs) + " " + "V3B=" + str(v3bs) + " " + "V4B=" + str(v4bs) + " " + "ISS=" + module + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
 
 #All GUI Screens are on separate kv files
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MainScreen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ManualControlScreen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/LED_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Playback_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Settings_Screen.kv')
@@ -4268,40 +4021,6 @@ Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/SPDM1_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MSS_MT_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/RS_Dock_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/VV_Image.kv')
-Builder.load_string('''
-#:kivy 1.8
-#:import kivy kivy
-#:import win kivy.core.window
-ScreenManager:
-    MainScreen:
-    ManualControlScreen:
-    LED_Screen:
-    Playback_Screen:
-    Settings_Screen:
-    MimicScreen:
-    ISS_Screen:
-    Orbit_Screen:
-    Orbit_Pass:
-    Orbit_Data:
-    EPS_Screen:
-    CT_Screen:
-    CT_SASA_Screen:
-    CT_UHF_Screen:
-    CT_Camera_Screen:
-    CT_SGANT_Screen:
-    ECLSS_Screen:
-    GNC_Screen:
-    TCS_Screen:
-    EVA_US_Screen:
-    EVA_RS_Screen:
-    EVA_Main_Screen:
-    EVA_Pictures:
-    RS_Screen:
-    Crew_Screen:
-    MSS_MT_Screen:
-    VV_Screen:
-    VV_Image:
-''')
 
 if __name__ == '__main__':
     MainApp().run()
