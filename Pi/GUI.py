@@ -404,18 +404,20 @@ class MainScreen(Screen):
 
     changeManualControlBoolean = change_manual_control   # ← kv compatibility
 
-    # ──────────────────────────────────────────────────────────────
-    # EXIT button callback
-    # ──────────────────────────────────────────────────────────────   
+    # ---------------------------------------------------------------------------
+    # EXIT button callback – non-blocking and thread-safe
+    # ---------------------------------------------------------------------------
     def killproc(self, *_):
         """
-        EXIT button callback – now non-blocking.
-        Spawns a daemon thread that does all the heavy lifting, then
-        closes the window from the main thread.
-        """
+        Called by the red “EXIT” button.
     
-        if getattr(self, "_exiting", False):
-            return                      # guard against double-clicks
+        1. Spawns a daemon thread so the UI never freezes.
+        2. Stops observer + helper subprocesses.
+        3. Schedules staleTelemetry() **and** app.stop() back on the
+           main Kivy thread to avoid cross-thread SQLite access.
+        """
+        if getattr(self, "_exiting", False):   # guard against double-clicks
+            return
         self._exiting = True
     
         threading.Thread(
@@ -424,13 +426,13 @@ class MainScreen(Screen):
         ).start()
     
     
-    # ──────────────────────────────────────────────────────────────
-    # helper runs in a background thread
-    # ──────────────────────────────────────────────────────────────
+    # ---------------------------------------------------------------------------
+    # Background worker  (runs in the daemon thread)
+    # ---------------------------------------------------------------------------
     def _cleanup_and_quit(self):
         app = App.get_running_app()
     
-        # 1. stop observer
+        # 1) Stop USB / TTY observer (if any)
         observer = getattr(app, "tty_observer", None)
         if observer:
             try:
@@ -439,36 +441,34 @@ class MainScreen(Screen):
             except Exception as exc:
                 log_error(f"Error stopping observer: {exc}")
     
-        # 2. terminate subprocesses
+        # 2) Terminate every helper subprocess
         for attr in (
-            "p", "TDRSproc",
-            "demo_proc", "disco_proc",
-            "htv_proc", "oft2_proc",
+            "p", "TDRSproc",           # telemetry collectors
+            "demo_proc", "disco_proc", # playback demos
+            "htv_proc", "oft2_proc",   # more demos
         ):
             self._terminate_attr(app, attr)
     
-        # 3. wipe tmp DBs
+        # 3) Wipe tmp SQLite caches
         for db in pathlib.Path("/dev/shm").glob("*.db*"):
             try:
                 db.unlink()
             except OSError as exc:
                 log_error(f"Could not remove {db}: {exc}")
     
-        staleTelemetry()
-        log_info("Cleanup complete – scheduling app.stop().")
-    
-        # 4. back to UI thread to close the window
-        Clock.schedule_once(lambda dt: app.stop())
+        # 4) Schedule UI-thread tasks to avoid cross-thread SQLite errors
+        Clock.schedule_once(lambda dt: staleTelemetry())
+        Clock.schedule_once(lambda dt: app.stop())  # close the window
     
     
-    # ──────────────────────────────────────────────────────────────
-    # updated terminator: terminate → wait → kill
-    # ──────────────────────────────────────────────────────────────
+    # ---------------------------------------------------------------------------
+    # Helper: terminate Popen safely   (called from _cleanup_and_quit)
+    # ---------------------------------------------------------------------------
     @staticmethod
     def _terminate_attr(app: App, attr_name: str) -> None:
         proc = getattr(app, attr_name, None)
         if not proc:
-            return
+            return                                 # never started
     
         try:
             proc.terminate()
