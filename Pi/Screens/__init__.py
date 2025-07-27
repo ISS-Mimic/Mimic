@@ -11,6 +11,7 @@ from __future__ import annotations
 # ── core screens (already migrated) ─────────────────────────────────────────
 from .main                import MainScreen
 from .manualcontrol       import ManualControlScreen
+from .settings_screen     import Settings_Screen
 
 # ── simple / placeholder screens ────────────────────────────────────────────
 from .cdh_screen          import CDH_Screen
@@ -52,7 +53,7 @@ from .vv_screen           import VV_Screen
 # ── build __all__ so “from Screens import …” works everywhere ───────────────
 __all__ = [
     # core
-    "MainScreen", "ManualControlScreen",
+    "MainScreen", "ManualControlScreen","Settings_Screen",
     # placeholders (add/remove as needed)
     "CDH_Screen", "Crew_Screen", "CT_Camera_Screen", "CT_SASA_Screen",
     "CT_Screen", "CT_SGANT_Screen", "CT_UHF_Screen",

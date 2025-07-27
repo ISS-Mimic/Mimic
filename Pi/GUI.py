@@ -478,22 +478,6 @@ class Playback_Screen(Screen):
     def stop_oft2(self):
         self._terminate("oft2_proc", "OFT-2 orbit demo")
 
-class Settings_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    def checkbox_clicked(*args):
-        if args[2]:
-            serialWrite("SmartRolloverBGA=1 ")
-        else:
-            serialWrite("SmartRolloverBGA=0 ")
-
-
-class ISS_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-    def selectModule(*args): #used for choosing a module on screen to light up
-        global module
-        module = str(args[1])
-
 class MimicScreen(Screen):
     """
     Shows live ISS telemetry and controls the background collectors
@@ -608,9 +592,9 @@ SCREEN_DEFS = {
     "manualcontrol":   screens.ManualControlScreen,
     "led":             screens.LED_Screen,
     "playback":        Playback_Screen,
-    "settings":        Settings_Screen,
+    "settings":        screens.Settings_Screen,
     "mimic":           MimicScreen,
-    "iss":             ISS_Screen,
+    "iss":             screens.ISS_Screen,
     "cdh":             screens.CDH_Screen,
     "crew":            screens.Crew_Screen,
     "ct_camera":       screens.CT_Camera_Screen,
@@ -3821,10 +3805,7 @@ class MainApp(App):
 
 #All GUI Screens are on separate kv files
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Playback_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Settings_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MimicScreen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ISS_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Science_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/RS_Dock_Screen.kv')
 
 if __name__ == '__main__':
