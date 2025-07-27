@@ -14,7 +14,8 @@ from ._base import MimicBase            # gives mimic_directory + signalcolor
 from utils.serial import log_info, log_error   # if you re-exported these; else import logging
 
 # ── load KV next to this file ──────────────────────────────────────────────
-Builder.load_file(str(pathlib.Path(__file__).with_name("Playback_Screen.kv")))
+kv_path = pathlib.Path(__file__).with_name("Playback_Screen.kv")
+Builder.load_file(str(kv_path))
 
 # ───────────────────────────────────────────────────────────────────────────
 class Playback_Screen(MimicBase):

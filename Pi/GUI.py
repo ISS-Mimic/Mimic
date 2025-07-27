@@ -355,128 +355,6 @@ module = ""
 old_mt_timestamp = 0.00
 old_mt_position = 0.00
 
-class Playback_Screen(Screen):
-    """
-    Lets the user pick a USB stick / canned demo (HTV, OFT-2, Disco, …) and
-    launches the corresponding playback script.
-    """
-
-    mimic_directory = pathlib.Path(__file__).resolve().parents[2]    # …/Mimic
-    usb_drives: set[str] = set()
-
-    # ──────────── initialisation ────────────────────────────────────────────
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.usb_drives = self._get_mount_points()
-        self._start_usb_monitor()
-        Clock.schedule_once(self._update_dropdown)
-
-    # ──────────── USB monitoring — same logic, cleaner style ───────────────
-    @staticmethod
-    def _get_mount_points() -> set[str]:
-        """
-        Return a **set** of folder names under /media/pi.
-        If the directory doesn’t exist (no USB plugged in yet) just
-        return an empty set **without** logging an error.
-        """
-        media_dir = pathlib.Path("/media/pi")
-    
-        if not media_dir.is_dir():
-            # No USB devices mounted – stay silent
-            return set()
-    
-        # Only keep directories; ignore stray files
-        try:
-            return {p.name for p in media_dir.iterdir() if p.is_dir()}
-        except Exception as exc:
-            # Unexpected problem (permissions, I/O). Log once, but don’t
-            # raise – it will retry on the next poll.
-            log_error(f"USB scan failed: {exc}")
-            return set()
-
-    def _usb_monitor_loop(self) -> None:
-        prev = self._get_mount_points()
-        while True:
-            curr = self._get_mount_points()
-            if curr != prev:
-                self.usb_drives = curr
-                Clock.schedule_once(self._update_dropdown)
-                prev = curr
-            time.sleep(5)
-
-    def _start_usb_monitor(self) -> None:
-        t = threading.Thread(target=self._usb_monitor_loop, daemon=True)
-        t.start()
-
-    def _update_dropdown(self, _dt) -> None:
-        spinner = self.ids.playback_dropdown
-        spinner.values = [f"{d} (USB)" for d in sorted(self.usb_drives)] + ["HTV", "OFT-2"]
-
-    # Kivy binds directly to this
-    def on_dropdown_select(self, value: str) -> None:
-        log_info(f"Playback selected: {value}")
-        # You could auto-launch here if desired.
-
-    # ──────────── DEMO / PLAYBACK PROCESS MANAGEMENT ───────────────────────
-    # Centralised helper so all start/stop actions are one-liners
-    def _launch(self, script: list[str] | str, attr: str, nice_name: str) -> None:
-        app = App.get_running_app()
-        if getattr(app, attr, None):
-            log_info(f"{nice_name} already running.")
-            return
-        try:
-            cmd = [script] if isinstance(script, str) else script
-            setattr(app, attr, Popen(cmd))
-            log_info(f"{nice_name} started.")
-        except (OSError, CalledProcessError) as exc:
-            log_error(f"Failed to start {nice_name}: {exc}")
-            setattr(app, attr, None)
-
-    def _terminate(self, attr: str, nice_name: str) -> None:
-        proc: Optional[Popen] = getattr(App.get_running_app(), attr, None)
-        if not proc:
-            return
-        try:
-            proc.terminate()
-            proc.wait(timeout=3)
-            log_info(f"{nice_name} stopped.")
-        except Exception as exc:
-            log_error(f"Failed to stop {nice_name}: {exc}")
-        finally:
-            setattr(App.get_running_app(), attr, None)
-
-    # ──────────── public callbacks (KV buttons bind to these) ──────────────
-    def start_disco(self):       # Disco lights demo
-        script = self.mimic_directory / "Mimic/Pi/RecordedData/disco.sh"
-        self._launch(str(script), "disco_proc", "Disco demo")
-
-    def stop_disco(self):
-        self._terminate("disco_proc", "Disco demo")
-
-    def start_demo_orbit(self):
-        # playback.out + OFT2 directory
-        script = [
-            str(self.mimic_directory / "Mimic/Pi/RecordedData/playback.out"),
-            str(self.mimic_directory / "Mimic/Pi/RecordedData/OFT2")
-        ]
-        self._launch(script, "demo_proc", "Standard orbit demo")
-
-    def stop_demo_orbit(self):
-        self._terminate("demo_proc", "Standard orbit demo")
-
-    def start_htv(self):
-        script = self.mimic_directory / "Mimic/Pi/RecordedData/demoHTVOrbit.sh"
-        self._launch(str(script), "htv_proc", "HTV orbit demo")
-
-    def stop_htv(self):
-        self._terminate("htv_proc", "HTV orbit demo")
-
-    def start_oft2(self):
-        script = self.mimic_directory / "Mimic/Pi/RecordedData/demoOFT2.sh"
-        self._launch(str(script), "oft2_proc", "OFT-2 orbit demo")
-
-    def stop_oft2(self):
-        self._terminate("oft2_proc", "OFT-2 orbit demo")
 
 class MimicScreen(Screen):
     """
@@ -591,9 +469,9 @@ SCREEN_DEFS = {
     "main":            screens.MainScreen,
     "manualcontrol":   screens.ManualControlScreen,
     "led":             screens.LED_Screen,
-    "playback":        Playback_Screen,
+    "playback":        screens.Playback_Screen,
     "settings":        screens.Settings_Screen,
-    "mimic":           MimicScreen,
+    "mimic":           screens.MimicScreen,
     "iss":             screens.ISS_Screen,
     "cdh":             screens.CDH_Screen,
     "crew":            screens.Crew_Screen,
@@ -619,7 +497,7 @@ SCREEN_DEFS = {
     "orbit_pass":      screens.Orbit_Pass,
     "orbit":           screens.Orbit_Screen,
     "robo":            screens.Robo_Screen,
-    "rs_dock":         RS_Dock_Screen,
+    "rs_dock":         screens.RS_Dock_Screen,
     "rs_eva":          screens.EVA_RS_Screen,
     "rs":              screens.RS_Screen,
     "science":         screens.Science_Screen,
@@ -3802,11 +3680,6 @@ class MainApp(App):
 
         if mimicbutton: # and float(aos) == 1.00):
             serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + str(v1as) + " " + "V2A=" + str(v2as) + " " + "V3A=" + str(v3as) + " " + "V4A=" + str(v4as) + " " + "V1B=" + str(v1bs) + " " + "V2B=" + str(v2bs) + " " + "V3B=" + str(v3bs) + " " + "V4B=" + str(v4bs) + " " + "ISS=" + module + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
-
-#All GUI Screens are on separate kv files
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Playback_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MimicScreen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/RS_Dock_Screen.kv')
 
 if __name__ == '__main__':
     MainApp().run()

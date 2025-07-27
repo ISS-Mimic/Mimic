@@ -12,6 +12,8 @@ from __future__ import annotations
 from .main                import MainScreen
 from .manualcontrol       import ManualControlScreen
 from .settings_screen     import Settings_Screen
+from .playback_screen     import Playback_Screen
+from .mimic_screen        import Mimic_Screen
 
 # ── simple / placeholder screens ────────────────────────────────────────────
 from .cdh_screen          import CDH_Screen
@@ -38,6 +40,7 @@ from .orbit_pass          import Orbit_Pass
 from .orbit_screen        import Orbit_Screen
 from .robo_screen         import Robo_Screen
 from .rs_screen           import RS_Screen
+from .rs_dock_screen      import RS_Dock_Screen
 from .science_ext_screen  import Science_EXT_Screen
 from .science_int_screen  import Science_INT_Screen
 from .science_jef_screen  import Science_JEF_Screen
