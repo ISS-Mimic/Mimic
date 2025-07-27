@@ -51,8 +51,7 @@ from kivy.network.urlrequest import UrlRequest
 
 #from screens import SCREEN_DEFS # import list of mimic screens
 import database_initialize # create and populate database script
-from Screens import MainScreen
-from Screens import ManualControlScreen
+import Screens
 from utils.serial import serialWrite # custom Serial Write function
 
 mimic_data_directory = Path.home() / '.mimic_data'
@@ -487,8 +486,6 @@ class Settings_Screen(Screen, EventDispatcher):
         else:
             serialWrite("SmartRolloverBGA=0 ")
 
-class LED_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
 class ISS_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
@@ -571,94 +568,6 @@ class MimicScreen(Screen):
         self.killproc()
             
 
-class CDH_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class Crew_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class CT_Camera_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class CT_SASA_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class CT_SGANT_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class CT_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class CT_UHF_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class ECLSS_IATCS_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class ECLSS_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class ECLSS_WRM_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class EPS_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class EVA_EMU_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class EVA_Main_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class EVA_Pictures(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class EVA_RS_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class EVA_US_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class GNC_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class MSS_MT_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class Orbit_Data(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class Orbit_Pass(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class Orbit_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    mimic_data_directory = Path.home() / '.mimic_data'
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class Robo_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
 
 class RS_Dock_Screen(Screen, EventDispatcher):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
@@ -693,54 +602,6 @@ class RS_Dock_Screen(Screen, EventDispatcher):
         self.ids.docking_bar.size = (new_width, self.ids.docking_bar.height)
         self.ids.dock_layout.do_layout()  # Force the layout to update
 
-class RS_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class Science_EXT_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class Science_INT_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class Science_JEF_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class Science_NRAL_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class Science_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class SPDM1_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class SSRMS_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class TCS_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class USOS_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class VV_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-class VV_Image(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    mimic_data_directory = Path.home() / '.mimic_data'
-    signalcolor = ObjectProperty([1, 1, 1])
 
 SCREEN_DEFS = {
     "main":            MainScreen,
@@ -778,7 +639,7 @@ SCREEN_DEFS = {
     "rs_eva":          EVA_RS_Screen,
     "rs":              RS_Screen,
     "science":         Science_Screen,
-    "spdm1":           SPDM1_Screen,
+    "spdm":            SPDM_Screen,
     "ssrms":           SSRMS_Screen,
     "tcs":             TCS_Screen,
     "us_eva":          EVA_US_Screen,
@@ -3749,85 +3610,85 @@ class MainApp(App):
         else:
             self.screens["ssrms"].ids.BaseLocation.text = "n/a"
         
-        #self.screens["spdm1"].ids.SPDMbase.text = str(SPDMbase)
+        #self.screens["spdm"].ids.SPDMbase.text = str(SPDMbase)
         if int(SPDMbase) == 1:
-            self.screens["spdm1"].ids.SPDMbase.text = "Lab"
+            self.screens["spdm"].ids.SPDMbase.text = "Lab"
         elif int(SPDMbase) == 2:
-            self.screens["spdm1"].ids.SPDMbase.text = "Node 3"
+            self.screens["spdm"].ids.SPDMbase.text = "Node 3"
         elif int(SPDMbase) == 4:
-            self.screens["spdm1"].ids.SPDMbase.text = "Node 2"
+            self.screens["spdm"].ids.SPDMbase.text = "Node 2"
         elif int(SPDMbase) == 7:
-            self.screens["spdm1"].ids.SPDMbase.text = "MBS PDGF 1"
+            self.screens["spdm"].ids.SPDMbase.text = "MBS PDGF 1"
         elif int(SPDMbase) == 8:
-            self.screens["spdm1"].ids.SPDMbase.text = "MBS PDGF 2"
+            self.screens["spdm"].ids.SPDMbase.text = "MBS PDGF 2"
         elif int(SPDMbase) == 11:
-            self.screens["spdm1"].ids.SPDMbase.text = "MBS PDGF 3"
+            self.screens["spdm"].ids.SPDMbase.text = "MBS PDGF 3"
         elif int(SPDMbase) == 13:
-            self.screens["spdm1"].ids.SPDMbase.text = "MBS PDGF 4"
+            self.screens["spdm"].ids.SPDMbase.text = "MBS PDGF 4"
         elif int(SPDMbase) ==14:
-            self.screens["spdm1"].ids.SPDMbase.text = "FGB"
+            self.screens["spdm"].ids.SPDMbase.text = "FGB"
         elif int(SPDMbase) == 16:
-            self.screens["spdm1"].ids.SPDMbase.text = "POA"
+            self.screens["spdm"].ids.SPDMbase.text = "POA"
         elif int(SPDMbase) == 19:
-            self.screens["spdm1"].ids.SPDMbase.text = "SSRMS Tip LEE"
+            self.screens["spdm"].ids.SPDMbase.text = "SSRMS Tip LEE"
         elif int(SPDMbase) == 63:
-            self.screens["spdm1"].ids.SPDMbase.text = "Undefined"
+            self.screens["spdm"].ids.SPDMbase.text = "Undefined"
         else:
-            self.screens["spdm1"].ids.SPDMbase.text = "n/a"
+            self.screens["spdm"].ids.SPDMbase.text = "n/a"
         
-         #self.screens["spdm1"].ids.SPDMoperatingBase.text = str(SPDMoperatingBase)
+         #self.screens["spdm"].ids.SPDMoperatingBase.text = str(SPDMoperatingBase)
         if int(SPDMoperatingBase) == 1:
-            self.screens["spdm1"].ids.SPDMoperatingBase.text = "SPDM Body LEE"
+            self.screens["spdm"].ids.SPDMoperatingBase.text = "SPDM Body LEE"
         elif int(SPDMoperatingBase) == 2:
-            self.screens["spdm1"].ids.SPDMoperatingBase.text = "SPDM Body PDGF"
+            self.screens["spdm"].ids.SPDMoperatingBase.text = "SPDM Body PDGF"
         else:
-            self.screens["spdm1"].ids.SPDMoperatingBase.text = "n/a"
+            self.screens["spdm"].ids.SPDMoperatingBase.text = "n/a"
         
-        #self.screens["spdm1"].ids.Arm1OTCM.text = str(Arm1OTCM)
+        #self.screens["spdm"].ids.Arm1OTCM.text = str(Arm1OTCM)
         if int(Arm1OTCM) == 0:
-            self.screens["spdm1"].ids.Arm1OTCM.text = "Released"
+            self.screens["spdm"].ids.Arm1OTCM.text = "Released"
         elif int(Arm1OTCM) == 1:
-            self.screens["spdm1"].ids.Arm1OTCM.text = "Captive"
+            self.screens["spdm"].ids.Arm1OTCM.text = "Captive"
         elif int(Arm1OTCM) == 2:
-            self.screens["spdm1"].ids.Arm1OTCM.text = "Captured"
+            self.screens["spdm"].ids.Arm1OTCM.text = "Captured"
         else:
-            self.screens["spdm1"].ids.Arm1OTCM.text = "n/a"
+            self.screens["spdm"].ids.Arm1OTCM.text = "n/a"
         
-        #self.screens["spdm1"].ids.Arm2OTCM.text = str(Arm1OTCM)
+        #self.screens["spdm"].ids.Arm2OTCM.text = str(Arm1OTCM)
         if int(Arm2OTCM) == 0:
-            self.screens["spdm1"].ids.Arm2OTCM.text = "Released"
+            self.screens["spdm"].ids.Arm2OTCM.text = "Released"
         elif int(Arm2OTCM) == 1:
-            self.screens["spdm1"].ids.Arm2OTCM.text = "Captive"
+            self.screens["spdm"].ids.Arm2OTCM.text = "Captive"
         elif int(Arm2OTCM) == 2:
-            self.screens["spdm1"].ids.Arm2OTCM.text = "Captured"
+            self.screens["spdm"].ids.Arm2OTCM.text = "Captured"
         else:
-            self.screens["spdm1"].ids.Arm2OTCM.text = "n/a"
+            self.screens["spdm"].ids.Arm2OTCM.text = "n/a"
         
-        #self.screens["spdm1"].ids.BodyPayload.text = str(BodyPayload)
+        #self.screens["spdm"].ids.BodyPayload.text = str(BodyPayload)
         if int(BodyPayload) == 0:
-            self.screens["spdm1"].ids.BodyPayload.text = "Released"
+            self.screens["spdm"].ids.BodyPayload.text = "Released"
         elif int(BodyPayload) == 1:
-            self.screens["spdm1"].ids.BodyPayload.text = "Captive"
+            self.screens["spdm"].ids.BodyPayload.text = "Captive"
         elif int(BodyPayload) == 2:
-            self.screens["spdm1"].ids.BodyPayload.text = "Captured"
+            self.screens["spdm"].ids.BodyPayload.text = "Captured"
         else:
-            self.screens["spdm1"].ids.BodyPayload.text = "n/a"
+            self.screens["spdm"].ids.BodyPayload.text = "n/a"
         
-        self.screens["spdm1"].ids.BodyRoll.text = str(BodyRoll)
-        self.screens["spdm1"].ids.Shoulder1Roll.text = str(Shoulder1Roll)
-        self.screens["spdm1"].ids.Shoulder1Yaw.text = str(Shoulder1Yaw)
-        self.screens["spdm1"].ids.Shoulder1Pitch.text = str(Shoulder1Pitch)
-        self.screens["spdm1"].ids.Elbow1Pitch.text = str(Elbow1Pitch)
-        self.screens["spdm1"].ids.Wrist1Roll.text = str(Wrist1Roll)
-        self.screens["spdm1"].ids.Wrist1Yaw.text = str(Wrist1Yaw)
-        self.screens["spdm1"].ids.Wrist1Pitch.text = str(Wrist1Pitch)
-        self.screens["spdm1"].ids.Shoulder2Roll.text = str(Shoulder2Roll)
-        self.screens["spdm1"].ids.Shoulder2Yaw.text = str(Shoulder2Yaw)
-        self.screens["spdm1"].ids.Shoulder2Pitch.text = str(Shoulder2Pitch)
-        self.screens["spdm1"].ids.Elbow2Pitch.text = str(Elbow2Pitch)
-        self.screens["spdm1"].ids.Wrist2Roll.text = str(Wrist2Roll)
-        self.screens["spdm1"].ids.Wrist2Yaw.text = str(Wrist2Yaw)
-        self.screens["spdm1"].ids.Wrist2Pitch.text = str(Wrist2Pitch)
+        self.screens["spdm"].ids.BodyRoll.text = str(BodyRoll)
+        self.screens["spdm"].ids.Shoulder1Roll.text = str(Shoulder1Roll)
+        self.screens["spdm"].ids.Shoulder1Yaw.text = str(Shoulder1Yaw)
+        self.screens["spdm"].ids.Shoulder1Pitch.text = str(Shoulder1Pitch)
+        self.screens["spdm"].ids.Elbow1Pitch.text = str(Elbow1Pitch)
+        self.screens["spdm"].ids.Wrist1Roll.text = str(Wrist1Roll)
+        self.screens["spdm"].ids.Wrist1Yaw.text = str(Wrist1Yaw)
+        self.screens["spdm"].ids.Wrist1Pitch.text = str(Wrist1Pitch)
+        self.screens["spdm"].ids.Shoulder2Roll.text = str(Shoulder2Roll)
+        self.screens["spdm"].ids.Shoulder2Yaw.text = str(Shoulder2Yaw)
+        self.screens["spdm"].ids.Shoulder2Pitch.text = str(Shoulder2Pitch)
+        self.screens["spdm"].ids.Elbow2Pitch.text = str(Elbow2Pitch)
+        self.screens["spdm"].ids.Wrist2Roll.text = str(Wrist2Roll)
+        self.screens["spdm"].ids.Wrist2Yaw.text = str(Wrist2Yaw)
+        self.screens["spdm"].ids.Wrist2Pitch.text = str(Wrist2Pitch)
 
         self.screens["eva_emu"].ids.UIApowerEMU1.text = str(UIApowerEMU1) + " V"
         self.screens["eva_emu"].ids.UIApowerEMU2.text = str(UIApowerEMU2) + " V"
@@ -3959,46 +3820,12 @@ class MainApp(App):
             serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + str(v1as) + " " + "V2A=" + str(v2as) + " " + "V3A=" + str(v3as) + " " + "V4A=" + str(v4as) + " " + "V1B=" + str(v1bs) + " " + "V2B=" + str(v2bs) + " " + "V3B=" + str(v3bs) + " " + "V4B=" + str(v4bs) + " " + "ISS=" + module + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
 
 #All GUI Screens are on separate kv files
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/LED_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Playback_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Settings_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MimicScreen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ISS_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Orbit_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Orbit_Pass.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Orbit_Data.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ECLSS_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ECLSS_WRM_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/ECLSS_IATCS_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EPS_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/CT_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/CT_SGANT_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/CT_SASA_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/CT_UHF_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/CT_Camera_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/GNC_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/CDH_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Science_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Science_EXT_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Science_INT_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Science_NRAL_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Science_JEF_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/USOS_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/VV_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/TCS_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EVA_US_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EVA_RS_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EVA_Main_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EVA_EMU_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/EVA_Pictures.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Crew_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/RS_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/Robo_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/SSRMS_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/SPDM1_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/MSS_MT_Screen.kv')
 Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/RS_Dock_Screen.kv')
-Builder.load_file(mimic_directory + '/Mimic/Pi/Screens/VV_Image.kv')
 
 if __name__ == '__main__':
     MainApp().run()

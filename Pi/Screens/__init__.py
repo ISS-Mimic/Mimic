@@ -12,92 +12,47 @@ from __future__ import annotations
 # ---------------------------------------------------------------------------
 # Core / navigation screens (already migrated)
 # ---------------------------------------------------------------------------
-from .mainscreen          import MainScreen
+from .main                import MainScreen
 from .manualcontrol       import ManualControlScreen
 
-# ---------------------------------------------------------------------------
-# Simple “placeholder” screens you said you’ll migrate next
-# ---------------------------------------------------------------------------
-try:
-    from .cdh_screen      import CDH_Screen
-except ImportError:
-    # still lives in GUI.py
-    pass
+#from .playback_screen     import Playback_Screen
+#from .iss_screen          import ISS_Screen
+#from .settings_screen     import Settings_Screen
+#from .mimic_screen        import MimicScreen
+#from .rs_dock_screen      import RS_Dock_Screen
 
-try:
-    from .led_screen      import LED_Screen
-except ImportError:
-    pass
-
-try:
-    from .playback_screen import Playback_Screen
-except ImportError:
-    pass
-
-try:
-    from .settings_screen import Settings_Screen
-except ImportError:
-    pass
-
-try:
-    from .mimic_screen    import MimicScreen
-except ImportError:
-    pass
-
-# ---------------------------------------------------------------------------
-# Truss / telemetry / science screens  (add as you extract)
-# ---------------------------------------------------------------------------
-for _name in (
-    "ISS_Screen",
-    "Orbit_Screen", "Orbit_Pass", "Orbit_Data",
-    "EPS_Screen",
-    "CT_Screen", "CT_SASA_Screen", "CT_UHF_Screen",
-    "CT_Camera_Screen", "CT_SGANT_Screen",
-    "ECLSS_Screen", "ECLSS_WRM_Screen", "ECLSS_IATCS_Screen",
-    "GNC_Screen", "TCS_Screen",
-    "EVA_US_Screen", "EVA_RS_Screen", "EVA_Main_Screen",
-    "EVA_Pictures",
-    "RS_Screen", "RS_Dock_Screen",
-    "Crew_Screen",
-    "MSS_MT_Screen",
-    "VV_Screen", "VV_Image",
-    "Science_Screen", "Science_EXT_Screen",
-    "Science_INT_Screen", "Science_NRAL_Screen", "Science_JEF_Screen",
-    "USOS_Screen",
-    "Robo_Screen", "SSRMS_Screen", "SPDM1_Screen",
-):
-    try:
-        globals()[_name] = __import__(f".{_name.lower()}", globals(), locals(), [_name], 1).__dict__[_name]
-    except (ImportError, KeyError):
-        # Module or class not migrated yet
-        pass
-
-# ---------------------------------------------------------------------------
-# Build __all__ from whatever successfully imported
-# ---------------------------------------------------------------------------
-__all__ = [name for name in (
-    "MainScreen",
-    "ManualControlScreen",
-    "CDH_Screen",
-    "LED_Screen",
-    "Playback_Screen",
-    "Settings_Screen",
-    "MimicScreen",
-    "ISS_Screen",
-    "Orbit_Screen", "Orbit_Pass", "Orbit_Data",
-    "EPS_Screen",
-    "CT_Screen", "CT_SASA_Screen", "CT_UHF_Screen",
-    "CT_Camera_Screen", "CT_SGANT_Screen",
-    "ECLSS_Screen", "ECLSS_WRM_Screen", "ECLSS_IATCS_Screen",
-    "GNC_Screen", "TCS_Screen",
-    "EVA_US_Screen", "EVA_RS_Screen", "EVA_Main_Screen",
-    "EVA_Pictures",
-    "RS_Screen", "RS_Dock_Screen",
-    "Crew_Screen",
-    "MSS_MT_Screen",
-    "VV_Screen", "VV_Image",
-    "Science_Screen", "Science_EXT_Screen",
-    "Science_INT_Screen", "Science_NRAL_Screen", "Science_JEF_Screen",
-    "USOS_Screen",
-    "Robo_Screen", "SSRMS_Screen", "SPDM1_Screen",
-) if name in globals()]
+from .cdh_screen.py				import CDH_Screen
+from .crew_screen.py			import Crew_Screen
+from .ct_camera_screen.py		import CT_Camera_Screen
+from .ct_sasa_screen.py			import CT_SASA_Screen
+from .ct_screen.py				import CT_Screen
+from .ct_sgant_screen.py		import CT_SGANT_Screen
+from .ct_uhf_screen.py			import CT_UHF_Screen
+from .eclss_iatcs_screen.py		import ECLSS_IATCS_Screen
+from .eclss_screen.py			import ECLSS_Screen
+from .eclss_wrm_screen.py		import ECLSS_WRM_Screen
+from .eps_screen.py				import EPS_Screen
+from .eva_emu_screen.py			import EVA_EMU_Screen
+from .eva_main_screen.py		import EVA_Main_Screen
+from .eva_pictures.py			import EVA_Pictures
+from .eva_rs_screen.py			import EVA_RS_Screen
+from .eva_us_screen.py			import EVA_US_Screen
+from .gnc_screen.py				import GNC_Screen
+from .led_screen.py				import LED_Screen
+from .mss_mt_screen.py			import MSS_MT_Screen
+from .orbit_data.py				import Orbit_Data
+from .orbit_pass.py				import Orbit_Pass
+from .orbit_screen.py			import Orbit_Screen
+from .robo_screen.py			import Robo_Screen
+from .rs_screen.py				import RS_Screen
+from .science_ext_screen.py		import Science_EXT_Screen
+from .science_int_screen.py		import Science_INT_Screen
+from .science_jef_screen.py		import Science_JEF_Screen
+from .science_nral_screen.py	import Science_NRAL_Screen
+from .science_screen.py			import Science_Screen
+from .spdm_screen.py			import SPDM_Screen
+from .ssrms_screen.py			import SSRMS_Screen
+from .tcs_screen.py				import TCS_Screen
+from .usos_screen.py			import USOS_Screen
+from .vv_image.py				import VV_Image
+from .vv_screen.py				import VV_Screen
