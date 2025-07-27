@@ -216,7 +216,7 @@
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: DemoStart.disabled = False
             on_release: DemoStop.disabled = True
-            on_release: root.stop_demo()
+            on_release: root.stop_demo_orbit()
             on_release: root.manager.current = 'main'
         Image:
             id: signal

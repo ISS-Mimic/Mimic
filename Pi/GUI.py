@@ -355,116 +355,6 @@ module = ""
 old_mt_timestamp = 0.00
 old_mt_position = 0.00
 
-
-class MimicScreen(Screen):
-    """
-    Shows live ISS telemetry and controls the background collectors
-    (iss_telemetry.py + TDRScheck.py).  Completely self-contained—no
-    module-level globals required.
-    """
-
-    #— UI-bound properties —--------------------------------------------------
-    mimic_directory = pathlib.Path(__file__).resolve().parents[2]   # …/Mimic
-    signalcolor     = ObjectProperty([1, 1, 1])                    # kv binds
-    # (optional) expose mimicbutton to kv if you want two-way binding:
-    # mimicbutton  = BooleanProperty(False)
-
-    # -----------------------------------------------------------------------
-    # Toggle from the kv file
-    # -----------------------------------------------------------------------
-    def change_mimic_boolean(self, value: bool) -> None:
-        """Bound to the 'Mimic' button: True → transmit, False → idle."""
-        App.get_running_app().mimicbutton = value        # replaces global
-
-    changeMimicBoolean = change_mimic_boolean            # keep old name alive
-
-    # -----------------------------------------------------------------------
-    # Launch helper subprocesses
-    # -----------------------------------------------------------------------
-    def startproc(self) -> None:
-        app  = App.get_running_app()
-        base = self.mimic_directory / "Mimic" / "Pi"
-
-        log_info("Starting telemetry subprocesses")
-        try:
-            app.p = Popen(["python", str(base / "iss_telemetry.py")])
-            app.TDRSproc = Popen(["python", str(base / "TDRScheck.py")])
-        except Exception as exc:
-            log_error(f"Failed to start telemetry procs: {exc}")
-            app.p = app.TDRSproc = None
-
-    # -----------------------------------------------------------------------
-    # Stop helper subprocesses and tidy up
-    # -----------------------------------------------------------------------
-    def killproc(self, *_):
-        """
-        Called by MainScreen’s EXIT button or when switching to playback.
-        """
-        app = App.get_running_app()
-
-        # optional: mark LS as unsubscribed in your DB
-        try:
-            if hasattr(app, "db_cursor"):
-                app.db_cursor.execute(
-                    "INSERT OR IGNORE INTO telemetry "
-                    "VALUES('Lightstreamer', '0', 'Unsubscribed', '0', 0)"
-                )
-        except Exception as exc:
-            log_error(f"DB write failed: {exc}")
-
-        for name in ("p", "TDRSproc"):
-            proc = getattr(app, name, None)
-            if not proc:
-                continue                                    # never started
-            try:
-                proc.terminate()
-                proc.wait(timeout=3)
-                log_info(f"{name} terminated.")
-            except Exception as exc:
-                log_error(f"Failed to kill {name}: {exc}")
-
-        # Tell the rest of the UI we’re no longer transmitting
-        app.mimicbutton = False
-    
-    def on_pre_leave(self):        # fired by ScreenManager, automatically kill telemetry process when exiting mimic screen
-        self.killproc()
-            
-
-
-class RS_Dock_Screen(Screen, EventDispatcher):
-    mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-    signalcolor = ObjectProperty([1, 1, 1])
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        Window.bind(on_resize=self.update_docking_bar)
-        self.bind(size=self.update_docking_bar)
-        self.bind(pos=self.update_docking_bar)
-        Clock.schedule_once(self.update_docking_bar, 0)  # Ensure the method is called after initialization
-
-    def update_docking_bar(self, *args):
-        width, height = Window.size
-        #log_info(f"Window size: width={width}, height={height}")  # Debug print
-        #log_info(f"Before update: docking_bar size={self.ids.docking_bar.size}, pos={self.ids.docking_bar.pos}")  # Debug print
-
-        self.ids.docking_bar.size = (width * 0.325, height * 0.04)  # Smaller size
-        self.ids.docking_bar.pos = (width * 0.53, height * 0.205)  # Adjusted position
-        self.ids.docking_bar.size_hint = None, None  # Ensure size_hint is not interfering
-
-        # Force the layout to update
-        self.ids.dock_layout.do_layout()
-        #log_info(f"After update: docking_bar size={self.ids.docking_bar.size}, pos={self.ids.docking_bar.pos}")  # Debug print 
-
-    def update_docking_bar_width(self, value):
-        width, height = Window.size
-        mapped_value = 1 - (value / 80000)  # Inverted mapping from 0-80000 to 1-0
-        if mapped_value < 0:
-            mapped_value = 0
-        new_width = width * 0.325 * mapped_value  # Adjust the width based on the value (0 to 1)
-        self.ids.docking_bar.size = (new_width, self.ids.docking_bar.height)
-        self.ids.dock_layout.do_layout()  # Force the layout to update
-
-
 SCREEN_DEFS = {
     "main":            screens.MainScreen,
     "manualcontrol":   screens.ManualControlScreen,
@@ -509,7 +399,6 @@ SCREEN_DEFS = {
     "vv_image":        screens.VV_Image,
     "vv":              screens.VV_Screen,
 }
-
 
 class MainScreenManager(ScreenManager):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))

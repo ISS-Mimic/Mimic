@@ -1,6 +1,7 @@
 from __future__ import annotations
 from kivy.uix.screenmanager import Screen
 import pathlib
+from kivy.properties import StringProperty
 from kivy.lang import Builder
 from ._base import MimicBase
 

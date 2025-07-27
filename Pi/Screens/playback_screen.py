@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pathlib, time, threading, logging
+from pathlib import Path
 from subprocess import Popen, CalledProcessError
 from typing import Optional, Union, List
 
@@ -95,20 +96,31 @@ class Playback_Screen(MimicBase):
             setattr(App.get_running_app(), attr, None)
 
     # ---------------------------------------------------- KV callbacks
-    def start_disco(self):  self._launch(self.mimic_directory / "Mimic/Pi/RecordedData/disco.sh",
-                                         "disco_proc", "Disco demo")
-    def stop_disco(self):   self._terminate("disco_proc", "Disco demo")
+    def start_disco(self):  
+        script = Path(self.mimic_directory) / "Mimic/Pi/RecordedData/disco.sh"
+        self._launch(str(script), "disco_proc", "Disco demo")
+    
+    def stop_disco(self):   
+        self._terminate("disco_proc", "Disco demo")
 
     def start_demo_orbit(self):
-        cmd = [ self.mimic_directory / "Mimic/Pi/RecordedData/playback.out",
-                self.mimic_directory / "Mimic/Pi/RecordedData/OFT2" ]
-        self._launch([str(p) for p in cmd], "demo_proc", "Standard orbit demo")
-    def stop_demo_orbit(self): self._terminate("demo_proc", "Standard orbit demo")
+        base   = Path(self.mimic_directory) / "Mimic/Pi/RecordedData"
+        cmd    = [ str(base / "playback.out"), str(base / "OFT2") ]
+        self._launch(cmd, "demo_proc", "Standard orbit demo")
+    
+    def stop_demo_orbit(self): 
+        self._terminate("demo_proc", "Standard orbit demo")
 
-    def start_htv(self):    self._launch(self.mimic_directory / "Mimic/Pi/RecordedData/demoHTVOrbit.sh",
-                                         "htv_proc", "HTV orbit demo")
-    def stop_htv(self):     self._terminate("htv_proc", "HTV orbit demo")
-
-    def start_oft2(self):   self._launch(self.mimic_directory / "Mimic/Pi/RecordedData/demoOFT2.sh",
-                                         "oft2_proc", "OFT-2 orbit demo")
-    def stop_oft2(self):    self._terminate("oft2_proc", "OFT-2 orbit demo")
+    def start_htv(self):
+        script = Path(self.mimic_directory) / "Mimic/Pi/RecordedData/demoHTVOrbit.sh"
+        self._launch(str(script), "htv_proc", "HTV orbit demo") 
+    
+    def stop_htv(self):
+        self._terminate("htv_proc", "HTV orbit demo")
+    
+    def start_oft2(self):   
+        script = Path(self.mimic_directory) / "Mimic/Pi/RecordedData/demoOFT2.sh"
+        self._launch(str(script), "oft2_proc", "OFT-2 orbit demo")
+    
+    def stop_oft2(self):
+        self._terminate("oft2_proc", "OFT-2 orbit demo")

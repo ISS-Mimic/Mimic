@@ -13,7 +13,7 @@ from .main                import MainScreen
 from .manualcontrol       import ManualControlScreen
 from .settings_screen     import Settings_Screen
 from .playback_screen     import Playback_Screen
-from .mimic_screen        import Mimic_Screen
+from .mimic_screen        import MimicScreen
 
 # ── simple / placeholder screens ────────────────────────────────────────────
 from .cdh_screen          import CDH_Screen
@@ -33,6 +33,7 @@ from .eva_pictures        import EVA_Pictures
 from .eva_rs_screen       import EVA_RS_Screen
 from .eva_us_screen       import EVA_US_Screen
 from .gnc_screen          import GNC_Screen
+from .iss_screen          import ISS_Screen
 from .led_screen          import LED_Screen
 from .mss_mt_screen       import MSS_MT_Screen
 from .orbit_data          import Orbit_Data

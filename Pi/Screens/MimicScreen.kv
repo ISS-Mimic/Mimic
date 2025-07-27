@@ -119,7 +119,7 @@
             font_size: self.height * 0.4
             size_hint_y: 0.1
             on_release: mimicstartbutton.text = 'Sending...'
-            on_release: root.changeMimicBoolean(True)
+            on_release: root.change_mimic_boolean(True)
             on_release: mimicstopbutton.disabled = False
             on_release: mimicstartbutton.disabled = True
         Button:
@@ -131,7 +131,7 @@
             font_size: self.height * 0.4
             size_hint_y: 0.1
             on_release: mimicstartbutton.text = 'Transmit'
-            on_release: root.changeMimicBoolean(False)
+            on_release: root.change_mimic_boolean(False)
             on_release: mimicstopbutton.disabled = True
             on_release: mimicstartbutton.disabled = False
         Button:
@@ -163,7 +163,7 @@
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
-            on_release: root.changeMimicBoolean(False)
+            on_release: root.change_mimic_boolean(False)
             on_release: mimicstartbutton.text = 'Transmit'
             on_release: mimicstopbutton.disabled = True
             on_release: mimicstartbutton.disabled = False
