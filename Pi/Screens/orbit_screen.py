@@ -22,6 +22,15 @@ Builder.load_file(str(Path(__file__).with_name("Orbit_Screen.kv")))
 # ────────────────────────────────────────────────────────────────────────────
 class Orbit_Screen(MimicBase):
     """Everything related to ground tracks, TDRS icons, next-pass timers."""
+    """
+    Everything related to ground tracks, TDRS icons, next-pass timers.
+    Only six satellites are shown:
+        • East  : TDRS 6, 12
+        • Z-belt: TDRS 7, 8
+        • West  : TDRS 10, 11
+    """
+
+    _TDRS_IDS = {"TDRS 6", "TDRS 12", "TDRS 7", "TDRS 8", "TDRS 10", "TDRS 11"}
 
     # ---------------------------------------------------------------- state
     iss_tle:          Optional[ephem.EarthSatellite] = None
@@ -93,15 +102,16 @@ class Orbit_Screen(MimicBase):
         cfg = Path.home() / ".mimic_data" / "tdrs_tle_config.json"
         try:
             db = json.loads(cfg.read_text())
+            # keep only the six satellites we actually display
             self.tdrs_tles = {
                 name: ephem.readtle(name, *lines)
                 for name, lines in db["TDRS_TLEs"].items()
+                if name in self._TDRS_IDS
             }
         except Exception as exc:
             log_error(f"TDRS TLE load failed: {exc}")
             return
 
-        # safe divide to avoid norm_image_size = (0,0) on startup
         def safe_div(a, b): return 1 if b == 0 else a / b
         nX = safe_div(self.ids.OrbitMap.norm_image_size[0],
                       self.ids.OrbitMap.texture_size[0])
@@ -111,28 +121,30 @@ class Orbit_Screen(MimicBase):
         for name, sat in self.tdrs_tles.items():
             try:
                 sat.compute(datetime.utcnow())
-                lon = float(str(sat.sublong).split(':')[0]) \
-                    + float(str(sat.sublong).split(':')[1])/60 \
-                    + float(str(sat.sublong).split(':')[2])/3600
-                lat = float(str(sat.sublat).split(':')[0]) \
-                    + float(str(sat.sublat).split(':')[1])/60 \
-                    + float(str(sat.sublat).split(':')[2])/3600
+                lon = (float(str(sat.sublong).split(':')[0])
+                       + float(str(sat.sublong).split(':')[1]) / 60
+                       + float(str(sat.sublong).split(':')[2]) / 3600)
+                lat = (float(str(sat.sublat).split(':')[0])
+                       + float(str(sat.sublat).split(':')[1]) / 60
+                       + float(str(sat.sublat).split(':')[2]) / 3600)
             except Exception:
                 continue
 
+            id_name = name.replace(" ", "")            # e.g. "TDRS 6" → "TDRS6"
+            if id_name not in self.ids:                # ignore satellites not drawn
+                continue
+
+            img   = self.ids[id_name]
             pos2d = self.scale_latlon(lat, lon)
             tex   = self.ids.OrbitMap.texture_size
-            norm  = self.ids.OrbitMap.norm_image_size
-            img   = getattr(self.ids, name.replace(" ", ""))  # id: TDRS12 …
-
             img.pos = (
-                (pos2d["newLon"] * tex[0]) - (img.width / 2 * nX),
+                (pos2d["newLon"] * tex[0]) - (img.width  / 2 * nX),
                 (pos2d["newLat"] * tex[1]) - (img.height / 2 * nY),
             )
 
-        # labels + ZOE
-        self.ids.ZOE.pos_hint       = self.scale_latlon(0, 77)
-        self.ids.ZOElabel.pos_hint  = {
+        # labels + ZOE unchanged
+        self.ids.ZOE.pos_hint = self.scale_latlon(0, 77)
+        self.ids.ZOElabel.pos_hint = {
             "center_x": self.ids.ZOE.pos_hint["center_x"],
             "center_y": self.ids.ZOE.pos_hint["center_y"] + 0.1,
         }
