@@ -162,56 +162,58 @@ class Orbit_Screen(MimicBase):
         #print(self.ids.ZOE.pos_hint)
 
     # ---------------------------------------------------------------- ISS + next-pass
+    # ---------------------------------------------------------------- ISS + next-pass
     def update_orbit(self, _dt=0):
-        #print("update orbit")
         cfg = Path.home() / ".mimic_data" / "iss_tle_config.json"
         try:
-            lines = json.loads(cfg.read_text())
-            #print("orbit iss json")
+            lines   = json.loads(cfg.read_text())
             self.iss_tle = ephem.readtle(
                 "ISS (ZARYA)", lines["ISS_TLE_Line1"], lines["ISS_TLE_Line2"]
             )
-            #print(self.iss_tle)
         except Exception as exc:
             log_error(f"ISS TLE load failed: {exc}")
             return
-
-        # compute next pass for Houston - hard coded for now
-        loc = self.location
+    
+        # --- observer (Houston for now) ---------------------------------------
+        loc             = self.location
         loc.lat, loc.lon = "29.585736", "-95.1327829"
         loc.elevation    = 10
-
+        loc.date         = ephem.now()          # ← **reset each tick**
+    
+        # ----------------------------------------------------------------------
         try:
-            next_pass = loc.next_pass(self.iss_tle)
+            next_pass = loc.next_pass(self.iss_tle)   # (AOS, …, max-el)
         except Exception as exc:
             log_error(f"next_pass failed: {exc}")
             return
-
-        if next_pass[0] is None:
+        if next_pass[0] is None:      # never rises
             self.ids.iss_next_pass1.text = "n/a"
             self.ids.iss_next_pass2.text = "n/a"
             self.ids.countdown.text      = "n/a"
             return
-
-        # localise
-        utc_dt  = datetime.strptime(str(next_pass[0]), "%Y/%m/%d %H:%M:%S")
-        local   = utc_dt.replace(tzinfo=pytz.utc).astimezone(
-                    pytz.timezone("America/Chicago"))
-
-        self.ids.iss_next_pass1.text = str(local).split()[0]
-        self.ids.iss_next_pass2.text = str(local).split()[1].split('-')[0]
-
-        delta   = next_pass[0] - loc.date
-        hrs     = delta * 24.0
-        mins    = (hrs - math.floor(hrs)) * 60
-        secs    = (mins - math.floor(mins)) * 60
+    
+        # — localise AOS time for display --------------------------------------
+        utc_dt = datetime.strptime(str(next_pass[0]), "%Y/%m/%d %H:%M:%S")
+        local  = utc_dt.replace(tzinfo=pytz.utc)\
+                       .astimezone(pytz.timezone("America/Chicago"))
+    
+        self.ids.iss_next_pass1.text = local.strftime("%Y-%m-%d")
+        self.ids.iss_next_pass2.text = local.strftime("%H:%M:%S")
+    
+        # — countdown ----------------------------------------------------------
+        delta  = next_pass[0] - loc.date            # loc.date is *now*
+        hrs    = delta * 24.0
+        mins   = (hrs  - math.floor(hrs)) * 60
+        secs   = (mins - math.floor(mins)) * 60
         self.ids.countdown.text = f"{int(hrs):02d}:{int(mins):02d}:{int(secs):02d}"
-
-        # simple visible / not-visible flag
-        sun = ephem.Sun(); loc.date = next_pass[2]  # max elevation time
-        sun.compute(loc); self.iss_tle.compute(loc)
-        sun_alt = float(str(sun.alt).split(':')[0])
+    
+        # — visible / not visible flag ----------------------------------------
+        sun         = ephem.Sun()
+        loc.date    = next_pass[2]                  # max-elevation time
+        sun.compute(loc)
+        self.iss_tle.compute(loc)
+        sun_alt = float(str(sun.alt).split(":")[0])
         self.ids.ISSvisible.text = (
-            "Visible Pass!" if not self.iss_tle.eclipsed and -18 < sun_alt < -6
+            "Visible Pass!" if (not self.iss_tle.eclipsed and -18 < sun_alt < -6)
             else "Not Visible"
         )
