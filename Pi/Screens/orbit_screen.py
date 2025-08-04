@@ -60,15 +60,46 @@ class Orbit_Screen(MimicBase):
 
     # ─────────────── helpers used by many orbit functions ──────────────────
     @staticmethod
-    def scale_latlon(lat: float, lon: float) -> dict[str, float]:
-        print("scale latlon")
+    def scale_latlon(self, lat: float, lon: float) -> dict[str, float]:
         """
-        Convert (lat, lon) to Kivy pos_hint percentages.
-        Returns keys **center_x / center_y** so callers can use it directly.
+        Convert (lat, lon) to **root-relative** centre-x / centre-y percentages
+        that you can store in pos_hint *or* turn into absolute positions.
+    
+        Works for any cropping / padding because it uses OrbitMap's
+        actual pixel geometry at run time.
         """
-        center_y = 0.265 + (lat + 90)  / 180.0 * 0.598
-        center_x = 0.140 + (lon + 180) / 360.0 * 0.716
-        return {"center_x": center_x, "center_y": center_y}
+        map_wdg   = self.ids.OrbitMap
+        root_w, root_h = self.width, self.height
+    
+        # Map texture geometry -------------------------------------------------
+        tex_w, tex_h   = map_wdg.texture_size
+        if tex_w == 0 or tex_h == 0:
+            # texture not ready yet – fall back to screen centre
+            return {"center_x": .5, "center_y": .5}
+    
+        norm_w, norm_h = map_wdg.norm_image_size
+        pad_x = (map_wdg.width  - norm_w) / 2      # black bar L/R inside widget
+        pad_y = (map_wdg.height - norm_h) / 2      # black bar top/bot
+    
+        # ---- fractional position *inside the crop window* --------------------
+        fx = (lon + 180.0) / 360.0                 # 0 .. 1   (west → east)
+        fy = (lat +  90.0) / 180.0                 # 0 .. 1   (north → south)
+    
+        # ---- pixel offset relative to **widget** origin ----------------------
+        # invert fy because screen y grows upward
+        px_in_map = pad_x + fx * norm_w
+        py_in_map = pad_y + (1.0 - fy) * norm_h
+    
+        # ---- absolute pixel in *root* coordinates ----------------------------
+        abs_x = map_wdg.x + px_in_map
+        abs_y = map_wdg.y + py_in_map
+    
+        # ---- final pos_hint percentages --------------------------------------
+        return {
+            "center_x": abs_x / root_w,
+            "center_y": abs_y / root_h,
+        }
+
 
     # ---------------------------------------------------------------- files
     @property
