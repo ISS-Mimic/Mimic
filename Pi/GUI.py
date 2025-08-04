@@ -1106,7 +1106,8 @@ class Playback_Screen(Screen):
         try:
             mount_points = set(os.listdir('/media/pi'))
         except Exception as e:
-            log_error(e)
+            #log_error(e)
+            continue
         return mount_points
 
     def usb_monitoring_task(self):
