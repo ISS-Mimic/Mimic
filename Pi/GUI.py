@@ -1103,11 +1103,11 @@ class Playback_Screen(Screen):
     def get_mount_points(self):
         # This function returns a set of current mount points
         mount_points = []
-        try:
-            mount_points = set(os.listdir('/media/pi'))
-        except Exception as e:
-            #log_error(e)
-            continue
+        #try:
+        #    mount_points = set(os.listdir('/media/pi'))
+        #except Exception as e:
+        #    #log_error(e)
+        #    #continue
         return mount_points
 
     def usb_monitoring_task(self):
