@@ -18,6 +18,8 @@ log_error = logging.getLogger("MyLogger").error
 
 Builder.load_file(str(Path(__file__).with_name("Orbit_Screen.kv")))
 
+# ----------------------------------------------------------------- state
+_track: list[tuple[float, float]] = []      # deque of lon/lat pairs
 
 # ────────────────────────────────────────────────────────────────────────────
 class Orbit_Screen(MimicBase):
@@ -43,6 +45,7 @@ class Orbit_Screen(MimicBase):
         print("orbit screen on enter")
         # periodic updates
         Clock.schedule_interval(self.update_orbit,         1)
+        Clock.schedule_interval(self.update_iss_position,  1)
         Clock.schedule_interval(self.update_nightshade,  120)
         Clock.schedule_interval(self.update_orbit_map,    31)
         Clock.schedule_interval(self.update_globe_image,  55)
@@ -217,3 +220,57 @@ class Orbit_Screen(MimicBase):
             "Visible Pass!" if (not self.iss_tle.eclipsed and -18 < sun_alt < -6)
             else "Not Visible"
         )
+        
+# ----------------------------------------------------------------- ISS icon + track
+def update_iss_position(self, _dt: float = 0) -> None:
+    """
+    Compute current sub-lat/-lon from the already-loaded self.iss_tle
+    and update icon & rolling ground-track.
+    """
+    if not self.iss_tle or "OrbitMap" not in self.ids:
+        return                                             # nothing to do yet
+
+    # ── compute current lat / lon in degrees ────────────────────────────
+    try:
+        self.iss_tle.compute(datetime.utcnow())
+        lat = math.degrees(self.iss_tle.sublat)
+        lon = math.degrees(self.iss_tle.sublong)
+    except Exception as exc:
+        log_error(f"ISS position compute failed: {exc}")
+        return
+
+    # ── update tiny ISS icon position  ──────────────────────────────────
+    tex = self.ids.OrbitMap.texture_size
+    if tex == (0, 0):        # map texture not ready yet
+        return
+    norm = self.ids.OrbitMap.norm_image_size
+    nX  = norm[0] / tex[0]
+    nY  = norm[1] / tex[1]
+
+    pos_hint = self.scale_latlon(lat, lon)
+    icon = self.ids.OrbitISStiny
+    icon.pos = (
+        (pos_hint["center_x"] * tex[0]) - icon.width  / 2 * nX,
+        (pos_hint["center_y"] * tex[1]) - icon.height / 2 * nY,
+    )
+
+    # ── rolling ground-track (keep ~2 orbits) ───────────────────────────
+    self._track.append((lon, lat))
+    if len(self._track) > 361:            # ≈ 2 × 180°   (call every ~1 s)
+        self._track.pop(0)
+
+    # convert to pixel coords for Line.points
+    pts = []
+    for lo, la in self._track:
+        p = self.scale_latlon(la, lo)
+        pts.extend([
+            p["center_x"] * tex[0],
+            p["center_y"] * tex[1],
+        ])
+
+    # first half → ISSgroundtrack, second half → ISSgroundtrack2
+    mid = len(pts) // 2
+    if "ISSgroundtrack" in self.ids:
+        self.ids.ISSgroundtrack.points  = pts[:mid]
+    if "ISSgroundtrack2" in self.ids:
+        self.ids.ISSgroundtrack2.points = pts[mid:]
