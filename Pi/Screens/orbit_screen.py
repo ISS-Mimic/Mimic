@@ -1,20 +1,28 @@
 # Pi/Screens/orbit_screen.py
 from __future__ import annotations
 
-import json, math, time, logging
+import json, math, time
 from datetime import datetime, timedelta
 from pathlib import Path
 from subprocess import Popen
 from typing import Optional
+from kivy.base import ExceptionManager, ExceptionHandler
+import traceback, sys, logging
+
+class _Reraise(ExceptionHandler):
+    def handle_exception(self, inst):
+        traceback.print_exception(type(inst), inst, inst.__traceback__, file=sys.stderr)
+        logging.getLogger("Mimic").exception("Unhandled Kivy error")
+        return ExceptionManager.PASS
+
+ExceptionManager.add_handler(_Reraise())
 
 import ephem, pytz
 from kivy.clock import Clock
 from kivy.lang import Builder
 
 from ._base import MimicBase
-
-log_info  = logging.getLogger("MyLogger").info
-log_error = logging.getLogger("MyLogger").error
+from utils.logger import log_info, log_error
 
 Builder.load_file(str(Path(__file__).with_name("Orbit_Screen.kv")))
 
@@ -40,7 +48,7 @@ class Orbit_Screen(MimicBase):
 
     # ---------------------------------------------------------------- enter
     def on_enter(self):
-        print("orbit screen on enter")
+        log_info("Orbit Screen Initialized")
         # periodic updates
         Clock.schedule_interval(self.update_orbit,         1)
         Clock.schedule_interval(self.update_iss_position,  1)
@@ -58,6 +66,7 @@ class Orbit_Screen(MimicBase):
 
     # ─────────────── helpers used by many orbit functions ──────────────────
     def map_px(self, lat: float, lon: float) -> tuple[float, float]:
+        log_info("Map Pixel")
         """
         Convert lat/lon to pixel positions
         """
@@ -72,48 +81,7 @@ class Orbit_Screen(MimicBase):
         x_px = fx * norm_w
         y_px = (1-fy) * norm_h #invert Y
         return x_px, y_px
-
-    def scale_latlon(self, lat: float, lon: float) -> dict[str, float]:
-        """
-        Convert (lat, lon) to **root-relative** centre-x / centre-y percentages
-        that you can store in pos_hint *or* turn into absolute positions.
     
-        Works for any cropping / padding because it uses OrbitMap's
-        actual pixel geometry at run time.
-        """
-        map_wdg   = self.ids.OrbitMap
-        root_w, root_h = self.width, self.height
-    
-        # Map texture geometry -------------------------------------------------
-        tex_w, tex_h   = map_wdg.texture_size
-        if tex_w == 0 or tex_h == 0:
-            # texture not ready yet – fall back to screen centre
-            return {"center_x": .5, "center_y": .5}
-    
-        norm_w, norm_h = map_wdg.norm_image_size
-        pad_x = (map_wdg.width  - norm_w) / 2      # black bar L/R inside widget
-        pad_y = (map_wdg.height - norm_h) / 2      # black bar top/bot
-    
-        # ---- fractional position *inside the crop window* --------------------
-        fx = (lon + 180.0) / 360.0                 # 0 .. 1   (west → east)
-        fy = (lat +  90.0) / 180.0                 # 0 .. 1   (north → south)
-    
-        # ---- pixel offset relative to **widget** origin ----------------------
-        # invert fy because screen y grows upward
-        px_in_map = pad_x + fx * norm_w
-        py_in_map = pad_y + (1.0 - fy) * norm_h
-    
-        # ---- absolute pixel in *root* coordinates ----------------------------
-        abs_x = map_wdg.x + px_in_map
-        abs_y = map_wdg.y + py_in_map
-    
-        # ---- final pos_hint percentages --------------------------------------
-        return {
-            "center_x": abs_x / root_w,
-            "center_y": abs_y / root_h,
-        }
-
-
     # ---------------------------------------------------------------- files
     @property
     def map_jpg(self) -> Path:
@@ -150,6 +118,7 @@ class Orbit_Screen(MimicBase):
 
     # ---------------------------------------------------------------- TDRS ground-track
     def update_tdrs(self, _dt=0):
+        log_info("Update TDRS")
         cfg = Path.home() / ".mimic_data" / "tdrs_tle_config.json"
         try:
             db = json.loads(cfg.read_text())
@@ -186,18 +155,9 @@ class Orbit_Screen(MimicBase):
                 log_error(f"{name} compute failed: {exc}")
                 continue
 
-            pos = self.scale_latlon(lat, lon)
-            tex, norm = self.ids.OrbitMap.texture_size, self.ids.OrbitMap.norm_image_size
-            nX = 1 if tex[0] == 0 else norm[0] / tex[0]
-            nY = 1 if tex[1] == 0 else norm[1] / tex[1]
-
-            img.pos = (
-                (pos["center_x"] * tex[0]) - img.width  / 2 * nX,
-                (pos["center_y"] * tex[1]) - img.height / 2 * nY,
-            )
-
-        pos = self.scale_latlon(0,0)
-        self.ids.mylocation.pos_hint = pos
+            x, y = self.map_px(lat, lon)
+	    img.pos = (x - img.width  / 2,
+                       y - img.height / 2)
 
 
         x, y = self.map_px(0, 77)
@@ -205,17 +165,11 @@ class Orbit_Screen(MimicBase):
                             y - self.ids.ZOE.height / 2)
         self.ids.ZOElabel.pos = (x, y + norm_h * 0.1)   # 10 % above
         
-        #pos = self.scale_latlon(0,0)
-        #self.ids.ZOE.pos_hint       = pos
-        #self.ids.ZOElabel.pos_hint  = {"center_x": pos["center_x"],
-        #                               "center_y": pos["center_y"] + 0.1}
-        
-        #self.ids.ZOElabel.pos_hint  = {"center_x": pos["center_x"],
-        #                               "center_y": pos["center_y"]}
-        #print(self.ids.ZOE.pos_hint)
+        log_info("Update TDRS done")
 
     # ---------------------------------------------------------------- ISS + next-pass
     def update_orbit(self, _dt=0):
+        log_info("Update Orbit")
         cfg = Path.home() / ".mimic_data" / "iss_tle_config.json"
         try:
             lines   = json.loads(cfg.read_text())
@@ -307,18 +261,9 @@ class Orbit_Screen(MimicBase):
             self._track.pop(0)
 
         # convert to pixel coords for Line.points
-        pts = []
-        for lo, la in self._track:
-            p = self.scale_latlon(la, lo)
-            pts.extend([
-                p["center_x"] * tex[0],
-                p["center_y"] * tex[1],
-            ])
-
-        # first half → ISSgroundtrack, second half → ISSgroundtrack2
-        mid = len(pts) // 2
-        if "ISSgroundtrack" in self.ids:
-            self.ids.ISSgroundtrack.points  = pts[:mid]
-        if "ISSgroundtrack2" in self.ids:
-            self.ids.ISSgroundtrack2.points = pts[mid:]
-
+	pts = []
+	for lo, la in self._track:
+	    px, py = self.map_px(la, lo)
+	    pts.extend([px, py])
+	self.ids.ISSgroundtrack.points  = pts[:len(pts)//2]
+	self.ids.ISSgroundtrack2.points = pts[len(pts)//2:]

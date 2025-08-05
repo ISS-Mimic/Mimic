@@ -17,7 +17,7 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 # Log-file destination  (~/Mimic/Pi/Logs/mimic.log)
 # ---------------------------------------------------------------------------
-_BASE_DIR = Path(__file__).resolve().parents[2]          # …/Mimic/Pi
+_BASE_DIR = Path(__file__).resolve().parents[1]          # …/Mimic/Pi
 _LOG_DIR  = _BASE_DIR / "Logs"
 _LOG_DIR.mkdir(parents=True, exist_ok=True)
 _LOG_FILE = _LOG_DIR / "mimic.log"

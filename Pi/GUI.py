@@ -1,9 +1,12 @@
 #!/usr/bin/python
 
+import os # used to remove database on program exit; also used for importing config.json
+os.environ["KIVY_NO_CONSOLELOG"] = "1"   # Kivy: no automatic console handler
+os.environ["KIVY_LOG_LEVEL"]    = "error"  # (< INFO is ignored without handler,
+
 from datetime import datetime, timedelta #used for time conversions and logging timestamps
 from dateutil.relativedelta import relativedelta
 import datetime as dtime #this is different from above for... reasons?
-import os # used to remove database on program exit; also used for importing config.json
 from subprocess import Popen #, PIPE, STDOUT #used to start/stop telemetry program and TDRS script and orbitmap
 import threading, subprocess #used for background monitoring of USB ports for playback data
 import time #used for time
@@ -22,8 +25,6 @@ from collections import deque # used for storing russian data at init
 import os.path as op #use for getting mimic directory
 from pathlib import Path
 import pathlib, sys, signal
-import logging
-from logging.handlers import RotatingFileHandler
 
 # This is here because Kivy gets upset if you pass in your own non-Kivy args
 CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), "config.json")
@@ -53,6 +54,7 @@ from kivy.network.urlrequest import UrlRequest
 import database_initialize # create and populate database script
 import Screens as screens
 from utils.serial import serialWrite # custom Serial Write function
+from utils.logger import log_info, log_error
 
 mimic_data_directory = Path.home() / '.mimic_data'
 mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
@@ -66,32 +68,7 @@ SERIAL_SPEED = 9600
 
 os.environ['KIVY_GL_BACKEND'] = 'gl' #need this to fix a kivy segfault that occurs with python3 for some reason
 
-# Set up basic configuration for the logging system
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)s: %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S')
-
-log_file_path = mimic_directory + '/Mimic/Pi/Logs/mimiclog.log'
-
-try:
-    handler = RotatingFileHandler(log_file_path, maxBytes=1048576, backupCount=5)
-    handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
-    logger = logging.getLogger('MyLogger')
-    logger.setLevel(logging.ERROR)  # Set logger to INFO level
-    handler.setLevel(logging.ERROR)  # Set handler to INFO level
-    logger.addHandler(handler)
-except Exception as e:
-    log_error(f"Failed to set up logging: {e}")
-
-logger.info("Mimic App Running.")
-
-def log_info(message):
-    logger.info(message)
-
-def log_error(message):
-    logger.error(message)
-
-log_info("Initialized Mimic Program Log")
+log_info("Initialized Mimic Program")
 
 #-------------------------Look for an internet connection-----------------------------------
 
