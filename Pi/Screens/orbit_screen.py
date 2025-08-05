@@ -18,9 +18,6 @@ log_error = logging.getLogger("MyLogger").error
 
 Builder.load_file(str(Path(__file__).with_name("Orbit_Screen.kv")))
 
-# ----------------------------------------------------------------- state
-_track: list[tuple[float, float]] = []      # deque of lon/lat pairs
-
 # ────────────────────────────────────────────────────────────────────────────
 class Orbit_Screen(MimicBase):
     """Everything related to ground tracks, TDRS icons, next-pass timers."""
@@ -39,6 +36,7 @@ class Orbit_Screen(MimicBase):
     tdrs_tles:        dict[str, ephem.EarthSatellite] = {}
     location         = ephem.Observer()          # reused by many helpers
     last_map_refresh = 0.                        # epoch seconds
+    _track: list[tuple[float, float]] = []       # deque of lon/lat pairs
 
     # ---------------------------------------------------------------- enter
     def on_enter(self):
@@ -59,7 +57,22 @@ class Orbit_Screen(MimicBase):
         Clock.schedule_interval(self.update_nightshade,  20)
 
     # ─────────────── helpers used by many orbit functions ──────────────────
-    @staticmethod
+    def map_px(self, lat: float, lon: float) -> tuple[float, float]:
+        """
+        Convert lat/lon to pixel positions
+        """
+        tex_w, tex_h = self.ids.OrbitMap.texture_size
+        if tex_w == 0 or tex_h == 0:
+            return 0, 0     # texture not ready
+    
+        norm_w, norm_h = self.ids.OrbitMap.norm_image_size
+        fx = (lon + 180.0)/360.0
+        fy = (lat +  90.0)/180.0
+
+        x_px = fx * norm_w
+        y_px = (1-fy) * norm_h #invert Y
+        return x_px, y_px
+
     def scale_latlon(self, lat: float, lon: float) -> dict[str, float]:
         """
         Convert (lat, lon) to **root-relative** centre-x / centre-y percentages
@@ -112,12 +125,10 @@ class Orbit_Screen(MimicBase):
 
     # ---------------------------------------------------------------- image reloads
     def update_orbit_map(self, _dt=0):
-        print("update orbit map")
         self.ids.OrbitMap.source = str(self.map_jpg)
         self.ids.OrbitMap.reload()
 
     def update_globe_image(self, _dt=0):
-        print("update globe image")
         try:
             self.ids.orbit3d.source = str(self.globe_png)
             self.ids.orbit3d.reload()
@@ -126,19 +137,15 @@ class Orbit_Screen(MimicBase):
 
     # ---------------------------------------------------------------- spawn helpers
     def update_globe(self, _dt=0):
-        print("update globe")
         Popen(["python", f"{self.mimic_directory}/Mimic/Pi/orbitGlobe.py"])
 
     def update_nightshade(self, _dt=0):
-        print("update nightshade")
         Popen(["python", f"{self.mimic_directory}/Mimic/Pi/NightShade.py"])
 
     def update_iss_tle(self, _dt=0):
-        print("update iss tle")
         Popen(["python", f"{self.mimic_directory}/Mimic/Pi/getTLE_ISS.py"])
 
     def update_tdrs_tle(self, _dt=0):
-        print("update tdrs tle")
         Popen(["python", f"{self.mimic_directory}/Mimic/Pi/getTLE_TDRS.py"])
 
     # ---------------------------------------------------------------- TDRS ground-track
@@ -189,13 +196,24 @@ class Orbit_Screen(MimicBase):
                 (pos["center_y"] * tex[1]) - img.height / 2 * nY,
             )
 
-        pos = self.scale_latlon(0, 77)
-        self.ids.ZOE.pos_hint       = pos
-        self.ids.ZOElabel.pos_hint  = {"center_x": pos["center_x"],
-                                       "center_y": pos["center_y"] + 0.1}
+        pos = self.scale_latlon(0,0)
+        self.ids.mylocation.pos_hint = pos
+
+
+        x, y = self.map_px(0, 77)
+        self.ids.ZOE.pos = (x - self.ids.ZOE.width / 2,
+                            y - self.ids.ZOE.height / 2)
+        self.ids.ZOElabel.pos = (x, y + norm_h * 0.1)   # 10 % above
+        
+        #pos = self.scale_latlon(0,0)
+        #self.ids.ZOE.pos_hint       = pos
+        #self.ids.ZOElabel.pos_hint  = {"center_x": pos["center_x"],
+        #                               "center_y": pos["center_y"] + 0.1}
+        
+        #self.ids.ZOElabel.pos_hint  = {"center_x": pos["center_x"],
+        #                               "center_y": pos["center_y"]}
         #print(self.ids.ZOE.pos_hint)
 
-    # ---------------------------------------------------------------- ISS + next-pass
     # ---------------------------------------------------------------- ISS + next-pass
     def update_orbit(self, _dt=0):
         cfg = Path.home() / ".mimic_data" / "iss_tle_config.json"
@@ -253,55 +271,54 @@ class Orbit_Screen(MimicBase):
         )
         
 # ----------------------------------------------------------------- ISS icon + track
-def update_iss_position(self, _dt: float = 0) -> None:
-    """
-    Compute current sub-lat/-lon from the already-loaded self.iss_tle
-    and update icon & rolling ground-track.
-    """
-    if not self.iss_tle or "OrbitMap" not in self.ids:
-        return                                             # nothing to do yet
+    def update_iss_position(self, _dt: float = 0) -> None:
+        """
+        Compute current sub-lat/-lon from the already-loaded self.iss_tle
+        and update icon & rolling ground-track.
+        """
+        if not self.iss_tle or "OrbitMap" not in self.ids:
+            return                                             # nothing to do yet
 
-    # ── compute current lat / lon in degrees ────────────────────────────
-    try:
-        self.iss_tle.compute(datetime.utcnow())
-        lat = math.degrees(self.iss_tle.sublat)
-        lon = math.degrees(self.iss_tle.sublong)
-    except Exception as exc:
-        log_error(f"ISS position compute failed: {exc}")
-        return
+        # ── compute current lat / lon in degrees ────────────────────────────
+        try:
+            self.iss_tle.compute(datetime.utcnow())
+            lat = math.degrees(self.iss_tle.sublat)
+            lon = math.degrees(self.iss_tle.sublong)
+        except Exception as exc:
+            log_error(f"ISS position compute failed: {exc}")
+            return
 
-    # ── update tiny ISS icon position  ──────────────────────────────────
-    tex = self.ids.OrbitMap.texture_size
-    if tex == (0, 0):        # map texture not ready yet
-        return
-    norm = self.ids.OrbitMap.norm_image_size
-    nX  = norm[0] / tex[0]
-    nY  = norm[1] / tex[1]
+        # ── update tiny ISS icon position  ──────────────────────────────────
+        tex = self.ids.OrbitMap.texture_size
+        if tex == (0, 0):        # map texture not ready yet
+            return
+        norm = self.ids.OrbitMap.norm_image_size
+        nX  = norm[0] / tex[0]
+        nY  = norm[1] / tex[1]
 
-    pos_hint = self.scale_latlon(lat, lon)
-    icon = self.ids.OrbitISStiny
-    icon.pos = (
-        (pos_hint["center_x"] * tex[0]) - icon.width  / 2 * nX,
-        (pos_hint["center_y"] * tex[1]) - icon.height / 2 * nY,
-    )
+        icon = self.ids.OrbitISStiny
+        x, y = self.map_px(lat, lon)
+        icon.pos = (x - icon.width  / 2,
+                    y - icon.height / 2)
 
-    # ── rolling ground-track (keep ~2 orbits) ───────────────────────────
-    self._track.append((lon, lat))
-    if len(self._track) > 361:            # ≈ 2 × 180°   (call every ~1 s)
-        self._track.pop(0)
+        # ── rolling ground-track (keep ~2 orbits) ───────────────────────────
+        self._track.append((lon, lat))
+        if len(self._track) > 361:            # ≈ 2 × 180°   (call every ~1 s)
+            self._track.pop(0)
 
-    # convert to pixel coords for Line.points
-    pts = []
-    for lo, la in self._track:
-        p = self.scale_latlon(la, lo)
-        pts.extend([
-            p["center_x"] * tex[0],
-            p["center_y"] * tex[1],
-        ])
+        # convert to pixel coords for Line.points
+        pts = []
+        for lo, la in self._track:
+            p = self.scale_latlon(la, lo)
+            pts.extend([
+                p["center_x"] * tex[0],
+                p["center_y"] * tex[1],
+            ])
 
-    # first half → ISSgroundtrack, second half → ISSgroundtrack2
-    mid = len(pts) // 2
-    if "ISSgroundtrack" in self.ids:
-        self.ids.ISSgroundtrack.points  = pts[:mid]
-    if "ISSgroundtrack2" in self.ids:
-        self.ids.ISSgroundtrack2.points = pts[mid:]
+        # first half → ISSgroundtrack, second half → ISSgroundtrack2
+        mid = len(pts) // 2
+        if "ISSgroundtrack" in self.ids:
+            self.ids.ISSgroundtrack.points  = pts[:mid]
+        if "ISSgroundtrack2" in self.ids:
+            self.ids.ISSgroundtrack2.points = pts[mid:]
+
