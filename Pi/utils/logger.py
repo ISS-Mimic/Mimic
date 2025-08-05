@@ -30,7 +30,7 @@ def _configure_root() -> logging.Logger:
     if root.handlers:                        # already configured
         return root
 
-    root.setLevel(logging.DEBUG)
+    root.setLevel(logging.ERROR)
 
     # rotating file handler --------------------------------------------------
     fh = RotatingFileHandler(_LOG_FILE, maxBytes=1_048_576, backupCount=5)

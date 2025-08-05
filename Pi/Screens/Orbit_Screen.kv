@@ -34,14 +34,12 @@
             font_size: self.height * 0.10
             markup: True
 
-    # ───────────────────────── Sun, own-ship, ISS ground-tracks ────────────
-        ## Sun widget (unchanged)
         Widget:
-            id: OrbitSun
-            pos: (0 - self.width/2, 0 - self.height/2)
+            id: test
+            pos: (400 - self.width/2, 268.8 - self.height/2)
             size_hint: None, None
-            size: 50, 50
-            color: (0, 1, 1, 1)
+            size: 10, 10
+            col: (1, 1, 1, 1)
             canvas:
                 PushMatrix
                 Translate:
@@ -49,11 +47,39 @@
                 Scale:
                     x: OrbitMap.norm_image_size[0] / (OrbitMap.texture_size[0] or 1)
                     y: OrbitMap.norm_image_size[1] / (OrbitMap.texture_size[1] or 1)
-                Rectangle:
-                    source: f"{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitSun.png"
+                Color:
+                    rgba: self.col
+                Ellipse:
                     pos: self.pos
                     size: self.size
                 PopMatrix
+
+    # ───────────────────────── Sun, own-ship, ISS ground-tracks ────────────
+        ## Sun widget (unchanged)
+        #Widget:
+        #    id: OrbitSun
+        #    pos: (0 - self.width/2, 0 - self.height/2)
+        #    size_hint: None, None
+        #    size: 50, 50
+        #    color: (0, 1, 1, 1)
+        #    canvas:
+        #        PushMatrix
+        #        Translate:
+        #            xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0]) / 2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1]) / 2)
+        #        Scale:
+        #            x: OrbitMap.norm_image_size[0] / (OrbitMap.texture_size[0] or 1)
+        #            y: OrbitMap.norm_image_size[1] / (OrbitMap.texture_size[1] or 1)
+        #        Rectangle:
+        #            source: f"{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitSun.png"
+        #            pos: self.pos
+        #            size: self.size
+        #        PopMatrix
+        Image:
+            id: sun_icon
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitSun.png"
+            size_hint: None, None
+            size: 40, 40
+            pos: 0, 0 #set in python
 
         ## Observer location (Chicago) – tiny magenta dot
         Widget:

@@ -18,6 +18,7 @@ class _Reraise(ExceptionHandler):
 ExceptionManager.add_handler(_Reraise())
 
 import ephem, pytz
+from math import degrees
 from kivy.clock import Clock
 from kivy.lang import Builder
 
@@ -57,30 +58,38 @@ class Orbit_Screen(MimicBase):
         Clock.schedule_interval(self.update_globe_image,  55)
         Clock.schedule_interval(self.update_globe,        31)
         Clock.schedule_interval(self.update_tdrs,        607)
+        Clock.schedule_interval(self.update_sun,          10) 
 
         # one-shots that existed in MainApp.build()
         Clock.schedule_once(self.update_iss_tle,         14)
         Clock.schedule_once(self.update_tdrs_tle,         7)
-        Clock.schedule_interval(self.update_tdrs,        30)
-        Clock.schedule_interval(self.update_nightshade,  20)
+        Clock.schedule_once(self.update_tdrs,            30)
+        Clock.schedule_once(self.update_nightshade,      20)
 
     # ─────────────── helpers used by many orbit functions ──────────────────
+
+
     def map_px(self, lat: float, lon: float) -> tuple[float, float]:
-        log_info("Map Pixel")
+        #log_info("Map Pixel")
         """
         Convert lat/lon to pixel positions
         """
-        tex_w, tex_h = self.ids.OrbitMap.texture_size
-        if tex_w == 0 or tex_h == 0:
+        mapw = self.ids.OrbitMap
+        tex_w, tex_h = mapw.texture_size
+        if tex_w == 0:
             return 0, 0     # texture not ready
-    
-        norm_w, norm_h = self.ids.OrbitMap.norm_image_size
-        fx = (lon + 180.0)/360.0
-        fy = (lat +  90.0)/180.0
 
-        x_px = fx * norm_w
-        y_px = (1-fy) * norm_h #invert Y
-        return x_px, y_px
+        norm_w, norm_h = mapw.norm_image_size
+        pad_x = (mapw.width  - norm_w) / 2   # ? keep!
+        pad_y = (mapw.height - norm_h) / 2   # ? keep!
+
+        fx = (lon + 180.0) / 360.0           # 0-1
+        fy = (lat +  90.0) / 180.0
+
+        x = mapw.x + pad_x + fx         * norm_w
+        y = mapw.y + pad_y + (1.0 - fy) * norm_h
+        return x, y
+        
     
     # ---------------------------------------------------------------- files
     @property
@@ -92,6 +101,35 @@ class Orbit_Screen(MimicBase):
         return Path.home() / ".mimic_data" / "globe.png"
 
     # ---------------------------------------------------------------- image reloads
+    def update_sun(self, _dt=0) -> None:
+        """
+        Compute the current sub-solar point and center the sun_icon there.
+        """
+        if "sun_icon" not in self.ids or "OrbitMap" not in self.ids:
+            return                        # GUI not ready yet
+
+        # current Sun position
+        sun = ephem.Sun(ephem.now())
+
+        lat = degrees(sun.dec)
+
+        greenwich = ephem.Observer()
+        greenwich.lon, greenwich.lat = "0", "0"
+        greenwich.date = ephem.now()
+        gst = greenwich.sidereal_time()        
+
+        lon = degrees(gst - sun.ra)
+        lon = (lon + 180) % 360 - 180
+
+        # centre of the icon in root pixels
+        x, y = self.map_px(lat, lon)
+        print(lat)
+        print(lon)
+
+        icon = self.ids.sun_icon
+        icon.pos = (x - icon.width  / 2,
+                    y - icon.height / 2)
+
     def update_orbit_map(self, _dt=0):
         self.ids.OrbitMap.source = str(self.map_jpg)
         self.ids.OrbitMap.reload()
@@ -118,6 +156,7 @@ class Orbit_Screen(MimicBase):
 
     # ---------------------------------------------------------------- TDRS ground-track
     def update_tdrs(self, _dt=0):
+
         log_info("Update TDRS")
         cfg = Path.home() / ".mimic_data" / "tdrs_tle_config.json"
         try:
@@ -133,16 +172,10 @@ class Orbit_Screen(MimicBase):
             log_error(f"TDRS TLE load failed: {exc}")
             return
 
-        def safe_div(a, b): return 1 if b == 0 else a / b
-        nX = safe_div(self.ids.OrbitMap.norm_image_size[0],
-                      self.ids.OrbitMap.texture_size[0])
-        nY = safe_div(self.ids.OrbitMap.norm_image_size[1],
-                      self.ids.OrbitMap.texture_size[1])
-
         for name, sat in self.tdrs_tles.items():
             id_name = name.replace(" ", "")           # "TDRS 6" ? "TDRS6"
             if id_name not in self.ids:               # icon missing in KV ? skip
-                print("missing KV id")
+                log_error("missing KV id")
                 continue
 
             img = self.ids[id_name]                   # the small ellipse icon
@@ -155,15 +188,40 @@ class Orbit_Screen(MimicBase):
                 log_error(f"{name} compute failed: {exc}")
                 continue
 
-            x, y = self.map_px(lat, lon)
-	    img.pos = (x - img.width  / 2,
-                       y - img.height / 2)
+            #print(lat)
+            #print(lon)
+            #x, y = self.map_px(lat, lon)
+            #print(x)
+            #print(y)
+            #print(self.ids.OrbitMap.norm_image_size)
+            #img.pos = (x - img.width  / 2,
+            #           y - img.height / 2)
+
+            tex_w, tex_h  = self.ids.OrbitMap.texture_size
+            norm_w, norm_h = self.ids.OrbitMap.norm_image_size
+            nX = 1 if tex_w == 0 else norm_w / tex_w
+            nY = 1 if tex_h == 0 else norm_h / tex_h
+
+            x, y = self.map_px(lat, lon)        # root-pixel centre of the dot
+            img.pos = (x - img.width  * nX / 2,
+                       y - img.height * nY / 2)
 
 
         x, y = self.map_px(0, 77)
         self.ids.ZOE.pos = (x - self.ids.ZOE.width / 2,
                             y - self.ids.ZOE.height / 2)
-        self.ids.ZOElabel.pos = (x, y + norm_h * 0.1)   # 10 % above
+
+        print("0,0")
+        print(self.map_px(0,0))
+        print("90,-180")
+        print(self.map_px(90,-180))
+        print("-90,180")
+        print(self.map_px(-90,180))
+
+        self.ids.ZOElabel.pos = (x, y + 40) 
+
+        self.ids.ZOE.color = (1,0,1,0.5)
+    
         
         log_info("Update TDRS done")
 
@@ -251,7 +309,11 @@ class Orbit_Screen(MimicBase):
         nY  = norm[1] / tex[1]
 
         icon = self.ids.OrbitISStiny
+        #print(lat)
+        #print(lon)
         x, y = self.map_px(lat, lon)
+        #print(y)
+        #print(x)
         icon.pos = (x - icon.width  / 2,
                     y - icon.height / 2)
 
@@ -261,9 +323,9 @@ class Orbit_Screen(MimicBase):
             self._track.pop(0)
 
         # convert to pixel coords for Line.points
-	pts = []
-	for lo, la in self._track:
-	    px, py = self.map_px(la, lo)
-	    pts.extend([px, py])
-	self.ids.ISSgroundtrack.points  = pts[:len(pts)//2]
-	self.ids.ISSgroundtrack2.points = pts[len(pts)//2:]
+        pts = []
+        for lo, la in self._track:
+            px, py = self.map_px(la, lo)
+            pts.extend([px, py])
+        self.ids.ISSgroundtrack.points  = pts[:len(pts)//2]
+        self.ids.ISSgroundtrack2.points = pts[len(pts)//2:]
