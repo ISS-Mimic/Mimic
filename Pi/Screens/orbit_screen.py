@@ -66,30 +66,50 @@ class Orbit_Screen(MimicBase):
         Clock.schedule_once(self.update_tdrs,            30)
         Clock.schedule_once(self.update_nightshade,      20)
 
-    # ─────────────── helpers used by many orbit functions ──────────────────
-
-
+    # ─────────────────────── map helper (root pixels) ──────────────────────────
     def map_px(self, lat: float, lon: float) -> tuple[float, float]:
-        #log_info("Map Pixel")
         """
-        Convert lat/lon to pixel positions
+        lat/lon → root-pixel coordinates that you can assign to widget.pos.
+        Works regardless of OrbitMap letter-boxing.
         """
-        mapw = self.ids.OrbitMap
-        tex_w, tex_h = mapw.texture_size
-        if tex_w == 0:
-            return 0, 0     # texture not ready
-
-        norm_w, norm_h = mapw.norm_image_size
-        pad_x = (mapw.width  - norm_w) / 2   # ? keep!
-        pad_y = (mapw.height - norm_h) / 2   # ? keep!
-
-        fx = (lon + 180.0) / 360.0           # 0-1
-        fy = (lat +  90.0) / 180.0
-
-        x = mapw.x + pad_x + fx         * norm_w
-        y = mapw.y + pad_y + (1.0 - fy) * norm_h
+        mp = self.ids.OrbitMap
+        tw, th = mp.texture_size
+        if tw == 0 or th == 0:
+            return 0, 0                           # texture not loaded yet
+    
+        nw, nh = mp.norm_image_size
+        pad_x  = (mp.width  - nw) / 2             # black bars left/right
+        pad_y  = (mp.height - nh) / 2             # black bars top/bottom
+    
+        fx = (lon + 180.0) / 360.0                # west→east  0 … 1
+        fy = (lat +  90.0) / 180.0                # north→south 0 … 1
+    
+        x = mp.x + pad_x + fx        * nw
+        y = mp.y + pad_y + (1.0 - fy) * nh        # invert Y
         return x, y
-        
+    
+    
+    # ─────────────────────── Sun updater ───────────────────────────────────────
+    def update_sun(self, _dt=0) -> None:
+        if "sun_icon" not in self.ids:
+            return                                # KV not built yet
+    
+        now = ephem.now()
+        sun = ephem.Sun(now)
+    
+        # latitude = declination
+        lat = degrees(sun.dec)
+    
+        # longitude: λ = RA − GST  (east-positive, wrap to −180…+180)
+        g = ephem.Observer(); g.lon = '0'; g.lat = '0'; g.date = now
+        lon = degrees(sun.ra - g.sidereal_time())
+        lon = (lon + 180) % 360 - 180
+    
+        x, y = self.map_px(lat, lon)
+    
+        icon = self.ids.sun_icon
+        icon.pos = (x - icon.width  / 2,
+                    y - icon.height / 2)
     
     # ---------------------------------------------------------------- files
     @property
