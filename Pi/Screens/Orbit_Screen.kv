@@ -58,14 +58,13 @@
                         (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360, 20)
 
 
-        # two line widgets share the same canvas; simplifies draw/update
+        # Track line widgets for ISS ground track
         Widget:
             id: iss_track_line_a
             canvas:
                 Color:
                     rgba: 1, 1, 0, 1           
                 Line:
-                    id: line_a
                     points: []                 
                     width: 1
 
@@ -75,7 +74,6 @@
                 Color:
                     rgba: 1, 1, 0, 1
                 Line:
-                    id: line_b
                     points: []
                     width: 1
 

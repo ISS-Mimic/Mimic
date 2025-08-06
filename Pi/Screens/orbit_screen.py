@@ -346,9 +346,15 @@ class Orbit_Screen(MimicBase):
                 last_lon = lon
 
             # ---------- push to the Line widgets ---------------------------------
-            # Access the line directly from the canvas
-            self.ids.iss_track_line_a.canvas.children[1].points = seg_a
-            self.ids.iss_track_line_b.canvas.children[1].points = seg_b
+            # Access the line instructions directly from canvas
+            for instruction in self.ids.iss_track_line_a.canvas.children:
+                if hasattr(instruction, 'points'):
+                    instruction.points = seg_a
+                    break
+            for instruction in self.ids.iss_track_line_b.canvas.children:
+                if hasattr(instruction, 'points'):
+                    instruction.points = seg_b
+                    break
             
         except Exception as exc:
             log_error(f"Update ground track failed: {exc}")

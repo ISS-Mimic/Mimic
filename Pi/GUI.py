@@ -1,10 +1,8 @@
 #!/usr/bin/python
 
 import os # used to remove database on program exit; also used for importing config.json
-# Temporarily enable error visibility for debugging
-# os.environ["KIVY_NO_CONSOLELOG"] = "1"   # Kivy: no automatic console handler
-# os.environ["KIVY_LOG_LEVEL"]    = "error"  # (< INFO is ignored without handler,
-os.environ["KIVY_LOG_LEVEL"]    = "debug"  # Enable all logging for debugging
+os.environ["KIVY_NO_CONSOLELOG"] = "1"   # Kivy: no automatic console handler
+os.environ["KIVY_LOG_LEVEL"]    = "error"  # (< INFO is ignored without handler,
 
 from datetime import datetime, timedelta #used for time conversions and logging timestamps
 from dateutil.relativedelta import relativedelta
