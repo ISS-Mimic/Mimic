@@ -226,6 +226,19 @@
                 points: []
                 width: 1
 
+    # ───────────────────────────── User Location ───────────────────────────
+    Widget:
+        id: user_location
+        size_hint: None, None
+        size: 12, 12
+        pos: 0, 0  # Will be set in Python
+        canvas:
+            Color:
+                rgba: 1, 0, 1, 1  # Magenta dot
+            Ellipse:
+                pos: self.pos
+                size: self.size
+
     # ───────────────────────────── ZOE & ISS icons ─────────────────────────
     Widget:
         id: ZOE

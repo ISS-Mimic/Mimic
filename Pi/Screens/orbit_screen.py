@@ -45,6 +45,10 @@ class Orbit_Screen(MimicBase):
     tdrs_tles:        dict[str, ephem.EarthSatellite] = {}
     location         = ephem.Observer()          # reused by many helpers
     last_map_refresh = 0.                        # epoch seconds
+    
+    # User location (default: Houston, TX)
+    user_lat: float = 29.585736
+    user_lon: float = -95.1327829
 
     # ---------------------------------------------------------------- enter
     def on_enter(self):
@@ -70,6 +74,9 @@ class Orbit_Screen(MimicBase):
         Clock.schedule_once(self.update_tdrs,             30)
         Clock.schedule_once(self.update_nightshade,       20)
         Clock.schedule_once(self.update_sun,              11)
+        
+        # Update user location on screen enter
+        Clock.schedule_once(self.update_user_location,     1)
 
     # ---------------------------------------------------------------- leave
     def on_leave(self):
@@ -84,6 +91,34 @@ class Orbit_Screen(MimicBase):
         Clock.unschedule(self.update_globe)
         Clock.unschedule(self.update_tdrs)
         Clock.unschedule(self.update_sun) 
+
+    # ─────────────────────── user location ─────────────────────────────────────
+    def update_user_location(self, _dt=0) -> None:
+        """Update the user location dot on the map."""
+        try:
+            if "user_location" not in self.ids:
+                log_error("User location widget not found in KV file")
+                return
+                
+            x, y = self.map_px(self.user_lat, self.user_lon)
+            self.ids.user_location.center = (x, y)
+            
+        except Exception as exc:
+            log_error(f"Update user location failed: {exc}")
+            import traceback
+            traceback.print_exc()
+
+    def set_user_location(self, lat: float, lon: float) -> None:
+        """Set the user location and update the display."""
+        self.user_lat = lat
+        self.user_lon = lon
+        
+        # Update the observer location for pass calculations
+        self.location.lat = str(lat)
+        self.location.lon = str(lon)
+        
+        # Update the display
+        self.update_user_location()
 
     # ─────────────────────── map helper (root pixels) ──────────────────────────
     def map_px(self, lat: float, lon: float) -> tuple[float, float]:
@@ -212,7 +247,7 @@ class Orbit_Screen(MimicBase):
                     t = datetime.utcnow()
                     step = timedelta(minutes=1)
                     
-                    for _ in range(96):  # ~ one orbit ahead
+                    for _ in range(1496):  # ~ one orbit ahead
                         try:
                             sat.compute(t)
                             track_lat = degrees(sat.sublat)
@@ -261,9 +296,9 @@ class Orbit_Screen(MimicBase):
             log_error(f"ISS TLE load failed: {exc}")
             return
     
-        # --- observer (Houston for now) ---------------------------------------
+        # --- observer (user location) ---------------------------------------
         loc             = self.location
-        loc.lat, loc.lon = "29.585736", "-95.1327829"
+        loc.lat, loc.lon = str(self.user_lat), str(self.user_lon)
         loc.elevation    = 10
         loc.date         = ephem.now()          # ← **reset each tick**
     
@@ -281,6 +316,7 @@ class Orbit_Screen(MimicBase):
     
         # — localise AOS time for display --------------------------------------
         utc_dt = datetime.strptime(str(next_pass[0]), "%Y/%m/%d %H:%M:%S")
+        # For now, use Houston timezone. In the future, this could be configurable
         local  = utc_dt.replace(tzinfo=pytz.utc)\
                        .astimezone(pytz.timezone("America/Chicago"))
     
