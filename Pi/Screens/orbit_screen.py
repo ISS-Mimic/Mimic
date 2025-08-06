@@ -49,6 +49,10 @@ class Orbit_Screen(MimicBase):
     # ---------------------------------------------------------------- enter
     def on_enter(self):
         log_info("Orbit Screen Initialized")
+        
+        # Debug: Check what widgets are available
+        log_info(f"Available widget IDs: {list(self.ids.keys())}")
+        
         # periodic updates
         Clock.schedule_interval(self.update_orbit,         1)
         Clock.schedule_interval(self.update_iss,           1)
@@ -160,57 +164,63 @@ class Orbit_Screen(MimicBase):
 
     # ---------------------------------------------------------------- TDRS ground-track
     def update_tdrs(self, _dt=0):
-
-        log_info("Update TDRS")
-        cfg = Path.home() / ".mimic_data" / "tdrs_tle_config.json"
         try:
-            db = json.loads(cfg.read_text())
-            # keep only the six satellites we actually display
-            self.tdrs_tles = {
-                name: ephem.readtle(name, *lines)
-                for name, lines in db["TDRS_TLEs"].items()
-                if name in self._TDRS_IDS
-            }
-        except Exception as exc:
-            log_error(f"TDRS TLE load failed: {exc}")
-            return
-
-        for name, sat in self.tdrs_tles.items():
-            id_name = name.replace(" ", "")           # "TDRS 6" ? "TDRS6"
-            if id_name not in self.ids:               # icon missing in KV ? skip
-                log_error("missing KV id")
-                continue
-
-            img = self.ids[id_name]                   # the small ellipse icon
-
+            log_info("Update TDRS")
+            cfg = Path.home() / ".mimic_data" / "tdrs_tle_config.json"
             try:
-                sat.compute(datetime.utcnow())
-                lon = sat.sublong * 180 / math.pi      # ephem radians?deg
-                lat = sat.sublat  * 180 / math.pi
+                db = json.loads(cfg.read_text())
+                # keep only the six satellites we actually display
+                self.tdrs_tles = {
+                    name: ephem.readtle(name, *lines)
+                    for name, lines in db["TDRS_TLEs"].items()
+                    if name in self._TDRS_IDS
+                }
             except Exception as exc:
-                log_error(f"{name} compute failed: {exc}")
-                continue
+                log_error(f"TDRS TLE load failed: {exc}")
+                return
 
-            tex_w, tex_h  = self.ids.OrbitMap.texture_size
-            norm_w, norm_h = self.ids.OrbitMap.norm_image_size
-            nX = 1 if tex_w == 0 else norm_w / tex_w
-            nY = 1 if tex_h == 0 else norm_h / tex_h
+            for name, sat in self.tdrs_tles.items():
+                id_name = name.replace(" ", "")           # "TDRS 6" ? "TDRS6"
+                if id_name not in self.ids:               # icon missing in KV ? skip
+                    log_error(f"Missing KV id: {id_name}")
+                    continue
 
-            x, y = self.map_px(lat, lon)        # root-pixel centre of the dot
-            img.pos = (x - img.width  * nX / 2,
-                       y - img.height * nY / 2)
+                img = self.ids[id_name]                   # the small ellipse icon
 
+                try:
+                    sat.compute(datetime.utcnow())
+                    lon = sat.sublong * 180 / math.pi      # ephem radians?deg
+                    lat = sat.sublat  * 180 / math.pi
+                except Exception as exc:
+                    log_error(f"{name} compute failed: {exc}")
+                    continue
 
-        x, y = self.map_px(0, 77)
-        self.ids.ZOE.pos = (x - self.ids.ZOE.width / 2,
-                            y - self.ids.ZOE.height / 2)
+                tex_w, tex_h  = self.ids.OrbitMap.texture_size
+                norm_w, norm_h = self.ids.OrbitMap.norm_image_size
+                nX = 1 if tex_w == 0 else norm_w / tex_w
+                nY = 1 if tex_h == 0 else norm_h / tex_h
 
-        self.ids.ZOElabel.pos = (x, y + 40) 
-        # Fix: ZOE is a Widget, not a Label, so we need to update the canvas color
-        self.ids.ZOE.col = (1, 0, 1, 0.5)
-    
+                x, y = self.map_px(lat, lon)        # root-pixel centre of the dot
+                img.pos = (x - img.width  * nX / 2,
+                           y - img.height * nY / 2)
+
+            # Check if ZOE widgets exist before accessing them
+            if 'ZOE' in self.ids and 'ZOElabel' in self.ids:
+                x, y = self.map_px(0, 77)
+                self.ids.ZOE.pos = (x - self.ids.ZOE.width / 2,
+                                    y - self.ids.ZOE.height / 2)
+
+                self.ids.ZOElabel.pos = (x, y + 40) 
+                # Fix: ZOE is a Widget, not a Label, so we need to update the canvas color
+                self.ids.ZOE.col = (1, 0, 1, 0.5)
+            else:
+                log_error("ZOE widgets not found in KV file")
         
-        log_info("Update TDRS done")
+            log_info("Update TDRS done")
+        except Exception as exc:
+            log_error(f"Update TDRS failed: {exc}")
+            import traceback
+            traceback.print_exc()
 
     # ---------------------------------------------------------------- ISS + next-pass
     def update_orbit(self, _dt=0):
@@ -295,40 +305,52 @@ class Orbit_Screen(MimicBase):
         Draw one full upcoming orbit (~96 min) as two Line objects so the
         path wraps cleanly at +-180 degrees 
         """
-
-        if self.iss_tle is None or "OrbitMap" not in self.ids:
+        try:
+            if self.iss_tle is None or "OrbitMap" not in self.ids:
+                log_error("ISS TLE or OrbitMap not available")
                 return
 
-        #---------- propagate ISS one orbit ahead -----------------------------
+            # Check if track line widgets exist
+            if "iss_track_line_a" not in self.ids or "iss_track_line_b" not in self.ids:
+                log_error("Track line widgets not found in KV file")
+                return
+
+            #---------- propagate ISS one orbit ahead -----------------------------
+            
+            future_pts: list[tuple[float, float]] = []
+
+            t = datetime.utcnow()                 # start time as real datetime
+            step = timedelta(minutes=1)           # 60-s increments
+
+            for _ in range(96):                   # ~ one orbit ahead
+                self.iss_tle.compute(t)
+                lat = degrees(self.iss_tle.sublat)
+                lon = degrees(self.iss_tle.sublong)
+                future_pts.append((lat, lon))
+                t += step                         # advance to next minute
+
         
-        future_pts: list[tuple[float, float]] = []
 
-        t = datetime.utcnow()                 # start time as real datetime
-        step = timedelta(minutes=1)           # 60-s increments
+            # ---------- split where path crosses dateline ------------------------
+            seg_a: list[float] = []
+            seg_b: list[float] = []
+            current = seg_a
 
-        for _ in range(96):                   # ~ one orbit ahead
-            self.iss_tle.compute(t)
-            lat = degrees(self.iss_tle.sublat)
-            lon = degrees(self.iss_tle.sublong)
-            future_pts.append((lat, lon))
-            t += step                         # advance to next minute
+            last_lon = future_pts[0][1]
+            for lat, lon in future_pts:
+                #if jump > 180, switch segments
+                if abs(lon - last_lon) > 180:
+                    current = seg_b if current is seg_a else seg_a
+                x, y = self.map_px(lat, lon)
+                current.extend([x, y])
+                last_lon = lon
 
-    
-
-        # ---------- split where path crosses dateline ------------------------
-        seg_a: list[float] = []
-        seg_b: list[float] = []
-        current = seg_a
-
-        last_lon = future_pts[0][1]
-        for lat, lon in future_pts:
-            #if jump > 180, switch segments
-            if abs(lon - last_lon) > 180:
-                current = seg_b if current is seg_a else seg_a
-            x, y = self.map_px(lat, lon)
-            current.extend([x, y])
-            last_lon = lon
-
-        # ---------- push to the Line widgets ---------------------------------
-        self.ids.iss_track_line_a.line.points = seg_a
-        self.ids.iss_track_line_b.line.points = seg_b
+            # ---------- push to the Line widgets ---------------------------------
+            # Access the line directly from the canvas
+            self.ids.iss_track_line_a.canvas.children[1].points = seg_a
+            self.ids.iss_track_line_b.canvas.children[1].points = seg_b
+            
+        except Exception as exc:
+            log_error(f"Update ground track failed: {exc}")
+            import traceback
+            traceback.print_exc()

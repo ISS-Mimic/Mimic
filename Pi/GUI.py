@@ -1,8 +1,10 @@
 #!/usr/bin/python
 
 import os # used to remove database on program exit; also used for importing config.json
-os.environ["KIVY_NO_CONSOLELOG"] = "1"   # Kivy: no automatic console handler
-os.environ["KIVY_LOG_LEVEL"]    = "error"  # (< INFO is ignored without handler,
+# Temporarily enable error visibility for debugging
+# os.environ["KIVY_NO_CONSOLELOG"] = "1"   # Kivy: no automatic console handler
+# os.environ["KIVY_LOG_LEVEL"]    = "error"  # (< INFO is ignored without handler,
+os.environ["KIVY_LOG_LEVEL"]    = "debug"  # Enable all logging for debugging
 
 from datetime import datetime, timedelta #used for time conversions and logging timestamps
 from dateutil.relativedelta import relativedelta
@@ -18,7 +20,7 @@ from bs4 import BeautifulSoup #used to parse webpages for data (EVA stats, ISS T
 import ephem #used for TLE orbit information on orbit screen
 import serial #used to send data over serial to arduino
 import json # used for serial port config and storing TLEs and crew info
-from pyudev import Context, Devices, Monitor, MonitorObserver # for automatically detecting Arduinos
+from pyudev import Context, Devices, Monitor, MonitorObserver # for automatically detecting Arduinos - not available on Windows
 import argparse
 import sys
 from collections import deque # used for storing russian data at init
