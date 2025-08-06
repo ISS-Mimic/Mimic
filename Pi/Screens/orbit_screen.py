@@ -204,6 +204,32 @@ class Orbit_Screen(MimicBase):
                 img.pos = (x - img.width  * nX / 2,
                            y - img.height * nY / 2)
 
+                # Update ground track for this TDRS satellite
+                track_id = f"{id_name}_track"
+                if track_id in self.ids:
+                    # Generate ground track points (simplified - one orbit ahead)
+                    track_points = []
+                    t = datetime.utcnow()
+                    step = timedelta(minutes=1)
+                    
+                    for _ in range(96):  # ~ one orbit ahead
+                        try:
+                            sat.compute(t)
+                            track_lat = degrees(sat.sublat)
+                            track_lon = degrees(sat.sublong)
+                            track_x, track_y = self.map_px(track_lat, track_lon)
+                            track_points.extend([track_x, track_y])
+                            t += step
+                        except Exception as exc:
+                            log_error(f"{name} track compute failed: {exc}")
+                            break
+                    
+                    # Update the track line
+                    for instruction in self.ids[track_id].canvas.children:
+                        if hasattr(instruction, 'points'):
+                            instruction.points = track_points
+                            break
+
             # Check if ZOE widgets exist before accessing them
             if 'ZOE' in self.ids and 'ZOElabel' in self.ids:
                 x, y = self.map_px(0, 77)
