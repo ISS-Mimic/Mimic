@@ -65,7 +65,21 @@ class Orbit_Screen(MimicBase):
         Clock.schedule_once(self.update_tdrs_tle,          7)
         Clock.schedule_once(self.update_tdrs,             30)
         Clock.schedule_once(self.update_nightshade,       20)
-        Clock.schedule_once(self.update_sun,              11) 
+        Clock.schedule_once(self.update_sun,              11)
+
+    # ---------------------------------------------------------------- leave
+    def on_leave(self):
+        log_info("Orbit Screen Leaving - Cleaning up scheduled events")
+        # Cancel all scheduled events to prevent memory leaks and unnecessary processing
+        Clock.unschedule(self.update_orbit)
+        Clock.unschedule(self.update_iss)
+        Clock.unschedule(self.update_groundtrack)
+        Clock.unschedule(self.update_nightshade)
+        Clock.unschedule(self.update_orbit_map)
+        Clock.unschedule(self.update_globe_image)
+        Clock.unschedule(self.update_globe)
+        Clock.unschedule(self.update_tdrs)
+        Clock.unschedule(self.update_sun) 
 
     # ─────────────────────── map helper (root pixels) ──────────────────────────
     def map_px(self, lat: float, lon: float) -> tuple[float, float]:
@@ -192,7 +206,8 @@ class Orbit_Screen(MimicBase):
                             y - self.ids.ZOE.height / 2)
 
         self.ids.ZOElabel.pos = (x, y + 40) 
-        self.ids.ZOE.color = (1,0,1,0.5)
+        # Fix: ZOE is a Widget, not a Label, so we need to update the canvas color
+        self.ids.ZOE.col = (1, 0, 1, 0.5)
     
         
         log_info("Update TDRS done")
