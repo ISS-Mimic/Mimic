@@ -1,8 +1,7 @@
 # Pi/Screens/orbit_screen.py
 from __future__ import annotations
 
-import json, math, time
-from datetime import datetime, timedelta
+import json, math, time, pytz
 from pathlib import Path
 from subprocess import Popen
 from typing import Optional
@@ -17,8 +16,10 @@ class _Reraise(ExceptionHandler):
 
 ExceptionManager.add_handler(_Reraise())
 
-import ephem, pytz
+from collections import deque
 from math import degrees
+from datetime import datetime
+import ephem
 from kivy.clock import Clock
 from kivy.lang import Builder
 
@@ -45,26 +46,27 @@ class Orbit_Screen(MimicBase):
     tdrs_tles:        dict[str, ephem.EarthSatellite] = {}
     location         = ephem.Observer()          # reused by many helpers
     last_map_refresh = 0.                        # epoch seconds
-    _track: list[tuple[float, float]] = []       # deque of lon/lat pairs
+    _TRACK = deque(maxlen=361)                   # deque of lon/lat pairs
 
     # ---------------------------------------------------------------- enter
     def on_enter(self):
         log_info("Orbit Screen Initialized")
         # periodic updates
         Clock.schedule_interval(self.update_orbit,         1)
-        Clock.schedule_interval(self.update_iss_position,  1)
+        Clock.schedule_interval(self.update_iss,           1)
         Clock.schedule_interval(self.update_nightshade,  120)
         Clock.schedule_interval(self.update_orbit_map,    31)
         Clock.schedule_interval(self.update_globe_image,  55)
         Clock.schedule_interval(self.update_globe,        31)
         Clock.schedule_interval(self.update_tdrs,        607)
-        Clock.schedule_interval(self.update_sun,          10) 
+        Clock.schedule_interval(self.update_sun,         489) 
 
         # one-shots that existed in MainApp.build()
-        Clock.schedule_once(self.update_iss_tle,         14)
-        Clock.schedule_once(self.update_tdrs_tle,         7)
-        Clock.schedule_once(self.update_tdrs,            30)
-        Clock.schedule_once(self.update_nightshade,      20)
+        Clock.schedule_once(self.update_iss_tle,          14)
+        Clock.schedule_once(self.update_tdrs_tle,          7)
+        Clock.schedule_once(self.update_tdrs,             30)
+        Clock.schedule_once(self.update_nightshade,       20)
+        Clock.schedule_once(self.update_sun,              11) 
 
     # ─────────────────────── map helper (root pixels) ──────────────────────────
     def map_px(self, lat: float, lon: float) -> tuple[float, float]:
@@ -84,8 +86,8 @@ class Orbit_Screen(MimicBase):
         fx = (lon + 180.0) / 360.0                # west→east  0 … 1
         fy = (lat +  90.0) / 180.0                # north→south 0 … 1
     
-        x = mp.x + pad_x + fx        * nw
-        y = mp.y + pad_y + (1.0 - fy) * nh        # invert Y
+        x = mp.x + pad_x + fx * nw
+        y = mp.y + pad_y + fy * nh        # invert Y
         return x, y
     
     
@@ -106,10 +108,9 @@ class Orbit_Screen(MimicBase):
         lon = (lon + 180) % 360 - 180
     
         x, y = self.map_px(lat, lon)
-    
+        
         icon = self.ids.sun_icon
-        icon.pos = (x - icon.width  / 2,
-                    y - icon.height / 2)
+        icon.center = (x, y)
     
     # ---------------------------------------------------------------- files
     @property
@@ -119,36 +120,6 @@ class Orbit_Screen(MimicBase):
     @property
     def globe_png(self) -> Path:
         return Path.home() / ".mimic_data" / "globe.png"
-
-    # ---------------------------------------------------------------- image reloads
-    def update_sun(self, _dt=0) -> None:
-        """
-        Compute the current sub-solar point and center the sun_icon there.
-        """
-        if "sun_icon" not in self.ids or "OrbitMap" not in self.ids:
-            return                        # GUI not ready yet
-
-        # current Sun position
-        sun = ephem.Sun(ephem.now())
-
-        lat = degrees(sun.dec)
-
-        greenwich = ephem.Observer()
-        greenwich.lon, greenwich.lat = "0", "0"
-        greenwich.date = ephem.now()
-        gst = greenwich.sidereal_time()        
-
-        lon = degrees(gst - sun.ra)
-        lon = (lon + 180) % 360 - 180
-
-        # centre of the icon in root pixels
-        x, y = self.map_px(lat, lon)
-        print(lat)
-        print(lon)
-
-        icon = self.ids.sun_icon
-        icon.pos = (x - icon.width  / 2,
-                    y - icon.height / 2)
 
     def update_orbit_map(self, _dt=0):
         self.ids.OrbitMap.source = str(self.map_jpg)
@@ -188,7 +159,6 @@ class Orbit_Screen(MimicBase):
                 if name in self._TDRS_IDS
             }
         except Exception as exc:
-            print(f"TDRS TLE load failed: {exc}")
             log_error(f"TDRS TLE load failed: {exc}")
             return
 
@@ -208,15 +178,6 @@ class Orbit_Screen(MimicBase):
                 log_error(f"{name} compute failed: {exc}")
                 continue
 
-            #print(lat)
-            #print(lon)
-            #x, y = self.map_px(lat, lon)
-            #print(x)
-            #print(y)
-            #print(self.ids.OrbitMap.norm_image_size)
-            #img.pos = (x - img.width  / 2,
-            #           y - img.height / 2)
-
             tex_w, tex_h  = self.ids.OrbitMap.texture_size
             norm_w, norm_h = self.ids.OrbitMap.norm_image_size
             nX = 1 if tex_w == 0 else norm_w / tex_w
@@ -231,15 +192,7 @@ class Orbit_Screen(MimicBase):
         self.ids.ZOE.pos = (x - self.ids.ZOE.width / 2,
                             y - self.ids.ZOE.height / 2)
 
-        print("0,0")
-        print(self.map_px(0,0))
-        print("90,-180")
-        print(self.map_px(90,-180))
-        print("-90,180")
-        print(self.map_px(-90,180))
-
         self.ids.ZOElabel.pos = (x, y + 40) 
-
         self.ids.ZOE.color = (1,0,1,0.5)
     
         
@@ -302,50 +255,37 @@ class Orbit_Screen(MimicBase):
             else "Not Visible"
         )
         
-# ----------------------------------------------------------------- ISS icon + track
-    def update_iss_position(self, _dt: float = 0) -> None:
+    # ----------------------------------------------------------------- ISS icon + track
+    def update_iss(self, _dt=0):
         """
-        Compute current sub-lat/-lon from the already-loaded self.iss_tle
-        and update icon & rolling ground-track.
+        Update icon centre + rolling ground-track.
         """
-        if not self.iss_tle or "OrbitMap" not in self.ids:
-            return                                             # nothing to do yet
+        if "iss_icon" not in self.ids or self.iss_tle is None:
+            return            # not ready yet
 
-        # ── compute current lat / lon in degrees ────────────────────────────
+        # -- current sub-lat / sub-lon ---------------------------------------
         try:
             self.iss_tle.compute(datetime.utcnow())
-            lat = math.degrees(self.iss_tle.sublat)
-            lon = math.degrees(self.iss_tle.sublong)
+            lat = degrees(self.iss_tle.sublat)
+            lon = degrees(self.iss_tle.sublong)
         except Exception as exc:
-            log_error(f"ISS position compute failed: {exc}")
+            log_error(f"ISS compute failed: {exc}")
             return
 
-        # ── update tiny ISS icon position  ──────────────────────────────────
-        tex = self.ids.OrbitMap.texture_size
-        if tex == (0, 0):        # map texture not ready yet
-            return
-        norm = self.ids.OrbitMap.norm_image_size
-        nX  = norm[0] / tex[0]
-        nY  = norm[1] / tex[1]
-
-        icon = self.ids.OrbitISStiny
-        #print(lat)
-        #print(lon)
+        # -- icon position ---------------------------------------------------
         x, y = self.map_px(lat, lon)
-        #print(y)
-        #print(x)
-        icon.pos = (x - icon.width  / 2,
-                    y - icon.height / 2)
+        self.ids.iss_icon.center = (x, y)
 
-        # ── rolling ground-track (keep ~2 orbits) ───────────────────────────
-        self._track.append((lon, lat))
-        if len(self._track) > 361:            # ≈ 2 × 180°   (call every ~1 s)
-            self._track.pop(0)
+        # -- ground track deque ----------------------------------------------
+        self._TRACK.append((lat, lon))
 
-        # convert to pixel coords for Line.points
-        pts = []
-        for lo, la in self._track:
+        # convert all stored points to root pixels
+        pts_px = []
+        for la, lo in self._TRACK:
             px, py = self.map_px(la, lo)
-            pts.extend([px, py])
-        self.ids.ISSgroundtrack.points  = pts[:len(pts)//2]
-        self.ids.ISSgroundtrack2.points = pts[len(pts)//2:]
+            pts_px.extend([px, py])
+
+        mid = len(pts_px) // 2
+        self.ids.tract1_line.points = pts_px[:mid]
+        self.ids.tract2_line.points = pts_px[mid:]
+

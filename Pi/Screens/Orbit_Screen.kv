@@ -34,52 +34,51 @@
             font_size: self.height * 0.10
             markup: True
 
-        Widget:
-            id: test
-            pos: (400 - self.width/2, 268.8 - self.height/2)
-            size_hint: None, None
-            size: 10, 10
-            col: (1, 1, 1, 1)
-            canvas:
-                PushMatrix
-                Translate:
-                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0]) / 2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1]) / 2)
-                Scale:
-                    x: OrbitMap.norm_image_size[0] / (OrbitMap.texture_size[0] or 1)
-                    y: OrbitMap.norm_image_size[1] / (OrbitMap.texture_size[1] or 1)
-                Color:
-                    rgba: self.col
-                Ellipse:
-                    pos: self.pos
-                    size: self.size
-                PopMatrix
-
-    # ───────────────────────── Sun, own-ship, ISS ground-tracks ────────────
-        ## Sun widget (unchanged)
-        #Widget:
-        #    id: OrbitSun
-        #    pos: (0 - self.width/2, 0 - self.height/2)
-        #    size_hint: None, None
-        #    size: 50, 50
-        #    color: (0, 1, 1, 1)
-        #    canvas:
-        #        PushMatrix
-        #        Translate:
-        #            xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0]) / 2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1]) / 2)
-        #        Scale:
-        #            x: OrbitMap.norm_image_size[0] / (OrbitMap.texture_size[0] or 1)
-        #            y: OrbitMap.norm_image_size[1] / (OrbitMap.texture_size[1] or 1)
-        #        Rectangle:
-        #            source: f"{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitSun.png"
-        #            pos: self.pos
-        #            size: self.size
-        #        PopMatrix
+        # ───────────────────────── Sun, own-ship, ISS ground-tracks ────────────
         Image:
             id: sun_icon
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitSun.png"
             size_hint: None, None
             size: 40, 40
             pos: 0, 0 #set in python
+        
+        # ----------------------- ISS icon & track ---------------------------
+        Image:
+            id: iss_icon
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitYellowISSicon.png"
+            size_hint: None, None
+            size: 30, 30
+            pos: 0, 0                        
+            canvas.after:
+                Color:
+                    rgba: 1, 1, 1, 1         
+                Line:
+                    width: 1
+                    circle:
+                        (self.center_x, self.center_y,
+                         min(self.width, self.height) / 2, 0, 360, 20)
+
+
+        # two line widgets share the same canvas; simplifies draw/update
+        Widget:
+            id: track1
+            canvas:
+                Color:
+                    rgba: 1, 1, 0, 1           
+                Line:
+                    id: tract1_line
+                    points: []                 
+                    width: 1
+
+        Widget:
+            id: track2
+            canvas:
+                Color:
+                    rgba: 1, 1, 0, 1
+                Line:
+                    id: tract2_line
+                    points: []
+                    width: 1
 
         ## Observer location (Chicago) – tiny magenta dot
         Widget:
@@ -386,72 +385,6 @@
             font_size: self.height * 0.30
             size_hint_y: 0.20
             markup: True
-
-        # ISS ground-track lines (unchanged) …
-        Widget:
-            id: ISSgroundtrack
-            col: (0, 1, 1, 1)
-            points: (0, 0, 100, 100, 200, 150)
-            canvas:
-                PushMatrix:
-                Translate:
-                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
-                Scale:
-                    origin: 0,0
-                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
-                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
-                Color:
-                    rgba: self.col
-                Line:    #Bezier looks better but is pretty slow and slightly wrong
-                    points: self.points
-                    joint: "round"
-                    width: 1
-                PopMatrix:
-
-        Widget:
-            id: ISSgroundtrack2
-            col: (0, 1, 1, 1)
-            points: (0, 0, 100, 100, 200, 150)
-            canvas:
-                PushMatrix:
-                Translate:
-                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
-                Scale:
-                    origin: 0,0
-                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
-                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
-                Color:
-                    rgba: self.col
-                Line:    #Bezier looks better but is pretty slow and slightly wrong
-                    points: self.points
-                    joint: "round"
-                    width: 1
-                PopMatrix:
-
-        # Tiny ISS icon
-        Widget:
-            id: OrbitISStiny
-            pos: (0 - self.width/2, 0 - self.height/2)
-            size_hint: None, None
-            size: 50, 50
-            canvas:
-                PushMatrix:
-                Color:
-                    rgba: (1,1,1,1)
-                Translate:
-                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0])/2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1])/2)
-                Scale:
-                    origin: 0,0
-                    x: OrbitMap.norm_image_size[0] / OrbitMap.texture_size[0] if OrbitMap.texture_size[0] > 0 else 1
-                    y: OrbitMap.norm_image_size[1] / OrbitMap.texture_size[1] if OrbitMap.texture_size[1] > 0 else 1
-                Rectangle:
-                    source: f'{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitYellowISSicon.png'
-                    size: self.size
-                    pos: self.pos
-                Line:
-                    width: 1
-                    circle: (self.center_x, self.center_y, min(self.width, self.height)/2, 0, 360, 20)
-                PopMatrix:
 
 # --------------------------------------------------------------------------
 #  Re-usable mixins
