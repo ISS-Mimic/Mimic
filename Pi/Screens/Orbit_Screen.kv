@@ -1,5 +1,16 @@
 #:import dp kivy.metrics.dp
 
+<TrackLine@Widget>:
+    line: line_instr                    
+
+    canvas:
+        Color:
+            rgba: 1, 1, 0, 1
+        Line:
+            id: line_instr           
+            width: 1
+            points: []
+
 <Orbit_Screen>:
     name: "orbit"
 
@@ -24,7 +35,7 @@
             size_hint_y: 0.598
             fit_mode: "contain"
 
-    # ───────────────────────── Global time & signal colour ─────────────────
+        # ───────────────────────── Global time & signal colour ─────────────────
         Label:
             id: gmtime
             pos_hint: {"center_x": 0.95, "center_y": 0.96}
@@ -55,30 +66,14 @@
                 Line:
                     width: 1
                     circle:
-                        (self.center_x, self.center_y,
-                         min(self.width, self.height) / 2, 0, 360, 20)
+                        (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360, 20)
 
+        # --------------- ISS ground-track (one orbit ahead) ----------------
+        TrackLine:
+            id: iss_track_a
 
-        # two line widgets share the same canvas; simplifies draw/update
-        Widget:
-            id: track1
-            canvas:
-                Color:
-                    rgba: 1, 1, 0, 1           
-                Line:
-                    id: tract1_line
-                    points: []                 
-                    width: 1
-
-        Widget:
-            id: track2
-            canvas:
-                Color:
-                    rgba: 1, 1, 0, 1
-                Line:
-                    id: tract2_line
-                    points: []
-                    width: 1
+        TrackLine:
+            id: iss_track_b
 
         ## Observer location (Chicago) – tiny magenta dot
         Widget:

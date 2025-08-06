@@ -16,9 +16,8 @@ class _Reraise(ExceptionHandler):
 
 ExceptionManager.add_handler(_Reraise())
 
-from collections import deque
 from math import degrees
-from datetime import datetime
+from datetime import datetime, timedelta
 import ephem
 from kivy.clock import Clock
 from kivy.lang import Builder
@@ -46,7 +45,6 @@ class Orbit_Screen(MimicBase):
     tdrs_tles:        dict[str, ephem.EarthSatellite] = {}
     location         = ephem.Observer()          # reused by many helpers
     last_map_refresh = 0.                        # epoch seconds
-    _TRACK = deque(maxlen=361)                   # deque of lon/lat pairs
 
     # ---------------------------------------------------------------- enter
     def on_enter(self):
@@ -54,6 +52,7 @@ class Orbit_Screen(MimicBase):
         # periodic updates
         Clock.schedule_interval(self.update_orbit,         1)
         Clock.schedule_interval(self.update_iss,           1)
+        Clock.schedule_interval(self.update_groundtrack,   1)
         Clock.schedule_interval(self.update_nightshade,  120)
         Clock.schedule_interval(self.update_orbit_map,    31)
         Clock.schedule_interval(self.update_globe_image,  55)
@@ -276,16 +275,45 @@ class Orbit_Screen(MimicBase):
         x, y = self.map_px(lat, lon)
         self.ids.iss_icon.center = (x, y)
 
-        # -- ground track deque ----------------------------------------------
-        self._TRACK.append((lat, lon))
+    def update_groundtrack(self, _dt=0) -> None:
+        """
+        Draw one full upcoming orbit (~96 min) as two Line objects so the
+        path wraps cleanly at +-180 degrees 
+        """
 
-        # convert all stored points to root pixels
-        pts_px = []
-        for la, lo in self._TRACK:
-            px, py = self.map_px(la, lo)
-            pts_px.extend([px, py])
+        if self.iss_tle is None or "OrbitMap" not in self.ids:
+                return
 
-        mid = len(pts_px) // 2
-        self.ids.tract1_line.points = pts_px[:mid]
-        self.ids.tract2_line.points = pts_px[mid:]
+        #---------- propagate ISS one orbit ahead -----------------------------
+        
+        future_pts: list[tuple[float, float]] = []
 
+        t = datetime.utcnow()                 # start time as real datetime
+        step = timedelta(minutes=1)           # 60-s increments
+
+        for _ in range(96):                   # ~ one orbit ahead
+            self.iss_tle.compute(t)
+            lat = degrees(self.iss_tle.sublat)
+            lon = degrees(self.iss_tle.sublong)
+            future_pts.append((lat, lon))
+            t += step                         # advance to next minute
+
+    
+
+        # ---------- split where path crosses dateline ------------------------
+        seg_a: list[float] = []
+        seg_b: list[float] = []
+        current = seg_a
+
+        last_lon = future_pts[0][1]
+        for lat, lon in future_pts:
+            #if jump > 180, switch segments
+            if abs(lon - last_lon) > 180:
+                current = seg_b if current is seg_a else seg_a
+            x, y = self.map_px(lat, lon)
+            current.extend([x, y])
+            last_lon = lon
+
+        # ---------- push to the Line widgets ---------------------------------
+        self.ids.iss_track_line_a.line.points = seg_a
+        self.ids.iss_track_line_b.line.points = seg_b
