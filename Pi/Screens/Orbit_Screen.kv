@@ -1,8 +1,10 @@
 #:import dp kivy.metrics.dp
 
+# --------------------------------------------------------------------------
+#  Re-usable mixins
+# --------------------------------------------------------------------------
 <TrackLine@Widget>:
     line: line_instr                    
-
     canvas:
         Color:
             rgba: 1, 1, 0, 1
@@ -11,379 +13,6 @@
             width: 1
             points: []
 
-<Orbit_Screen>:
-    name: "orbit"
-
-    FloatLayout:
-    # ───────────────────────── Background & static images ──────────────────
-        Image:
-            id: Orbit_background
-            source: f"{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitBackground.png"
-            fit_mode: "fill"
-
-        Image:
-            id: orbit3d
-            source: f"{root.mimic_data_directory}/globe.png"
-            size_hint: 0.20, 0.20
-            pos_hint: {"center_x": 0.92, "center_y": 0.35}
-            fit_mode: "contain"
-
-        Image:
-            id: OrbitMap
-            source: f"{root.mimic_data_directory}/map.jpg"
-            pos_hint: {"center_x": 0.50, "center_y": 0.56}
-            size_hint_y: 0.598
-            fit_mode: "contain"
-
-        # ───────────────────────── Global time & signal colour ─────────────────
-        Label:
-            id: gmtime
-            pos_hint: {"center_x": 0.95, "center_y": 0.96}
-            text: "00:00:00"
-            color: root.signalcolor
-            size_hint_y: 0.4
-            font_size: self.height * 0.10
-            markup: True
-
-        # ───────────────────────── Sun, own-ship, ISS ground-tracks ────────────
-        Image:
-            id: sun_icon
-            source: f"{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitSun.png"
-            size_hint: None, None
-            size: 40, 40
-            pos: 0, 0 #set in python
-        
-        # ----------------------- ISS icon & track ---------------------------
-        Image:
-            id: iss_icon
-            source: f"{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitYellowISSicon.png"
-            size_hint: None, None
-            size: 30, 30
-            pos: 0, 0                        
-            canvas.after:
-                Color:
-                    rgba: 1, 1, 1, 1         
-                Line:
-                    width: 1
-                    circle:
-                        (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360, 20)
-
-        # --------------- ISS ground-track (one orbit ahead) ----------------
-        TrackLine:
-            id: iss_track_a
-
-        TrackLine:
-            id: iss_track_b
-
-        ## Observer location (Chicago) – tiny magenta dot
-        Widget:
-            id: mylocation
-            pos: (0 - self.width/2, 0 - self.height/2)
-            size_hint: None, None
-            size: 10, 10
-            col: (0, 0, 0, 0)
-            canvas:
-                PushMatrix
-                Translate:
-                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0]) / 2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1]) / 2)
-                Scale:
-                    x: OrbitMap.norm_image_size[0] / (OrbitMap.texture_size[0] or 1)
-                    y: OrbitMap.norm_image_size[1] / (OrbitMap.texture_size[1] or 1)
-                Color:
-                    rgba: self.col
-                Ellipse:
-                    pos: self.pos
-                    size: self.size
-                PopMatrix
-
-    # ────────────────────────────  T D R S  widgets  ───────────────────────
-    # Group colours:  red = East, green = Z-belt, blue = West
-        ## EAST — 6 & 12
-        Widget:
-            id: TDRS6
-            pos: (0 - self.width/2, 0 - self.height/2)
-            size_hint: None, None
-            size: 10, 10
-            col: (1, 0, 0, 1)
-            canvas:
-                PushMatrix
-                Translate:
-                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0]) / 2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1]) / 2)
-                Scale:
-                    x: OrbitMap.norm_image_size[0] / (OrbitMap.texture_size[0] or 1)
-                    y: OrbitMap.norm_image_size[1] / (OrbitMap.texture_size[1] or 1)
-                Color:
-                    rgba: self.col
-                Ellipse:
-                    pos: self.pos
-                    size: self.size
-                PopMatrix
-
-        Widget:
-            id: TDRS6groundtrack
-            col: (1, 0, 0, 1)
-            points: (0, 0, 100, 100, 200, 150)
-            canvas:
-                PushMatrix
-                Translate:
-                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0]) / 2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1]) / 2)
-                Scale:
-                    x: OrbitMap.norm_image_size[0] / (OrbitMap.texture_size[0] or 1)
-                    y: OrbitMap.norm_image_size[1] / (OrbitMap.texture_size[1] or 1)
-                Color:
-                    rgba: self.col
-                Line:
-                    points: self.points
-                    width: 1
-                PopMatrix
-
-        # identical pattern repeated for TDRS12 (East)
-        Widget:
-            id: TDRS12
-            pos: (0 - self.width/2, 0 - self.height/2)
-            size_hint: None, None
-            size: 10, 10
-            col: (1, 0, 0, 1)
-            canvas:
-                PushMatrix
-                Translate:
-                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0]) / 2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1]) / 2)
-                Scale:
-                    x: OrbitMap.norm_image_size[0] / (OrbitMap.texture_size[0] or 1)
-                    y: OrbitMap.norm_image_size[1] / (OrbitMap.texture_size[1] or 1)
-                Color:
-                    rgba: self.col
-                Ellipse:
-                    pos: self.pos
-                    size: self.size
-                PopMatrix
-
-        Widget:
-            id: TDRS12groundtrack
-            col: (1, 0, 0, 1)
-            points: (0, 0, 100, 100, 200, 150)
-            canvas:
-                PushMatrix
-                Translate:
-                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0]) / 2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1]) / 2)
-                Scale:
-                    x: OrbitMap.norm_image_size[0] / (OrbitMap.texture_size[0] or 1)
-                    y: OrbitMap.norm_image_size[1] / (OrbitMap.texture_size[1] or 1)
-                Color:
-                    rgba: self.col
-                Line:
-                    points: self.points
-                    width: 1
-                PopMatrix
-
-        Label:
-            id: TDRSeLabel
-            text: "TDRS-East"
-            color: (1, 0, 1, 1)
-            pos_hint: {"center_x": 0.5, "center_y": 0.5}
-            font_size: self.height * 0.20
-            size_hint_y: 0.20
-            markup: True
-
-        ## Z-BELT — 7 & 8
-        Widget:
-            id: TDRS7
-            col: (0, 1, 0, 1)
-            pos: (0 - self.width/2, 0 - self.height/2)
-            size_hint: None, None
-            size: 10, 10
-            canvas:
-                PushMatrix
-                Translate:
-                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0]) / 2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1]) / 2)
-                Scale:
-                    x: OrbitMap.norm_image_size[0] / (OrbitMap.texture_size[0] or 1)
-                    y: OrbitMap.norm_image_size[1] / (OrbitMap.texture_size[1] or 1)
-                Color:
-                    rgba: self.col
-                Ellipse:
-                    pos: self.pos
-                    size: self.size
-                PopMatrix
-
-        Widget:
-            id: TDRS7groundtrack
-            col: (0, 1, 0, 1)
-            points: (0, 0, 100, 100, 200, 150)
-            canvas: 
-                PushMatrix
-                Translate:
-                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0]) / 2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1]) / 2)
-                Scale:
-                    x: OrbitMap.norm_image_size[0] / (OrbitMap.texture_size[0] or 1)
-                    y: OrbitMap.norm_image_size[1] / (OrbitMap.texture_size[1] or 1)
-                Color:
-                    rgba: self.col
-                Line:
-                    points: self.points
-                    width: 1
-                PopMatrix
-
-        Widget:
-            id: TDRS8
-            col: (0, 1, 0, 1)
-            pos: (0 - self.width/2, 0 - self.height/2)
-            size_hint: None, None
-            size: 10, 10
-            canvas: 
-                PushMatrix
-                Translate:
-                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0]) / 2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1]) / 2)
-                Scale:
-                    x: OrbitMap.norm_image_size[0] / (OrbitMap.texture_size[0] or 1)
-                    y: OrbitMap.norm_image_size[1] / (OrbitMap.texture_size[1] or 1)
-                Color:
-                    rgba: self.col
-                Ellipse:
-                    pos: self.pos
-                    size: self.size
-                PopMatrix
-
-        Widget:
-            id: TDRS8groundtrack
-            col: (0, 1, 0, 1)
-            points: (0, 0, 100, 100, 200, 150)
-            canvas:  
-                PushMatrix
-                Translate:
-                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0]) / 2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1]) / 2)
-                Scale:
-                    x: OrbitMap.norm_image_size[0] / (OrbitMap.texture_size[0] or 1)
-                    y: OrbitMap.norm_image_size[1] / (OrbitMap.texture_size[1] or 1)
-                Color:
-                    rgba: self.col
-                Line:
-                    points: self.points
-                    width: 1
-                PopMatrix
-
-        Label:
-            id: TDRSzLabel
-            text: "TDRS-Z"
-            color: (1, 0, 1, 1)
-            pos_hint: {"center_x": 0.5, "center_y": 0.5}
-            font_size: self.height * 0.20
-            size_hint_y: 0.20
-            markup: True
-
-        ## WEST — 10 & 11
-        Widget:
-            id: TDRS10
-            col: (0, 0, 1, 1)
-            pos: (0 - self.width/2, 0 - self.height/2)
-            size_hint: None, None
-            size: 10, 10
-            canvas: 
-                PushMatrix
-                Translate:
-                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0]) / 2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1]) / 2)
-                Scale:
-                    x: OrbitMap.norm_image_size[0] / (OrbitMap.texture_size[0] or 1)
-                    y: OrbitMap.norm_image_size[1] / (OrbitMap.texture_size[1] or 1)
-                Color:
-                    rgba: self.col
-                Ellipse:
-                    pos: self.pos
-                    size: self.size
-                PopMatrix
-
-        Widget:
-            id: TDRS10groundtrack
-            col: (0, 0, 1, 1)
-            points: (0, 0, 100, 100, 200, 150)
-            canvas:  
-                PushMatrix
-                Translate:
-                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0]) / 2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1]) / 2)
-                Scale:
-                    x: OrbitMap.norm_image_size[0] / (OrbitMap.texture_size[0] or 1)
-                    y: OrbitMap.norm_image_size[1] / (OrbitMap.texture_size[1] or 1)
-                Color:
-                    rgba: self.col
-                Line:
-                    points: self.points
-                    width: 1
-                PopMatrix
-
-        Widget:
-            id: TDRS11
-            col: (0, 0, 1, 1)
-            pos: (0 - self.width/2, 0 - self.height/2)
-            size_hint: None, None
-            size: 10, 10
-            canvas:
-                PushMatrix
-                Translate:
-                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0]) / 2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1]) / 2)
-                Scale:
-                    x: OrbitMap.norm_image_size[0] / (OrbitMap.texture_size[0] or 1)
-                    y: OrbitMap.norm_image_size[1] / (OrbitMap.texture_size[1] or 1)
-                Color:
-                    rgba: self.col
-                Ellipse:
-                    pos: self.pos
-                    size: self.size
-                PopMatrix
-
-        Widget:
-            id: TDRS11groundtrack
-            col: (0, 0, 1, 1)
-            points: (0, 0, 100, 100, 200, 150)
-            canvas:  
-                PushMatrix
-                Translate:
-                    xy: (OrbitMap.x + (OrbitMap.width - OrbitMap.norm_image_size[0]) / 2, OrbitMap.y + (OrbitMap.height - OrbitMap.norm_image_size[1]) / 2)
-                Scale:
-                    x: OrbitMap.norm_image_size[0] / (OrbitMap.texture_size[0] or 1)
-                    y: OrbitMap.norm_image_size[1] / (OrbitMap.texture_size[1] or 1)
-                Color:
-                    rgba: self.col
-                Line:
-                    points: self.points
-                    width: 1
-                PopMatrix
-
-        Label:
-            id: TDRSwLabel
-            text: "TDRS-West"
-            color: (1, 0, 1, 1)
-            pos_hint: {"center_x": 0.5, "center_y": 0.5}
-            font_size: self.height * 0.20
-            size_hint_y: 0.20
-            markup: True
-
-    # ───────────────────────────── ZOE & ISS icons ─────────────────────────
-        Widget:
-            id: ZOE
-            col: (1, 1, 0, .2)
-            size_hint: None, None
-            size: dp(6), dp(38)
-            pos_hint: {"center_x": 0.5, "center_y": 0.5}
-            opacity: 0.2
-            canvas:
-                Color:
-                    rgba: self.col
-                Ellipse:
-                    pos: self.pos
-                    size: self.size
-
-        Label:
-            id: ZOElabel
-            text: "ZOE"
-            color: (1, 1, 1, 1)
-            pos_hint: {"center_x": 0.5, "center_y": 0.5}
-            font_size: self.height * 0.30
-            size_hint_y: 0.20
-            markup: True
-
-# --------------------------------------------------------------------------
-#  Re-usable mixins
-# --------------------------------------------------------------------------
 <TelemetryLabel@Label>:
     color: 1, 1, 1, 1
     font_size: self.height * 0.17
@@ -403,8 +32,89 @@
 #  Orbit screen — telemetry, ISS pass, nav
 # --------------------------------------------------------------------------
 <Orbit_Screen>:
+    Image:
+        id: Orbit_background
+        source: f"{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitBackground.png"
+        fit_mode: "fill"
 
-    # … (all previously defined widgets: map, TDRS, ISS icon, etc.) …
+    Image:
+        id: orbit3d
+        source: f"{root.mimic_data_directory}/globe.png"
+        size_hint: 0.20, 0.20
+        pos_hint: {"center_x": 0.92, "center_y": 0.35}
+        fit_mode: "contain"
+
+    Image:
+        id: OrbitMap
+        source: f"{root.mimic_data_directory}/map.jpg"
+        pos_hint: {"center_x": 0.50, "center_y": 0.56}
+        size_hint_y: 0.598
+        fit_mode: "contain"
+
+    # ───────────────────────── Global time & signal colour ─────────────────
+    Label:
+        id: gmtime
+        pos_hint: {"center_x": 0.95, "center_y": 0.96}
+        text: "00:00:00"
+        color: root.signalcolor
+        size_hint_y: 0.4
+        font_size: self.height * 0.10
+        markup: True
+
+    # ───────────────────────── Sun, own-ship, ISS ground-tracks ────────────
+    Image:
+        id: sun_icon
+        source: f"{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitSun.png"
+        size_hint: None, None
+        size: 40, 40
+        pos: 0, 0 #set in python
+    
+    # ----------------------- ISS icon & track ---------------------------
+    Image:
+        id: iss_icon
+        source: f"{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitYellowISSicon.png"
+        size_hint: None, None
+        size: 30, 30
+        pos: 0, 0                        
+        canvas.after:
+            Color:
+                rgba: 1, 1, 1, 1         
+            Line:
+                width: 1
+                circle:
+                    (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360, 20)
+
+    # --------------- ISS ground-track (one orbit ahead) ----------------
+    TrackLine:
+        id: iss_track_a
+
+    TrackLine:
+        id: iss_track_b
+
+
+# ───────────────────────────── ZOE & ISS icons ─────────────────────────
+    Widget:
+        id: ZOE
+        col: (1, 1, 0, .2)
+        size_hint: None, None
+        size: dp(6), dp(38)
+        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+        opacity: 0.2
+        canvas:
+            Color:
+                rgba: self.col
+            Ellipse:
+                pos: self.pos
+                size: self.size
+
+    Label:
+        id: ZOElabel
+        text: "ZOE"
+        color: (1, 1, 1, 1)
+        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+        font_size: self.height * 0.30
+        size_hint_y: 0.20
+        markup: True
 
     # ─────── orbit counters (left column) ───────
     TelemetryLabel:
