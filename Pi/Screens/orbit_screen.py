@@ -138,14 +138,20 @@ class Orbit_Screen(MimicBase):
                 print("in if")
                 new_active_tdrs = [int(result[0]) if result[0] != '0' else 0, 
                                   int(result[1]) if result[1] != '0' else 0]
-                print(new_active_tdrs) 
+                print(f"new_active_tdrs: {new_active_tdrs}")
+                print(f"self.active_tdrs: {self.active_tdrs}")
+                print(f"Comparison result: {new_active_tdrs != self.active_tdrs}")
+                
                 # Only update if the active TDRS have changed
                 if new_active_tdrs != self.active_tdrs:
+                    print("Updating active TDRS!")
                     self.active_tdrs = new_active_tdrs
                     log_info(f"Active TDRS updated: {self.active_tdrs}")
                     
                     # Update all TDRS circle visibility
                     self._update_tdrs_circles()
+                else:
+                    print("No change in active TDRS")
                     
         except Exception as exc:
             log_error(f"Update active TDRS failed: {exc}")
@@ -155,22 +161,32 @@ class Orbit_Screen(MimicBase):
     def _update_tdrs_circles(self) -> None:
         """Update the visibility of active TDRS circles."""
         try:
+            print(f"Updating TDRS circles. Active TDRS: {self.active_tdrs}")
+            
             # TDRS IDs that can be active
             tdrs_ids = [6, 7, 8, 10, 11, 12]
             
             for tdrs_id in tdrs_ids:
                 circle_id = f"TDRS{tdrs_id}_active_circle"
+                print(f"Checking {circle_id}...")
+                
                 if circle_id in self.ids:
                     circle_widget = self.ids[circle_id]
+                    print(f"Found {circle_id} widget")
                     
                     # Show circle if this TDRS is active
                     if tdrs_id in self.active_tdrs:
+                        print(f"TDRS{tdrs_id} is active - showing circle")
                         circle_widget.opacity = 1.0
                         # Position the circle around the TDRS dot
                         tdrs_widget = self.ids[f"TDRS{tdrs_id}"]
                         circle_widget.center = tdrs_widget.center
+                        print(f"Set {circle_id} opacity to 1.0 and positioned at {circle_widget.center}")
                     else:
+                        print(f"TDRS{tdrs_id} is not active - hiding circle")
                         circle_widget.opacity = 0.0
+                else:
+                    print(f"Widget {circle_id} not found in self.ids")
                         
         except Exception as exc:
             log_error(f"Update TDRS circles failed: {exc}")
