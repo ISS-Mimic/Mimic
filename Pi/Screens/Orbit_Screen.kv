@@ -67,7 +67,7 @@
         id: iss_icon
         source: f"{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitYellowISSicon.png"
         size_hint: None, None
-        size: min(dp(60), self.parent.width * 0.05), min(dp(60), self.parent.height * 0.05)  # Responsive size
+        size: min(dp(75), self.parent.width * 0.075), min(dp(75), self.parent.height * 0.075)  # Responsive size
         pos: 0, 0                        
         canvas.after:
             Color:
@@ -107,7 +107,7 @@
             Color:
                 rgba: 1, 0, 0, 1  # Red
             Line:
-                width: 16  # Thick line to create filled circle
+                width: 2  # Thick line to create filled circle
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # Active TDRS circle for TDRS6
@@ -141,7 +141,7 @@
             Color:
                 rgba: 1, 0, 0, 1  # Red
             Line:
-                width: 16  # Thick line to create filled circle
+                width: 2  # Thick line to create filled circle
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # Active TDRS circle for TDRS12
@@ -171,7 +171,7 @@
         id: tdrs_east_label
         text: "TDRS East"
         color: 1, 1, 1, 1  # White text
-        font_size: min(dp(24), self.parent.width * 0.016)  # Much larger text
+        font_size: min(dp(36), self.parent.width * 0.024)  # Much larger text
         bold: True  # Make text thicker
         size_hint: None, None
         size: self.texture_size
@@ -187,7 +187,7 @@
             Color:
                 rgba: 0, 1, 0, 1  # Green
             Line:
-                width: 16  # Thick line to create filled circle
+                width: 2  # Thick line to create filled circle
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # Active TDRS circle for TDRS7
@@ -221,7 +221,7 @@
             Color:
                 rgba: 0, 1, 0, 1  # Green
             Line:
-                width: 16  # Thick line to create filled circle
+                width: 2  # Thick line to create filled circle
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # Active TDRS circle for TDRS8
@@ -251,7 +251,7 @@
         id: tdrs_zbelt_label
         text: "TDRS Z-Belt"
         color: 1, 1, 1, 1  # White text
-        font_size: min(dp(24), self.parent.width * 0.016)  # Much larger text
+        font_size: min(dp(36), self.parent.width * 0.024)  # Much larger text
         bold: True  # Make text thicker
         size_hint: None, None
         size: self.texture_size
@@ -267,7 +267,7 @@
             Color:
                 rgba: 0, 0, 1, 1  # Blue
             Line:
-                width: 16  # Thick line to create filled circle
+                width: 2  # Thick line to create filled circle
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # Active TDRS circle for TDRS10
@@ -301,7 +301,7 @@
             Color:
                 rgba: 0, 0, 1, 1  # Blue
             Line:
-                width: 16  # Thick line to create filled circle
+                width: 2  # Thick line to create filled circle
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # Active TDRS circle for TDRS11
@@ -331,7 +331,7 @@
         id: tdrs_west_label
         text: "TDRS West"
         color: 1, 1, 1, 1  # White text
-        font_size: min(dp(24), self.parent.width * 0.016)  # Much larger text
+        font_size: min(dp(36), self.parent.width * 0.024)  # Much larger text
         bold: True  # Make text thicker
         size_hint: None, None
         size: self.texture_size
@@ -347,7 +347,7 @@
             Color:
                 rgba: 1, 0, 1, 1  # Magenta dot
             Line:
-                width: 8  # Thick line to create filled circle
+                width: 2  # Thick line to create filled circle
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # ───────────────────────────── ZOE & ISS icons ─────────────────────────
