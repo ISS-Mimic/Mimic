@@ -361,6 +361,17 @@
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # ───────────────────────────── ZOE & ISS icons ─────────────────────────
+    # ZOE boundary widget (will be drawn as a polygon)
+    Widget:
+        id: ZOE_boundary
+        canvas:
+            Color:
+                rgba: 1, 0, 1, 0.3  # Magenta, semi-transparent
+            Line:
+                points: []  # Will be populated with ZOE boundary points
+                width: 2
+                close: True
+
     Widget:
         id: ZOE
         col: (1, 1, 0, .2)
@@ -465,6 +476,25 @@
         pos_hint: {"center_x": .72, "center_y": .19}
         background_normal: f"{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitDataUnlit.png"
         on_release: app.root.current = "orbit_data"
+
+    # ─────── ZOE timing labels (right of orbit data button) ───────
+    Label:
+        id: zoe_loss_timer
+        text: "Loss: --:--"
+        color: (1, 1, 1, 1)  # White text
+        font_size: min(dp(16), self.parent.width * 0.012)
+        size_hint: None, None
+        size: self.texture_size
+        pos_hint: {"center_x": .85, "center_y": .22}
+
+    Label:
+        id: zoe_acquisition_timer
+        text: "Acquire: --:--"
+        color: (1, 1, 1, 1)  # White text
+        font_size: min(dp(16), self.parent.width * 0.012)
+        size_hint: None, None
+        size: self.texture_size
+        pos_hint: {"center_x": .85, "center_y": .18}
 
     # ─────── Arduino & signal icons (bottom-left) ───────
     Image:

@@ -485,6 +485,34 @@ class Orbit_Screen(MimicBase):
             log_error(f"Calculate TDRS coverage failed: {exc}")
             return {}
 
+    def calculate_zoe_boundary_points(self) -> list:
+        """Calculate the boundary points for the ZOE region."""
+        try:
+            # Define the ZOE region boundary (Indian Ocean area)
+            # This creates a polygon around the Indian Ocean region
+            zoe_boundary = [
+                (30, 60),   # Top-left
+                (30, 100),  # Top-right
+                (20, 110),  # Upper right
+                (10, 115),  # Right edge
+                (0, 120),   # Right edge
+                (-10, 115), # Right edge
+                (-20, 110), # Lower right
+                (-30, 100), # Bottom-right
+                (-30, 60),  # Bottom-left
+                (-20, 50),  # Lower left
+                (-10, 45),  # Left edge
+                (0, 40),    # Left edge
+                (10, 45),   # Left edge
+                (20, 50),   # Upper left
+            ]
+            
+            return zoe_boundary
+            
+        except Exception as exc:
+            log_error(f"Calculate ZOE boundary points failed: {exc}")
+            return []
+
     def calculate_zoe_from_coverage(self, coverage_areas: list) -> list:
         """Calculate ZOE points from TDRS coverage areas."""
         try:
@@ -509,17 +537,107 @@ class Orbit_Screen(MimicBase):
             log_error(f"Calculate ZOE from coverage failed: {exc}")
             return []
 
+    def calculate_zoe_timing(self) -> tuple:
+        """Calculate time until ZOE entry and exit."""
+        try:
+            if not self.iss_tle:
+                return None, None
+            
+            # Define ZOE region (Indian Ocean area)
+            zoe_lat_min, zoe_lat_max = -30, 30
+            zoe_lon_min, zoe_lon_max = 60, 100
+            
+            # Get current ISS position
+            self.iss_tle.compute(ephem.now())
+            current_lat = math.degrees(self.iss_tle.sublat)
+            current_lon = math.degrees(self.iss_tle.sublong)
+            
+            # Check if currently in ZOE
+            in_zoe = (zoe_lat_min <= current_lat <= zoe_lat_max) and (zoe_lon_min <= current_lon <= zoe_lon_max)
+            
+            # Calculate future positions to find entry/exit times
+            entry_time = None
+            exit_time = None
+            
+            # Look ahead in time to find ZOE crossings
+            current_time = ephem.now()
+            step_minutes = 1
+            
+            for i in range(1, 1440):  # Look ahead 24 hours
+                future_time = current_time + (i * step_minutes * ephem.minute)
+                self.iss_tle.compute(future_time)
+                future_lat = math.degrees(self.iss_tle.sublat)
+                future_lon = math.degrees(self.iss_tle.sublong)
+                
+                future_in_zoe = (zoe_lat_min <= future_lat <= zoe_lat_max) and (zoe_lon_min <= future_lon <= zoe_lon_max)
+                
+                if not in_zoe and future_in_zoe and entry_time is None:
+                    # Found entry time
+                    entry_time = future_time
+                elif in_zoe and not future_in_zoe and exit_time is None:
+                    # Found exit time
+                    exit_time = future_time
+                elif not in_zoe and not future_in_zoe and entry_time is not None and exit_time is None:
+                    # Found exit time (if we were in ZOE)
+                    exit_time = future_time
+                
+                # Stop if we found both times
+                if entry_time is not None and exit_time is not None:
+                    break
+            
+            return entry_time, exit_time
+            
+        except Exception as exc:
+            log_error(f"Calculate ZOE timing failed: {exc}")
+            return None, None
+
     def update_zoe_region(self) -> None:
         """Update the ZOE region display based on calculated coverage."""
         try:
-            # Calculate the ZOE region
-            zoe_points = self.calculate_zoe_region()
+            # Calculate ZOE timing
+            entry_time, exit_time = self.calculate_zoe_timing()
             
-            if not zoe_points:
-                return
+            # Update timing labels
+            if 'zoe_loss_timer' in self.ids and 'zoe_acquisition_timer' in self.ids:
+                if entry_time:
+                    time_to_entry = entry_time - ephem.now()
+                    hours = int(time_to_entry * 24)
+                    minutes = int((time_to_entry * 24 - hours) * 60)
+                    self.ids.zoe_loss_timer.text = f"Loss: {hours:02d}:{minutes:02d}"
+                else:
+                    self.ids.zoe_loss_timer.text = "Loss: --:--"
+                
+                if exit_time:
+                    time_to_exit = exit_time - ephem.now()
+                    hours = int(time_to_exit * 24)
+                    minutes = int((time_to_exit * 24 - hours) * 60)
+                    self.ids.zoe_acquisition_timer.text = f"Acquire: {hours:02d}:{minutes:02d}"
+                else:
+                    self.ids.zoe_acquisition_timer.text = "Acquire: --:--"
             
-            # For now, we'll just update the ZOE widget position
-            # In a full implementation, this would draw the actual ZOE boundary
+            # Calculate and draw ZOE boundary
+            zoe_boundary_points = self.calculate_zoe_boundary_points()
+            
+            if 'ZOE_boundary' in self.ids and zoe_boundary_points:
+                # Convert lat/lon points to screen coordinates
+                screen_points = []
+                for lat, lon in zoe_boundary_points:
+                    x, y = self.map_px(lat, lon)
+                    screen_points.extend([x, y])
+                
+                # Update the ZOE boundary widget
+                for instruction in self.ids.ZOE_boundary.canvas.children:
+                    if hasattr(instruction, 'points'):
+                        instruction.points = screen_points
+                        break
+            
+            # Update ZOE label position to center of ZOE region
+            if 'ZOElabel' in self.ids:
+                # Center of ZOE region (approximately)
+                zoe_center_lat = 0  # Equator
+                zoe_center_lon = 80  # Center of Indian Ocean region
+                x, y = self.map_px(zoe_center_lat, zoe_center_lon)
+                self.ids.ZOElabel.pos = (x - self.ids.ZOElabel.width/2, y - self.ids.ZOElabel.height/2)
             
             # Check if ISS is currently in the ZOE
             if self.iss_tle:
