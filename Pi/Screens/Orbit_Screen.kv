@@ -482,19 +482,19 @@
         id: zoe_loss_timer
         text: "Loss: --:--"
         color: (1, 1, 1, 1)  # White text
-        font_size: min(dp(16), self.parent.width * 0.012)
+        font_size: min(dp(20), self.parent.width * 0.014)
         size_hint: None, None
         size: self.texture_size
-        pos_hint: {"center_x": .85, "center_y": .22}
+        pos_hint: {"center_x": .95, "center_y": .22}
 
     Label:
         id: zoe_acquisition_timer
         text: "Acquire: --:--"
         color: (1, 1, 1, 1)  # White text
-        font_size: min(dp(16), self.parent.width * 0.012)
+        font_size: min(dp(20), self.parent.width * 0.014)
         size_hint: None, None
         size: self.texture_size
-        pos_hint: {"center_x": .85, "center_y": .18}
+        pos_hint: {"center_x": .95, "center_y": .18}
 
     # ─────── Arduino & signal icons (bottom-left) ───────
     Image:
