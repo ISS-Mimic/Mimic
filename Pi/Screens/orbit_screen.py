@@ -889,13 +889,13 @@ class Orbit_Screen(MimicBase):
                 # Check if ISS is in ZOE using accurate boundaries
                 in_zoe = self.is_point_in_zoe(iss_lat, iss_lon, zoe_boundary_points)
                 
-                if 'ZOE' in self.ids:
+                if 'ZOE_boundary' in self.ids:
                     if in_zoe:
                         # ISS is in ZOE - make it more visible
-                        self.ids.ZOE.col = (1, 0, 0, 0.8)  # Red, more opaque
+                        self.ids.ZOE_boundary.col = (1, 0, 0, 0.8)  # Red, more opaque
                     else:
                         # ISS is not in ZOE - normal appearance
-                        self.ids.ZOE.col = (1, 0, 1, 0.5)  # Magenta, semi-transparent
+                        self.ids.ZOE_boundary.col = (1, 0, 1, 0.5)  # Magenta, semi-transparent
                         
         except Exception as exc:
             log_error(f"Update ZOE region failed: {exc}")

@@ -372,24 +372,11 @@
                 width: 2
                 close: True
 
-    Widget:
-        id: ZOE
-        col: (1, 1, 0, .2)
-        size_hint: None, None
-        size: min(dp(6), self.parent.width * 0.005), min(dp(38), self.parent.height * 0.04)  # Responsive size
-        pos_hint: {"center_x": 0.5, "center_y": 0.5}
-        opacity: 0.2
-        canvas:
-            Color:
-                rgba: self.col
-            Ellipse:
-                pos: self.pos
-                size: self.size
 
     Label:
         id: ZOElabel
         text: "ZOE"
-        color: (1, 1, 1, 1)
+        color: (0.5, 1, 0.5, 1)
         pos_hint: {"center_x": 0.5, "center_y": 0.5}
         font_size: min(self.height * 0.30, dp(24))  # Responsive with max size
         size_hint_y: 0.20
@@ -478,22 +465,18 @@
         on_release: app.root.current = "orbit_data"
 
     # ─────── ZOE timing labels (right of orbit data button) ───────
-    Label:
+    TelemetryLabel:
         id: zoe_loss_timer
         text: "--:--"
-        color: (1, 1, 1, 1)  # White text
+        color: (1, 0, 0, 1)  # Red text
         font_size: min(dp(20), self.parent.width * 0.014)
-        size_hint: None, None
-        size: self.texture_size
         pos_hint: {"center_x": .95, "center_y": .22}
 
-    Label:
+    TelemetryLabel:
         id: zoe_acquisition_timer
         text: "--:--"
-        color: (1, 1, 1, 1)  # White text
+        color: (0, 1, 0, 1)  # Green text
         font_size: min(dp(20), self.parent.width * 0.014)
-        size_hint: None, None
-        size: self.texture_size
         pos_hint: {"center_x": .95, "center_y": .18}
 
     # ─────── Arduino & signal icons (bottom-left) ───────
