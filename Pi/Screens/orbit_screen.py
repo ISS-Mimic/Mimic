@@ -603,17 +603,19 @@ class Orbit_Screen(MimicBase):
                     time_to_entry = entry_time - ephem.now()
                     hours = int(time_to_entry * 24)
                     minutes = int((time_to_entry * 24 - hours) * 60)
-                    self.ids.zoe_loss_timer.text = f"Loss: {hours:02d}:{minutes:02d}"
+                    seconds = int((time_to_entry * 24 - hours) * 60 - minutes * 60)
+                    self.ids.zoe_loss_timer.text = f"{minutes:02d}:{seconds:02d}"
                 else:
-                    self.ids.zoe_loss_timer.text = "Loss: --:--"
+                    self.ids.zoe_loss_timer.text = "--:--"
                 
                 if exit_time:
                     time_to_exit = exit_time - ephem.now()
                     hours = int(time_to_exit * 24)
                     minutes = int((time_to_exit * 24 - hours) * 60)
-                    self.ids.zoe_acquisition_timer.text = f"Acquire: {hours:02d}:{minutes:02d}"
+                    seconds = int((time_to_exit * 24 - hours) * 60 - minutes * 60)
+                    self.ids.zoe_acquisition_timer.text = f"{minutes:02d}:{seconds:02d}"
                 else:
-                    self.ids.zoe_acquisition_timer.text = "Acquire: --:--"
+                    self.ids.zoe_acquisition_timer.text = "--:--"
             
             # Calculate and draw ZOE boundary
             zoe_boundary_points = self.calculate_zoe_boundary_points()
