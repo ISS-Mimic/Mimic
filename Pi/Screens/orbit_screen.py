@@ -433,6 +433,7 @@ class Orbit_Screen(MimicBase):
                 countdown = sleep_start_dt - utc_now
                 hours = int(countdown.total_seconds() // 3600)
                 minutes = int((countdown.total_seconds() % 3600) // 60)
+                seconds = int(elapsed.total_seconds() % 60)
                 
                 self.ids.crew_sleep_timer.text = f"-{hours:02d}:{minutes:02d}:{seconds:02d}"
                 self.ids.crew_sleep_timer.color = (1, 1, 1, 1)  # White countdown
