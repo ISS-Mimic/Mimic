@@ -709,6 +709,11 @@ class Orbit_Screen(MimicBase):
         # — update telemetry values ------------------------------------------
         self.update_telemetry_values()
         
+        # — update UTC time ------------------------------------------------
+        if 'gmtime' in self.ids:
+            utc_now = datetime.utcnow()
+            self.ids.gmtime.text = utc_now.strftime("%H:%M:%S UTC")
+        
     # ----------------------------------------------------------------- ISS icon + track
     def update_iss(self, _dt=0):
         """
