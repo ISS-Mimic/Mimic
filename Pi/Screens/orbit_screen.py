@@ -177,6 +177,45 @@ class Orbit_Screen(MimicBase):
             import traceback
             traceback.print_exc()
 
+    def _update_tdrs_labels(self) -> None:
+        """Position TDRS group labels dynamically based on satellite positions."""
+        try:
+            # TDRS groups: East (6,12), Z-Belt (7,8), West (10,11)
+            tdrs_groups = {
+                'east': [6, 12],
+                'zbelt': [7, 8], 
+                'west': [10, 11]
+            }
+            
+            for group_name, tdrs_ids in tdrs_groups.items():
+                # Find the first visible TDRS in this group to position the label
+                label_id = f"tdrs_{group_name}_label"
+                if label_id not in self.ids:
+                    continue
+                    
+                label_widget = self.ids[label_id]
+                label_positioned = False
+                
+                for tdrs_id in tdrs_ids:
+                    tdrs_name = f"TDRS{tdrs_id}"
+                    if tdrs_name in self.ids:
+                        tdrs_widget = self.ids[tdrs_name]
+                        # Position label near the TDRS dot with some offset
+                        label_x = tdrs_widget.center_x + 60  # Offset right
+                        label_y = tdrs_widget.center_y + 30  # Offset up
+                        label_widget.pos = (label_x, label_y)
+                        label_positioned = True
+                        break
+                
+                # If no TDRS in group is visible, hide the label
+                if not label_positioned:
+                    label_widget.pos = (-1000, -1000)  # Move off-screen
+                    
+        except Exception as exc:
+            log_error(f"Update TDRS labels failed: {exc}")
+            import traceback
+            traceback.print_exc()
+
     def set_user_location(self, lat: float, lon: float) -> None:
         """Set the user location and update the display."""
         self.user_lat = lat
@@ -346,6 +385,9 @@ class Orbit_Screen(MimicBase):
                     tdrs_id = int(name.split()[1])  # Extract TDRS number
                     if tdrs_id in self.active_tdrs:
                         circle_widget.center = img.center
+
+            # Position TDRS labels dynamically based on satellite positions
+            self._update_tdrs_labels()
 
             # Check if ZOE widgets exist before accessing them
             if 'ZOE' in self.ids and 'ZOElabel' in self.ids:

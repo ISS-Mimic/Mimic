@@ -106,9 +106,9 @@
         canvas:
             Color:
                 rgba: 1, 0, 0, 1  # Red
-            Line:
-                width: 1
-                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
+            Ellipse:
+                pos: self.pos
+                size: self.size
 
     # Active TDRS circle for TDRS6
     Widget:
@@ -140,9 +140,9 @@
         canvas:
             Color:
                 rgba: 1, 0, 0, 1  # Red
-            Line:
-                width: 1
-                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
+            Ellipse:
+                pos: self.pos
+                size: self.size
 
     # Active TDRS circle for TDRS12
     Widget:
@@ -171,10 +171,10 @@
         id: tdrs_east_label
         text: "TDRS East"
         color: 1, 1, 1, 1  # White text
-        font_size: min(dp(12), self.parent.width * 0.008)
+        font_size: min(dp(24), self.parent.width * 0.016)  # Much larger text
         size_hint: None, None
         size: self.texture_size
-        pos_hint: {"center_x": 0.85, "center_y": 0.75}  # Position near TDRS 6/12
+        pos: 0, 0  # Will be positioned dynamically in Python
 
     # Z-BELT — TDRS 7 & 8 (Green)
     Widget:
@@ -185,9 +185,9 @@
         canvas:
             Color:
                 rgba: 0, 1, 0, 1  # Green
-            Line:
-                width: 1
-                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
+            Ellipse:
+                pos: self.pos
+                size: self.size
 
     # Active TDRS circle for TDRS7
     Widget:
@@ -219,9 +219,9 @@
         canvas:
             Color:
                 rgba: 0, 1, 0, 1  # Green
-            Line:
-                width: 1
-                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
+            Ellipse:
+                pos: self.pos
+                size: self.size
 
     # Active TDRS circle for TDRS8
     Widget:
@@ -250,10 +250,10 @@
         id: tdrs_zbelt_label
         text: "TDRS Z-Belt"
         color: 1, 1, 1, 1  # White text
-        font_size: min(dp(12), self.parent.width * 0.008)
+        font_size: min(dp(24), self.parent.width * 0.016)  # Much larger text
         size_hint: None, None
         size: self.texture_size
-        pos_hint: {"center_x": 0.15, "center_y": 0.75}  # Position near TDRS 7/8
+        pos: 0, 0  # Will be positioned dynamically in Python
 
     # WEST — TDRS 10 & 11 (Blue)
     Widget:
@@ -264,9 +264,9 @@
         canvas:
             Color:
                 rgba: 0, 0, 1, 1  # Blue
-            Line:
-                width: 1
-                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
+            Ellipse:
+                pos: self.pos
+                size: self.size
 
     # Active TDRS circle for TDRS10
     Widget:
@@ -298,9 +298,9 @@
         canvas:
             Color:
                 rgba: 0, 0, 1, 1  # Blue
-            Line:
-                width: 1
-                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
+            Ellipse:
+                pos: self.pos
+                size: self.size
 
     # Active TDRS circle for TDRS11
     Widget:
@@ -329,10 +329,10 @@
         id: tdrs_west_label
         text: "TDRS West"
         color: 1, 1, 1, 1  # White text
-        font_size: min(dp(12), self.parent.width * 0.008)
+        font_size: min(dp(24), self.parent.width * 0.016)  # Much larger text
         size_hint: None, None
         size: self.texture_size
-        pos_hint: {"center_x": 0.15, "center_y": 0.25}  # Position near TDRS 10/11
+        pos: 0, 0  # Will be positioned dynamically in Python
 
     # ───────────────────────────── User Location ───────────────────────────
     Widget:
