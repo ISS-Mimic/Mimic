@@ -196,6 +196,19 @@ class Orbit_Screen(MimicBase):
                     
                 label_widget = self.ids[label_id]
                 label_positioned = False
+                group_active = False
+                
+                # Check if any TDRS in this group is active
+                for tdrs_id in tdrs_ids:
+                    if tdrs_id in self.active_tdrs:
+                        group_active = True
+                        break
+                
+                # Set label color based on group activity
+                if group_active:
+                    label_widget.color = (1, 0, 1, 1)  # Magenta when active
+                else:
+                    label_widget.color = (1, 1, 1, 1)  # White when inactive
                 
                 for tdrs_id in tdrs_ids:
                     tdrs_name = f"TDRS{tdrs_id}"
