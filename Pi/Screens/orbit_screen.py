@@ -1275,11 +1275,85 @@ class Orbit_Screen(MimicBase):
 
     # ---------------------------------------------------------------- TDRS ground-track
     def update_tdrs(self, _dt=0):
-        """Update TDRS positions and clear ZOE cache if needed."""
+        """Update TDRS positions and ground tracks."""
         try:
-            # Update TDRS positions (this would normally fetch from database)
-            # For now, we'll just clear the ZOE cache to ensure fresh calculations
-            self._clear_zoe_cache()
+            log_info("Update TDRS")
+            cfg = Path.home() / ".mimic_data" / "tdrs_tle_config.json"
+            try:
+                db = json.loads(cfg.read_text())
+                # keep only the six satellites we actually display
+                self.tdrs_tles = {
+                    name: ephem.readtle(name, *lines)
+                    for name, lines in db["TDRS_TLEs"].items()
+                    if name in self._TDRS_IDS
+                }
+            except Exception as exc:
+                log_error(f"TDRS TLE load failed: {exc}")
+                return
+
+            for name, sat in self.tdrs_tles.items():
+                id_name = name.replace(" ", "")           # "TDRS 6" ? "TDRS6"
+                if id_name not in self.ids:               # icon missing in KV ? skip
+                    log_error(f"Missing KV id: {id_name}")
+                    continue
+
+                img = self.ids[id_name]                   # the small ellipse icon
+
+                try:
+                    sat.compute(datetime.utcnow())
+                    lon = sat.sublong * 180 / math.pi      # ephem radians?deg
+                    lat = sat.sublat  * 180 / math.pi
+                except Exception as exc:
+                    log_error(f"{name} compute failed: {exc}")
+                    continue
+
+                tex_w, tex_h  = self.ids.OrbitMap.texture_size
+                norm_w, norm_h = self.ids.OrbitMap.norm_image_size
+                nX = 1 if tex_w == 0 else norm_w / tex_w
+                nY = 1 if tex_h == 0 else norm_h / tex_h
+
+                x, y = self.map_px(lat, lon)        # root-pixel centre of the dot
+                img.pos = (x - img.width  * nX / 2,
+                           y - img.height * nY / 2)
+
+                # Update ground track for this TDRS satellite
+                track_id = f"{id_name}_track"
+                if track_id in self.ids:
+                    # Generate ground track points (simplified - one orbit ahead)
+                    track_points = []
+                    t = datetime.utcnow()
+                    step = timedelta(minutes=1)
+                    
+                    for _ in range(1496):  # ~ one orbit ahead
+                        try:
+                            sat.compute(t)
+                            track_lat = degrees(sat.sublat)
+                            track_lon = degrees(sat.sublong)
+                            track_x, track_y = self.map_px(track_lat, track_lon)
+                            track_points.extend([track_x, track_y])
+                            t += step
+                        except Exception as exc:
+                            log_error(f"{name} track compute failed: {exc}")
+                            break
+                    
+                    # Update the track line
+                    for instruction in self.ids[track_id].canvas.children:
+                        if hasattr(instruction, 'points'):
+                            instruction.points = track_points
+                            break
+                
+                # Update active circle position if this TDRS is active
+                circle_id = f"{id_name}_active_circle"
+                if circle_id in self.ids:
+                    circle_widget = self.ids[circle_id]
+                    tdrs_id = int(name.split()[1])  # Extract TDRS number
+                    if tdrs_id in self.active_tdrs:
+                        circle_widget.center = img.center
+
+            # Position TDRS labels dynamically based on satellite positions
+            self._update_tdrs_labels()
+        
+            log_info("Update TDRS done")
             
         except Exception as exc:
             log_error(f"Update TDRS failed: {exc}")
