@@ -246,10 +246,10 @@
                 points: []
                 width: max(1, dp(0.5))  # Responsive line width
 
-    # TDRS Z-Belt Label
+    # TDRS Z Label
     Label:
         id: tdrs_zbelt_label
-        text: "TDRS Z-Belt"
+        text: "TDRS Z"
         color: 1, 1, 1, 1  # White text
         font_size: min(dp(36), self.parent.width * 0.024)  # Much larger text
         bold: True  # Make text thicker
@@ -402,7 +402,7 @@
         
     TelemetryLabel:
         id: solarbeta
-        pos_hint: {"center_x": .59, "center_y": .22}  # Moved higher
+        pos_hint: {"center_x": .575, "center_y": .22}  # Moved higher
         text: "0.00"
         font_size: min(dp(20), self.parent.width * 0.014)  # Larger text
 
@@ -420,7 +420,7 @@
         
     TelemetryLabel:
         id: period
-        pos_hint: {"center_x": .59, "center_y": .18}  # Moved higher
+        pos_hint: {"center_x": .575, "center_y": .18}  # Moved higher
         text: "0.00"
         font_size: min(dp(20), self.parent.width * 0.014)  # Larger text
 

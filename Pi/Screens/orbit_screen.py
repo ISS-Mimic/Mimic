@@ -291,9 +291,9 @@ class Orbit_Screen(MimicBase):
             from pathlib import Path
             
             # Database path - cross-platform handling
-            db_path = Path("/dev/shm/telemetry.db")
+            db_path = Path("/dev/shm/iss_telemetry.db")
             if not db_path.exists():
-                db_path = Path.home() / ".mimic_data" / "telemetry.db"
+                db_path = Path.home() / ".mimic_data" / "iss_telemetry.db"
                 if not db_path.exists():
                     log_error("Telemetry database not found")
                     return [], []
@@ -364,34 +364,10 @@ class Orbit_Screen(MimicBase):
             else:
                 period_minutes = 0
             
-            # Calculate solar beta angle
-            # This is the angle between the orbital plane normal and the Sun direction
-            try:
-                sun = ephem.Sun()
-                sun.compute(ephem.now())
-                
-                # Get Sun's position in ECI coordinates
-                # Convert from equatorial to ECI (simplified)
-                sun_ra = float(sun.ra)
-                sun_dec = float(sun.dec)
-                
-                # Convert to Cartesian coordinates
-                sun_x = math.cos(sun_dec) * math.cos(sun_ra)
-                sun_y = math.cos(sun_dec) * math.sin(sun_ra)
-                sun_z = math.sin(sun_dec)
-                
-                # Calculate angle between orbital plane normal and Sun direction
-                cos_beta = safe_divide(dot(h_vec, [sun_x, sun_y, sun_z]), (h_mag * math.sqrt(sun_x**2 + sun_y**2 + sun_z**2)))
-                beta_deg = math.degrees(math.acos(abs(cos_beta)))
-                
-            except Exception:
-                beta_deg = 0  # Fallback if Sun calculation fails
-            
             return {
                 'altitude_km': altitude_km,
                 'inc_deg': inc_deg,
                 'period_minutes': period_minutes,
-                'beta_deg': beta_deg,
                 'e_mag': e_mag
             }
             
@@ -410,6 +386,7 @@ class Orbit_Screen(MimicBase):
         try:
             # Get telemetry data from database
             values, timestamps = self.get_telemetry_data()
+
             if not values or len(values) < 61:
                 log_error("Insufficient telemetry data")
                 return
@@ -421,6 +398,9 @@ class Orbit_Screen(MimicBase):
             velocity_x = float(values[58][0]) / 1000.0  # convert to km/s
             velocity_y = float(values[59][0]) / 1000.0  # convert to km/s
             velocity_z = float(values[60][0]) / 1000.0  # convert to km/s
+            
+            # Get solar beta directly from telemetry (index 176 from GUI.py)
+            solar_beta = float(values[176][0])  # degrees
             
             # Create position and velocity vectors
             pos_vec = [position_x, position_y, position_z]
@@ -449,7 +429,7 @@ class Orbit_Screen(MimicBase):
             if 'period' in self.ids:
                 self.ids.period.text = f"{orbital_params['period_minutes']:.1f}m"
             if 'solarbeta' in self.ids:
-                self.ids.solarbeta.text = f"{orbital_params['beta_deg']:.1f}°"
+                self.ids.solarbeta.text = f"{solar_beta:.1f}°"
                 
         except Exception as exc:
             log_error(f"Update telemetry values failed: {exc}")
