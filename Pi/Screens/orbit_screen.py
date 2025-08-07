@@ -417,9 +417,10 @@ class Orbit_Screen(MimicBase):
                 elapsed = utc_now - sleep_start_dt
                 hours = int(elapsed.total_seconds() // 3600)
                 minutes = int((elapsed.total_seconds() % 3600) // 60)
+                seconds = int(elapsed.total_seconds() % 60)
                 
-                self.ids.crew_sleep_timer.text = f"Sleep: +{hours:02d}:{minutes:02d}"
-                self.ids.crew_sleep_timer.color = (0, 1, 0, 1)  # Green during sleep
+                self.ids.crew_sleep_timer.text = f"+{hours:02d}:{minutes:02d}:{seconds:02d}"
+                self.ids.crew_sleep_timer.color = (0.5, 0, 0.5, 1)  # Magenta during sleep
             else:
                 # Before sleep period - show countdown
                 if current_time < sleep_start:
@@ -433,8 +434,8 @@ class Orbit_Screen(MimicBase):
                 hours = int(countdown.total_seconds() // 3600)
                 minutes = int((countdown.total_seconds() % 3600) // 60)
                 
-                self.ids.crew_sleep_timer.text = f"Sleep: -{hours:02d}:{minutes:02d}"
-                self.ids.crew_sleep_timer.color = (1, 1, 0, 1)  # Yellow countdown
+                self.ids.crew_sleep_timer.text = f"-{hours:02d}:{minutes:02d}:{seconds:02d}"
+                self.ids.crew_sleep_timer.color = (1, 1, 1, 1)  # White countdown
                 
         except Exception as exc:
             log_error(f"Update crew sleep timer failed: {exc}")

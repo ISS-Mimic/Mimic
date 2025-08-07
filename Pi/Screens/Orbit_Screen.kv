@@ -49,7 +49,7 @@
         id: gmtime
         pos_hint: {"center_x": 0.9, "center_y": 0.97}
         text: "00:00:00"
-        color: root.signalcolor
+        color: (1, 1, 1, 1)  # White text
         size_hint_y: 0.4
         font_size: min(self.height * 0.10, dp(32))  # Responsive with max size
         markup: True
@@ -58,10 +58,10 @@
     Label:
         id: crew_sleep_timer
         pos_hint: {"center_x": 0.9, "center_y": 0.93}
-        text: "Sleep: --:--"
+        text: "00:00:00"
         color: (1, 1, 1, 1)  # White text
         size_hint_y: 0.4
-        font_size: min(self.height * 0.08, dp(24))  # Responsive with max size
+        font_size: min(self.height * 0.10, dp(32))  # Responsive with max size
         markup: True
 
     # ───────────────────────── Sun, ISS icon & ground tracks ───────────────
