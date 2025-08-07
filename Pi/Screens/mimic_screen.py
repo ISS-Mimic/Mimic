@@ -10,9 +10,7 @@ from kivy.lang import Builder
 from kivy.app import App
 
 from ._base import MimicBase                    # gives mimic_directory + signalcolor
-
-log_info  = logging.getLogger("MyLogger").info
-log_error = logging.getLogger("MyLogger").error
+from utils.logger import log_info, log_error
 
 # -- load KV that sits next to this file -------------------------------------
 kv_path = pathlib.Path(__file__).with_name("MimicScreen.kv")

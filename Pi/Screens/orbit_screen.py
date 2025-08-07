@@ -120,12 +120,12 @@ class Orbit_Screen(MimicBase):
         """Update the active TDRS circles based on database."""
         try:
             # Read active TDRS from database
-            tdrs_db_path = Path.home() / ".mimic_data" / "tdrs.db"
+            tdrs_db_path = "/dev/shm/tdrs.db"
             if not tdrs_db_path.exists():
                 log_error("TDRS database not found")
                 return
                 
-            conn = sqlite3.connect(str(tdrs_db_path))
+            conn = sqlite3.connect(tdrs_db_path)
             cursor = conn.cursor()
             cursor.execute("SELECT TDRS1, TDRS2 FROM tdrs LIMIT 1")
             result = cursor.fetchone()
@@ -187,7 +187,6 @@ class Orbit_Screen(MimicBase):
 
     def on_size(self, *args):
         """Handle screen size changes for responsive design."""
-        super().on_size(*args)
         # Update user location when screen size changes
         Clock.schedule_once(self.update_user_location, 0.1)
 
