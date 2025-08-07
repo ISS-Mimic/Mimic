@@ -286,6 +286,58 @@ class Orbit_Screen(MimicBase):
             log_error(f"Calculate daily orbits failed: {exc}")
             return 0
 
+    def update_telemetry_values(self) -> None:
+        """Update all telemetry values (latitude, longitude, altitude, etc.)."""
+        try:
+            if not self.iss_tle:
+                return
+                
+            # Compute ISS position
+            self.iss_tle.compute(ephem.now())
+            
+            # Calculate latitude and longitude
+            lat_deg = math.degrees(self.iss_tle.sublat)
+            lon_deg = math.degrees(self.iss_tle.sublong)
+            
+            # Calculate altitude (approximate)
+            altitude_km = 408  # Approximate ISS altitude in km
+            
+            # Calculate inclination
+            inc_rad = self.iss_tle.inc
+            inc_deg = math.degrees(inc_rad)
+            
+            # Calculate orbital period
+            # Using approximate formula: period = 2π * sqrt(a³/μ) where a is semi-major axis
+            # For ISS, semi-major axis ≈ 6371 + 408 = 6779 km
+            mu = 398600.4418  # Earth's gravitational parameter (km³/s²)
+            a = 6779  # Semi-major axis in km
+            period_minutes = (2 * math.pi * math.sqrt(a**3 / mu)) / 60
+            
+            # Calculate solar beta angle (simplified)
+            # This is the angle between the ISS orbital plane and the Sun direction
+            sun = ephem.Sun()
+            sun.compute(ephem.now())
+            solar_beta = 0  # Placeholder - would need more complex calculation
+            
+            # Update UI elements
+            if 'latitude' in self.ids:
+                self.ids.latitude.text = f"{lat_deg:.2f}°"
+            if 'longitude' in self.ids:
+                self.ids.longitude.text = f"{lon_deg:.2f}°"
+            if 'altitude' in self.ids:
+                self.ids.altitude.text = f"{altitude_km} km"
+            if 'inc' in self.ids:
+                self.ids.inc.text = f"{inc_deg:.2f}°"
+            if 'period' in self.ids:
+                self.ids.period.text = f"{period_minutes:.1f}m"
+            if 'solarbeta' in self.ids:
+                self.ids.solarbeta.text = f"{solar_beta:.1f}°"
+                
+        except Exception as exc:
+            log_error(f"Update telemetry values failed: {exc}")
+            import traceback
+            traceback.print_exc()
+
     def set_user_location(self, lat: float, lon: float) -> None:
         """Set the user location and update the display."""
         self.user_lat = lat
@@ -542,6 +594,9 @@ class Orbit_Screen(MimicBase):
             
             self.ids.totalorbits.text = str(total_orbits)
             self.ids.dailyorbit.text = str(daily_orbits)
+        
+        # — update telemetry values ------------------------------------------
+        self.update_telemetry_values()
         
     # ----------------------------------------------------------------- ISS icon + track
     def update_iss(self, _dt=0):

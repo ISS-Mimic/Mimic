@@ -1679,8 +1679,7 @@ class MainApp(App):
 
             inc = math.acos(safe_divide(h_mom[2],h_mom_mag))
             self.screens["orbit_data"].ids.inc.text = "{:.2f}".format(math.degrees(inc))
-            self.screens["orbit"].ids.inc.text = "{:.2f}".format(math.degrees(inc)) + " deg"
-
+   
             node_vec = cross([0,0,1],h_mom)
             node_mag = math.sqrt(dot(node_vec,node_vec))
 
@@ -1718,8 +1717,7 @@ class MainApp(App):
                 period = 0
             self.screens["orbit_data"].ids.apogee_height.text = str("{:.2f}".format(apogee_height))
             self.screens["orbit_data"].ids.perigee_height.text = str("{:.2f}".format(perigee_height))
-            self.screens["orbit"].ids.period.text = str("{:.2f}".format(period)) + "m"
-
+       
         cmg1_active = int((values[145])[0])
         cmg2_active = int((values[146])[0])
         cmg3_active = int((values[147])[0])
@@ -2949,7 +2947,7 @@ class MainApp(App):
         self.screens["eps"].ids.c4b_value.text = c4b + "A"
         self.screens["eps"].ids.v4b_value.text = v4b + "V"
         self.screens["iss"].ids.altitude_value.text = str(altitude) + " km"
-        self.screens["orbit"].ids.altitude.text = str(altitude) + " km"
+
         self.screens["iss"].ids.velocity_value.text = str(velocity) + " km/s"
         self.screens["iss"].ids.stationmass_value.text = str(iss_mass) + " kg"
 

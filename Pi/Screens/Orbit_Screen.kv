@@ -386,38 +386,43 @@
         text: "0"
 
     # ─────── orbital parameters (lower band) ───────
-    GridLayout:
-        cols: 3
-        rows: 2
-        size_hint_y: .15
-        row_default_height: self.height / 2
-        spacing: 0, dp(4)
+    # Positioned to align with background graphics, higher up and larger text
+    
+    TelemetryLabel:
+        id: latitude
+        pos_hint: {"center_x": .12, "center_y": .28}  # Moved higher
+        text: "0.00"
+        font_size: min(dp(20), self.parent.width * 0.014)  # Larger text
+        
+    TelemetryLabel:
+        id: altitude
+        pos_hint: {"center_x": .35, "center_y": .28}  # Moved higher
+        text: "0.00"
+        font_size: min(dp(20), self.parent.width * 0.014)  # Larger text
+        
+    TelemetryLabel:
+        id: solarbeta
+        pos_hint: {"center_x": .57, "center_y": .28}  # Moved higher
+        text: "0.00"
+        font_size: min(dp(20), self.parent.width * 0.014)  # Larger text
 
-        TelemetryLabel:
-            id: latitude
-            pos_hint: {"center_x": .12, "center_y": .3}
-            text: "0.00"
-        TelemetryLabel:
-            id: altitude
-            pos_hint: {"center_x": .35, "center_y": .3}
-            text: "0.00"
-        TelemetryLabel:
-            id: solarbeta
-            pos_hint: {"center_x": .57, "center_y": .3}
-            text: "0.00"
-
-        TelemetryLabel:
-            id: longitude
-            pos_hint: {"center_x": .13, "center_y": .2}
-            text: "0.00"
-        TelemetryLabel:
-            id: inc
-            pos_hint: {"center_x": .35, "center_y": .2}
-            text: "0.00"
-        TelemetryLabel:
-            id: period
-            pos_hint: {"center_x": .57, "center_y": .2}
-            text: "0.00"
+    TelemetryLabel:
+        id: longitude
+        pos_hint: {"center_x": .13, "center_y": .22}  # Moved higher
+        text: "0.00"
+        font_size: min(dp(20), self.parent.width * 0.014)  # Larger text
+        
+    TelemetryLabel:
+        id: inc
+        pos_hint: {"center_x": .35, "center_y": .22}  # Moved higher
+        text: "0.00"
+        font_size: min(dp(20), self.parent.width * 0.014)  # Larger text
+        
+    TelemetryLabel:
+        id: period
+        pos_hint: {"center_x": .57, "center_y": .22}  # Moved higher
+        text: "0.00"
+        font_size: min(dp(20), self.parent.width * 0.014)  # Larger text
 
     # ─────── next-pass block (upper-right) ───────
     PassLabel:
