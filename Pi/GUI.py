@@ -68,6 +68,7 @@ SERIAL_SPEED = 9600
 
 os.environ['KIVY_GL_BACKEND'] = 'gl' #need this to fix a kivy segfault that occurs with python3 for some reason
 
+log_info("--------------------------------")
 log_info("Initialized Mimic Program")
 
 #-------------------------Look for an internet connection-----------------------------------

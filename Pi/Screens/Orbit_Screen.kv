@@ -375,26 +375,10 @@
         markup: True
 
     # ─────── orbit counters (left column) ───────
-    Label:
-        text: "Daily Orbits"
-        color: 1, 1, 1, 1  # White text
-        font_size: min(dp(16), self.parent.width * 0.012)
-        size_hint: None, None
-        size: self.texture_size
-        pos_hint: {"center_x": .08, "center_y": .80}
-        
     TelemetryLabel:
         id: dailyorbit
         pos_hint: {"center_x": .08, "center_y": .70}
         text: "0"
-
-    Label:
-        text: "Total Orbits"
-        color: 1, 1, 1, 1  # White text
-        font_size: min(dp(16), self.parent.width * 0.012)
-        size_hint: None, None
-        size: self.texture_size
-        pos_hint: {"center_x": .08, "center_y": .60}
         
     TelemetryLabel:
         id: totalorbits
@@ -406,34 +390,33 @@
         cols: 3
         rows: 2
         size_hint_y: .15
-        row_default_height: self.height / 3
+        row_default_height: self.height / 2
         spacing: 0, dp(4)
 
         TelemetryLabel:
             id: latitude
-            pos_hint: {"center_x": .12, "center_y": .22}
+            pos_hint: {"center_x": .12, "center_y": .3}
             text: "0.00"
         TelemetryLabel:
             id: altitude
-            pos_hint: {"center_x": .35, "center_y": .22}
+            pos_hint: {"center_x": .35, "center_y": .3}
+            text: "0.00"
+        TelemetryLabel:
+            id: solarbeta
+            pos_hint: {"center_x": .57, "center_y": .3}
             text: "0.00"
 
         TelemetryLabel:
             id: longitude
-            pos_hint: {"center_x": .13, "center_y": .185}
+            pos_hint: {"center_x": .13, "center_y": .2}
             text: "0.00"
         TelemetryLabel:
             id: inc
-            pos_hint: {"center_x": .35, "center_y": .185}
-            text: "0.00"
-
-        TelemetryLabel:
-            id: solarbeta
-            pos_hint: {"center_x": .57, "center_y": .22}
+            pos_hint: {"center_x": .35, "center_y": .2}
             text: "0.00"
         TelemetryLabel:
             id: period
-            pos_hint: {"center_x": .57, "center_y": .185}
+            pos_hint: {"center_x": .57, "center_y": .2}
             text: "0.00"
 
     # ─────── next-pass block (upper-right) ───────
