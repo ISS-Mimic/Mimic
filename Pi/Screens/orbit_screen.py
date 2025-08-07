@@ -623,7 +623,8 @@ class Orbit_Screen(MimicBase):
                 return self.get_simple_zoe_boundary()
             
             self.iss_tle.compute(ephem.now())
-            iss_inc = math.degrees(self.iss_tle.inclination)
+            # Use the correct attribute for inclination
+            iss_inc = math.degrees(self.iss_tle._inc)
             
             # ZOE is bounded by ISS inclination
             zoe_lat_min = -iss_inc
@@ -850,6 +851,36 @@ class Orbit_Screen(MimicBase):
                 if entry_time is not None and exit_time is not None:
                     break
             
+            # If we're currently in ZOE, we need to find the next exit
+            if in_zoe and exit_time is None:
+                # Look for the next exit time
+                for i in range(1, 288):
+                    future_time = current_time + (i * coarse_step_minutes * ephem.minute)
+                    self.iss_tle.compute(future_time)
+                    future_lat = math.degrees(self.iss_tle.sublat)
+                    future_lon = math.degrees(self.iss_tle.sublong)
+                    
+                    future_in_zoe = self.is_point_in_zoe(future_lat, future_lon, zoe_boundary_points)
+                    
+                    if not future_in_zoe:
+                        exit_time = self._refine_zoe_crossing(current_time, future_time, zoe_boundary_points, True, False)
+                        break
+            
+            # If we're not in ZOE, we need to find the next entry
+            if not in_zoe and entry_time is None:
+                # Look for the next entry time
+                for i in range(1, 288):
+                    future_time = current_time + (i * coarse_step_minutes * ephem.minute)
+                    self.iss_tle.compute(future_time)
+                    future_lat = math.degrees(self.iss_tle.sublat)
+                    future_lon = math.degrees(self.iss_tle.sublong)
+                    
+                    future_in_zoe = self.is_point_in_zoe(future_lat, future_lon, zoe_boundary_points)
+                    
+                    if future_in_zoe:
+                        entry_time = self._refine_zoe_crossing(current_time, future_time, zoe_boundary_points, False, True)
+                        break
+            
             return entry_time, exit_time
             
         except Exception as exc:
@@ -924,8 +955,11 @@ class Orbit_Screen(MimicBase):
             
             # Update timing labels
             if 'zoe_loss_timer' in self.ids and 'zoe_acquisition_timer' in self.ids:
-                if entry_time:
-                    time_to_entry = entry_time - ephem.now()
+                current_time = ephem.now()
+                
+                # zoe_loss_timer shows time until ISS enters ZOE (loses signal)
+                if entry_time and entry_time > current_time:
+                    time_to_entry = entry_time - current_time
                     total_minutes = int(time_to_entry * 24 * 60)
                     minutes = total_minutes % 60
                     seconds = int((time_to_entry * 24 * 60 - total_minutes) * 60)
@@ -933,8 +967,9 @@ class Orbit_Screen(MimicBase):
                 else:
                     self.ids.zoe_loss_timer.text = "--:--"
                 
-                if exit_time:
-                    time_to_exit = exit_time - ephem.now()
+                # zoe_acquisition_timer shows time until ISS exits ZOE (regains signal)
+                if exit_time and exit_time > current_time:
+                    time_to_exit = exit_time - current_time
                     total_minutes = int(time_to_exit * 24 * 60)
                     minutes = total_minutes % 60
                     seconds = int((time_to_exit * 24 * 60 - total_minutes) * 60)
@@ -1388,7 +1423,7 @@ class Orbit_Screen(MimicBase):
             # Check ISS position and ZOE status
             if self.iss_tle:
                 self.iss_tle.compute(ephem.now())
-                info['iss_inclination'] = math.degrees(self.iss_tle.inclination)
+                info['iss_inclination'] = math.degrees(self.iss_tle._inc)
                 
                 current_lat = math.degrees(self.iss_tle.sublat)
                 current_lon = math.degrees(self.iss_tle.sublong)
