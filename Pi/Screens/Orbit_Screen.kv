@@ -106,9 +106,9 @@
         canvas:
             Color:
                 rgba: 1, 0, 0, 1  # Red
-            Ellipse:
-                pos: self.pos
-                size: self.size
+            Line:
+                width: 16  # Thick line to create filled circle
+                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # Active TDRS circle for TDRS6
     Widget:
@@ -140,9 +140,9 @@
         canvas:
             Color:
                 rgba: 1, 0, 0, 1  # Red
-            Ellipse:
-                pos: self.pos
-                size: self.size
+            Line:
+                width: 16  # Thick line to create filled circle
+                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # Active TDRS circle for TDRS12
     Widget:
@@ -172,6 +172,7 @@
         text: "TDRS East"
         color: 1, 1, 1, 1  # White text
         font_size: min(dp(24), self.parent.width * 0.016)  # Much larger text
+        bold: True  # Make text thicker
         size_hint: None, None
         size: self.texture_size
         pos: 0, 0  # Will be positioned dynamically in Python
@@ -185,9 +186,9 @@
         canvas:
             Color:
                 rgba: 0, 1, 0, 1  # Green
-            Ellipse:
-                pos: self.pos
-                size: self.size
+            Line:
+                width: 16  # Thick line to create filled circle
+                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # Active TDRS circle for TDRS7
     Widget:
@@ -219,9 +220,9 @@
         canvas:
             Color:
                 rgba: 0, 1, 0, 1  # Green
-            Ellipse:
-                pos: self.pos
-                size: self.size
+            Line:
+                width: 16  # Thick line to create filled circle
+                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # Active TDRS circle for TDRS8
     Widget:
@@ -251,6 +252,7 @@
         text: "TDRS Z-Belt"
         color: 1, 1, 1, 1  # White text
         font_size: min(dp(24), self.parent.width * 0.016)  # Much larger text
+        bold: True  # Make text thicker
         size_hint: None, None
         size: self.texture_size
         pos: 0, 0  # Will be positioned dynamically in Python
@@ -264,9 +266,9 @@
         canvas:
             Color:
                 rgba: 0, 0, 1, 1  # Blue
-            Ellipse:
-                pos: self.pos
-                size: self.size
+            Line:
+                width: 16  # Thick line to create filled circle
+                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # Active TDRS circle for TDRS10
     Widget:
@@ -298,9 +300,9 @@
         canvas:
             Color:
                 rgba: 0, 0, 1, 1  # Blue
-            Ellipse:
-                pos: self.pos
-                size: self.size
+            Line:
+                width: 16  # Thick line to create filled circle
+                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # Active TDRS circle for TDRS11
     Widget:
@@ -330,6 +332,7 @@
         text: "TDRS West"
         color: 1, 1, 1, 1  # White text
         font_size: min(dp(24), self.parent.width * 0.016)  # Much larger text
+        bold: True  # Make text thicker
         size_hint: None, None
         size: self.texture_size
         pos: 0, 0  # Will be positioned dynamically in Python
@@ -344,7 +347,7 @@
             Color:
                 rgba: 1, 0, 1, 1  # Magenta dot
             Line:
-                width: 1
+                width: 8  # Thick line to create filled circle
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # ───────────────────────────── ZOE & ISS icons ─────────────────────────

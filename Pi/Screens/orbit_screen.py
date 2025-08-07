@@ -201,8 +201,8 @@ class Orbit_Screen(MimicBase):
                     if tdrs_name in self.ids:
                         tdrs_widget = self.ids[tdrs_name]
                         # Position label near the TDRS dot with some offset
-                        label_x = tdrs_widget.center_x + 60  # Offset right
-                        label_y = tdrs_widget.center_y + 30  # Offset up
+                        label_x = tdrs_widget.center_x + 0  # Offset right
+                        label_y = tdrs_widget.center_y - 30  # Offset up
                         label_widget.pos = (label_x, label_y)
                         label_positioned = True
                         break
