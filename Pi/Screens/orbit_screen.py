@@ -60,8 +60,6 @@ class Orbit_Screen(MimicBase):
     def on_enter(self):
         log_info("Orbit Screen Initialized")
         
-        # Debug: Check what widgets are available
-        log_info(f"Available widget IDs: {list(self.ids.keys())}")
         
         # periodic updates
         Clock.schedule_interval(self.update_orbit,         1)
