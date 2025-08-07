@@ -120,7 +120,7 @@ class Orbit_Screen(MimicBase):
         """Update the active TDRS circles based on database."""
         try:
             # Read active TDRS from database
-            tdrs_db_path = "/dev/shm/tdrs.db"
+            tdrs_db_path = Path(r"/dev/shm/tdrs.db")
             if not tdrs_db_path.exists():
                 log_error("TDRS database not found")
                 return
@@ -130,6 +130,8 @@ class Orbit_Screen(MimicBase):
             cursor.execute("SELECT TDRS1, TDRS2 FROM tdrs LIMIT 1")
             result = cursor.fetchone()
             conn.close()
+            
+            print(result)
             
             if result:
                 new_active_tdrs = [int(result[0]) if result[0] != '0' else 0, 
@@ -363,7 +365,7 @@ class Orbit_Screen(MimicBase):
 
     # ---------------------------------------------------------------- ISS + next-pass
     def update_orbit(self, _dt=0):
-        log_info("Update Orbit")
+        #log_info("Update Orbit")
         cfg = Path.home() / ".mimic_data" / "iss_tle_config.json"
         try:
             lines   = json.loads(cfg.read_text())

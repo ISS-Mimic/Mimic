@@ -51,7 +51,7 @@
         text: "00:00:00"
         color: root.signalcolor
         size_hint_y: 0.4
-        font_size: min(self.height * 0.10, dp(16))  # Responsive with max size
+        font_size: min(self.height * 0.10, dp(32))  # Responsive with max size
         markup: True
 
     # ───────────────────────── Sun, ISS icon & ground tracks ───────────────
@@ -59,7 +59,7 @@
         id: sun_icon
         source: f"{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitSun.png"
         size_hint: None, None
-        size: min(dp(40), self.parent.width * 0.03), min(dp(40), self.parent.height * 0.03)  # Responsive size
+        size: min(dp(80), self.parent.width * 0.06), min(dp(80), self.parent.height * 0.06)  # Responsive size
         pos: 0, 0  # set in python
     
     # ISS icon & track
@@ -67,7 +67,7 @@
         id: iss_icon
         source: f"{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitYellowISSicon.png"
         size_hint: None, None
-        size: min(dp(30), self.parent.width * 0.025), min(dp(30), self.parent.height * 0.025)  # Responsive size
+        size: min(dp(60), self.parent.width * 0.05), min(dp(60), self.parent.height * 0.05)  # Responsive size
         pos: 0, 0                        
         canvas.after:
             Color:
@@ -101,7 +101,7 @@
     Widget:
         id: TDRS6
         size_hint: None, None
-        size: min(dp(8), self.parent.width * 0.006), min(dp(8), self.parent.height * 0.006)  # Responsive size
+        size: min(dp(16), self.parent.width * 0.006), min(dp(16), self.parent.height * 0.006)  # Responsive size
         pos: 0, 0
         canvas:
             Color:
@@ -114,11 +114,11 @@
     Widget:
         id: TDRS6_active_circle
         size_hint: None, None
-        size: min(dp(16), self.parent.width * 0.012), min(dp(16), self.parent.height * 0.012)  # Responsive size
+        size: min(dp(32), self.parent.width * 0.012), min(dp(32), self.parent.height * 0.012)  # Responsive size
         pos: 0, 0
         canvas:
             Color:
-                rgba: 1, 1, 0, 0.8  # Yellow circle for active TDRS
+                rgba: 1, 1, 0, 0  # Yellow circle for active TDRS
             Ellipse:
                 pos: self.pos
                 size: self.size
@@ -135,7 +135,7 @@
     Widget:
         id: TDRS12
         size_hint: None, None
-        size: min(dp(8), self.parent.width * 0.006), min(dp(8), self.parent.height * 0.006)  # Responsive size
+        size: min(dp(16), self.parent.width * 0.006), min(dp(16), self.parent.height * 0.006)  # Responsive size
         pos: 0, 0
         canvas:
             Color:
@@ -148,11 +148,11 @@
     Widget:
         id: TDRS12_active_circle
         size_hint: None, None
-        size: min(dp(16), self.parent.width * 0.012), min(dp(16), self.parent.height * 0.012)  # Responsive size
+        size: min(dp(32), self.parent.width * 0.012), min(dp(32), self.parent.height * 0.012)  # Responsive size
         pos: 0, 0
         canvas:
             Color:
-                rgba: 1, 1, 0, 0.8  # Yellow circle for active TDRS
+                rgba: 1, 1, 0, 0  # Yellow circle for active TDRS
             Ellipse:
                 pos: self.pos
                 size: self.size
@@ -170,7 +170,7 @@
     Widget:
         id: TDRS7
         size_hint: None, None
-        size: min(dp(8), self.parent.width * 0.006), min(dp(8), self.parent.height * 0.006)  # Responsive size
+        size: min(dp(16), self.parent.width * 0.006), min(dp(16), self.parent.height * 0.006)  # Responsive size
         pos: 0, 0
         canvas:
             Color:
@@ -183,11 +183,11 @@
     Widget:
         id: TDRS7_active_circle
         size_hint: None, None
-        size: min(dp(16), self.parent.width * 0.012), min(dp(16), self.parent.height * 0.012)  # Responsive size
+        size: min(dp(32), self.parent.width * 0.012), min(dp(32), self.parent.height * 0.012)  # Responsive size
         pos: 0, 0
         canvas:
             Color:
-                rgba: 1, 1, 0, 0.8  # Yellow circle for active TDRS
+                rgba: 1, 1, 0, 0  # Yellow circle for active TDRS
             Ellipse:
                 pos: self.pos
                 size: self.size
@@ -204,7 +204,7 @@
     Widget:
         id: TDRS8
         size_hint: None, None
-        size: min(dp(8), self.parent.width * 0.006), min(dp(8), self.parent.height * 0.006)  # Responsive size
+        size: min(dp(16), self.parent.width * 0.006), min(dp(16), self.parent.height * 0.006)  # Responsive size
         pos: 0, 0
         canvas:
             Color:
@@ -217,11 +217,11 @@
     Widget:
         id: TDRS8_active_circle
         size_hint: None, None
-        size: min(dp(16), self.parent.width * 0.012), min(dp(16), self.parent.height * 0.012)  # Responsive size
+        size: min(dp(32), self.parent.width * 0.012), min(dp(32), self.parent.height * 0.012)  # Responsive size
         pos: 0, 0
         canvas:
             Color:
-                rgba: 1, 1, 0, 0.8  # Yellow circle for active TDRS
+                rgba: 1, 1, 0, 0  # Yellow circle for active TDRS
             Ellipse:
                 pos: self.pos
                 size: self.size
@@ -239,7 +239,7 @@
     Widget:
         id: TDRS10
         size_hint: None, None
-        size: min(dp(8), self.parent.width * 0.006), min(dp(8), self.parent.height * 0.006)  # Responsive size
+        size: min(dp(16), self.parent.width * 0.006), min(dp(16), self.parent.height * 0.006)  # Responsive size
         pos: 0, 0
         canvas:
             Color:
@@ -252,11 +252,11 @@
     Widget:
         id: TDRS10_active_circle
         size_hint: None, None
-        size: min(dp(16), self.parent.width * 0.012), min(dp(16), self.parent.height * 0.012)  # Responsive size
+        size: min(dp(32), self.parent.width * 0.012), min(dp(32), self.parent.height * 0.012)  # Responsive size
         pos: 0, 0
         canvas:
             Color:
-                rgba: 1, 1, 0, 0.8  # Yellow circle for active TDRS
+                rgba: 1, 1, 0, 0  # Yellow circle for active TDRS
             Ellipse:
                 pos: self.pos
                 size: self.size
@@ -273,7 +273,7 @@
     Widget:
         id: TDRS11
         size_hint: None, None
-        size: min(dp(8), self.parent.width * 0.006), min(dp(8), self.parent.height * 0.006)  # Responsive size
+        size: min(dp(16), self.parent.width * 0.006), min(dp(16), self.parent.height * 0.006)  # Responsive size
         pos: 0, 0
         canvas:
             Color:
@@ -286,11 +286,11 @@
     Widget:
         id: TDRS11_active_circle
         size_hint: None, None
-        size: min(dp(16), self.parent.width * 0.012), min(dp(16), self.parent.height * 0.012)  # Responsive size
+        size: min(dp(32), self.parent.width * 0.012), min(dp(32), self.parent.height * 0.012)  # Responsive size
         pos: 0, 0
         canvas:
             Color:
-                rgba: 1, 1, 0, 0.8  # Yellow circle for active TDRS
+                rgba: 1, 1, 0, 0  # Yellow circle for active TDRS
             Ellipse:
                 pos: self.pos
                 size: self.size
@@ -308,7 +308,7 @@
     Widget:
         id: user_location
         size_hint: None, None
-        size: min(dp(6), self.parent.width * 0.005), min(dp(6), self.parent.height * 0.005)  # Responsive size
+        size: min(dp(12), self.parent.width * 0.01), min(dp(12), self.parent.height * 0.01)  # Responsive size
         pos: 0, 0  # Will be set in Python
         canvas:
             Color:
