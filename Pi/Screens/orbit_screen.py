@@ -601,6 +601,62 @@ class Orbit_Screen(MimicBase):
             log_error(f"Check point coverage failed: {exc}")
             return False
 
+    def _clear_zoe_cache(self) -> None:
+        """Clear the ZOE boundary cache to force recalculation."""
+        self._zoe_boundary_cache = None
+        self._zoe_cache_time = 0.0
+        log_info("ZOE boundary cache cleared")
+
+    def _find_zoe_longitude_extremes(self, lat_min: float, lat_max: float, tdrs_positions: dict) -> tuple:
+        """Find the minimum and maximum longitude of the ZOE region at different latitudes."""
+        try:
+            # Sample at coarser intervals for performance
+            lat_step = 10  # 10 degree intervals
+            lon_step = 1   # 1 degree intervals for longitude precision
+            
+            # Search in the Indian Ocean region (40°E to 120°E)
+            search_lon_min = 40
+            search_lon_max = 120
+            
+            # Store longitude extremes at different latitudes
+            lat_lon_extremes = {}
+            
+            for lat in range(int(lat_min), int(lat_max) + 1, lat_step):
+                zoe_lon_min = None
+                zoe_lon_max = None
+                
+                # Find the westernmost (minimum) longitude where ZOE exists at this latitude
+                for lon in range(search_lon_min, search_lon_max + 1, lon_step):
+                    if not self.is_point_covered_by_tdrs(lat, lon, tdrs_positions):
+                        zoe_lon_min = lon
+                        break
+                
+                # Find the easternmost (maximum) longitude where ZOE exists at this latitude
+                for lon in range(search_lon_max, search_lon_min - 1, -lon_step):
+                    if not self.is_point_covered_by_tdrs(lat, lon, tdrs_positions):
+                        zoe_lon_max = lon
+                        break
+                
+                # Store the extremes for this latitude
+                if zoe_lon_min is not None and zoe_lon_max is not None:
+                    lat_lon_extremes[lat] = (zoe_lon_min, zoe_lon_max)
+            
+            # If we couldn't find extremes, use default values
+            if not lat_lon_extremes:
+                lat_lon_extremes = {
+                    0: (60, 100),    # Equator
+                    20: (65, 95),    # 20°N
+                    -20: (65, 95),   # 20°S
+                    40: (70, 90),    # 40°N
+                    -40: (70, 90),   # 40°S
+                }
+            
+            return lat_lon_extremes
+            
+        except Exception as exc:
+            log_error(f"Find ZOE longitude extremes failed: {exc}")
+            return {}
+
     def calculate_zoe_boundary_points(self) -> list:
         """Calculate the boundary points for the ZOE region using accurate TDRS coverage."""
         try:
@@ -630,77 +686,41 @@ class Orbit_Screen(MimicBase):
             
             log_info(f"Calculating ZOE boundary for latitude range {zoe_lat_min:.1f}° to {zoe_lat_max:.1f}°")
             
-            # Find the longitude extremes of the ZOE region
-            lon_min, lon_max = self._find_zoe_longitude_extremes(zoe_lat_min, zoe_lat_max, tdrs_positions)
+            # Find the longitude extremes at different latitudes
+            lat_lon_extremes = self._find_zoe_longitude_extremes(zoe_lat_min, zoe_lat_max, tdrs_positions)
             
-            if lon_min is None or lon_max is None:
+            if not lat_lon_extremes:
                 log_info("Could not determine ZOE longitude extremes, using simple boundary")
                 return self.get_simple_zoe_boundary()
             
-            # Create a simple rectangular polygon
-            boundary_points = [
-                (zoe_lat_max, lon_min),  # Top-left
-                (zoe_lat_max, lon_max),  # Top-right
-                (zoe_lat_min, lon_max),  # Bottom-right
-                (zoe_lat_min, lon_min),  # Bottom-left
-                (zoe_lat_max, lon_min),  # Close polygon
-            ]
+            # Create an elliptical-like polygon using the longitude extremes at different latitudes
+            boundary_points = []
+            
+            # Add points along the western edge (minimum longitude)
+            for lat in sorted(lat_lon_extremes.keys()):
+                lon_min, _ = lat_lon_extremes[lat]
+                boundary_points.append((lat, lon_min))
+            
+            # Add points along the eastern edge (maximum longitude) in reverse order
+            for lat in sorted(lat_lon_extremes.keys(), reverse=True):
+                _, lon_max = lat_lon_extremes[lat]
+                boundary_points.append((lat, lon_max))
+            
+            # Close the polygon
+            if boundary_points and boundary_points[0] != boundary_points[-1]:
+                boundary_points.append(boundary_points[0])
             
             # Cache the result for much longer since ZOE doesn't change
             self._zoe_boundary_cache = boundary_points
             self._zoe_cache_time = current_time
             
-            log_info(f"Calculated ZOE boundary: lat {zoe_lat_min:.1f}° to {zoe_lat_max:.1f}°, lon {lon_min:.1f}° to {lon_max:.1f}°")
+            log_info(f"Calculated ZOE boundary with {len(boundary_points)} points")
             
             return boundary_points
             
         except Exception as exc:
             log_error(f"Calculate ZOE boundary points failed: {exc}")
             return self.get_simple_zoe_boundary()
-
-    def _find_zoe_longitude_extremes(self, lat_min: float, lat_max: float, tdrs_positions: dict) -> tuple:
-        """Find the minimum and maximum longitude of the ZOE region."""
-        try:
-            # Sample at coarser intervals for performance
-            lat_step = 10  # 10 degree intervals
-            lon_step = 1   # 1 degree intervals for longitude precision
-            
-            # Search in the Indian Ocean region (40°E to 120°E)
-            search_lon_min = 40
-            search_lon_max = 120
-            
-            zoe_lon_min = None
-            zoe_lon_max = None
-            
-            # Find the westernmost (minimum) longitude where ZOE exists
-            for lon in range(search_lon_min, search_lon_max + 1, lon_step):
-                for lat in range(int(lat_min), int(lat_max) + 1, lat_step):
-                    if not self.is_point_covered_by_tdrs(lat, lon, tdrs_positions):
-                        zoe_lon_min = lon
-                        break
-                if zoe_lon_min is not None:
-                    break
-            
-            # Find the easternmost (maximum) longitude where ZOE exists
-            for lon in range(search_lon_max, search_lon_min - 1, -lon_step):
-                for lat in range(int(lat_min), int(lat_max) + 1, lat_step):
-                    if not self.is_point_covered_by_tdrs(lat, lon, tdrs_positions):
-                        zoe_lon_max = lon
-                        break
-                if zoe_lon_max is not None:
-                    break
-            
-            # If we couldn't find extremes, use default values
-            if zoe_lon_min is None:
-                zoe_lon_min = 60
-            if zoe_lon_max is None:
-                zoe_lon_max = 100
-            
-            return zoe_lon_min, zoe_lon_max
-            
-        except Exception as exc:
-            log_error(f"Find ZOE longitude extremes failed: {exc}")
-            return None, None
 
     def _validate_zoe_boundary(self, boundary_points: list) -> bool:
         """Validate that the ZOE boundary points form a reasonable polygon."""
