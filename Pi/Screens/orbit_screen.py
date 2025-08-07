@@ -134,12 +134,11 @@ class Orbit_Screen(MimicBase):
             result = cursor.fetchone()
             conn.close()
             
-            print(result)
-            
             if result:
+                print("in if")
                 new_active_tdrs = [int(result[0]) if result[0] != '0' else 0, 
                                   int(result[1]) if result[1] != '0' else 0]
-                
+                print(new_active_tdrs) 
                 # Only update if the active TDRS have changed
                 if new_active_tdrs != self.active_tdrs:
                     self.active_tdrs = new_active_tdrs

@@ -5,7 +5,7 @@
 # --------------------------------------------------------------------------
 <TelemetryLabel@Label>:
     color: 1, 1, 1, 1
-    font_size: min(self.height * 0.17, dp(20))  # Responsive with max size
+    font_size: min(self.height * 0.2, dp(30))  # Responsive with max size
     size_hint_y: 0.2
 
 <PassLabel@Label>:
@@ -354,8 +354,8 @@
 
     # ─────── orbital parameters (lower band) ───────
     GridLayout:
-        cols: 2
-        rows: 3
+        cols: 3
+        rows: 2
         size_hint_y: .15
         row_default_height: self.height / 3
         spacing: 0, dp(4)
