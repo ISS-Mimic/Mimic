@@ -5,13 +5,13 @@
 # --------------------------------------------------------------------------
 <TelemetryLabel@Label>:
     color: 1, 1, 1, 1
-    font_size: self.height * 0.17
+    font_size: min(self.height * 0.17, dp(20))  # Responsive with max size
     size_hint_y: 0.2
 
 <PassLabel@Label>:
     color: 1, 1, 1, 1
     halign: "center"
-    font_size: self.height * 0.17
+    font_size: min(self.height * 0.17, dp(18))  # Responsive with max size
     size_hint_y: 0.2
 
 <NavButton@Button>:
@@ -51,7 +51,7 @@
         text: "00:00:00"
         color: root.signalcolor
         size_hint_y: 0.4
-        font_size: self.height * 0.10
+        font_size: min(self.height * 0.10, dp(16))  # Responsive with max size
         markup: True
 
     # ───────────────────────── Sun, ISS icon & ground tracks ───────────────
@@ -59,7 +59,7 @@
         id: sun_icon
         source: f"{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitSun.png"
         size_hint: None, None
-        size: 40, 40
+        size: min(dp(40), self.parent.width * 0.03), min(dp(40), self.parent.height * 0.03)  # Responsive size
         pos: 0, 0  # set in python
     
     # ISS icon & track
@@ -67,13 +67,13 @@
         id: iss_icon
         source: f"{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitYellowISSicon.png"
         size_hint: None, None
-        size: 30, 30
+        size: min(dp(30), self.parent.width * 0.025), min(dp(30), self.parent.height * 0.025)  # Responsive size
         pos: 0, 0                        
         canvas.after:
             Color:
                 rgba: 1, 1, 1, 1         
             Line:
-                width: 1
+                width: max(1, dp(0.5))  # Responsive line width
                 circle:
                     (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360, 20)
 
@@ -85,7 +85,7 @@
                 rgba: 1, 1, 0, 1           
             Line:
                 points: []                 
-                width: 1
+                width: max(1, dp(0.5))  # Responsive line width
 
     Widget:
         id: iss_track_line_b
@@ -94,18 +94,31 @@
                 rgba: 1, 1, 0, 1
             Line:
                 points: []
-                width: 1
+                width: max(1, dp(0.5))  # Responsive line width
 
     # ──────────────────────────── TDRS Satellites ─────────────────────────
     # EAST — TDRS 6 & 12 (Red)
     Widget:
         id: TDRS6
         size_hint: None, None
-        size: 8, 8
+        size: min(dp(8), self.parent.width * 0.006), min(dp(8), self.parent.height * 0.006)  # Responsive size
         pos: 0, 0
         canvas:
             Color:
                 rgba: 1, 0, 0, 1  # Red
+            Ellipse:
+                pos: self.pos
+                size: self.size
+
+    # Active TDRS circle for TDRS6
+    Widget:
+        id: TDRS6_active_circle
+        size_hint: None, None
+        size: min(dp(16), self.parent.width * 0.012), min(dp(16), self.parent.height * 0.012)  # Responsive size
+        pos: 0, 0
+        canvas:
+            Color:
+                rgba: 1, 1, 0, 0.8  # Yellow circle for active TDRS
             Ellipse:
                 pos: self.pos
                 size: self.size
@@ -117,16 +130,29 @@
                 rgba: 1, 0, 0, 0.5  # Red, semi-transparent
             Line:
                 points: []
-                width: 1
+                width: max(1, dp(0.5))  # Responsive line width
 
     Widget:
         id: TDRS12
         size_hint: None, None
-        size: 8, 8
+        size: min(dp(8), self.parent.width * 0.006), min(dp(8), self.parent.height * 0.006)  # Responsive size
         pos: 0, 0
         canvas:
             Color:
                 rgba: 1, 0, 0, 1  # Red
+            Ellipse:
+                pos: self.pos
+                size: self.size
+
+    # Active TDRS circle for TDRS12
+    Widget:
+        id: TDRS12_active_circle
+        size_hint: None, None
+        size: min(dp(16), self.parent.width * 0.012), min(dp(16), self.parent.height * 0.012)  # Responsive size
+        pos: 0, 0
+        canvas:
+            Color:
+                rgba: 1, 1, 0, 0.8  # Yellow circle for active TDRS
             Ellipse:
                 pos: self.pos
                 size: self.size
@@ -138,17 +164,30 @@
                 rgba: 1, 0, 0, 0.5  # Red, semi-transparent
             Line:
                 points: []
-                width: 1
+                width: max(1, dp(0.5))  # Responsive line width
 
     # Z-BELT — TDRS 7 & 8 (Green)
     Widget:
         id: TDRS7
         size_hint: None, None
-        size: 8, 8
+        size: min(dp(8), self.parent.width * 0.006), min(dp(8), self.parent.height * 0.006)  # Responsive size
         pos: 0, 0
         canvas:
             Color:
                 rgba: 0, 1, 0, 1  # Green
+            Ellipse:
+                pos: self.pos
+                size: self.size
+
+    # Active TDRS circle for TDRS7
+    Widget:
+        id: TDRS7_active_circle
+        size_hint: None, None
+        size: min(dp(16), self.parent.width * 0.012), min(dp(16), self.parent.height * 0.012)  # Responsive size
+        pos: 0, 0
+        canvas:
+            Color:
+                rgba: 1, 1, 0, 0.8  # Yellow circle for active TDRS
             Ellipse:
                 pos: self.pos
                 size: self.size
@@ -160,16 +199,29 @@
                 rgba: 0, 1, 0, 0.5  # Green, semi-transparent
             Line:
                 points: []
-                width: 1
+                width: max(1, dp(0.5))  # Responsive line width
 
     Widget:
         id: TDRS8
         size_hint: None, None
-        size: 8, 8
+        size: min(dp(8), self.parent.width * 0.006), min(dp(8), self.parent.height * 0.006)  # Responsive size
         pos: 0, 0
         canvas:
             Color:
                 rgba: 0, 1, 0, 1  # Green
+            Ellipse:
+                pos: self.pos
+                size: self.size
+
+    # Active TDRS circle for TDRS8
+    Widget:
+        id: TDRS8_active_circle
+        size_hint: None, None
+        size: min(dp(16), self.parent.width * 0.012), min(dp(16), self.parent.height * 0.012)  # Responsive size
+        pos: 0, 0
+        canvas:
+            Color:
+                rgba: 1, 1, 0, 0.8  # Yellow circle for active TDRS
             Ellipse:
                 pos: self.pos
                 size: self.size
@@ -181,17 +233,30 @@
                 rgba: 0, 1, 0, 0.5  # Green, semi-transparent
             Line:
                 points: []
-                width: 1
+                width: max(1, dp(0.5))  # Responsive line width
 
     # WEST — TDRS 10 & 11 (Blue)
     Widget:
         id: TDRS10
         size_hint: None, None
-        size: 8, 8
+        size: min(dp(8), self.parent.width * 0.006), min(dp(8), self.parent.height * 0.006)  # Responsive size
         pos: 0, 0
         canvas:
             Color:
                 rgba: 0, 0, 1, 1  # Blue
+            Ellipse:
+                pos: self.pos
+                size: self.size
+
+    # Active TDRS circle for TDRS10
+    Widget:
+        id: TDRS10_active_circle
+        size_hint: None, None
+        size: min(dp(16), self.parent.width * 0.012), min(dp(16), self.parent.height * 0.012)  # Responsive size
+        pos: 0, 0
+        canvas:
+            Color:
+                rgba: 1, 1, 0, 0.8  # Yellow circle for active TDRS
             Ellipse:
                 pos: self.pos
                 size: self.size
@@ -203,16 +268,29 @@
                 rgba: 0, 0, 1, 0.5  # Blue, semi-transparent
             Line:
                 points: []
-                width: 1
+                width: max(1, dp(0.5))  # Responsive line width
 
     Widget:
         id: TDRS11
         size_hint: None, None
-        size: 8, 8
+        size: min(dp(8), self.parent.width * 0.006), min(dp(8), self.parent.height * 0.006)  # Responsive size
         pos: 0, 0
         canvas:
             Color:
                 rgba: 0, 0, 1, 1  # Blue
+            Ellipse:
+                pos: self.pos
+                size: self.size
+
+    # Active TDRS circle for TDRS11
+    Widget:
+        id: TDRS11_active_circle
+        size_hint: None, None
+        size: min(dp(16), self.parent.width * 0.012), min(dp(16), self.parent.height * 0.012)  # Responsive size
+        pos: 0, 0
+        canvas:
+            Color:
+                rgba: 1, 1, 0, 0.8  # Yellow circle for active TDRS
             Ellipse:
                 pos: self.pos
                 size: self.size
@@ -224,13 +302,13 @@
                 rgba: 0, 0, 1, 0.5  # Blue, semi-transparent
             Line:
                 points: []
-                width: 1
+                width: max(1, dp(0.5))  # Responsive line width
 
     # ───────────────────────────── User Location ───────────────────────────
     Widget:
         id: user_location
         size_hint: None, None
-        size: 12, 12
+        size: min(dp(6), self.parent.width * 0.005), min(dp(6), self.parent.height * 0.005)  # Responsive size
         pos: 0, 0  # Will be set in Python
         canvas:
             Color:
@@ -244,7 +322,7 @@
         id: ZOE
         col: (1, 1, 0, .2)
         size_hint: None, None
-        size: dp(6), dp(38)
+        size: min(dp(6), self.parent.width * 0.005), min(dp(38), self.parent.height * 0.04)  # Responsive size
         pos_hint: {"center_x": 0.5, "center_y": 0.5}
         opacity: 0.2
         canvas:
@@ -259,7 +337,7 @@
         text: "ZOE"
         color: (1, 1, 1, 1)
         pos_hint: {"center_x": 0.5, "center_y": 0.5}
-        font_size: self.height * 0.30
+        font_size: min(self.height * 0.30, dp(24))  # Responsive with max size
         size_hint_y: 0.20
         markup: True
 
@@ -355,7 +433,7 @@
         pos_hint: {"center_x": .14, "center_y": .08}
         text: ""
         markup: True
-        font_size: self.height * .30
+        font_size: min(self.height * .30, dp(20))  # Responsive with max size
 
     Image:
         id: signal

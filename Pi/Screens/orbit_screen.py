@@ -1,7 +1,7 @@
 # Pi/Screens/orbit_screen.py
 from __future__ import annotations
 
-import json, math, time, pytz
+import json, math, pytz, sqlite3
 from pathlib import Path
 from subprocess import Popen
 from typing import Optional
@@ -49,6 +49,9 @@ class Orbit_Screen(MimicBase):
     # User location (default: Houston, TX)
     user_lat: float = 29.585736
     user_lon: float = -95.1327829
+    
+    # Active TDRS tracking
+    active_tdrs: list[int] = [0, 0]  # TDRS1, TDRS2 from database
 
     # ---------------------------------------------------------------- enter
     def on_enter(self):
@@ -77,6 +80,10 @@ class Orbit_Screen(MimicBase):
         
         # Update user location on screen enter
         Clock.schedule_once(self.update_user_location,     1)
+        
+        # Update active TDRS circles
+        Clock.schedule_interval(self.update_active_tdrs,  30)  # Check every 30 seconds
+        Clock.schedule_once(self.update_active_tdrs,       5)  # Initial check after 5 seconds
 
     # ---------------------------------------------------------------- leave
     def on_leave(self):
@@ -90,7 +97,8 @@ class Orbit_Screen(MimicBase):
         Clock.unschedule(self.update_globe_image)
         Clock.unschedule(self.update_globe)
         Clock.unschedule(self.update_tdrs)
-        Clock.unschedule(self.update_sun) 
+        Clock.unschedule(self.update_sun)
+        Clock.unschedule(self.update_active_tdrs) 
 
     # ─────────────────────── user location ─────────────────────────────────────
     def update_user_location(self, _dt=0) -> None:
@@ -108,6 +116,63 @@ class Orbit_Screen(MimicBase):
             import traceback
             traceback.print_exc()
 
+    def update_active_tdrs(self, _dt=0) -> None:
+        """Update the active TDRS circles based on database."""
+        try:
+            # Read active TDRS from database
+            tdrs_db_path = Path.home() / ".mimic_data" / "tdrs.db"
+            if not tdrs_db_path.exists():
+                log_error("TDRS database not found")
+                return
+                
+            conn = sqlite3.connect(str(tdrs_db_path))
+            cursor = conn.cursor()
+            cursor.execute("SELECT TDRS1, TDRS2 FROM tdrs LIMIT 1")
+            result = cursor.fetchone()
+            conn.close()
+            
+            if result:
+                new_active_tdrs = [int(result[0]) if result[0] != '0' else 0, 
+                                  int(result[1]) if result[1] != '0' else 0]
+                
+                # Only update if the active TDRS have changed
+                if new_active_tdrs != self.active_tdrs:
+                    self.active_tdrs = new_active_tdrs
+                    log_info(f"Active TDRS updated: {self.active_tdrs}")
+                    
+                    # Update all TDRS circle visibility
+                    self._update_tdrs_circles()
+                    
+        except Exception as exc:
+            log_error(f"Update active TDRS failed: {exc}")
+            import traceback
+            traceback.print_exc()
+
+    def _update_tdrs_circles(self) -> None:
+        """Update the visibility of active TDRS circles."""
+        try:
+            # TDRS IDs that can be active
+            tdrs_ids = [6, 7, 8, 10, 11, 12]
+            
+            for tdrs_id in tdrs_ids:
+                circle_id = f"TDRS{tdrs_id}_active_circle"
+                if circle_id in self.ids:
+                    circle_widget = self.ids[circle_id]
+                    
+                    # Show circle if this TDRS is active
+                    if tdrs_id in self.active_tdrs:
+                        circle_widget.opacity = 1.0
+                        # Position the circle around the TDRS dot
+                        tdrs_widget = self.ids[f"TDRS{tdrs_id}"]
+                        circle_widget.center = tdrs_widget.center
+                    else:
+                        circle_widget.opacity = 0.0
+                        
+        except Exception as exc:
+            log_error(f"Update TDRS circles failed: {exc}")
+            import traceback
+            traceback.print_exc()
+
     def set_user_location(self, lat: float, lon: float) -> None:
         """Set the user location and update the display."""
         self.user_lat = lat
@@ -119,6 +184,12 @@ class Orbit_Screen(MimicBase):
         
         # Update the display
         self.update_user_location()
+
+    def on_size(self, *args):
+        """Handle screen size changes for responsive design."""
+        super().on_size(*args)
+        # Update user location when screen size changes
+        Clock.schedule_once(self.update_user_location, 0.1)
 
     # ─────────────────────── map helper (root pixels) ──────────────────────────
     def map_px(self, lat: float, lon: float) -> tuple[float, float]:
@@ -264,6 +335,14 @@ class Orbit_Screen(MimicBase):
                         if hasattr(instruction, 'points'):
                             instruction.points = track_points
                             break
+                
+                # Update active circle position if this TDRS is active
+                circle_id = f"{id_name}_active_circle"
+                if circle_id in self.ids:
+                    circle_widget = self.ids[circle_id]
+                    tdrs_id = int(name.split()[1])  # Extract TDRS number
+                    if tdrs_id in self.active_tdrs:
+                        circle_widget.center = img.center
 
             # Check if ZOE widgets exist before accessing them
             if 'ZOE' in self.ids and 'ZOElabel' in self.ids:
