@@ -394,6 +394,52 @@ class Orbit_Screen(MimicBase):
                 'e_mag': 0
             }
 
+    def update_crew_sleep_timer(self) -> None:
+        """Update the crew sleep timer based on standard sleep schedule (21:30-06:00 GMT)."""
+        try:
+            utc_now = datetime.utcnow()
+            current_time = utc_now.time()
+            
+            # Define sleep schedule (21:30 to 06:00 GMT)
+            sleep_start = datetime.strptime("21:30", "%H:%M").time()
+            sleep_end = datetime.strptime("06:00", "%H:%M").time()
+            
+            # Check if currently in sleep period
+            if sleep_start <= current_time or current_time < sleep_end:
+                # During sleep period - show elapsed time
+                if current_time < sleep_end:
+                    # Sleep started yesterday at 21:30
+                    sleep_start_dt = utc_now.replace(hour=21, minute=30, second=0, microsecond=0) - timedelta(days=1)
+                else:
+                    # Sleep started today at 21:30
+                    sleep_start_dt = utc_now.replace(hour=21, minute=30, second=0, microsecond=0)
+                
+                elapsed = utc_now - sleep_start_dt
+                hours = int(elapsed.total_seconds() // 3600)
+                minutes = int((elapsed.total_seconds() % 3600) // 60)
+                
+                self.ids.crew_sleep_timer.text = f"Sleep: +{hours:02d}:{minutes:02d}"
+                self.ids.crew_sleep_timer.color = (0, 1, 0, 1)  # Green during sleep
+            else:
+                # Before sleep period - show countdown
+                if current_time < sleep_start:
+                    # Sleep starts today
+                    sleep_start_dt = utc_now.replace(hour=21, minute=30, second=0, microsecond=0)
+                else:
+                    # Sleep starts tomorrow
+                    sleep_start_dt = utc_now.replace(hour=21, minute=30, second=0, microsecond=0) + timedelta(days=1)
+                
+                countdown = sleep_start_dt - utc_now
+                hours = int(countdown.total_seconds() // 3600)
+                minutes = int((countdown.total_seconds() % 3600) // 60)
+                
+                self.ids.crew_sleep_timer.text = f"Sleep: -{hours:02d}:{minutes:02d}"
+                self.ids.crew_sleep_timer.color = (1, 1, 0, 1)  # Yellow countdown
+                
+        except Exception as exc:
+            log_error(f"Update crew sleep timer failed: {exc}")
+            self.ids.crew_sleep_timer.text = "Sleep: --:--"
+
     def update_telemetry_values(self) -> None:
         """Update all telemetry values using accurate state vectors."""
         try:
@@ -713,6 +759,10 @@ class Orbit_Screen(MimicBase):
         if 'gmtime' in self.ids:
             utc_now = datetime.utcnow()
             self.ids.gmtime.text = utc_now.strftime("%H:%M:%S UTC")
+        
+        # — update crew sleep timer -----------------------------------------
+        if 'crew_sleep_timer' in self.ids:
+            self.update_crew_sleep_timer()
         
     # ----------------------------------------------------------------- ISS icon + track
     def update_iss(self, _dt=0):
