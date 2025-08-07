@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import pathlib
-import logging
+import subprocess
 from subprocess import Popen
 from kivy.uix.screenmanager import Screen
 from kivy.properties import ObjectProperty
@@ -42,9 +42,49 @@ class MimicScreen(MimicBase):
         base = Path(self.mimic_directory) / "Mimic" / "Pi"   # ? cast to Path
 
         log_info("Starting telemetry subprocesses")
+        
+        # Check if scripts exist
+        iss_telemetry_path = base / "iss_telemetry.py"
+        tdrscheck_path = base / "TDRScheck.py"
+        
+        if not iss_telemetry_path.exists():
+            log_error(f"iss_telemetry.py not found at {iss_telemetry_path}")
+            return
+            
+        if not tdrscheck_path.exists():
+            log_error(f"TDRScheck.py not found at {tdrscheck_path}")
+            return
+        
         try:
-            app.p        = Popen(["python", str(base / "iss_telemetry.py")])
-            app.TDRSproc = Popen(["python", str(base / "TDRScheck.py")])
+            # Start ISS telemetry process
+            app.p = Popen(
+                ["python", str(iss_telemetry_path)],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            log_info(f"Started iss_telemetry.py (PID: {app.p.pid})")
+            
+            # Start TDRS check process
+            app.TDRSproc = Popen(
+                ["python", str(tdrscheck_path)],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            log_info(f"Started TDRScheck.py (PID: {app.TDRSproc.pid})")
+            
+            # Check if processes started successfully
+            if app.p.poll() is not None:
+                stdout, stderr = app.p.communicate()
+                log_error(f"iss_telemetry.py failed to start: {stderr}")
+                app.p = None
+                
+            if app.TDRSproc.poll() is not None:
+                stdout, stderr = app.TDRSproc.communicate()
+                log_error(f"TDRScheck.py failed to start: {stderr}")
+                app.TDRSproc = None
+                
         except Exception as exc:
             log_error(f"Failed to start telemetry procs: {exc}")
             app.p = app.TDRSproc = None

@@ -120,12 +120,15 @@ class Orbit_Screen(MimicBase):
         """Update the active TDRS circles based on database."""
         try:
             # Read active TDRS from database
-            tdrs_db_path = "/dev/shm/tdrs.db"
+            tdrs_db_path = Path("/dev/shm/tdrs.db")
             if not tdrs_db_path.exists():
-                log_error("TDRS database not found")
-                return
+                # Try Windows path
+                tdrs_db_path = Path.home() / ".mimic_data" / "tdrs.db"
+                if not tdrs_db_path.exists():
+                    log_error("TDRS database not found")
+                    return
                 
-            conn = sqlite3.connect(tdrs_db_path)
+            conn = sqlite3.connect(str(tdrs_db_path))
             cursor = conn.cursor()
             cursor.execute("SELECT TDRS1, TDRS2 FROM tdrs LIMIT 1")
             result = cursor.fetchone()
