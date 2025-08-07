@@ -30,10 +30,12 @@ class MimicScreen(MimicBase):
         Mirrors the state on the App instance (no global).
         """
         App.get_running_app().mimicbutton = value
+        log_info(f"Change Mimic Boolean: {value}")
     changeMimicBoolean = change_mimic_boolean      # keep legacy name
 
     # ---------------------------------------------------------------- start
     def startproc(self) -> None:
+        log_info(f"Start Proc")
         """
         Launches the two collector scripts in the background.
         Keeps Popen handles on the App instance so MainScreen EXIT can kill them.

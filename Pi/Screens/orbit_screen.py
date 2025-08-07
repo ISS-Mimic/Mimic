@@ -134,6 +134,8 @@ class Orbit_Screen(MimicBase):
             result = cursor.fetchone()
             conn.close()
             
+            print(result)
+            
             if result:
                 new_active_tdrs = [int(result[0]) if result[0] != '0' else 0, 
                                   int(result[1]) if result[1] != '0' else 0]
@@ -366,7 +368,7 @@ class Orbit_Screen(MimicBase):
 
     # ---------------------------------------------------------------- ISS + next-pass
     def update_orbit(self, _dt=0):
-        log_info("Update Orbit")
+        #log_info("Update Orbit")
         cfg = Path.home() / ".mimic_data" / "iss_tle_config.json"
         try:
             lines   = json.loads(cfg.read_text())
