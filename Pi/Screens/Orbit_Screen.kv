@@ -106,9 +106,9 @@
         canvas:
             Color:
                 rgba: 1, 0, 0, 1  # Red
-            Ellipse:
-                pos: self.pos
-                size: self.size
+            Line:
+                width: 1
+                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # Active TDRS circle for TDRS6
     Widget:
@@ -140,9 +140,9 @@
         canvas:
             Color:
                 rgba: 1, 0, 0, 1  # Red
-            Ellipse:
-                pos: self.pos
-                size: self.size
+            Line:
+                width: 1
+                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # Active TDRS circle for TDRS12
     Widget:
@@ -166,6 +166,16 @@
                 points: []
                 width: max(1, dp(0.5))  # Responsive line width
 
+    # TDRS East Label
+    Label:
+        id: tdrs_east_label
+        text: "TDRS East"
+        color: 1, 1, 1, 1  # White text
+        font_size: min(dp(12), self.parent.width * 0.008)
+        size_hint: None, None
+        size: self.texture_size
+        pos_hint: {"center_x": 0.85, "center_y": 0.75}  # Position near TDRS 6/12
+
     # Z-BELT — TDRS 7 & 8 (Green)
     Widget:
         id: TDRS7
@@ -175,9 +185,9 @@
         canvas:
             Color:
                 rgba: 0, 1, 0, 1  # Green
-            Ellipse:
-                pos: self.pos
-                size: self.size
+            Line:
+                width: 1
+                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # Active TDRS circle for TDRS7
     Widget:
@@ -209,9 +219,9 @@
         canvas:
             Color:
                 rgba: 0, 1, 0, 1  # Green
-            Ellipse:
-                pos: self.pos
-                size: self.size
+            Line:
+                width: 1
+                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # Active TDRS circle for TDRS8
     Widget:
@@ -235,6 +245,16 @@
                 points: []
                 width: max(1, dp(0.5))  # Responsive line width
 
+    # TDRS Z-Belt Label
+    Label:
+        id: tdrs_zbelt_label
+        text: "TDRS Z-Belt"
+        color: 1, 1, 1, 1  # White text
+        font_size: min(dp(12), self.parent.width * 0.008)
+        size_hint: None, None
+        size: self.texture_size
+        pos_hint: {"center_x": 0.15, "center_y": 0.75}  # Position near TDRS 7/8
+
     # WEST — TDRS 10 & 11 (Blue)
     Widget:
         id: TDRS10
@@ -244,9 +264,9 @@
         canvas:
             Color:
                 rgba: 0, 0, 1, 1  # Blue
-            Ellipse:
-                pos: self.pos
-                size: self.size
+            Line:
+                width: 1
+                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # Active TDRS circle for TDRS10
     Widget:
@@ -278,9 +298,9 @@
         canvas:
             Color:
                 rgba: 0, 0, 1, 1  # Blue
-            Ellipse:
-                pos: self.pos
-                size: self.size
+            Line:
+                width: 1
+                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # Active TDRS circle for TDRS11
     Widget:
@@ -304,6 +324,16 @@
                 points: []
                 width: max(1, dp(0.5))  # Responsive line width
 
+    # TDRS West Label
+    Label:
+        id: tdrs_west_label
+        text: "TDRS West"
+        color: 1, 1, 1, 1  # White text
+        font_size: min(dp(12), self.parent.width * 0.008)
+        size_hint: None, None
+        size: self.texture_size
+        pos_hint: {"center_x": 0.15, "center_y": 0.25}  # Position near TDRS 10/11
+
     # ───────────────────────────── User Location ───────────────────────────
     Widget:
         id: user_location
@@ -313,9 +343,9 @@
         canvas:
             Color:
                 rgba: 1, 0, 1, 1  # Magenta dot
-            Ellipse:
-                pos: self.pos
-                size: self.size
+            Line:
+                width: 1
+                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # ───────────────────────────── ZOE & ISS icons ─────────────────────────
     Widget:
