@@ -603,7 +603,7 @@ class Orbit_Screen(MimicBase):
                     time_to_entry = entry_time - ephem.now()
                     hours = int(time_to_entry * 24)
                     minutes = int((time_to_entry * 24 - hours) * 60)
-                    seconds = int((time_to_entry * 24 - hours) * 60 - minutes * 60)
+                    seconds = int(((time_to_entry * 24 - hours) * 60 - minutes) * 60)
                     self.ids.zoe_loss_timer.text = f"{minutes:02d}:{seconds:02d}"
                 else:
                     self.ids.zoe_loss_timer.text = "--:--"
@@ -612,7 +612,7 @@ class Orbit_Screen(MimicBase):
                     time_to_exit = exit_time - ephem.now()
                     hours = int(time_to_exit * 24)
                     minutes = int((time_to_exit * 24 - hours) * 60)
-                    seconds = int((time_to_exit * 24 - hours) * 60 - minutes * 60)
+                    seconds = int(((time_to_entry * 24 - hours) * 60 - minutes) * 60)
                     self.ids.zoe_acquisition_timer.text = f"{minutes:02d}:{seconds:02d}"
                 else:
                     self.ids.zoe_acquisition_timer.text = "--:--"
