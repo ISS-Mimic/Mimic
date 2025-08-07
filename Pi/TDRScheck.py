@@ -3,9 +3,23 @@ from twisted.internet.defer import inlineCallbacks
 from autobahn.twisted.wamp import ApplicationSession, ApplicationRunner
 import sqlite3
 
-# Database connection
-conn = sqlite3.connect('/dev/shm/tdrs.db', isolation_level=None)
+# Database connection - cross-platform path handling
+import os
+from pathlib import Path
+
+# Try Pi path first, then Windows path
+tdrs_db_path = Path('/dev/shm/tdrs.db')
+if not tdrs_db_path.parent.exists():
+    tdrs_db_path = Path.home() / '.mimic_data' / 'tdrs.db'
+    tdrs_db_path.parent.mkdir(exist_ok=True)
+
+conn = sqlite3.connect(str(tdrs_db_path), isolation_level=None)
 c = conn.cursor()
+
+# Initialize database if it doesn't exist
+c.execute("CREATE TABLE IF NOT EXISTS tdrs (TDRS1 TEXT, TDRS2 TEXT, Timestamp TEXT)")
+c.execute("INSERT OR IGNORE INTO tdrs VALUES(?, ?, ?)", ('0', '0', '0'))
+conn.commit()
 
 
 def update_active_tdrs(msg, tdrs_id, active_tdrs):

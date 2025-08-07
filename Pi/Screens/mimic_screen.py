@@ -125,5 +125,11 @@ class MimicScreen(MimicBase):
 
     # auto-cleanup when user leaves the screen
     def on_pre_leave(self):        # ScreenManager hook
-        self.killproc()
+        """
+        Only kill processes when explicitly exiting mimic screen (via back button), 
+        not when navigating to subscreens.
+        """
+        # Since the back button explicitly calls killproc(), we don't need to do anything here
+        # The processes will only be killed when the user explicitly presses the back button
+        log_info("Leaving mimic screen - processes will only be killed on explicit exit")
 
