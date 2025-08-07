@@ -52,6 +52,9 @@ class Orbit_Screen(MimicBase):
     
     # Active TDRS tracking
     active_tdrs: list[int] = [0, 0]  # TDRS1, TDRS2 from database
+    
+    # Orbit counting
+    last_daily_reset: datetime = None  # Track when we last reset daily counter
 
     # ---------------------------------------------------------------- enter
     def on_enter(self):
@@ -215,6 +218,69 @@ class Orbit_Screen(MimicBase):
             log_error(f"Update TDRS labels failed: {exc}")
             import traceback
             traceback.print_exc()
+
+    def calculate_total_orbits(self) -> int:
+        """Calculate total lifetime orbits for ISS."""
+        try:
+            if not self.iss_tle:
+                return 0
+                
+            # Get TLE epoch
+            epoch = self.iss_tle.epoch
+            epoch_dt = datetime.strptime(str(epoch), "%Y/%m/%d %H:%M:%S")
+            
+            # Calculate orbits since epoch
+            now = datetime.utcnow()
+            time_since_epoch = (now - epoch_dt).total_seconds()
+            
+            # ISS orbital period is approximately 92.5 minutes
+            orbital_period_seconds = 92.5 * 60
+            orbits_since_epoch = int(time_since_epoch / orbital_period_seconds)
+            
+            # TLE epoch revolutions (from TLE line 2)
+            # n is revolutions per day, so we need to calculate total revolutions at epoch
+            revolutions_per_day = self.iss_tle.n
+            days_since_launch = (epoch_dt - datetime(1998, 11, 20)).days  # ISS launched Nov 20, 1998
+            epoch_revolutions = int(revolutions_per_day * days_since_launch)
+            
+            # Total = epoch revolutions + 100,000 + orbits since epoch
+            total_orbits = epoch_revolutions + 100000 + orbits_since_epoch
+            
+            return total_orbits
+            
+        except Exception as exc:
+            log_error(f"Calculate total orbits failed: {exc}")
+            return 0
+
+    def calculate_daily_orbits(self) -> int:
+        """Calculate orbits completed today (since midnight in user's timezone)."""
+        try:
+            if not self.iss_tle:
+                return 0
+                
+            # Get user's timezone (default to Houston)
+            user_tz = pytz.timezone("America/Chicago")  # Houston timezone
+            
+            # Get current time in user's timezone
+            now_utc = datetime.utcnow()
+            now_local = now_utc.replace(tzinfo=pytz.utc).astimezone(user_tz)
+            
+            # Get midnight today in user's timezone
+            midnight_local = now_local.replace(hour=0, minute=0, second=0, microsecond=0)
+            midnight_utc = midnight_local.astimezone(pytz.utc)
+            
+            # Calculate time since midnight
+            time_since_midnight = (now_utc - midnight_utc).total_seconds()
+            
+            # ISS orbital period is approximately 92.5 minutes
+            orbital_period_seconds = 92.5 * 60
+            daily_orbits = int(time_since_midnight / orbital_period_seconds)
+            
+            return daily_orbits
+            
+        except Exception as exc:
+            log_error(f"Calculate daily orbits failed: {exc}")
+            return 0
 
     def set_user_location(self, lat: float, lon: float) -> None:
         """Set the user location and update the display."""
@@ -464,6 +530,14 @@ class Orbit_Screen(MimicBase):
             "Visible Pass!" if (not self.iss_tle.eclipsed and -18 < sun_alt < -6)
             else "Not Visible"
         )
+        
+        # — update orbit counters --------------------------------------------
+        if 'dailyorbit' in self.ids and 'totalorbits' in self.ids:
+            total_orbits = self.calculate_total_orbits()
+            daily_orbits = self.calculate_daily_orbits()
+            
+            self.ids.totalorbits.text = str(total_orbits)
+            self.ids.dailyorbit.text = str(daily_orbits)
         
     # ----------------------------------------------------------------- ISS icon + track
     def update_iss(self, _dt=0):
