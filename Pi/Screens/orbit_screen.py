@@ -237,13 +237,17 @@ class Orbit_Screen(MimicBase):
             orbital_period_seconds = 92.5 * 60
             orbits_since_epoch = int(time_since_epoch / orbital_period_seconds)
             
-            # TLE epoch revolutions (from TLE line 2)
-            # n is revolutions per day, so we need to calculate total revolutions at epoch
-            revolutions_per_day = self.iss_tle.n
-            days_since_launch = (epoch_dt - datetime(1998, 11, 20)).days  # ISS launched Nov 20, 1998
-            epoch_revolutions = int(revolutions_per_day * days_since_launch)
+            # Extract revolutions directly from TLE line 2 (characters 64-68)
+            # We need to get the raw TLE data
+            cfg = Path.home() / ".mimic_data" / "iss_tle_config.json"
+            lines = json.loads(cfg.read_text())
+            tle_line2 = lines["ISS_TLE_Line2"]
             
-            # Total = epoch revolutions + 100,000 + orbits since epoch
+            # Extract revolutions (characters 64-68, 1-indexed)
+            revolutions_str = tle_line2[63:68].strip()  # 0-indexed, so 63:68
+            epoch_revolutions = int(revolutions_str)
+            
+            # Total = TLE revolutions + 100,000 + orbits since epoch
             total_orbits = epoch_revolutions + 100000 + orbits_since_epoch
             
             return total_orbits
@@ -269,8 +273,8 @@ class Orbit_Screen(MimicBase):
             midnight_local = now_local.replace(hour=0, minute=0, second=0, microsecond=0)
             midnight_utc = midnight_local.astimezone(pytz.utc)
             
-            # Calculate time since midnight
-            time_since_midnight = (now_utc - midnight_utc).total_seconds()
+            # Calculate time since midnight (both times are now timezone-aware)
+            time_since_midnight = (now_utc.replace(tzinfo=pytz.utc) - midnight_utc).total_seconds()
             
             # ISS orbital period is approximately 92.5 minutes
             orbital_period_seconds = 92.5 * 60
