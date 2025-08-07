@@ -1772,7 +1772,6 @@ class MainApp(App):
         USOS_Power = power_1a + power_1b + power_2a + power_2b + power_3a + power_3b + power_4a + power_4b
         self.screens["eps"].ids.usos_power.text = str("{:.0f}".format(USOS_Power*-1.0)) + " W"
         self.screens["eps"].ids.solarbeta.text = str(solarbeta)
-        self.screens["orbit"].ids.solarbeta.text = str(solarbeta) + " deg"
 
         avg_total_voltage = (float(v1a)+float(v1b)+float(v2a)+float(v2b)+float(v3a)+float(v3b)+float(v4a)+float(v4b))/8.0
 

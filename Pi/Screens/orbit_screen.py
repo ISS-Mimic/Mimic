@@ -284,52 +284,172 @@ class Orbit_Screen(MimicBase):
             log_error(f"Calculate daily orbits failed: {exc}")
             return 0
 
-    def update_telemetry_values(self) -> None:
-        """Update all telemetry values (latitude, longitude, altitude, etc.)."""
+    def get_telemetry_data(self) -> tuple[list, list]:
+        """Get telemetry data from the database."""
         try:
-            if not self.iss_tle:
-                return
-                
-            # Compute ISS position
-            self.iss_tle.compute(ephem.now())
+            import sqlite3
+            from pathlib import Path
             
-            # Calculate latitude and longitude
-            lat_deg = math.degrees(self.iss_tle.sublat)
-            lon_deg = math.degrees(self.iss_tle.sublong)
+            # Database path - cross-platform handling
+            db_path = Path("/dev/shm/telemetry.db")
+            if not db_path.exists():
+                db_path = Path.home() / ".mimic_data" / "telemetry.db"
+                if not db_path.exists():
+                    log_error("Telemetry database not found")
+                    return [], []
             
-            # Calculate altitude (approximate)
-            altitude_km = 408  # Approximate ISS altitude in km
+            conn = sqlite3.connect(str(db_path))
+            c = conn.cursor()
             
-            # Calculate inclination
-            inc_rad = self.iss_tle.inc
+            c.execute('select Value from telemetry')
+            values = c.fetchall()
+            c.execute('select Timestamp from telemetry')
+            timestamps = c.fetchall()
+            
+            conn.close()
+            return values, timestamps
+            
+        except Exception as exc:
+            log_error(f"Get telemetry data failed: {exc}")
+            return [], []
+
+    def calculate_orbital_parameters(self, pos_vec: list, vel_vec: list) -> dict:
+        """Calculate accurate orbital parameters from state vectors."""
+        try:
+            # Helper functions
+            def dot(a, b):
+                return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]
+            
+            def cross(a, b):
+                return [a[1]*b[2] - a[2]*b[1],
+                       a[2]*b[0] - a[0]*b[2],
+                       a[0]*b[1] - a[1]*b[0]]
+            
+            def safe_divide(numerator, denominator):
+                return numerator / denominator if denominator != 0 else 0
+            
+            # Earth's gravitational parameter (km³/s²)
+            mu = 398600.4418
+            
+            # Calculate position and velocity magnitudes
+            pos_mag = math.sqrt(dot(pos_vec, pos_vec))
+            vel_mag = math.sqrt(dot(vel_vec, vel_vec))
+            
+            # Calculate altitude (distance from Earth's surface)
+            altitude_km = pos_mag - 6371.0  # Earth radius in km
+            
+            # Calculate specific angular momentum vector
+            h_vec = cross(pos_vec, vel_vec)
+            h_mag = math.sqrt(dot(h_vec, h_vec))
+            
+            # Calculate inclination (angle between h and z-axis)
+            inc_rad = math.acos(safe_divide(h_vec[2], h_mag))
             inc_deg = math.degrees(inc_rad)
             
+            # Calculate eccentricity vector
+            v_radial = safe_divide(dot(vel_vec, pos_vec), pos_mag)
+            
+            # e = (v² - μ/r)r - (r·v)v / μ
+            e_term1 = [x * (vel_mag**2 - mu/pos_mag) for x in pos_vec]
+            e_term2 = [x * (pos_mag * v_radial) for x in vel_vec]
+            e_vec = [(e_term1[i] - e_term2[i]) / mu for i in range(3)]
+            e_mag = math.sqrt(dot(e_vec, e_vec))
+            
             # Calculate orbital period
-            # Using approximate formula: period = 2π * sqrt(a³/μ) where a is semi-major axis
-            # For ISS, semi-major axis ≈ 6371 + 408 = 6779 km
-            mu = 398600.4418  # Earth's gravitational parameter (km³/s²)
-            a = 6779  # Semi-major axis in km
-            period_minutes = (2 * math.pi * math.sqrt(a**3 / mu)) / 60
+            # T = 2π * sqrt(a³/μ) where a is semi-major axis
+            # a = h² / (μ(1-e²))
+            if e_mag < 1:  # Valid orbit
+                a = (h_mag**2) / (mu * (1 - e_mag**2))
+                period_minutes = (2 * math.pi * math.sqrt(a**3 / mu)) / 60
+            else:
+                period_minutes = 0
             
-            # Calculate solar beta angle (simplified)
-            # This is the angle between the ISS orbital plane and the Sun direction
-            sun = ephem.Sun()
-            sun.compute(ephem.now())
-            solar_beta = 0  # Placeholder - would need more complex calculation
+            # Calculate solar beta angle
+            # This is the angle between the orbital plane normal and the Sun direction
+            try:
+                sun = ephem.Sun()
+                sun.compute(ephem.now())
+                
+                # Get Sun's position in ECI coordinates
+                # Convert from equatorial to ECI (simplified)
+                sun_ra = float(sun.ra)
+                sun_dec = float(sun.dec)
+                
+                # Convert to Cartesian coordinates
+                sun_x = math.cos(sun_dec) * math.cos(sun_ra)
+                sun_y = math.cos(sun_dec) * math.sin(sun_ra)
+                sun_z = math.sin(sun_dec)
+                
+                # Calculate angle between orbital plane normal and Sun direction
+                cos_beta = safe_divide(dot(h_vec, [sun_x, sun_y, sun_z]), (h_mag * math.sqrt(sun_x**2 + sun_y**2 + sun_z**2)))
+                beta_deg = math.degrees(math.acos(abs(cos_beta)))
+                
+            except Exception:
+                beta_deg = 0  # Fallback if Sun calculation fails
             
-            # Update UI elements
+            return {
+                'altitude_km': altitude_km,
+                'inc_deg': inc_deg,
+                'period_minutes': period_minutes,
+                'beta_deg': beta_deg,
+                'e_mag': e_mag
+            }
+            
+        except Exception as exc:
+            log_error(f"Calculate orbital parameters failed: {exc}")
+            return {
+                'altitude_km': 0,
+                'inc_deg': 0,
+                'period_minutes': 0,
+                'beta_deg': 0,
+                'e_mag': 0
+            }
+
+    def update_telemetry_values(self) -> None:
+        """Update all telemetry values using accurate state vectors."""
+        try:
+            # Get telemetry data from database
+            values, timestamps = self.get_telemetry_data()
+            if not values or len(values) < 61:
+                log_error("Insufficient telemetry data")
+                return
+            
+            # Extract ISS state vectors (indices 55-60 from GUI.py)
+            position_x = float(values[55][0])  # km
+            position_y = float(values[56][0])  # km
+            position_z = float(values[57][0])  # km
+            velocity_x = float(values[58][0]) / 1000.0  # convert to km/s
+            velocity_y = float(values[59][0]) / 1000.0  # convert to km/s
+            velocity_z = float(values[60][0]) / 1000.0  # convert to km/s
+            
+            # Create position and velocity vectors
+            pos_vec = [position_x, position_y, position_z]
+            vel_vec = [velocity_x, velocity_y, velocity_z]
+            
+            # Calculate accurate orbital parameters
+            orbital_params = self.calculate_orbital_parameters(pos_vec, vel_vec)
+            
+            # Calculate latitude and longitude from position vector
+            # Convert Cartesian to spherical coordinates
+            lat_rad = math.asin(position_z / math.sqrt(position_x**2 + position_y**2 + position_z**2))
+            lon_rad = math.atan2(position_y, position_x)
+            
+            lat_deg = math.degrees(lat_rad)
+            lon_deg = math.degrees(lon_rad)
+            
+            # Update UI elements with accurate values
             if 'latitude' in self.ids:
                 self.ids.latitude.text = f"{lat_deg:.2f}°"
             if 'longitude' in self.ids:
                 self.ids.longitude.text = f"{lon_deg:.2f}°"
             if 'altitude' in self.ids:
-                self.ids.altitude.text = f"{altitude_km} km"
+                self.ids.altitude.text = f"{orbital_params['altitude_km']:.1f} km"
             if 'inc' in self.ids:
-                self.ids.inc.text = f"{inc_deg:.2f}°"
+                self.ids.inc.text = f"{orbital_params['inc_deg']:.2f}°"
             if 'period' in self.ids:
-                self.ids.period.text = f"{period_minutes:.1f}m"
+                self.ids.period.text = f"{orbital_params['period_minutes']:.1f}m"
             if 'solarbeta' in self.ids:
-                self.ids.solarbeta.text = f"{solar_beta:.1f}°"
+                self.ids.solarbeta.text = f"{orbital_params['beta_deg']:.1f}°"
                 
         except Exception as exc:
             log_error(f"Update telemetry values failed: {exc}")
