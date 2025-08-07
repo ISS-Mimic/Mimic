@@ -394,6 +394,153 @@ class Orbit_Screen(MimicBase):
                 'e_mag': 0
             }
 
+    def calculate_zoe_region(self) -> list:
+        """Calculate the Zone of Exclusion (ZOE) based on TDRS coverage."""
+        try:
+            # Get current ISS position
+            if not self.iss_tle:
+                return []
+            
+            self.iss_tle.compute(ephem.now())
+            iss_lat = math.degrees(self.iss_tle.sublat)
+            iss_lon = math.degrees(self.iss_tle.sublong)
+            iss_alt = 408  # Approximate ISS altitude in km
+            
+            # Earth radius in km
+            earth_radius = 6371.0
+            
+            # Calculate ISS position vector
+            iss_lat_rad = math.radians(iss_lat)
+            iss_lon_rad = math.radians(iss_lon)
+            iss_pos = [
+                (earth_radius + iss_alt) * math.cos(iss_lat_rad) * math.cos(iss_lon_rad),
+                (earth_radius + iss_alt) * math.cos(iss_lat_rad) * math.sin(iss_lon_rad),
+                (earth_radius + iss_alt) * math.sin(iss_lat_rad)
+            ]
+            
+            # Get TDRS positions (we'll use the TLE data we already have)
+            tdrs_positions = []
+            for name, sat in self.tdrs_tles.items():
+                try:
+                    sat.compute(ephem.now())
+                    tdrs_lat = math.degrees(sat.sublat)
+                    tdrs_lon = math.degrees(sat.sublong)
+                    tdrs_alt = 35786  # Geostationary altitude in km
+                    
+                    tdrs_lat_rad = math.radians(tdrs_lat)
+                    tdrs_lon_rad = math.radians(tdrs_lon)
+                    tdrs_pos = [
+                        (earth_radius + tdrs_alt) * math.cos(tdrs_lat_rad) * math.cos(tdrs_lon_rad),
+                        (earth_radius + tdrs_alt) * math.cos(tdrs_lat_rad) * math.sin(tdrs_lon_rad),
+                        (earth_radius + tdrs_alt) * math.sin(tdrs_lat_rad)
+                    ]
+                    tdrs_positions.append(tdrs_pos)
+                except Exception:
+                    continue
+            
+            # Calculate coverage areas for each TDRS
+            coverage_areas = []
+            for tdrs_pos in tdrs_positions:
+                # Calculate the coverage circle for this TDRS
+                # This is a simplified calculation - in reality it's more complex
+                coverage_circle = self.calculate_tdrs_coverage(tdrs_pos, iss_pos)
+                coverage_areas.append(coverage_circle)
+            
+            # Find the ZOE (area not covered by any TDRS)
+            zoe_points = self.calculate_zoe_from_coverage(coverage_areas)
+            
+            return zoe_points
+            
+        except Exception as exc:
+            log_error(f"Calculate ZOE region failed: {exc}")
+            return []
+
+    def calculate_tdrs_coverage(self, tdrs_pos: list, iss_pos: list) -> list:
+        """Calculate the coverage area for a single TDRS satellite."""
+        try:
+            # Simplified coverage calculation
+            # In reality, this would involve complex orbital mechanics
+            # For now, we'll create a basic coverage circle
+            
+            # Calculate the coverage radius based on TDRS-ISS geometry
+            earth_radius = 6371.0
+            tdrs_alt = 35786  # Geostationary altitude
+            
+            # Calculate the maximum coverage angle
+            # This is a simplified calculation
+            coverage_angle = math.acos(earth_radius / (earth_radius + tdrs_alt))
+            
+            # Convert to degrees
+            coverage_angle_deg = math.degrees(coverage_angle)
+            
+            # For now, return a basic coverage circle
+            # In a full implementation, this would be more complex
+            return {
+                'center_lat': 0,  # Would be calculated from TDRS position
+                'center_lon': 0,  # Would be calculated from TDRS position
+                'radius_deg': coverage_angle_deg
+            }
+            
+        except Exception as exc:
+            log_error(f"Calculate TDRS coverage failed: {exc}")
+            return {}
+
+    def calculate_zoe_from_coverage(self, coverage_areas: list) -> list:
+        """Calculate ZOE points from TDRS coverage areas."""
+        try:
+            # This is a placeholder for the actual ZOE calculation
+            # In a full implementation, this would:
+            # 1. Create a grid of points on Earth's surface
+            # 2. Check which points are not covered by any TDRS
+            # 3. Return the boundary of the uncovered area
+            
+            # For now, return a simple ZOE region (Indian Ocean area)
+            zoe_points = [
+                (20, 60),   # Sample points around Indian Ocean
+                (20, 80),
+                (0, 70),
+                (-20, 80),
+                (-20, 60)
+            ]
+            
+            return zoe_points
+            
+        except Exception as exc:
+            log_error(f"Calculate ZOE from coverage failed: {exc}")
+            return []
+
+    def update_zoe_region(self) -> None:
+        """Update the ZOE region display based on calculated coverage."""
+        try:
+            # Calculate the ZOE region
+            zoe_points = self.calculate_zoe_region()
+            
+            if not zoe_points:
+                return
+            
+            # For now, we'll just update the ZOE widget position
+            # In a full implementation, this would draw the actual ZOE boundary
+            
+            # Check if ISS is currently in the ZOE
+            if self.iss_tle:
+                self.iss_tle.compute(ephem.now())
+                iss_lat = math.degrees(self.iss_tle.sublat)
+                iss_lon = math.degrees(self.iss_tle.sublong)
+                
+                # Simple check if ISS is in ZOE region (Indian Ocean area)
+                in_zoe = (-30 <= iss_lat <= 30) and (60 <= iss_lon <= 100)
+                
+                if 'ZOE' in self.ids:
+                    if in_zoe:
+                        # ISS is in ZOE - make it more visible
+                        self.ids.ZOE.col = (1, 0, 0, 0.8)  # Red, more opaque
+                    else:
+                        # ISS is not in ZOE - normal appearance
+                        self.ids.ZOE.col = (1, 0, 1, 0.5)  # Magenta, semi-transparent
+                        
+        except Exception as exc:
+            log_error(f"Update ZOE region failed: {exc}")
+
     def update_crew_sleep_timer(self) -> None:
         """Update the crew sleep timer based on standard sleep schedule (21:30-06:00 GMT)."""
         try:
@@ -433,7 +580,7 @@ class Orbit_Screen(MimicBase):
                 countdown = sleep_start_dt - utc_now
                 hours = int(countdown.total_seconds() // 3600)
                 minutes = int((countdown.total_seconds() % 3600) // 60)
-                seconds = int(elapsed.total_seconds() % 60)
+                seconds = int(countdown.total_seconds() % 60)
                 
                 self.ids.crew_sleep_timer.text = f"-{hours:02d}:{minutes:02d}:{seconds:02d}"
                 self.ids.crew_sleep_timer.color = (1, 1, 1, 1)  # White countdown
@@ -765,6 +912,9 @@ class Orbit_Screen(MimicBase):
         # — update crew sleep timer -----------------------------------------
         if 'crew_sleep_timer' in self.ids:
             self.update_crew_sleep_timer()
+        
+        # — update ZOE region ----------------------------------------------
+        self.update_zoe_region()
         
     # ----------------------------------------------------------------- ISS icon + track
     def update_iss(self, _dt=0):
