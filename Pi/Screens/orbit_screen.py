@@ -126,7 +126,11 @@ class Orbit_Screen(MimicBase):
             
             # Force the widget to be visible and on top
             self.ids.user_location.opacity = 1.0
-
+            
+            # Also position the user location label
+            if "user_location_label" in self.ids:
+                label = self.ids.user_location_label
+                label.pos = (x + 5, y - 5)  # Small offset from the dot
             
         except Exception as exc:
             log_error(f"Update user location failed: {exc}")
@@ -919,7 +923,6 @@ class Orbit_Screen(MimicBase):
                 ("mcc_huntsville", "mcc_huntsville_label", 34.730,  -86.586,   5,  -5),   # Huntsville, AL
                 ("mcc_tsukuba",    "mcc_tsukuba_label",    36.083,  140.083,   5,  -5),   # Tsukuba, JP
                 ("mcc_moscow",     "mcc_moscow_label",     55.752,   37.616,   5,  -5),   # Moscow, RU
-                ("user_location",  "user_location_label",  39.730,  -104.990,   5,  -5),   # User Location
             ]
             for dot_id, label_id, lat, lon, dx, dy in loc_defs:
                 if dot_id in self.ids and label_id in self.ids:
@@ -1016,6 +1019,9 @@ class Orbit_Screen(MimicBase):
         
         # — update location markers ----------------------------------------------
         self._update_loc_markers()
+        
+        # — update user location ----------------------------------------------
+        self.update_user_location()
         
     # ----------------------------------------------------------------- ISS icon + track
     def update_iss(self, _dt=0):
