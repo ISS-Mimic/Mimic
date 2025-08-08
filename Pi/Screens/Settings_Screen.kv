@@ -18,88 +18,23 @@
         # Current Location Display
         Label:
             id: current_location_label
-            text: 'Current: Houston, TX'
+            text: 'Current: 29.7604, -95.3698'
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
             size_hint_y: 0.05
             font_size: self.height * 0.2
             color: 0, 1, 0, 1
         
-        # Preset Locations Section
-        Label:
-            text: 'Quick Select:'
-            pos_hint: {"center_x": 0.2, "center_y": 0.7}
-            size_hint_y: 0.05
-            font_size: self.height * 0.15
-            color: 1, 1, 1, 1
-        
-        # Preset Location Buttons (2 columns)
-        Button:
-            text: 'Houston, TX'
-            pos_hint: {"center_x": 0.25, "center_y": 0.6}
-            size_hint: 0.2, 0.06
-            on_release: root.set_location_from_preset('Houston, TX')
-            background_color: 0.2, 0.6, 1, 1
-        
-        Button:
-            text: 'Kennedy Space Center'
-            pos_hint: {"center_x": 0.75, "center_y": 0.6}
-            size_hint: 0.2, 0.06
-            on_release: root.set_location_from_preset('Kennedy Space Center')
-            background_color: 0.2, 0.6, 1, 1
-        
-        Button:
-            text: 'Moscow, Russia'
-            pos_hint: {"center_x": 0.25, "center_y": 0.5}
-            size_hint: 0.2, 0.06
-            on_release: root.set_location_from_preset('Moscow, Russia')
-            background_color: 0.2, 0.6, 1, 1
-        
-        Button:
-            text: 'Tsukuba, Japan'
-            pos_hint: {"center_x": 0.75, "center_y": 0.5}
-            size_hint: 0.2, 0.06
-            on_release: root.set_location_from_preset('Tsukuba, Japan')
-            background_color: 0.2, 0.6, 1, 1
-        
-        Button:
-            text: 'Oberpfaffenhofen, DE'
-            pos_hint: {"center_x": 0.25, "center_y": 0.4}
-            size_hint: 0.2, 0.06
-            on_release: root.set_location_from_preset('Oberpfaffenhofen, Germany')
-            background_color: 0.2, 0.6, 1, 1
-        
-        Button:
-            text: 'Quebec, Canada'
-            pos_hint: {"center_x": 0.75, "center_y": 0.4}
-            size_hint: 0.2, 0.06
-            on_release: root.set_location_from_preset('Quebec, Canada')
-            background_color: 0.2, 0.6, 1, 1
-        
-        Button:
-            text: 'London, UK'
-            pos_hint: {"center_x": 0.25, "center_y": 0.3}
-            size_hint: 0.2, 0.06
-            on_release: root.set_location_from_preset('London, UK')
-            background_color: 0.2, 0.6, 1, 1
-        
-        Button:
-            text: 'Sydney, Australia'
-            pos_hint: {"center_x": 0.75, "center_y": 0.3}
-            size_hint: 0.2, 0.06
-            on_release: root.set_location_from_preset('Sydney, Australia')
-            background_color: 0.2, 0.6, 1, 1
-        
         # Manual Input Section
         Label:
-            text: 'Manual Coordinates:'
-            pos_hint: {"center_x": 0.2, "center_y": 0.2}
+            text: 'Enter Coordinates:'
+            pos_hint: {"center_x": 0.5, "center_y": 0.6}
             size_hint_y: 0.05
             font_size: self.height * 0.15
             color: 1, 1, 1, 1
         
         Label:
             text: 'Latitude:'
-            pos_hint: {"center_x": 0.15, "center_y": 0.15}
+            pos_hint: {"center_x": 0.25, "center_y": 0.5}
             size_hint_y: 0.05
             font_size: self.height * 0.12
             color: 1, 1, 1, 1
@@ -107,7 +42,7 @@
         TextInput:
             id: lat_input
             text: '29.7604'
-            pos_hint: {"center_x": 0.25, "center_y": 0.15}
+            pos_hint: {"center_x": 0.35, "center_y": 0.5}
             size_hint: 0.1, 0.05
             font_size: 14
             multiline: False
@@ -115,7 +50,7 @@
         
         Label:
             text: 'Longitude:'
-            pos_hint: {"center_x": 0.45, "center_y": 0.15}
+            pos_hint: {"center_x": 0.55, "center_y": 0.5}
             size_hint_y: 0.05
             font_size: self.height * 0.12
             color: 1, 1, 1, 1
@@ -123,7 +58,7 @@
         TextInput:
             id: lon_input
             text: '-95.3698'
-            pos_hint: {"center_x": 0.55, "center_y": 0.15}
+            pos_hint: {"center_x": 0.65, "center_y": 0.5}
             size_hint: 0.1, 0.05
             font_size: 14
             multiline: False
@@ -131,7 +66,7 @@
         
         Button:
             text: 'Set Manual Location'
-            pos_hint: {"center_x": 0.75, "center_y": 0.15}
+            pos_hint: {"center_x": 0.5, "center_y": 0.4}
             size_hint: 0.15, 0.05
             on_release: root.set_location_from_coordinates(lat_input.text, lon_input.text)
             background_color: 0.2, 1, 0.2, 1
@@ -139,7 +74,7 @@
         # Auto-detect Button
         Button:
             text: 'Auto-detect from IP'
-            pos_hint: {"center_x": 0.5, "center_y": 0.08}
+            pos_hint: {"center_x": 0.5, "center_y": 0.3}
             size_hint: 0.2, 0.06
             on_release: root.detect_location_from_ip()
             background_color: 1, 0.5, 0, 1

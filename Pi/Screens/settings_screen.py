@@ -25,20 +25,6 @@ class Settings_Screen(Screen, EventDispatcher):
         str(pathlib.Path(__file__).resolve().parents[3])   # /home/pi/Mimic
     )
 
-    # Preset locations for easy selection
-    PRESET_LOCATIONS = {
-        "Houston, TX": (29.7604, -95.3698),
-        "Kennedy Space Center": (28.5729, -80.6490),
-        "Moscow, Russia": (55.7558, 37.6176),
-        "Tsukuba, Japan": (36.0833, 140.0833),
-        "Oberpfaffenhofen, Germany": (48.0833, 11.2833),
-        "Quebec, Canada": (46.8139, -71.2080),
-        "London, UK": (51.5074, -0.1278),
-        "Sydney, Australia": (-33.8688, 151.2093),
-        "Cape Town, South Africa": (-33.9249, 18.4241),
-        "São Paulo, Brazil": (-23.5505, -46.6333),
-    }
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.current_location = None
@@ -53,20 +39,9 @@ class Settings_Screen(Screen, EventDispatcher):
         """Update the current location display label."""
         try:
             if self.current_location:
-                # Find the closest preset location name
-                closest_name = "Custom Location"
-                min_distance = float('inf')
-                
-                for name, coords in self.PRESET_LOCATIONS.items():
-                    distance = ((coords[0] - self.current_location[0])**2 + 
-                              (coords[1] - self.current_location[1])**2)**0.5
-                    if distance < min_distance:
-                        min_distance = distance
-                        closest_name = name
-                
-                # Update the display
+                # Update the display with coordinates
                 if hasattr(self, 'ids') and 'current_location_label' in self.ids:
-                    self.ids.current_location_label.text = f'Current: {closest_name}'
+                    self.ids.current_location_label.text = f'Current: {self.current_location[0]:.4f}, {self.current_location[1]:.4f}'
                     
                 # Update the manual input fields
                 if 'lat_input' in self.ids and 'lon_input' in self.ids:
@@ -129,16 +104,6 @@ class Settings_Screen(Screen, EventDispatcher):
                     json.dump(data, f)
         except Exception as e:
             print(f"Location saving failed: {e}")
-
-    def set_location_from_preset(self, location_name):
-        """Set location from preset list."""
-        if location_name in self.PRESET_LOCATIONS:
-            self.current_location = self.PRESET_LOCATIONS[location_name]
-            self.save_location_settings()
-            self.update_orbit_screen_location()
-            self.update_location_display()
-            return True
-        return False
 
     def set_location_from_coordinates(self, lat, lon):
         """Set location from manual coordinates."""
