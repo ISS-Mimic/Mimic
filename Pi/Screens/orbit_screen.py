@@ -442,7 +442,7 @@ class Orbit_Screen(MimicBase):
             # Simple distance check from center
             center_lat = 0.0
             center_lon = 70.0
-            lat_radius = 25.0
+            lat_radius = 52.0
             lon_radius = 20.0
             
             # Calculate normalized distance from center
@@ -484,7 +484,7 @@ class Orbit_Screen(MimicBase):
             coarse_step_minutes = 5
             
             # First pass: coarse search
-            for i in range(1, 288):  # Look ahead 24 hours in 5-minute steps
+            for i in range(1, 24):  # look ahead 2 hours in 5 minute steps
                 future_time = current_time + (i * coarse_step_minutes * ephem.minute)
                 self.iss_tle.compute(future_time)
                 future_lat = math.degrees(self.iss_tle.sublat)
@@ -583,7 +583,6 @@ class Orbit_Screen(MimicBase):
             
             # Update ZOE label position
             if 'ZOElabel' in self.ids:
-                print("Updating ZOE label position")
                 # Center of ZOE region
                 zoe_center_lat = 0  # Equator
                 zoe_center_lon = 70  # Center of Indian Ocean region
