@@ -461,80 +461,62 @@ class Orbit_Screen(MimicBase):
             return False
 
     def calculate_zoe_timing(self) -> tuple:
-        """Calculate time until ZOE entry and exit using static ZOE boundary."""
+        """Calculate time until ZOE entry (LOS) and exit (AOS).
+        - If currently outside ZOE: look ahead up to 90 minutes to find first entry, then up to 30 minutes after entry for exit.
+        - If currently inside ZOE: look ahead up to 30 minutes to find exit.
+        Returns (entry_time, exit_time) as ephem.Date or (None, None) if not found in windows.
+        """
         try:
             if not self.iss_tle:
                 return None, None
-            
-            # Get static ZOE boundary
+
+            # Static ellipse boundary
             zoe_boundary_points = self.get_static_zoe_boundary()
-            
-            # Get current ISS position
-            self.iss_tle.compute(ephem.now())
-            current_lat = math.degrees(self.iss_tle.sublat)
-            current_lon = math.degrees(self.iss_tle.sublong)
-            
-            # Check if currently in ZOE
-            in_zoe = self.is_point_in_zoe(current_lat, current_lon, zoe_boundary_points)
-            
-            # Calculate future positions to find entry/exit times
+
+            # Helper to check ZOE at a given time
+            def in_zoe_at(t: ephem.Date) -> bool:
+                self.iss_tle.compute(t)
+                lat = math.degrees(self.iss_tle.sublat)
+                lon = math.degrees(self.iss_tle.sublong)
+                return self.is_point_in_zoe(lat, lon, zoe_boundary_points)
+
+            now = ephem.now()
+            in_zoe_now = in_zoe_at(now)
+
             entry_time = None
             exit_time = None
-            
-            # Look ahead in time to find ZOE crossings
-            current_time = ephem.now()
-            
-            # Use larger steps initially for efficiency, then refine
-            coarse_step_minutes = 5
-            
-            # First pass: coarse search
-            for i in range(1, 24):  # look ahead 2 hours in 5 minute steps
-                future_time = current_time + (i * coarse_step_minutes * ephem.minute)
-                self.iss_tle.compute(future_time)
-                future_lat = math.degrees(self.iss_tle.sublat)
-                future_lon = math.degrees(self.iss_tle.sublong)
-                
-                future_in_zoe = self.is_point_in_zoe(future_lat, future_lon, zoe_boundary_points)
-                
-                if not in_zoe and future_in_zoe and entry_time is None:
-                    entry_time = future_time
-                elif in_zoe and not future_in_zoe and exit_time is None:
-                    exit_time = future_time
-                
-                # Stop if we found both times
-                if entry_time is not None and exit_time is not None:
-                    break
-            
-            # If we're currently in ZOE, we need to find the next exit
-            if in_zoe and exit_time is None:
-                for i in range(1, 24):
-                    future_time = current_time + (i * coarse_step_minutes * ephem.minute)
-                    self.iss_tle.compute(future_time)
-                    future_lat = math.degrees(self.iss_tle.sublat)
-                    future_lon = math.degrees(self.iss_tle.sublong)
-                    
-                    future_in_zoe = self.is_point_in_zoe(future_lat, future_lon, zoe_boundary_points)
-                    
-                    if not future_in_zoe:
-                        exit_time = future_time
+
+            # Time windows and resolution
+            step_sec = 30  # 30-second resolution
+            lookahead_entry_sec = 90 * 60  # 90 minutes
+            lookahead_exit_sec = 30 * 60   # 30 minutes
+
+            if in_zoe_now:
+                # Find exit within 30 minutes
+                for s in range(step_sec, lookahead_exit_sec + step_sec, step_sec):
+                    t = now + s * ephem.second
+                    if not in_zoe_at(t):
+                        exit_time = t
                         break
-            
-            # If we're not in ZOE, we need to find the next entry
-            if not in_zoe and entry_time is None:
-                for i in range(1, 24):
-                    future_time = current_time + (i * coarse_step_minutes * ephem.minute)
-                    self.iss_tle.compute(future_time)
-                    future_lat = math.degrees(self.iss_tle.sublat)
-                    future_lon = math.degrees(self.iss_tle.sublong)
-                    
-                    future_in_zoe = self.is_point_in_zoe(future_lat, future_lon, zoe_boundary_points)
-                    
-                    if future_in_zoe:
-                        entry_time = future_time
+                # No entry_time when already inside
+                entry_time = None
+            else:
+                # Find entry within 90 minutes
+                for s in range(step_sec, lookahead_entry_sec + step_sec, step_sec):
+                    t = now + s * ephem.second
+                    if in_zoe_at(t):
+                        entry_time = t
                         break
-            
+                # If an entry was found, also find exit within 30 minutes after entry
+                if entry_time is not None:
+                    for s in range(step_sec, lookahead_exit_sec + step_sec, step_sec):
+                        t = entry_time + s * ephem.second
+                        if not in_zoe_at(t):
+                            exit_time = t
+                            break
+
             return entry_time, exit_time
-            
+
         except Exception as exc:
             log_error(f"Calculate ZOE timing failed: {exc}")
             return None, None
