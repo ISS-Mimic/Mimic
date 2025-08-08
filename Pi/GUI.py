@@ -1677,46 +1677,7 @@ class MainApp(App):
             h_mom = cross(pos_vec,vel_vec)
             h_mom_mag = math.sqrt(dot(h_mom,h_mom))
 
-            inc = math.acos(safe_divide(h_mom[2],h_mom_mag))
-            self.screens["orbit_data"].ids.inc.text = "{:.2f}".format(math.degrees(inc))
-   
-            node_vec = cross([0,0,1],h_mom)
-            node_mag = math.sqrt(dot(node_vec,node_vec))
-
-            raan = math.acos(safe_divide(node_vec[0],node_mag))
-            if node_vec[1] < 0:
-                raan = math.radians(360) - raan
-            self.screens["orbit_data"].ids.raan.text = "{:.2f}".format(math.degrees(raan))
-
-            pvnew = [x * (math.pow(vel_mag,2)-(mu/pos_mag)) for x in pos_vec]
-            vvnew = [x * (pos_mag*v_radial) for x in vel_vec]
-            e_vec1 = [(1/mu) * x for x in pvnew]
-            e_vec2 = [(1/mu) * x for x in vvnew]
-            e_vec = [e_vec1[0] - e_vec2[0],e_vec1[1] - e_vec2[1],e_vec1[2] - e_vec2[2] ]
-            e_mag = math.sqrt(dot(e_vec,e_vec))
-            self.screens["orbit_data"].ids.e.text = "{:.4f}".format(e_mag)
-
-            arg_per = math.acos(safe_divide(dot(node_vec,e_vec),(node_mag*e_mag)))
-            if e_vec[2] <= 0:
-                arg_per = math.radians(360) - arg_per
-            self.screens["orbit_data"].ids.arg_per.text = "{:.2f}".format(math.degrees(arg_per))
-
-            ta = math.acos(safe_divide(dot(e_vec,pos_vec),(e_mag*pos_mag)))
-            if v_radial <= 0:
-                ta = math.radians(360) - ta
-            self.screens["orbit_data"].ids.true_anomaly.text = "{:.2f}".format(math.degrees(ta))
-
-            apogee = (math.pow(h_mom_mag,2)/mu)*(safe_divide(1,(1+e_mag*math.cos(math.radians(180)))))
-            perigee = (math.pow(h_mom_mag,2)/mu)*(safe_divide(1,(1+e_mag*math.cos(0))))
-            apogee_height = apogee - 6371.00
-            perigee_height = perigee - 6371.00
-            sma = 0.5*(apogee+perigee) #km
-            if sma>=0:
-                period = ((safe_divide(2*math.pi,math.sqrt(mu)))*math.pow(sma,3/2))/60 # minutes
-            else:
-                period = 0
-            self.screens["orbit_data"].ids.apogee_height.text = str("{:.2f}".format(apogee_height))
-            self.screens["orbit_data"].ids.perigee_height.text = str("{:.2f}".format(perigee_height))
+            # Orbital mechanics calculations moved to orbit_data.py
        
         cmg1_active = int((values[145])[0])
         cmg2_active = int((values[146])[0])
@@ -2380,12 +2341,7 @@ class MainApp(App):
             #serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "V1A=" + v1a + " " + "V2A=" + v2a + " " + "V3A=" + v3a + " " + "V4A=" + v4a + " " + "V1B=" + v1b + " " + "V2B=" + v2b + " " + "V3B=" + v3b + " " + "V4B=" + v4b + " ")
             serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + str(v1as) + " " + "V2A=" + str(v2as) + " " + "V3A=" + str(v3as) + " " + "V4A=" + str(v4as) + " " + "V1B=" + str(v1bs) + " " + "V2B=" + str(v2bs) + " " + "V3B=" + str(v3bs) + " " + "V4B=" + str(v4bs) + " " + "ISS=" + module + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
 
-        self.screens["orbit_data"].ids.position_x.text = str("{:.2f}".format(position_x))
-        self.screens["orbit_data"].ids.position_y.text = str("{:.2f}".format(position_y))
-        self.screens["orbit_data"].ids.position_z.text = str("{:.2f}".format(position_z))
-        self.screens["orbit_data"].ids.velocity_x.text = str("{:.2f}".format(velocity_x))
-        self.screens["orbit_data"].ids.velocity_y.text = str("{:.2f}".format(velocity_y))
-        self.screens["orbit_data"].ids.velocity_z.text = str("{:.2f}".format(velocity_z))
+        # State vector updates moved to orbit_data.py
  
         self.screens["eps"].ids.psarj_value.text = psarj + "deg"
         self.screens["eps"].ids.ssarj_value.text = ssarj + "deg"
