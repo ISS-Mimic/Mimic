@@ -1,33 +1,6 @@
 #:import dp kivy.metrics.dp
 
 # --------------------------------------------------------------------------
-#  Re-usable mixins
-# --------------------------------------------------------------------------
-<OrbitDataLabel@Label>:
-    color: 1, 1, 1, 1
-    font_size: min(self.height * 0.10, dp(24))  # Responsive with max size
-    size_hint_y: 0.4
-    markup: True
-
-<OrbitDataValue@Label>:
-    color: root.signalcolor
-    font_size: min(self.height * 0.10, dp(24))  # Responsive with max size
-    size_hint_y: 0.4
-    markup: True
-
-<StateVectorLabel@Label>:
-    color: 1, 1, 1, 1
-    font_size: min(self.height * 0.10, dp(20))  # Responsive with max size
-    size_hint_y: 0.4
-    markup: True
-
-<StateVectorValue@Label>:
-    color: root.signalcolor
-    font_size: min(self.height * 0.10, dp(20))  # Responsive with max size
-    size_hint_y: 0.4
-    markup: True
-
-# --------------------------------------------------------------------------
 #  Orbit Data Screen — Detailed orbital mechanics display
 # --------------------------------------------------------------------------
 <Orbit_Data>:
@@ -42,165 +15,285 @@
         
         # ─────────────────────── Orbital Elements ─────────────────────────
         # Semi Major Axis
-        OrbitDataLabel:
+        Label:
             id: sma_label
             pos_hint: {"center_x": 0.7, "center_y": 0.81}
             text: 'Semi Major Axis:'
+            color: 1, 1, 1, 1
+            font_size: min(self.height * 0.10, dp(24))
+            size_hint_y: 0.4
+            markup: True
         
-        OrbitDataValue:
+        Label:
             id: sma
             pos_hint: {"center_x": 0.9, "center_y": 0.81}
             text: '0'
+            color: root.signalcolor
+            font_size: min(self.height * 0.10, dp(24))
+            size_hint_y: 0.4
+            markup: True
         
         # Eccentricity
-        OrbitDataLabel:
+        Label:
             id: e_label
             pos_hint: {"center_x": 0.7, "center_y": 0.75}
             text: 'Eccentricity:'
+            color: 1, 1, 1, 1
+            font_size: min(self.height * 0.10, dp(24))
+            size_hint_y: 0.4
+            markup: True
         
-        OrbitDataValue:
+        Label:
             id: e
             pos_hint: {"center_x": 0.9, "center_y": 0.75}
             text: '0'
+            color: root.signalcolor
+            font_size: min(self.height * 0.10, dp(24))
+            size_hint_y: 0.4
+            markup: True
         
         # Inclination
-        OrbitDataLabel:
+        Label:
             id: inc_label
             pos_hint: {"center_x": 0.7, "center_y": 0.69}
             text: 'Inclination (deg):'
+            color: 1, 1, 1, 1
+            font_size: min(self.height * 0.10, dp(24))
+            size_hint_y: 0.4
+            markup: True
         
-        OrbitDataValue:
+        Label:
             id: inc
             pos_hint: {"center_x": 0.9, "center_y": 0.69}
             text: '0'
+            color: root.signalcolor
+            font_size: min(self.height * 0.10, dp(24))
+            size_hint_y: 0.4
+            markup: True
         
         # Apogee
-        OrbitDataLabel:
+        Label:
             id: apogee_label
             pos_hint: {"center_x": 0.7, "center_y": 0.63}
             text: 'Apogee (km):'
+            color: 1, 1, 1, 1
+            font_size: min(self.height * 0.10, dp(24))
+            size_hint_y: 0.4
+            markup: True
         
-        OrbitDataValue:
+        Label:
             id: apogee_height
             pos_hint: {"center_x": 0.9, "center_y": 0.63}
             text: '0'
+            color: root.signalcolor
+            font_size: min(self.height * 0.10, dp(24))
+            size_hint_y: 0.4
+            markup: True
         
         # Perigee
-        OrbitDataLabel:
+        Label:
             id: perigee_label
             pos_hint: {"center_x": 0.7, "center_y": 0.57}
             text: 'Perigee (km):'
+            color: 1, 1, 1, 1
+            font_size: min(self.height * 0.10, dp(24))
+            size_hint_y: 0.4
+            markup: True
         
-        OrbitDataValue:
+        Label:
             id: perigee_height
             pos_hint: {"center_x": 0.9, "center_y": 0.57}
             text: '0'
+            color: root.signalcolor
+            font_size: min(self.height * 0.10, dp(24))
+            size_hint_y: 0.4
+            markup: True
         
         # Right Ascension of Ascending Node
-        OrbitDataLabel:
+        Label:
             id: raan_label
             pos_hint: {"center_x": 0.7, "center_y": 0.51}
             text: 'Right Ascension (deg):'
+            color: 1, 1, 1, 1
+            font_size: min(self.height * 0.10, dp(24))
+            size_hint_y: 0.4
+            markup: True
         
-        OrbitDataValue:
+        Label:
             id: raan
             pos_hint: {"center_x": 0.9, "center_y": 0.51}
             text: '0'
+            color: root.signalcolor
+            font_size: min(self.height * 0.10, dp(24))
+            size_hint_y: 0.4
+            markup: True
         
         # Argument of Periapsis
-        OrbitDataLabel:
+        Label:
             id: arg_per_label
             pos_hint: {"center_x": 0.7, "center_y": 0.45}
             text: 'Argument of Periapsis (deg):'
+            color: 1, 1, 1, 1
+            font_size: min(self.height * 0.10, dp(24))
+            size_hint_y: 0.4
+            markup: True
         
-        OrbitDataValue:
+        Label:
             id: arg_per
             pos_hint: {"center_x": 0.9, "center_y": 0.45}
             text: '0'
+            color: root.signalcolor
+            font_size: min(self.height * 0.10, dp(24))
+            size_hint_y: 0.4
+            markup: True
         
         # True Anomaly
-        OrbitDataLabel:
+        Label:
             id: true_anomaly_label
             pos_hint: {"center_x": 0.7, "center_y": 0.39}
             text: 'True Anomaly (deg):'
+            color: 1, 1, 1, 1
+            font_size: min(self.height * 0.10, dp(24))
+            size_hint_y: 0.4
+            markup: True
         
-        OrbitDataValue:
+        Label:
             id: true_anomaly
             pos_hint: {"center_x": 0.9, "center_y": 0.39}
             text: '0'
+            color: root.signalcolor
+            font_size: min(self.height * 0.10, dp(24))
+            size_hint_y: 0.4
+            markup: True
         
         # ─────────────────────── State Vectors ────────────────────────────
         # Position State Vector
-        StateVectorLabel:
+        Label:
             id: position_sv_label
             pos_hint: {"center_x": 0.2, "center_y": 0.29}
             text: 'Position State Vector:'
+            color: 1, 1, 1, 1
+            font_size: min(self.height * 0.10, dp(20))
+            size_hint_y: 0.4
+            markup: True
         
-        StateVectorLabel:
+        Label:
             id: position_x_label
             pos_hint: {"center_x": 0.5, "center_y": 0.29}
             text: 'x   + '
+            color: 1, 1, 1, 1
+            font_size: min(self.height * 0.10, dp(20))
+            size_hint_y: 0.4
+            markup: True
         
-        StateVectorValue:
+        Label:
             id: position_x
             pos_hint: {"center_x": 0.4, "center_y": 0.29}
             text: '0'
+            color: root.signalcolor
+            font_size: min(self.height * 0.10, dp(20))
+            size_hint_y: 0.4
+            markup: True
         
-        StateVectorLabel:
+        Label:
             id: position_y_label
             pos_hint: {"center_x": 0.7, "center_y": 0.29}
             text: 'y   + '
+            color: 1, 1, 1, 1
+            font_size: min(self.height * 0.10, dp(20))
+            size_hint_y: 0.4
+            markup: True
         
-        StateVectorValue:
+        Label:
             id: position_y
             pos_hint: {"center_x": 0.6, "center_y": 0.29}
             text: '0'
+            color: root.signalcolor
+            font_size: min(self.height * 0.10, dp(20))
+            size_hint_y: 0.4
+            markup: True
         
-        StateVectorLabel:
+        Label:
             id: position_z_label
             pos_hint: {"center_x": 0.9, "center_y": 0.29}
             text: 'z      km'
+            color: 1, 1, 1, 1
+            font_size: min(self.height * 0.10, dp(20))
+            size_hint_y: 0.4
+            markup: True
         
-        StateVectorValue:
+        Label:
             id: position_z
             pos_hint: {"center_x": 0.8, "center_y": 0.29}
             text: '0'
+            color: root.signalcolor
+            font_size: min(self.height * 0.10, dp(20))
+            size_hint_y: 0.4
+            markup: True
         
         # Velocity State Vector
-        StateVectorLabel:
+        Label:
             id: velocity_sv_label
             pos_hint: {"center_x": 0.2, "center_y": 0.23}
             text: 'Velocity State Vector:'
+            color: 1, 1, 1, 1
+            font_size: min(self.height * 0.10, dp(20))
+            size_hint_y: 0.4
+            markup: True
         
-        StateVectorLabel:
+        Label:
             id: velocity_x_label
             pos_hint: {"center_x": 0.5, "center_y": 0.23}
             text: 'x   + '
+            color: 1, 1, 1, 1
+            font_size: min(self.height * 0.10, dp(20))
+            size_hint_y: 0.4
+            markup: True
         
-        StateVectorValue:
+        Label:
             id: velocity_x
             pos_hint: {"center_x": 0.4, "center_y": 0.23}
             text: '0'
+            color: root.signalcolor
+            font_size: min(self.height * 0.10, dp(20))
+            size_hint_y: 0.4
+            markup: True
         
-        StateVectorLabel:
+        Label:
             id: velocity_label
             pos_hint: {"center_x": 0.7, "center_y": 0.23}
             text: 'y   + '
+            color: 1, 1, 1, 1
+            font_size: min(self.height * 0.10, dp(20))
+            size_hint_y: 0.4
+            markup: True
         
-        StateVectorValue:
+        Label:
             id: velocity_y
             pos_hint: {"center_x": 0.6, "center_y": 0.23}
             text: '0'
+            color: root.signalcolor
+            font_size: min(self.height * 0.10, dp(20))
+            size_hint_y: 0.4
+            markup: True
         
-        StateVectorLabel:
+        Label:
             id: velocity_z_label
             pos_hint: {"center_x": 0.9, "center_y": 0.23}
             text: 'z      km/s'
+            color: 1, 1, 1, 1
+            font_size: min(self.height * 0.10, dp(20))
+            size_hint_y: 0.4
+            markup: True
         
-        StateVectorValue:
+        Label:
             id: velocity_z
             pos_hint: {"center_x": 0.8, "center_y": 0.23}
             text: '0'
+            color: root.signalcolor
+            font_size: min(self.height * 0.10, dp(20))
+            size_hint_y: 0.4
+            markup: True
         
         # ─────────────────────── Status Indicators ─────────────────────────
         Image:
@@ -227,7 +320,7 @@
             text: ''
             markup: True
             color: 1, 1, 1, 1
-            font_size: min(self.height * 0.3, dp(40))  # Responsive with max size
+            font_size: min(self.height * 0.3, dp(40))
             size_hint_y: 0.5
         
         # ─────────────────────── Navigation ────────────────────────────────
