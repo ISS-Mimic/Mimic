@@ -92,7 +92,7 @@ class Orbit_Screen(MimicBase):
         Clock.schedule_once(self.update_sun,              11)
         
         # Update user location on screen enter
-        Clock.schedule_once(self.update_user_location,     1)
+        Clock.schedule_once(self.update_user_location,    10)
         
         # Update active TDRS circles
         Clock.schedule_interval(self.update_active_tdrs,   2)  # Check every 2 seconds
@@ -1018,6 +1018,9 @@ class Orbit_Screen(MimicBase):
 
         # — update MCC markers ----------------------------------------------
         self._update_mcc_markers()
+
+        # — ensure user location dot is refreshed and above markers ---------
+        self.update_user_location()
         
     # ----------------------------------------------------------------- ISS icon + track
     def update_iss(self, _dt=0):
