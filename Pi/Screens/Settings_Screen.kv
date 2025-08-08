@@ -12,7 +12,7 @@
             pos_hint: {"center_x": 0.5, "center_y": 0.9}
             bold: True
             size_hint_y: 0.1
-            font_size: self.height * 0.4
+            font_size: min(self.height * 0.4, dp(48))
             color: 1, 1, 1, 1
         
         # Current Location Display
@@ -21,7 +21,7 @@
             text: 'Current: 29.7604, -95.3698'
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
             size_hint_y: 0.05
-            font_size: self.height * 0.2
+            font_size: min(self.height * 0.25, dp(24))
             color: 0, 1, 0, 1
         
         # Manual Input Section
@@ -29,14 +29,14 @@
             text: 'Enter Coordinates:'
             pos_hint: {"center_x": 0.5, "center_y": 0.6}
             size_hint_y: 0.05
-            font_size: self.height * 0.15
+            font_size: min(self.height * 0.2, dp(20))
             color: 1, 1, 1, 1
         
         Label:
             text: 'Latitude:'
             pos_hint: {"center_x": 0.25, "center_y": 0.5}
             size_hint_y: 0.05
-            font_size: self.height * 0.12
+            font_size: min(self.height * 0.18, dp(18))
             color: 1, 1, 1, 1
         
         TextInput:
@@ -44,7 +44,7 @@
             text: '29.7604'
             pos_hint: {"center_x": 0.35, "center_y": 0.5}
             size_hint: 0.1, 0.05
-            font_size: 14
+            font_size: min(dp(16), self.parent.width * 0.012)
             multiline: False
             input_filter: 'float'
         
@@ -52,7 +52,7 @@
             text: 'Longitude:'
             pos_hint: {"center_x": 0.55, "center_y": 0.5}
             size_hint_y: 0.05
-            font_size: self.height * 0.12
+            font_size: min(self.height * 0.18, dp(18))
             color: 1, 1, 1, 1
         
         TextInput:
@@ -60,7 +60,7 @@
             text: '-95.3698'
             pos_hint: {"center_x": 0.65, "center_y": 0.5}
             size_hint: 0.1, 0.05
-            font_size: 14
+            font_size: min(dp(16), self.parent.width * 0.012)
             multiline: False
             input_filter: 'float'
         
@@ -70,6 +70,7 @@
             size_hint: 0.15, 0.05
             on_release: root.set_location_from_coordinates(lat_input.text, lon_input.text)
             background_color: 0.2, 1, 0.2, 1
+            font_size: min(dp(16), self.parent.width * 0.012)
         
         # Auto-detect Button
         Button:
@@ -78,19 +79,20 @@
             size_hint: 0.2, 0.06
             on_release: root.detect_location_from_ip()
             background_color: 1, 0.5, 0, 1
+            font_size: min(dp(16), self.parent.width * 0.012)
         
-        # Smartflip Checkbox (moved to bottom)
+        # Smartflip Checkbox (moved to better position)
         CheckBox:
             id: smartflip
-            pos_hint: {"center_x": 0.1, "center_y": 0.02}
+            pos_hint: {"center_x": 0.2, "center_y": 0.2}
             size_hint_y: 0.05
             on_active: root.checkbox_clicked(self, self.active)
         
         Label:
             text: "Smartflip (smooth 0 crossing)"
-            pos_hint: {"center_x": 0.35, "center_y": 0.02}
+            pos_hint: {"center_x": 0.5, "center_y": 0.2}
             size_hint_y: 0.05
-            font_size: self.height * 0.12
+            font_size: min(self.height * 0.15, dp(16))
             color: 1, 1, 1, 1
         
         # Back Button
@@ -125,5 +127,5 @@
             text: ''
             markup: True
             color: 1, 1, 1
-            font_size: self.height * 0.3
+            font_size: min(self.height * 0.3, dp(40))
             size_hint_y: 0.5
