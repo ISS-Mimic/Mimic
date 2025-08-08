@@ -354,7 +354,7 @@
         size_hint: None, None
         size: min(dp(8), self.parent.width * 0.0075), min(dp(8), self.parent.height * 0.0075)
         pos: 0, 0
-        canvas.before:
+        canvas:
             Color:
                 rgba: 1, 1, 1, 1
             Line:
@@ -366,7 +366,7 @@
         size_hint: None, None
         size: min(dp(8), self.parent.width * 0.0075), min(dp(8), self.parent.height * 0.0075)
         pos: 0, 0
-        canvas.before:
+        canvas:
             Color:
                 rgba: 1, 1, 1, 1
             Line:
@@ -378,7 +378,7 @@
         size_hint: None, None
         size: min(dp(8), self.parent.width * 0.0075), min(dp(8), self.parent.height * 0.0075)
         pos: 0, 0
-        canvas.before:
+        canvas:
             Color:
                 rgba: 1, 1, 1, 1
             Line:
@@ -390,7 +390,7 @@
         size_hint: None, None
         size: min(dp(8), self.parent.width * 0.0075), min(dp(8), self.parent.height * 0.0075)
         pos: 0, 0
-        canvas.before:
+        canvas:
             Color:
                 rgba: 1, 1, 1, 1
             Line:
@@ -402,7 +402,7 @@
         size_hint: None, None
         size: min(dp(8), self.parent.width * 0.0075), min(dp(8), self.parent.height * 0.0075)
         pos: 0, 0
-        canvas.before:
+        canvas:
             Color:
                 rgba: 1, 1, 1, 1
             Line:
@@ -414,7 +414,7 @@
         size_hint: None, None
         size: min(dp(8), self.parent.width * 0.0075), min(dp(8), self.parent.height * 0.0075)
         pos: 0, 0
-        canvas.before:
+        canvas:
             Color:
                 rgba: 1, 1, 1, 1
             Line:
@@ -480,16 +480,11 @@
     Widget:
         id: user_location
         size_hint: None, None
-        size: min(dp(18), self.parent.width * 0.014), min(dp(18), self.parent.height * 0.014)  # Slightly larger
-        pos: 0, 0  # Will be set in Python
-        canvas.after:
+        size: min(dp(8), self.parent.width * 0.0075), min(dp(8), self.parent.height * 0.0075)
+        pos: 0, 0
+        canvas:
             Color:
-                rgba: 1, 1, 0, 1  # bright yellow fill
-            Ellipse:
-                pos: (self.center_x - min(self.width, self.height) / 2, self.center_y - min(self.width, self.height) / 2)
-                size: (min(self.width, self.height), min(self.width, self.height))
-            Color:
-                rgba: 1, 0, 0, 1  # red outline
+                rgba: 1, 0, 0, 1
             Line:
                 width: 2
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
@@ -505,7 +500,6 @@
                 points: []  # Will be populated with ZOE boundary points
                 width: 2
                 close: True
-
 
     Label:
         id: ZOElabel
