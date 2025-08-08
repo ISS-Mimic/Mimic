@@ -429,7 +429,7 @@ class MainApp(App):
         Clock.schedule_interval(self.updateArduinoCount, 5)
         Clock.schedule_interval(self.updateVV, 500)
         Clock.schedule_interval(self.update_vv_values, 40)
-        Clock.schedule_interval(self.updateNASAVVImage, 67)
+        # VV image refresh moved into VV_Image screen's on_enter
         return root
 
     def _schedule_internet_probe(self, _dt) -> None:
@@ -544,9 +544,8 @@ class MainApp(App):
         if urlindex > urlsize-1:
             urlindex = 0
 
-    def updateNASAVVImage(self, dt):
-        self.screens["vv_image"].ids.VVimage.source = str(mimic_data_directory) + '/vv.png'
-        self.screens["vv_image"].ids.VVimage.reload()
+    # def updateNASAVVImage(self, dt):
+    #     pass  # migrated to VV_Image.update_vv_image
                 
     def check_EVA_stats(self, lastname1, firstname1, lastname2, firstname2):
         global numEVAs1, EVAtime_hours1, EVAtime_minutes1, numEVAs2, EVAtime_hours2, EVAtime_minutes2
