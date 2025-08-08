@@ -8,35 +8,35 @@
         
         # Title
         Label:
-            text: 'Location Settings'
-            pos_hint: {"center_x": 0.5, "center_y": 0.9}
+            text: 'Location Settings----------------------------------------------'
+            pos_hint: {"center_x": 0.2, "center_y": 0.8}
             bold: True
             size_hint_y: 0.1
-            font_size: min(self.height * 0.4, dp(48))
+            font_size: min(self.height * 0.6, dp(56))
             color: 1, 1, 1, 1
         
         # Current Location Display
         Label:
             id: current_location_label
             text: 'Current: 29.7604, -95.3698'
-            pos_hint: {"center_x": 0.5, "center_y": 0.8}
-            size_hint_y: 0.05
-            font_size: min(self.height * 0.25, dp(24))
+            pos_hint: {"center_x": 0.2, "center_y": 0.7}
+            size_hint_y: 0.1
+            font_size: min(self.height * 0.4, dp(48))
             color: 0, 1, 0, 1
         
         # Manual Input Section
         Label:
             text: 'Enter Coordinates:'
-            pos_hint: {"center_x": 0.5, "center_y": 0.6}
-            size_hint_y: 0.05
-            font_size: min(self.height * 0.2, dp(20))
+            pos_hint: {"center_x": 0.2, "center_y": 0.6}
+            size_hint_y: 0.1
+            font_size: min(self.height * 0.4, dp(48))
             color: 1, 1, 1, 1
         
         Label:
             text: 'Latitude:'
             pos_hint: {"center_x": 0.25, "center_y": 0.5}
             size_hint_y: 0.05
-            font_size: min(self.height * 0.18, dp(18))
+            font_size: min(self.height * 0.4, dp(48))
             color: 1, 1, 1, 1
         
         TextInput:
@@ -52,7 +52,7 @@
             text: 'Longitude:'
             pos_hint: {"center_x": 0.55, "center_y": 0.5}
             size_hint_y: 0.05
-            font_size: min(self.height * 0.18, dp(18))
+            font_size: min(self.height * 0.4, dp(48))
             color: 1, 1, 1, 1
         
         TextInput:
@@ -66,20 +66,20 @@
         
         Button:
             text: 'Set Manual Location'
-            pos_hint: {"center_x": 0.5, "center_y": 0.4}
-            size_hint: 0.15, 0.05
+            pos_hint: {"center_x": 0.3, "center_y": 0.4}
+            size_hint: 0.2, 0.06
             on_release: root.set_location_from_coordinates(lat_input.text, lon_input.text)
             background_color: 0.2, 1, 0.2, 1
-            font_size: min(dp(16), self.parent.width * 0.012)
+            font_size: min(dp(32), self.parent.width * 0.024)
         
         # Auto-detect Button
         Button:
             text: 'Auto-detect from IP'
-            pos_hint: {"center_x": 0.5, "center_y": 0.3}
+            pos_hint: {"center_x": 0.3, "center_y": 0.3}
             size_hint: 0.2, 0.06
             on_release: root.detect_location_from_ip()
             background_color: 1, 0.5, 0, 1
-            font_size: min(dp(16), self.parent.width * 0.012)
+            font_size: min(dp(32), self.parent.width * 0.024)
         
         # Smartflip Checkbox (moved to better position)
         CheckBox:
