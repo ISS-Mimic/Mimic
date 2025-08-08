@@ -7,9 +7,9 @@ from kivy.uix.screenmanager import Screen
 from kivy.event import EventDispatcher
 from kivy.lang import Builder
 from kivy.properties import StringProperty
-from kivy.clock import Clock
 
 from utils.serial import serialWrite          # <-- already works elsewhere
+from utils.logger import log_info, log_error
 
 kv_path = pathlib.Path(__file__).with_name("Settings_Screen.kv")
 Builder.load_file(str(kv_path))
@@ -17,8 +17,10 @@ Builder.load_file(str(kv_path))
 class Settings_Screen(Screen, EventDispatcher):
     """
     User preferences screen.
-    Currently: checkbox toggles SmartRolloverBGA.
-    Location settings for ISS pass detection.
+    Features:
+    - Location settings for ISS pass detection (IP geolocation + manual input)
+    - Smartflip motor control toggle
+    - Automatic integration with orbit screen
     """
 
     mimic_directory = StringProperty(
@@ -48,7 +50,7 @@ class Settings_Screen(Screen, EventDispatcher):
                     self.ids.lat_input.text = f'{self.current_location[0]:.4f}'
                     self.ids.lon_input.text = f'{self.current_location[1]:.4f}'
         except Exception as e:
-            print(f"Failed to update location display: {e}")
+            log_error(f"Failed to update location display: {e}")
 
     def load_location_settings(self):
         """Load saved location settings or use IP geolocation."""
@@ -58,18 +60,22 @@ class Settings_Screen(Screen, EventDispatcher):
                 with open(config_path, 'r') as f:
                     data = json.load(f)
                     self.current_location = (data['lat'], data['lon'])
+                    log_info(f"Loaded saved location: {self.current_location[0]:.4f}, {self.current_location[1]:.4f}")
                     return
             
             # No saved location, try IP geolocation
+            log_info("No saved location found, attempting IP geolocation")
             self.detect_location_from_ip()
         except Exception as e:
-            print(f"Location loading failed: {e}")
+            log_error(f"Location loading failed: {e}")
             # Default to Houston
             self.current_location = (29.7604, -95.3698)
+            log_info("Using default Houston location")
 
     def detect_location_from_ip(self):
         """Detect user location from IP address."""
         try:
+            log_info("Attempting IP geolocation...")
             # Use a free IP geolocation service
             response = requests.get('http://ip-api.com/json/', timeout=5)
             if response.status_code == 200:
@@ -79,13 +85,15 @@ class Settings_Screen(Screen, EventDispatcher):
                     self.save_location_settings()
                     self.update_location_display()
                     self.update_orbit_screen_location()
+                    log_info(f"IP geolocation successful: {self.current_location[0]:.4f}, {self.current_location[1]:.4f}")
                     return True
         except Exception as e:
-            print(f"IP geolocation failed: {e}")
+            log_error(f"IP geolocation failed: {e}")
         
         # Fallback to Houston
         self.current_location = (29.7604, -95.3698)
         self.update_location_display()
+        log_info("Using fallback Houston location")
         return False
 
     def save_location_settings(self):
@@ -102,8 +110,9 @@ class Settings_Screen(Screen, EventDispatcher):
                 
                 with open(config_path, 'w') as f:
                     json.dump(data, f)
+                log_info(f"Location settings saved: {self.current_location[0]:.4f}, {self.current_location[1]:.4f}")
         except Exception as e:
-            print(f"Location saving failed: {e}")
+            log_error(f"Location saving failed: {e}")
 
     def set_location_from_coordinates(self, lat, lon):
         """Set location from manual coordinates."""
@@ -115,9 +124,12 @@ class Settings_Screen(Screen, EventDispatcher):
                 self.save_location_settings()
                 self.update_orbit_screen_location()
                 self.update_location_display()
+                log_info(f"Manual location set: {lat:.4f}, {lon:.4f}")
                 return True
+            else:
+                log_error(f"Invalid coordinates: {lat}, {lon} (must be lat: -90 to 90, lon: -180 to 180)")
         except ValueError:
-            pass
+            log_error(f"Invalid coordinate format: {lat}, {lon}")
         return False
 
     def update_orbit_screen_location(self):
@@ -127,8 +139,11 @@ class Settings_Screen(Screen, EventDispatcher):
             orbit_screen = self.manager.get_screen('orbit')
             if hasattr(orbit_screen, 'set_user_location'):
                 orbit_screen.set_user_location(self.current_location[0], self.current_location[1])
+                log_info(f"Updated orbit screen location: {self.current_location[0]:.4f}, {self.current_location[1]:.4f}")
+            else:
+                log_error("Orbit screen does not have set_user_location method")
         except Exception as e:
-            print(f"Failed to update orbit screen: {e}")
+            log_error(f"Failed to update orbit screen: {e}")
 
     # ------------------------------------------------------------------
     # bound in KV:  on_active: root.checkbox_clicked(self, value)
@@ -136,4 +151,5 @@ class Settings_Screen(Screen, EventDispatcher):
     def checkbox_clicked(self, checkbox, active: bool) -> None:
         cmd = "SmartRolloverBGA=1 " if active else "SmartRolloverBGA=0 "
         serialWrite(cmd)
+        log_info(f"SmartRolloverBGA toggled to {active}")
 
