@@ -400,206 +400,12 @@ class Orbit_Screen(MimicBase):
             }
 
     def calculate_zoe_region(self) -> list:
-        """Calculate the Zone of Exclusion (ZOE) based on TDRS coverage."""
+        """Calculate the ZOE region - now returns static boundary."""
         try:
-            # Get current ISS position
-            if not self.iss_tle:
-                return []
-            
-            self.iss_tle.compute(ephem.now())
-            iss_lat = math.degrees(self.iss_tle.sublat)
-            iss_lon = math.degrees(self.iss_tle.sublong)
-            iss_alt = 408  # Approximate ISS altitude in km
-            
-            # Earth radius in km
-            earth_radius = 6371.0
-            
-            # Calculate ISS position vector
-            iss_lat_rad = math.radians(iss_lat)
-            iss_lon_rad = math.radians(iss_lon)
-            iss_pos = [
-                (earth_radius + iss_alt) * math.cos(iss_lat_rad) * math.cos(iss_lon_rad),
-                (earth_radius + iss_alt) * math.cos(iss_lat_rad) * math.sin(iss_lon_rad),
-                (earth_radius + iss_alt) * math.sin(iss_lat_rad)
-            ]
-            
-            # Get TDRS positions (we'll use the TLE data we already have)
-            tdrs_positions = []
-            for name, sat in self.tdrs_tles.items():
-                try:
-                    sat.compute(ephem.now())
-                    tdrs_lat = math.degrees(sat.sublat)
-                    tdrs_lon = math.degrees(sat.sublong)
-                    tdrs_alt = 35786  # Geostationary altitude in km
-                    
-                    tdrs_lat_rad = math.radians(tdrs_lat)
-                    tdrs_lon_rad = math.radians(tdrs_lon)
-                    tdrs_pos = [
-                        (earth_radius + tdrs_alt) * math.cos(tdrs_lat_rad) * math.cos(tdrs_lon_rad),
-                        (earth_radius + tdrs_alt) * math.cos(tdrs_lat_rad) * math.sin(tdrs_lon_rad),
-                        (earth_radius + tdrs_alt) * math.sin(tdrs_lat_rad)
-                    ]
-                    tdrs_positions.append(tdrs_pos)
-                except Exception:
-                    continue
-            
-            # Calculate coverage areas for each TDRS
-            coverage_areas = []
-            for tdrs_pos in tdrs_positions:
-                # Calculate the coverage circle for this TDRS
-                # This is a simplified calculation - in reality it's more complex
-                coverage_circle = self.calculate_tdrs_coverage(tdrs_pos, iss_pos)
-                coverage_areas.append(coverage_circle)
-            
-            # Find the ZOE (area not covered by any TDRS)
-            zoe_points = self.calculate_zoe_from_coverage(coverage_areas)
-            
-            return zoe_points
-            
+            return self.get_static_zoe_boundary()
         except Exception as exc:
             log_error(f"Calculate ZOE region failed: {exc}")
             return []
-
-    def calculate_tdrs_coverage(self, tdrs_pos: list, iss_pos: list) -> list:
-        """Calculate the coverage area for a single TDRS satellite."""
-        try:
-            # Simplified coverage calculation
-            # In reality, this would involve complex orbital mechanics
-            # For now, we'll create a basic coverage circle
-            
-            # Calculate the coverage radius based on TDRS-ISS geometry
-            earth_radius = 6371.0
-            tdrs_alt = 35786  # Geostationary altitude
-            
-            # Calculate the maximum coverage angle
-            # This is a simplified calculation
-            coverage_angle = math.acos(earth_radius / (earth_radius + tdrs_alt))
-            
-            # Convert to degrees
-            coverage_angle_deg = math.degrees(coverage_angle)
-            
-            # For now, return a basic coverage circle
-            # In a full implementation, this would be more complex
-            return {
-                'center_lat': 0,  # Would be calculated from TDRS position
-                'center_lon': 0,  # Would be calculated from TDRS position
-                'radius_deg': coverage_angle_deg
-            }
-            
-        except Exception as exc:
-            log_error(f"Calculate TDRS coverage failed: {exc}")
-            return {}
-
-    def get_tdrs_positions(self) -> dict:
-        """Get current positions of all TDRS satellites."""
-        try:
-            # TDRS satellite positions (approximate geostationary positions)
-            # These are simplified but more realistic than the previous dummy TLEs
-            # Note: TDRS 7 and 8 are Z-belt satellites that are often unavailable,
-            # which is why the ZOE (Zone of Exclusion) exists
-            tdrs_positions = {}
-            
-            # TDRS 6 (East) - approximately 171°W
-            tdrs_positions[6] = {
-                'lat': 0.0,  # Geostationary satellites are at 0° latitude
-                'lon': -171.0,  # 171°W
-                'alt': 35786.0  # Geostationary altitude in km
-            }
-            
-            # TDRS 10 (West) - approximately 150°W
-            tdrs_positions[10] = {
-                'lat': 0.0,
-                'lon': -150.0,  # 150°W
-                'alt': 35786.0
-            }
-            
-            # TDRS 11 (West) - approximately 150°W (backup)
-            tdrs_positions[11] = {
-                'lat': 0.0,
-                'lon': -150.0,  # 150°W
-                'alt': 35786.0
-            }
-            
-            # TDRS 12 (East) - approximately 171°W (backup)
-            tdrs_positions[12] = {
-                'lat': 0.0,
-                'lon': -171.0,  # 171°W
-                'alt': 35786.0
-            }
-            
-            # Note: TDRS 7 and 8 are intentionally excluded from coverage calculations
-            # as their unavailability is what creates the ZOE region in the Indian Ocean
-            
-            return tdrs_positions
-            
-        except Exception as exc:
-            log_error(f"Get TDRS positions failed: {exc}")
-            return {}
-
-    def calculate_earth_view_angle(self, tdrs_lat: float, tdrs_lon: float, tdrs_alt: float, 
-                                 ground_lat: float, ground_lon: float) -> float:
-        """Calculate the Earth view angle from TDRS to a ground point."""
-        try:
-            # Earth radius in km
-            earth_radius = 6371.0
-            
-            # Convert to radians
-            tdrs_lat_rad = math.radians(tdrs_lat)
-            tdrs_lon_rad = math.radians(tdrs_lon)
-            ground_lat_rad = math.radians(ground_lat)
-            ground_lon_rad = math.radians(ground_lon)
-            
-            # Calculate angular distance between TDRS and ground point
-            # Using great circle distance formula
-            dlat = ground_lat_rad - tdrs_lat_rad
-            dlon = ground_lon_rad - tdrs_lon_rad
-            a = math.sin(dlat/2)**2 + math.cos(tdrs_lat_rad) * math.cos(ground_lat_rad) * math.sin(dlon/2)**2
-            c = 2 * math.asin(math.sqrt(a))
-            
-            # Calculate the Earth view angle
-            # This is the angle between the line from TDRS to ground point and the tangent to Earth
-            # For geostationary satellites, this is approximately the angle from nadir
-            earth_angle = math.asin(earth_radius / (earth_radius + tdrs_alt))
-            
-            # The view angle is the difference between the Earth angle and the angular distance
-            view_angle = earth_angle - c/2
-            
-            return math.degrees(view_angle)
-            
-        except Exception as exc:
-            log_error(f"Calculate Earth view angle failed: {exc}")
-            return 0.0
-
-    def is_point_covered_by_tdrs(self, lat: float, lon: float, tdrs_positions: dict) -> bool:
-        """Check if a ground point is covered by any TDRS satellite.
-        
-        Note: Only East (TDRS 6, 12) and West (TDRS 10, 11) satellites are considered.
-        Z-belt satellites (TDRS 7, 8) are intentionally excluded as their unavailability
-        is what creates the ZOE (Zone of Exclusion) region in the Indian Ocean.
-        """
-        try:
-            # Minimum Earth view angle for coverage (typically 5-10 degrees)
-            # For geostationary satellites, this corresponds to about 81° from nadir
-            min_view_angle = 5.0
-            
-            # Check coverage from each TDRS (excluding Z-belt satellites)
-            for tdrs_id, tdrs_pos in tdrs_positions.items():
-                # Only consider East and West TDRS satellites
-                if tdrs_id in [6, 10, 11, 12]:  # East and West satellites only
-                    view_angle = self.calculate_earth_view_angle(
-                        tdrs_pos['lat'], tdrs_pos['lon'], tdrs_pos['alt'],
-                        lat, lon
-                    )
-                    
-                    # Point is covered if view angle is sufficient
-                    if view_angle >= min_view_angle:
-                        return True
-            
-            return False
-            
-        except Exception as exc:
-            log_error(f"Check point coverage failed: {exc}")
-            return False
 
     def _clear_zoe_cache(self) -> None:
         """Clear the ZOE boundary cache to force recalculation."""
@@ -607,267 +413,64 @@ class Orbit_Screen(MimicBase):
         self._zoe_cache_time = 0.0
         log_info("ZOE boundary cache cleared")
 
-    def _find_zoe_longitude_extremes(self, lat_min: float, lat_max: float, tdrs_positions: dict) -> tuple:
-        """Find the minimum and maximum longitude of the ZOE region at different latitudes."""
-        try:
-            # Sample at coarser intervals for performance
-            lat_step = 10  # 10 degree intervals
-            lon_step = 1   # 1 degree intervals for longitude precision
-            
-            # Search in the Indian Ocean region (40°E to 120°E)
-            search_lon_min = 40
-            search_lon_max = 120
-            
-            # Store longitude extremes at different latitudes
-            lat_lon_extremes = {}
-            
-            for lat in range(int(lat_min), int(lat_max) + 1, lat_step):
-                zoe_lon_min = None
-                zoe_lon_max = None
-                
-                # Find the westernmost (minimum) longitude where ZOE exists at this latitude
-                for lon in range(search_lon_min, search_lon_max + 1, lon_step):
-                    if not self.is_point_covered_by_tdrs(lat, lon, tdrs_positions):
-                        zoe_lon_min = lon
-                        break
-                
-                # Find the easternmost (maximum) longitude where ZOE exists at this latitude
-                for lon in range(search_lon_max, search_lon_min - 1, -lon_step):
-                    if not self.is_point_covered_by_tdrs(lat, lon, tdrs_positions):
-                        zoe_lon_max = lon
-                        break
-                
-                # Store the extremes for this latitude
-                if zoe_lon_min is not None and zoe_lon_max is not None:
-                    lat_lon_extremes[lat] = (zoe_lon_min, zoe_lon_max)
-            
-            # If we couldn't find extremes, use default values
-            if not lat_lon_extremes:
-                lat_lon_extremes = {
-                    0: (60, 100),    # Equator
-                    20: (65, 95),    # 20°N
-                    -20: (65, 95),   # 20°S
-                    40: (70, 90),    # 40°N
-                    -40: (70, 90),   # 40°S
-                }
-            
-            return lat_lon_extremes
-            
-        except Exception as exc:
-            log_error(f"Find ZOE longitude extremes failed: {exc}")
-            return {}
+    def get_static_zoe_boundary(self) -> list:
+        """Get a static ZOE boundary as a simple ellipse centered at 0° lat, 70° lon."""
+        # Create a simple elliptical boundary
+        center_lat = 0.0
+        center_lon = 70.0
+        lat_radius = 25.0  # ±25° latitude
+        lon_radius = 20.0  # ±20° longitude
+        
+        # Generate ellipse points
+        points = []
+        num_points = 32  # Number of points to create smooth ellipse
+        
+        for i in range(num_points):
+            angle = 2 * math.pi * i / num_points
+            lat = center_lat + lat_radius * math.sin(angle)
+            lon = center_lon + lon_radius * math.cos(angle)
+            points.append((lat, lon))
+        
+        # Close the ellipse
+        points.append(points[0])
+        
+        return points
 
-    def calculate_zoe_boundary_points(self) -> list:
-        """Calculate the boundary points for the ZOE region using accurate TDRS coverage."""
+    def is_point_in_zoe(self, lat: float, lon: float, zoe_boundary_points: list) -> bool:
+        """Check if a point is inside the ZOE ellipse using simple distance check."""
         try:
-            # Check cache first - extend cache duration since ZOE doesn't change much
-            current_time = time.time()
-            if (self._zoe_boundary_cache is not None and 
-                current_time - self._zoe_cache_time < self._zoe_cache_duration * 10):  # 50 minutes cache
-                return self._zoe_boundary_cache
+            # Simple distance check from center
+            center_lat = 0.0
+            center_lon = 70.0
+            lat_radius = 25.0
+            lon_radius = 20.0
             
-            # Get current TDRS positions
-            tdrs_positions = self.get_tdrs_positions()
-            if not tdrs_positions:
-                log_info("No TDRS positions available, using simple ZOE boundary")
-                return self.get_simple_zoe_boundary()
+            # Calculate normalized distance from center
+            lat_dist = abs(lat - center_lat) / lat_radius
+            lon_dist = abs(lon - center_lon) / lon_radius
             
-            # Get ISS inclination to bound ZOE north/south
-            if not self.iss_tle:
-                log_info("No ISS TLE available, using simple ZOE boundary")
-                return self.get_simple_zoe_boundary()
-            
-            self.iss_tle.compute(ephem.now())
-            iss_inc = math.degrees(self.iss_tle._inc)
-            
-            # ZOE is bounded by ISS inclination
-            zoe_lat_min = -iss_inc
-            zoe_lat_max = iss_inc
-            
-            log_info(f"Calculating ZOE boundary for latitude range {zoe_lat_min:.1f}° to {zoe_lat_max:.1f}°")
-            
-            # Find the longitude extremes at different latitudes
-            lat_lon_extremes = self._find_zoe_longitude_extremes(zoe_lat_min, zoe_lat_max, tdrs_positions)
-            
-            if not lat_lon_extremes:
-                log_info("Could not determine ZOE longitude extremes, using simple boundary")
-                return self.get_simple_zoe_boundary()
-            
-            # Create an elliptical-like polygon using the longitude extremes at different latitudes
-            boundary_points = []
-            
-            # Add points along the western edge (minimum longitude)
-            for lat in sorted(lat_lon_extremes.keys()):
-                lon_min, _ = lat_lon_extremes[lat]
-                boundary_points.append((lat, lon_min))
-            
-            # Add points along the eastern edge (maximum longitude) in reverse order
-            for lat in sorted(lat_lon_extremes.keys(), reverse=True):
-                _, lon_max = lat_lon_extremes[lat]
-                boundary_points.append((lat, lon_max))
-            
-            # Close the polygon
-            if boundary_points and boundary_points[0] != boundary_points[-1]:
-                boundary_points.append(boundary_points[0])
-            
-            # Cache the result for much longer since ZOE doesn't change
-            self._zoe_boundary_cache = boundary_points
-            self._zoe_cache_time = current_time
-            
-            log_info(f"Calculated ZOE boundary with {len(boundary_points)} points")
-            
-            return boundary_points
+            # Point is inside if normalized distance <= 1
+            return (lat_dist**2 + lon_dist**2) <= 1.0
             
         except Exception as exc:
-            log_error(f"Calculate ZOE boundary points failed: {exc}")
-            return self.get_simple_zoe_boundary()
-
-    def _validate_zoe_boundary(self, boundary_points: list) -> bool:
-        """Validate that the ZOE boundary points form a reasonable polygon."""
-        try:
-            if not boundary_points or len(boundary_points) < 3:
-                log_error("ZOE boundary has insufficient points")
-                return False
-            
-            # Check for reasonable geographic bounds
-            lats = [p[0] for p in boundary_points]
-            lons = [p[1] for p in boundary_points]
-            
-            lat_range = max(lats) - min(lats)
-            lon_range = max(lons) - min(lons)
-            
-            # ZOE should be a reasonable size (not too small, not too large)
-            if lat_range < 10 or lat_range > 120:
-                log_error(f"ZOE latitude range {lat_range:.1f}° is unreasonable")
-                return False
-            
-            if lon_range < 20 or lon_range > 360:
-                log_error(f"ZOE longitude range {lon_range:.1f}° is unreasonable")
-                return False
-            
-            # Check for reasonable latitude bounds (should be within ISS inclination)
-            if max(lats) > 60 or min(lats) < -60:
-                log_error(f"ZOE latitude bounds {min(lats):.1f}° to {max(lats):.1f}° are unreasonable")
-                return False
-            
-            log_info(f"ZOE boundary validation passed: {len(boundary_points)} points, "
-                    f"lat range {lat_range:.1f}°, lon range {lon_range:.1f}°")
-            return True
-            
-        except Exception as exc:
-            log_error(f"ZOE boundary validation failed: {exc}")
+            log_error(f"Check point in ZOE failed: {exc}")
             return False
 
-    def _find_boundary_from_points(self, points: list) -> list:
-        """Find the boundary polygon from a set of uncovered points."""
-        try:
-            if not points:
-                return []
-            
-            # Simple convex hull approach for boundary
-            # Sort points by latitude and longitude to find extremes
-            points.sort(key=lambda p: (p[0], p[1]))
-            
-            # Find the boundary by connecting extreme points
-            boundary = []
-            
-            # Add points along the perimeter
-            # Start from the leftmost point
-            leftmost = min(points, key=lambda p: p[1])
-            boundary.append(leftmost)
-            
-            # Add points along the top edge
-            top_points = [p for p in points if p[0] == max(p[0] for p in points)]
-            top_points.sort(key=lambda p: p[1])
-            boundary.extend(top_points)
-            
-            # Add points along the right edge
-            rightmost = max(points, key=lambda p: p[1])
-            if rightmost not in boundary:
-                boundary.append(rightmost)
-            
-            # Add points along the bottom edge
-            bottom_points = [p for p in points if p[0] == min(p[0] for p in points)]
-            bottom_points.sort(key=lambda p: p[1], reverse=True)
-            boundary.extend(bottom_points)
-            
-            # Close the polygon
-            if boundary and boundary[0] != boundary[-1]:
-                boundary.append(boundary[0])
-            
-            # Validate the boundary
-            if not self._validate_zoe_boundary(boundary):
-                log_error("Generated ZOE boundary failed validation")
-                return self.get_simple_zoe_boundary()
-            
-            return boundary
-            
-        except Exception as exc:
-            log_error(f"Find boundary from points failed: {exc}")
-            return []
-
-    def get_simple_zoe_boundary(self) -> list:
-        """Fallback ZOE boundary for when TDRS data is unavailable.
-        This represents the typical Indian Ocean coverage gap."""
-        return [
-            (30, 60),   # Top-left (Arabian Sea)
-            (30, 100),  # Top-right (Bay of Bengal)
-            (20, 110),  # Upper right
-            (10, 115),  # Right edge
-            (0, 120),   # Right edge (equator)
-            (-10, 115), # Right edge
-            (-20, 110), # Lower right
-            (-30, 100), # Bottom-right (Indian Ocean)
-            (-30, 60),  # Bottom-left (Indian Ocean)
-            (-20, 50),  # Lower left
-            (-10, 45),  # Left edge
-            (0, 40),    # Left edge (equator)
-            (10, 45),   # Left edge
-            (20, 50),   # Upper left
-            (30, 60),   # Close the polygon
-        ]
-
-    def calculate_zoe_from_coverage(self, coverage_areas: list) -> list:
-        """Calculate ZOE points from TDRS coverage areas."""
-        try:
-            # This is a placeholder for the actual ZOE calculation
-            # In a full implementation, this would:
-            # 1. Create a grid of points on Earth's surface
-            # 2. Check which points are not covered by any TDRS
-            # 3. Return the boundary of the uncovered area
-            
-            # For now, return a simple ZOE region (Indian Ocean area)
-            zoe_points = [
-                (20, 60),   # Sample points around Indian Ocean
-                (20, 80),
-                (0, 70),
-                (-20, 80),
-                (-20, 60)
-            ]
-            
-            return zoe_points
-            
-        except Exception as exc:
-            log_error(f"Calculate ZOE from coverage failed: {exc}")
-            return []
-
     def calculate_zoe_timing(self) -> tuple:
-        """Calculate time until ZOE entry and exit using accurate ZOE boundaries."""
+        """Calculate time until ZOE entry and exit using static ZOE boundary."""
         try:
             if not self.iss_tle:
                 return None, None
             
-            # Get accurate ZOE boundaries
-            zoe_boundary_points = self.calculate_zoe_boundary_points()
-            if not zoe_boundary_points:
-                return None, None
+            # Get static ZOE boundary
+            zoe_boundary_points = self.get_static_zoe_boundary()
             
             # Get current ISS position
             self.iss_tle.compute(ephem.now())
             current_lat = math.degrees(self.iss_tle.sublat)
             current_lon = math.degrees(self.iss_tle.sublong)
             
-            # Check if currently in ZOE using point-in-polygon test
+            # Check if currently in ZOE
             in_zoe = self.is_point_in_zoe(current_lat, current_lon, zoe_boundary_points)
             
             # Calculate future positions to find entry/exit times
@@ -879,7 +482,6 @@ class Orbit_Screen(MimicBase):
             
             # Use larger steps initially for efficiency, then refine
             coarse_step_minutes = 5
-            fine_step_minutes = 1
             
             # First pass: coarse search
             for i in range(1, 288):  # Look ahead 24 hours in 5-minute steps
@@ -891,11 +493,9 @@ class Orbit_Screen(MimicBase):
                 future_in_zoe = self.is_point_in_zoe(future_lat, future_lon, zoe_boundary_points)
                 
                 if not in_zoe and future_in_zoe and entry_time is None:
-                    # Found approximate entry time, now refine
-                    entry_time = self._refine_zoe_crossing(current_time, future_time, zoe_boundary_points, False, True)
+                    entry_time = future_time
                 elif in_zoe and not future_in_zoe and exit_time is None:
-                    # Found approximate exit time, now refine
-                    exit_time = self._refine_zoe_crossing(current_time, future_time, zoe_boundary_points, True, False)
+                    exit_time = future_time
                 
                 # Stop if we found both times
                 if entry_time is not None and exit_time is not None:
@@ -903,7 +503,6 @@ class Orbit_Screen(MimicBase):
             
             # If we're currently in ZOE, we need to find the next exit
             if in_zoe and exit_time is None:
-                # Look for the next exit time
                 for i in range(1, 288):
                     future_time = current_time + (i * coarse_step_minutes * ephem.minute)
                     self.iss_tle.compute(future_time)
@@ -913,12 +512,11 @@ class Orbit_Screen(MimicBase):
                     future_in_zoe = self.is_point_in_zoe(future_lat, future_lon, zoe_boundary_points)
                     
                     if not future_in_zoe:
-                        exit_time = self._refine_zoe_crossing(current_time, future_time, zoe_boundary_points, True, False)
+                        exit_time = future_time
                         break
             
             # If we're not in ZOE, we need to find the next entry
             if not in_zoe and entry_time is None:
-                # Look for the next entry time
                 for i in range(1, 288):
                     future_time = current_time + (i * coarse_step_minutes * ephem.minute)
                     self.iss_tle.compute(future_time)
@@ -928,7 +526,7 @@ class Orbit_Screen(MimicBase):
                     future_in_zoe = self.is_point_in_zoe(future_lat, future_lon, zoe_boundary_points)
                     
                     if future_in_zoe:
-                        entry_time = self._refine_zoe_crossing(current_time, future_time, zoe_boundary_points, False, True)
+                        entry_time = future_time
                         break
             
             return entry_time, exit_time
@@ -937,90 +535,13 @@ class Orbit_Screen(MimicBase):
             log_error(f"Calculate ZOE timing failed: {exc}")
             return None, None
 
-    def _refine_zoe_crossing(self, start_time, end_time, zoe_boundary_points, was_in_zoe, will_be_in_zoe) -> float:
-        """Refine the ZOE crossing time using binary search."""
-        try:
-            # Binary search to find the exact crossing time
-            left_time = start_time
-            right_time = end_time
-            tolerance_minutes = 0.5  # 30 seconds tolerance
-            
-            while (right_time - left_time) > (tolerance_minutes * ephem.minute):
-                mid_time = left_time + (right_time - left_time) / 2
-                self.iss_tle.compute(mid_time)
-                mid_lat = math.degrees(self.iss_tle.sublat)
-                mid_lon = math.degrees(self.iss_tle.sublong)
-                mid_in_zoe = self.is_point_in_zoe(mid_lat, mid_lon, zoe_boundary_points)
-                
-                if was_in_zoe and not will_be_in_zoe:
-                    # Looking for exit
-                    if mid_in_zoe:
-                        left_time = mid_time
-                    else:
-                        right_time = mid_time
-                else:
-                    # Looking for entry
-                    if mid_in_zoe:
-                        right_time = mid_time
-                    else:
-                        left_time = mid_time
-            
-            return left_time
-            
-        except Exception as exc:
-            log_error(f"Refine ZOE crossing failed: {exc}")
-            return start_time
-
-    def is_point_in_zoe(self, lat: float, lon: float, zoe_boundary_points: list) -> bool:
-        """Check if a point is inside the ZOE polygon using ray casting algorithm."""
-        try:
-            if len(zoe_boundary_points) < 3:
-                return False
-            
-            # Ray casting algorithm
-            inside = False
-            j = len(zoe_boundary_points) - 1
-            
-            for i in range(len(zoe_boundary_points)):
-                point_i_lat, point_i_lon = zoe_boundary_points[i]
-                point_j_lat, point_j_lon = zoe_boundary_points[j]
-                
-                if ((point_i_lat > lat) != (point_j_lat > lat)) and \
-                   (lon < (point_j_lon - point_i_lon) * (lat - point_i_lat) / (point_j_lat - point_i_lat) + point_i_lon):
-                    inside = not inside
-                
-                j = i
-            
-            return inside
-            
-        except Exception as exc:
-            log_error(f"Check point in ZOE failed: {exc}")
-            return False
-
     def update_zoe_region(self) -> None:
-        """Update the ZOE region display based on calculated coverage."""
+        """Update the ZOE region display using static boundary."""
         try:
-            # Only update ZOE boundary occasionally since it doesn't change much
-            current_time = time.time()
-            if (self._zoe_boundary_cache is None or 
-                current_time - self._zoe_cache_time > self._zoe_cache_duration * 10):  # 50 minutes
-                # Calculate ZOE boundary (this is cached for a long time)
-                zoe_boundary_points = self.calculate_zoe_boundary_points()
-                
-                if 'ZOE_boundary' in self.ids and zoe_boundary_points:
-                    # Convert lat/lon points to screen coordinates
-                    screen_points = []
-                    for lat, lon in zoe_boundary_points:
-                        x, y = self.map_px(lat, lon)
-                        screen_points.extend([x, y])
-                    
-                    # Update the ZOE boundary widget
-                    for instruction in self.ids.ZOE_boundary.canvas.children:
-                        if hasattr(instruction, 'points'):
-                            instruction.points = screen_points
-                            break
+            # Get static ZOE boundary
+            zoe_boundary_points = self.get_static_zoe_boundary()
             
-            # Update timing labels (this can be more frequent)
+            # Update timing labels
             entry_time, exit_time = self.calculate_zoe_timing()
             
             if 'zoe_loss_timer' in self.ids and 'zoe_acquisition_timer' in self.ids:
@@ -1046,24 +567,35 @@ class Orbit_Screen(MimicBase):
                 else:
                     self.ids.zoe_acquisition_timer.text = "--:--"
             
-            # Update ZOE label position (this can be more frequent)
+            # Update ZOE boundary display
+            if 'ZOE_boundary' in self.ids and zoe_boundary_points:
+                # Convert lat/lon points to screen coordinates
+                screen_points = []
+                for lat, lon in zoe_boundary_points:
+                    x, y = self.map_px(lat, lon)
+                    screen_points.extend([x, y])
+                
+                # Update the ZOE boundary widget
+                for instruction in self.ids.ZOE_boundary.canvas.children:
+                    if hasattr(instruction, 'points'):
+                        instruction.points = screen_points
+                        break
+            
+            # Update ZOE label position
             if 'ZOElabel' in self.ids:
-                # Center of ZOE region (approximately)
+                # Center of ZOE region
                 zoe_center_lat = 0  # Equator
-                zoe_center_lon = 80  # Center of Indian Ocean region
+                zoe_center_lon = 70  # Center of Indian Ocean region
                 x, y = self.map_px(zoe_center_lat, zoe_center_lon)
                 self.ids.ZOElabel.pos = (x - self.ids.ZOElabel.width/2, y - self.ids.ZOElabel.height/2)
             
-            # Check if ISS is currently in the ZOE (this can be more frequent)
+            # Check if ISS is currently in the ZOE
             if self.iss_tle and 'ZOE_boundary' in self.ids:
                 self.iss_tle.compute(ephem.now())
                 iss_lat = math.degrees(self.iss_tle.sublat)
                 iss_lon = math.degrees(self.iss_tle.sublong)
                 
-                # Get cached ZOE boundary
-                zoe_boundary_points = self.calculate_zoe_boundary_points()
-                
-                # Check if ISS is in ZOE using accurate boundaries
+                # Check if ISS is in ZOE
                 in_zoe = self.is_point_in_zoe(iss_lat, iss_lon, zoe_boundary_points)
                 
                 if in_zoe:
@@ -1558,7 +1090,7 @@ class Orbit_Screen(MimicBase):
                 current_lon = math.degrees(self.iss_tle.sublong)
                 
                 # Get current ZOE boundary
-                zoe_boundary = self.calculate_zoe_boundary_points()
+                zoe_boundary = self.get_static_zoe_boundary()
                 if zoe_boundary:
                     info['iss_in_zoe'] = self.is_point_in_zoe(current_lat, current_lon, zoe_boundary)
             
