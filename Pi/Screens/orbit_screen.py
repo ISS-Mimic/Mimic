@@ -125,6 +125,11 @@ class Orbit_Screen(MimicBase):
             x, y = self.map_px(self.user_lat, self.user_lon)
             self.ids.user_location.center = (x, y)
             
+            # Debug: log the position and ensure widget is visible
+            log_info(f"User location positioned at ({x}, {y}) for lat/lon ({self.user_lat}, {self.user_lon})")
+            self.ids.user_location.opacity = 1.0
+            self.ids.user_location.size = (min(18, self.width * 0.014), min(18, self.height * 0.014))
+            
         except Exception as exc:
             log_error(f"Update user location failed: {exc}")
             import traceback

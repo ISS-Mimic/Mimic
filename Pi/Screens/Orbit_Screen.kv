@@ -484,12 +484,12 @@
         pos: 0, 0  # Will be set in Python
         canvas.after:
             Color:
-                rgba: 0.5, 0, 0.5, 1  # white fill
+                rgba: 1, 1, 0, 1  # bright yellow fill
             Ellipse:
                 pos: (self.center_x - min(self.width, self.height) / 2, self.center_y - min(self.width, self.height) / 2)
                 size: (min(self.width, self.height), min(self.width, self.height))
             Color:
-                rgba: 0.5, 0, 0.5, 1  # magenta outline
+                rgba: 1, 0, 0, 1  # red outline
             Line:
                 width: 2
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
