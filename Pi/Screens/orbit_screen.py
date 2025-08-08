@@ -909,11 +909,12 @@ class Orbit_Screen(MimicBase):
         try:
             # Define MCCs: (id_dot, id_label, lat, lon, dx, dy) where dx,dy are pixel offsets for label
             mcc_defs = [
-                ("mcc_houston",    "mcc_houston_label",    29.550,  -95.097,   10,  10),  # Houston, TX area
-                ("mcc_quebec",     "mcc_quebec_label",     46.813,  -71.208,   10,  10),  # Quebec City
-                ("mcc_oberpf",     "mcc_oberpf_label",     48.083,   11.283,   10,  10),  # Oberpfaffenhofen, DE
-                ("mcc_huntsville", "mcc_huntsville_label", 34.730,  -86.586,   10,  10),  # Huntsville, AL
-                ("mcc_tsukuba",    "mcc_tsukuba_label",    36.083,  140.083,   10,  10),  # Tsukuba, JP
+                ("mcc_houston",    "mcc_houston_label",    29.550,  -95.097,   0,  -15),  # Houston, TX area
+                ("mcc_quebec",     "mcc_quebec_label",     46.813,  -71.208,   5,  -5),   # Quebec City
+                ("mcc_oberpf",     "mcc_oberpf_label",     48.083,   11.283,   5,  -5),   # Oberpfaffenhofen, DE
+                ("mcc_huntsville", "mcc_huntsville_label", 34.730,  -86.586,   5,  -5),   # Huntsville, AL
+                ("mcc_tsukuba",    "mcc_tsukuba_label",    36.083,  140.083,   5,  -5),   # Tsukuba, JP
+                ("mcc_moscow",     "mcc_moscow_label",     55.752,   37.616,   5,  -5),   # Moscow, RU
             ]
             for dot_id, label_id, lat, lon, dx, dy in mcc_defs:
                 if dot_id in self.ids and label_id in self.ids:
@@ -924,6 +925,14 @@ class Orbit_Screen(MimicBase):
                     # place label with small offset
                     lbl = self.ids[label_id]
                     lbl.pos = (x + dx, y + dy)
+
+            # Ensure user_location is drawn above MCC dots (bring to front)
+            if 'user_location' in self.ids:
+                w = self.ids.user_location
+                parent = w.parent
+                if parent is not None and w in parent.children:
+                    parent.remove_widget(w)
+                    parent.add_widget(w)
         except Exception as exc:
             log_error(f"Update MCC markers failed: {exc}")
 

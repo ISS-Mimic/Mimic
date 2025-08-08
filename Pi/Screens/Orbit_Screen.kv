@@ -468,6 +468,28 @@
         size: self.texture_size
         pos: 0, 0
  
+    # Roscosmos (Moscow)
+    Widget:
+        id: mcc_moscow
+        size_hint: None, None
+        size: min(dp(10), self.parent.width * 0.009), min(dp(10), self.parent.height * 0.009)
+        pos: 0, 0
+        canvas:
+            Color:
+                rgba: 1, 1, 1, 1
+            Line:
+                width: 2
+                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
+
+    Label:
+        id: mcc_moscow_label
+        text: "ROSCOSMOS"
+        color: 1, 1, 1, 1
+        font_size: min(dp(16), self.parent.width * 0.012)
+        size_hint: None, None
+        size: self.texture_size
+        pos: 0, 0
+
     # ───────────────────────────── ZOE & ISS icons ─────────────────────────
     # ZOE boundary widget (will be drawn as a polygon)
     Widget:
