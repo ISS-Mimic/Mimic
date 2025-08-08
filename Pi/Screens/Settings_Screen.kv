@@ -8,8 +8,8 @@
         
         # Title
         Label:
-            text: 'Location Settings'
-            pos_hint: {"center_x": 0.1, "center_y": 0.85}
+            text: 'Location Settings
+            pos_hint: {"center_x": 0.15, "center_y": 0.85}
             bold: True
             size_hint_y: 0.1
             font_size: min(self.height * 0.6, dp(56))
@@ -27,7 +27,7 @@
         # Manual Input Section
         Label:
             text: 'Enter Coordinates:'
-            pos_hint: {"center_x": 0.2, "center_y": 0.68}
+            pos_hint: {"center_x": 0.2, "center_y": 0.7}
             size_hint_y: 0.1
             font_size: min(self.height * 0.4, dp(48))
             color: 1, 1, 1, 1
@@ -35,7 +35,7 @@
         Label:
             text: 'Latitude:'
             pos_hint: {"center_x": 0.15, "center_y": 0.63}
-            size_hint_y: 0.05
+            size_hint_y: 0.1
             font_size: min(self.height * 0.6, dp(56))
             color: 1, 1, 1, 1
         
@@ -43,7 +43,7 @@
             id: lat_input
             text: '29.7604'
             pos_hint: {"center_x": 0.25, "center_y": 0.63}
-            size_hint: 0.1, 0.05
+            size_hint: 0.1, 0.1
             font_size: min(dp(16), self.parent.width * 0.012)
             multiline: False
             input_filter: 'float'
@@ -51,7 +51,7 @@
         Label:
             text: 'Longitude:'
             pos_hint: {"center_x": 0.35, "center_y": 0.63}
-            size_hint_y: 0.05
+            size_hint_y: 0.1
             font_size: min(self.height * 0.6, dp(56))
             color: 1, 1, 1, 1
         
@@ -59,7 +59,7 @@
             id: lon_input
             text: '-95.3698'
             pos_hint: {"center_x": 0.45, "center_y": 0.63}
-            size_hint: 0.1, 0.05
+            size_hint: 0.1, 0.1
             font_size: min(dp(16), self.parent.width * 0.012)
             multiline: False
             input_filter: 'float'
@@ -84,7 +84,7 @@
         # Title
         Label:
             text: 'Motor Settings'
-            pos_hint: {"center_x": 0.1, "center_y": 0.4}
+            pos_hint: {"center_x": 0.15, "center_y": 0.35}
             bold: True
             size_hint_y: 0.1
             font_size: min(self.height * 0.6, dp(56))
