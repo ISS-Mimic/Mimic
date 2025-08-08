@@ -544,8 +544,6 @@ class MainApp(App):
         if urlindex > urlsize-1:
             urlindex = 0
 
-    # def updateNASAVVImage(self, dt):
-    #     pass  # migrated to VV_Image.update_vv_image
                 
     def check_EVA_stats(self, lastname1, firstname1, lastname2, firstname2):
         global numEVAs1, EVAtime_hours1, EVAtime_minutes1, numEVAs2, EVAtime_hours2, EVAtime_minutes2
