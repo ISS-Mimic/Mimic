@@ -418,7 +418,7 @@ class Orbit_Screen(MimicBase):
         # Create a simple elliptical boundary
         center_lat = 0.0
         center_lon = 70.0
-        lat_radius = 25.0  # ±25° latitude
+        lat_radius = 52.0  # ±52° latitude
         lon_radius = 20.0  # ±20° longitude
         
         # Generate ellipse points
@@ -583,6 +583,7 @@ class Orbit_Screen(MimicBase):
             
             # Update ZOE label position
             if 'ZOElabel' in self.ids:
+                print("Updating ZOE label position")
                 # Center of ZOE region
                 zoe_center_lat = 0  # Equator
                 zoe_center_lon = 70  # Center of Indian Ocean region
