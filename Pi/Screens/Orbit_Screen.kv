@@ -484,15 +484,15 @@
         pos: 0, 0
         canvas:
             Color:
-                rgba: 1, 0, 0, 1
+                rgba: 0.5, 0, 0.5, 1
             Line:
                 width: 2
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
-    Widget:
+    Label:
         id: user_location_label
         text: "user"
-        color: 1, 0, 0, 1
+        color: 0.5, 0, 0.5, 1
         font_size: min(dp(16), self.parent.width * 0.012)
         size_hint: None, None
         size: self.texture_size
