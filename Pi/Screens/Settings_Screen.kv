@@ -5,43 +5,167 @@
         Image:
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/SettingsBackground.png'
             fit_mode: "fill"
+        
+        # Title
         Label:
-            text: ''
-            pos_hint: {"center_x": 0.5,"center_y":0.8}
+            text: 'Location Settings'
+            pos_hint: {"center_x": 0.5, "center_y": 0.9}
             bold: True
-            size_hint_y: 0.2
-            font_size: self.height * 0.5
-            markup: True
-            color: 1,0,1
+            size_hint_y: 0.1
+            font_size: self.height * 0.4
+            color: 1, 1, 1, 1
+        
+        # Current Location Display
+        Label:
+            id: current_location_label
+            text: 'Current: Houston, TX'
+            pos_hint: {"center_x": 0.5, "center_y": 0.8}
+            size_hint_y: 0.05
+            font_size: self.height * 0.2
+            color: 0, 1, 0, 1
+        
+        # Preset Locations Section
+        Label:
+            text: 'Quick Select:'
+            pos_hint: {"center_x": 0.2, "center_y": 0.7}
+            size_hint_y: 0.05
+            font_size: self.height * 0.15
+            color: 1, 1, 1, 1
+        
+        # Preset Location Buttons (2 columns)
+        Button:
+            text: 'Houston, TX'
+            pos_hint: {"center_x": 0.25, "center_y": 0.6}
+            size_hint: 0.2, 0.06
+            on_release: root.set_location_from_preset('Houston, TX')
+            background_color: 0.2, 0.6, 1, 1
+        
+        Button:
+            text: 'Kennedy Space Center'
+            pos_hint: {"center_x": 0.75, "center_y": 0.6}
+            size_hint: 0.2, 0.06
+            on_release: root.set_location_from_preset('Kennedy Space Center')
+            background_color: 0.2, 0.6, 1, 1
+        
+        Button:
+            text: 'Moscow, Russia'
+            pos_hint: {"center_x": 0.25, "center_y": 0.5}
+            size_hint: 0.2, 0.06
+            on_release: root.set_location_from_preset('Moscow, Russia')
+            background_color: 0.2, 0.6, 1, 1
+        
+        Button:
+            text: 'Tsukuba, Japan'
+            pos_hint: {"center_x": 0.75, "center_y": 0.5}
+            size_hint: 0.2, 0.06
+            on_release: root.set_location_from_preset('Tsukuba, Japan')
+            background_color: 0.2, 0.6, 1, 1
+        
+        Button:
+            text: 'Oberpfaffenhofen, DE'
+            pos_hint: {"center_x": 0.25, "center_y": 0.4}
+            size_hint: 0.2, 0.06
+            on_release: root.set_location_from_preset('Oberpfaffenhofen, Germany')
+            background_color: 0.2, 0.6, 1, 1
+        
+        Button:
+            text: 'Quebec, Canada'
+            pos_hint: {"center_x": 0.75, "center_y": 0.4}
+            size_hint: 0.2, 0.06
+            on_release: root.set_location_from_preset('Quebec, Canada')
+            background_color: 0.2, 0.6, 1, 1
+        
+        Button:
+            text: 'London, UK'
+            pos_hint: {"center_x": 0.25, "center_y": 0.3}
+            size_hint: 0.2, 0.06
+            on_release: root.set_location_from_preset('London, UK')
+            background_color: 0.2, 0.6, 1, 1
+        
+        Button:
+            text: 'Sydney, Australia'
+            pos_hint: {"center_x": 0.75, "center_y": 0.3}
+            size_hint: 0.2, 0.06
+            on_release: root.set_location_from_preset('Sydney, Australia')
+            background_color: 0.2, 0.6, 1, 1
+        
+        # Manual Input Section
+        Label:
+            text: 'Manual Coordinates:'
+            pos_hint: {"center_x": 0.2, "center_y": 0.2}
+            size_hint_y: 0.05
+            font_size: self.height * 0.15
+            color: 1, 1, 1, 1
+        
+        Label:
+            text: 'Latitude:'
+            pos_hint: {"center_x": 0.15, "center_y": 0.15}
+            size_hint_y: 0.05
+            font_size: self.height * 0.12
+            color: 1, 1, 1, 1
+        
+        TextInput:
+            id: lat_input
+            text: '29.7604'
+            pos_hint: {"center_x": 0.25, "center_y": 0.15}
+            size_hint: 0.1, 0.05
+            font_size: 14
+            multiline: False
+            input_filter: 'float'
+        
+        Label:
+            text: 'Longitude:'
+            pos_hint: {"center_x": 0.45, "center_y": 0.15}
+            size_hint_y: 0.05
+            font_size: self.height * 0.12
+            color: 1, 1, 1, 1
+        
+        TextInput:
+            id: lon_input
+            text: '-95.3698'
+            pos_hint: {"center_x": 0.55, "center_y": 0.15}
+            size_hint: 0.1, 0.05
+            font_size: 14
+            multiline: False
+            input_filter: 'float'
+        
+        Button:
+            text: 'Set Manual Location'
+            pos_hint: {"center_x": 0.75, "center_y": 0.15}
+            size_hint: 0.15, 0.05
+            on_release: root.set_location_from_coordinates(lat_input.text, lon_input.text)
+            background_color: 0.2, 1, 0.2, 1
+        
+        # Auto-detect Button
+        Button:
+            text: 'Auto-detect from IP'
+            pos_hint: {"center_x": 0.5, "center_y": 0.08}
+            size_hint: 0.2, 0.06
+            on_release: root.detect_location_from_ip()
+            background_color: 1, 0.5, 0, 1
+        
+        # Smartflip Checkbox (moved to bottom)
         CheckBox:
             id: smartflip
-            pos_hint: {"center_x": 0.1,"center_y": 0.5}
-            size_hint_y: 0.2
-            on_active: root.checkbox_clicked(self,self.active)
+            pos_hint: {"center_x": 0.1, "center_y": 0.02}
+            size_hint_y: 0.05
+            on_active: root.checkbox_clicked(self, self.active)
+        
         Label:
-            text: "Smartflip (check to enable smooth 0 crossing)"
-            pos_hint: {"center_x": 0.35,"center_y":0.5}
-            size_hint_y: 0.4   
-            font_size: self.height * 0.13
-        TextInput:
-            id: lat_input1
-            pos_hint: {'center_x': 0.2, 'y': 0.4}
-            size_hint: (0.1, 0.06)
-            cursor_blink: True
-            font_size: 15
-            multiline: False
-        TextInput:
-            id: lat_input2
-            pos_hint: {'center_x': 0.4, 'y': 0.4}
-            size_hint: (0.1, 0.06)
-            cursor_blink: True
-            font_size: 15
-            multiline: False
+            text: "Smartflip (smooth 0 crossing)"
+            pos_hint: {"center_x": 0.35, "center_y": 0.02}
+            size_hint_y: 0.05
+            font_size: self.height * 0.12
+            color: 1, 1, 1, 1
+        
+        # Back Button
         Button:
-            size_hint: 0.1,0.11
+            size_hint: 0.1, 0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: app.root.current = 'main'
+        
+        # Status Icons
         Image:
             id: signal
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/signalred.zip"
@@ -50,6 +174,7 @@
             anim_loop: 0
             pos_hint: {"center_x": 0.05, "center_y": 0.07}
             fit_mode: "scale-down"
+        
         Image:
             id: arduino
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
@@ -58,11 +183,12 @@
             anim_loop: 0
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
             fit_mode: "scale-down"
+        
         Label:
             id: arduino_count
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
             text: ''
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1
             font_size: self.height * 0.3
             size_hint_y: 0.5

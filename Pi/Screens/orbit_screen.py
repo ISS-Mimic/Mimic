@@ -52,8 +52,8 @@ class Orbit_Screen(MimicBase):
     last_map_refresh = 0.                        # epoch seconds
     
     # User location (default: Houston, TX)
-    user_lat: float = 29.585736
-    user_lon: float = -95.1327829
+    user_lat: float = 29.7604  # Will be updated from settings
+    user_lon: float = -95.3698  # Will be updated from settings
     
     # Active TDRS tracking
     active_tdrs: list[int] = [0, 0]  # TDRS1, TDRS2 from database
@@ -72,6 +72,8 @@ class Orbit_Screen(MimicBase):
     def on_enter(self):
         log_info("Orbit Screen Initialized")
         
+        # Load user location from settings
+        self.load_user_location_from_settings()
         
         # periodic updates
         Clock.schedule_interval(self.update_orbit,         1)
@@ -98,6 +100,23 @@ class Orbit_Screen(MimicBase):
         self._update_tdrs_labels()
 
         self.update_user_location()
+
+    def load_user_location_from_settings(self):
+        """Load user location from settings configuration file."""
+        try:
+            config_path = Path.home() / ".mimic_data" / "location_config.json"
+            if config_path.exists():
+                with open(config_path, 'r') as f:
+                    data = json.load(f)
+                    self.user_lat = data['lat']
+                    self.user_lon = data['lon']
+                    log_info(f"Loaded user location: {self.user_lat}, {self.user_lon}")
+                    # Update the observer location for pass calculations
+                    self.location.lat = str(self.user_lat)
+                    self.location.lon = str(self.user_lon)
+        except Exception as exc:
+            log_error(f"Failed to load user location from settings: {exc}")
+            # Keep default Houston location
 
     # ---------------------------------------------------------------- leave
     def on_leave(self):
