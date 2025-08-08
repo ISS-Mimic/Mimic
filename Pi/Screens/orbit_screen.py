@@ -904,6 +904,29 @@ class Orbit_Screen(MimicBase):
             traceback.print_exc()
 
     # ---------------------------------------------------------------- ISS + next-pass
+    def _update_mcc_markers(self) -> None:
+        """Place Mission Control Center dots and labels on the map."""
+        try:
+            # Define MCCs: (id_dot, id_label, lat, lon, dx, dy) where dx,dy are pixel offsets for label
+            mcc_defs = [
+                ("mcc_houston",    "mcc_houston_label",    29.550,  -95.097,   10,  10),  # Houston, TX area
+                ("mcc_quebec",     "mcc_quebec_label",     46.813,  -71.208,   10,  10),  # Quebec City
+                ("mcc_oberpf",     "mcc_oberpf_label",     48.083,   11.283,   10,  10),  # Oberpfaffenhofen, DE
+                ("mcc_huntsville", "mcc_huntsville_label", 34.730,  -86.586,   10,  10),  # Huntsville, AL
+                ("mcc_tsukuba",    "mcc_tsukuba_label",    36.083,  140.083,   10,  10),  # Tsukuba, JP
+            ]
+            for dot_id, label_id, lat, lon, dx, dy in mcc_defs:
+                if dot_id in self.ids and label_id in self.ids:
+                    x, y = self.map_px(lat, lon)
+                    # place dot centered on location
+                    dot = self.ids[dot_id]
+                    dot.pos = (x - dot.width/2, y - dot.height/2)
+                    # place label with small offset
+                    lbl = self.ids[label_id]
+                    lbl.pos = (x + dx, y + dy)
+        except Exception as exc:
+            log_error(f"Update MCC markers failed: {exc}")
+
     def update_orbit(self, _dt=0):
         #log_info("Update Orbit")
         cfg = Path.home() / ".mimic_data" / "iss_tle_config.json"
@@ -983,6 +1006,9 @@ class Orbit_Screen(MimicBase):
         
         # — update ZOE region ----------------------------------------------
         self.update_zoe_region()
+
+        # — update MCC markers ----------------------------------------------
+        self._update_mcc_markers()
         
     # ----------------------------------------------------------------- ISS icon + track
     def update_iss(self, _dt=0):

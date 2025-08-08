@@ -359,7 +359,115 @@
             Line:
                 width: 2  # Thick line to create filled circle
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
-
+ 
+    # ───────────────────── Mission Control Centers (MCC) ───────────────────
+    # Dots
+    Widget:
+        id: mcc_houston
+        size_hint: None, None
+        size: min(dp(10), self.parent.width * 0.009), min(dp(10), self.parent.height * 0.009)
+        pos: 0, 0
+        canvas:
+            Color:
+                rgba: 1, 1, 1, 1
+            Line:
+                width: 2
+                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
+ 
+    Widget:
+        id: mcc_quebec
+        size_hint: None, None
+        size: min(dp(10), self.parent.width * 0.009), min(self.height, self.parent.height * 0.009)
+        pos: 0, 0
+        canvas:
+            Color:
+                rgba: 1, 1, 1, 1
+            Line:
+                width: 2
+                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
+ 
+    Widget:
+        id: mcc_oberpf
+        size_hint: None, None
+        size: min(dp(10), self.parent.width * 0.009), min(dp(10), self.parent.height * 0.009)
+        pos: 0, 0
+        canvas:
+            Color:
+                rgba: 1, 1, 1, 1
+            Line:
+                width: 2
+                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
+ 
+    Widget:
+        id: mcc_huntsville
+        size_hint: None, None
+        size: min(dp(10), self.parent.width * 0.009), min(dp(10), self.parent.height * 0.009)
+        pos: 0, 0
+        canvas:
+            Color:
+                rgba: 1, 1, 1, 1
+            Line:
+                width: 2
+                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
+ 
+    Widget:
+        id: mcc_tsukuba
+        size_hint: None, None
+        size: min(dp(10), self.parent.width * 0.009), min(dp(10), self.parent.height * 0.009)
+        pos: 0, 0
+        canvas:
+            Color:
+                rgba: 1, 1, 1, 1
+            Line:
+                width: 2
+                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
+ 
+    # Labels
+    Label:
+        id: mcc_houston_label
+        text: "NASA"
+        color: 1, 1, 1, 1
+        font_size: min(dp(16), self.parent.width * 0.012)
+        size_hint: None, None
+        size: self.texture_size
+        pos: 0, 0
+ 
+    Label:
+        id: mcc_quebec_label
+        text: "CSA"
+        color: 1, 1, 1, 1
+        font_size: min(dp(16), self.parent.width * 0.012)
+        size_hint: None, None
+        size: self.texture_size
+        pos: 0, 0
+ 
+    Label:
+        id: mcc_oberpf_label
+        text: "ESA"
+        color: 1, 1, 1, 1
+        font_size: min(dp(16), self.parent.width * 0.012)
+        size_hint: None, None
+        size: self.texture_size
+        pos: 0, 0
+ 
+    Label:
+        id: mcc_huntsville_label
+        text: "NASA"
+        color: 1, 1, 1, 1
+        font_size: min(dp(16), self.parent.width * 0.012)
+        size_hint: None, None
+        size: self.texture_size
+        pos: 0, 0
+ 
+    Label:
+        id: mcc_tsukuba_label
+        text: "JAXA"
+        color: 1, 1, 1, 1
+        font_size: min(dp(16), self.parent.width * 0.012)
+        size_hint: None, None
+        size: self.texture_size
+        pos: 0, 0
+ 
     # ───────────────────────────── ZOE & ISS icons ─────────────────────────
     # ZOE boundary widget (will be drawn as a polygon)
     Widget:
