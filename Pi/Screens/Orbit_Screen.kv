@@ -352,9 +352,9 @@
     Widget:
         id: mcc_houston
         size_hint: None, None
-        size: min(dp(10), self.parent.width * 0.009), min(dp(10), self.parent.height * 0.009)
+        size: min(dp(8), self.parent.width * 0.0075), min(dp(8), self.parent.height * 0.0075)
         pos: 0, 0
-        canvas:
+        canvas.before:
             Color:
                 rgba: 1, 1, 1, 1
             Line:
@@ -364,9 +364,9 @@
     Widget:
         id: mcc_quebec
         size_hint: None, None
-        size: min(dp(10), self.parent.width * 0.009), min(self.height, self.parent.height * 0.009)
+        size: min(dp(8), self.parent.width * 0.0075), min(dp(8), self.parent.height * 0.0075)
         pos: 0, 0
-        canvas:
+        canvas.before:
             Color:
                 rgba: 1, 1, 1, 1
             Line:
@@ -376,9 +376,9 @@
     Widget:
         id: mcc_oberpf
         size_hint: None, None
-        size: min(dp(10), self.parent.width * 0.009), min(dp(10), self.parent.height * 0.009)
+        size: min(dp(8), self.parent.width * 0.0075), min(dp(8), self.parent.height * 0.0075)
         pos: 0, 0
-        canvas:
+        canvas.before:
             Color:
                 rgba: 1, 1, 1, 1
             Line:
@@ -388,9 +388,9 @@
     Widget:
         id: mcc_huntsville
         size_hint: None, None
-        size: min(dp(10), self.parent.width * 0.009), min(dp(10), self.parent.height * 0.009)
+        size: min(dp(8), self.parent.width * 0.0075), min(dp(8), self.parent.height * 0.0075)
         pos: 0, 0
-        canvas:
+        canvas.before:
             Color:
                 rgba: 1, 1, 1, 1
             Line:
@@ -400,9 +400,21 @@
     Widget:
         id: mcc_tsukuba
         size_hint: None, None
-        size: min(dp(10), self.parent.width * 0.009), min(dp(10), self.parent.height * 0.009)
+        size: min(dp(8), self.parent.width * 0.0075), min(dp(8), self.parent.height * 0.0075)
         pos: 0, 0
-        canvas:
+        canvas.before:
+            Color:
+                rgba: 1, 1, 1, 1
+            Line:
+                width: 2
+                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
+
+    Widget:
+        id: mcc_moscow
+        size_hint: None, None
+        size: min(dp(8), self.parent.width * 0.0075), min(dp(8), self.parent.height * 0.0075)
+        pos: 0, 0
+        canvas.before:
             Color:
                 rgba: 1, 1, 1, 1
             Line:
@@ -454,19 +466,6 @@
         size_hint: None, None
         size: self.texture_size
         pos: 0, 0
- 
-    # Roscosmos (Moscow)
-    Widget:
-        id: mcc_moscow
-        size_hint: None, None
-        size: min(dp(10), self.parent.width * 0.009), min(dp(10), self.parent.height * 0.009)
-        pos: 0, 0
-        canvas:
-            Color:
-                rgba: 1, 1, 1, 1
-            Line:
-                width: 2
-                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     Label:
         id: mcc_moscow_label
@@ -481,11 +480,11 @@
     Widget:
         id: user_location
         size_hint: None, None
-        size: min(dp(12), self.parent.width * 0.01), min(dp(12), self.parent.height * 0.01)  # Responsive size
+        size: min(dp(18), self.parent.width * 0.014), min(dp(18), self.parent.height * 0.014)  # Slightly larger
         pos: 0, 0  # Will be set in Python
         canvas.after:
             Color:
-                rgba: 0.5, 0, 0.5, 1  # magenta fill
+                rgba: 0.5, 0, 0.5, 1  # white fill
             Ellipse:
                 pos: (self.center_x - min(self.width, self.height) / 2, self.center_y - min(self.width, self.height) / 2)
                 size: (min(self.width, self.height), min(self.width, self.height))
