@@ -89,15 +89,14 @@ class Orbit_Screen(MimicBase):
         Clock.schedule_once(self.update_tdrs_tle,          7)
         Clock.schedule_once(self.update_tdrs,              5)
         Clock.schedule_once(self.update_nightshade,       15)
-        Clock.schedule_once(self.update_sun,              11)
-        
-        # Update user location on screen enter
-        Clock.schedule_once(self.update_user_location,    10)
+        Clock.schedule_once(self.update_sun,              11)  
 
         # Update active TDRS circles - ensure hidden immediately when none active
         self._update_tdrs_circles()
         # Also update group labels initially
         self._update_tdrs_labels()
+
+        self.update_user_location()
 
     # ---------------------------------------------------------------- leave
     def on_leave(self):
@@ -125,15 +124,9 @@ class Orbit_Screen(MimicBase):
             x, y = self.map_px(self.user_lat, self.user_lon)
             self.ids.user_location.center = (x, y)
             
-            # Debug: log the position and ensure widget is visible
-            log_info(f"User location positioned at ({x}, {y}) for lat/lon ({self.user_lat}, {self.user_lon})")
-            self.ids.user_location.opacity = 1.0
-            self.ids.user_location.size = (min(18, self.width * 0.014), min(18, self.height * 0.014))
-            
             # Force the widget to be visible and on top
             self.ids.user_location.opacity = 1.0
-            # Try to bring it to front immediately
-            Clock.schedule_once(lambda dt: self._bring_widget_to_front(self.ids.user_location), 0.1)
+
             
         except Exception as exc:
             log_error(f"Update user location failed: {exc}")
@@ -915,19 +908,20 @@ class Orbit_Screen(MimicBase):
             traceback.print_exc()
 
     # ---------------------------------------------------------------- ISS + next-pass
-    def _update_mcc_markers(self) -> None:
+    def _update_loc_markers(self) -> None:
         """Place Mission Control Center dots and labels on the map."""
         try:
             # Define MCCs: (id_dot, id_label, lat, lon, dx, dy) where dx,dy are pixel offsets for label
-            mcc_defs = [
+            loc_defs = [
                 ("mcc_houston",    "mcc_houston_label",    29.550,  -95.097,   0,  -15),  # Houston, TX area
                 ("mcc_quebec",     "mcc_quebec_label",     46.813,  -71.208,   5,  -5),   # Quebec City
                 ("mcc_oberpf",     "mcc_oberpf_label",     48.083,   11.283,   5,  -5),   # Oberpfaffenhofen, DE
                 ("mcc_huntsville", "mcc_huntsville_label", 34.730,  -86.586,   5,  -5),   # Huntsville, AL
                 ("mcc_tsukuba",    "mcc_tsukuba_label",    36.083,  140.083,   5,  -5),   # Tsukuba, JP
                 ("mcc_moscow",     "mcc_moscow_label",     55.752,   37.616,   5,  -5),   # Moscow, RU
+                ("user_location",  "user_location_label",  39.730,  -104.990,   5,  -5),   # User Location
             ]
-            for dot_id, label_id, lat, lon, dx, dy in mcc_defs:
+            for dot_id, label_id, lat, lon, dx, dy in loc_defs:
                 if dot_id in self.ids and label_id in self.ids:
                     x, y = self.map_px(lat, lon)
                     # place dot centered on location
@@ -937,23 +931,8 @@ class Orbit_Screen(MimicBase):
                     lbl = self.ids[label_id]
                     lbl.pos = (x + dx, y + dy)
 
-            # Debug: Check if user location conflicts with Houston MCC
-            if 'user_location' in self.ids:
-                user_x, user_y = self.map_px(self.user_lat, self.user_lon)
-                houston_x, houston_y = self.map_px(29.550, -95.097)
-                distance = ((user_x - houston_x)**2 + (user_y - houston_y)**2)**0.5
-                log_info(f"User location: ({user_x}, {user_y}), Houston MCC: ({houston_x}, {houston_y}), Distance: {distance}")
-
         except Exception as exc:
-            log_error(f"Update MCC markers failed: {exc}")
-
-    def _bring_user_to_front(self, *_args) -> None:
-        try:
-            if 'user_location' in self.ids:
-                self.ids.user_location.opacity = 1.0
-                self._bring_widget_to_front(self.ids.user_location)
-        except Exception as exc:
-            log_error(f"Bring user to front failed: {exc}")
+            log_error(f"Update Location markers failed: {exc}")
 
     def update_orbit(self, _dt=0):
         #log_info("Update Orbit")
@@ -1035,13 +1014,8 @@ class Orbit_Screen(MimicBase):
         # — update ZOE region ----------------------------------------------
         self.update_zoe_region()
         
-        # — update MCC markers ----------------------------------------------
-        self._update_mcc_markers()
-        
-        # — ensure user location dot is refreshed and above markers ---------
-        self.update_user_location()
-        # schedule bring-to-front on next frame to ensure it draws last
-        Clock.schedule_once(self._bring_user_to_front, 0)
+        # — update location markers ----------------------------------------------
+        self._update_loc_markers()
         
     # ----------------------------------------------------------------- ISS icon + track
     def update_iss(self, _dt=0):
