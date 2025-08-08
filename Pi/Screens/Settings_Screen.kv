@@ -20,22 +20,22 @@
         Label:
             id: current_location_label
             text: 'Current: 29.7604, -95.3698'
-            pos_hint: {"center_x": 0.2, "center_y": 0.75}
+            pos_hint: {"center_x": 0.2, "center_y": 0.8}
             size_hint_y: 0.1
             font_size: min(self.height * 0.4, dp(48))
-            color: 0, 1, 0, 1
+            color: 0.5, 0, 0.5, 1
         
         # Manual Input Section
         Label:
             text: 'Enter Coordinates:'
-            pos_hint: {"center_x": 0.2, "center_y": 0.68}
+            pos_hint: {"center_x": 0.2, "center_y": 0.73}
             size_hint_y: 0.1
             font_size: min(self.height * 0.4, dp(48))
             color: 1, 1, 1, 1
         
         Label:
             text: 'Latitude:'
-            pos_hint: {"center_x": 0.15, "center_y": 0.63}
+            pos_hint: {"center_x": 0.15, "center_y": 0.68}
             size_hint_y: 0.05
             font_size: min(self.height * 0.6, dp(56))
             color: 1, 1, 1, 1
@@ -43,7 +43,7 @@
         TextInput:
             id: lat_input
             text: '29.7604'
-            pos_hint: {"center_x": 0.25, "center_y": 0.63}
+            pos_hint: {"center_x": 0.25, "center_y": 0.68}
             size_hint: 0.1, 0.05
             font_size: min(dp(16), self.parent.width * 0.012)
             multiline: False
@@ -51,7 +51,7 @@
         
         Label:
             text: 'Longitude:'
-            pos_hint: {"center_x": 0.35, "center_y": 0.63}
+            pos_hint: {"center_x": 0.35, "center_y": 0.68}
             size_hint_y: 0.05
             font_size: min(self.height * 0.6, dp(56))
             color: 1, 1, 1, 1
@@ -59,7 +59,7 @@
         TextInput:
             id: lon_input
             text: '-95.3698'
-            pos_hint: {"center_x": 0.45, "center_y": 0.63}
+            pos_hint: {"center_x": 0.45, "center_y": 0.68}
             size_hint: 0.1, 0.05
             font_size: min(dp(16), self.parent.width * 0.012)
             multiline: False
@@ -67,7 +67,7 @@
         
         Button:
             text: 'Set Manual Location'
-            pos_hint: {"center_x": 0.2, "center_y": 0.55}
+            pos_hint: {"center_x": 0.2, "center_y": 0.58}
             size_hint: 0.3, 0.06
             on_release: root.set_location_from_coordinates(lat_input.text, lon_input.text)
             background_color: 0.2, 1, 0.2, 1
@@ -76,7 +76,7 @@
         # Auto-detect Button
         Button:
             text: 'Auto-detect from IP'
-            pos_hint: {"center_x": 0.2, "center_y": 0.48}
+            pos_hint: {"center_x": 0.2, "center_y": 0.51}
             size_hint: 0.3, 0.06
             on_release: root.detect_location_from_ip()
             background_color: 1, 0.5, 0, 1
@@ -85,17 +85,11 @@
         # Title
         Label:
             text: 'Motor Settings'
-            pos_hint: {"center_x": 0.1, "center_y": 0.4}
+            pos_hint: {"center_x": 0.15, "center_y": 0.4}
             bold: True
-            size_hint_y: 0.15
+            size_hint_y: 0.1
             font_size: min(self.height * 0.6, dp(56))
             color: 1, 1, 1, 1
-
-        CheckBox:
-            id: smartflip
-            pos_hint: {"center_x": 0.4, "center_y": 0.3}
-            size_hint_y: 0.05
-            on_active: root.checkbox_clicked(self, self.active)
         
         Label:
             text: "Enable Smartflip (smooth 0 crossing)"
@@ -103,6 +97,12 @@
             size_hint_y: 0.05
             font_size: min(dp(32), self.parent.width * 0.024)
             color: 1, 1, 1, 1
+
+        CheckBox:
+            id: smartflip
+            pos_hint: {"center_x": 0.45, "center_y": 0.3}
+            size_hint_y: 0.05
+            on_active: root.checkbox_clicked(self, self.active)
         
         # Back Button
         Button:
