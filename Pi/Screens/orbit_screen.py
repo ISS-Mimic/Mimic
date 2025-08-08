@@ -130,6 +130,11 @@ class Orbit_Screen(MimicBase):
             self.ids.user_location.opacity = 1.0
             self.ids.user_location.size = (min(18, self.width * 0.014), min(18, self.height * 0.014))
             
+            # Force the widget to be visible and on top
+            self.ids.user_location.opacity = 1.0
+            # Try to bring it to front immediately
+            Clock.schedule_once(lambda dt: self._bring_widget_to_front(self.ids.user_location), 0.1)
+            
         except Exception as exc:
             log_error(f"Update user location failed: {exc}")
             import traceback
@@ -932,13 +937,13 @@ class Orbit_Screen(MimicBase):
                     lbl = self.ids[label_id]
                     lbl.pos = (x + dx, y + dy)
 
-            # Ensure user_location is drawn above MCC dots (bring to front)
+            # Debug: Check if user location conflicts with Houston MCC
             if 'user_location' in self.ids:
-                w = self.ids.user_location
-                parent = w.parent
-                if parent is not None and w in parent.children:
-                    parent.remove_widget(w)
-                    parent.add_widget(w)
+                user_x, user_y = self.map_px(self.user_lat, self.user_lon)
+                houston_x, houston_y = self.map_px(29.550, -95.097)
+                distance = ((user_x - houston_x)**2 + (user_y - houston_y)**2)**0.5
+                log_info(f"User location: ({user_x}, {user_y}), Houston MCC: ({houston_x}, {houston_y}), Distance: {distance}")
+
         except Exception as exc:
             log_error(f"Update MCC markers failed: {exc}")
 
