@@ -60,6 +60,13 @@ class Orbit_Screen(MimicBase):
     _zoe_boundary_cache: Optional[list] = None
     _zoe_cache_time: float = 0.0
     _zoe_cache_duration: float = 3600.0  # Cache for 1 hour (ZOE is very stable)
+    
+    # ZOE timing cache (for smooth per-second countdown without heavy recompute)
+    _zoe_entry_time: Optional[ephem.Date] = None
+    _zoe_exit_time: Optional[ephem.Date] = None
+    _zoe_last_compute_time: float = 0.0
+    _zoe_recompute_interval_s: float = 15.0
+    _zoe_last_in_state: Optional[bool] = None
 
     # ---------------------------------------------------------------- enter
     def on_enter(self):
@@ -537,36 +544,40 @@ class Orbit_Screen(MimicBase):
                 if 'zoe_acquisition_timer' in self.ids:
                     self.ids.zoe_acquisition_timer.text = "--:--"
                 return
-            
-            # Get static ZOE boundary
+
+            # Refresh cached entry/exit times sparingly
+            self._refresh_zoe_times_if_needed()
+
+            # Use static ZOE boundary for drawing
             zoe_boundary_points = self.get_static_zoe_boundary()
-            
-            # Update timing labels
-            entry_time, exit_time = self.calculate_zoe_timing()
-            
+
+            # Update timing labels using cached times for smooth per-second countdown
+            entry_time = self._zoe_entry_time
+            exit_time = self._zoe_exit_time
+
             if 'zoe_loss_timer' in self.ids and 'zoe_acquisition_timer' in self.ids:
-                current_time_ephem = ephem.now()
-                
+                now = ephem.now()
+
                 # zoe_loss_timer shows time until ISS enters ZOE (loses signal)
-                if entry_time and entry_time > current_time_ephem:
-                    time_to_entry = entry_time - current_time_ephem
+                if entry_time and entry_time > now:
+                    time_to_entry = entry_time - now
                     total_minutes = int(time_to_entry * 24 * 60)
                     minutes = total_minutes % 60
                     seconds = int((time_to_entry * 24 * 60 - total_minutes) * 60)
                     self.ids.zoe_loss_timer.text = f"{minutes:02d}:{seconds:02d}"
                 else:
                     self.ids.zoe_loss_timer.text = "--:--"
-                
+
                 # zoe_acquisition_timer shows time until ISS exits ZOE (regains signal)
-                if exit_time and exit_time > current_time_ephem:
-                    time_to_exit = exit_time - current_time_ephem
+                if exit_time and exit_time > now:
+                    time_to_exit = exit_time - now
                     total_minutes = int(time_to_exit * 24 * 60)
                     minutes = total_minutes % 60
                     seconds = int((time_to_exit * 24 * 60 - total_minutes) * 60)
                     self.ids.zoe_acquisition_timer.text = f"{minutes:02d}:{seconds:02d}"
                 else:
                     self.ids.zoe_acquisition_timer.text = "--:--"
-            
+
             # Update ZOE boundary display
             if 'ZOE_boundary' in self.ids and zoe_boundary_points:
                 # Convert lat/lon points to screen coordinates
@@ -574,13 +585,13 @@ class Orbit_Screen(MimicBase):
                 for lat, lon in zoe_boundary_points:
                     x, y = self.map_px(lat, lon)
                     screen_points.extend([x, y])
-                
+
                 # Update the ZOE boundary widget
                 for instruction in self.ids.ZOE_boundary.canvas.children:
                     if hasattr(instruction, 'points'):
                         instruction.points = screen_points
                         break
-            
+
             # Update ZOE label position
             if 'ZOElabel' in self.ids:
                 # Center of ZOE region
@@ -588,23 +599,23 @@ class Orbit_Screen(MimicBase):
                 zoe_center_lon = 70  # Center of Indian Ocean region
                 x, y = self.map_px(zoe_center_lat, zoe_center_lon)
                 self.ids.ZOElabel.pos = (x - self.ids.ZOElabel.width/2, y - self.ids.ZOElabel.height/2)
-            
+
             # Check if ISS is currently in the ZOE
             if self.iss_tle and 'ZOE_boundary' in self.ids:
                 self.iss_tle.compute(ephem.now())
                 iss_lat = math.degrees(self.iss_tle.sublat)
                 iss_lon = math.degrees(self.iss_tle.sublong)
-                
+
                 # Check if ISS is in ZOE
                 in_zoe = self.is_point_in_zoe(iss_lat, iss_lon, zoe_boundary_points)
-                
+
                 if in_zoe:
                     # ISS is in ZOE - make it more visible
                     self.ids.ZOE_boundary.col = (1, 0, 0, 0.8)  # Red, more opaque
                 else:
                     # ISS is not in ZOE - normal appearance
                     self.ids.ZOE_boundary.col = (1, 0, 1, 0.5)  # Magenta, semi-transparent
-                        
+
         except Exception as exc:
             log_error(f"Update ZOE region failed: {exc}")
 
@@ -1099,3 +1110,45 @@ class Orbit_Screen(MimicBase):
         except Exception as exc:
             log_error(f"Get ZOE debug info failed: {exc}")
             return {'error': str(exc)}
+
+    def _refresh_zoe_times_if_needed(self) -> None:
+        """Recompute ZOE entry/exit times sparingly; keep cached for smooth countdown."""
+        try:
+            # Hide ZOE if Z-belt active; clear cached times
+            zoe_should_show = not any(t in (7, 8) for t in self.active_tdrs if t)
+            if not zoe_should_show:
+                self._zoe_entry_time = None
+                self._zoe_exit_time = None
+                self._zoe_last_in_state = None
+                return
+            
+            # Current in/out state
+            if not self.iss_tle:
+                return
+            now = ephem.now()
+            self.iss_tle.compute(now)
+            cur_lat = math.degrees(self.iss_tle.sublat)
+            cur_lon = math.degrees(self.iss_tle.sublong)
+            in_zoe_now = self.is_point_in_zoe(cur_lat, cur_lon, self.get_static_zoe_boundary())
+            
+            # Determine if we need to recompute
+            should_recompute = False
+            if self._zoe_entry_time is None and self._zoe_exit_time is None:
+                should_recompute = True
+            elif (time.time() - self._zoe_last_compute_time) > self._zoe_recompute_interval_s:
+                should_recompute = True
+            elif self._zoe_exit_time is not None and now >= self._zoe_exit_time:
+                should_recompute = True
+            elif self._zoe_entry_time is not None and now >= self._zoe_entry_time and not in_zoe_now:
+                should_recompute = True
+            elif self._zoe_last_in_state is None or self._zoe_last_in_state != in_zoe_now:
+                should_recompute = True
+            
+            if should_recompute:
+                entry, exit_ = self.calculate_zoe_timing()
+                self._zoe_entry_time = entry
+                self._zoe_exit_time = exit_
+                self._zoe_last_compute_time = time.time()
+                self._zoe_last_in_state = in_zoe_now
+        except Exception as exc:
+            log_error(f"Refresh ZOE times failed: {exc}")
