@@ -347,24 +347,6 @@
         size: self.texture_size
         pos: 0, 0  # Will be positioned dynamically in Python
 
-    # ───────────────────────────── User Location ───────────────────────────
-    Widget:
-        id: user_location
-        size_hint: None, None
-        size: min(dp(12), self.parent.width * 0.01), min(dp(12), self.parent.height * 0.01)  # Responsive size
-        pos: 0, 0  # Will be set in Python
-        canvas:
-            Color:
-                rgba: 1, 1, 1, 1  # white fill
-            Ellipse:
-                pos: (self.center_x - min(self.width, self.height) / 2, self.center_y - min(self.width, self.height) / 2)
-                size: (min(self.width, self.height), min(self.width, self.height))
-            Color:
-                rgba: 0.5, 0, 0.5, 1  # magenta outline
-            Line:
-                width: 2
-                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
- 
     # ───────────────────── Mission Control Centers (MCC) ───────────────────
     # Dots
     Widget:
@@ -494,6 +476,24 @@
         size_hint: None, None
         size: self.texture_size
         pos: 0, 0
+
+    # ───────────────────────────── User Location ───────────────────────────
+    Widget:
+        id: user_location
+        size_hint: None, None
+        size: min(dp(12), self.parent.width * 0.01), min(dp(12), self.parent.height * 0.01)  # Responsive size
+        pos: 0, 0  # Will be set in Python
+        canvas:
+            Color:
+                rgba: 0.5, 0, 0.5, 1  # magenta fill
+            Ellipse:
+                pos: (self.center_x - min(self.width, self.height) / 2, self.center_y - min(self.width, self.height) / 2)
+                size: (min(self.width, self.height), min(self.width, self.height))
+            Color:
+                rgba: 0.5, 0, 0.5, 1  # magenta outline
+            Line:
+                width: 2
+                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # ───────────────────────────── ZOE & ISS icons ─────────────────────────
     # ZOE boundary widget (will be drawn as a polygon)

@@ -93,10 +93,11 @@ class Orbit_Screen(MimicBase):
         
         # Update user location on screen enter
         Clock.schedule_once(self.update_user_location,    10)
-        
-        # Update active TDRS circles
-        Clock.schedule_interval(self.update_active_tdrs,   2)  # Check every 2 seconds
-        Clock.schedule_once(self.update_active_tdrs,       5)  # Initial check after 5 seconds
+
+        # Update active TDRS circles - ensure hidden immediately when none active
+        self._update_tdrs_circles()
+        # Also update group labels initially
+        self._update_tdrs_labels()
 
     # ---------------------------------------------------------------- leave
     def on_leave(self):
@@ -947,13 +948,13 @@ class Orbit_Screen(MimicBase):
         except Exception as exc:
             log_error(f"ISS TLE load failed: {exc}")
             return
-    
+        
         # --- observer (user location) ---------------------------------------
         loc             = self.location
         loc.lat, loc.lon = str(self.user_lat), str(self.user_lon)
         loc.elevation    = 10
         loc.date         = ephem.now()          # ← **reset each tick**
-    
+        
         # ----------------------------------------------------------------------
         try:
             next_pass = loc.next_pass(self.iss_tle)   # (AOS, …, max-el)
@@ -965,23 +966,23 @@ class Orbit_Screen(MimicBase):
             self.ids.iss_next_pass2.text = "n/a"
             self.ids.countdown.text      = "n/a"
             return
-    
+        
         # — localise AOS time for display --------------------------------------
         utc_dt = datetime.strptime(str(next_pass[0]), "%Y/%m/%d %H:%M:%S")
         # For now, use Houston timezone. In the future, this could be configurable
         local  = utc_dt.replace(tzinfo=pytz.utc)\
                        .astimezone(pytz.timezone("America/Chicago"))
-    
+        
         self.ids.iss_next_pass1.text = local.strftime("%Y-%m-%d")
         self.ids.iss_next_pass2.text = local.strftime("%H:%M:%S")
-    
+        
         # — countdown ----------------------------------------------------------
         delta  = next_pass[0] - loc.date            # loc.date is *now*
         hrs    = delta * 24.0
         mins   = (hrs  - math.floor(hrs)) * 60
         secs   = (mins - math.floor(mins)) * 60
         self.ids.countdown.text = f"{int(hrs):02d}:{int(mins):02d}:{int(secs):02d}"
-    
+        
         # — visible / not visible flag ----------------------------------------
         sun         = ephem.Sun()
         loc.date    = next_pass[2]                  # max-elevation time
@@ -1015,12 +1016,14 @@ class Orbit_Screen(MimicBase):
         
         # — update ZOE region ----------------------------------------------
         self.update_zoe_region()
-
+        
         # — update MCC markers ----------------------------------------------
         self._update_mcc_markers()
-
+        
         # — ensure user location dot is refreshed and above markers ---------
         self.update_user_location()
+        if 'user_location' in self.ids:
+            self._bring_widget_to_front(self.ids.user_location)
         
     # ----------------------------------------------------------------- ISS icon + track
     def update_iss(self, _dt=0):
@@ -1190,3 +1193,12 @@ class Orbit_Screen(MimicBase):
                 self._zoe_last_in_state = in_zoe_now
         except Exception as exc:
             log_error(f"Refresh ZOE times failed: {exc}")
+
+    def _bring_widget_to_front(self, widget) -> None:
+        try:
+            parent = widget.parent
+            if parent is not None and widget in parent.children:
+                parent.remove_widget(widget)
+                parent.add_widget(widget)
+        except Exception as exc:
+            log_error(f"Bring widget to front failed: {exc}")
