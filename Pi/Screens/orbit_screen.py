@@ -1,12 +1,26 @@
 # Pi/Screens/orbit_screen.py
 from __future__ import annotations
 
-import json, math, pytz, sqlite3, time
+import json
+import math
+import pytz
+import sqlite3
+import time
+import traceback
+import sys
+import logging
 from pathlib import Path
 from subprocess import Popen
 from typing import Optional
 from kivy.base import ExceptionManager, ExceptionHandler
-import traceback, sys, logging
+from kivy.clock import Clock
+from kivy.lang import Builder
+
+from datetime import datetime, timedelta
+import ephem
+
+from ._base import MimicBase
+from utils.logger import log_info, log_error
 
 class _Reraise(ExceptionHandler):
     def handle_exception(self, inst):
@@ -15,15 +29,6 @@ class _Reraise(ExceptionHandler):
         return ExceptionManager.PASS
 
 ExceptionManager.add_handler(_Reraise())
-
-from math import degrees
-from datetime import datetime, timedelta
-import ephem
-from kivy.clock import Clock
-from kivy.lang import Builder
-
-from ._base import MimicBase
-from utils.logger import log_info, log_error
 
 Builder.load_file(str(Path(__file__).with_name("Orbit_Screen.kv")))
 
@@ -55,11 +60,6 @@ class Orbit_Screen(MimicBase):
     
     # Orbit counting
     last_daily_reset: datetime = None  # Track when we last reset daily counter
-    
-    # ZOE calculation caching
-    _zoe_boundary_cache: Optional[list] = None
-    _zoe_cache_time: float = 0.0
-    _zoe_cache_duration: float = 3600.0  # Cache for 1 hour (ZOE is very stable)
     
     # ZOE timing cache (for smooth per-second countdown without heavy recompute)
     _zoe_entry_time: Optional[ephem.Date] = None
@@ -419,20 +419,6 @@ class Orbit_Screen(MimicBase):
                 'e_mag': 0
             }
 
-    def calculate_zoe_region(self) -> list:
-        """Calculate the ZOE region - now returns static boundary."""
-        try:
-            return self.get_static_zoe_boundary()
-        except Exception as exc:
-            log_error(f"Calculate ZOE region failed: {exc}")
-            return []
-
-    def _clear_zoe_cache(self) -> None:
-        """Clear the ZOE boundary cache to force recalculation."""
-        self._zoe_boundary_cache = None
-        self._zoe_cache_time = 0.0
-        log_info("ZOE boundary cache cleared")
-
     def get_static_zoe_boundary(self) -> list:
         """Get a static ZOE boundary as a simple ellipse centered at 0° lat, 70° lon."""
         # Create a simple elliptical boundary
@@ -780,11 +766,11 @@ class Orbit_Screen(MimicBase):
         sun = ephem.Sun(now)
     
         # latitude = declination
-        lat = degrees(sun.dec)
+        lat = math.degrees(sun.dec)
     
         # longitude: λ = RA − GST  (east-positive, wrap to −180…+180)
         g = ephem.Observer(); g.lon = '0'; g.lat = '0'; g.date = now
-        lon = degrees(sun.ra - g.sidereal_time())
+        lon = math.degrees(sun.ra - g.sidereal_time())
         lon = (lon + 180) % 360 - 180
     
         x, y = self.map_px(lat, lon)
@@ -879,8 +865,8 @@ class Orbit_Screen(MimicBase):
                     for _ in range(1496):  # ~ one orbit ahead
                         try:
                             sat.compute(t)
-                            track_lat = degrees(sat.sublat)
-                            track_lon = degrees(sat.sublong)
+                            track_lat = math.degrees(sat.sublat)
+                            track_lon = math.degrees(sat.sublong)
                             track_x, track_y = self.map_px(track_lat, track_lon)
                             track_points.extend([track_x, track_y])
                             t += step
@@ -939,7 +925,6 @@ class Orbit_Screen(MimicBase):
             log_error(f"Update Location markers failed: {exc}")
 
     def update_orbit(self, _dt=0):
-        #log_info("Update Orbit")
         cfg = Path.home() / ".mimic_data" / "iss_tle_config.json"
         try:
             lines   = json.loads(cfg.read_text())
@@ -1035,8 +1020,8 @@ class Orbit_Screen(MimicBase):
         # -- current sub-lat / sub-lon ---------------------------------------
         try:
             self.iss_tle.compute(datetime.utcnow())
-            lat = degrees(self.iss_tle.sublat)
-            lon = degrees(self.iss_tle.sublong)
+            lat = math.degrees(self.iss_tle.sublat)
+            lon = math.degrees(self.iss_tle.sublong)
         except Exception as exc:
             log_error(f"ISS compute failed: {exc}")
             return
@@ -1069,8 +1054,8 @@ class Orbit_Screen(MimicBase):
 
             for _ in range(96):                   # ~ one orbit ahead
                 self.iss_tle.compute(t)
-                lat = degrees(self.iss_tle.sublat)
-                lon = degrees(self.iss_tle.sublong)
+                lat = math.degrees(self.iss_tle.sublat)
+                lon = math.degrees(self.iss_tle.sublong)
                 future_pts.append((lat, lon))
                 t += step                         # advance to next minute
 
@@ -1105,51 +1090,6 @@ class Orbit_Screen(MimicBase):
             log_error(f"Update ground track failed: {exc}")
             import traceback
             traceback.print_exc()
-
-    def get_zoe_debug_info(self) -> dict:
-        """Get debugging information about the current ZOE calculation."""
-        try:
-            info = {
-                'cache_valid': False,
-                'cache_age_seconds': 0,
-                'boundary_points_count': 0,
-                'iss_in_zoe': False,
-                'tdrs_positions_count': 0,
-                'tdrs_coverage_satellites': 'East (6,12) and West (10,11) only',
-                'z_belt_excluded': 'TDRS 7,8 excluded (creates ZOE)',
-                'iss_tle_available': self.iss_tle is not None,
-                'iss_inclination': None,
-            }
-            
-            # Check cache status
-            current_time = time.time()
-            if self._zoe_boundary_cache is not None:
-                info['cache_valid'] = current_time - self._zoe_cache_time < self._zoe_cache_duration
-                info['cache_age_seconds'] = current_time - self._zoe_cache_time
-                info['boundary_points_count'] = len(self._zoe_boundary_cache)
-            
-            # Check TDRS positions
-            tdrs_positions = self.get_tdrs_positions()
-            info['tdrs_positions_count'] = len(tdrs_positions)
-            
-            # Check ISS position and ZOE status
-            if self.iss_tle:
-                self.iss_tle.compute(ephem.now())
-                info['iss_inclination'] = math.degrees(self.iss_tle._inc)
-                
-                current_lat = math.degrees(self.iss_tle.sublat)
-                current_lon = math.degrees(self.iss_tle.sublong)
-                
-                # Get current ZOE boundary
-                zoe_boundary = self.get_static_zoe_boundary()
-                if zoe_boundary:
-                    info['iss_in_zoe'] = self.is_point_in_zoe(current_lat, current_lon, zoe_boundary)
-            
-            return info
-            
-        except Exception as exc:
-            log_error(f"Get ZOE debug info failed: {exc}")
-            return {'error': str(exc)}
 
     def _refresh_zoe_times_if_needed(self) -> None:
         """Recompute ZOE entry/exit times sparingly; keep cached for smooth countdown."""
@@ -1192,12 +1132,3 @@ class Orbit_Screen(MimicBase):
                 self._zoe_last_in_state = in_zoe_now
         except Exception as exc:
             log_error(f"Refresh ZOE times failed: {exc}")
-
-    def _bring_widget_to_front(self, widget) -> None:
-        try:
-            parent = widget.parent
-            if parent is not None and widget in parent.children:
-                parent.remove_widget(widget)
-                parent.add_widget(widget)
-        except Exception as exc:
-            log_error(f"Bring widget to front failed: {exc}")
