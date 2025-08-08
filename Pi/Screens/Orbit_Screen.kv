@@ -483,7 +483,7 @@
         size_hint: None, None
         size: min(dp(12), self.parent.width * 0.01), min(dp(12), self.parent.height * 0.01)  # Responsive size
         pos: 0, 0  # Will be set in Python
-        canvas:
+        canvas.after:
             Color:
                 rgba: 0.5, 0, 0.5, 1  # magenta fill
             Ellipse:

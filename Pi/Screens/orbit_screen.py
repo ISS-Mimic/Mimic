@@ -937,6 +937,14 @@ class Orbit_Screen(MimicBase):
         except Exception as exc:
             log_error(f"Update MCC markers failed: {exc}")
 
+    def _bring_user_to_front(self, *_args) -> None:
+        try:
+            if 'user_location' in self.ids:
+                self.ids.user_location.opacity = 1.0
+                self._bring_widget_to_front(self.ids.user_location)
+        except Exception as exc:
+            log_error(f"Bring user to front failed: {exc}")
+
     def update_orbit(self, _dt=0):
         #log_info("Update Orbit")
         cfg = Path.home() / ".mimic_data" / "iss_tle_config.json"
@@ -1022,8 +1030,8 @@ class Orbit_Screen(MimicBase):
         
         # — ensure user location dot is refreshed and above markers ---------
         self.update_user_location()
-        if 'user_location' in self.ids:
-            self._bring_widget_to_front(self.ids.user_location)
+        # schedule bring-to-front on next frame to ensure it draws last
+        Clock.schedule_once(self._bring_user_to_front, 0)
         
     # ----------------------------------------------------------------- ISS icon + track
     def update_iss(self, _dt=0):
