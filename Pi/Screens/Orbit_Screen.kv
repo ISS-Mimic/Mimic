@@ -355,7 +355,7 @@
         pos: 0, 0  # Will be set in Python
         canvas:
             Color:
-                rgba: 1, 1, 1, 1  # white dot
+                rgba: 0.5, 0, 0.5, 1  # magenta dot
             Line:
                 width: 2  # Thick line to create filled circle
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
@@ -376,7 +376,7 @@
     Label:
         id: ZOElabel
         text: "ZOE"
-        color: (0.5, 1, 0.5, 1)
+        color: 1, 0, 1, 1
         font_size: min(self.height * 0.30, dp(24))  # Responsive with max size
         markup: True
 

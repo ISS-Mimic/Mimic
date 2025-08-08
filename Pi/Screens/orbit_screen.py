@@ -132,6 +132,8 @@ class Orbit_Screen(MimicBase):
                 tdrs_db_path = Path.home() / ".mimic_data" / "tdrs.db"
                 if not tdrs_db_path.exists():
                     log_error("TDRS database not found")
+                    # Still update labels to reflect no-active state
+                    self._update_tdrs_labels()
                     return
                 
             conn = sqlite3.connect(str(tdrs_db_path))
@@ -144,14 +146,16 @@ class Orbit_Screen(MimicBase):
                 new_active_tdrs = [int(result[0]) if result[0] != '0' else 0, 
                                   int(result[1]) if result[1] != '0' else 0]
                 
-                # Only update if the active TDRS have changed
+                # Update list if changed
                 if new_active_tdrs != self.active_tdrs:
                     self.active_tdrs = new_active_tdrs
                     log_info(f"Active TDRS updated: {self.active_tdrs}")
-                    
-                    # Update all TDRS circle visibility
+                    # Update circles immediately
                     self._update_tdrs_circles()
-                    
+            
+            # Always refresh group labels color/position promptly
+            self._update_tdrs_labels()
+            
         except Exception as exc:
             log_error(f"Update active TDRS failed: {exc}")
             import traceback
@@ -503,7 +507,7 @@ class Orbit_Screen(MimicBase):
             
             # If we're currently in ZOE, we need to find the next exit
             if in_zoe and exit_time is None:
-                for i in range(1, 288):
+                for i in range(1, 24):
                     future_time = current_time + (i * coarse_step_minutes * ephem.minute)
                     self.iss_tle.compute(future_time)
                     future_lat = math.degrees(self.iss_tle.sublat)
@@ -517,7 +521,7 @@ class Orbit_Screen(MimicBase):
             
             # If we're not in ZOE, we need to find the next entry
             if not in_zoe and entry_time is None:
-                for i in range(1, 288):
+                for i in range(1, 24):
                     future_time = current_time + (i * coarse_step_minutes * ephem.minute)
                     self.iss_tle.compute(future_time)
                     future_lat = math.degrees(self.iss_tle.sublat)
@@ -538,6 +542,20 @@ class Orbit_Screen(MimicBase):
     def update_zoe_region(self) -> None:
         """Update the ZOE region display using static boundary."""
         try:
+            # Hide ZOE entirely if Z-belt (7/8) is active (no ZOE during Z-belt coverage)
+            zoe_should_show = not any(t in (7, 8) for t in self.active_tdrs if t)
+            if 'ZOE_boundary' in self.ids:
+                self.ids.ZOE_boundary.opacity = 1.0 if zoe_should_show else 0.0
+            if 'ZOElabel' in self.ids:
+                self.ids.ZOElabel.opacity = 1.0 if zoe_should_show else 0.0
+            if not zoe_should_show:
+                # Clear timers when ZOE does not apply
+                if 'zoe_loss_timer' in self.ids:
+                    self.ids.zoe_loss_timer.text = "--:--"
+                if 'zoe_acquisition_timer' in self.ids:
+                    self.ids.zoe_acquisition_timer.text = "--:--"
+                return
+            
             # Get static ZOE boundary
             zoe_boundary_points = self.get_static_zoe_boundary()
             
