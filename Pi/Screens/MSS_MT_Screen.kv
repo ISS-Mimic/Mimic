@@ -7,37 +7,33 @@
     max_speed: 5.5  # ~2.17 in/s, headroom above 2 in/s (5.08 cm/s)
     start_angle: -120.0
     end_angle: 120.0
-    # clamp speed and compute angle mapping
-    _clamped: min(max(self.speed_cms, self.min_speed), self.max_speed)
-    _angle: (self.start_angle + (self._clamped - self.min_speed) / (self.max_speed - self.min_speed) * (self.end_angle - self.start_angle)) if (self.max_speed - self.min_speed) != 0 else 0
     canvas:
         Color:
             rgba: 1, 1, 1, 0.4
         # Arc background
         Line:
-            ellipse: (self.center_x - self.width * 0.45, self.center_y - self.height * 0.45, self.width * 0.9, self.height * 0.9, 210, 330)
+            ellipse: (root.center_x - root.width * 0.45, root.center_y - root.height * 0.45, root.width * 0.9, root.height * 0.9, 210, 330)
             width: dp(2)
         # Needle
         Color:
             rgba: 1, 0.2, 0.4, 1
         PushMatrix
         Rotate:
-            angle: self._angle
-            origin: self.center_x, self.center_y
+            angle: root.start_angle + (((min(max(root.speed_cms, root.min_speed), root.max_speed) - root.min_speed) / (root.max_speed - root.min_speed) if (root.max_speed - root.min_speed) != 0 else 0) * (root.end_angle - root.start_angle))
+            origin: root.center_x, root.center_y
         Line:
-            points: [self.center_x, self.center_y, self.center_x + self.width * 0.4, self.center_y]
+            points: [root.center_x, root.center_y, root.center_x + root.width * 0.4, root.center_y]
             width: dp(2)
         PopMatrix
         # Center cap
         Color:
             rgba: 1, 1, 1, 1
         Line:
-            circle: (self.center_x, self.center_y, dp(3))
+            circle: (root.center_x, root.center_y, dp(3))
 
 <MSS_MT_Screen>:
     name: 'mt'
     FloatLayout:
-        #:import dp kivy.metrics.dp
         Image:
             id: MBS_MT_background
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/robo/MBSbackground.png'
@@ -154,7 +150,7 @@
             size_hint: 0.25, 0.25
             pos_hint: {"right": 0.98, "top": 0.98}
         Label:
-            text: f"{mt_speedometer.speed_cms:.2f} cm/s"
+            text: "{:.2f} cm/s".format(mt_speedometer.speed_cms)
             color: 1,1,1,1
             size_hint: None, None
             size: self.texture_size
