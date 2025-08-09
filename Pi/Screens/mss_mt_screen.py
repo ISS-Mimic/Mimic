@@ -111,6 +111,12 @@ class MSS_MT_Screen(MimicBase):
                     self.ids.mt_speed_value.text = f"{self._last_speed_cms:0.2f} cm/s"
                 except Exception:
                     self.ids.mt_speed_value.text = 'n/a'
+            # Update speedometer widget if present
+            if 'mt_speedometer' in self.ids:
+                try:
+                    self.ids.mt_speedometer.speed_cms = float(self._last_speed_cms)
+                except Exception:
+                    self.ids.mt_speedometer.speed_cms = 0.0
 
             # Payload labels
             try:
