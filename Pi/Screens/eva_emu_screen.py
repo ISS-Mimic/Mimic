@@ -45,25 +45,25 @@ class EVA_EMU_Screen(MimicBase):
             conn = sqlite3.connect(str(db_path))
             cur = conn.cursor()
             cur.execute('select Value from telemetry')
-            values = cur.fetchall()
+            values,timestamp = cur.fetchall()
             conn.close()
             
             # EVA EMU Telemetry - indices from GUI.py
             # UIA (Utility Interface Assembly) - EMU 1 & 2
-            uia_power_emu1 = float(values[61]) if values[61] else 0.0
-            uia_current_emu1 = float(values[62]) if values[62] else 0.0
-            uia_power_emu2 = float(values[63]) if values[63] else 0.0
-            uia_current_emu2 = float(values[64]) if values[64] else 0.0
+            uia_power_emu1 = float(values[61][0]) if values[61][0] else 0.0
+            uia_current_emu1 = float(values[62][0]) if values[62][0] else 0.0
+            uia_power_emu2 = float(values[63][0]) if values[63][0] else 0.0
+            uia_current_emu2 = float(values[64][0]) if values[64][0] else 0.0
             
             # PSA (Power Supply Assembly) - EMU 1 & 2
-            psa_power_emu1 = float(values[67]) if values[67] else 0.0
-            psa_current_emu1 = float(values[68]) if values[68] else 0.0
-            psa_power_emu2 = float(values[69]) if values[69] else 0.0
-            psa_current_emu2 = float(values[70]) if values[70] else 0.0
+            psa_power_emu1 = float(values[67][0]) if values[67][0] else 0.0
+            psa_current_emu1 = float(values[68][0]) if values[68][0] else 0.0
+            psa_power_emu2 = float(values[69][0]) if values[69][0] else 0.0
+            psa_current_emu2 = float(values[70][0]) if values[70][0] else 0.0
             
             # IRU (Inertial Reference Unit)
-            iru_voltage = float(values[65]) if values[65] else 0.0
-            iru_current = float(values[66]) if values[66] else 0.0
+            iru_voltage = float(values[65][0]) if values[65][0] else 0.0
+            iru_current = float(values[66][0]) if values[66][0] else 0.0
             
             # Update UI with formatted values
             self._set_text('UIApowerEMU1', f"{uia_power_emu1:.2f} V")

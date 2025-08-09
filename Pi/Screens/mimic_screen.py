@@ -148,5 +148,4 @@ class MimicScreen(MimicBase):
         """
         # Since the back button explicitly calls killproc(), we don't need to do anything here
         # The processes will only be killed when the user explicitly presses the back button
-        log_info("Leaving mimic screen - processes will only be killed on explicit exit")
-
+        log_info("Leaving mimic screen")
