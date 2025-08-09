@@ -5,14 +5,15 @@
     speed_cms: 0.0
     min_speed: 0.0
     max_speed: 5.5  # ~2.17 in/s, headroom above 2 in/s (5.08 cm/s)
-    start_angle: -90.0
-    end_angle: 90.0
+    # Horizontal semicircle: 0=left (180°) → max=right (360°)
+    start_angle: 180.0
+    end_angle: 360.0
     canvas:
         Color:
             rgba: 1, 1, 1, 0.4
         # Arc background
         Line:
-            ellipse: (root.center_x - root.width * 0.45, root.center_y - root.height * 0.45, root.width * 0.9, root.height * 0.9, 210, 330)
+            ellipse: (root.center_x - root.width * 0.45, root.center_y - root.height * 0.45, root.width * 0.9, root.height * 0.9, 180, 360)
             width: dp(2)
         # Needle
         Color:
@@ -39,21 +40,6 @@
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/robo/MBSbackground.png'
             fit_mode: "fill"
         Label:
-            ##pos_hint: {"center_x": 0.5, "center_y": 0.8}
-            ##text: 'Mobile Transporter'
-            ##markup: True
-            ##color: 1,0,1
-            ##size_hint_y: 0.4
-            ##font_size: min(self.height * 0.10, dp(32))
-        Label:
-            ##id: mt_ws_label
-            ##pos_hint: {"center_x": 0.25, "center_y": 0.6}
-            ##text: 'MT is at WS: '
-            ##markup: True
-            ##color: 1,1,1
-            ##size_hint_y: 0.4
-            ##font_size: self.height * 0.10
-        Label:
             id: mt_ws_value
             pos_hint: {"center_x": 0.275, "center_y": 0.73}
             text: '0'
@@ -62,14 +48,6 @@
             size_hint_y: 0.4
             font_size: min(self.height * 0.10, dp(28))
         Label:
-            ##id: mt_positon_label
-            ##pos_hint: {"center_x": 0.2, "center_y": 0.45}
-            ##text: 'MT Position: '
-            ##markup: True
-            ##color: 1,1,1
-            ##size_hint_y: 0.4
-            ##font_size: self.height * 0.10
-        Label:
             id: mt_position_value
             pos_hint: {"center_x": 0.275, "center_y": 0.65}
             text: '0'
@@ -77,14 +55,6 @@
             color: root.signalcolor
             size_hint_y: 0.4
             font_size: min(self.height * 0.10, dp(28))
-        Label:
-            ##id: mt_speed_label
-            ##pos_hint: {"center_x": 0.22, "center_y": 0.3}
-            ##text: 'MT Speed: '
-            ##markup: True
-            ##color: 1,1,1
-            ##size_hint_y: 0.4
-            ##font_size: self.height * 0.10
         Label:
             id: mt_speed_value
             pos_hint: {"center_x": 0.275, "center_y": 0.69}
@@ -95,7 +65,7 @@
             font_size: min(self.height * 0.10, dp(28))
         Label:
             id: MBS_Base_Location
-            pos_hint: {"center_x": 0.275, "center_y": 0.46}
+            pos_hint: {"center_x": 0.275, "center_y": 0.48}
             text: '0'
             markup: True
             color: root.signalcolor
@@ -103,7 +73,7 @@
             font_size: min(self.height * 0.10, dp(28))
         Label:
             id: MBS_Operating_Base
-            pos_hint: {"center_x": 0.275, "center_y": 0.42}
+            pos_hint: {"center_x": 0.275, "center_y": 0.44}
             text: '0'
             markup: True
             color: root.signalcolor
