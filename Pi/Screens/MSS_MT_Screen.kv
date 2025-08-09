@@ -13,7 +13,7 @@
             rgba: 1, 1, 1, 0.4
         # Arc background
         Line:
-            ellipse: (root.center_x - root.width * 0.45, root.center_y - root.height * 0.45, root.width * 0.9, root.height * 0.9, 180, 360)
+            ellipse: (root.center_x - root.width * 0.45, root.center_y - root.height * 0.45, root.width * 0.9, root.height * 0.9, -90, 90)
             width: dp(2)
         # Needle
         Color:
@@ -158,11 +158,4 @@
         MTSpeedometer:
             id: mt_speedometer
             size_hint: 0.25, 0.25
-            pos_hint: {"right": 0.98, "top": 0.98}
-        Label:
-            text: "{:.2f} cm/s".format(mt_speedometer.speed_cms)
-            color: 1,1,1,1
-            size_hint: None, None
-            size: self.texture_size
-            pos_hint: {"right": 0.98, "top": 0.84}
-            font_size: min(self.height * 0.20, dp(20))
+            pos_hint: {"right": 0.7, "top": 0.8}
