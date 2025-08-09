@@ -1849,10 +1849,8 @@ class MainApp(App):
             if Disco:
                 serialWrite("Disco ")
                 Disco = False
-            #serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "V1A=" + v1a + " " + "V2A=" + v2a + " " + "V3A=" + v3a + " " + "V4A=" + v4a + " " + "V1B=" + v1b + " " + "V2B=" + v2b + " " + "V3B=" + v3b + " " + "V4B=" + v4b + " ")
             serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + str(v1as) + " " + "V2A=" + str(v2as) + " " + "V3A=" + str(v3as) + " " + "V4A=" + str(v4as) + " " + "V1B=" + str(v1bs) + " " + "V2B=" + str(v2bs) + " " + "V3B=" + str(v3bs) + " " + "V4B=" + str(v4bs) + " " + "ISS=" + module + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
 
-        # State vector updates moved to orbit_data.py
  
         self.screens["eps"].ids.psarj_value.text = psarj + "deg"
         self.screens["eps"].ids.ssarj_value.text = ssarj + "deg"
@@ -2153,65 +2151,6 @@ class MainApp(App):
         else:
             self.screens["mt"].ids.POApayload.text = "n/a" 
         
-        #self.screens["ssrms"].ids.OperatingBase.text = str(OperatingBase)
-        if int(OperatingBase) == 0:
-            self.screens["ssrms"].ids.OperatingBase.text = "A"
-        elif int(OperatingBase) == 5:
-            self.screens["ssrms"].ids.OperatingBase.text = "B"
-        else:
-            self.screens["ssrms"].ids.OperatingBase.text = "n/a"
-                                      
-        #self.screens["ssrms"].ids.TipLEEstatus.text = str(TipLEEstatus)
-        if int(TipLEEstatus) == 0:
-            self.screens["ssrms"].ids.TipLEEstatus.text = "Released"
-        elif int(TipLEEstatus) == 1:
-            self.screens["ssrms"].ids.TipLEEstatus.text = "Captive"
-        elif int(TipLEEstatus) == 2:
-            self.screens["ssrms"].ids.TipLEEstatus.text = "Captured"
-        else:
-            self.screens["ssrms"].ids.TipLEEstatus.text = "n/a"
-        
-         #self.screens["ssrms"].ids.SACSopBase.text = str(SACSopBase)
-        if int(SACSopBase) == 0:
-            self.screens["ssrms"].ids.SACSopBase.text = "A"
-        elif int(SACSopBase) == 5:
-            self.screens["ssrms"].ids.SACSopBase.text = "B"
-        else:
-            self.screens["ssrms"].ids.OperatingBase.text = "n/a"
-        
-        self.screens["ssrms"].ids.ShoulderRoll.text = str(ShoulderRoll) + " deg"
-        self.screens["ssrms"].ids.ShoulderYaw.text = str(ShoulderYaw) + " deg"
-        self.screens["ssrms"].ids.ShoulderPitch.text = str(ShoulderPitch) + " deg"
-        self.screens["ssrms"].ids.ElbowPitch.text = str(ElbowPitch) + " deg"
-        self.screens["ssrms"].ids.WristRoll.text = str(WristRoll) + " deg"
-        self.screens["ssrms"].ids.WristYaw.text = str(WristYaw) + " deg"
-        self.screens["ssrms"].ids.WristPitch.text = str(WristPitch) + " deg"
-        
-        #self.screens["ssrms"].ids.BaseLocation.text = str(BaseLocation)
-        if int(BaseLocation) == 1:
-            self.screens["ssrms"].ids.BaseLocation.text = "Lab"
-        elif int(BaseLocation) == 2:
-            self.screens["ssrms"].ids.BaseLocation.text = "Node 3"
-        elif int(BaseLocation) == 4:
-            self.screens["ssrms"].ids.BaseLocation.text = "Node 2"
-        elif int(BaseLocation) == 7:
-            self.screens["ssrms"].ids.BaseLocation.text = "MBS PDGF 1"
-        elif int(BaseLocation) == 8:
-            self.screens["ssrms"].ids.BaseLocation.text = "MBS PDGF 2"
-        elif int(BaseLocation) == 11:
-            self.screens["ssrms"].ids.BaseLocation.text = "MBS PDGF 3"
-        elif int(BaseLocation) == 13:
-            self.screens["ssrms"].ids.BaseLocation.text = "MBS PDGF 4"
-        elif int(BaseLocation) ==14:
-            self.screens["ssrms"].ids.BaseLocation.text = "FGB"
-        elif int(BaseLocation) == 16:
-            self.screens["ssrms"].ids.BaseLocation.text = "POA"
-        elif int(BaseLocation) == 19:
-            self.screens["ssrms"].ids.BaseLocation.text = "SSRMS Tip LEE"
-        elif int(BaseLocation) == 63:
-            self.screens["ssrms"].ids.BaseLocation.text = "Undefined"
-        else:
-            self.screens["ssrms"].ids.BaseLocation.text = "n/a"
         
         #self.screens["spdm"].ids.SPDMbase.text = str(SPDMbase)
         if int(SPDMbase) == 1:
