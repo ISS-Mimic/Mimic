@@ -1284,16 +1284,7 @@ class MainApp(App):
         ##-------------------EVA Functionality End-------------------##
 
         #----------------------EVA EMU Telemetry-------------------#
-        UIApowerEMU1 = "{:.2f}".format(float((values[61])[0]))
-        UIApowerEMU2 = "{:.2f}".format(float((values[63])[0]))
-        UIAcurrentEMU1 = "{:.2f}".format(float((values[62])[0]))
-        UIAcurrentEMU2 = "{:.2f}".format(float((values[64])[0]))
-        PSApowerEMU1 = "{:.2f}".format(float((values[67])[0]))
-        PSApowerEMU2 = "{:.2f}".format(float((values[69])[0]))
-        PSAcurrentEMU1 = "{:.2f}".format(float((values[68])[0]))
-        PSAcurrentEMU2 = "{:.2f}".format(float((values[70])[0]))
-        IRUvoltage = "{:.2f}".format(float((values[65])[0]))
-        IRUcurrent = "{:.2f}".format(float((values[66])[0]))
+        # Moved to eva_emu_screen.py
         #--------------------EVA EMU Telemetry End------------------#
 
 #        if (difference > -10) and (isinstance(App.get_running_app().root_window.children[0], Popup)==False):
@@ -1423,17 +1414,6 @@ class MainApp(App):
                 Disco = False
             serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + str(v1as) + " " + "V2A=" + str(v2as) + " " + "V3A=" + str(v3as) + " " + "V4A=" + str(v4as) + " " + "V1B=" + str(v1bs) + " " + "V2B=" + str(v2bs) + " " + "V3B=" + str(v3bs) + " " + "V4B=" + str(v4bs) + " " + "ISS=" + module + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
 
-
-        self.screens["eva_emu"].ids.UIApowerEMU1.text = str(UIApowerEMU1) + " V"
-        self.screens["eva_emu"].ids.UIApowerEMU2.text = str(UIApowerEMU2) + " V"
-        self.screens["eva_emu"].ids.UIAcurrentEMU1.text = str(UIAcurrentEMU1) + " A"
-        self.screens["eva_emu"].ids.UIAcurrentEMU2.text = str(UIAcurrentEMU2)  + " A" 
-        self.screens["eva_emu"].ids.PSApowerEMU1.text = str(PSApowerEMU1) + " V"
-        self.screens["eva_emu"].ids.PSApowerEMU2.text = str(PSApowerEMU2) + " V"
-        self.screens["eva_emu"].ids.PSAcurrentEMU1.text = str(PSAcurrentEMU1) + " A"
-        self.screens["eva_emu"].ids.PSAcurrentEMU2.text = str(PSAcurrentEMU2) + " A"
-        self.screens["eva_emu"].ids.IRUvoltage.text = str(IRUvoltage) + " V"
-        self.screens["eva_emu"].ids.IRUcurrent.text = str(IRUcurrent) + " A"
         
         #self.screens["ct_uhf"].ids.UHF1pwr.text = str(UHF1pwr)
         if int(UHF1pwr) == 0:

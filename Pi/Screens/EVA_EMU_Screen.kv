@@ -1,3 +1,5 @@
+#:import dp
+
 <EVA_EMU_Screen>:
     name: 'eva_emu'
     FloatLayout:
@@ -12,7 +14,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.3
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         Label:
             id: UIApowerEMU2
             pos_hint: {"center_x": 0.69, "center_y": 0.77}
@@ -20,7 +22,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.3
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         Label:
             id: UIAcurrentEMU1
             pos_hint: {"center_x": 0.6, "center_y": 0.74}
@@ -28,7 +30,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.3
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         Label:
             id: UIAcurrentEMU2
             pos_hint: {"center_x": 0.69, "center_y": 0.74}
@@ -36,7 +38,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.3
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         Label:
             id: PSApowerEMU1
             pos_hint: {"center_x": 0.81, "center_y": 0.77}
@@ -44,7 +46,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.3
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         Label:
             id: PSApowerEMU2
             pos_hint: {"center_x": 0.9, "center_y": 0.77}
@@ -52,7 +54,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.3
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         Label:
             id: PSAcurrentEMU1
             pos_hint: {"center_x": 0.81, "center_y": 0.74}
@@ -60,7 +62,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.3
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         Label:
             id: PSAcurrentEMU2
             pos_hint: {"center_x": 0.9, "center_y": 0.74}
@@ -68,7 +70,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.3
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         Label:
             id: IRUvoltage
             pos_hint: {"center_x": 0.15, "center_y": 0.2}
@@ -76,15 +78,15 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.3
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         Label:
             id: IRUcurrent
             pos_hint: {"center_x": 0.15, "center_y": 0.17}
-            text: '0.003'
+            text: '0.03'
             markup: True
             color: root.signalcolor
             size_hint_y: 0.3
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
