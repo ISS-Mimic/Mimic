@@ -50,22 +50,22 @@ class SSRMS_Screen(MimicBase):
             values = cur.fetchall()
             conn.close()
 
-            # Operating Base (values[102]) A/B
+            # Operating Base (values[261]) A/B
             OperatingBase = int(float(values[261][0]))
-            if OperatingBase == 1:
+            if OperatingBase == 0:
                 self.ids.OperatingBase.text = "LEE A"
-            elif OperatingBase == 2:
+            elif OperatingBase == 5:
                 self.ids.OperatingBase.text = "LEE B"
             else:
                 self.ids.OperatingBase.text = "n/a"
 
-            # Tip LEE status (values[103])
+            # Tip LEE status (values[269])
             TipLEEstatus = int(float(values[269][0]))
-            if TipLEEstatus == 1:
+            if TipLEEstatus == 0:
                 self.ids.TipLEEstatus.text = "Released"
-            elif TipLEEstatus == 2:
+            elif TipLEEstatus == 1:
                 self.ids.TipLEEstatus.text = "Captive"
-            elif TipLEEstatus == 3:
+            elif TipLEEstatus == 2:
                 self.ids.TipLEEstatus.text = "Captured"
             else:
                 self.ids.TipLEEstatus.text = "n/a"
@@ -79,7 +79,7 @@ class SSRMS_Screen(MimicBase):
             except Exception:
                 self.ids.SACSopBase.text = "n/a"
 
-            # Joint angles (values[105..110]? per GUI usage order)
+            # Joint angles
             self.ids.ShoulderRoll.text = f"{float(values[262][0]):.2f} deg"
             self.ids.ShoulderYaw.text = f"{float(values[263][0]):.2f} deg"
             self.ids.ShoulderPitch.text = f"{float(values[264][0]):.2f} deg"
