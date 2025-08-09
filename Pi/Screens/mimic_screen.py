@@ -48,6 +48,7 @@ class MimicScreen(MimicBase):
         # Check if scripts exist
         iss_telemetry_path = base / "iss_telemetry.py"
         tdrscheck_path = base / "TDRScheck.py"
+        vvcheck_path = base / "VVcheck.py"
         
         if not iss_telemetry_path.exists():
             log_error(f"iss_telemetry.py not found at {iss_telemetry_path}")
@@ -55,6 +56,9 @@ class MimicScreen(MimicBase):
             
         if not tdrscheck_path.exists():
             log_error(f"TDRScheck.py not found at {tdrscheck_path}")
+            return
+        if not vvcheck_path.exists():
+            log_error(f"VVcheck.py not found at {vvcheck_path}")
             return
         
         try:
@@ -76,6 +80,15 @@ class MimicScreen(MimicBase):
             )
             log_info(f"Started TDRScheck.py (PID: {app.TDRSproc.pid})")
             
+            # Start NASA Visiting Vehicles updater
+            app.VVproc = Popen(
+                ["python", str(vvcheck_path)],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            log_info(f"Started VVcheck.py (PID: {app.VVproc.pid})")
+            
             # Check if processes started successfully
             if app.p.poll() is not None:
                 stdout, stderr = app.p.communicate()
@@ -86,10 +99,14 @@ class MimicScreen(MimicBase):
                 stdout, stderr = app.TDRSproc.communicate()
                 log_error(f"TDRScheck.py failed to start: {stderr}")
                 app.TDRSproc = None
+            if app.VVproc.poll() is not None:
+                stdout, stderr = app.VVproc.communicate()
+                log_error(f"VVcheck.py failed to start: {stderr}")
+                app.VVproc = None
                 
         except Exception as exc:
             log_error(f"Failed to start telemetry procs: {exc}")
-            app.p = app.TDRSproc = None
+            app.p = app.TDRSproc = app.VVproc = None
 
     # ---------------------------------------------------------------- stop
     def killproc(self, *_):
@@ -109,7 +126,7 @@ class MimicScreen(MimicBase):
         except Exception as exc:
             log_error(f"DB write failed: {exc}")
 
-        for name in ("p", "TDRSproc"):
+        for name in ("p", "TDRSproc", "VVproc"):
             proc = getattr(app, name, None)
             if not proc:
                 continue
