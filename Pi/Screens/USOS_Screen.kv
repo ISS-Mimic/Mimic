@@ -1,10 +1,15 @@
+#:import dp kivy.metrics.dp
+
 <USOS_Screen>:
     name: 'usos'
     FloatLayout:
+        # ───────────────────────── Background ──────────────────────────────
         Image:
             id: USOS_Background
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/usos/USOSbackground.png"
             fit_mode: "fill"
+        
+        # ───────────────────────── Port Icons ─────────────────────────────
         Image:
             id: n1n_cygnus
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/usos/N1NcygnusUSOS.png"
@@ -29,16 +34,18 @@
             id: n2z_starliner
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/usos/N2ZcstUSOS.png"
             opacity: 0.0
+        
+        # ───────────────────────── Labels (N2Z) ───────────────────────────
         Label:
             id: n2z_label
             pos_hint: {"center_x": 0.48, "center_y": 0.58}
             text: ''
-            font_size: 10
-            text_size: 200,None
+            font_size: min(self.height * 0.25, dp(18))
+            text_size: 200, None
             halign: 'left'
             bold: True
             markup: True
-            color: 0,0,1
+            color: 0, 0, 1, 1
         Label:
             id: n2z_mission
             pos_hint: {"center_x": 0.65, "center_y": 0.35}
@@ -47,7 +54,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: n2z_vehicle
             pos_hint: {"center_x": 0.65, "center_y": 0.31}
@@ -56,7 +63,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: n2z_spacecraft
             pos_hint: {"center_x": 0.65, "center_y": 0.27}
@@ -65,7 +72,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: n2z_arrival
             pos_hint: {"center_x": 0.65, "center_y": 0.23}
@@ -74,7 +81,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: n2z_departure
             pos_hint: {"center_x": 0.65, "center_y": 0.19}
@@ -83,17 +90,19 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
+        
+        # ───────────────────────── Labels (N2F) ───────────────────────────
         Label:
             id: n2f_label
             pos_hint: {"center_x": 0.48, "center_y": 0.47}
             text: ''
-            font_size: 10
-            text_size: 200,None
+            font_size: min(self.height * 0.25, dp(18))
+            text_size: 200, None
             halign: 'left'
             bold: True
             markup: True
-            color: 0,0,1
+            color: 0, 0, 1, 1
         Label:
             id: n2f_mission
             pos_hint: {"center_x": 0.65, "center_y": 0.71}
@@ -102,7 +111,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: n2f_vehicle
             pos_hint: {"center_x": 0.65, "center_y": 0.67}
@@ -111,7 +120,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: n2f_spacecraft
             pos_hint: {"center_x": 0.65, "center_y": 0.63}
@@ -120,7 +129,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: n2f_arrival
             pos_hint: {"center_x": 0.65, "center_y": 0.59}
@@ -129,7 +138,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: n2f_departure
             pos_hint: {"center_x": 0.65, "center_y": 0.55}
@@ -138,17 +147,19 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
+        
+        # ───────────────────────── Labels (N1N) ───────────────────────────
         Label:
             id: n1n_label
             pos_hint: {"center_x": 0.24, "center_y": 0.2}
             text: ''
-            font_size: 10
-            text_size: 200,None
+            font_size: min(self.height * 0.25, dp(18))
+            text_size: 200, None
             halign: 'left'
             bold: True
             markup: True
-            color: 0,0,1
+            color: 0, 0, 1, 1
         Label:
             id: n1n_mission
             pos_hint: {"center_x": 0.92, "center_y": 0.35}
@@ -157,7 +168,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: n1n_vehicle
             pos_hint: {"center_x": 0.92, "center_y": 0.31}
@@ -166,7 +177,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: n1n_spacecraft
             pos_hint: {"center_x": 0.92, "center_y": 0.27}
@@ -175,7 +186,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: n1n_arrival
             pos_hint: {"center_x": 0.92, "center_y": 0.23}
@@ -184,7 +195,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: n1n_departure
             pos_hint: {"center_x": 0.92, "center_y": 0.19}
@@ -193,17 +204,19 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
+        
+        # ───────────────────────── Labels (N2N) ───────────────────────────
         Label:
             id: n2n_label
             pos_hint: {"center_x": 0.46, "center_y": 0.2}
             text: ''
-            font_size: 10
-            text_size: 200,None
+            font_size: min(self.height * 0.25, dp(18))
+            text_size: 200, None
             halign: 'left'
             bold: True
             markup: True
-            color: 0,0,1
+            color: 0, 0, 1, 1
         Label:
             id: n2n_mission
             pos_hint: {"center_x": 0.92, "center_y": 0.71}
@@ -212,7 +225,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: n2n_vehicle
             pos_hint: {"center_x": 0.92, "center_y": 0.67}
@@ -221,7 +234,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: n2n_spacecraft
             pos_hint: {"center_x": 0.92, "center_y": 0.63}
@@ -230,7 +243,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: n2n_arrival
             pos_hint: {"center_x": 0.92, "center_y": 0.59}
@@ -239,7 +252,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: n2n_departure
             pos_hint: {"center_x": 0.92, "center_y": 0.55}
@@ -248,11 +261,14 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
+
+        # ───────────────────────── Back Button & Status ───────────────────
         Button:
-            size_hint: 0.1,0.11
+            size_hint: 0.1, 0.11
             pos_hint: {"center_x": 0.92375, "center_y": 0.082}
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            background_down: self.background_normal.replace('BackButton.png', 'BackButton_Down.png') if self.background_normal else ''
             on_release: app.root.current = 'mimic'
         Image:
             id: signal
@@ -275,6 +291,6 @@
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
             text: ''
             markup: True
-            color: 1,1,1
-            font_size: self.height * 0.3
+            color: 1, 1, 1, 1
+            font_size: min(self.height * 0.3, dp(40))
             size_hint_y: 0.5
