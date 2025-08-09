@@ -428,7 +428,7 @@ class MainApp(App):
 
         Clock.schedule_interval(self.updateArduinoCount, 5)
         Clock.schedule_interval(self.updateVV, 500)
-        Clock.schedule_interval(self.update_vv_values, 40)
+        # VV values updater moved into VV_Screen.on_enter
         # VV image refresh moved into VV_Image screen's on_enter
         return root
 
@@ -985,12 +985,12 @@ class MainApp(App):
                         self.screens["usos"].ids.n2n_departure.text = "Departure: " + departure_date
                         self.screens["usos"].ids.n2n_label.text = sc_name + "\n" + str(mission[i][0])
                         self.screens["vv"].ids.n2n_label.text = sc_name + "\n" + str(mission[i][0])
-                        #if "Dream" in sc_name:
+                        #if "Dream" in sc_name: #TODO: Add back in when we have a Dreamchaser
                             #self.screens["usos"].ids.n2n_dreamchaser.opacity = 1.0
                             #self.screens["usos"].ids.n2n_htvx.opacity = 0.0
                             #self.screens["vv"].ids.n2n_dreamchaser.opacity = 1.0
                             #self.screens["vv"].ids.n2n_htvx.opacity = 0.0
-                        #elif "HTV" in sc_name:
+                        #elif "HTV" in sc_name: #TODO: Add back in when we have a HTV-X
                             #self.screens["usos"].ids.n2n_dreamchaser.opacity = 0.0
                             #self.screens["usos"].ids.n2n_htvx.opacity = 1.0
                             #self.screens["vv"].ids.n2n_dreamchaser.opacity = 0.0
