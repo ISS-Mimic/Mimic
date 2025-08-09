@@ -1,6 +1,7 @@
 <MSS_MT_Screen>:
     name: 'mt'
     FloatLayout:
+        #:import dp kivy.metrics.dp
         Image:
             id: MBS_MT_background
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/robo/MBSbackground.png'
@@ -11,7 +12,7 @@
             ##markup: True
             ##color: 1,0,1
             ##size_hint_y: 0.4
-            ##font_size: self.height * 0.10
+            ##font_size: min(self.height * 0.10, dp(32))
         Label:
             ##id: mt_ws_label
             ##pos_hint: {"center_x": 0.25, "center_y": 0.6}
@@ -27,7 +28,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         Label:
             ##id: mt_positon_label
             ##pos_hint: {"center_x": 0.2, "center_y": 0.45}
@@ -43,7 +44,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         Label:
             ##id: mt_speed_label
             ##pos_hint: {"center_x": 0.22, "center_y": 0.3}
@@ -59,7 +60,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         Label:
             id: MCASpayload
             pos_hint: {"center_x": 0.275, "center_y": 0.32}
@@ -67,7 +68,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         Label:
             id: POApayload
             pos_hint: {"center_x": 0.275, "center_y": 0.28}
@@ -75,7 +76,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         Image:
             id: FloatingMT
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/robo/MovingMT.png'
