@@ -82,13 +82,13 @@ class ECLSS_Screen(MimicBase):
 
             # Valve positions
             try:
-                VRSvlvPosition = int(float(values[97][0]))
+                VRSvlvPosition = int(float(values[199][0]))
                 vmap = {0: 'FAIL', 1: 'OPEN', 2: 'CLSD', 3: 'TRNS'}
                 set_text('VRSvlvPosition', vmap.get(VRSvlvPosition, 'n/a'))
             except Exception:
                 set_text('VRSvlvPosition', 'n/a')
             try:
-                VESvlvPosition = int(float(values[98][0]))
+                VESvlvPosition = int(float(values[198][0]))
                 vmap = {0: 'FAIL', 1: 'OPEN', 2: 'CLSD', 3: 'TRNS'}
                 set_text('VESvlvPosition', vmap.get(VESvlvPosition, 'n/a'))
             except Exception:
