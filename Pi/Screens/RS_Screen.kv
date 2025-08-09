@@ -1,9 +1,14 @@
+#:import dp kivy.metrics.dp
+
 <RS_Screen>:
     name: 'rs'
     FloatLayout:
+        # ───────────────────────── Background ──────────────────────────────
         Image:
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/russian/ROSbackground.png'
             fit_mode: "fill"
+        
+        # ───────────────────────── Port Icons ─────────────────────────────
         Image:
             id: sma_soyuz
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/russian/SMAsoyuzROS.png"
@@ -36,16 +41,18 @@
             id: rsn_progress
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/russian/RSNprogressROS.png"
             opacity: 0.0
+        
+        # ───────────────────────── Labels (RS Node Nadir) ─────────────────
         Label:
             id: rsn_label
             pos_hint: {"center_x": 0.37, "center_y": 0.2}
             text: ''
-            font_size: 10
-            text_size: 200,None
+            font_size: min(self.height * 0.25, dp(18))
+            text_size: 200, None
             halign: 'left'
             bold: True
             markup: True
-            color: 1,0,0
+            color: 1, 0, 0, 1
         Label:
             id: rsn_mission
             pos_hint: {"center_x": 0.65, "center_y": 0.39}
@@ -54,7 +61,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: rsn_vehicle
             pos_hint: {"center_x": 0.65, "center_y": 0.35}
@@ -63,7 +70,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: rsn_spacecraft
             pos_hint: {"center_x": 0.65, "center_y": 0.31}
@@ -72,7 +79,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: rsn_arrival
             pos_hint: {"center_x": 0.65, "center_y": 0.27}
@@ -81,7 +88,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: rsn_departure
             pos_hint: {"center_x": 0.65, "center_y": 0.23}
@@ -90,17 +97,19 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
+        
+        # ───────────────────────── Labels (Service Module Aft) ────────────
         Label:
             id: sma_label
             pos_hint: {"center_x": 0.15, "center_y": 0.71}
             text: ''
-            font_size: 10
-            text_size: 200,None
+            font_size: min(self.height * 0.25, dp(18))
+            text_size: 200, None
             halign: 'left'
             bold: True
             markup: True
-            color: 1,0,0
+            color: 1, 0, 0, 1
         Label:
             id: sma_mission
             pos_hint: {"center_x": 0.65, "center_y": 0.75}
@@ -109,7 +118,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: sma_vehicle
             pos_hint: {"center_x": 0.65, "center_y": 0.71}
@@ -118,7 +127,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: sma_spacecraft
             pos_hint: {"center_x": 0.65, "center_y": 0.67}
@@ -127,7 +136,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: sma_arrival
             pos_hint: {"center_x": 0.65, "center_y": 0.63}
@@ -136,7 +145,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: sma_departure
             pos_hint: {"center_x": 0.65, "center_y": 0.59}
@@ -145,17 +154,19 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
+        
+        # ───────────────────────── Labels (MRM-1) ─────────────────────────
         Label:
             id: mrm1_label
             pos_hint: {"center_x": 0.435, "center_y": 0.3}
             text: ''
-            font_size: 10
-            text_size: 200,None
+            font_size: min(self.height * 0.25, dp(18))
+            text_size: 200, None
             halign: 'left'
             bold: True
             markup: True
-            color: 1,0,0
+            color: 1, 0, 0, 1
         Label:
             id: mrm1_mission
             pos_hint: {"center_x": 0.92, "center_y": 0.39}
@@ -164,7 +175,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: mrm1_vehicle
             pos_hint: {"center_x": 0.92, "center_y": 0.35}
@@ -173,7 +184,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: mrm1_spacecraft
             pos_hint: {"center_x": 0.92, "center_y": 0.31}
@@ -182,7 +193,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: mrm1_arrival
             pos_hint: {"center_x": 0.92, "center_y": 0.27}
@@ -191,7 +202,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: mrm1_departure
             pos_hint: {"center_x": 0.92, "center_y": 0.23}
@@ -200,17 +211,19 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
+        
+        # ───────────────────────── Labels (MRM-2) ─────────────────────────
         Label:
             id: mrm2_label
             pos_hint: {"center_x": 0.37, "center_y": 0.82}
             text: ''
-            font_size: 10
-            text_size: 200,None
+            font_size: min(self.height * 0.25, dp(18))
+            text_size: 200, None
             halign: 'left'
             bold: True
             markup: True
-            color: 1,0,0
+            color: 1, 0, 0, 1
         Label:
             id: mrm2_mission
             pos_hint: {"center_x": 0.92, "center_y": 0.75}
@@ -219,7 +232,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: mrm2_vehicle
             pos_hint: {"center_x": 0.92, "center_y": 0.71}
@@ -228,7 +241,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: mrm2_spacecraft
             pos_hint: {"center_x": 0.92, "center_y": 0.67}
@@ -237,7 +250,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: mrm2_arrival
             pos_hint: {"center_x": 0.92, "center_y": 0.63}
@@ -246,7 +259,7 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
         Label:
             id: mrm2_departure
             pos_hint: {"center_x": 0.92, "center_y": 0.59}
@@ -255,19 +268,22 @@
             halign: 'left'
             bold: True
             markup: True
-            color: 1,1,1
+            color: 1, 1, 1, 1
+
+        # ───────────────────────── Buttons / Status ───────────────────────
         Button:
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/russian/DockingUnlit.png'
             background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/russian/DockingDown.png'
-            size_hint: 0.1,0.13
+            size_hint: 0.1, 0.13
             pos_hint: {"x": 0.0, "y": 0.2}
             width: 50
             height:20
             on_release: root.manager.current = 'rs_dock'
         Button:
-            size_hint: 0.1,0.11
+            size_hint: 0.1, 0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            background_down: self.background_normal.replace('BackButton.png', 'BackButton_Down.png') if self.background_normal else ''
             on_release: app.root.current = 'mimic'
         Image:
             id: signal
@@ -290,6 +306,6 @@
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
             text: ''
             markup: True
-            color: 1,1,1
-            font_size: self.height * 0.3
+            color: 1, 1, 1, 1
+            font_size: min(self.height * 0.3, dp(40))
             size_hint_y: 0.5
