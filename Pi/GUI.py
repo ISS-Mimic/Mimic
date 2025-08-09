@@ -1015,7 +1015,6 @@ class MainApp(App):
 
         #MBS and MT telemetry
         mt_worksite = int((values[258])[0])
-        self.screens["mt"].ids.mt_ws_value.text = str(mt_worksite)
         mt_position = float((values[257])[0])
         mt_position_timestamp = float((timestamps[257])[0])
 
@@ -2035,7 +2034,7 @@ class MainApp(App):
         BaseLocation = 0
         SPDMbase = 0
         SPDMoperatingBase = 0
-        
+
         #self.screens["robo"].ids.OperatingBase.text = str(OperatingBase)
         if int(OperatingBase) == 0:
             self.screens["robo"].ids.OperatingBase.text = "A"
@@ -2103,23 +2102,6 @@ class MainApp(App):
             self.screens["robo"].ids.SPDMoperatingBase.text = "SPDM Body PDGF"
         else:
             self.screens["robo"].ids.SPDMoperatingBase.text = "n/a"
-
-        #self.screens["mt"].ids.MCASpayload.text = str(MCASpayload)
-        if int(MCASpayload) == 0:
-            self.screens["mt"].ids.MCASpayload.text = "Released"
-        elif int(MCASpayload) == 1:
-            self.screens["mt"].ids.MCASpayload.text = "Captured"
-        else:
-            self.screens["mt"].ids.MCASpayload.text = "n/a"   
-        #self.screens["mt"].ids.POApayload.text = str(POApayload)
-        if int(POApayload) == 0:
-            self.screens["mt"].ids.POApayload.text = "Released"
-        elif int(POApayload) == 1:
-            self.screens["mt"].ids.POApayload.text = "Captive"
-        elif int(POApayload) == 2:
-            self.screens["mt"].ids.POApayload.text = "Captured"
-        else:
-            self.screens["mt"].ids.POApayload.text = "n/a" 
     
 
         self.screens["eva_emu"].ids.UIApowerEMU1.text = str(UIApowerEMU1) + " V"
