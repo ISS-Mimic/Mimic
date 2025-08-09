@@ -41,6 +41,12 @@ class TCS_Screen(MimicBase):
 
     def update_tcs_values(self, _dt):
         try:
+            def fmt2(value) -> str:
+                try:
+                    return f"{float(value):.2f}"
+                except Exception:
+                    return str(value)
+
             db_path = self._get_db_path()
             if not db_path.exists():
                 return
@@ -74,12 +80,12 @@ class TCS_Screen(MimicBase):
             self.ids.SWmode_loopB.text = SW_MODE_MAP.get(SWmode_loopB, "UNKNOWN")
 
             # NH3 flows/pressures/temps (indices per original GUI writes)
-            self.ids.NH3flow_loopA.text = str(values[192][0])
-            self.ids.NH3flow_loopB.text = str(values[193][0])
-            self.ids.NH3outletPress_loopA.text = str(values[194][0])
-            self.ids.NH3outletPress_loopB.text = str(values[195][0])
-            self.ids.NH3outletTemp_loopA.text = str(values[196][0])
-            self.ids.NH3outletTemp_loopB.text = str(values[197][0])
+            self.ids.NH3flow_loopA.text = fmt2(values[192][0])
+            self.ids.NH3flow_loopB.text = fmt2(values[193][0])
+            self.ids.NH3outletPress_loopA.text = fmt2(values[194][0])
+            self.ids.NH3outletPress_loopB.text = fmt2(values[195][0])
+            self.ids.NH3outletTemp_loopA.text = fmt2(values[196][0])
+            self.ids.NH3outletTemp_loopB.text = fmt2(values[197][0])
 
         except Exception as exc:
             log_error(f"TCS update failed: {exc}")
