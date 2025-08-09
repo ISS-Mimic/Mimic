@@ -1,6 +1,8 @@
 from __future__ import annotations
 from kivy.uix.screenmanager import Screen
 import pathlib
+import sqlite3
+from pathlib import Path
 from kivy.lang import Builder
 from kivy.clock import Clock
 from ._base import MimicBase
@@ -29,19 +31,22 @@ class EVA_EMU_Screen(MimicBase):
         except Exception as exc:
             log_error(f"EVA_EMU on_leave failed: {exc}")
     
+    def _get_db_path(self) -> Path:
+        shm = Path('/dev/shm/iss_telemetry.db')
+        if shm.exists():
+            return shm
+        return Path.home() / '.mimic_data' / 'iss_telemetry.db'
+    
     def update_eva_emu_values(self, _dt):
         try:
-            # Query database for EVA EMU telemetry
-            cursor = self.get_db_cursor()
-            if not cursor:
+            db_path = self._get_db_path()
+            if not db_path.exists():
                 return
-                
-            cursor.execute("SELECT * FROM iss_telemetry ORDER BY timestamp DESC LIMIT 1")
-            row = cursor.fetchone()
-            if not row:
-                return
-                
-            values = row[1:]  # Skip timestamp column
+            conn = sqlite3.connect(str(db_path))
+            cur = conn.cursor()
+            cur.execute('select Value from telemetry')
+            values = cur.fetchall()
+            conn.close()
             
             # EVA EMU Telemetry - indices from GUI.py
             # UIA (Utility Interface Assembly) - EMU 1 & 2
