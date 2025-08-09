@@ -1002,46 +1002,6 @@ class MainApp(App):
 
         stationmode = float((values[46])[0]) #russian segment mode same as usos mode
 
-        #TCS telemetry
-        SWmode_loopA = int((values[43])[0])
-        SWmode_loopB = int((values[42])[0])
-        NH3flow_loopA = "{:.2f}".format(float((values[22])[0]))
-        NH3flow_loopB = "{:.2f}".format(float((values[19])[0]))
-        NH3outletPress_loopA = "{:.2f}".format(float((values[23])[0]))
-        NH3outletPress_loopB = "{:.2f}".format(float((values[20])[0]))
-        NH3outletTemp_loopA = "{:.2f}".format(float((values[24])[0]))
-        NH3outletTemp_loopB = "{:.2f}".format(float((values[21])[0]))
-
-
-        #MBS and MT telemetry
-        mt_worksite = int((values[258])[0])
-        mt_position = float((values[257])[0])
-        mt_position_timestamp = float((timestamps[257])[0])
-
-        def map_mt_value(value):
-            mt_min_value = 2000.0 #minimum mt position float value, rough guess needs refining
-            mt_max_value = -2000.0 #maximum mt position float value, rough guess needs refining
-            min_mt_mapped_value = 0.4 #change this to be leftmost kivy screen percentage of truss image
-            max_mt_mapped_value = 0.9 #change this to be rightmost kivy screen percentage of truss image
-        
-            # Calculate the ratio of the input value within the range
-            ratio = (value - mt_min_value) / (mt_max_value - mt_min_value)
-        
-            # Map the ratio to the desired output range
-            mt_mapped_value = min_mt_mapped_value + ratio * (max_mt_mapped_value - min_mt_mapped_value)
-        
-            return mt_mapped_value #this should be the new pos_hint_x value
-        
-        self.screens["mt"].ids.FloatingMT.pos_hint = {"center_x": map_mt_value(mt_position),"center_y": 0.375}
-            
-        self.screens["mt"].ids.mt_position_value.text = str(mt_position)
-
-        if (mt_position_timestamp - old_mt_timestamp) > 0:
-            mt_speed = (mt_position - old_mt_position) / ((mt_position_timestamp - old_mt_timestamp)*3600)
-            old_mt_timestamp = mt_position_timestamp
-            old_mt_position = mt_position
-            roboflashevent = Clock.schedule_once(self.flashROBObutton, 1)
-        self.screens["mt"].ids.mt_speed_value.text = "{:2.2f}".format(float(mt_speed)) + " cm/s"
 
         MCASpayload = int((values[292])[0])
         POApayload = int((values[294])[0])
@@ -2027,82 +1987,6 @@ class MainApp(App):
         else:
             self.screens["iatcs"].ids.AC_Node3.text = "n/a"
         
-        ##Summary Telemetery on Robo Screen
-        self.screens["robo"].ids.mt_worksite.text = str(mt_worksite)
-        
-        OperatingBase = 0
-        BaseLocation = 0
-        SPDMbase = 0
-        SPDMoperatingBase = 0
-
-        #self.screens["robo"].ids.OperatingBase.text = str(OperatingBase)
-        if int(OperatingBase) == 0:
-            self.screens["robo"].ids.OperatingBase.text = "A"
-        elif int(OperatingBase) == 5:
-            self.screens["robo"].ids.OperatingBase.text = "B"
-        else:
-            self.screens["robo"].ids.OperatingBase.text = "n/a"
-        
-        #self.screens["robo"].ids.BaseLocation.text = str(BaseLocation)
-        if int(BaseLocation) == 1:
-            self.screens["robo"].ids.BaseLocation.text = "Lab"
-        elif int(BaseLocation) == 2:
-            self.screens["robo"].ids.BaseLocation.text = "Node 3"
-        elif int(BaseLocation) == 4:
-            self.screens["robo"].ids.BaseLocation.text = "Node 2"
-        elif int(BaseLocation) == 7:
-            self.screens["robo"].ids.BaseLocation.text = "MBS PDGF 1"
-        elif int(BaseLocation) == 8:
-            self.screens["robo"].ids.BaseLocation.text = "MBS PDGF 2"
-        elif int(BaseLocation) == 11:
-            self.screens["robo"].ids.BaseLocation.text = "MBS PDGF 3"
-        elif int(BaseLocation) == 13:
-            self.screens["robo"].ids.BaseLocation.text = "MBS PDGF 4"
-        elif int(BaseLocation) == 14:
-            self.screens["robo"].ids.BaseLocation.text = "FGB"
-        elif int(BaseLocation) == 16:
-            self.screens["robo"].ids.BaseLocation.text = "POA"
-        elif int(BaseLocation) == 19:
-            self.screens["robo"].ids.BaseLocation.text = "SSRMS Tip LEE"
-        elif int(BaseLocation) == 63:
-            self.screens["robo"].ids.BaseLocation.text = "Undefined"
-        else:
-            self.screens["robo"].ids.BaseLocation.text = "n/a"
-        
-        #self.screens["robo"].ids.SPDMbase.text = str(SPDMbase)
-        if int(SPDMbase) == 1:
-            self.screens["robo"].ids.SPDMbase.text = "US Lab"
-        elif int(SPDMbase) == 2:
-            self.screens["robo"].ids.SPDMbase.text = "Node 3"
-        elif int(SPDMbase) == 4:
-            self.screens["robo"].ids.SPDMbase.text = "Node 2"
-        elif int(SPDMbase) == 7:
-            self.screens["robo"].ids.SPDMbase.text = "MBS PDGF 1"
-        elif int(SPDMbase) == 8:
-            self.screens["robo"].ids.SPDMbase.text = "MBS PDGF 2"
-        elif int(SPDMbase) == 11:
-            self.screens["robo"].ids.SPDMbase.text = "MBS PDGF 3"
-        elif int(SPDMbase) == 13:
-            self.screens["robo"].ids.SPDMbase.text = "MBS PDGF 4"
-        elif int(SPDMbase) ==14:
-            self.screens["robo"].ids.SPDMbase.text = "FGB"
-        elif int(SPDMbase) == 16:
-            self.screens["robo"].ids.SPDMbase.text = "POA"
-        elif int(SPDMbase) == 19:
-            self.screens["robo"].ids.SPDMbase.text = "SSRMS Tip LEE"
-        elif int(SPDMbase) == 63:
-            self.screens["robo"].ids.SPDMbase.text = "Undefined"
-        else:
-            self.screens["robo"].ids.SPDMbase.text = "n/a"
-        
-        #self.screens["robo"].ids.SPDMoperatingBase.text = str(SPDMoperatingBase)
-        if int(SPDMoperatingBase) == 1:
-            self.screens["robo"].ids.SPDMoperatingBase.text = "SPDM Body LEE"
-        elif int(SPDMoperatingBase) == 2:
-            self.screens["robo"].ids.SPDMoperatingBase.text = "SPDM Body PDGF"
-        else:
-            self.screens["robo"].ids.SPDMoperatingBase.text = "n/a"
-    
 
         self.screens["eva_emu"].ids.UIApowerEMU1.text = str(UIApowerEMU1) + " V"
         self.screens["eva_emu"].ids.UIApowerEMU2.text = str(UIApowerEMU2) + " V"

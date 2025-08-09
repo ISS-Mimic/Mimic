@@ -1,3 +1,5 @@
+#:import dp kivy.metrics.dp
+
 <Robo_Screen>:
     name: 'robo'
     FloatLayout:
@@ -11,35 +13,35 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(30))
         Label:
             id: BaseLocation
             pos_hint: {"center_x": 0.25, "center_y": 0.56}
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(30))
         Label:
             id: mt_worksite
             pos_hint: {"center_x": 0.625, "center_y": 0.47}
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(30))
         Label:
             id: SPDMbase
             pos_hint: {"center_x": 0.7, "center_y": 0.6}
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(30))
         Label:
             id: SPDMoperatingBase
             pos_hint: {"center_x": 0.7, "center_y": 0.54}
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(30))
         Button:
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/robo/MTMBSunlit.png'
             background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/robo/MTMBSdown.png'
