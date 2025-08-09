@@ -3,13 +3,20 @@ from kivy.uix.screenmanager import Screen
 import pathlib
 from kivy.lang import Builder
 from kivy.clock import Clock
+from kivy.uix.widget import Widget
+from kivy.properties import NumericProperty
 from utils.logger import log_info, log_error
 import sqlite3
 from pathlib import Path
 from ._base import MimicBase
 
-kv_path = pathlib.Path(__file__).with_name("MSS_MT_Screen.kv")
-Builder.load_file(str(kv_path))
+class MTSpeedometer(Widget):
+    """Simple needle gauge for MT speed (cm/s)."""
+    speed_cms = NumericProperty(0.0)
+    min_speed = NumericProperty(0.0)
+    max_speed = NumericProperty(5.5)
+    start_angle = NumericProperty(-120.0)
+    end_angle = NumericProperty(120.0)
 
 class MSS_MT_Screen(MimicBase):
     """Mobile Transporter (MT) status screen: worksite, position, speed, payloads."""
@@ -134,3 +141,8 @@ class MSS_MT_Screen(MimicBase):
 
         except Exception as exc:
             log_error(f"MSS/MT update failed: {exc}")
+
+
+# Load KV after classes are defined so custom widgets are available
+kv_path = pathlib.Path(__file__).with_name("MSS_MT_Screen.kv")
+Builder.load_file(str(kv_path))
