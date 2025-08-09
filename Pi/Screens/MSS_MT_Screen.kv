@@ -5,8 +5,8 @@
     speed_cms: 0.0
     min_speed: 0.0
     max_speed: 5.5  # ~2.17 in/s, headroom above 2 in/s (5.08 cm/s)
-    start_angle: 0.0
-    end_angle: 180.0
+    start_angle: -90.0
+    end_angle: 90.0
     canvas:
         Color:
             rgba: 1, 1, 1, 0.4
@@ -104,6 +104,30 @@
         Label:
             id: POApayload
             pos_hint: {"center_x": 0.275, "center_y": 0.28}
+            text: '0'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: min(self.height * 0.10, dp(28))
+        Label:
+            id: POA_Stop_Condition
+            pos_hint: {"center_x": 0.275, "center_y": 0.24}
+            text: '0'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: min(self.height * 0.10, dp(28))
+        Label:
+            id: POA_Run_Speed
+            pos_hint: {"center_x": 0.275, "center_y": 0.20}
+            text: '0'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: min(self.height * 0.10, dp(28))
+        Label:
+            id: POA_Hot
+            pos_hint: {"center_x": 0.275, "center_y": 0.16}
             text: '0'
             markup: True
             color: root.signalcolor

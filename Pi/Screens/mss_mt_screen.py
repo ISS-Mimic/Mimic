@@ -125,20 +125,60 @@ class MSS_MT_Screen(MimicBase):
                 except Exception:
                     self.ids.mt_speedometer.speed_cms = 0.0
 
-            # Payload labels
+            # Payload labels with state mapping
             try:
                 if 'MCASpayload' in self.ids:
-                    self.ids.MCASpayload.text = str(int(float(values[292][0])))
+                    mcas_val = int(float(values[292][0]))
+                    if mcas_val == 0:
+                        self.ids.MCASpayload.text = 'Released'
+                    elif mcas_val == 1:
+                        self.ids.MCASpayload.text = 'Captured'
+                    else:
+                        self.ids.MCASpayload.text = 'n/a'
             except Exception:
                 if 'MCASpayload' in self.ids:
                     self.ids.MCASpayload.text = 'n/a'
             try:
                 if 'POApayload' in self.ids:
-                    self.ids.POApayload.text = str(int(float(values[294][0])))
+                    poa_val = int(float(values[294][0]))
+                    if poa_val == 0:
+                        self.ids.POApayload.text = 'Released'
+                    elif poa_val == 1:
+                        self.ids.POApayload.text = 'Captive'
+                    elif poa_val == 2:
+                        self.ids.POApayload.text = 'Captured'
+                    else:
+                        self.ids.POApayload.text = 'n/a'
             except Exception:
                 if 'POApayload' in self.ids:
                     self.ids.POApayload.text = 'n/a'
 
+            # need to unpack the values for POA and MCAS
+            # CSAMBA00003 = values[295]
+            try:
+                packed_csamaba00003 = int(float(values[295][0]))
+                # POA Stop, Speed, Hot
+                poa_stop = (packed_csamaba00003 >> 14) & 0x3
+                poa_speed = (packed_csamaba00003 >> 12) & 0x3
+                poa_hot = (packed_csamaba00003 >> 11) & 0x1
+                stop_map = {1: 'Soft Stop', 2: 'Hard Stop'}
+                speed_map = {1: 'Slow', 2: 'Fast'}
+                hot_map = {0: 'Null', 1: 'Hot'}
+                if 'POA_Stop_Condition' in self.ids:
+                    self.ids.POA_Stop_Condition.text = stop_map.get(poa_stop, 'n/a')
+                if 'POA_Run_Speed' in self.ids:
+                    self.ids.POA_Run_Speed.text = speed_map.get(poa_speed, 'n/a')
+                if 'POA_Hot' in self.ids:
+                    self.ids.POA_Hot.text = hot_map.get(poa_hot, 'n/a')
+            except Exception:
+                if 'POA_Stop_Condition' in self.ids:
+                    self.ids.POA_Stop_Condition.text = 'n/a'
+                if 'POA_Run_Speed' in self.ids:
+                    self.ids.POA_Run_Speed.text = 'n/a'
+                if 'POA_Hot' in self.ids:
+                    self.ids.POA_Hot.text = 'n/a'
+
+            
         except Exception as exc:
             log_error(f"MSS/MT update failed: {exc}")
 
