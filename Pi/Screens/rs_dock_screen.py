@@ -8,8 +8,7 @@ from kivy.core.window import Window
 from kivy.clock import Clock
 
 from ._base import MimicBase                        # common mimic_directory / signalcolor
-
-log_info = logging.getLogger("MyLogger").info
+from utils.logger import log_info, log_error
 
 kv_path = pathlib.Path(__file__).with_name("RS_Dock_Screen.kv")
 Builder.load_file(str(kv_path))
@@ -47,9 +46,12 @@ class RS_Dock_Screen(MimicBase):
         Map incoming telemetry value (0-80 000) to a 0-1 range,
         invert, and shrink the bar width accordingly.
         """
-        width, _ = Window.size
-        mapped = max(0.0, 1 - value / 80_000)
-        new_w  = width * 0.325 * mapped
-        self.ids.docking_bar.size = (new_w, self.ids.docking_bar.height)
-        self.ids.dock_layout.do_layout()
+        try:
+            width, _ = Window.size
+            mapped = max(0.0, 1 - float(value) / 80_000)
+            new_w  = width * 0.325 * mapped
+            self.ids.docking_bar.size = (new_w, self.ids.docking_bar.height)
+            self.ids.dock_layout.do_layout()
+        except Exception as exc:
+            log_error(f"update_docking_bar_width failed: {exc}")
 
