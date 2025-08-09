@@ -1856,32 +1856,7 @@ class MainApp(App):
  
         self.screens["eps"].ids.psarj_value.text = psarj + "deg"
         self.screens["eps"].ids.ssarj_value.text = ssarj + "deg"
-        self.screens["tcs"].ids.ptrrj_value.text = ptrrj + "deg"
-        self.screens["tcs"].ids.strrj_value.text = strrj + "deg"
 
-        SW_MODE_MAP = {
-            1: "STANDBY",
-            2: "RESTART",
-            3: "CHECKOUT",
-            4: "DIRECTED POS",
-            5: "AUTOTRACK",
-            6: "BLIND",
-            7: "SHUTDOWN",
-            8: "SWITCHOVER"
-        }
-        
-        self.screens["tcs"].ids.SWmode_loopA.text = SW_MODE_MAP.get(SWmode_loopA, "UNKNOWN")
-        self.screens["tcs"].ids.SWmode_loopB.text = SW_MODE_MAP.get(SWmode_loopB, "UNKNOWN")
-
-            
-        #self.screens["tcs"].ids.SWmode_loopA.text = str(SWmode_loopA)
-        #self.screens["tcs"].ids.SWmode_loopB.text = str(SWmode_loopB)
-        self.screens["tcs"].ids.NH3flow_loopA.text = str(NH3flow_loopA)
-        self.screens["tcs"].ids.NH3flow_loopB.text = str(NH3flow_loopB)
-        self.screens["tcs"].ids.NH3outletPress_loopA.text = str(NH3outletPress_loopA)
-        self.screens["tcs"].ids.NH3outletPress_loopB.text = str(NH3outletPress_loopB)
-        self.screens["tcs"].ids.NH3outletTemp_loopA.text = str(NH3outletTemp_loopA)
-        self.screens["tcs"].ids.NH3outletTemp_loopB.text = str(NH3outletTemp_loopB)
         
         self.screens["eclss"].ids.CabinTemp.text = str(CabinTemp)
         self.screens["eclss"].ids.CabinPress.text = str(CabinPress)
