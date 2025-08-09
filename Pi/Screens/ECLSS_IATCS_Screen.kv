@@ -1,3 +1,5 @@
+#:import dp kivy.metrics.dp
+
 <ECLSS_IATCS_Screen>:
     name: 'iatcs'
     FloatLayout:
@@ -12,7 +14,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.07
+            font_size: min(self.height * 0.07, dp(26))
         Label:
             id: MTwater_Lab
             pos_hint: {"center_x": 0.15, "center_y": 0.81}
@@ -20,7 +22,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.07
+            font_size: min(self.height * 0.07, dp(26))
         Label:
             id: AC_LabPort
             pos_hint: {"center_x": 0.15, "center_y": 0.78}
@@ -28,7 +30,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.07
+            font_size: min(self.height * 0.07, dp(26))
         Label:
             id: AC_LabStbd
             pos_hint: {"center_x": 0.15, "center_y": 0.75}
@@ -36,7 +38,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.07
+            font_size: min(self.height * 0.07, dp(26))
         Label:
             id: FluidTempAir_Lab
             pos_hint: {"center_x": 0.15, "center_y": 0.68}
@@ -44,7 +46,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.07
+            font_size: min(self.height * 0.07, dp(26))
         Label:
             id: FluidTempAv_Lab
             pos_hint: {"center_x": 0.15, "center_y": 0.65}
@@ -52,7 +54,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.07        
+            font_size: min(self.height * 0.07, dp(26))
         Label:
             id: LTwater_Node2
             pos_hint: {"center_x": 0.15, "center_y": 0.58}
@@ -60,7 +62,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.07
+            font_size: min(self.height * 0.07, dp(26))
         Label:
             id: MTwater_Node2
             pos_hint: {"center_x": 0.15, "center_y": 0.55}
@@ -68,7 +70,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.07
+            font_size: min(self.height * 0.07, dp(26))
         Label:
             id: AC_Node2
             pos_hint: {"center_x": 0.15, "center_y": 0.52}
@@ -76,7 +78,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.07
+            font_size: min(self.height * 0.07, dp(26))
         Label:
             id: FluidTempAir_Node2
             pos_hint: {"center_x": 0.15, "center_y": 0.46}
@@ -84,7 +86,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.07
+            font_size: min(self.height * 0.07, dp(26))
         Label:
             id: FluidTempAv_Node2
             pos_hint: {"center_x": 0.15, "center_y": 0.43}
@@ -92,7 +94,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.07         
+            font_size: min(self.height * 0.07, dp(26))
         Label:
             id: LTwater_Node3
             pos_hint: {"center_x": 0.15, "center_y": 0.35}
@@ -100,7 +102,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.07
+            font_size: min(self.height * 0.07, dp(26))
         Label:
             id: MTwater_Node3
             pos_hint: {"center_x": 0.15, "center_y": 0.32}
@@ -108,7 +110,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.07
+            font_size: min(self.height * 0.07, dp(26))
         Label:
             id: AC_Node3
             pos_hint: {"center_x": 0.15, "center_y": 0.29}
@@ -116,7 +118,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.07
+            font_size: min(self.height * 0.07, dp(26))
         Label:
             id: FluidTempAir_Node3
             pos_hint: {"center_x": 0.15, "center_y": 0.23}
@@ -124,7 +126,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.07
+            font_size: min(self.height * 0.07, dp(26))
         Label:
             id: FluidTempAv_Node3
             pos_hint: {"center_x": 0.15, "center_y": 0.20}
@@ -132,7 +134,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.07
+            font_size: min(self.height * 0.07, dp(26))
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
