@@ -51,16 +51,16 @@ class SSRMS_Screen(MimicBase):
             conn.close()
 
             # Operating Base (values[102]) A/B
-            OperatingBase = int(float(values[102][0]))
+            OperatingBase = int(float(values[261][0]))
             if OperatingBase == 1:
-                self.ids.OperatingBase.text = "A"
+                self.ids.OperatingBase.text = "LEE A"
             elif OperatingBase == 2:
-                self.ids.OperatingBase.text = "B"
+                self.ids.OperatingBase.text = "LEE B"
             else:
                 self.ids.OperatingBase.text = "n/a"
 
             # Tip LEE status (values[103])
-            TipLEEstatus = int(float(values[103][0]))
+            TipLEEstatus = int(float(values[269][0]))
             if TipLEEstatus == 1:
                 self.ids.TipLEEstatus.text = "Released"
             elif TipLEEstatus == 2:
@@ -71,37 +71,37 @@ class SSRMS_Screen(MimicBase):
                 self.ids.TipLEEstatus.text = "n/a"
 
             # SACS operating base (values[104]) A/B
-            SACSopBase = int(float(values[104][0]))
+            SACSopBase = int(float(values[259][0]))
             if SACSopBase == 1:
-                self.ids.SACSopBase.text = "A"
+                self.ids.SACSopBase.text = "LEE A"
             elif SACSopBase == 2:
-                self.ids.SACSopBase.text = "B"
+                self.ids.SACSopBase.text = "LEE B"
             else:
                 self.ids.SACSopBase.text = "n/a"
 
             # Joint angles (values[105..110]? per GUI usage order)
-            self.ids.ShoulderRoll.text = f"{float(values[105][0]):.2f} deg"
-            self.ids.ShoulderYaw.text = f"{float(values[106][0]):.2f} deg"
-            self.ids.ShoulderPitch.text = f"{float(values[107][0]):.2f} deg"
-            self.ids.ElbowPitch.text = f"{float(values[108][0]):.2f} deg"
-            self.ids.WristRoll.text = f"{float(values[109][0]):.2f} deg"
-            self.ids.WristYaw.text = f"{float(values[110][0]):.2f} deg"
-            self.ids.WristPitch.text = f"{float(values[111][0]):.2f} deg"
+            self.ids.ShoulderRoll.text = f"{float(values[262][0]):.2f} deg"
+            self.ids.ShoulderYaw.text = f"{float(values[263][0]):.2f} deg"
+            self.ids.ShoulderPitch.text = f"{float(values[264][0]):.2f} deg"
+            self.ids.ElbowPitch.text = f"{float(values[265][0]):.2f} deg"
+            self.ids.WristRoll.text = f"{float(values[268][0]):.2f} deg"
+            self.ids.WristYaw.text = f"{float(values[267][0]):.2f} deg"
+            self.ids.WristPitch.text = f"{float(values[266][0]):.2f} deg"
 
             # Base location (values[112]) per mapping from GUI
-            BaseLocation = int(float(values[112][0]))
+            BaseLocation = int(float(values[260][0]))
             base_map = {
                 1: "Lab",
                 2: "Node 3",
-                3: "Node 2",
-                4: "MBS PDGF 1",
-                5: "MBS PDGF 2",
-                6: "MBS PDGF 3",
-                7: "MBS PDGF 4",
-                8: "FGB",
-                9: "POA",
-                10: "SSRMS Tip LEE",
-                11: "Undefined",
+                4: "Node 2",
+                7: "MBS PDGF 1",
+                8: "MBS PDGF 2",
+                11: "MBS PDGF 3",
+                13: "MBS PDGF 4",
+                14: "FGB",
+                16: "POA",
+                19: "SSRMS Tip LEE",
+                63: "Undefined",
             }
             self.ids.BaseLocation.text = base_map.get(BaseLocation, "n/a")
 
