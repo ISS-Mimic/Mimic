@@ -125,10 +125,11 @@ class MSS_MT_Screen(MimicBase):
                 except Exception:
                     self.ids.mt_speedometer.speed_cms = 0.0
 
+
             # Payload labels with state mapping
             try:
                 if 'MCASpayload' in self.ids:
-                    mcas_val = int(float(values[292][0]))
+                    mcas_val = int(float(values[293][0]))
                     if mcas_val == 0:
                         self.ids.MCASpayload.text = 'Released'
                     elif mcas_val == 1:
@@ -177,6 +178,23 @@ class MSS_MT_Screen(MimicBase):
                     self.ids.POA_Run_Speed.text = 'n/a'
                 if 'POA_Hot' in self.ids:
                     self.ids.POA_Hot.text = 'n/a'
+
+            # CSAMBS00001 (values[292]): MBS Operating Base and Base Location
+            try:
+                packed_csambs00001 = int(float(values[292][0]))
+                mbs_op_base = (packed_csambs00001 >> 8) & 0xF
+                mbs_loc = packed_csambs00001 & 0x3F
+                op_map = {3: 'MTCL', 4: 'TUS'}
+                loc_map = {58: 'MT', 60: 'TUS', 63: 'Undefined'}
+                if 'MBS_Operating_Base' in self.ids:
+                    self.ids.MBS_Operating_Base.text = op_map.get(mbs_op_base, 'n/a')
+                if 'MBS_Base_Location' in self.ids:
+                    self.ids.MBS_Base_Location.text = loc_map.get(mbs_loc, 'n/a')
+            except Exception:
+                if 'MBS_Operating_Base' in self.ids:
+                    self.ids.MBS_Operating_Base.text = 'n/a'
+                if 'MBS_Base_Location' in self.ids:
+                    self.ids.MBS_Base_Location.text = 'n/a'
 
             
         except Exception as exc:
