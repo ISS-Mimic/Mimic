@@ -1,10 +1,15 @@
+#:import dp kivy.metrics.dp
+
 <VV_Screen>:
     name: 'vv'
     FloatLayout:
+        # ───────────────────────── Background ──────────────────────────────
         Image:
             id: VV_Background
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/vv/VVbackground.png"
             fit_mode: "fill"
+        
+        # ───────────────────────── Port Icons ─────────────────────────────
         Image:
             id: n1n_cygnus
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/vv/N1NcygnusVV.png"
@@ -61,97 +66,105 @@
             id: rsn_progress
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/vv/RSNprogressVV.png"
             opacity: 0.0
+        
+        # ───────────────────────── Labels ─────────────────────────────────
         Label:
             id: sma_label
             pos_hint: {"center_x": 0.43, "center_y": 0.59}
             text: ''
-            font_size: 10
-            text_size: 200,None
+            font_size: min(self.height * 0.25, dp(18))
+            text_size: 200, None
             halign: 'left'
             bold: True
             markup: True
-            color: 1,0,0
+            color: 1, 0, 0, 1
         Label:
             id: mrm2_label
             pos_hint: {"center_x": 0.63, "center_y": 0.85}
             text: ''
-            font_size: 10
-            text_size: 200,None
+            font_size: min(self.height * 0.25, dp(18))
+            text_size: 200, None
             halign: 'left'
             bold: True
             markup: True
-            color: 1,0,0
+            color: 1, 0, 0, 1
         Label:
             id: rsn_label
             pos_hint: {"center_x": 0.63, "center_y": 0.25}
             text: ''
-            font_size: 10
-            text_size: 200,None
+            font_size: min(self.height * 0.25, dp(18))
+            text_size: 200, None
             halign: 'left'
             bold: True
             markup: True
-            color: 1,0,0
+            color: 1, 0, 0, 1
         Label:
             id: mrm1_label
             pos_hint: {"center_x": 0.70, "center_y": 0.35}
             text: ''
-            font_size: 10
-            text_size: 200,None
+            font_size: min(self.height * 0.25, dp(18))
+            text_size: 200, None
             halign: 'left'
             bold: True
             markup: True
-            color: 1,0,0
+            color: 1, 0, 0, 1
         Label:
             id: n1n_label
             pos_hint: {"center_x": 0.79, "center_y": 0.45}
             text: ''
-            font_size: 10
-            text_size: 200,None
+            font_size: min(self.height * 0.25, dp(18))
+            text_size: 200, None
             halign: 'left'
             bold: True
             markup: True
-            color: 0,0,1
+            color: 0, 0, 1, 1
         Label:
             id: n2n_label
             pos_hint: {"center_x": 0.97, "center_y": 0.4}
             text: ''
-            font_size: 10
-            text_size: 200,None
+            font_size: min(self.height * 0.25, dp(18))
+            text_size: 200, None
             halign: 'left'
             bold: True
             markup: True
-            color: 0,0,1
+            color: 0, 0, 1, 1
         Label:
             id: n2f_label
             pos_hint: {"center_x": 0.99, "center_y": 0.55}
             text: ''
-            font_size: 10
-            text_size: 150,None
+            font_size: min(self.height * 0.25, dp(18))
+            text_size: 150, None
             halign: 'left'
             bold: True
             markup: True
-            color: 0,0,1
+            color: 0, 0, 1, 1
         Label:
             id: n2z_label
             pos_hint: {"center_x": 0.99, "center_y": 0.78}
             text: ''
-            font_size: 10
-            text_size: 150,None
+            font_size: min(self.height * 0.25, dp(18))
+            text_size: 150, None
             halign: 'left'
             bold: True
             markup: True
-            color: 0,0,1
+            color: 0, 0, 1, 1
+        
+        # ───────────────────────── Buttons ────────────────────────────────
         Button:
-            size_hint: 0.3,0.11
+            size_hint: 0.3, 0.11
             text: "NASA VV Image"
-            font_size: 16
+            font_size: min(dp(16), self.parent.width * 0.015)
             pos_hint: {"center_x": 0.85, "center_y": 0.2}
+            background_down: self.background_normal
             on_release: app.root.current = 'vv_image'
         Button:
-            size_hint: 0.1,0.11
+            size_hint: 0.1, 0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            background_down: self.background_normal.replace('BackButton.png', 'BackButton_Down.png') if self.background_normal else ''
             on_release: app.root.current = 'mimic'
+        
+        # ───────────────────────── Status Indicators ──────────────────────
         Image:
             id: signal
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
@@ -173,6 +186,6 @@
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
             text: ''
             markup: True
-            color: 1,1,1
-            font_size: self.height * 0.3
+            color: 1, 1, 1, 1
+            font_size: min(self.height * 0.3, dp(40))
             size_hint_y: 0.5
