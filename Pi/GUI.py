@@ -1046,42 +1046,7 @@ class MainApp(App):
 
         MCASpayload = int((values[292])[0])
         POApayload = int((values[294])[0])
-        
-        ##SSRMS telemetry
-        OperatingBase = str((values[261])[0])
-        BaseLocation = str((values[260])[0])
-        TipLEEstatus = str((values[269])[0])
-        SACSopBase = str((values[261])[0])
-        ShoulderRoll = "{:.2f}".format(float((values[262])[0]))
-        ShoulderYaw = "{:.2f}".format(float((values[263])[0]))
-        ShoulderPitch = "{:.2f}".format(float((values[264])[0]))
-        ElbowPitch = "{:.2f}".format(float((values[265])[0]))
-        WristRoll = "{:.2f}".format(float((values[268])[0]))
-        WristYaw = "{:.2f}".format(float((values[267])[0]))
-        WristPitch = "{:.2f}".format(float((values[266])[0]))
-        
-        ##SPDM Telemetry
-        SPDMbase = str((values[271])[0])
-        SPDMoperatingBase = str((values[270])[0])
-        Shoulder1Roll = "{:.2f}".format(float((values[272])[0]))
-        Shoulder1Yaw = "{:.2f}".format(float((values[273])[0]))
-        Shoulder1Pitch = "{:.2f}".format(float((values[274])[0]))
-        Elbow1Pitch = "{:.2f}".format(float((values[275])[0]))
-        Wrist1Roll = "{:.2f}".format(float((values[278])[0]))
-        Wrist1Yaw = "{:.2f}".format(float((values[277])[0]))
-        Wrist1Pitch = "{:.2f}".format(float((values[276])[0]))
-        Shoulder2Roll = "{:.2f}".format(float((values[280])[0]))
-        Shoulder2Yaw = "{:.2f}".format(float((values[281])[0]))
-        Shoulder2Pitch = "{:.2f}".format(float((values[282])[0]))
-        Elbow2Pitch = "{:.2f}".format(float((values[283])[0]))
-        Wrist2Roll = "{:.2f}".format(float((values[286])[0]))
-        Wrist2Yaw = "{:.2f}".format(float((values[285])[0]))
-        Wrist2Pitch = "{:.2f}".format(float((values[284])[0])) 
-        Arm1OTCM = int((values[279])[0])
-        Arm2OTCM = int((values[288])[0])
-        BodyPayload = int((values[288])[0])
-        BodyRoll = "{:.2f}".format(float((values[289])[0]))
-                                       
+                                        
         #ECLSS telemetry
         CabinTemp = "{:.2f}".format(float((values[195])[0]))
         CabinPress = "{:.2f}".format(float((values[194])[0]))
@@ -2066,6 +2031,11 @@ class MainApp(App):
         ##Summary Telemetery on Robo Screen
         self.screens["robo"].ids.mt_worksite.text = str(mt_worksite)
         
+        OperatingBase = 0
+        BaseLocation = 0
+        SPDMbase = 0
+        SPDMoperatingBase = 0
+        
         #self.screens["robo"].ids.OperatingBase.text = str(OperatingBase)
         if int(OperatingBase) == 0:
             self.screens["robo"].ids.OperatingBase.text = "A"
@@ -2150,87 +2120,7 @@ class MainApp(App):
             self.screens["mt"].ids.POApayload.text = "Captured"
         else:
             self.screens["mt"].ids.POApayload.text = "n/a" 
-        
-        
-        #self.screens["spdm"].ids.SPDMbase.text = str(SPDMbase)
-        if int(SPDMbase) == 1:
-            self.screens["spdm"].ids.SPDMbase.text = "Lab"
-        elif int(SPDMbase) == 2:
-            self.screens["spdm"].ids.SPDMbase.text = "Node 3"
-        elif int(SPDMbase) == 4:
-            self.screens["spdm"].ids.SPDMbase.text = "Node 2"
-        elif int(SPDMbase) == 7:
-            self.screens["spdm"].ids.SPDMbase.text = "MBS PDGF 1"
-        elif int(SPDMbase) == 8:
-            self.screens["spdm"].ids.SPDMbase.text = "MBS PDGF 2"
-        elif int(SPDMbase) == 11:
-            self.screens["spdm"].ids.SPDMbase.text = "MBS PDGF 3"
-        elif int(SPDMbase) == 13:
-            self.screens["spdm"].ids.SPDMbase.text = "MBS PDGF 4"
-        elif int(SPDMbase) ==14:
-            self.screens["spdm"].ids.SPDMbase.text = "FGB"
-        elif int(SPDMbase) == 16:
-            self.screens["spdm"].ids.SPDMbase.text = "POA"
-        elif int(SPDMbase) == 19:
-            self.screens["spdm"].ids.SPDMbase.text = "SSRMS Tip LEE"
-        elif int(SPDMbase) == 63:
-            self.screens["spdm"].ids.SPDMbase.text = "Undefined"
-        else:
-            self.screens["spdm"].ids.SPDMbase.text = "n/a"
-        
-         #self.screens["spdm"].ids.SPDMoperatingBase.text = str(SPDMoperatingBase)
-        if int(SPDMoperatingBase) == 1:
-            self.screens["spdm"].ids.SPDMoperatingBase.text = "SPDM Body LEE"
-        elif int(SPDMoperatingBase) == 2:
-            self.screens["spdm"].ids.SPDMoperatingBase.text = "SPDM Body PDGF"
-        else:
-            self.screens["spdm"].ids.SPDMoperatingBase.text = "n/a"
-        
-        #self.screens["spdm"].ids.Arm1OTCM.text = str(Arm1OTCM)
-        if int(Arm1OTCM) == 0:
-            self.screens["spdm"].ids.Arm1OTCM.text = "Released"
-        elif int(Arm1OTCM) == 1:
-            self.screens["spdm"].ids.Arm1OTCM.text = "Captive"
-        elif int(Arm1OTCM) == 2:
-            self.screens["spdm"].ids.Arm1OTCM.text = "Captured"
-        else:
-            self.screens["spdm"].ids.Arm1OTCM.text = "n/a"
-        
-        #self.screens["spdm"].ids.Arm2OTCM.text = str(Arm1OTCM)
-        if int(Arm2OTCM) == 0:
-            self.screens["spdm"].ids.Arm2OTCM.text = "Released"
-        elif int(Arm2OTCM) == 1:
-            self.screens["spdm"].ids.Arm2OTCM.text = "Captive"
-        elif int(Arm2OTCM) == 2:
-            self.screens["spdm"].ids.Arm2OTCM.text = "Captured"
-        else:
-            self.screens["spdm"].ids.Arm2OTCM.text = "n/a"
-        
-        #self.screens["spdm"].ids.BodyPayload.text = str(BodyPayload)
-        if int(BodyPayload) == 0:
-            self.screens["spdm"].ids.BodyPayload.text = "Released"
-        elif int(BodyPayload) == 1:
-            self.screens["spdm"].ids.BodyPayload.text = "Captive"
-        elif int(BodyPayload) == 2:
-            self.screens["spdm"].ids.BodyPayload.text = "Captured"
-        else:
-            self.screens["spdm"].ids.BodyPayload.text = "n/a"
-        
-        self.screens["spdm"].ids.BodyRoll.text = str(BodyRoll)
-        self.screens["spdm"].ids.Shoulder1Roll.text = str(Shoulder1Roll)
-        self.screens["spdm"].ids.Shoulder1Yaw.text = str(Shoulder1Yaw)
-        self.screens["spdm"].ids.Shoulder1Pitch.text = str(Shoulder1Pitch)
-        self.screens["spdm"].ids.Elbow1Pitch.text = str(Elbow1Pitch)
-        self.screens["spdm"].ids.Wrist1Roll.text = str(Wrist1Roll)
-        self.screens["spdm"].ids.Wrist1Yaw.text = str(Wrist1Yaw)
-        self.screens["spdm"].ids.Wrist1Pitch.text = str(Wrist1Pitch)
-        self.screens["spdm"].ids.Shoulder2Roll.text = str(Shoulder2Roll)
-        self.screens["spdm"].ids.Shoulder2Yaw.text = str(Shoulder2Yaw)
-        self.screens["spdm"].ids.Shoulder2Pitch.text = str(Shoulder2Pitch)
-        self.screens["spdm"].ids.Elbow2Pitch.text = str(Elbow2Pitch)
-        self.screens["spdm"].ids.Wrist2Roll.text = str(Wrist2Roll)
-        self.screens["spdm"].ids.Wrist2Yaw.text = str(Wrist2Yaw)
-        self.screens["spdm"].ids.Wrist2Pitch.text = str(Wrist2Pitch)
+    
 
         self.screens["eva_emu"].ids.UIApowerEMU1.text = str(UIApowerEMU1) + " V"
         self.screens["eva_emu"].ids.UIApowerEMU2.text = str(UIApowerEMU2) + " V"
