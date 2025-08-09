@@ -1,3 +1,5 @@
+#:import dp kivy.metrics.dp
+
 <GNC_Screen>:
     name: 'gnc'
     FloatLayout:
@@ -12,7 +14,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(30))
         ProgressBar:
             id: cmgsaturation
             max: 100
@@ -31,7 +33,7 @@
             markup: True
             color: 1,1,1
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(28))
         Label:
             id: cmg1spintemp
             pos_hint: {"center_x": 0.2, "center_y": 0.45}
@@ -39,7 +41,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(26))
         Label:
             id: cmg1halltemp
             pos_hint: {"center_x": 0.2, "center_y": 0.4}
@@ -47,7 +49,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(26))
         Label:
             id: cmg1vibration
             pos_hint: {"center_x": 0.2, "center_y": 0.35}
@@ -55,7 +57,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(26))
         Label:
             id: cmg1current
             pos_hint: {"center_x": 0.2, "center_y": 0.3}
@@ -63,7 +65,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(26))
         Label:
             id: cmg1speed
             pos_hint: {"center_x": 0.2, "center_y": 0.25}
@@ -71,7 +73,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(26))
         Image:
             id: cmg2
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/gnc/cmg.png"
@@ -84,7 +86,7 @@
             markup: True
             color: 1,1,1
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(28))
         Label:
             id: cmg2spintemp
             pos_hint: {"center_x": 0.2, "center_y": 0.8}
@@ -92,7 +94,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(26))
         Label:
             id: cmg2halltemp
             pos_hint: {"center_x": 0.2, "center_y": 0.75}
@@ -100,7 +102,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(26))
         Label:
             id: cmg2vibration
             pos_hint: {"center_x": 0.2, "center_y": 0.7}
@@ -108,7 +110,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(26))
         Label:
             id: cmg2current
             pos_hint: {"center_x": 0.2, "center_y": 0.65}
@@ -116,7 +118,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(26))
         Label:
             id: cmg2speed
             pos_hint: {"center_x": 0.2, "center_y": 0.6}
@@ -124,7 +126,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(26))
         Image:
             id: cmg3
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/gnc/cmg.png"
@@ -137,7 +139,7 @@
             markup: True
             color: 1,1,1
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(28))
         Label:
             id: cmg3spintemp
             pos_hint: {"center_x": 0.8, "center_y": 0.8}
@@ -145,7 +147,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(26))
         Label:
             id: cmg3halltemp
             pos_hint: {"center_x": 0.8, "center_y": 0.75}
@@ -153,7 +155,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(26))
         Label:
             id: cmg3vibration
             pos_hint: {"center_x": 0.8, "center_y": 0.7}
@@ -161,7 +163,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(26))
         Label:
             id: cmg3current
             pos_hint: {"center_x": 0.8, "center_y": 0.65}
@@ -169,7 +171,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(26))
         Label:
             id: cmg3speed
             pos_hint: {"center_x": 0.8, "center_y": 0.6}
@@ -177,7 +179,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(26))
         Image:
             id: cmg4
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/gnc/cmg.png"
@@ -190,7 +192,7 @@
             markup: True
             color: 1,1,1
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(28))
         Label:
             id: cmg4spintemp
             pos_hint: {"center_x": 0.8, "center_y": 0.45}
@@ -198,7 +200,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(26))
         Label:
             id: cmg4halltemp
             pos_hint: {"center_x": 0.8, "center_y": 0.4}
@@ -206,7 +208,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(26))
         Label:
             id: cmg4vibration
             pos_hint: {"center_x": 0.8, "center_y": 0.35}
@@ -214,7 +216,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(26))
         Label:
             id: cmg4current
             pos_hint: {"center_x": 0.8, "center_y": 0.3}
@@ -222,7 +224,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(26))
         Label:
             id: cmg4speed
             pos_hint: {"center_x": 0.8, "center_y": 0.25}
@@ -230,7 +232,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(26))
         Label:
             id: yaw_label
             pos_hint: {"center_x": 0.4, "center_y": 0.15}
@@ -238,7 +240,7 @@
             markup: True
             color: 1,1,1
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(28))
         Label:
             id: yaw
             pos_hint: {"center_x": 0.4, "center_y": 0.1}
@@ -246,7 +248,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(28))
         Label:
             id: pitch_label
             pos_hint: {"center_x": 0.5, "center_y": 0.15}
@@ -254,7 +256,7 @@
             markup: True
             color: 1,1,1
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(28))
         Label:
             id: pitch
             pos_hint: {"center_x": 0.5, "center_y": 0.1}
@@ -262,7 +264,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(28))
         Label:
             id: roll_label
             pos_hint: {"center_x": 0.6, "center_y": 0.15}
@@ -270,7 +272,7 @@
             markup: True
             color: 1,1,1
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(28))
         Label:
             id: roll
             pos_hint: {"center_x": 0.6, "center_y": 0.1}
@@ -278,7 +280,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.1
+            font_size: min(self.height * 0.1, dp(28))
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
