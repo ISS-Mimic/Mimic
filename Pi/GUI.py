@@ -1629,58 +1629,6 @@ class MainApp(App):
         self.screens["eps"].ids.ssarj_value.text = ssarj + "deg"
 
         
-        self.screens["eclss"].ids.CabinTemp.text = str(CabinTemp)
-        self.screens["eclss"].ids.CabinPress.text = str(CabinPress)
-        self.screens["eclss"].ids.CrewlockPress.text = str(CrewlockPress)
-        self.screens["eclss"].ids.AirlockPress.text = str(AirlockPress)
-        self.screens["eclss"].ids.CleanWater.text = str(CleanWater)
-        self.screens["eclss"].ids.WasteWater.text = str(WasteWater)
-        self.screens["eclss"].ids.O2prodRate.text = str(O2prodRate)
-        
-        #self.screens["eclss"].ids.O2genState.text = str(O2genState)
-        if int(O2genState) == 1:
-            self.screens["eclss"].ids.O2genState.text = "PROCESS"
-        elif int(O2genState) == 2:
-            self.screens["eclss"].ids.O2genState.text = "STANDBY"
-        elif int(O2genState) == 3:
-            self.screens["eclss"].ids.O2genState.text = "SHUTDOWN"
-        elif int(O2genState) == 4:
-            self.screens["eclss"].ids.O2genState.text = "STOP"
-        elif int(O2genState) == 5:
-            self.screens["eclss"].ids.O2genState.text = "VENT DOME"
-        elif int(O2genState) == 6:
-            self.screens["eclss"].ids.O2genState.text = "INERT DOME"
-        elif int(O2genState) == 7:
-            self.screens["eclss"].ids.O2genState.text = "FAST SHTDWN"
-        elif int(O2genState) == 8:
-            self.screens["eclss"].ids.O2genState.text = "N2 PURGE SHTDWN"
-        else:
-            self.screens["eclss"].ids.O2genState.text = "n/a"
-        
-        #self.screens["eclss"].ids.VRSvlvPosition.text = str(VRSvlvPosition)
-        if int(VRSvlvPosition) == 0:
-            self.screens["eclss"].ids.VRSvlvPosition.text = "FAIL"
-        elif int(VRSvlvPosition) == 1:
-            self.screens["eclss"].ids.VRSvlvPosition.text = "OPEN"
-        elif int(VRSvlvPosition) == 2:
-            self.screens["eclss"].ids.VRSvlvPosition.text = "CLSD"
-        elif int(VRSvlvPosition) == 3:
-            self.screens["eclss"].ids.VRSvlvPosition.text = "TRNS"
-        else:
-            self.screens["eclss"].ids.VESvlvPosition.text = "n/a"
-        
-        #self.screens["eclss"].ids.VESvlvPosition.text = str(VESvlvPosition)
-        if int(VESvlvPosition) == 0:
-            self.screens["eclss"].ids.VESvlvPosition.text = "FAIL"
-        elif int(VESvlvPosition) == 1:
-            self.screens["eclss"].ids.VESvlvPosition.text = "OPEN"
-        elif int(VESvlvPosition) == 2:
-            self.screens["eclss"].ids.VESvlvPosition.text = "CLSD"
-        elif int(VESvlvPosition) == 3:
-            self.screens["eclss"].ids.VESvlvPosition.text = "TRNS"
-        else:
-            self.screens["eclss"].ids.VESvlvPosition.text = "n/a"
-        
         self.screens["wrm"].ids.UrineTank.text = str(UrineTank)
         self.screens["wrm"].ids.CleanWater.text = str(CleanWater)
         self.screens["wrm"].ids.WasteWater.text = str(WasteWater)
