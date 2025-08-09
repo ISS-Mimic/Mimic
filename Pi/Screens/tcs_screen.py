@@ -74,18 +74,18 @@ class TCS_Screen(MimicBase):
                 8: "SWITCHOVER",
             }
 
-            SWmode_loopA = int(float(values[190][0])) if len(values) > 190 else 0
-            SWmode_loopB = int(float(values[191][0])) if len(values) > 191 else 0
+            SWmode_loopA = int(float(values[43][0]))
+            SWmode_loopB = int(float(values[42][0]))
             self.ids.SWmode_loopA.text = SW_MODE_MAP.get(SWmode_loopA, "UNKNOWN")
             self.ids.SWmode_loopB.text = SW_MODE_MAP.get(SWmode_loopB, "UNKNOWN")
 
             # NH3 flows/pressures/temps (indices per original GUI writes)
-            self.ids.NH3flow_loopA.text = fmt2(values[192][0])
-            self.ids.NH3flow_loopB.text = fmt2(values[193][0])
-            self.ids.NH3outletPress_loopA.text = fmt2(values[194][0])
-            self.ids.NH3outletPress_loopB.text = fmt2(values[195][0])
-            self.ids.NH3outletTemp_loopA.text = fmt2(values[196][0])
-            self.ids.NH3outletTemp_loopB.text = fmt2(values[197][0])
+            self.ids.NH3flow_loopA.text = fmt2(values[22][0])
+            self.ids.NH3flow_loopB.text = fmt2(values[19][0])
+            self.ids.NH3outletPress_loopA.text = fmt2(values[23][0])
+            self.ids.NH3outletPress_loopB.text = fmt2(values[20][0])
+            self.ids.NH3outletTemp_loopA.text = fmt2(values[24][0])
+            self.ids.NH3outletTemp_loopB.text = fmt2(values[21][0])
 
         except Exception as exc:
             log_error(f"TCS update failed: {exc}")

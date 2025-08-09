@@ -70,13 +70,13 @@ class SSRMS_Screen(MimicBase):
             else:
                 self.ids.TipLEEstatus.text = "n/a"
 
-            # SACS operating base (values[104]) A/B
-            SACSopBase = int(float(values[259][0]))
-            if SACSopBase == 1:
-                self.ids.SACSopBase.text = "LEE A"
-            elif SACSopBase == 2:
-                self.ids.SACSopBase.text = "LEE B"
-            else:
+            # Decode CSASSRMS001: SACS operating base in bits 6..9
+            try:
+                packed_csassrms001 = int(float(values[259][0]))
+                sacs_operating_base = (packed_csassrms001 >> 6) & 0xF
+                sacs_map = {0: "LEE A", 5: "LEE B"}
+                self.ids.SACSopBase.text = sacs_map.get(sacs_operating_base, "n/a")
+            except Exception:
                 self.ids.SACSopBase.text = "n/a"
 
             # Joint angles (values[105..110]? per GUI usage order)
@@ -88,7 +88,31 @@ class SSRMS_Screen(MimicBase):
             self.ids.WristYaw.text = f"{float(values[267][0]):.2f} deg"
             self.ids.WristPitch.text = f"{float(values[266][0]):.2f} deg"
 
-            # Base location (values[112]) per mapping from GUI
+            # Decode CSAMBA00003: LEE stop/speed/hot in bits 6.., 4.., 3
+            try:
+                packed_csamaba00003 = int(float(values[294][0]))
+                lee_stop = (packed_csamaba00003 >> 6) & 0x3
+                lee_speed = (packed_csamaba00003 >> 4) & 0x3
+                lee_hot = (packed_csamaba00003 >> 3) & 0x1
+                stop_map = {1: "Soft Stop", 2: "Hard Stop"}
+                speed_map = {1: "Slow", 2: "Fast"}
+                hot_map = {0: "Null", 1: "Hot"}
+                if 'SSRMS_LEE_Stop_Condition' in self.ids:
+                    self.ids.SSRMS_LEE_Stop_Condition.text = stop_map.get(lee_stop, "n/a")
+                if 'SSRMS_LEE_Run_Speed' in self.ids:
+                    self.ids.SSRMS_LEE_Run_Speed.text = speed_map.get(lee_speed, "n/a")
+                if 'SSRMS_LEE_Hot' in self.ids:
+                    self.ids.SSRMS_LEE_Hot.text = hot_map.get(lee_hot, "Null")
+            except Exception:
+                if 'SSRMS_LEE_Stop_Condition' in self.ids:
+                    self.ids.SSRMS_LEE_Stop_Condition.text = "n/a"
+                if 'SSRMS_LEE_Run_Speed' in self.ids:
+                    self.ids.SSRMS_LEE_Run_Speed.text = "n/a"
+                if 'SSRMS_LEE_Hot' in self.ids:
+                    self.ids.SSRMS_LEE_Hot.text = "n/a"
+
+
+            # Base location (values[260]) per mapping from GUI
             BaseLocation = int(float(values[260][0]))
             base_map = {
                 1: "Lab",
