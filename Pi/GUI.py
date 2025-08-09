@@ -248,16 +248,7 @@ runningDemo = False
 oldtdrs = "n/a"
 logged = False
 mt_speed = 0.00
-#-----------EPS Variables----------------------
-EPSstorageindex = 0
-channel1A_voltage = [154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1]
-channel1B_voltage = [154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1]
-channel2A_voltage = [154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1]
-channel2B_voltage = [154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1]
-channel3A_voltage = [154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1]
-channel3B_voltage = [154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1]
-channel4A_voltage = [154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1]
-channel4B_voltage = [154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1, 154.1]
+
 sizeX = 0.00
 sizeY = 0.00
 psarj2 = 1.0
@@ -868,7 +859,6 @@ class MainApp(App):
         global mimicbutton, switchtofake, demoboolean, runningDemo, playbackboolean, psarj2, ssarj2, aos, los, oldLOS, psarjmc, ssarjmc, ptrrjmc, strrjmc, beta1bmc, beta1amc, beta2bmc, beta2amc, beta3bmc, beta3amc, beta4bmc, beta4amc, US_EVAinProgress, position_x, position_y, position_z, velocity_x, velocity_y, velocity_z, altitude, velocity, iss_mass, testvalue, testfactor, airlock_pump, crewlockpres, leak_hold, firstcrossing, EVA_activities, repress, depress, oldAirlockPump, obtained_EVA_crew, EVAstartTime
         global holdstartTime, LS_Subscription
         global Disco, eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
-        global EPSstorageindex, channel1A_voltage, channel1B_voltage, channel2A_voltage, channel2B_voltage, channel3A_voltage, channel3B_voltage, channel4A_voltage, channel4B_voltage, USOS_Power
         global stationmode, sgant_elevation, sgant_xelevation
         global tdrs, module
         global old_mt_timestamp, old_mt_position, mt_speed
@@ -965,40 +955,6 @@ class MainApp(App):
         uhf2_power = int((values[234])[0]) #0 = off, 1 = on, 3 = failed
         uhf_framesync = int((values[235])[0]) #1 or 0
 
-        #initialize array statuses to discharge
-        v1as = 1
-        v1bs = 1
-        v2as = 1
-        v2bs = 1
-        v3as = 1
-        v3bs = 1
-        v4as = 1
-        v4bs = 1
-
-        v1a = "{:.2f}".format(float((values[25])[0]))
-        channel1A_voltage[EPSstorageindex] = float(v1a)
-        v1b = "{:.2f}".format(float((values[26])[0]))
-        channel1B_voltage[EPSstorageindex] = float(v1b)
-        v2a = "{:.2f}".format(float((values[27])[0]))
-        channel2A_voltage[EPSstorageindex] = float(v2a)
-        v2b = "{:.2f}".format(float((values[28])[0]))
-        channel2B_voltage[EPSstorageindex] = float(v2b)
-        v3a = "{:.2f}".format(float((values[29])[0]))
-        channel3A_voltage[EPSstorageindex] = float(v3a)
-        v3b = "{:.2f}".format(float((values[30])[0]))
-        channel3B_voltage[EPSstorageindex] = float(v3b)
-        v4a = "{:.2f}".format(float((values[31])[0]))
-        channel4A_voltage[EPSstorageindex] = float(v4a)
-        v4b = "{:.2f}".format(float((values[32])[0]))
-        channel4B_voltage[EPSstorageindex] = float(v4b)
-        c1a = "{:.2f}".format(float((values[33])[0]))
-        c1b = "{:.2f}".format(float((values[34])[0]))
-        c2a = "{:.2f}".format(float((values[35])[0]))
-        c2b = "{:.2f}".format(float((values[36])[0]))
-        c3a = "{:.2f}".format(float((values[37])[0]))
-        c3b = "{:.2f}".format(float((values[38])[0]))
-        c4a = "{:.2f}".format(float((values[39])[0]))
-        c4b = "{:.2f}".format(float((values[40])[0]))
 
         stationmode = float((values[46])[0]) #russian segment mode same as usos mode
 
@@ -1058,45 +1014,6 @@ class MainApp(App):
         airlock_pump_switch = int((values[72])[0])
         crewlockpres = float((values[16])[0])
         airlockpres = float((values[77])[0])
-
-        ##US EPS Stuff---------------------------##
-        solarbeta = "{:.2f}".format(float((values[176])[0]))
-
-        power_1a = float(v1a) * float(c1a)
-        power_1b = float(v1b) * float(c1b)
-        power_2a = float(v2a) * float(c2a)
-        power_2b = float(v2b) * float(c2b)
-        power_3a = float(v3a) * float(c3a)
-        power_3b = float(v3b) * float(c3b)
-        power_4a = float(v4a) * float(c4a)
-        power_4b = float(v4b) * float(c4b)
-
-        USOS_Power = power_1a + power_1b + power_2a + power_2b + power_3a + power_3b + power_4a + power_4b
-        self.screens["eps"].ids.usos_power.text = str("{:.0f}".format(USOS_Power*-1.0)) + " W"
-        self.screens["eps"].ids.solarbeta.text = str(solarbeta)
-
-        avg_total_voltage = (float(v1a)+float(v1b)+float(v2a)+float(v2b)+float(v3a)+float(v3b)+float(v4a)+float(v4b))/8.0
-
-        avg_1a = (channel1A_voltage[0]+channel1A_voltage[1]+channel1A_voltage[2]+channel1A_voltage[3]+channel1A_voltage[4]+channel1A_voltage[5]+channel1A_voltage[6]+channel1A_voltage[7]+channel1A_voltage[8]+channel1A_voltage[9])/10
-        avg_1b = (channel1B_voltage[0]+channel1B_voltage[1]+channel1B_voltage[2]+channel1B_voltage[3]+channel1B_voltage[4]+channel1B_voltage[5]+channel1B_voltage[6]+channel1B_voltage[7]+channel1B_voltage[8]+channel1B_voltage[9])/10
-        avg_2a = (channel2A_voltage[0]+channel2A_voltage[1]+channel2A_voltage[2]+channel2A_voltage[3]+channel2A_voltage[4]+channel2A_voltage[5]+channel2A_voltage[6]+channel2A_voltage[7]+channel2A_voltage[8]+channel2A_voltage[9])/10
-        avg_2b = (channel2B_voltage[0]+channel2B_voltage[1]+channel2B_voltage[2]+channel2B_voltage[3]+channel2B_voltage[4]+channel2B_voltage[5]+channel2B_voltage[6]+channel2B_voltage[7]+channel2B_voltage[8]+channel2B_voltage[9])/10
-        avg_3a = (channel3A_voltage[0]+channel3A_voltage[1]+channel3A_voltage[2]+channel3A_voltage[3]+channel3A_voltage[4]+channel3A_voltage[5]+channel3A_voltage[6]+channel3A_voltage[7]+channel3A_voltage[8]+channel3A_voltage[9])/10
-        avg_3b = (channel3B_voltage[0]+channel3B_voltage[1]+channel3B_voltage[2]+channel3B_voltage[3]+channel3B_voltage[4]+channel3B_voltage[5]+channel3B_voltage[6]+channel3B_voltage[7]+channel3B_voltage[8]+channel3B_voltage[9])/10
-        avg_4a = (channel4A_voltage[0]+channel4A_voltage[1]+channel4A_voltage[2]+channel4A_voltage[3]+channel4A_voltage[4]+channel4A_voltage[5]+channel4A_voltage[6]+channel4A_voltage[7]+channel4A_voltage[8]+channel4A_voltage[9])/10
-        avg_4b = (channel4B_voltage[0]+channel4B_voltage[1]+channel4B_voltage[2]+channel4B_voltage[3]+channel4B_voltage[4]+channel4B_voltage[5]+channel4B_voltage[6]+channel4B_voltage[7]+channel4B_voltage[8]+channel4B_voltage[9])/10
-        halfavg_1a = (channel1A_voltage[0]+channel1A_voltage[1]+channel1A_voltage[2]+channel1A_voltage[3]+channel1A_voltage[4])/5
-        halfavg_1b = (channel1B_voltage[0]+channel1B_voltage[1]+channel1B_voltage[2]+channel1B_voltage[3]+channel1B_voltage[4])/5
-        halfavg_2a = (channel2A_voltage[0]+channel2A_voltage[1]+channel2A_voltage[2]+channel2A_voltage[3]+channel2A_voltage[4])/5
-        halfavg_2b = (channel2B_voltage[0]+channel2B_voltage[1]+channel2B_voltage[2]+channel2B_voltage[3]+channel2B_voltage[4])/5
-        halfavg_3a = (channel3A_voltage[0]+channel3A_voltage[1]+channel3A_voltage[2]+channel3A_voltage[3]+channel3A_voltage[4])/5
-        halfavg_3b = (channel3B_voltage[0]+channel3B_voltage[1]+channel3B_voltage[2]+channel3B_voltage[3]+channel3B_voltage[4])/5
-        halfavg_4a = (channel4A_voltage[0]+channel4A_voltage[1]+channel4A_voltage[2]+channel4A_voltage[3]+channel4A_voltage[4])/5
-        halfavg_4b = (channel4B_voltage[0]+channel4B_voltage[1]+channel4B_voltage[2]+channel4B_voltage[3]+channel4B_voltage[4])/5
-
-        EPSstorageindex += 1
-        if EPSstorageindex > 9:
-            EPSstorageindex = 0
 
 
         ## Station Mode ##
@@ -1179,230 +1096,7 @@ class MainApp(App):
         #ISS altitude too low
         #Russion hook status - make sure all modules remain docked
 
-
-        ##-------------------EPS Stuff---------------------------##
-
-        #if halfavg_1a < 151.5: #discharging
-        #    self.screens["eps"].ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
-        #    #self.screens["eps"].ids.array_1a.color = 1, 1, 1, 0.8
-        #elif avg_1a > 160.0: #charged
-        #    self.screens["eps"].ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
-        #elif halfavg_1a >= 151.5:  #charging
-        #    self.screens["eps"].ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-        #    self.screens["eps"].ids.array_1a.color = 1, 1, 1, 1.0
-        #if float(c1a) > 0.0:    #power channel offline!
-        #    self.screens["eps"].ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
-
-        #if halfavg_1b < 151.5: #discharging
-        #    self.screens["eps"].ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
-        #    #self.screens["eps"].ids.array_1b.color = 1, 1, 1, 0.8
-        #elif avg_1b > 160.0: #charged
-        #    self.screens["eps"].ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
-        #elif halfavg_1b >= 151.5:  #charging
-        #    self.screens["eps"].ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-        #    self.screens["eps"].ids.array_1b.color = 1, 1, 1, 1.0
-        #if float(c1b) > 0.0:                                  #power channel offline!
-        #    self.screens["eps"].ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
-
-        #if halfavg_2a < 151.5: #discharging
-        #    self.screens["eps"].ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
-        #    #self.screens["eps"].ids.array_2a.color = 1, 1, 1, 0.8
-        #elif avg_2a > 160.0: #charged
-        #    self.screens["eps"].ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
-        #elif halfavg_2a >= 151.5:  #charging
-        #    self.screens["eps"].ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-        #    self.screens["eps"].ids.array_2a.color = 1, 1, 1, 1.0
-        #if float(c2a) > 0.0:                                  #power channel offline!
-        #    self.screens["eps"].ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
-
-        #if halfavg_2b < 151.5: #discharging
-        #    self.screens["eps"].ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
-        #    #self.screens["eps"].ids.array_2b.color = 1, 1, 1, 0.8
-        #elif avg_2b > 160.0: #charged
-        #    self.screens["eps"].ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
-        #elif halfavg_2b >= 151.5:  #charging
-        #    self.screens["eps"].ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-        #    self.screens["eps"].ids.array_2b.color = 1, 1, 1, 1.0
-        #if float(c2b) > 0.0:                                  #power channel offline!
-        #    self.screens["eps"].ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
-
-        #if halfavg_3a < 151.5: #discharging
-        #    self.screens["eps"].ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
-            #self.screens["eps"].ids.array_3a.color = 1, 1, 1, 0.8
-        #elif avg_3a > 160.0: #charged
-        #    self.screens["eps"].ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
-        #elif halfavg_3a >= 151.5:  #charging
-        #    self.screens["eps"].ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-        #    self.screens["eps"].ids.array_3a.color = 1, 1, 1, 1.0
-        #if float(c3a) > 0.0:                                  #power channel offline!
-        #    self.screens["eps"].ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
-
-        #if halfavg_3b < 151.5: #discharging
-        #    self.screens["eps"].ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
-            #self.screens["eps"].ids.array_3b.color = 1, 1, 1, 0.8
-        #elif avg_3b > 160.0: #charged
-        #    self.screens["eps"].ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
-        #elif halfavg_3b >= 151.5:  #charging
-        #    self.screens["eps"].ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-        #    self.screens["eps"].ids.array_3b.color = 1, 1, 1, 1.0
-        #if float(c3b) > 0.0:                                  #power channel offline!
-        #    self.screens["eps"].ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
-
-        #if halfavg_4a < 151.5: #discharging
-        #    self.screens["eps"].ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
-        #    #self.screens["eps"].ids.array_4a.color = 1, 1, 1, 0.8
-        #elif avg_4a > 160.0: #charged
-        #    self.screens["eps"].ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
-        #elif halfavg_4a >= 151.5:  #charging
-        #    self.screens["eps"].ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-        #    self.screens["eps"].ids.array_4a.color = 1, 1, 1, 1.0
-        #if float(c4a) > 0.0:                                  #power channel offline!
-        #    self.screens["eps"].ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
-
-        #if halfavg_4b < 151.5: #discharging
-        #    self.screens["eps"].ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
-        #    #self.screens["eps"].ids.array_4b.color = 1, 1, 1, 0.8
-        #elif avg_4b > 160.0: #charged
-        #    self.screens["eps"].ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
-        #elif halfavg_4b >= 151.5:  #charging
-        #    self.screens["eps"].ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-        #    self.screens["eps"].ids.array_4b.color = 1, 1, 1, 1.0
-        #if float(c4b) > 0.0:                                  #power channel offline!
-        #    self.screens["eps"].ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
-        #if avg_total_voltage > 151.5:
-        #else:
-
-        if float(v1a) >= 151.5 or float(v1b) >= 151.5 or float(v2a) >= 151.5 or float(v2b) >= 151.5 or float(v3a) >= 151.5 or float(v3b) >= 151.5 or float(v4a) >= 151.5 or float(v4b) >= 151.5:
-            self.screens["eps"].ids.eps_sun.color = 1, 1, 1, 1
-        else:
-            self.screens["eps"].ids.eps_sun.color = 1, 1, 1, 0.1
-
-        # array status numbers to be sent to arduino
-        # 1 = discharging
-        # 2 = charging
-        # 3 = full
-        # 4 = offline
-
-        if float(v1a) < 151.5: #discharging
-            self.screens["eps"].ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
-            v1as = 1
-            #self.screens["eps"].ids.array_1a.color = 1, 1, 1, 0.8
-        elif float(v1a) > 160.0: #charged
-            self.screens["eps"].ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
-            v1as = 3
-        elif float(v1a) >= 151.5:  #charging
-            self.screens["eps"].ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-            self.screens["eps"].ids.array_1a.color = 1, 1, 1, 1.0
-            v1as = 2
-        if float(c1a) > 0.0:    #power channel offline!
-            self.screens["eps"].ids.array_1a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
-            v1as = 4
-
-        if float(v1b) < 151.5: #discharging
-            self.screens["eps"].ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
-            v1bs = 1
-            #self.screens["eps"].ids.array_1b.color = 1, 1, 1, 0.8
-        elif float(v1b) > 160.0: #charged
-            self.screens["eps"].ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
-            v1bs = 3
-        elif float(v1b) >= 151.5:  #charging
-            self.screens["eps"].ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-            self.screens["eps"].ids.array_1b.color = 1, 1, 1, 1.0
-            v1bs = 2
-        if float(c1b) > 0.0:                                  #power channel offline!
-            self.screens["eps"].ids.array_1b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
-            v1bs = 4
-
-        if float(v2a) < 151.5: #discharging
-            self.screens["eps"].ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
-            v2as = 1
-            #self.screens["eps"].ids.array_2a.color = 1, 1, 1, 0.8
-        elif float(v2a) > 160.0: #charged
-            self.screens["eps"].ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
-            v2as = 3
-        elif float(v2a) >= 151.5:  #charging
-            self.screens["eps"].ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-            self.screens["eps"].ids.array_2a.color = 1, 1, 1, 1.0
-            v2as = 2
-        if float(c2a) > 0.0:                                  #power channel offline!
-            self.screens["eps"].ids.array_2a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
-            v2as = 4
-
-        if float(v2b) < 151.5: #discharging
-            self.screens["eps"].ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
-            v2bs = 1
-            #self.screens["eps"].ids.array_2b.color = 1, 1, 1, 0.8
-        elif float(v2b) > 160.0: #charged
-            self.screens["eps"].ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
-            v2bs = 3
-        elif float(v2b) >= 151.5:  #charging
-            self.screens["eps"].ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-            self.screens["eps"].ids.array_2b.color = 1, 1, 1, 1.0
-            v2bs = 2
-        if float(c2b) > 0.0:                                  #power channel offline!
-            self.screens["eps"].ids.array_2b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
-            v2bs = 4
-
-        if float(v3a) < 151.5: #discharging
-            self.screens["eps"].ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
-            v3as = 1
-            #self.screens["eps"].ids.array_3a.color = 1, 1, 1, 0.8
-        elif float(v3a) > 160.0: #charged
-            self.screens["eps"].ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
-            v3as = 3
-        elif float(v3a) >= 151.5:  #charging
-            self.screens["eps"].ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-            self.screens["eps"].ids.array_3a.color = 1, 1, 1, 1.0
-            v3as = 2
-        if float(c3a) > 0.0:                                  #power channel offline!
-            self.screens["eps"].ids.array_3a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
-            v3as = 4
-
-        if float(v3b) < 151.5: #discharging
-            self.screens["eps"].ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
-            v3bs = 1
-            #self.screens["eps"].ids.array_3b.color = 1, 1, 1, 0.8
-        elif float(v3b) > 160.0: #charged
-            self.screens["eps"].ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
-            v3bs = 3
-        elif float(v3b) >= 151.5:  #charging
-            self.screens["eps"].ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-            self.screens["eps"].ids.array_3b.color = 1, 1, 1, 1.0
-            v3bs = 2
-        if float(c3b) > 0.0:                                  #power channel offline!
-            self.screens["eps"].ids.array_3b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
-            v3bs = 4
-
-        if float(v4a) < 151.5: #discharging
-            self.screens["eps"].ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
-            v4as = 1
-            #self.screens["eps"].ids.array_4a.color = 1, 1, 1, 0.8
-        elif float(v4a) > 160.0: #charged
-            self.screens["eps"].ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
-            v4as = 3
-        elif float(v4a) >= 151.5:  #charging
-            self.screens["eps"].ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-            self.screens["eps"].ids.array_4a.color = 1, 1, 1, 1.0
-            v4as = 2
-        if float(c4a) > 0.0:                                  #power channel offline!
-            self.screens["eps"].ids.array_4a.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
-            v4as = 4
         
-        if float(v4b) < 151.5: #discharging
-            self.screens["eps"].ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-discharging.zip"
-            v4bs = 1
-            #self.screens["eps"].ids.array_4b.color = 1, 1, 1, 0.8
-        elif float(v4b) > 160.0: #charged
-            self.screens["eps"].ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charged.zip"
-            v4bs = 3
-        elif float(v4b) >= 151.5:  #charging
-            self.screens["eps"].ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-charging.zip"
-            self.screens["eps"].ids.array_4b.color = 1, 1, 1, 1.0
-            v4bs = 2
-        if float(c4b) > 0.0:                                  #power channel offline!
-            self.screens["eps"].ids.array_4b.source = mimic_directory + "/Mimic/Pi/imgs/eps/array-offline.png"
-            v4bs = 4
-
         ##-------------------C&T Functionality-------------------##
         self.screens["ct_sgant"].ids.sgant_dish.angle = float(sgant_elevation)
         self.screens["ct_sgant"].ids.sgant_elevation.text = "{:.2f}".format(float(sgant_elevation))
@@ -1618,15 +1312,116 @@ class MainApp(App):
         #self.screens["playback"].ids.beta4a.text = str(beta4a)
         #self.screens["playback"].ids.beta4b.text = str(beta4b)
 
+        #initialize array statuses to discharge
+        v1as = 1
+        v1bs = 1
+        v2as = 1
+        v2bs = 1
+        v3as = 1
+        v3bs = 1
+        v4as = 1
+        v4bs = 1
+
+        v1a = "{:.2f}".format(float((values[25])[0]))
+        v1b = "{:.2f}".format(float((values[26])[0]))
+        v2a = "{:.2f}".format(float((values[27])[0]))
+        v2b = "{:.2f}".format(float((values[28])[0]))
+        v3a = "{:.2f}".format(float((values[29])[0]))
+        v3b = "{:.2f}".format(float((values[30])[0]))
+        v4a = "{:.2f}".format(float((values[31])[0]))
+        v4b = "{:.2f}".format(float((values[32])[0]))
+        c1a = "{:.2f}".format(float((values[33])[0]))
+        c1b = "{:.2f}".format(float((values[34])[0]))
+        c2a = "{:.2f}".format(float((values[35])[0]))
+        c2b = "{:.2f}".format(float((values[36])[0]))
+        c3a = "{:.2f}".format(float((values[37])[0]))
+        c3b = "{:.2f}".format(float((values[38])[0]))
+        c4a = "{:.2f}".format(float((values[39])[0]))
+        c4b = "{:.2f}".format(float((values[40])[0]))
+
+        # array status numbers to be sent to arduino
+        # 1 = discharging
+        # 2 = charging
+        # 3 = full
+        # 4 = offline
+
+        if float(v1a) < 151.5: #discharging
+            v1as = 1
+        elif float(v1a) > 160.0: #charged
+            v1as = 3
+        elif float(v1a) >= 151.5:  #charging
+            v1as = 2
+        if float(c1a) > 0.0:    #power channel offline!
+            v1as = 4
+
+        if float(v1b) < 151.5: #discharging
+            v1bs = 1
+        elif float(v1b) > 160.0: #charged
+            v1bs = 3
+        elif float(v1b) >= 151.5:  #charging
+            v1bs = 2
+        if float(c1b) > 0.0:                                  #power channel offline!
+            v1bs = 4
+
+        if float(v2a) < 151.5: #discharging
+            v2as = 1
+        elif float(v2a) > 160.0: #charged
+            v2as = 3
+        elif float(v2a) >= 151.5:  #charging
+            v2as = 2
+        if float(c2a) > 0.0:                                  #power channel offline!
+            v2as = 4
+
+        if float(v2b) < 151.5: #discharging
+            v2bs = 1
+        elif float(v2b) > 160.0: #charged
+            v2bs = 3
+        elif float(v2b) >= 151.5:  #charging
+            v2bs = 2
+        if float(c2b) > 0.0:                                  #power channel offline!
+            v2bs = 4
+
+        if float(v3a) < 151.5: #discharging
+            v3as = 1
+        elif float(v3a) > 160.0: #charged
+            v3as = 3
+        elif float(v3a) >= 151.5:  #charging
+            v3as = 2
+        if float(c3a) > 0.0:                                  #power channel offline!
+            v3as = 4
+
+        if float(v3b) < 151.5: #discharging
+            v3bs = 1
+        elif float(v3b) > 160.0: #charged
+            v3bs = 3
+        elif float(v3b) >= 151.5:  #charging
+            v3bs = 2
+        if float(c3b) > 0.0:                                  #power channel offline!
+            v3bs = 4
+
+        if float(v4a) < 151.5: #discharging
+            v4as = 1
+        elif float(v4a) > 160.0: #charged
+            v4as = 3
+        elif float(v4a) >= 151.5:  #charging
+            v4as = 2
+        if float(c4a) > 0.0:                                  #power channel offline!
+            v4as = 4
+        
+        if float(v4b) < 151.5: #discharging
+            v4bs = 1
+        elif float(v4b) > 160.0: #charged
+            v4bs = 3
+        elif float(v4b) >= 151.5:  #charging
+            v4bs = 2
+        if float(c4b) > 0.0:                                  #power channel offline!
+            v4bs = 4
+
         if demoboolean:
             if Disco:
                 serialWrite("Disco ")
                 Disco = False
             serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + str(v1as) + " " + "V2A=" + str(v2as) + " " + "V3A=" + str(v3as) + " " + "V4A=" + str(v4as) + " " + "V1B=" + str(v1bs) + " " + "V2B=" + str(v2bs) + " " + "V3B=" + str(v3bs) + " " + "V4B=" + str(v4bs) + " " + "ISS=" + module + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
-
- 
-        self.screens["eps"].ids.psarj_value.text = psarj + "deg"
-        self.screens["eps"].ids.ssarj_value.text = ssarj + "deg"
 
 
         self.screens["eva_emu"].ids.UIApowerEMU1.text = str(UIApowerEMU1) + " V"
@@ -1699,30 +1494,6 @@ class MainApp(App):
         self.screens["ct_sasa"].ids.RFG2azimuth.text = str(RFG2azimuth)
         self.screens["ct_sasa"].ids.RFG2elev.text = str(RFG2elev)        
 
-        self.screens["eps"].ids.beta1b_value.text = beta1b
-        self.screens["eps"].ids.beta1a_value.text = beta1a
-        self.screens["eps"].ids.beta2b_value.text = beta2b
-        self.screens["eps"].ids.beta2a_value.text = beta2a
-        self.screens["eps"].ids.beta3b_value.text = beta3b
-        self.screens["eps"].ids.beta3a_value.text = beta3a
-        self.screens["eps"].ids.beta4b_value.text = beta4b
-        self.screens["eps"].ids.beta4a_value.text = beta4a
-        self.screens["eps"].ids.c1a_value.text = c1a + "A"
-        self.screens["eps"].ids.v1a_value.text = v1a + "V"
-        self.screens["eps"].ids.c1b_value.text = c1b + "A"
-        self.screens["eps"].ids.v1b_value.text = v1b + "V"
-        self.screens["eps"].ids.c2a_value.text = c2a + "A"
-        self.screens["eps"].ids.v2a_value.text = v2a + "V"
-        self.screens["eps"].ids.c2b_value.text = c2b + "A"
-        self.screens["eps"].ids.v2b_value.text = v2b + "V"
-        self.screens["eps"].ids.c3a_value.text = c3a + "A"
-        self.screens["eps"].ids.v3a_value.text = v3a + "V"
-        self.screens["eps"].ids.c3b_value.text = c3b + "A"
-        self.screens["eps"].ids.v3b_value.text = v3b + "V"
-        self.screens["eps"].ids.c4a_value.text = c4a + "A"
-        self.screens["eps"].ids.v4a_value.text = v4a + "V"
-        self.screens["eps"].ids.c4b_value.text = c4b + "A"
-        self.screens["eps"].ids.v4b_value.text = v4b + "V"
         self.screens["iss"].ids.altitude_value.text = str(altitude) + " km"
 
         self.screens["iss"].ids.velocity_value.text = str(velocity) + " km/s"
