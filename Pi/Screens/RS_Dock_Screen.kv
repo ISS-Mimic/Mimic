@@ -3,7 +3,7 @@
 <RS_Dock_Screen>:
     name: 'rs_dock'
     FloatLayout:
-        id:dock_layout
+        id: dock_layout
         Image:
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/russian/ROSdockBackground.png'
             fit_mode: "fill"
@@ -11,7 +11,7 @@
             id: ros_mode
             pos_hint: {"center_x": 0.33, "center_y": 0.73}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 300,None
             halign: 'left'
             markup: True
@@ -20,7 +20,7 @@
             id: active_attitude
             pos_hint: {"center_x": 0.374, "center_y": 0.692}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 300,None
             halign: 'left'
             markup: True
@@ -29,7 +29,7 @@
             id: motion_control
             pos_hint: {"center_x": 0.375, "center_y": 0.654}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 300,None
             halign: 'left'
             markup: True
@@ -38,7 +38,7 @@
             id: prep_free_drift
             pos_hint: {"center_x": 0.4, "center_y": 0.615}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 300,None
             halign: 'left'
             markup: True
@@ -47,7 +47,7 @@
             id: thruster_operation
             pos_hint: {"center_x": 0.415, "center_y": 0.575}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 300,None
             halign: 'left'
             markup: True
@@ -56,7 +56,7 @@
             id: current_dynamic
             pos_hint: {"center_x": 0.397, "center_y": 0.537}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 300,None
             halign: 'left'
             markup: True
@@ -65,7 +65,7 @@
             id: kurs1_operating
             pos_hint: {"center_x": 0.4, "center_y": 0.43}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 300,None
             halign: 'left'
             markup: True
@@ -74,7 +74,7 @@
             id: kurs2_operating
             pos_hint: {"center_x": 0.4, "center_y": 0.39}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 300,None
             halign: 'left'
             markup: True
@@ -83,7 +83,7 @@
             id: p1p2_failure
             pos_hint: {"center_x": 0.39, "center_y": 0.352}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 300,None
             halign: 'left'
             markup: True
@@ -92,7 +92,7 @@
             id: kursp_test_mode
             pos_hint: {"center_x": 0.405, "center_y": 0.315}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 300,None
             halign: 'left'
             markup: True
@@ -101,7 +101,7 @@
             id: functional_mode
             pos_hint: {"center_x": 0.392, "center_y": 0.275}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 300,None
             halign: 'left'
             markup: True
@@ -110,7 +110,7 @@
             id: standby_mode
             pos_hint: {"center_x": 0.37, "center_y": 0.236}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 300,None
             halign: 'left'
             markup: True
@@ -119,7 +119,7 @@
             id: sm_capture_signal
             pos_hint: {"center_x": 0.405, "center_y": 0.197}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 300,None
             halign: 'left'
             markup: True
@@ -128,7 +128,7 @@
             id: target_acquisition
             pos_hint: {"center_x": 0.403, "center_y": 0.158}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 300,None
             halign: 'left'
             markup: True
@@ -137,7 +137,7 @@
             id: sm_fwd_dock
             pos_hint: {"center_x": 0.757, "center_y": 0.74}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 300,None
             halign: 'left'
             markup: True
@@ -146,7 +146,7 @@
             id: sm_aft_dock
             pos_hint: {"center_x": 0.747, "center_y": 0.702}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 300,None
             halign: 'left'
             markup: True
@@ -155,7 +155,7 @@
             id: sm_nadir_dock
             pos_hint: {"center_x": 0.769, "center_y": 0.662}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 300,None
             halign: 'left'
             markup: True
@@ -164,7 +164,7 @@
             id: fgb_nadir_dock
             pos_hint: {"center_x": 0.779, "center_y": 0.621}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 300,None
             halign: 'left'
             markup: True
@@ -173,7 +173,7 @@
             id: sm_udm_dock
             pos_hint: {"center_x": 0.769, "center_y": 0.583}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 300,None
             halign: 'left'
             markup: True
@@ -182,7 +182,7 @@
             id: mrm1_dock
             pos_hint: {"center_x": 0.752, "center_y": 0.545}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 300,None
             halign: 'left'
             markup: True
@@ -191,7 +191,7 @@
             id: mrm2_dock
             pos_hint: {"center_x": 0.752, "center_y": 0.505}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 300,None
             halign: 'left'
             markup: True
@@ -200,7 +200,7 @@
             id: sm_docking_flag
             pos_hint: {"center_x": 0.809, "center_y": 0.447}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 300,None
             halign: 'left'
             markup: True
@@ -209,7 +209,7 @@
             id: sm_hooks
             pos_hint: {"center_x": 0.97, "center_y": 0.405}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 300,None
             halign: 'left'
             markup: True
@@ -218,7 +218,7 @@
             id: sm_range
             pos_hint: {"center_x": 0.832, "center_y": 0.366}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 300,None
             halign: 'left'
             markup: True
@@ -227,7 +227,7 @@
             id: sm_rate
             pos_hint: {"center_x": 0.965, "center_y": 0.366}
             text: '-'
-            font_size: 16
+            font_size: min(self.height * 0.20, dp(16))
             text_size: 200,None
             halign: 'left'
             markup: True
@@ -236,7 +236,7 @@
             id: dock_in_progress
             pos_hint: {"center_x": 0.65, "center_y": 0.28}
             text: 'DOCKING IN PROGRESS'
-            font_size: 20
+            font_size: min(self.height * 0.25, dp(20))
             bold: True
             markup: True
             color: 0,1,0,1
