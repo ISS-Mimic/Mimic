@@ -33,8 +33,8 @@ class EPS_Screen(MimicBase):
             }
             self._eps_index = 0
             self.update_eps_values(0)
-            self._update_event = Clock.schedule_interval(self.update_eps_values, 2)
-            log_info("EPS: started updates (2s)")
+            self._update_event = Clock.schedule_interval(self.update_eps_values, 1)
+            log_info("EPS: started updates (1s)")
         except Exception as exc:
             log_error(f"EPS on_enter failed: {exc}")
 
@@ -159,6 +159,22 @@ class EPS_Screen(MimicBase):
             # Show SARJs (deg)
             self._set_text('psarj_value', f"{psarj:.2f}deg")
             self._set_text('ssarj_value', f"{ssarj:.2f}deg")
+            
+            # SARJ modes
+            try:
+                psarj_mode = int(values[44][0])
+                ssarj_mode = int(values[45][0])
+                
+                mode_map = {1:"STANDBY", 2:"RESTART", 3:"CHECKOUT", 4:"DIRECTED_POSITION", 
+                           5:"AUTOTRACK", 6:"BLIND", 7:"SHUTDOWN", 8:"SWITCHOVER"}
+                
+                psarj_mode_text = mode_map.get(psarj_mode, f"Mode {psarj_mode}")
+                ssarj_mode_text = mode_map.get(ssarj_mode, f"Mode {ssarj_mode}")
+                
+                self._set_text('psarj_mode', psarj_mode_text)
+                self._set_text('ssarj_mode', ssarj_mode_text)
+            except Exception:
+                pass
 
         except Exception as exc:
             log_error(f"EPS update failed: {exc}")

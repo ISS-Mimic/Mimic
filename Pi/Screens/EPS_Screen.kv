@@ -20,12 +20,20 @@
             font_size: min(self.height * 0.10, dp(28))
         Label:
             id: ssarj_label
-            pos_hint: {"center_x": 0.40, "center_y": 0.55}
+            pos_hint: {"center_x": 0.40, "center_y": 0.58}
             text: 'SSARJ:'
             markup: True
             color: 1,1,1
             size_hint_y: 0.4
-            font_size: min(self.height * 0.10, dp(28))
+            font_size: min(self.height * 0.08, dp(24))
+        Label:
+            id: ssarj_mode
+            pos_hint: {"center_x": 0.40, "center_y": 0.53}
+            text: '-'
+            markup: True
+            color: 1,1,1
+            size_hint_y: 0.4
+            font_size: min(self.height * 0.08, dp(24))
         Label:
             id: ssarj_value
             pos_hint: {"center_x": 0.40, "center_y": 0.48}
@@ -33,15 +41,23 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: min(self.height * 0.10, dp(28))
+            font_size: min(self.height * 0.08, dp(24))
         Label:
             id: psarj_label
-            pos_hint: {"center_x": 0.60, "center_y": 0.55}
+            pos_hint: {"center_x": 0.60, "center_y": 0.58}
             text: 'PSARJ:'
             markup: True
             color: 1,1,1
             size_hint_y: 0.4
-            font_size: min(self.height * 0.10, dp(28))
+            font_size: min(self.height * 0.08, dp(24))
+        Label:
+            id: psarj_mode
+            pos_hint: {"center_x": 0.60, "center_y": 0.53}
+            text: '-'
+            markup: True
+            color: 1,1,1
+            size_hint_y: 0.4
+            font_size: min(self.height * 0.08, dp(24))
         Label:
             id: psarj_value
             pos_hint: {"center_x": 0.60, "center_y": 0.48}
@@ -49,7 +65,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: min(self.height * 0.10, dp(28))
+            font_size: min(self.height * 0.08, dp(24))
 ##----------------------------------------------------------------------        
         Label:
             pos_hint: {"center_x": 0.57, "center_y": 0.85}
