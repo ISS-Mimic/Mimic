@@ -1629,67 +1629,6 @@ class MainApp(App):
         self.screens["eps"].ids.ssarj_value.text = ssarj + "deg"
 
         
-        self.screens["wrm"].ids.UrineTank.text = str(UrineTank)
-        self.screens["wrm"].ids.CleanWater.text = str(CleanWater)
-        self.screens["wrm"].ids.WasteWater.text = str(WasteWater)
-        
-        #self.screens["wrm"].ids.UrineProcessState.text = str(UrineProcessState)
-        if int(UrineProcessState) == 2:
-            self.screens["wrm"].ids.UrineProcessState.text = "STOP"
-        elif int(UrineProcessState) == 4:
-            self.screens["wrm"].ids.UrineProcessState.text = "SHTDWN"
-        elif int(UrineProcessState) == 8:
-            self.screens["wrm"].ids.UrineProcessState.text = "MAINT"
-        elif int(UrineProcessState) == 16:
-            self.screens["wrm"].ids.UrineProcessState.text = "NORM"
-        elif int(UrineProcessState) == 32:
-            self.screens["wrm"].ids.UrineProcessState.text = "STBY"
-        elif int(UrineProcessState) == 64:
-            self.screens["wrm"].ids.UrineProcessState.text = "IDLE"
-        elif int(UrineProcessState) == 128:
-            self.screens["wrm"].ids.UrineProcessState.text = "INIT"
-        else:
-            self.screens["wrm"].ids.UrineProcessState.text = "n/a"
-        
-        #self.screens["wrm"].ids.WaterProcessState.text = str(WaterProcessState)
-        if int(WaterProcessState) == 1:
-            self.screens["wrm"].ids.WaterProcessState.text = "STOP"
-        elif int(WaterProcessState) == 2:
-            self.screens["wrm"].ids.WaterProcessState.text = "SHTDWN"
-        elif int(WaterProcessState) == 3:
-            self.screens["wrm"].ids.WaterProcessState.text = "STBY"
-        elif int(WaterProcessState) == 4:
-            self.screens["wrm"].ids.WaterProcessState.text = "PROC"
-        elif int(WaterProcessState) == 5:
-            self.screens["wrm"].ids.WaterProcessState.text = "HOT SVC"
-        elif int(WaterProcessState) == 6:
-            self.screens["wrm"].ids.WaterProcessState.text = "FLUSH"
-        elif int(WaterProcessState) == 7:
-            self.screens["wrm"].ids.WaterProcessState.text = "WARM SHTDWN"
-        else:
-            self.screens["wrm"].ids.WaterProcessState.text = "n/a"
-        
-        #self.screens["wrm"].ids.WaterProcessStep.text = str(WaterProcessStep)
-        if int(WaterProcessStep) == 0:
-            self.screens["wrm"].ids.WaterProcessStep.text = "NONE"
-        elif int(WaterProcessStep) == 1:
-            self.screens["wrm"].ids.WaterProcessStep.text = "VENT"
-        elif int(WaterProcessStep) == 2:
-            self.screens["wrm"].ids.WaterProcessStep.text = "HEATUP"
-        elif int(WaterProcessStep) == 3:
-            self.screens["wrm"].ids.WaterProcessStep.text = "OURGE"
-        elif int(WaterProcessStep) == 4:
-            self.screens["wrm"].ids.WaterProcessStep.text = "FLOW"
-        elif int(WaterProcessStep) == 5:
-            self.screens["wrm"].ids.WaterProcessStep.text = "TEST"
-        elif int(WaterProcessStep) == 6:
-            self.screens["wrm"].ids.WaterProcessStep.text = "TEST SV 1"
-        elif int(WaterProcessStep) == 7:
-            self.screens["wrm"].ids.WaterProcessStep.text = "TEST SV 2"
-        elif int(WaterProcessStep) == 8:
-            self.screens["wrm"].ids.WaterProcessStep.text = "SERVICE"
-        else:
-            self.screens["wrm"].ids.WaterProcessStep.text = "n/a"
         
         self.screens["iatcs"].ids.LTwater_Lab.text = str(LTwater_Lab)
         self.screens["iatcs"].ids.MTwater_Lab.text = str(MTwater_Lab)
