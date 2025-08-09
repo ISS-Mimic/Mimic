@@ -56,8 +56,8 @@ class ECLSS_WRM_Screen(MimicBase):
 
             # Tank levels
             self._set_text('UrineTank', f"{float(values[90][0]):.2f}")
-            self._set_text('CleanWater', f"{float(values[93][0]):.2f}")
-            self._set_text('WasteWater', f"{float(values[94][0]):.2f}")
+            self._set_text('CleanWater', f"{float(values[94][0]):.2f}")
+            self._set_text('WasteWater', f"{float(values[93][0]):.2f}")
 
             # Process states
             try:
