@@ -248,8 +248,6 @@ class CT_SGANT_Screen(MimicBase):
                     log_error(f"Failed to calculate position for {name}: {exc}")
                     continue
             
-            log_info(f"Updated TDRS positions with ISS longitude: {iss_longitude:.2f}°")
-            
         except Exception as e:
             log_error(f"Error updating TDRS positions: {e}")
     
