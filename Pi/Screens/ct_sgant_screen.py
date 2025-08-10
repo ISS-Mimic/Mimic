@@ -7,7 +7,7 @@ import sqlite3
 import platform
 from pathlib import Path
 from kivy.clock import Clock
-from ..utils.logger import log_info, log_error
+from utils.logger import log_info, log_error
 
 kv_path = pathlib.Path(__file__).with_name("CT_SGANT_Screen.kv")
 Builder.load_file(str(kv_path))
