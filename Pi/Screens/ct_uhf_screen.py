@@ -1,6 +1,7 @@
 from __future__ import annotations
 from kivy.uix.screenmanager import Screen
 import pathlib
+from pathlib import Path
 import sqlite3
 from kivy.lang import Builder
 from kivy.clock import Clock
@@ -29,21 +30,25 @@ class CT_UHF_Screen(MimicBase):
             self._update_event = None
             log_info("CT UHF Screen: Stopped telemetry updates")
     
+    def _get_db_path(self) -> Path:
+        shm = Path('/dev/shm/iss_telemetry.db')
+        if shm.exists():
+            return shm
+        return Path.home() / '.mimic_data' / 'iss_telemetry.db'
+    
     def update_uhf_values(self, dt):
         """Update UHF screen telemetry values"""
         try:
             # Connect to telemetry database
-            db_path = pathlib.Path(self.mimic_directory) / "Mimic" / "Pi" / "iss_telemetry.db"
+            db_path = self._get_db_path()
+            if not db_path.exists():
+                log_error(f"CT UHF Screen: Database file not found at {db_path}")
+                return
             conn = sqlite3.connect(str(db_path))
             cur = conn.cursor()
-            
-            # Get telemetry values
-            cur.execute('SELECT Value FROM telemetry')
+            cur.execute('select Value from telemetry')
             values = cur.fetchall()
-            
-            if not values or len(values) < 240:  # Ensure we have enough data
-                conn.close()
-                return
+            conn.close()
             
             # Extract UHF-related telemetry values
             uhf1_power = int(values[233][0])  # UHF 1 power status
