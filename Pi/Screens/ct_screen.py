@@ -1,10 +1,12 @@
 from __future__ import annotations
 from kivy.uix.screenmanager import Screen
 import pathlib
-import sqlite3
 from kivy.lang import Builder
-from kivy.clock import Clock
 from ._base import MimicBase
+import sqlite3
+import platform
+from pathlib import Path
+from kivy.clock import Clock
 from utils.logger import log_info, log_error
 
 kv_path = pathlib.Path(__file__).with_name("CT_Screen.kv")
@@ -28,16 +30,31 @@ class CT_Screen(MimicBase):
             self._update_event = None
             log_info("CT Screen: Stopped telemetry updates")
     
+    def _get_db_path(self):
+        """Get the database path based on platform"""
+        # Cross-platform database path
+        if platform.system() == "Windows":
+            # On Windows, use home directory
+            base_path = Path.home() / '.mimic_data'
+            base_path.mkdir(exist_ok=True)  # Ensure directory exists
+            return base_path / 'iss_telemetry.db'
+        else:
+            # On Linux/Unix, use /dev/shm
+            shm = Path('/dev/shm/iss_telemetry.db')
+            if shm.exists():
+                return shm
+            return Path.home() / '.mimic_data' / 'iss_telemetry.db'
+    
     def update_ct_values(self, dt):
         """Update CT screen telemetry values"""
         try:
             # Connect to telemetry database
-            db_path = pathlib.Path(self.mimic_directory) / "Mimic" / "Pi" / "iss_telemetry.db"
+            db_path = self._get_db_path()
+            if not db_path.exists():
+                return
             conn = sqlite3.connect(str(db_path))
             cur = conn.cursor()
-            
-            # Get telemetry values
-            cur.execute('SELECT Value FROM telemetry')
+            cur.execute('select Value from telemetry')
             values = cur.fetchall()
             
             if not values or len(values) < 300:  # Ensure we have enough data
@@ -50,9 +67,12 @@ class CT_Screen(MimicBase):
             sasa2_active = int(values[52][0])  # SASA 2 active status
             uhf1_power = int(values[233][0])   # UHF 1 power (0=off, 1=on, 3=failed)
             uhf2_power = int(values[234][0])   # UHF 2 power (0=off, 1=on, 3=failed)
-            
+            sgant_transmit = int(values[41][0])
+
+            print(aos, sasa1_active, sasa2_active, uhf1_power, uhf2_power, sgant_transmit)
+
             # Update SGANT radio indicators based on AOS status
-            if aos == 1:
+            if sgant_transmit == 1 and aos == 1:
                 self.ids.sgant1_radio.color = (1, 1, 1, 1)
                 self.ids.sgant2_radio.color = (1, 1, 1, 1)
             else:
