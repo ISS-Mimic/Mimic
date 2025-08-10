@@ -994,14 +994,7 @@ class MainApp(App):
         FluidTempAir_Node3 = "{:.2f}".format(float((values[98])[0]))
         FluidTempAv_Node3 = "{:.2f}".format(float((values[97])[0]))
         
-        #SASA telemetry
-        ActiveString = str((values[54])[0])
-        RFG1status = str((values[53])[0])
-        RFG1azimuth = "{:.2f}".format(float((values[18])[0]))
-        RFG1elev = "{:.2f}".format(float((values[14])[0]))
-        RFG2status = str((values[52])[0])
-        RFG2azimuth = "{:.2f}".format(float((values[51])[0]))
-        RFG2elev = "{:.2f}".format(float((values[50])[0]))
+
         
         #UHF telemetry
         UHF1pwr = str((values[233])[0])
@@ -1281,11 +1274,7 @@ class MainApp(App):
             self.screens["us_eva"].ids.EVA_occuring.text = "Crewlock Repressurizing"
             self.screens["us_eva"].ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/RepressLights.png'
 
-        ##-------------------EVA Functionality End-------------------##
 
-        #----------------------EVA EMU Telemetry-------------------#
-        # Moved to eva_emu_screen.py
-        #--------------------EVA EMU Telemetry End------------------#
 
 #        if (difference > -10) and (isinstance(App.get_running_app().root_window.children[0], Popup)==False):
 #            LOSpopup = Popup(title='Loss of Signal', content=Label(text='Possible LOS Soon'), size_hint=(0.3, 0.2), auto_dismiss=True)
@@ -1448,31 +1437,7 @@ class MainApp(App):
             self.screens["ct_sgant"].ids.sgant_transmit.text = "NORMAL"
         else:
             self.screens["ct_sgant"].ids.sgant_transmit.text = "n/a"
-        
-        self.screens["ct_sasa"].ids.ActiveString.text = str(ActiveString)
-        self.screens["ct_sasa"].ids.RFG1status.text = str(RFG1status)
-        if int(RFG1status) == 0:
-            self.screens["ct_sasa"].ids.RFG1status.text = "Off-Ok"
-        elif int(RFG1status) == 1:
-            self.screens["ct_sasa"].ids.RFG1status.text = "Not Off-Ok"
-        elif int(RFG1status) == 2:
-            self.screens["ct_sasa"].ids.RFG1status.text = "Not Off-Failed"
-        else:
-            self.screens["ct_sasa"].ids.RFG1status.text = "n/a"
-        self.screens["ct_sasa"].ids.RFG1azimuth.text = str(RFG1azimuth)
-        self.screens["ct_sasa"].ids.RFG1elev.text = str(RFG1elev)
-        
-        self.screens["ct_sasa"].ids.RFG2status.text = str(RFG2status)
-        if int(RFG2status) == 0:
-            self.screens["ct_sasa"].ids.RFG2status.text = "Off-Ok"
-        elif int(RFG2status) == 1:
-            self.screens["ct_sasa"].ids.RFG2status.text = "Not Off-Ok"
-        elif int(RFG2status) == 2:
-            self.screens["ct_sasa"].ids.RFG2status.text = "Not Off-Failed"
-        else:
-            self.screens["ct_sasa"].ids.RFG2status.text = "n/a"
-        self.screens["ct_sasa"].ids.RFG2azimuth.text = str(RFG2azimuth)
-        self.screens["ct_sasa"].ids.RFG2elev.text = str(RFG2elev)        
+
 
         self.screens["iss"].ids.altitude_value.text = str(altitude) + " km"
 
