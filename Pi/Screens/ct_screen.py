@@ -58,7 +58,7 @@ class CT_Screen(MimicBase):
             cur.execute('select Value from telemetry')
             values = cur.fetchall()
             
-            if not values or len(values) < 300:  # Ensure we have enough data
+            if not values:
                 log_error(f"CT Screen: Not enough data in database")
                 conn.close()
                 return
