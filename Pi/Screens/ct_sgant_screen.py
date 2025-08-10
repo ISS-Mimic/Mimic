@@ -130,49 +130,50 @@ class CT_SGANT_Screen(MimicBase):
                 if 'radio_up' in self.ids:
                     self.ids.radio_up.color = (1, 1, 1, 1)
                 
-                # Update TDRS sources based on station mode
-                # For now, use a default mode since stationmode is not defined
-                active_tdrs_group = "WEST"  # Default mode
+                # Get active TDRS from database to determine which ones to animate
+                active_tdrs = self.get_active_tdrs()
                 
-                if active_tdrs_group == "WEST":
-                    if 'tdrs_west10' in self.ids:
-                        self.ids.tdrs_west10.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip"
-                    if 'tdrs_west11' in self.ids:
-                        self.ids.tdrs_west11.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip"
-                    if 'tdrs_east12' in self.ids:
-                        self.ids.tdrs_east12.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
-                    if 'tdrs_east6' in self.ids:
-                        self.ids.tdrs_east6.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
-                    if 'tdrs_z7' in self.ids:
-                        self.ids.tdrs_z7.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
-                    if 'tdrs_z8' in self.ids:
-                        self.ids.tdrs_z8.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
-                elif active_tdrs_group == "EAST":
-                    if 'tdrs_west11' in self.ids:
-                        self.ids.tdrs_west11.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
-                    if 'tdrs_west10' in self.ids:
-                        self.ids.tdrs_west10.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
-                    if 'tdrs_east12' in self.ids:
-                        self.ids.tdrs_east12.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip"
-                    if 'tdrs_east6' in self.ids:
+                # Update TDRS sources - only animate the specific active satellites
+                # All TDRS start with static PNG, then we animate only the active ones
+                if 'tdrs_west10' in self.ids:
+                    self.ids.tdrs_west10.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                if 'tdrs_west11' in self.ids:
+                    self.ids.tdrs_west11.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                if 'tdrs_east12' in self.ids:
+                    self.ids.tdrs_east12.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                if 'tdrs_east6' in self.ids:
+                    self.ids.tdrs_east6.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                if 'tdrs_z7' in self.ids:
+                    self.ids.tdrs_z7.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                if 'tdrs_z8' in self.ids:
+                    self.ids.tdrs_z8.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                
+                # Now animate only the specific active TDRS satellites
+                animated_tdrs = []
+                for tdrs_number in active_tdrs:
+                    if tdrs_number == 6 and 'tdrs_east6' in self.ids:
                         self.ids.tdrs_east6.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip"
-                    if 'tdrs_z7' in self.ids:
-                        self.ids.tdrs_z7.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
-                    if 'tdrs_z8' in self.ids:
-                        self.ids.tdrs_z8.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
-                elif active_tdrs_group == "Z":
-                    if 'tdrs_west11' in self.ids:
-                        self.ids.tdrs_west11.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
-                    if 'tdrs_west10' in self.ids:
-                        self.ids.tdrs_west10.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
-                    if 'tdrs_east6' in self.ids:
-                        self.ids.tdrs_east6.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
-                    if 'tdrs_east12' in self.ids:
-                        self.ids.tdrs_east12.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
-                    if 'tdrs_z7' in self.ids:
+                        animated_tdrs.append("TDRS 6")
+                    elif tdrs_number == 12 and 'tdrs_east12' in self.ids:
+                        self.ids.tdrs_east12.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip"
+                        animated_tdrs.append("TDRS 12")
+                    elif tdrs_number == 7 and 'tdrs_z7' in self.ids:
                         self.ids.tdrs_z7.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip"
-                    if 'tdrs_z8' in self.ids:
+                        animated_tdrs.append("TDRS 7")
+                    elif tdrs_number == 8 and 'tdrs_z8' in self.ids:
                         self.ids.tdrs_z8.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip"
+                        animated_tdrs.append("TDRS 8")
+                    elif tdrs_number == 10 and 'tdrs_west10' in self.ids:
+                        self.ids.tdrs_west10.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip"
+                        animated_tdrs.append("TDRS 10")
+                    elif tdrs_number == 11 and 'tdrs_west11' in self.ids:
+                        self.ids.tdrs_west11.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip"
+                        animated_tdrs.append("TDRS 11")
+                
+                if animated_tdrs:
+                    log_info(f"Animated TDRS satellites: {', '.join(animated_tdrs)}")
+                else:
+                    log_info("No active TDRS satellites to animate")
             
             elif float(aos) == 0.0 and (float(sgant_transmit) == 0.0 or float(sgant_transmit) == 1.0):
                 # No AOS, turn off radio and reset TDRS
@@ -229,20 +230,17 @@ class CT_SGANT_Screen(MimicBase):
                     
                     # Convert relative longitude to rotation angle around the SGANT dish
                     # 0° = top of screen, 90° = right, 180° = bottom, 270° = left
-                    rotation_angle = relative_lon
-                    
+                    rotation_angle = relative_lon + 285
+
                     # Map to the correct widget ID
                     widget_id = self.get_tdrs_widget_id(name)
                     if widget_id and widget_id in self.ids:
                         self.ids[widget_id].angle = rotation_angle
-                        print(f"Updated {widget_id} angle to {rotation_angle}")
                         # Only show TDRS images for active satellites
                         if self.is_tdrs_active(name, active_tdrs):
                             self.ids[widget_id].opacity = 1.0
-                            print(f"Updated {widget_id} opacity to 1.0")
                         else:
                             self.ids[widget_id].opacity = 0.3
-                            print(f"Updated {widget_id} opacity to 0.3")
                     
                 except Exception as exc:
                     log_error(f"Failed to calculate position for {name}: {exc}")
