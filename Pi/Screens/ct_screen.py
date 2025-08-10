@@ -14,7 +14,6 @@ class CT_Screen(MimicBase):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._update_event = None
-        self.mimic_directory = self.get_mimic_directory()
         
     def on_enter(self):
         """Start telemetry updates when entering the screen"""
