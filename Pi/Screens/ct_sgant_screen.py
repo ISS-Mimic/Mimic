@@ -110,13 +110,11 @@ class CT_SGANT_Screen(MimicBase):
             # Update elevation display
             if 'sgant_elevation' in self.ids:
                 self.ids.sgant_elevation.text = f"{sgant_elevation:.2f}"
-                print(f"SGANT elevation: {sgant_elevation}")
             else:
-                print("sgant_elevation not found")
+                log_error("sgant_elevation not found")
             
             # Update transmit status text
             if 'sgant_transmit' in self.ids:
-                print(f"SGANT transmit: {sgant_transmit}")
                 if int(sgant_transmit) == 0:
                     self.ids.sgant_transmit.text = "RESET"
                 elif int(sgant_transmit) == 1:
@@ -124,7 +122,7 @@ class CT_SGANT_Screen(MimicBase):
                 else:
                     self.ids.sgant_transmit.text = "n/a"
             else:
-                print("sgant_transmit not found")
+                log_error("sgant_transmit not found")
             
             # Update radio and TDRS based on transmit and AOS status
             if float(sgant_transmit) == 1.0 and float(aos) == 1.0:
