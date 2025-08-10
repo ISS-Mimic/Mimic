@@ -5,7 +5,7 @@ import sqlite3
 from kivy.lang import Builder
 from kivy.clock import Clock
 from ._base import MimicBase
-from ..utils.logger import log_info, log_error
+from utils.logger import log_info, log_error
 
 kv_path = pathlib.Path(__file__).with_name("CT_Screen.kv")
 Builder.load_file(str(kv_path))
