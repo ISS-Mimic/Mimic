@@ -170,10 +170,6 @@ class CT_SGANT_Screen(MimicBase):
                         self.ids.tdrs_west11.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip"
                         animated_tdrs.append("TDRS 11")
                 
-                if animated_tdrs:
-                    log_info(f"Animated TDRS satellites: {', '.join(animated_tdrs)}")
-                else:
-                    log_info("No active TDRS satellites to animate")
             
             elif float(aos) == 0.0 and (float(sgant_transmit) == 0.0 or float(sgant_transmit) == 1.0):
                 # No AOS, turn off radio and reset TDRS
