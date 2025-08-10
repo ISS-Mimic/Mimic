@@ -2,6 +2,7 @@ from __future__ import annotations
 from kivy.uix.screenmanager import Screen
 import pathlib
 import sqlite3
+import platform
 from pathlib import Path
 from kivy.lang import Builder
 from kivy.clock import Clock
@@ -32,10 +33,18 @@ class EVA_EMU_Screen(MimicBase):
             log_error(f"EVA_EMU on_leave failed: {exc}")
     
     def _get_db_path(self) -> Path:
-        shm = Path('/dev/shm/iss_telemetry.db')
-        if shm.exists():
-            return shm
-        return Path.home() / '.mimic_data' / 'iss_telemetry.db'
+        # Cross-platform database path
+        if platform.system() == "Windows":
+            # On Windows, use home directory
+            base_path = Path.home() / '.mimic_data'
+            base_path.mkdir(exist_ok=True)  # Ensure directory exists
+            return base_path / 'iss_telemetry.db'
+        else:
+            # On Linux/Unix, use /dev/shm
+            shm = Path('/dev/shm/iss_telemetry.db')
+            if shm.exists():
+                return shm
+            return Path.home() / '.mimic_data' / 'iss_telemetry.db'
     
     def update_eva_emu_values(self, _dt):
         try:
@@ -45,21 +54,21 @@ class EVA_EMU_Screen(MimicBase):
             conn = sqlite3.connect(str(db_path))
             cur = conn.cursor()
             cur.execute('select Value from telemetry')
-            values,timestamp = cur.fetchall()
+            values = cur.fetchall()
             conn.close()
             
-            # EVA EMU Telemetry - indices from GUI.py
-            # UIA (Utility Interface Assembly) - EMU 1 & 2
-            uia_power_emu1 = float(values[61][0]) if values[61][0] else 0.0
-            uia_current_emu1 = float(values[62][0]) if values[62][0] else 0.0
-            uia_power_emu2 = float(values[63][0]) if values[63][0] else 0.0
-            uia_current_emu2 = float(values[64][0]) if values[64][0] else 0.0
-            
+            # EVA EMU Telemetry - indices from database_initialize.py
             # PSA (Power Supply Assembly) - EMU 1 & 2
-            psa_power_emu1 = float(values[67][0]) if values[67][0] else 0.0
-            psa_current_emu1 = float(values[68][0]) if values[68][0] else 0.0
-            psa_power_emu2 = float(values[69][0]) if values[69][0] else 0.0
-            psa_current_emu2 = float(values[70][0]) if values[70][0] else 0.0
+            psa_power_emu1 = float(values[61][0]) if values[61][0] else 0.0
+            psa_current_emu1 = float(values[62][0]) if values[62][0] else 0.0
+            psa_power_emu2 = float(values[63][0]) if values[63][0] else 0.0
+            psa_current_emu2 = float(values[64][0]) if values[64][0] else 0.0
+            
+            # UIA (Utility Interface Assembly) - EMU 1 & 2
+            uia_power_emu1 = float(values[67][0]) if values[67][0] else 0.0
+            uia_current_emu1 = float(values[68][0]) if values[68][0] else 0.0
+            uia_power_emu2 = float(values[69][0]) if values[69][0] else 0.0
+            uia_current_emu2 = float(values[70][0]) if values[70][0] else 0.0
             
             # IRU (Inertial Reference Unit)
             iru_voltage = float(values[65][0]) if values[65][0] else 0.0
