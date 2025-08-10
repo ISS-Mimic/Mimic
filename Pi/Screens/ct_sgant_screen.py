@@ -235,12 +235,14 @@ class CT_SGANT_Screen(MimicBase):
                     widget_id = self.get_tdrs_widget_id(name)
                     if widget_id and widget_id in self.ids:
                         self.ids[widget_id].angle = rotation_angle
-                        
+                        print(f"Updated {widget_id} angle to {rotation_angle}")
                         # Only show TDRS images for active satellites
                         if self.is_tdrs_active(name, active_tdrs):
                             self.ids[widget_id].opacity = 1.0
+                            print(f"Updated {widget_id} opacity to 1.0")
                         else:
                             self.ids[widget_id].opacity = 0.3
+                            print(f"Updated {widget_id} opacity to 0.3")
                     
                 except Exception as exc:
                     log_error(f"Failed to calculate position for {name}: {exc}")
