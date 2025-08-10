@@ -1085,7 +1085,9 @@ class MainApp(App):
         #ISS altitude too low
         #Russion hook status - make sure all modules remain docked
 
-        
+        sgant_transmit = float((values[41])[0])
+
+        iss_mass = float((values[18])[0])
    
         #now check main CT screen radio signal
         if float(sgant_transmit) == 1.0 and float(aos) == 1.0:
