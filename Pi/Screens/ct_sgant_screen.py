@@ -84,15 +84,21 @@ class CT_SGANT_Screen(MimicBase):
             # Update elevation display
             if 'sgant_elevation' in self.ids:
                 self.ids.sgant_elevation.text = f"{sgant_elevation:.2f}"
+                print(f"SGANT elevation: {sgant_elevation}")
+            else:
+                print("sgant_elevation not found")
             
             # Update transmit status text
             if 'sgant_transmit' in self.ids:
+                print(f"SGANT transmit: {sgant_transmit}")
                 if int(sgant_transmit) == 0:
                     self.ids.sgant_transmit.text = "RESET"
                 elif int(sgant_transmit) == 1:
                     self.ids.sgant_transmit.text = "NORMAL"
                 else:
                     self.ids.sgant_transmit.text = "n/a"
+            else:
+                print("sgant_transmit not found")
             
             # Update radio and TDRS based on transmit and AOS status
             if float(sgant_transmit) == 1.0 and float(aos) == 1.0:
@@ -121,7 +127,7 @@ class CT_SGANT_Screen(MimicBase):
                     if 'tdrs_west10' in self.ids:
                         self.ids.tdrs_west10.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
                     if 'tdrs_east12' in self.ids:
-                        self.ids.tdrs_east12.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip"
+                        self.ids.tdrs_east12.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
                     if 'tdrs_east6' in self.ids:
                         self.ids.tdrs_east6.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
                     if 'tdrs_z7' in self.ids:
@@ -136,7 +142,7 @@ class CT_SGANT_Screen(MimicBase):
                     if 'tdrs_east12' in self.ids:
                         self.ids.tdrs_east12.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
                     if 'tdrs_z7' in self.ids:
-                        self.ids.tdrs_z7.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip"
+                        self.ids.tdrs_z7.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
             
             elif float(aos) == 0.0 and (float(sgant_transmit) == 0.0 or float(sgant_transmit) == 1.0):
                 # No AOS, turn off radio and reset TDRS
@@ -183,16 +189,16 @@ class CT_SGANT_Screen(MimicBase):
             if result and result[0] and result[1]:
                 active_tdrs = []
                 if result[0] != '0':
-                    active_tdrs.append(f"TDRS {result[0]}")
+                    active_tdrs.append(f"TDRS {result[0]} Connected")
                 if result[1] != '0':
-                    active_tdrs.append(f"TDRS {result[1]}")
+                    active_tdrs.append(f"TDRS {result[1]} Connected")
                 
                 if active_tdrs:
                     if 'tdrs_label' in self.ids:
                         self.ids.tdrs_label.text = f"Active: {', '.join(active_tdrs)}"
                 else:
                     if 'tdrs_label' in self.ids:
-                        self.ids.tdrs_label.text = 'TDRS: No Active Satellites'
+                        self.ids.tdrs_label.text = 'TDRS: No Active Connections'
             else:
                 if 'tdrs_label' in self.ids:
                     self.ids.tdrs_label.text = 'TDRS: No Active Satellites'
