@@ -24,7 +24,7 @@
             markup: True
             color: 1, 1, 1
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         
         Label:
             id: ActiveString
@@ -33,7 +33,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         
         # RFG1 (SASA 1) Status
         Label:
@@ -43,7 +43,7 @@
             markup: True
             color: 1, 1, 1
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         
         Label:
             id: RFG1status
@@ -52,7 +52,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         
         # RFG1 Azimuth
         Label:
@@ -62,7 +62,7 @@
             markup: True
             color: 1, 1, 1
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         
         Label:
             id: RFG1azimuth
@@ -71,7 +71,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         
         # RFG1 Elevation
         Label:
@@ -81,7 +81,7 @@
             markup: True
             color: 1, 1, 1
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         
         Label:
             id: RFG1elev
@@ -90,7 +90,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         
         # RFG2 (SASA 2) Status
         Label:
@@ -100,7 +100,7 @@
             markup: True
             color: 1, 1, 1
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         
         Label:
             id: RFG2status
