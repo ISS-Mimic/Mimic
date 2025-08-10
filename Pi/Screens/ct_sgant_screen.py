@@ -9,16 +9,21 @@ from pathlib import Path
 from kivy.clock import Clock
 from utils.logger import log_info, log_error
 import math
+import json
+import ephem
+from datetime import datetime
 
 kv_path = pathlib.Path(__file__).with_name("CT_SGANT_Screen.kv")
 Builder.load_file(str(kv_path))
 
 class CT_SGANT_Screen(MimicBase):
     _update_event = None
+    tdrs_tles = {}  # Store TDRS TLE data
     
     def on_enter(self):
         """Called when the screen is entered - start updating values"""
         try:
+            self.load_tdrs_tles()
             self.update_sgant_values(0)
             self._update_event = Clock.schedule_interval(self.update_sgant_values, 2.0)
             log_info("CT_SGANT: started updates (2s)")
@@ -34,6 +39,25 @@ class CT_SGANT_Screen(MimicBase):
             log_info("CT_SGANT: stopped updates")
         except Exception as exc:
             log_error(f"CT_SGANT on_leave failed: {exc}")
+    
+    def load_tdrs_tles(self):
+        """Load TDRS TLE data from configuration file"""
+        try:
+            cfg = Path.home() / ".mimic_data" / "tdrs_tle_config.json"
+            if cfg.exists():
+                db = json.loads(cfg.read_text())
+                # Load only the TDRS satellites we need
+                tdrs_ids = {"TDRS 6", "TDRS 12", "TDRS 7", "TDRS 8", "TDRS 10", "TDRS 11"}
+                self.tdrs_tles = {
+                    name: ephem.readtle(name, *lines)
+                    for name, lines in db["TDRS_TLEs"].items()
+                    if name in tdrs_ids
+                }
+                log_info(f"Loaded {len(self.tdrs_tles)} TDRS TLEs")
+            else:
+                log_error("TDRS TLE config file not found")
+        except Exception as exc:
+            log_error(f"Failed to load TDRS TLEs: {exc}")
     
     def _get_db_path(self):
         """Get the database path based on platform"""
@@ -68,9 +92,9 @@ class CT_SGANT_Screen(MimicBase):
             aos = float((values[12])[0])
             
             # Get ISS position for longitude calculation
-            position_x = float(values[57][0]) if values[57][0] else 0.0
-            position_y = float(values[58][0]) if values[58][0] else 0.0
-            position_z = float(values[59][0]) if values[59][0] else 0.0
+            position_x = float((values[57])[0])
+            position_y = float((values[58])[0])
+            position_z = float((values[59])[0])
             
             # Calculate ISS longitude from position vector
             if position_x != 0 or position_y != 0:
@@ -171,7 +195,7 @@ class CT_SGANT_Screen(MimicBase):
             
             conn.close()
             
-            # Update TDRS widget positions based on ISS longitude
+            # Update TDRS widget positions based on actual orbital positions
             self.update_tdrs_positions(iss_longitude)
             
             # Update TDRS label with active satellite info
@@ -181,26 +205,102 @@ class CT_SGANT_Screen(MimicBase):
             log_error(f"Error updating SGANT values: {e}")
     
     def update_tdrs_positions(self, iss_longitude):
-        """Update TDRS widget positions based on ISS longitude"""
+        """Update TDRS widget positions based on their actual orbital positions relative to ISS"""
         try:
-            # Position TDRS widgets using the hardcoded adjustment values from user
-            if 'tdrs_east12' in self.ids:
-                self.ids.tdrs_east12.angle = (-1 * iss_longitude) - 41
-            if 'tdrs_east6' in self.ids:
-                self.ids.tdrs_east6.angle = (-1 * iss_longitude) - 46
-            if 'tdrs_z7' in self.ids:
-                self.ids.tdrs_z7.angle = ((-1 * iss_longitude) - 41) + 126
-            if 'tdrs_z8' in self.ids:
-                self.ids.tdrs_z8.angle = ((-1 * iss_longitude) - 41) + 127
-            if 'tdrs_west11' in self.ids:
-                self.ids.tdrs_west11.angle = ((-1 * iss_longitude) - 41) - 133
-            if 'tdrs_west10' in self.ids:
-                self.ids.tdrs_west10.angle = ((-1 * iss_longitude) - 41) - 130
-                
+            if not self.tdrs_tles:
+                log_error("No TDRS TLE data available")
+                return
+            
+            # Get active TDRS from database
+            active_tdrs = self.get_active_tdrs()
+            
+            # Calculate positions for each TDRS based on their actual orbital longitude
+            for name, sat in self.tdrs_tles.items():
+                try:
+                    # Compute current TDRS position
+                    sat.compute(datetime.utcnow())
+                    tdrs_longitude = math.degrees(sat.sublong)
+                    
+                    # Calculate relative longitude difference (how far TDRS is from ISS)
+                    # Normalize to -180 to +180 range
+                    relative_lon = tdrs_longitude - iss_longitude
+                    while relative_lon > 180:
+                        relative_lon -= 360
+                    while relative_lon < -180:
+                        relative_lon += 360
+                    
+                    # Convert relative longitude to rotation angle around the SGANT dish
+                    # 0° = top of screen, 90° = right, 180° = bottom, 270° = left
+                    rotation_angle = relative_lon
+                    
+                    # Map to the correct widget ID
+                    widget_id = self.get_tdrs_widget_id(name)
+                    if widget_id and widget_id in self.ids:
+                        self.ids[widget_id].angle = rotation_angle
+                        
+                        # Only show TDRS images for active satellites
+                        if self.is_tdrs_active(name, active_tdrs):
+                            self.ids[widget_id].opacity = 1.0
+                        else:
+                            self.ids[widget_id].opacity = 0.3
+                    
+                except Exception as exc:
+                    log_error(f"Failed to calculate position for {name}: {exc}")
+                    continue
+            
             log_info(f"Updated TDRS positions with ISS longitude: {iss_longitude:.2f}°")
             
         except Exception as e:
             log_error(f"Error updating TDRS positions: {e}")
+    
+    def get_tdrs_widget_id(self, tdrs_name):
+        """Map TDRS name to widget ID"""
+        mapping = {
+            "TDRS 6": "tdrs_east6",
+            "TDRS 12": "tdrs_east12", 
+            "TDRS 7": "tdrs_z7",
+            "TDRS 8": "tdrs_z8",
+            "TDRS 10": "tdrs_west10",
+            "TDRS 11": "tdrs_west11"
+        }
+        return mapping.get(tdrs_name)
+    
+    def get_active_tdrs(self):
+        """Get list of active TDRS numbers from database"""
+        try:
+            tdrs_db_path = Path("/dev/shm/tdrs.db")
+            if not tdrs_db_path.exists():
+                tdrs_db_path = Path.home() / ".mimic_data" / "tdrs.db"
+                if not tdrs_db_path.exists():
+                    return []
+            
+            conn = sqlite3.connect(str(tdrs_db_path))
+            cursor = conn.cursor()
+            cursor.execute("SELECT TDRS1, TDRS2 FROM tdrs LIMIT 1")
+            result = cursor.fetchone()
+            conn.close()
+            
+            if result and result[0] and result[1]:
+                active_tdrs = []
+                if result[0] != '0':
+                    active_tdrs.append(int(result[0]))
+                if result[1] != '0':
+                    active_tdrs.append(int(result[1]))
+                return active_tdrs
+            return []
+            
+        except Exception as e:
+            log_error(f"Error getting active TDRS: {e}")
+            return []
+    
+    def is_tdrs_active(self, tdrs_name, active_tdrs):
+        """Check if a TDRS is currently active"""
+        try:
+            # Extract TDRS number from name (e.g., "TDRS 6" -> 6)
+            tdrs_number = int(tdrs_name.split()[1])
+            return tdrs_number in active_tdrs
+        except:
+            return False
     
     def update_tdrs_label(self):
         """Update the TDRS label with active satellite information"""
