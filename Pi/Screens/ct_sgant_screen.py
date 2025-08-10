@@ -76,10 +76,9 @@ class CT_SGANT_Screen(MimicBase):
             aos = float(values[12][0]) if values[12][0] else 0.0
             
             # Update SGANT dish angle - convert elevation to rotation angle
-            # SGANT elevation is typically 0-90 degrees, map to rotation
-            dish_angle = 90 - sgant_elevation  # Invert so 0° elevation = 90° rotation
+
             if 'sgant_dish' in self.ids:
-                self.ids.sgant_dish.angle = dish_angle
+                self.ids.sgant_dish.angle = sgant_elevation
             
             # Update elevation display
             if 'sgant_elevation' in self.ids:
