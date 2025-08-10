@@ -1,3 +1,5 @@
+#:import dp kivy.metrics.dp
+
 <CT_SGANT_Screen>:
     name: 'ct_sgant'
     FloatLayout:
@@ -19,24 +21,24 @@
             text: 'Ku-Band SGANT Elevation'
             markup: True
             color: 1,1,1
-            size_hint_y: 0.4
-            font_size: self.height * 0.14
+            size_hint: 0.3, 0.4
+            font_size: min(self.height * 0.14, dp(20))
         Label:
             id: sgant_elevation
             pos_hint: {"center_x": 0.65, "center_y": 0.2}
             text: ''
             markup: True
             color: root.signalcolor
-            size_hint_y: 0.4
-            font_size: self.height * 0.10
+            size_hint: 0.15, 0.4
+            font_size: min(self.height * 0.10, dp(16))
         Label:
             id: sgant_transmit
             pos_hint: {"center_x": 0.75, "center_y": 0.2}
             text: ''
             markup: True
             color: root.signalcolor
-            size_hint_y: 0.4
-            font_size: self.height * 0.10
+            size_hint: 0.15, 0.4
+            font_size: min(self.height * 0.10, dp(16))
         Image:
             id: sgant_dish
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/ct/SGANTantenna.png"
@@ -87,18 +89,12 @@
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
             angle: 0
-            angle2: 180
             canvas.before:
                 PushMatrix
                 Rotate:
                     angle: self.angle
-                    axis: 0,0,-1
-                    ##origin: sgant_dish.center
-                    origin: 400,0
-                Rotate:
-                    angle: self.angle2
                     axis: 0,0,1
-                    origin: self.center
+                    origin: sgant_dish.center
             canvas.after:
                 PopMatrix
         Image:
@@ -111,18 +107,12 @@
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
             angle: 0
-            angle2: 180
             canvas.before:
                 PushMatrix
                 Rotate:
                     angle: self.angle
-                    axis: 0,0,-1
-                    ##origin: sgant_dish.center
-                    origin: 400,0
-                Rotate:
-                    angle: self.angle2
                     axis: 0,0,1
-                    origin: self.center
+                    origin: sgant_dish.center
             canvas.after:
                 PopMatrix
         Image:
@@ -135,18 +125,12 @@
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
             angle: 0
-            angle2: 180
             canvas.before:
                 PushMatrix
                 Rotate:
                     angle: self.angle
-                    axis: 0,0,-1
-                    ##origin: sgant_dish.center
-                    origin: 400,0
-                Rotate:
-                    angle: self.angle2
                     axis: 0,0,1
-                    origin: self.center
+                    origin: sgant_dish.center
             canvas.after:
                 PopMatrix
         Image:
@@ -159,18 +143,12 @@
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
             angle: 0
-            angle2: 180
             canvas.before:
                 PushMatrix
                 Rotate:
                     angle: self.angle
-                    axis: 0,0,-1
-                    ##origin: sgant_dish.center
-                    origin: 400,0
-                Rotate:
-                    angle: self.angle2
                     axis: 0,0,1
-                    origin: self.center
+                    origin: sgant_dish.center
             canvas.after:
                 PopMatrix
         Image:
@@ -183,18 +161,12 @@
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
             angle: 0
-            angle2: 180
             canvas.before:
                 PushMatrix
                 Rotate:
                     angle: self.angle
-                    axis: 0,0,-1
-                    ##origin: sgant_dish.center
-                    origin: 400,0
-                Rotate:
-                    angle: self.angle2
                     axis: 0,0,1
-                    origin: self.center
+                    origin: sgant_dish.center
             canvas.after:
                 PopMatrix
         Image:
@@ -207,29 +179,22 @@
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
             angle: 0
-            angle2: 180
             canvas.before:
                 PushMatrix
                 Rotate:
                     angle: self.angle
-                    axis: 0,0,-1
-                    ##origin: sgant_dish.center
-                    origin: 400,0
-                Rotate:
-                    angle: self.angle2
                     axis: 0,0,1
-                    origin: self.center
+                    origin: sgant_dish.center
             canvas.after:
                 PopMatrix
         Label:
             id: tdrs_label
-            ##pos: tdrs.pos
-            pos_hint: {"center_x": 0.5, "center_y": 0.88}
+            pos_hint: {"center_x": 0.5, "center_y": 0.89}
             text: '---'
             markup: True
             color: root.signalcolor
-            size_hint_y: 0.4
-            font_size: self.height * 0.12
+            size_hint: 0.4, 0.4
+            font_size: min(self.height * 0.12, dp(18))
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
@@ -249,5 +214,5 @@
             text: ''
             markup: True
             color: 1,1,1
-            font_size: self.height * 0.3
-            size_hint_y: 0.5
+            size_hint: 0.1, 0.5
+            font_size: min(self.height * 0.3, dp(24))
