@@ -71,10 +71,10 @@ class CT_SGANT_Screen(MimicBase):
                 return
             
             # Extract SGANT values using indices from database_initialize.py
-            sgant_elevation = float(values[15][0]) if values[15][0] else 0.0
-            sgant_xelevation = float(values[17][0]) if values[17][0] else 0.0
-            sgant_transmit = float(values[41][0]) if values[41][0] else 0.0
-            aos = float(values[12][0]) if values[12][0] else 0.0
+            sgant_elevation = float((values[15])[0])
+            sgant_xelevation = float((values[17])[0])
+            sgant_transmit = float((values[41])[0])
+            aos = float((values[12])[0])
             
             # Get ISS position for longitude calculation
             position_x = float(values[57][0]) if values[57][0] else 0.0
