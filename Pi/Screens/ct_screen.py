@@ -71,7 +71,6 @@ class CT_Screen(MimicBase):
             uhf2_power = int(values[234][0])   # UHF 2 power (0=off, 1=on, 3=failed)
             sgant_transmit = int(values[41][0])
 
-            print(aos, sasa1_active, sasa2_active, uhf1_power, uhf2_power, sgant_transmit)
 
             # Update SGANT radio indicators based on AOS status
             if sgant_transmit == 1 and aos == 1:
