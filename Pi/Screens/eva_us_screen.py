@@ -109,21 +109,6 @@ class EVA_US_Screen(MimicBase):
         self.ids.EVA_clock.text = f"{hours}:{minutes:02d}:{seconds:02d}"
         self.ids.EVA_clock.color = 0.33, 0.7, 0.18
     
-    def hold_timer(self, dt):
-        """Update hold timer and bar position"""
-        if not self.eva_start_time:
-            return
-            
-        unixconvert = time.gmtime(time.time())
-        currenthours = float(unixconvert[7])*24+unixconvert[3]+float(unixconvert[4])/60+float(unixconvert[5])/3600
-        seconds2 = (currenthours-self.eva_start_time)*3600
-        seconds2 = int(seconds2)
-        
-        new_bar_x = self.map_hold_bar(260-seconds2)
-        self.ids.leak_timer.text = f"~{seconds2}s"
-        self.ids.Hold_bar.pos_hint = {"center_x": new_bar_x, "center_y": 0.47}
-        self.ids.Crewlock_Status_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/eva/LeakCheckLights.png"
-    
     def set_current_astronauts(self, astronaut_names):
         """Set the current astronauts for EVA stats display
         
@@ -441,14 +426,14 @@ class EVA_US_Screen(MimicBase):
             elif airlock_pump_voltage == 1 and crewlockpres > 740 and airlockpres > 740:
                 self.prebreath1 = True
                 self.ids.Crewlock_Status_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/eva/PreBreatheLights.png"
-                self.ids.leak_timer.text = "~160s Leak Check"
+                self.ids.leak_timer.text = "Leak Check"
                 self.ids.EVA_occuring.color = 0, 0, 1
                 self.ids.EVA_occuring.text = "Pre-EVA Nitrogen Purge"
             
             # EVA Depress1
             elif airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres < 740 and airlockpres > 740:
                 self.depress1 = True
-                self.ids.leak_timer.text = "~160s Leak Check"
+                self.ids.leak_timer.text = "Leak Check"
                 self.ids.EVA_occuring.text = "Crewlock Depressurizing"
                 self.ids.EVA_occuring.color = 0, 0, 1
                 self.ids.Crewlock_Status_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/eva/DepressLights.png"
@@ -462,8 +447,6 @@ class EVA_US_Screen(MimicBase):
                 self.depress1 = False
                 self.ids.EVA_occuring.text = "Leak Check in Progress!"
                 self.ids.EVA_occuring.color = 0, 0, 1
-                if not self._hold_timer_event:
-                    self._hold_timer_event = Clock.schedule_interval(self.hold_timer, 1.0)
                 self.ids.Crewlock_Status_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/eva/LeakCheckLights.png"
             
             # EVA Depress2

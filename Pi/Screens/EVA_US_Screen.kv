@@ -28,12 +28,26 @@
         # Pressure Value Label - scales with screen
         Label:
             id: crewlockpressure_value
-            pos_hint: {"center_x": 0.9, "center_y": 0.61}
+            pos_hint: {"center_x": 0.9, "center_y": 0.6}
             text: '0.00'
             markup: True
+            bold: True
             color: root.signalcolor 
             size_hint: 0.1, 0.04
             font_size: min(self.width * 0.8, self.height * 0.8)
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+        
+        # Leak Timer Label - scales with screen
+        Label:
+            id: leak_timer
+            pos_hint: {"center_x": 0.83, "center_y": 0.47}
+            text: '~260s Leak Check'
+            markup: True
+            color: 0,0,0
+            size_hint: 0.15, 0.04
+            font_size: min(self.width * 0.6, self.height * 0.6)
             text_size: self.size
             halign: 'center'
             valign: 'middle'
@@ -59,7 +73,7 @@
             text_size: self.width, None
             markup: True
             color: root.signalcolor 
-            font_size: min(self.height * 0.1, dp(24))
+            font_size: min(self.height * 0.8, dp(24))
             halign: 'left'
             valign: 'middle'
         
@@ -72,7 +86,7 @@
             text_size: self.width, None
             markup: True
             color: root.signalcolor 
-            font_size: min(self.height * 0.1, dp(24))
+            font_size: min(self.height * 0.8, dp(24))
             halign: 'left'
             valign: 'middle'
         
@@ -146,7 +160,7 @@
             text_size: self.width, None
             markup: True
             color: 1,1,1
-            font_size: min(self.height * 0.1, dp(24))
+            font_size: min(self.height * 0.9, dp(24))
             halign: 'left'
             valign: 'middle'
         
@@ -159,7 +173,7 @@
             text_size: self.size
             markup: True
             color: 0,0,0
-            font_size: min(self.height * 0.2, dp(48))
+            font_size: min(self.height * 0.9, dp(48))
             halign: 'center'
             valign: 'middle'
         
@@ -172,7 +186,7 @@
             text_size: self.width, None
             markup: True
             color: 0,0,0
-            font_size: min(self.height * 0.1, dp(24))
+            font_size: min(self.height * 0.8, dp(24))
             halign: 'left'
             valign: 'middle'
         
@@ -185,7 +199,7 @@
             text_size: self.width, None
             markup: True
             color: 0,0,0
-            font_size: min(self.height * 0.1, dp(24))
+            font_size: min(self.height * 0.8, dp(24))
             halign: 'left'
             valign: 'middle'
         
@@ -198,7 +212,7 @@
             text_size: self.width, None
             markup: True
             color: 0,0,0
-            font_size: min(self.height * 0.1, dp(24))
+            font_size: min(self.height * 0.8, dp(24))
             halign: 'left'
             valign: 'middle'
         
@@ -211,7 +225,7 @@
             text_size: self.width, None
             markup: True
             color: 0,0,0
-            font_size: min(self.height * 0.1, dp(24))
+            font_size: min(self.height * 0.8, dp(24))
             halign: 'left'
             valign: 'middle'
         
@@ -224,7 +238,7 @@
             text_size: self.width, None
             markup: True
             color: 0,0,0
-            font_size: min(self.height * 0.1, dp(24))
+            font_size: min(self.height * 0.8, dp(24))
             halign: 'left'
             valign: 'middle'
         
@@ -237,7 +251,7 @@
             text_size: self.width, None
             markup: True
             color: 0,0,0
-            font_size: min(self.height * 0.1, dp(24))
+            font_size: min(self.height * 0.8, dp(24))
             halign: 'left'
             valign: 'middle'
         
@@ -250,7 +264,7 @@
             text_size: self.width, None
             markup: True
             color: 1,1,1
-            font_size: min(self.height * 0.1, dp(24))
+            font_size: min(self.height * 0.8, dp(24))
             halign: 'center'
             valign: 'middle'
         
