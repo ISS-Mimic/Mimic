@@ -55,20 +55,11 @@ class CT_SGANT_Screen(MimicBase):
         try:
             db_path = self._get_db_path()
             if not db_path.exists():
-                log_error(f"Database file not found: {db_path}")
                 return
-            
             conn = sqlite3.connect(str(db_path))
             cur = conn.cursor()
-            
-            # Get all telemetry values
-            cur.execute("SELECT value FROM telemetry ORDER BY id")
+            cur.execute('select Value from telemetry')
             values = cur.fetchall()
-            
-            if len(values) < 42:  # Need at least 42 values for kuband_transmit
-                log_error(f"Not enough telemetry values: {len(values)}")
-                conn.close()
-                return
             
             # Extract SGANT values using indices from database_initialize.py
             sgant_elevation = float((values[15])[0])
