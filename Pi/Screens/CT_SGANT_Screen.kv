@@ -1,3 +1,5 @@
+#:import dp kivy.metrics.dp
+
 <CT_SGANT_Screen>:
     name: 'ct_sgant'
     FloatLayout:
@@ -104,17 +106,12 @@
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
             angle: 0
-            angle2: 180
             canvas.before:
                 PushMatrix
                 Rotate:
                     angle: self.angle
-                    axis: 0, 0, -1
-                    origin: 400, 0
-                Rotate:
-                    angle: self.angle2
                     axis: 0, 0, 1
-                    origin: self.center
+                    origin: sgant_dish.center
             canvas.after:
                 PopMatrix
         
@@ -128,18 +125,13 @@
             anim_loop: 0
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
-            angle: 0
-            angle2: 180
+            angle: 120
             canvas.before:
                 PushMatrix
                 Rotate:
                     angle: self.angle
-                    axis: 0, 0, -1
-                    origin: 400, 0
-                Rotate:
-                    angle: self.angle2
                     axis: 0, 0, 1
-                    origin: self.center
+                    origin: sgant_dish.center
             canvas.after:
                 PopMatrix
         
@@ -153,18 +145,13 @@
             anim_loop: 0
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
-            angle: 0
-            angle2: 180
+            angle: 240
             canvas.before:
                 PushMatrix
                 Rotate:
                     angle: self.angle
-                    axis: 0, 0, -1
-                    origin: 400, 0
-                Rotate:
-                    angle: self.angle2
                     axis: 0, 0, 1
-                    origin: self.center
+                    origin: sgant_dish.center
             canvas.after:
                 PopMatrix
         
@@ -178,18 +165,13 @@
             anim_loop: 0
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
-            angle: 0
-            angle2: 180
+            angle: 300
             canvas.before:
                 PushMatrix
                 Rotate:
                     angle: self.angle
-                    axis: 0, 0, -1
-                    origin: 400, 0
-                Rotate:
-                    angle: self.angle2
                     axis: 0, 0, 1
-                    origin: self.center
+                    origin: sgant_dish.center
             canvas.after:
                 PopMatrix
         
@@ -203,18 +185,13 @@
             anim_loop: 0
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
-            angle: 0
-            angle2: 180
+            angle: 60
             canvas.before:
                 PushMatrix
                 Rotate:
                     angle: self.angle
-                    axis: 0, 0, -1
-                    origin: 400, 0
-                Rotate:
-                    angle: self.angle2
                     axis: 0, 0, 1
-                    origin: self.center
+                    origin: sgant_dish.center
             canvas.after:
                 PopMatrix
         

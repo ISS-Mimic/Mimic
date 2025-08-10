@@ -7,23 +7,32 @@ import sqlite3
 import platform
 from pathlib import Path
 from kivy.clock import Clock
-from utils.logger import log_info, log_error
+from ..utils.logger import log_info, log_error
 
 kv_path = pathlib.Path(__file__).with_name("CT_SGANT_Screen.kv")
 Builder.load_file(str(kv_path))
 
 class CT_SGANT_Screen(MimicBase):
+    _update_event = None
+    
     def on_enter(self):
         """Called when the screen is entered - start updating values"""
-        super().on_enter()
-        # Schedule updates every 2 seconds
-        Clock.schedule_interval(self.update_sgant_values, 2.0)
+        try:
+            self.update_sgant_values(0)
+            self._update_event = Clock.schedule_interval(self.update_sgant_values, 2.0)
+            log_info("CT_SGANT: started updates (2s)")
+        except Exception as exc:
+            log_error(f"CT_SGANT on_enter failed: {exc}")
     
     def on_leave(self):
         """Called when the screen is left - stop updating values"""
-        super().on_leave()
-        # Cancel scheduled updates
-        Clock.unschedule(self.update_sgant_values)
+        try:
+            if self._update_event:
+                self._update_event.cancel()
+                self._update_event = None
+            log_info("CT_SGANT: stopped updates")
+        except Exception as exc:
+            log_error(f"CT_SGANT on_leave failed: {exc}")
     
     def _get_db_path(self):
         """Get the database path based on platform"""
@@ -66,59 +75,132 @@ class CT_SGANT_Screen(MimicBase):
             sgant_transmit = float(values[41][0]) if values[41][0] else 0.0
             aos = float(values[12][0]) if values[12][0] else 0.0
             
-            # Update SGANT dish angle
-            self._set_text(self.ids.sgant_dish, 'angle', float(sgant_elevation))
+            # Update SGANT dish angle - convert elevation to rotation angle
+            # SGANT elevation is typically 0-90 degrees, map to rotation
+            dish_angle = 90 - sgant_elevation  # Invert so 0° elevation = 90° rotation
+            if 'sgant_dish' in self.ids:
+                self.ids.sgant_dish.angle = dish_angle
             
             # Update elevation display
-            self._set_text(self.ids.sgant_elevation, 'text', "{:.2f}".format(float(sgant_elevation)))
+            if 'sgant_elevation' in self.ids:
+                self.ids.sgant_elevation.text = f"{sgant_elevation:.2f}"
             
             # Update transmit status text
-            if int(sgant_transmit) == 0:
-                self._set_text(self.ids.sgant_transmit, 'text', "RESET")
-            elif int(sgant_transmit) == 1:
-                self._set_text(self.ids.sgant_transmit, 'text', "NORMAL")
-            else:
-                self._set_text(self.ids.sgant_transmit, 'text', "n/a")
+            if 'sgant_transmit' in self.ids:
+                if int(sgant_transmit) == 0:
+                    self.ids.sgant_transmit.text = "RESET"
+                elif int(sgant_transmit) == 1:
+                    self.ids.sgant_transmit.text = "NORMAL"
+                else:
+                    self.ids.sgant_transmit.text = "n/a"
             
             # Update radio and TDRS based on transmit and AOS status
             if float(sgant_transmit) == 1.0 and float(aos) == 1.0:
                 # Active transmission and AOS
-                self._set_text(self.ids.radio_up, 'color', (1, 1, 1, 1))
+                if 'radio_up' in self.ids:
+                    self.ids.radio_up.color = (1, 1, 1, 1)
                 
                 # Update TDRS sources based on station mode
-                if hasattr(self, 'stationmode'):
-                    if self.stationmode == "WEST":
-                        self._set_text(self.ids.tdrs_west10, 'source', f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip")
-                        self._set_text(self.ids.tdrs_west11, 'source', f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png")
-                        self._set_text(self.ids.tdrs_east12, 'source', f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png")
-                        self._set_text(self.ids.tdrs_east6, 'source', f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png")
-                        self._set_text(self.ids.tdrs_z7, 'source', f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png")
-                    elif self.stationmode == "EAST":
-                        self._set_text(self.ids.tdrs_west11, 'source', f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip")
-                        self._set_text(self.ids.tdrs_west10, 'source', f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png")
-                        self._set_text(self.ids.tdrs_east12, 'source', f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip")
-                        self._set_text(self.ids.tdrs_east6, 'source', f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png")
-                        self._set_text(self.ids.tdrs_z7, 'source', f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png")
-                    elif self.stationmode == "ZENITH":
-                        self._set_text(self.ids.tdrs_west11, 'source', f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png")
-                        self._set_text(self.ids.tdrs_west10, 'source', f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png")
-                        self._set_text(self.ids.tdrs_east6, 'source', f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip")
-                        self._set_text(self.ids.tdrs_east12, 'source', f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png")
-                        self._set_text(self.ids.tdrs_z7, 'source', f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip")
+                # For now, use a default mode since stationmode is not defined
+                station_mode = "WEST"  # Default mode
+                
+                if station_mode == "WEST":
+                    if 'tdrs_west10' in self.ids:
+                        self.ids.tdrs_west10.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                    if 'tdrs_west11' in self.ids:
+                        self.ids.tdrs_west11.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                    if 'tdrs_east12' in self.ids:
+                        self.ids.tdrs_east12.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                    if 'tdrs_east6' in self.ids:
+                        self.ids.tdrs_east6.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                    if 'tdrs_z7' in self.ids:
+                        self.ids.tdrs_z7.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                elif station_mode == "EAST":
+                    if 'tdrs_west11' in self.ids:
+                        self.ids.tdrs_west11.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                    if 'tdrs_west10' in self.ids:
+                        self.ids.tdrs_west10.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                    if 'tdrs_east12' in self.ids:
+                        self.ids.tdrs_east12.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip"
+                    if 'tdrs_east6' in self.ids:
+                        self.ids.tdrs_east6.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                    if 'tdrs_z7' in self.ids:
+                        self.ids.tdrs_z7.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                elif station_mode == "ZENITH":
+                    if 'tdrs_west11' in self.ids:
+                        self.ids.tdrs_west11.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                    if 'tdrs_west10' in self.ids:
+                        self.ids.tdrs_west10.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                    if 'tdrs_east6' in self.ids:
+                        self.ids.tdrs_east6.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                    if 'tdrs_east12' in self.ids:
+                        self.ids.tdrs_east12.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                    if 'tdrs_z7' in self.ids:
+                        self.ids.tdrs_z7.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip"
             
             elif float(aos) == 0.0 and (float(sgant_transmit) == 0.0 or float(sgant_transmit) == 1.0):
                 # No AOS, turn off radio and reset TDRS
-                self._set_text(self.ids.radio_up, 'color', (0, 0, 0, 0))
-                self._set_text(self.ids.tdrs_east12, 'source', f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png")
-                self._set_text(self.ids.tdrs_east6, 'source', f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png")
-                self._set_text(self.ids.tdrs_west11, 'source', f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png")
-                self._set_text(self.ids.tdrs_west10, 'source', f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png")
-                self._set_text(self.ids.tdrs_z7, 'source', f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png")
+                if 'radio_up' in self.ids:
+                    self.ids.radio_up.color = (0, 0, 0, 0)
+                if 'tdrs_east12' in self.ids:
+                    self.ids.tdrs_east12.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                if 'tdrs_east6' in self.ids:
+                    self.ids.tdrs_east6.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                if 'tdrs_west11' in self.ids:
+                    self.ids.tdrs_west11.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                if 'tdrs_west10' in self.ids:
+                    self.ids.tdrs_west10.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                if 'tdrs_z7' in self.ids:
+                    self.ids.tdrs_z7.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
             
             conn.close()
             
+            # Update TDRS label with active satellite info
+            self.update_tdrs_label()
+            
         except Exception as e:
             log_error(f"Error updating SGANT values: {e}")
+    
+    def update_tdrs_label(self):
+        """Update the TDRS label with active satellite information"""
+        try:
+            # Try to read from TDRS database
+            tdrs_db_path = Path("/dev/shm/tdrs.db")
+            if not tdrs_db_path.exists():
+                # Try Windows path
+                tdrs_db_path = Path.home() / ".mimic_data" / "tdrs.db"
+                if not tdrs_db_path.exists():
+                    if 'tdrs_label' in self.ids:
+                        self.ids.tdrs_label.text = 'TDRS: No Database'
+                    return
+            
+            conn = sqlite3.connect(str(tdrs_db_path))
+            cursor = conn.cursor()
+            cursor.execute("SELECT TDRS1, TDRS2 FROM tdrs LIMIT 1")
+            result = cursor.fetchone()
+            conn.close()
+            
+            if result and result[0] and result[1]:
+                active_tdrs = []
+                if result[0] != '0':
+                    active_tdrs.append(f"TDRS {result[0]}")
+                if result[1] != '0':
+                    active_tdrs.append(f"TDRS {result[1]}")
+                
+                if active_tdrs:
+                    if 'tdrs_label' in self.ids:
+                        self.ids.tdrs_label.text = f"Active: {', '.join(active_tdrs)}"
+                else:
+                    if 'tdrs_label' in self.ids:
+                        self.ids.tdrs_label.text = 'TDRS: No Active Satellites'
+            else:
+                if 'tdrs_label' in self.ids:
+                    self.ids.tdrs_label.text = 'TDRS: No Active Satellites'
+                
+        except Exception as e:
+            log_error(f"Error updating TDRS label: {e}")
+            if 'tdrs_label' in self.ids:
+                self.ids.tdrs_label.text = 'TDRS: Error'
     
     def _set_text(self, widget, property_name, value):
         """Helper method to safely set widget properties"""

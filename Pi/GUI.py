@@ -857,7 +857,7 @@ class MainApp(App):
         global mimicbutton, switchtofake, demoboolean, runningDemo, playbackboolean, psarj2, ssarj2, aos, los, oldLOS, psarjmc, ssarjmc, ptrrjmc, strrjmc, beta1bmc, beta1amc, beta2bmc, beta2amc, beta3bmc, beta3amc, beta4bmc, beta4amc, US_EVAinProgress, position_x, position_y, position_z, velocity_x, velocity_y, velocity_z, altitude, velocity, iss_mass, testvalue, testfactor, airlock_pump, crewlockpres, leak_hold, firstcrossing, EVA_activities, repress, depress, oldAirlockPump, obtained_EVA_crew, EVAstartTime
         global holdstartTime, LS_Subscription
         global Disco, eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
-        global stationmode, sgant_elevation, sgant_xelevation
+        global stationmode
         global tdrs, module
         global old_mt_timestamp, old_mt_position, mt_speed
 
@@ -1085,21 +1085,13 @@ class MainApp(App):
         #ISS altitude too low
         #Russion hook status - make sure all modules remain docked
 
-        sgant_transmit = float((values[41])[0])
-
         iss_mass = float((values[18])[0])
    
         #now check main CT screen radio signal
-        if float(sgant_transmit) == 1.0 and float(aos) == 1.0:
+        if float(aos) == 1.0:
             self.screens["ct"].ids.sgant1_radio.color = 1, 1, 1, 1
             self.screens["ct"].ids.sgant2_radio.color = 1, 1, 1, 1
-        elif float(sgant_transmit) == 1.0 and float(aos) == 0.0:
-            self.screens["ct"].ids.sgant1_radio.color = 0, 0, 0, 0
-            self.screens["ct"].ids.sgant2_radio.color = 0, 0, 0, 0
-        elif float(sgant_transmit) == 0.0:
-            self.screens["ct"].ids.sgant1_radio.color = 0, 0, 0, 0
-            self.screens["ct"].ids.sgant2_radio.color = 0, 0, 0, 0
-        elif float(aos) == 0.0:
+        else:
             self.screens["ct"].ids.sgant1_radio.color = 0, 0, 0, 0
             self.screens["ct"].ids.sgant2_radio.color = 0, 0, 0, 0
 
@@ -1350,6 +1342,10 @@ class MainApp(App):
         if float(c4b) > 0.0:                                  #power channel offline!
             v4bs = 4
 
+        sgant_elevation = float((values[15])[0])
+        sgant_xelevation = float((values[17])[0])
+        sgant_transmit = float((values[41])[0])
+
         if demoboolean:
             if Disco:
                 serialWrite("Disco ")
@@ -1383,13 +1379,7 @@ class MainApp(App):
         else:
             self.screens["iss"].ids.UHFframeSync.text = "n/a"
 
-            self.screens["ct_sgant"].ids.sgant_transmit.text = str(sgant_transmit)
-        if int(sgant_transmit) == 0:
-            self.screens["ct_sgant"].ids.sgant_transmit.text = "RESET"
-        elif int(sgant_transmit) == 1:
-            self.screens["ct_sgant"].ids.sgant_transmit.text = "NORMAL"
-        else:
-            self.screens["ct_sgant"].ids.sgant_transmit.text = "n/a"
+
 
 
         self.screens["iss"].ids.altitude_value.text = str(altitude) + " km"
