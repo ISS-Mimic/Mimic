@@ -51,6 +51,7 @@ class CT_Screen(MimicBase):
             # Connect to telemetry database
             db_path = self._get_db_path()
             if not db_path.exists():
+                log_error(f"CT Screen: Database file not found at {db_path}")
                 return
             conn = sqlite3.connect(str(db_path))
             cur = conn.cursor()
@@ -58,6 +59,7 @@ class CT_Screen(MimicBase):
             values = cur.fetchall()
             
             if not values or len(values) < 300:  # Ensure we have enough data
+                log_error(f"CT Screen: Not enough data in database")
                 conn.close()
                 return
             
