@@ -992,10 +992,7 @@ class MainApp(App):
         
 
         
-        #UHF telemetry
-        UHF1pwr = str((values[233])[0])
-        UHF2pwr = str((values[234])[0])
-        UHFframeSync = str((values[235])[0])
+        #UHF telemetry - now handled in CT_UHF_Screen
         
         #EVA Telemetry
         airlock_pump_voltage = int((values[71])[0])
@@ -1312,31 +1309,7 @@ class MainApp(App):
             serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + str(v1as) + " " + "V2A=" + str(v2as) + " " + "V3A=" + str(v3as) + " " + "V4A=" + str(v4as) + " " + "V1B=" + str(v1bs) + " " + "V2B=" + str(v2bs) + " " + "V3B=" + str(v3bs) + " " + "V4B=" + str(v4bs) + " " + "ISS=" + module + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
 
         
-        #self.screens["ct_uhf"].ids.UHF1pwr.text = str(UHF1pwr)
-        if int(UHF1pwr) == 0:
-            self.screens["ct_uhf"].ids.UHF1pwr.text = "Off-Ok"
-        elif int(UHF1pwr) == 1:
-            self.screens["ct_uhf"].ids.UHF1pwr.text = "Not Off-Ok"
-        elif int(UHF1pwr) == 2:
-            self.screens["ct_uhf"].ids.UHF1pwr.text = "Not Off-Failed"
-        else:
-            self.screens["ct_uhf"].ids.UHF1pwr.text = "n/a"        
-        #self.screens["ct_uhf"].ids.UHF2pwr.text = str(UHF2pwr)
-        if int(UHF2pwr) == 0:
-            self.screens["ct_uhf"].ids.UHF2pwr.text = "Off-Ok"
-        elif int(UHF2pwr) == 1:
-            self.screens["ct_uhf"].ids.UHF2pwr.text = "Not Off-Ok"
-        elif int(UHF2pwr) == 2:
-            self.screens["ct_uhf"].ids.UHF2pwr.text = "Not Off-Failed"
-        else:
-            self.screens["ct_uhf"].ids.UHF2pwr.text = "n/a"
-        #self.screens["ct_uhf"].ids.UHFframeSync.text = str(UHFframeSync)
-        if int(UHFframeSync) == 0:
-            self.screens["ct_uhf"].ids.UHFframeSync.text = "Unlocked"
-        elif int(UHFframeSync) == 1:
-            self.screens["ct_uhf"].ids.UHFframeSync.text = "Locked"
-        else:
-            self.screens["iss"].ids.UHFframeSync.text = "n/a"
+        #UHF telemetry updates now handled in CT_UHF_Screen
 
 
 
