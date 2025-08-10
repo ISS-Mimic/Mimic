@@ -89,12 +89,18 @@
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
             angle: 0
+            angle2: 180
             canvas.before:
                 PushMatrix
                 Rotate:
                     angle: self.angle
+                    axis: 0,0,-1
+                    ##origin: sgant_dish.center
+                    origin: 400,0
+                Rotate:
+                    angle: self.angle2
                     axis: 0,0,1
-                    origin: sgant_dish.center
+                    origin: self.center
             canvas.after:
                 PopMatrix
         Image:
@@ -107,12 +113,18 @@
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
             angle: 0
+            angle2: 180
             canvas.before:
                 PushMatrix
                 Rotate:
                     angle: self.angle
+                    axis: 0,0,-1
+                    ##origin: sgant_dish.center
+                    origin: 400,0
+                Rotate:
+                    angle: self.angle2
                     axis: 0,0,1
-                    origin: sgant_dish.center
+                    origin: self.center
             canvas.after:
                 PopMatrix
         Image:
@@ -125,12 +137,18 @@
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
             angle: 0
+            angle2: 180
             canvas.before:
                 PushMatrix
                 Rotate:
                     angle: self.angle
+                    axis: 0,0,-1
+                    ##origin: sgant_dish.center
+                    origin: 400,0
+                Rotate:
+                    angle: self.angle2
                     axis: 0,0,1
-                    origin: sgant_dish.center
+                    origin: self.center
             canvas.after:
                 PopMatrix
         Image:
@@ -143,12 +161,18 @@
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
             angle: 0
+            angle2: 180
             canvas.before:
                 PushMatrix
                 Rotate:
                     angle: self.angle
+                    axis: 0,0,-1
+                    ##origin: sgant_dish.center
+                    origin: 400,0
+                Rotate:
+                    angle: self.angle2
                     axis: 0,0,1
-                    origin: sgant_dish.center
+                    origin: self.center
             canvas.after:
                 PopMatrix
         Image:
@@ -161,12 +185,18 @@
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
             angle: 0
+            angle2: 180
             canvas.before:
                 PushMatrix
                 Rotate:
                     angle: self.angle
+                    axis: 0,0,-1
+                    ##origin: sgant_dish.center
+                    origin: 400,0
+                Rotate:
+                    angle: self.angle2
                     axis: 0,0,1
-                    origin: sgant_dish.center
+                    origin: self.center
             canvas.after:
                 PopMatrix
         Image:
@@ -179,12 +209,18 @@
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.5, "center_y": 0.8}
             angle: 0
+            angle2: 180
             canvas.before:
                 PushMatrix
                 Rotate:
                     angle: self.angle
+                    axis: 0,0,-1
+                    ##origin: sgant_dish.center
+                    origin: 400,0
+                Rotate:
+                    angle: self.angle2
                     axis: 0,0,1
-                    origin: sgant_dish.center
+                    origin: self.center
             canvas.after:
                 PopMatrix
         Label:
