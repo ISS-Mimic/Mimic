@@ -259,9 +259,7 @@ new_x2 = 0
 new_y2 = 0
 aos = 0.00
 los = 0.00
-sgant_elevation = 0.00
-sgant_xelevation = 0.00
-sgant_elevation_old = -110.00
+
 seconds2 = 260
 oldLOS = 0.00
 psarjmc = 0.00
@@ -948,9 +946,7 @@ class MainApp(App):
             sasa_xmit = True
         else:
             sasa_xmit = False
-        sgant_elevation = float((values[15])[0])
-        sgant_xelevation = float((values[17])[0])
-        sgant_transmit = float((values[41])[0])
+
         uhf1_power = int((values[233])[0]) #0 = off, 1 = on, 3 = failed
         uhf2_power = int((values[234])[0]) #0 = off, 1 = on, 3 = failed
         uhf_framesync = int((values[235])[0]) #1 or 0
@@ -1090,52 +1086,7 @@ class MainApp(App):
         #Russion hook status - make sure all modules remain docked
 
         
-        ##-------------------C&T Functionality-------------------##
-        self.screens["ct_sgant"].ids.sgant_dish.angle = float(sgant_elevation)
-        self.screens["ct_sgant"].ids.sgant_elevation.text = "{:.2f}".format(float(sgant_elevation))
-
-        #make sure radio animations turn off when no signal or no transmit
-        if float(sgant_transmit) == 1.0 and float(aos) == 1.0:
-            self.screens["ct_sgant"].ids.radio_up.color = 1, 1, 1, 1
-            if "10" in tdrs:
-                self.screens["ct_sgant"].ids.tdrs_west10.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.zip"
-                self.screens["ct_sgant"].ids.tdrs_west11.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.screens["ct_sgant"].ids.tdrs_east12.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.screens["ct_sgant"].ids.tdrs_east6.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.screens["ct_sgant"].ids.tdrs_z7.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-            if "11" in tdrs:
-                self.screens["ct_sgant"].ids.tdrs_west11.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.zip"
-                self.screens["ct_sgant"].ids.tdrs_west10.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.screens["ct_sgant"].ids.tdrs_east12.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.screens["ct_sgant"].ids.tdrs_east6.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.screens["ct_sgant"].ids.tdrs_z7.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-            if "12" in tdrs:
-                self.screens["ct_sgant"].ids.tdrs_west11.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.screens["ct_sgant"].ids.tdrs_west10.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.screens["ct_sgant"].ids.tdrs_east12.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.zip"
-                self.screens["ct_sgant"].ids.tdrs_east6.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.screens["ct_sgant"].ids.tdrs_z7.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-            if "6" in tdrs:
-                self.screens["ct_sgant"].ids.tdrs_west11.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.screens["ct_sgant"].ids.tdrs_west10.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.screens["ct_sgant"].ids.tdrs_east6.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.zip"
-                self.screens["ct_sgant"].ids.tdrs_east12.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.screens["ct_sgant"].ids.tdrs_z7.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-            if "7" in tdrs:
-                self.screens["ct_sgant"].ids.tdrs_west11.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.screens["ct_sgant"].ids.tdrs_west10.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.screens["ct_sgant"].ids.tdrs_east6.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.screens["ct_sgant"].ids.tdrs_east12.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-                self.screens["ct_sgant"].ids.tdrs_z7.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.zip"
-
-        elif float(aos) == 0.0 and (float(sgant_transmit) == 0.0 or float(sgant_transmit) == 1.0):
-            self.screens["ct_sgant"].ids.radio_up.color = 0, 0, 0, 0
-            self.screens["ct_sgant"].ids.tdrs_east12.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-            self.screens["ct_sgant"].ids.tdrs_east6.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-            self.screens["ct_sgant"].ids.tdrs_west11.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-            self.screens["ct_sgant"].ids.tdrs_west10.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-            self.screens["ct_sgant"].ids.tdrs_z7.source = mimic_directory + "/Mimic/Pi/imgs/ct/TDRS.png"
-
+   
         #now check main CT screen radio signal
         if float(sgant_transmit) == 1.0 and float(aos) == 1.0:
             self.screens["ct"].ids.sgant1_radio.color = 1, 1, 1, 1
