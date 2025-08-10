@@ -1,11 +1,104 @@
 from __future__ import annotations
 from kivy.uix.screenmanager import Screen
 import pathlib
+import sqlite3
 from kivy.lang import Builder
+from kivy.clock import Clock
 from ._base import MimicBase
+from ..utils.logger import log_info, log_error
 
 kv_path = pathlib.Path(__file__).with_name("CT_Screen.kv")
 Builder.load_file(str(kv_path))
 
 class CT_Screen(MimicBase):
-    pass
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._update_event = None
+        self.mimic_directory = self.get_mimic_directory()
+        
+    def on_enter(self):
+        """Start telemetry updates when entering the screen"""
+        if self._update_event is None:
+            self._update_event = Clock.schedule_interval(self.update_ct_values, 1.0)
+            log_info("CT Screen: Started telemetry updates")
+    
+    def on_leave(self):
+        """Stop telemetry updates when leaving the screen"""
+        if self._update_event:
+            Clock.unschedule(self._update_event)
+            self._update_event = None
+            log_info("CT Screen: Stopped telemetry updates")
+    
+    def update_ct_values(self, dt):
+        """Update CT screen telemetry values"""
+        try:
+            # Connect to telemetry database
+            db_path = pathlib.Path(self.mimic_directory) / "Mimic" / "Pi" / "iss_telemetry.db"
+            conn = sqlite3.connect(str(db_path))
+            cur = conn.cursor()
+            
+            # Get telemetry values
+            cur.execute('SELECT Value FROM telemetry')
+            values = cur.fetchall()
+            
+            if not values or len(values) < 300:  # Ensure we have enough data
+                conn.close()
+                return
+            
+            # Extract CT-related telemetry values
+            aos = int(values[12][0])  # Acquisition of Signal (index 12)
+            sasa1_active = int(values[53][0])  # SASA 1 active status
+            sasa2_active = int(values[52][0])  # SASA 2 active status
+            uhf1_power = int(values[233][0])   # UHF 1 power (0=off, 1=on, 3=failed)
+            uhf2_power = int(values[234][0])   # UHF 2 power (0=off, 1=on, 3=failed)
+            
+            # Update SGANT radio indicators based on AOS status
+            if aos == 1:
+                self.ids.sgant1_radio.color = (1, 1, 1, 1)
+                self.ids.sgant2_radio.color = (1, 1, 1, 1)
+            else:
+                self.ids.sgant1_radio.color = (0, 0, 0, 0)
+                self.ids.sgant2_radio.color = (0, 0, 0, 0)
+            
+            # Update SASA 1 radio indicator
+            if sasa1_active == 1 and aos == 1:
+                self.ids.sasa1_radio.color = (1, 1, 1, 1)
+            elif sasa1_active == 1 and aos == 0:
+                self.ids.sasa1_radio.color = (0, 0, 0, 0)
+            elif sasa1_active == 0:
+                self.ids.sasa1_radio.color = (0, 0, 0, 0)
+            elif aos == 0:
+                self.ids.sasa1_radio.color = (0, 0, 0, 0)
+            
+            # Update SASA 2 radio indicator
+            if sasa2_active == 1 and aos == 1:
+                self.ids.sasa2_radio.color = (1, 1, 1, 1)
+            elif sasa2_active == 1 and aos == 0:
+                self.ids.sasa2_radio.color = (0, 0, 0, 0)
+            elif sasa2_active == 0:
+                self.ids.sasa2_radio.color = (0, 0, 0, 0)
+            elif aos == 0:
+                self.ids.sasa2_radio.color = (0, 0, 0, 0)
+            
+            # Update UHF 1 radio indicator
+            if uhf1_power == 1 and aos == 1:
+                self.ids.uhf1_radio.color = (1, 1, 1, 1)
+            elif uhf1_power == 1 and aos == 0:
+                self.ids.uhf1_radio.color = (1, 0, 0, 1)  # Red when no AOS
+            elif uhf1_power == 0:
+                self.ids.uhf1_radio.color = (0, 0, 0, 0)
+            
+            # Update UHF 2 radio indicator
+            if uhf2_power == 1 and aos == 1:
+                self.ids.uhf2_radio.color = (1, 1, 1, 1)
+            elif uhf2_power == 1 and aos == 0:
+                self.ids.uhf2_radio.color = (1, 0, 0, 1)  # Red when no AOS
+            elif uhf2_power == 0:
+                self.ids.uhf2_radio.color = (0, 0, 0, 0)
+            
+            conn.close()
+            
+        except Exception as e:
+            log_error(f"CT Screen update failed: {e}")
+            if 'conn' in locals():
+                conn.close()

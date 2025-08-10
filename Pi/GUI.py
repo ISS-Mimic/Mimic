@@ -1086,47 +1086,6 @@ class MainApp(App):
         #Russion hook status - make sure all modules remain docked
 
         iss_mass = float((values[18])[0])
-   
-        #now check main CT screen radio signal
-        if float(aos) == 1.0:
-            self.screens["ct"].ids.sgant1_radio.color = 1, 1, 1, 1
-            self.screens["ct"].ids.sgant2_radio.color = 1, 1, 1, 1
-        else:
-            self.screens["ct"].ids.sgant1_radio.color = 0, 0, 0, 0
-            self.screens["ct"].ids.sgant2_radio.color = 0, 0, 0, 0
-
-        if float(sasa1_active) == 1.0 and float(aos) == 1.0:
-            self.screens["ct"].ids.sasa1_radio.color = 1, 1, 1, 1
-        elif float(sasa1_active) == 1.0 and float(aos) == 0.0:
-            self.screens["ct"].ids.sasa1_radio.color = 0, 0, 0, 0
-        elif float(sasa1_active) == 0.0:
-            self.screens["ct"].ids.sasa1_radio.color = 0, 0, 0, 0
-        elif float(aos) == 0.0:
-            self.screens["ct"].ids.sasa1_radio.color = 0, 0, 0, 0
-
-
-        if float(sasa2_active) == 1.0 and float(aos) == 1.0:
-            self.screens["ct"].ids.sasa2_radio.color = 1, 1, 1, 1
-        elif float(sasa2_active) == 1.0 and float(aos) == 0.0:
-            self.screens["ct"].ids.sasa2_radio.color = 0, 0, 0, 0
-        elif float(sasa2_active) == 0.0:
-            self.screens["ct"].ids.sasa2_radio.color = 0, 0, 0, 0
-        elif float(aos) == 0.0:
-            self.screens["ct"].ids.sasa2_radio.color = 0, 0, 0, 0
-
-        if float(uhf1_power) == 1.0 and float(aos) == 1.0:
-            self.screens["ct"].ids.uhf1_radio.color = 1, 1, 1, 1
-        elif float(uhf1_power) == 1.0 and float(aos) == 0.0:
-            self.screens["ct"].ids.uhf1_radio.color = 1, 0, 0, 1
-        elif float(uhf1_power) == 0.0:
-            self.screens["ct"].ids.uhf1_radio.color = 0, 0, 0, 0
-
-        if float(uhf2_power) == 1.0 and float(aos) == 1.0:
-            self.screens["ct"].ids.uhf2_radio.color = 1, 1, 1, 1
-        elif float(uhf2_power) == 1.0 and float(aos) == 0.0:
-            self.screens["ct"].ids.uhf2_radio.color = 1, 0, 0, 1
-        elif float(uhf2_power) == 0.0:
-            self.screens["ct"].ids.uhf2_radio.color = 0, 0, 0, 0
 
         ##-------------------US EVA Functionality-------------------##
 
