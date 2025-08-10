@@ -197,6 +197,30 @@
                     origin: self.center
             canvas.after:
                 PopMatrix
+        Image:
+            id: tdrs_z8
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+            color: 1,1,1,0.2
+            size_hint: 0.15,0.15
+            anim_delay: 0.12
+            anim_loop: 0
+            fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.5, "center_y": 0.8}
+            angle: 0
+            angle2: 180
+            canvas.before:
+                PushMatrix
+                Rotate:
+                    angle: self.angle
+                    axis: 0,0,-1
+                    ##origin: sgant_dish.center
+                    origin: 400,0
+                Rotate:
+                    angle: self.angle2
+                    axis: 0,0,1
+                    origin: self.center
+            canvas.after:
+                PopMatrix
         Label:
             id: tdrs_label
             ##pos: tdrs.pos

@@ -8,6 +8,7 @@ import platform
 from pathlib import Path
 from kivy.clock import Clock
 from utils.logger import log_info, log_error
+import math
 
 kv_path = pathlib.Path(__file__).with_name("CT_SGANT_Screen.kv")
 Builder.load_file(str(kv_path))
@@ -75,8 +76,19 @@ class CT_SGANT_Screen(MimicBase):
             sgant_transmit = float(values[41][0]) if values[41][0] else 0.0
             aos = float(values[12][0]) if values[12][0] else 0.0
             
+            # Get ISS position for longitude calculation
+            position_x = float(values[57][0]) if values[57][0] else 0.0
+            position_y = float(values[58][0]) if values[58][0] else 0.0
+            position_z = float(values[59][0]) if values[59][0] else 0.0
+            
+            # Calculate ISS longitude from position vector
+            if position_x != 0 or position_y != 0:
+                lon_rad = math.atan2(position_y, position_x)
+                iss_longitude = math.degrees(lon_rad)
+            else:
+                iss_longitude = 0.0
+            
             # Update SGANT dish angle - convert elevation to rotation angle
-
             if 'sgant_dish' in self.ids:
                 self.ids.sgant_dish.angle = sgant_elevation
             
@@ -107,31 +119,35 @@ class CT_SGANT_Screen(MimicBase):
                 
                 # Update TDRS sources based on station mode
                 # For now, use a default mode since stationmode is not defined
-                station_mode = "WEST"  # Default mode
+                active_tdrs_group = "WEST"  # Default mode
                 
-                if station_mode == "WEST":
+                if active_tdrs_group == "WEST":
                     if 'tdrs_west10' in self.ids:
-                        self.ids.tdrs_west10.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                        self.ids.tdrs_west10.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip"
                     if 'tdrs_west11' in self.ids:
-                        self.ids.tdrs_west11.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                        self.ids.tdrs_west11.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip"
                     if 'tdrs_east12' in self.ids:
                         self.ids.tdrs_east12.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
                     if 'tdrs_east6' in self.ids:
                         self.ids.tdrs_east6.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
                     if 'tdrs_z7' in self.ids:
                         self.ids.tdrs_z7.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
-                elif station_mode == "EAST":
+                    if 'tdrs_z8' in self.ids:
+                        self.ids.tdrs_z8.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                elif active_tdrs_group == "EAST":
                     if 'tdrs_west11' in self.ids:
                         self.ids.tdrs_west11.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
                     if 'tdrs_west10' in self.ids:
                         self.ids.tdrs_west10.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
                     if 'tdrs_east12' in self.ids:
-                        self.ids.tdrs_east12.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                        self.ids.tdrs_east12.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip"
                     if 'tdrs_east6' in self.ids:
-                        self.ids.tdrs_east6.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                        self.ids.tdrs_east6.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip"
                     if 'tdrs_z7' in self.ids:
                         self.ids.tdrs_z7.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
-                elif station_mode == "ZENITH":
+                    if 'tdrs_z8' in self.ids:
+                        self.ids.tdrs_z8.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                elif active_tdrs_group == "Z":
                     if 'tdrs_west11' in self.ids:
                         self.ids.tdrs_west11.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
                     if 'tdrs_west10' in self.ids:
@@ -141,7 +157,9 @@ class CT_SGANT_Screen(MimicBase):
                     if 'tdrs_east12' in self.ids:
                         self.ids.tdrs_east12.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
                     if 'tdrs_z7' in self.ids:
-                        self.ids.tdrs_z7.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                        self.ids.tdrs_z7.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip"
+                    if 'tdrs_z8' in self.ids:
+                        self.ids.tdrs_z8.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip"
             
             elif float(aos) == 0.0 and (float(sgant_transmit) == 0.0 or float(sgant_transmit) == 1.0):
                 # No AOS, turn off radio and reset TDRS
@@ -157,14 +175,41 @@ class CT_SGANT_Screen(MimicBase):
                     self.ids.tdrs_west10.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
                 if 'tdrs_z7' in self.ids:
                     self.ids.tdrs_z7.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+                if 'tdrs_z8' in self.ids:
+                    self.ids.tdrs_z8.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
             
             conn.close()
+            
+            # Update TDRS widget positions based on ISS longitude
+            self.update_tdrs_positions(iss_longitude)
             
             # Update TDRS label with active satellite info
             self.update_tdrs_label()
             
         except Exception as e:
             log_error(f"Error updating SGANT values: {e}")
+    
+    def update_tdrs_positions(self, iss_longitude):
+        """Update TDRS widget positions based on ISS longitude"""
+        try:
+            # Position TDRS widgets using the hardcoded adjustment values from user
+            if 'tdrs_east12' in self.ids:
+                self.ids.tdrs_east12.angle = (-1 * iss_longitude) - 41
+            if 'tdrs_east6' in self.ids:
+                self.ids.tdrs_east6.angle = (-1 * iss_longitude) - 46
+            if 'tdrs_z7' in self.ids:
+                self.ids.tdrs_z7.angle = ((-1 * iss_longitude) - 41) + 126
+            if 'tdrs_z8' in self.ids:
+                self.ids.tdrs_z8.angle = ((-1 * iss_longitude) - 41) + 127
+            if 'tdrs_west11' in self.ids:
+                self.ids.tdrs_west11.angle = ((-1 * iss_longitude) - 41) - 133
+            if 'tdrs_west10' in self.ids:
+                self.ids.tdrs_west10.angle = ((-1 * iss_longitude) - 41) - 130
+                
+            log_info(f"Updated TDRS positions with ISS longitude: {iss_longitude:.2f}°")
+            
+        except Exception as e:
+            log_error(f"Error updating TDRS positions: {e}")
     
     def update_tdrs_label(self):
         """Update the TDRS label with active satellite information"""
