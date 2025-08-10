@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 """
-mock_iss_feeder.py — quick-and-dirty ISS Mimic DB fuzzer
+mock_data_feeder.py — quick-and-dirty ISS Mimic DB fuzzer
 
 Usage examples:
   # Set a few values once:
-  python mock_iss_feeder.py --db /dev/shm/iss_telemetry.db --set psarj=12.5 ssarj=33.1 iss_mode=LVLH
+
+  python mock_data_tester.py --db /dev/shm/iss_telemetry.db --set crewlock_pres=740
 
   # Stream updates at 5 Hz for selected labels (timestamps auto-updated):
-  python mock_iss_feeder.py --db /dev/shm/iss_telemetry.db --loop --hz 5 --set "USGNC_PS_Solar_Beta_Angle=+0.1" "psarj=+1" "ssarj=-1"
+  python mock_data_tester.py --db /dev/shm/iss_telemetry.db --loop --hz 5 --set "USGNC_PS_Solar_Beta_Angle=+0.1" "psarj=+1" "ssarj=-1"
 
   # Load values from JSON (dict of label->value) and apply once:
-  python mock_iss_feeder.py --db /dev/shm/iss_telemetry.db --json values.json
+  python mock_data_tester.py --db /dev/shm/iss_telemetry.db --json values.json
 
 Notes:
 - The 'telemetry' table is assumed to have columns: Label (PK), Timestamp, Value, ID, dbID.
