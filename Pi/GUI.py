@@ -509,169 +509,6 @@ class MainApp(App):
             self.screens["manualcontrol"].ids.set90.disabled = True
             self.screens["manualcontrol"].ids.set0.disabled = True
 
-    def deleteURLPictures(self, dt):
-        log_info("Function call - deleteURLPictures")
-        global EVA_picture_urls
-        del EVA_picture_urls[:]
-        EVA_picture_urls[:] = []
-
-    def changePictures(self, dt):
-        log_info("Function call - changeURLPictures")
-        global EVA_picture_urls
-        global urlindex
-        urlsize = len(EVA_picture_urls)
-
-        if urlsize > 0:
-            self.screens["us_eva"].ids.EVAimage.source = EVA_picture_urls[urlindex]
-            self.screens["eva_pictures"].ids.EVAimage.source = EVA_picture_urls[urlindex]
-
-        urlindex = urlindex + 1
-        if urlindex > urlsize-1:
-            urlindex = 0
-
-                
-    def check_EVA_stats(self, lastname1, firstname1, lastname2, firstname2):
-        global numEVAs1, EVAtime_hours1, EVAtime_minutes1, numEVAs2, EVAtime_hours2, EVAtime_minutes2
-        log_info("Function call - check EVA stats")
-        eva_url = 'http://www.spacefacts.de/eva/e_eva_az.htm'
-
-        def on_success(req, result):
-            log_info("Check EVA Stats - Successs")
-            soup = BeautifulSoup(result, 'html.parser') #using bs4 to parse website
-            numEVAs1 = 0
-            EVAtime_hours1 = 0
-            EVAtime_minutes1 = 0
-            numEVAs2 = 0
-            EVAtime_hours2 = 0
-            EVAtime_minutes2 = 0
-
-            tabletags = soup.find_all("td")
-            for tag in tabletags:
-                if  lastname1 in tag.text:
-                    if firstname1 in tag.find_next_sibling("td").text:
-                        numEVAs1 = tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text
-                        EVAtime_hours1 = int(tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
-                        EVAtime_minutes1 = int(tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
-                        EVAtime_minutes1 += (EVAtime_hours1 * 60)
-
-            for tag in tabletags:
-                if lastname2 in tag.text:
-                    if firstname2 in tag.find_next_sibling("td").text:
-                        numEVAs2 = tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text
-                        EVAtime_hours2 = int(tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
-                        EVAtime_minutes2 = int(tag.find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").find_next_sibling("td").text)
-                        EVAtime_minutes2 += (EVAtime_hours2 * 60)
-
-            EV1_EVA_number = numEVAs1
-            EV1_EVA_time  = EVAtime_minutes1
-            EV2_EVA_number = numEVAs2
-            EV2_EVA_time  = EVAtime_minutes2
-
-            EV1_minutes = str(EV1_EVA_time%60).zfill(2)
-            EV2_minutes = str(EV2_EVA_time%60).zfill(2)
-            EV1_hours = int(EV1_EVA_time/60)
-            EV2_hours = int(EV2_EVA_time/60)
-
-            self.screens["us_eva"].ids.EV1.text = " (EV): " + str(firstname1) + " " + str(lastname1)
-            self.screens["us_eva"].ids.EV2.text = " (EV): " + str(firstname2) + " " + str(lastname2)
-
-            self.screens["us_eva"].ids.EV1_EVAnum.text = "Number of EVAs = " + str(EV1_EVA_number)
-            self.screens["us_eva"].ids.EV2_EVAnum.text = "Number of EVAs = " + str(EV2_EVA_number)
-            self.screens["us_eva"].ids.EV1_EVAtime.text = "Total EVA Time = " + str(EV1_hours) + "h " + str(EV1_minutes) + "m"
-            self.screens["us_eva"].ids.EV2_EVAtime.text = "Total EVA Time = " + str(EV2_hours) + "h " + str(EV2_minutes) + "m"
-
-        def on_redirect(req, result):
-            log_info("Warning - EVA stats failure (redirect)")
-
-        def on_failure(req, result):
-            log_info("Warning - EVA stats failure (url failure)")
-
-        def on_error(req, result):
-            log_info("Warning - EVA stats failure (url error)")
-
-        #obtain eva statistics web page for parsing
-        req = UrlRequest(eva_url, on_success, on_redirect, on_failure, on_error, timeout=1)
-
-    def checkBlogforEVA(self, dt):
-        iss_blog_url =  'https://blogs.nasa.gov/spacestation/tag/spacewalk/'
-        def on_success(req, data): #if blog data is successfully received, it is processed here
-            log_info("Blog Success")
-            soup = BeautifulSoup(data, "lxml")
-            blog_entries = soup.find("div", {"class": "entry-content"})
-            blog_text = blog_entries.get_text()
-
-            iss_EVcrew_url = 'https://www.howmanypeopleareinspacerightnow.com/peopleinspace.json'
-
-            def on_success2(req2, data2):
-                log_info("Successfully fetched EV crew JSON")
-                number_of_space = int(data2['number'])
-                names = []
-                for num in range(0, number_of_space):
-                    names.append(str(data2['people'][num]['name']))
-
-                try:
-                    self.checkBlog(names,blog_text)
-                except Exception as e:
-                    log_error("Error checking blog: " + str(e))
-
-            def on_redirect2(req, result):
-                log_error("Warning - Get EVA crew failure (redirect)")
-                log_error(result)
-
-            def on_failure2(req, result):
-                log_error("Warning - Get EVA crew failure (url failure)")
-
-            def on_error2(req, result):
-                log_error("Warning - Get EVA crew failure (url error)")
-
-            req2 = UrlRequest(iss_EVcrew_url, on_success2, on_redirect2, on_failure2, on_error2, timeout=1)
-
-        def on_redirect(req, result):
-            log_error("Warning - Get nasa blog failure (redirect)")
-
-        def on_failure(req, result):
-            log_error("Warning - Get nasa blog failure (url failure)")
-
-        def on_error(req, result):
-            log_error("Warning - Get nasa blog failure (url error)")
-
-        req = UrlRequest(iss_blog_url, on_success, on_redirect, on_failure, on_error, timeout=1)
-
-    def checkBlog(self, names, blog_text): #takes the nasa blog and compares it to people in space
-        ev1_surname = ''
-        ev1_firstname = ''
-        ev2_surname = ''
-        ev2_firstname = ''
-        ev1name = ''
-        ev2name = ''
-
-        name_position = 1000000
-        for name in names: #search for text in blog that matchs people in space list, choose 1st result as likely EV1
-            if name in blog_text:
-                if blog_text.find(name) < name_position:
-                    name_position = blog_text.find(name)
-                    ev1name = name
-
-        name_position = 1000000
-
-        for name in names: #search for text in blog that matchs people in space list, choose 2nd result as likely EV2
-            if name in blog_text and name != ev1name:
-                if blog_text.find(name) < name_position:
-                    name_position = blog_text.find(name)
-                    ev2name = name
-
-        log_info("Likely EV1: "+ev1name)
-        log_info("Likely EV2: "+ev2name)
-
-        ev1_surname = ev1name.split()[-1]
-        ev1_firstname = ev1name.split()[0]
-        ev2_surname = ev2name.split()[-1]
-        ev2_firstname = ev2name.split()[0]
-
-        try:
-            self.check_EVA_stats(ev1_surname,ev1_firstname,ev2_surname,ev2_firstname)
-        except Exception as e:
-            log_error("Error retrieving EVA stats: " + str(e))
 
     def flashROBObutton(self, instance):
         #log_info("Function call - flashRobo")
@@ -705,20 +542,6 @@ class MainApp(App):
             self.screens["mimic"].ids.EVA_button.background_color = (1, 1, 1, 1)
         Clock.schedule_once(reset_color, 0.5)
 
-    def EVA_clock(self, dt):
-        global seconds, minutes, hours, EVAstartTime
-        unixconvert = time.gmtime(time.time())
-        currenthours = float(unixconvert[7])*24+unixconvert[3]+float(unixconvert[4])/60+float(unixconvert[5])/3600
-        difference = (currenthours-EVAstartTime)*3600
-        minutes, seconds = divmod(difference, 60)
-        hours, minutes = divmod(minutes, 60)
-
-        hours = int(hours)
-        minutes = int(minutes)
-        seconds = int(seconds)
-
-        self.screens["us_eva"].ids.EVA_clock.text =(str(hours) + ":" + str(minutes).zfill(2) + ":" + str(int(seconds)).zfill(2))
-        self.screens["us_eva"].ids.EVA_clock.color = 0.33, 0.7, 0.18
 
     def animate(self, instance):
         global new_x2, new_y2
@@ -947,59 +770,10 @@ class MainApp(App):
         else:
             sasa_xmit = False
 
-        uhf1_power = int((values[233])[0]) #0 = off, 1 = on, 3 = failed
-        uhf2_power = int((values[234])[0]) #0 = off, 1 = on, 3 = failed
-        uhf_framesync = int((values[235])[0]) #1 or 0
 
 
         stationmode = float((values[46])[0]) #russian segment mode same as usos mode
 
-
-        MCASpayload = int((values[292])[0])
-        POApayload = int((values[294])[0])
-                                        
-        #ECLSS telemetry
-        CabinTemp = "{:.2f}".format(float((values[195])[0]))
-        CabinPress = "{:.2f}".format(float((values[194])[0]))
-        CrewlockPress = "{:.2f}".format(float((values[16])[0]))
-        AirlockPress = "{:.2f}".format(float((values[77])[0]))
-        CleanWater = "{:.2f}".format(float((values[93])[0]))
-        WasteWater = "{:.2f}".format(float((values[94])[0]))
-        O2genState = str((values[95])[0])
-        O2prodRate = "{:.2f}".format(float((values[96])[0]))
-        VRSvlvPosition = str((values[198])[0])
-        VESvlvPosition = str((values[199])[0])
-        UrineProcessState = str((values[89])[0])
-        UrineTank = "{:.2f}".format(float((values[90])[0]))
-        WaterProcessState = str((values[91])[0])
-        WaterProcessStep = str((values[92])[0])
-        LTwater_Lab = "{:.2f}".format(float((values[192])[0]))
-        MTwater_Lab = "{:.2f}".format(float((values[193])[0]))
-        AC_LabPort = str((values[200])[0])
-        AC_LabStbd = str((values[201])[0])
-        FluidTempAir_Lab = "{:.2f}".format(float((values[197])[0]))
-        FluidTempAv_Lab = "{:.2f}".format(float((values[196])[0]))
-        LTwater_Node2 = "{:.2f}".format(float((values[82])[0]))
-        MTwater_Node2 = "{:.2f}".format(float((values[81])[0]))
-        AC_Node2 = str((values[83])[0])
-        FluidTempAir_Node2 = "{:.2f}".format(float((values[84])[0]))
-        FluidTempAv_Node2 = "{:.2f}".format(float((values[85])[0]))
-        LTwater_Node3 = "{:.2f}".format(float((values[101])[0]))           
-        MTwater_Node3 = "{:.2f}".format(float((values[99])[0]))            
-        AC_Node3 = str((values[100])[0])
-        FluidTempAir_Node3 = "{:.2f}".format(float((values[98])[0]))
-        FluidTempAv_Node3 = "{:.2f}".format(float((values[97])[0]))
-        
-
-        
-        #UHF telemetry - now handled in CT_UHF_Screen
-        
-        #EVA Telemetry
-        airlock_pump_voltage = int((values[71])[0])
-        airlock_pump_voltage_timestamp = float((timestamps[71])[0])
-        airlock_pump_switch = int((values[72])[0])
-        crewlockpres = float((values[16])[0])
-        airlockpres = float((values[77])[0])
 
 
         ## Station Mode ##
@@ -1083,98 +857,6 @@ class MainApp(App):
         #Russion hook status - make sure all modules remain docked
 
         iss_mass = float((values[18])[0])
-
-        ##-------------------US EVA Functionality-------------------##
-
-        if airlock_pump_voltage == 1:
-            self.screens["us_eva"].ids.pumpvoltage.text = "Airlock Pump Power On!"
-            self.screens["us_eva"].ids.pumpvoltage.color = 0.33, 0.7, 0.18
-        else:
-            self.screens["us_eva"].ids.pumpvoltage.text = "Airlock Pump Power Off"
-            self.screens["us_eva"].ids.pumpvoltage.color = 0, 0, 0
-
-        if airlock_pump_switch == 1:
-            self.screens["us_eva"].ids.pumpswitch.text = "Airlock Pump Active!"
-            self.screens["us_eva"].ids.pumpswitch.color = 0.33, 0.7, 0.18
-        else:
-            self.screens["us_eva"].ids.pumpswitch.text = "Airlock Pump Inactive"
-            self.screens["us_eva"].ids.pumpswitch.color = 0, 0, 0
-
-        ##activate EVA button flash
-        if (airlock_pump_voltage == 1 or crewlockpres < 734):
-            usevaflashevent = Clock.schedule_once(self.flashUS_EVAbutton, 1)
-
-        ##No EVA Currently
-        if airlock_pump_voltage == 0 and airlock_pump_switch == 0 and crewlockpres > 737 and airlockpres > 740:
-            eva = False
-            self.screens["us_eva"].ids.leak_timer.text = ""
-            self.screens["us_eva"].ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/BlankLights.png'
-            self.screens["us_eva"].ids.EVA_occuring.color = 1, 0, 0
-            self.screens["us_eva"].ids.EVA_occuring.text = "Currently No EVA"
-
-        ##EVA Standby - NOT UNIQUE
-        if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres > 740 and airlockpres > 740:
-            standby = True
-            self.screens["us_eva"].ids.leak_timer.text = "~160s Leak Check"
-            self.screens["us_eva"].ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/StandbyLights.png'
-            self.screens["us_eva"].ids.EVA_occuring.color = 0, 0, 1
-            self.screens["us_eva"].ids.EVA_occuring.text = "EVA Standby"
-        else:
-            standby = False
-
-        ##EVA Prebreath Pressure
-        if airlock_pump_voltage == 1 and crewlockpres > 740 and airlockpres > 740:
-            prebreath1 = True
-            self.screens["us_eva"].ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/PreBreatheLights.png'
-            self.screens["us_eva"].ids.leak_timer.text = "~160s Leak Check"
-            self.screens["us_eva"].ids.EVA_occuring.color = 0, 0, 1
-            self.screens["us_eva"].ids.EVA_occuring.text = "Pre-EVA Nitrogen Purge"
-
-        ##EVA Depress1
-        if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres < 740 and airlockpres > 740:
-            depress1 = True
-            self.screens["us_eva"].ids.leak_timer.text = "~160s Leak Check"
-            self.screens["us_eva"].ids.EVA_occuring.text = "Crewlock Depressurizing"
-            self.screens["us_eva"].ids.EVA_occuring.color = 0, 0, 1
-            self.screens["us_eva"].ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/DepressLights.png'
-
-        ##EVA Leakcheck
-        if airlock_pump_voltage == 1 and crewlockpres < 260 and crewlockpres > 250 and (depress1 or leakhold):
-            if depress1:
-                holdstartTime = float(unixconvert[7])*24+unixconvert[3]+float(unixconvert[4])/60+float(unixconvert[5])/3600
-            leakhold = True
-            depress1 = False
-            self.screens["us_eva"].ids.EVA_occuring.text = "Leak Check in Progress!"
-            self.screens["us_eva"].ids.EVA_occuring.color = 0, 0, 1
-            Clock.schedule_once(self.hold_timer, 1)
-            self.screens["us_eva"].ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/LeakCheckLights.png'
-        else:
-            leakhold = False
-
-        ##EVA Depress2
-        if airlock_pump_voltage == 1 and crewlockpres <= 250 and crewlockpres > 3:
-            leakhold = False
-            self.screens["us_eva"].ids.leak_timer.text = "Complete"
-            self.screens["us_eva"].ids.EVA_occuring.text = "Crewlock Depressurizing"
-            self.screens["us_eva"].ids.EVA_occuring.color = 0, 0, 1
-            self.screens["us_eva"].ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/DepressLights.png'
-
-        ##EVA in progress
-        if crewlockpres < 2.5:
-            eva = True
-            self.screens["us_eva"].ids.EVA_occuring.text = "EVA In Progress!!!"
-            self.screens["us_eva"].ids.EVA_occuring.color = 0.33, 0.7, 0.18
-            self.screens["us_eva"].ids.leak_timer.text = "Complete"
-            self.screens["us_eva"].ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/InProgressLights.png'
-            evatimerevent = Clock.schedule_once(self.EVA_clock, 1)
-
-        ##Repress - this one still did not work with the code changes I did for eva88 (June 2023)
-        if airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres >= 3 and airlockpres < 734:
-            eva = False
-            self.screens["us_eva"].ids.EVA_occuring.color = 0, 0, 1
-            self.screens["us_eva"].ids.EVA_occuring.text = "Crewlock Repressurizing"
-            self.screens["us_eva"].ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/RepressLights.png'
-
 
 
 #        if (difference > -10) and (isinstance(App.get_running_app().root_window.children[0], Popup)==False):
@@ -1318,14 +1000,6 @@ class MainApp(App):
 
         self.screens["iss"].ids.velocity_value.text = str(velocity) + " km/s"
         self.screens["iss"].ids.stationmass_value.text = str(iss_mass) + " kg"
-
-        self.screens["us_eva"].ids.EVA_needle.angle = float(self.map_rotation(0.0193368*float(crewlockpres)))
-        self.screens["us_eva"].ids.crewlockpressure_value.text = "{:.2f}".format(0.0193368*float(crewlockpres))
-
-        psi_bar_x = self.map_psi_bar(0.0193368*float(crewlockpres)) #convert to torr
-
-        self.screens["us_eva"].ids.EVA_psi_bar.pos_hint = {"center_x": psi_bar_x, "center_y": 0.61}
-
 
         ##-------------------Signal Status Check-------------------##
 
