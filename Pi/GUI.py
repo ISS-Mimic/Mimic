@@ -958,6 +958,7 @@ if __name__ == '__main__':
         print(f"Log File: ~/Mimic/Pi/Logs/mimic.log")
         print("Mimic Program Directory: " + mimic_directory + "/Mimic/Pi")
         print("Mimic Data Directory: " + str(mimic_data_directory))
+        print("run: \"python3 GUI.py --debug\" to enable debug logging")
         print(f"=====================")
         
         log_info("Starting ISS Mimic Program")
