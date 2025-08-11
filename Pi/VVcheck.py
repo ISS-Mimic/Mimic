@@ -25,7 +25,7 @@ nasaurl = 'https://www.nasa.gov/international-space-station/space-station-visiti
 
 # Cross-platform database path handling
 import pathlib
-log_info("Setting up cross-platform database paths")
+#log_info("Setting up cross-platform database paths")
 
 vv_db_path = pathlib.Path('/dev/shm/vv.db')
 if not vv_db_path.exists():
@@ -36,10 +36,10 @@ if not vv_db_path.exists():
     log_info(f"Created fallback directory: {vv_db_path.parent}")
 
 vv_db_path = str(vv_db_path)
-log_info(f"VV database path: {vv_db_path}")
+#log_info(f"VV database path: {vv_db_path}")
 
 output_file = str(mimic_data_directory) + '/vv.png'
-log_info(f"Output image path: {output_file}")
+#log_info(f"Output image path: {output_file}")
 
 # Define a mapping to standardize mission names
 mission_name_mapping = {
@@ -51,13 +51,13 @@ mission_name_mapping = {
 def get_image_hash(image_path):
     """Calculate MD5 hash of an image file."""
     try:
-        log_info(f"Calculating image hash for: {image_path}")
+        #log_info(f"Calculating image hash for: {image_path}")
         hasher = hashlib.md5()
         with open(image_path, 'rb') as img_file:
             buf = img_file.read()
             hasher.update(buf)
         hash_value = hasher.hexdigest()
-        log_info(f"Image hash calculated: {hash_value[:8]}...")
+        #log_info(f"Image hash calculated: {hash_value[:8]}...")
         return hash_value
     except FileNotFoundError:
         log_error(f"Image file not found: {image_path}")
@@ -69,14 +69,14 @@ def get_image_hash(image_path):
 def getVV_Image(page_url, output):
     """Download and process visiting vehicle image from NASA website."""
     try:
-        log_info(f"Fetching visiting vehicle image from: {page_url}")
+        #log_info(f"Fetching visiting vehicle image from: {page_url}")
         response = requests.get(page_url, timeout=30)
         response.raise_for_status()
-        log_info("Successfully retrieved NASA webpage")
+        #log_info("Successfully retrieved NASA webpage")
 
         soup = BeautifulSoup(response.content, 'html.parser')
         image_tags = soup.find_all('img')
-        log_info(f"Found {len(image_tags)} image tags on page")
+        #log_info(f"Found {len(image_tags)} image tags on page")
 
         filtered_image_urls = []
         for image_tag in image_tags:
@@ -88,40 +88,40 @@ def getVV_Image(page_url, output):
             if re.search(r'/wp-content/uploads/\d{4}/\d{2}/iss-\d{2}-\d{2}-\d{2}(-\d)?\.png', image_url):
                 filtered_image_urls.append(image_url)
 
-        log_info(f"Filtered to {len(filtered_image_urls)} matching ISS images")
+        #log_info(f"Filtered to {len(filtered_image_urls)} matching ISS images")
 
         if filtered_image_urls:
             target_image_url = sorted(filtered_image_urls)[-1]
-            log_info(f"Selected target image: {target_image_url}")
+            #log_info(f"Selected target image: {target_image_url}")
             
             context = ssl._create_unverified_context()
-            log_info("Downloading target image")
+            #log_info("Downloading target image")
 
             with urllib.request.urlopen(target_image_url, context=context) as response:
                 new_image_data = response.read()
 
             new_image_hash = hashlib.md5(new_image_data).hexdigest()
-            log_info(f"Downloaded image hash: {new_image_hash[:8]}...")
+            #log_info(f"Downloaded image hash: {new_image_hash[:8]}...")
 
             if Path(output).exists():
                 current_image_hash = get_image_hash(output)
                 if current_image_hash:
-                    log_info(f"Current image hash: {current_image_hash[:8]}...")
+                    #log_info(f"Current image hash: {current_image_hash[:8]}...")
                     if new_image_hash == current_image_hash:
-                        log_info("Image has not changed, not downloading.")
+                        #log_info("Image has not changed, not downloading.")
                         return False
-                    else:
-                        log_info("Image has changed, will download new version.")
-                else:
-                    log_info("Could not calculate current image hash, will download new version.")
-            else:
-                log_info("No existing image found, will download new version.")
+                    #else:
+                        #log_info("Image has changed, will download new version.")
+                #else:
+                    #log_info("Could not calculate current image hash, will download new version.")
+            #else:
+                #log_info("No existing image found, will download new version.")
 
             # Save the new image
-            log_info(f"Saving new image to: {output}")
+            #log_info(f"Saving new image to: {output}")
             with open(output, 'wb') as f:
                 f.write(new_image_data)
-            log_info("New image saved successfully")
+            #log_info("New image saved successfully")
             return True
         else:
             log_error("No matching image URL found.")
@@ -137,17 +137,17 @@ def getVV_Image(page_url, output):
 def get_nasa_data(url):
     """Fetch visiting vehicle data from NASA website."""
     try:
-        log_info(f"Fetching NASA visiting vehicle data from: {url}")
+        #log_info(f"Fetching NASA visiting vehicle data from: {url}")
         response = requests.get(url, timeout=30)
         response.raise_for_status()
-        log_info("Successfully retrieved NASA visiting vehicle data")
+        #log_info("Successfully retrieved NASA visiting vehicle data")
         
         soup = BeautifulSoup(response.content, 'html.parser')
         paragraphs = soup.find_all('p')
         nasa_data = []
         date_pattern = re.compile(r'\b\d{1,2}/\d{1,2}/\d{2,4}\b')
         
-        log_info(f"Processing {len(paragraphs)} paragraphs for date patterns")
+        #log_info(f"Processing {len(paragraphs)} paragraphs for date patterns")
         
         for paragraph in paragraphs:
             for event in paragraph:
@@ -155,7 +155,7 @@ def get_nasa_data(url):
                     if date_pattern.search(event.get_text()):
                         nasa_data.append(event.get_text())
         
-        log_info(f"Found {len(nasa_data)} NASA data entries with dates")
+        #log_info(f"Found {len(nasa_data)} NASA data entries with dates")
         return nasa_data
         
     except requests.exceptions.RequestException as e:
@@ -182,7 +182,7 @@ def standardize_mission_names(event, mapping):
 def parse_nasa_data(data):
     """Parse NASA visiting vehicle data into dock and undock events."""
     try:
-        log_info(f"Parsing {len(data)} NASA data entries")
+        #log_info(f"Parsing {len(data)} NASA data entries")
         dock_events = []
         undock_events = []
         
@@ -199,17 +199,17 @@ def parse_nasa_data(data):
         dock_df = pd.DataFrame(dock_events)
         undock_df = pd.DataFrame(undock_events)
         
-        log_info(f"Parsed {len(dock_events)} dock events and {len(undock_events)} undock events")
+        #log_info(f"Parsed {len(dock_events)} dock events and {len(undock_events)} undock events")
         return dock_df, undock_df
         
     except Exception as e:
         log_error(f"Error parsing NASA data: {e}")
         return pd.DataFrame(), pd.DataFrame()
 
-log_info("Starting visiting vehicle data processing")
+#log_info("Starting visiting vehicle data processing")
 
 # Download visiting vehicle image
-log_info("Downloading visiting vehicle image")
+#log_info("Downloading visiting vehicle image")
 image_downloaded = getVV_Image(nasaurl, output_file)
 if image_downloaded:
     log_info("Visiting vehicle image updated")
@@ -217,17 +217,17 @@ else:
     log_info("Visiting vehicle image unchanged or download failed")
 
 # Fetch and parse NASA data
-log_info("Fetching and parsing NASA visiting vehicle data")
+#log_info("Fetching and parsing NASA visiting vehicle data")
 nasa_data = get_nasa_data(nasaurl)
 if nasa_data:
     nasa_dock_df, nasa_undock_df = parse_nasa_data(nasa_data)
     
     # Apply the mapping to standardize mission names in both DataFrames
-    log_info("Standardizing mission names using mapping")
+    #log_info("Standardizing mission names using mapping")
     nasa_dock_df['Event'] = nasa_dock_df['Event'].apply(lambda x: standardize_mission_names(x, mission_name_mapping))
     nasa_undock_df['Event'] = nasa_undock_df['Event'].apply(lambda x: standardize_mission_names(x, mission_name_mapping))
     
-    log_info("NASA data processing completed successfully")
+    #log_info("NASA data processing completed successfully")
 else:
     log_error("Failed to fetch NASA data, creating empty DataFrames")
     nasa_dock_df, nasa_undock_df = pd.DataFrame(), pd.DataFrame()
@@ -242,9 +242,9 @@ def identify_current_docked(dock_df, undock_df):
     return current_docked
 
 
-log_info("Identifying currently docked vehicles")
+#log_info("Identifying currently docked vehicles")
 current_docked_df = identify_current_docked(nasa_dock_df, nasa_undock_df)
-log_info(f"Currently docked vehicles identified: {len(current_docked_df)} vehicles")
+#log_info(f"Currently docked vehicles identified: {len(current_docked_df)} vehicles")
 
 def get_wikipedia_data(wikiurl):
     tables = pd.read_html(wikiurl)
@@ -303,15 +303,15 @@ def clean_citations(text):
     else:
         return text
 
-log_info("Fetching and processing Wikipedia visiting vehicle data")
+#log_info("Fetching and processing Wikipedia visiting vehicle data")
 wikipedia_df = get_wikipedia_data(wikiurl)
 if wikipedia_df is not None:
-    log_info("Successfully retrieved Wikipedia data")
-    log_info("Cleaning citation references from Wikipedia data")
+    #log_info("Successfully retrieved Wikipedia data")
+    #log_info("Cleaning citation references from Wikipedia data")
     wikipedia_df = wikipedia_df.map(clean_citations)
-    log_info("Applying location and mission name standardizations")
+    #log_info("Applying location and mission name standardizations")
     wikipedia_df = clean_wikipedia_data(wikipedia_df)
-    log_info("Wikipedia data processing completed successfully")
+    #log_info("Wikipedia data processing completed successfully")
 else:
     log_error("Failed to fetch Wikipedia data, creating empty DataFrame")
     wikipedia_df = pd.DataFrame()
@@ -339,9 +339,9 @@ def correlate_data(nasa_df, wiki_df):
             })
     return pd.DataFrame(correlated_data)
 
-log_info("Correlating NASA and Wikipedia data")
+#log_info("Correlating NASA and Wikipedia data")
 correlated_df = correlate_data(current_docked_df, wikipedia_df)
-log_info(f"Correlation completed: {len(correlated_df)} correlated events")
+#log_info(f"Correlation completed: {len(correlated_df)} correlated events")
 
 def print_database_events(db_path='iss_vehicles.db'):
     conn = sqlite3.connect(db_path)
