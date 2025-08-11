@@ -1,4 +1,42 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
+
+import argparse
+import sys
+import os
+
+# Parse command line arguments first, before any other imports
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='ISS Mimic GUI Application')
+    parser.add_argument('--debug', action='store_true', 
+                       help='Enable debug logging (INFO level)')
+    parser.add_argument('--verbose', action='store_true',
+                       help='Enable verbose logging (INFO level) - same as --debug')
+    parser.add_argument('--quiet', action='store_true',
+                       help='Suppress all logging output')
+    parser.add_argument('--console-logging', action='store_true',
+                       help='Enable console logging in addition to file logging')
+    
+    return parser.parse_args()
+
+# Parse arguments and set environment variables for logger configuration
+args = parse_arguments()
+
+if args.debug or args.verbose:
+    os.environ['MIMIC_LOG_LEVEL'] = 'INFO'
+    print("Debug logging enabled - INFO level and above will be logged")
+elif args.quiet:
+    os.environ['MIMIC_LOG_LEVEL'] = 'CRITICAL'
+    print("Quiet mode enabled - only critical errors will be logged")
+else:
+    os.environ['MIMIC_LOG_LEVEL'] = 'ERROR'
+    print("Normal mode - ERROR level and above will be logged")
+
+if args.console_logging:
+    os.environ['MIMIC_CONSOLE_LOGGING'] = '1'
+    print("Console logging enabled")
+
+# Now import the rest of the modules
+import os.path as op
 
 import os # used to remove database on program exit; also used for importing config.json
 os.environ["KIVY_NO_CONSOLELOG"] = "1"   # Kivy: no automatic console handler
@@ -915,6 +953,15 @@ class MainApp(App):
 
 if __name__ == '__main__':
     try:
+        # Show logging configuration
+        log_level = os.environ.get('MIMIC_LOG_LEVEL', 'ERROR')
+        console_enabled = os.environ.get('MIMIC_CONSOLE_LOGGING', '0') == '1'
+        print(f"=== ISS Mimic GUI ===")
+        print(f"Logging Level: {log_level}")
+        print(f"Console Logging: {'Enabled' if console_enabled else 'Disabled'}")
+        print(f"Log File: ~/Mimic/Pi/Logs/mimic.log")
+        print(f"=====================")
+        
         log_info("Starting ISS Mimic Program")
         log_info("Mimic Program Directory: " + mimic_directory + "/Mimic/Pi")
         log_info("Mimic Data Directory: " + str(mimic_data_directory))

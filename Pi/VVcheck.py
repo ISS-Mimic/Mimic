@@ -308,7 +308,7 @@ wikipedia_df = get_wikipedia_data(wikiurl)
 if wikipedia_df is not None:
     log_info("Successfully retrieved Wikipedia data")
     log_info("Cleaning citation references from Wikipedia data")
-    wikipedia_df = wikipedia_df.applymap(clean_citations)
+    wikipedia_df = wikipedia_df.map(clean_citations)
     log_info("Applying location and mission name standardizations")
     wikipedia_df = clean_wikipedia_data(wikipedia_df)
     log_info("Wikipedia data processing completed successfully")
@@ -352,13 +352,28 @@ def print_database_events(db_path='iss_vehicles.db'):
         print(row[0])
     conn.close()
 
-#print("Existing events in the database:")
-#print_database_events(db_path=vv_db_path)
+
 
 def update_database(correlated_df, undock_df, db_path='iss_vehicles.db'):
     """Update the visiting vehicle database with new data."""
     try:
         log_info(f"Updating database at: {db_path}")
+        
+        # Log DataFrame information for debugging
+        if not correlated_df.empty:
+            log_info(f"Correlated DataFrame info:")
+            log_info(f"  Shape: {correlated_df.shape}")
+            log_info(f"  Columns: {list(correlated_df.columns)}")
+            log_info(f"  Data types: {correlated_df.dtypes.to_dict()}")
+            log_info(f"  Sample data: {correlated_df.head(2).to_dict('records')}")
+        
+        if not undock_df.empty:
+            log_info(f"Undock DataFrame info:")
+            log_info(f"  Shape: {undock_df.shape}")
+            log_info(f"  Columns: {list(undock_df.columns)}")
+            log_info(f"  Data types: {undock_df.dtypes.to_dict()}")
+            log_info(f"  Sample data: {undock_df.head(2).to_dict('records')}")
+        
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         
@@ -370,7 +385,7 @@ def update_database(correlated_df, undock_df, db_path='iss_vehicles.db'):
                 Type TEXT,
                 Mission TEXT,
                 Event TEXT,
-                Date DATE,
+                Date TEXT,
                 Location TEXT,
                 Arrival TEXT,
                 Departure TEXT
@@ -384,24 +399,46 @@ def update_database(correlated_df, undock_df, db_path='iss_vehicles.db'):
         # Insert correlated data
         if not correlated_df.empty:
             log_info(f"Inserting {len(correlated_df)} correlated events into database")
-            for _, row in correlated_df.iterrows():
+            for idx, row in correlated_df.iterrows():
+                # Debug logging to see data types
+                log_info(f"Processing row {idx}: {dict(row)}")
+                
+                # Convert pandas types to SQLite-compatible types
+                spacecraft = str(row['Spacecraft']) if pd.notna(row['Spacecraft']) else 'Unknown'
+                type_val = str(row['Type']) if pd.notna(row['Type']) else 'Unknown'
+                mission = str(row['Mission']) if pd.notna(row['Mission']) else 'Unknown'
+                event = str(row['Event']) if pd.notna(row['Event']) else 'Unknown'
+                date = row['Date'].strftime('%Y-%m-%d %H:%M:%S') if pd.notna(row['Date']) and hasattr(row['Date'], 'strftime') else str(row['Date']) if pd.notna(row['Date']) else 'Unknown'
+                location = str(row['Location']) if pd.notna(row['Location']) else 'Unknown'
+                arrival = row['Arrival'].strftime('%Y-%m-%d %H:%M:%S') if pd.notna(row['Arrival']) and hasattr(row['Arrival'], 'strftime') else str(row['Arrival']) if pd.notna(row['Arrival']) else 'Unknown'
+                departure = row['Departure'].strftime('%Y-%m-%d %H:%M:%S') if pd.notna(row['Departure']) and hasattr(row['Departure'], 'strftime') else str(row['Departure']) if pd.notna(row['Departure']) else 'Unknown'
+                
+                log_info(f"Converted values: spacecraft={spacecraft}, type={type_val}, mission={mission}, event={event}, date={date}, location={location}, arrival={arrival}, departure={departure}")
+                
                 cursor.execute('''
                     INSERT INTO vehicles (Spacecraft, Type, Mission, Event, Date, Location, Arrival, Departure)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (row['Spacecraft'], row['Type'], row['Mission'], row['Event'], 
-                      row['Date'], row['Location'], row['Arrival'], row['Departure']))
+                ''', (spacecraft, type_val, mission, event, date, location, arrival, departure))
         else:
             log_info("No correlated events to insert")
         
         # Insert undock events
         if not undock_df.empty:
             log_info(f"Inserting {len(undock_df)} undock events into database")
-            for _, row in undock_df.iterrows():
+            for idx, row in undock_df.iterrows():
+                # Debug logging to see data types
+                log_info(f"Processing undock row {idx}: {dict(row)}")
+                
+                # Convert pandas types to SQLite-compatible types
+                event = str(row['Event']) if pd.notna(row['Event']) else 'Unknown'
+                date = row['Date'].strftime('%Y-%m-%d %H:%M:%S') if pd.notna(row['Date']) and hasattr(row['Date'], 'strftime') else str(row['Date']) if pd.notna(row['Date']) else 'Unknown'
+                
+                log_info(f"Converted undock values: event={event}, date={date}")
+                
                 cursor.execute('''
                     INSERT INTO vehicles (Spacecraft, Type, Mission, Event, Date, Location, Arrival, Departure)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                ''', ('Unknown', 'Unknown', 'Unknown', row['Event'], 
-                      row['Date'], 'Unknown', 'Unknown', 'Unknown'))
+                ''', ('Unknown', 'Unknown', 'Unknown', event, date, 'Unknown', 'Unknown', 'Unknown'))
         else:
             log_info("No undock events to insert")
         
