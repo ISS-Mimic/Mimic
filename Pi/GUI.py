@@ -586,35 +586,6 @@ class MainApp(App):
     def changeManualControlBoolean(self, *args):
         App.get_running_app().manual_control = args[0]
 
-
-    def map_rotation(self, args):
-        scalefactor = 0.083333
-        scaledValue = float(args)/scalefactor
-        return scaledValue
-
-    def map_psi_bar(self, args):
-        scalefactor = 0.015
-        scaledValue = (float(args)*scalefactor)+0.72
-        return scaledValue
-
-    def map_hold_bar(self, args):
-        scalefactor = 0.0015
-        scaledValue = (float(args)*scalefactor)+0.71
-        return scaledValue
-
-    def hold_timer(self, dt):
-        global seconds2, holdstartTime
-        log_info("Function Call - hold timer")
-        unixconvert = time.gmtime(time.time())
-        currenthours = float(unixconvert[7])*24+unixconvert[3]+float(unixconvert[4])/60+float(unixconvert[5])/3600
-        seconds2 = (currenthours-EVAstartTime)*3600
-        seconds2 = int(seconds2)
-
-        new_bar_x = self.map_hold_bar(260-seconds2)
-        self.screens["us_eva"].ids.leak_timer.text = "~"+ str(int(seconds2)) + "s"
-        self.screens["us_eva"].ids.Hold_bar.pos_hint = {"center_x": new_bar_x, "center_y": 0.47}
-        self.screens["us_eva"].ids.Crewlock_Status_image.source = mimic_directory + '/Mimic/Pi/imgs/eva/LeakCheckLights.png'
-
     def _broadcast_signal(self,
                           filename: str,
                           rgb: tuple[float, float, float],
@@ -677,10 +648,9 @@ class MainApp(App):
 
 
     def update_labels(self, dt): #THIS IS THE IMPORTANT FUNCTION
-        global mimicbutton, switchtofake, demoboolean, runningDemo, playbackboolean, psarj2, ssarj2, aos, los, oldLOS, psarjmc, ssarjmc, ptrrjmc, strrjmc, beta1bmc, beta1amc, beta2bmc, beta2amc, beta3bmc, beta3amc, beta4bmc, beta4amc, US_EVAinProgress, position_x, position_y, position_z, velocity_x, velocity_y, velocity_z, altitude, velocity, iss_mass, testvalue, testfactor, airlock_pump, crewlockpres, leak_hold, firstcrossing, EVA_activities, repress, depress, oldAirlockPump, obtained_EVA_crew, EVAstartTime
+        global mimicbutton, switchtofake, demoboolean, runningDemo, playbackboolean, psarj2, ssarj2, aos, los, oldLOS, psarjmc, ssarjmc, ptrrjmc, strrjmc, beta1bmc, beta1amc, beta2bmc, beta2amc, beta3bmc, beta3amc, beta4bmc, beta4amc, US_EVAinProgress, position_x, position_y, position_z, velocity_x, velocity_y, velocity_z, testvalue, testfactor, airlock_pump, crewlockpres, leak_hold, firstcrossing, EVA_activities, repress, depress, oldAirlockPump, obtained_EVA_crew, EVAstartTime
         global holdstartTime, LS_Subscription
         global Disco, eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
-        global stationmode
         global tdrs, module
         global old_mt_timestamp, old_mt_position, mt_speed
 
@@ -771,29 +741,7 @@ class MainApp(App):
             sasa_xmit = False
 
 
-
-        stationmode = float((values[46])[0]) #russian segment mode same as usos mode
-
-
-
-        ## Station Mode ##
-
-        if stationmode == 1.0:
-            self.screens["iss"].ids.stationmode_value.text = "Crew Rescue"
-        elif stationmode == 2.0:
-            self.screens["iss"].ids.stationmode_value.text = "Survival"
-        elif stationmode == 3.0:
-            self.screens["iss"].ids.stationmode_value.text = "Reboost"
-        elif stationmode == 4.0:
-            self.screens["iss"].ids.stationmode_value.text = "Proximity Operations"
-        elif stationmode == 5.0:
-            self.screens["iss"].ids.stationmode_value.text = "EVA"
-        elif stationmode == 6.0:
-            self.screens["iss"].ids.stationmode_value.text = "Microgravity"
-        elif stationmode == 7.0:
-            self.screens["iss"].ids.stationmode_value.text = "Standard"
-        else:
-            self.screens["iss"].ids.stationmode_value.text = "n/a"
+        # Station mode logic moved to ISS_Screen
 
 
         #Crew Screen Stuff
@@ -856,7 +804,7 @@ class MainApp(App):
         #ISS altitude too low
         #Russion hook status - make sure all modules remain docked
 
-        iss_mass = float((values[18])[0])
+        # ISS mass logic moved to ISS_Screen
 
 
 #        if (difference > -10) and (isinstance(App.get_running_app().root_window.children[0], Popup)==False):
@@ -994,12 +942,7 @@ class MainApp(App):
         #UHF telemetry updates now handled in CT_UHF_Screen
 
 
-
-
-        self.screens["iss"].ids.altitude_value.text = str(altitude) + " km"
-
-        self.screens["iss"].ids.velocity_value.text = str(velocity) + " km/s"
-        self.screens["iss"].ids.stationmass_value.text = str(iss_mass) + " kg"
+        # ISS telemetry updates moved to ISS_Screen
 
         ##-------------------Signal Status Check-------------------##
 
