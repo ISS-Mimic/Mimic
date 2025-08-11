@@ -18,12 +18,27 @@ from bs4 import BeautifulSoup #used to parse webpages for data (EVA stats, ISS T
 import ephem #used for TLE orbit information on orbit screen
 import serial #used to send data over serial to arduino
 import json # used for serial port config and storing TLEs and crew info
-from pyudev import Context, Devices, Monitor, MonitorObserver # for automatically detecting Arduinos - not available on Windows
 import argparse
 import sys
 import os.path as op #use for getting mimic directory
 from pathlib import Path
 import pathlib, sys, signal
+import math
+import time
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
+# Conditional import for pyudev (Linux only)
+try:
+    from pyudev import Context, Devices, Monitor, MonitorObserver # for automatically detecting Arduinos - not available on Windows
+    PYUDEV_AVAILABLE = True
+except ImportError:
+    PYUDEV_AVAILABLE = False
+    # Create dummy classes for Windows
+    class Context: pass
+    class Devices: pass
+    class Monitor: pass
+    class MonitorObserver: pass
 
 # This is here because Kivy gets upset if you pass in your own non-Kivy args
 CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), "config.json")
@@ -35,6 +50,19 @@ parser.add_argument(
 args, kivy_args = parser.parse_known_args()
 sys.argv[1:] = kivy_args
 USE_CONFIG_JSON = args.config
+
+# Global variables for animations and arduino count
+new_x = 0.0
+new_y = 0.75
+sizeX = 0.07
+sizeY = 0.07
+startingAnim = True
+new_x2 = 0.0
+new_y2 = 0.75
+mimicbutton = False
+demoboolean = False
+runningDemo = False
+Disco = False
 
 from kivy.app import App
 from kivy.lang import Builder
@@ -195,29 +223,41 @@ def open_serial_ports(serial_ports):
         raise Exception(e)
 
 context = Context()
-if not USE_CONFIG_JSON:
+if not USE_CONFIG_JSON and PYUDEV_AVAILABLE:
     MONITOR = Monitor.from_netlink(context)
     TTY_OBSERVER = MonitorObserver(MONITOR, callback=detect_device_event, name='monitor-observer')
     TTY_OBSERVER.daemon = False
+else:
+    MONITOR = None
+    TTY_OBSERVER = None
+
 SERIAL_PORTS = get_serial_ports(context, USE_CONFIG_JSON)
 OPEN_SERIAL_PORTS = []
 open_serial_ports(SERIAL_PORTS)
 log_str = "Serial ports opened: %s" % str(SERIAL_PORTS)
 log_info(log_str)
-if not USE_CONFIG_JSON:
+if not USE_CONFIG_JSON and PYUDEV_AVAILABLE and TTY_OBSERVER:
     TTY_OBSERVER.start()
     log_str = "Started monitoring serial ports."
     log_info(log_str)
     log_info(log_str)
 
 #-----------------------------Checking Databases-----------------------------------------
-TDRSconn = sqlite3.connect('/dev/shm/tdrs.db')
+# Cross-platform database path handling
+def get_db_path(db_name):
+    """Get database path with cross-platform handling."""
+    shm = pathlib.Path(f'/dev/shm/{db_name}')
+    if shm.exists():
+        return str(shm)
+    return str(pathlib.Path.home() / '.mimic_data' / db_name)
+
+TDRSconn = sqlite3.connect(get_db_path('tdrs.db'))
 TDRSconn.isolation_level = None
 TDRScursor = TDRSconn.cursor()
-VVconn = sqlite3.connect('/dev/shm/vv.db')
+VVconn = sqlite3.connect(get_db_path('vv.db'))
 VVconn.isolation_level = None
 VVcursor = VVconn.cursor()
-conn = sqlite3.connect('/dev/shm/iss_telemetry.db')
+conn = sqlite3.connect(get_db_path('iss_telemetry.db'))
 conn.isolation_level = None
 c = conn.cursor()
 
@@ -277,6 +317,7 @@ class MainApp(App):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     INTERNET_POLL_S = 1.0 # check internet connection every 1s
     manual_control = BooleanProperty(False)
+    mimicbutton = BooleanProperty(False)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -298,6 +339,14 @@ class MainApp(App):
         self.tty_observer = None
 
         self.mimic_directory = mimic_directory
+        
+        # Bind mimicbutton property to update global variable
+        self.bind(mimicbutton=self._on_mimicbutton_change)
+    
+    def _on_mimicbutton_change(self, instance, value):
+        """Update global mimicbutton variable when app property changes."""
+        global mimicbutton
+        mimicbutton = value
 
     def build(self):
         # 1. instantiate once, store in a dict
@@ -384,7 +433,7 @@ class MainApp(App):
                 ids.arduino_count.text = str(arduino_count)
                 ids.arduino.source = (
                     f"{self.mimic_directory}/Mimic/Pi/imgs/signal/"
-                    + ("Arduino_Transmit.zip" if mimicbutton
+                    + ("Arduino_Transmit.zip" if mimic_is_tx
                        else "arduino_notransmit.png")
                 )
             else:
@@ -400,7 +449,7 @@ class MainApp(App):
             self.screens["playback"].ids.OFT2DemoStart.disabled = False
             self.screens["manualcontrol"].ids.set90.disabled = False
             self.screens["manualcontrol"].ids.set0.disabled = False
-            if mimicbutton:
+            if mimic_is_tx:
                 self.screens["mimic"].ids.mimicstartbutton.disabled = True
             else:
                 self.screens["mimic"].ids.mimicstartbutton.disabled = False
@@ -412,8 +461,7 @@ class MainApp(App):
             self.screens["playback"].ids.OFT2DemoStart.disabled = True
             self.screens["manualcontrol"].ids.set90.disabled = True
             self.screens["manualcontrol"].ids.set0.disabled = True
-
-
+    
     def flashROBObutton(self, instance):
         #log_info("Function call - flashRobo")
 

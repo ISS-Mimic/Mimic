@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import pathlib
 
 telemetry_data = [
     ('psarj', '0', '0', 'S0000004', 0),
@@ -394,9 +395,17 @@ def create_iss_telemetry_database(database_path, table_name, data):
     conn.close()
 
 # Define the paths to the databases
-iss_telemetry_db_path = '/dev/shm/iss_telemetry.db'
-tdrs_db_path = '/dev/shm/tdrs.db'
-vv_db_path = '/dev/shm/vv.db'
+# Cross-platform database path handling
+def get_db_path(db_name):
+    """Get database path with cross-platform handling."""
+    shm = pathlib.Path(f'/dev/shm/{db_name}')
+    if shm.exists():
+        return str(shm)
+    return str(pathlib.Path.home() / '.mimic_data' / db_name)
+
+iss_telemetry_db_path = get_db_path('iss_telemetry.db')
+tdrs_db_path = get_db_path('tdrs.db')
+vv_db_path = get_db_path('vv.db')
 
 # Remove any existing databases at startup
 if os.path.exists(iss_telemetry_db_path):
