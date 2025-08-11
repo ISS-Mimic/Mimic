@@ -59,9 +59,6 @@ class EVA_US_Screen(MimicBase):
         if self._eva_clock_event:
             Clock.unschedule(self._eva_clock_event)
             self._eva_clock_event = None
-        if self._hold_timer_event:
-            Clock.unschedule(self._hold_timer_event)
-            self._hold_timer_event = None
         if self._eva_stats_request:
             self._eva_stats_request.cancel()
             self._eva_stats_request = None

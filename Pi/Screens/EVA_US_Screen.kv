@@ -28,7 +28,7 @@
         # Pressure Value Label - scales with screen
         Label:
             id: crewlockpressure_value
-            pos_hint: {"center_x": 0.9, "center_y": 0.6}
+            pos_hint: {"center_x": 0.9, "center_y": 0.61}
             text: '0.00'
             markup: True
             bold: True
@@ -137,7 +137,7 @@
         # EVA Image - scales with screen
         AsyncImage:
             id: EVAimage
-            source: ""
+            source: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/US_Airlock.jpg'
             opacity: 0.0
             size_hint: 0.42, 0.38
             fit_mode: "scale-down"
