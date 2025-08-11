@@ -26,13 +26,8 @@ Builder.load_file(str(kv_path))
 class EVA_US_Screen(MimicBase):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._update_event = None
-        self._eva_clock_event = None
-        self._hold_timer_event = None
         
-        # EVA state variables
-        self.eva_start_time = None
-        self.hold_start_time = None
+        # EVA state tracking
         self.eva_in_progress = False
         self.standby = False
         self.prebreath1 = False
@@ -41,11 +36,23 @@ class EVA_US_Screen(MimicBase):
         self.depress2 = False
         self.repress = False
         
-        # EVA stats variables
-        self.eva_stats_cache = {}  # Cache for astronaut EVA stats
-        self.current_astronauts = []  # List of current EVA astronauts
-        self._eva_stats_request = None  # Current EVA stats request
+        # EVA timing
+        self.eva_start_time = None
+        self.hold_start_time = None
+        self._eva_clock_event = None
         
+        # EVA stats and astronaut management
+        self.eva_stats_cache = {}
+        self.current_astronauts = []
+        self._eva_stats_request = None
+        
+        # Sustained low pressure tracking for delayed EVA triggering
+        self._low_pressure_start_time = None
+        self._low_pressure_samples = 0
+        self._low_pressure_threshold = 2.5
+        self._low_pressure_required_samples = 30  # 30 seconds at 1Hz update rate
+        self._low_pressure_triggered = False
+    
     def on_enter(self):
         """Start telemetry updates when screen is entered"""
         log_info("EVA US Screen: Starting telemetry updates")
@@ -334,24 +341,71 @@ class EVA_US_Screen(MimicBase):
         return summary
     
     def force_refresh_astronaut_stats(self):
-        """Force refresh of astronaut EVA stats from the web
-        
-        This can be useful if you want to ensure you have the latest data
-        or if you suspect the cached data might be stale.
-        """
+        """Force refresh astronaut statistics by clearing cache and re-fetching"""
         if not self.current_astronauts:
-            log_info("No astronauts assigned - nothing to refresh")
+            log_info("No astronauts assigned to refresh")
             return
         
-        # Clear cache for current astronauts
-        for firstname, lastname in self.current_astronauts:
+        log_info("Force refreshing astronaut statistics")
+        for astronaut in self.current_astronauts:
+            if isinstance(astronaut, tuple):
+                firstname, lastname = astronaut
+            else:
+                # Parse full name
+                name_parts = astronaut.split()
+                if len(name_parts) >= 2:
+                    firstname = name_parts[0]
+                    lastname = name_parts[-1]
+                else:
+                    continue
+            
+            # Clear cache for this astronaut
             cache_key = f"{firstname}_{lastname}".lower()
             if cache_key in self.eva_stats_cache:
                 del self.eva_stats_cache[cache_key]
+                log_info(f"Cleared cache for {firstname} {lastname}")
         
         # Re-fetch stats
         self.update_eva_stats_for_current_astronauts()
-        log_info("Forced refresh of astronaut EVA stats")
+    
+    def set_low_pressure_delay(self, seconds):
+        """Set the delay duration for low pressure EVA triggering
+        
+        Args:
+            seconds: Number of seconds to wait before triggering EVA in progress
+        """
+        if seconds < 1:
+            log_error(f"Invalid delay duration: {seconds} seconds (minimum 1)")
+            return
+        
+        self._low_pressure_required_samples = seconds
+        log_info(f"Low pressure delay set to {seconds} seconds")
+    
+    def get_low_pressure_status(self):
+        """Get current low pressure tracking status
+        
+        Returns:
+            dict: Status information about low pressure tracking
+        """
+        if self._low_pressure_start_time is None:
+            return {
+                'tracking': False,
+                'samples': 0,
+                'required_samples': self._low_pressure_required_samples,
+                'threshold': self._low_pressure_threshold,
+                'triggered': False
+            }
+        
+        elapsed_time = time.time() - self._low_pressure_start_time
+        return {
+            'tracking': True,
+            'samples': self._low_pressure_samples,
+            'required_samples': self._low_pressure_required_samples,
+            'threshold': self._low_pressure_threshold,
+            'triggered': self._low_pressure_triggered,
+            'elapsed_time': elapsed_time,
+            'remaining_samples': max(0, self._low_pressure_required_samples - self._low_pressure_samples)
+        }
     
     def update_eva_values(self, dt):
         """Update EVA screen telemetry values"""
@@ -374,6 +428,7 @@ class EVA_US_Screen(MimicBase):
             crewlockpres = float(values[16][0])
             airlock_pump_voltage = int(values[71][0])
             airlock_pump_switch = int(values[72][0])
+            aos_status = float(values[12][0])  # AOS status: 1.0 = connected, 0.0 = no signal, 2.0 = error
             
             # Update airlock pump status
             if airlock_pump_voltage == 1:
@@ -410,6 +465,10 @@ class EVA_US_Screen(MimicBase):
                 self.ids.EVA_occuring.text = "Currently No EVA"
                 # Clear astronaut stats when no EVA
                 self.clear_eva_stats_display()
+                # Reset low pressure tracking when no EVA
+                self._low_pressure_start_time = None
+                self._low_pressure_samples = 0
+                self._low_pressure_triggered = False
             
             # EVA Standby
             elif airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres > 740 and airlockpres > 740:
@@ -418,6 +477,10 @@ class EVA_US_Screen(MimicBase):
                 self.ids.Crewlock_Status_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/eva/StandbyLights.png"
                 self.ids.EVA_occuring.color = 0, 0, 1
                 self.ids.EVA_occuring.text = "EVA Standby"
+                # Reset low pressure tracking when in standby
+                self._low_pressure_start_time = None
+                self._low_pressure_samples = 0
+                self._low_pressure_triggered = False
             
             # EVA Prebreath Pressure
             elif airlock_pump_voltage == 1 and crewlockpres > 740 and airlockpres > 740:
@@ -426,6 +489,10 @@ class EVA_US_Screen(MimicBase):
                 self.ids.leak_timer.text = "Leak Check"
                 self.ids.EVA_occuring.color = 0, 0, 1
                 self.ids.EVA_occuring.text = "Pre-EVA Nitrogen Purge"
+                # Reset low pressure tracking when in prebreath
+                self._low_pressure_start_time = None
+                self._low_pressure_samples = 0
+                self._low_pressure_triggered = False
             
             # EVA Depress1
             elif airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres < 740 and airlockpres > 740:
@@ -434,6 +501,10 @@ class EVA_US_Screen(MimicBase):
                 self.ids.EVA_occuring.text = "Crewlock Depressurizing"
                 self.ids.EVA_occuring.color = 0, 0, 1
                 self.ids.Crewlock_Status_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/eva/DepressLights.png"
+                # Reset low pressure tracking when depressurizing
+                self._low_pressure_start_time = None
+                self._low_pressure_samples = 0
+                self._low_pressure_triggered = False
             
             # EVA Leakcheck
             elif airlock_pump_voltage == 1 and crewlockpres < 260 and crewlockpres > 250 and (self.depress1 or self.leakhold):
@@ -445,6 +516,10 @@ class EVA_US_Screen(MimicBase):
                 self.ids.EVA_occuring.text = "Leak Check in Progress!"
                 self.ids.EVA_occuring.color = 0, 0, 1
                 self.ids.Crewlock_Status_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/eva/LeakCheckLights.png"
+                # Reset low pressure tracking when in leak check
+                self._low_pressure_start_time = None
+                self._low_pressure_samples = 0
+                self._low_pressure_triggered = False
             
             # EVA Depress2
             elif airlock_pump_voltage == 1 and crewlockpres <= 250 and crewlockpres > 3:
@@ -453,27 +528,67 @@ class EVA_US_Screen(MimicBase):
                 self.ids.EVA_occuring.text = "Crewlock Depressurizing"
                 self.ids.EVA_occuring.color = 0, 0, 1
                 self.ids.Crewlock_Status_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/eva/DepressLights.png"
+                # Reset low pressure tracking when depressurizing
+                self._low_pressure_start_time = None
+                self._low_pressure_samples = 0
+                self._low_pressure_triggered = False
             
-            # EVA in progress
-            elif crewlockpres < 2.5:
-                self.eva_in_progress = True
-                self.ids.EVA_occuring.text = "EVA In Progress!!!"
-                self.ids.EVA_occuring.color = 0.33, 0.7, 0.18
-                self.ids.leak_timer.text = "Complete"
-                self.ids.Crewlock_Status_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/eva/InProgressLights.png"
-                
-                # Start EVA clock if not already running
-                if not self._eva_clock_event:
-                    unixconvert = time.gmtime(time.time())
-                    self.eva_start_time = float(unixconvert[7])*24+float(unixconvert[3])+float(unixconvert[4])/60+float(unixconvert[5])/3600
-                    self._eva_clock_event = Clock.schedule_interval(self.eva_clock, 1.0)
+            # EVA in progress - with delayed triggering and AOS status check
+            elif crewlockpres < self._low_pressure_threshold:
+                # Check if we have AOS (telemetry acquired)
+                if aos_status == 1.0:  # AOS active
+                    # Start or continue tracking sustained low pressure
+                    if self._low_pressure_start_time is None:
+                        self._low_pressure_start_time = time.time()
+                        self._low_pressure_samples = 0
+                    
+                    self._low_pressure_samples += 1
+                    
+                    # Check if we've had sustained low pressure for required duration
+                    if (self._low_pressure_samples >= self._low_pressure_required_samples and 
+                        not self._low_pressure_triggered):
+                        
+                        self._low_pressure_triggered = True
+                        self.eva_in_progress = True
+                        self.ids.EVA_occuring.text = "EVA In Progress!!!"
+                        self.ids.EVA_occuring.color = 0.33, 0.7, 0.18
+                        self.ids.leak_timer.text = "Complete"
+                        self.ids.Crewlock_Status_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/eva/InProgressLights.png"
+                        
+                        # Start EVA clock if not already running
+                        if not self._eva_clock_event:
+                            unixconvert = time.gmtime(time.time())
+                            self.eva_start_time = float(unixconvert[7])*24+float(unixconvert[3])+float(unixconvert[4])/60+float(unixconvert[5])/3600
+                            self._eva_clock_event = Clock.schedule_interval(self.eva_clock, 1.0)
+                        
+                        log_info(f"EVA In Progress triggered after {self._low_pressure_samples} samples of sustained low pressure ({self._low_pressure_threshold} PSI) with AOS active")
+                    else:
+                        # Still tracking, show intermediate status
+                        remaining_samples = self._low_pressure_required_samples - self._low_pressure_samples
+                        self.ids.EVA_occuring.text = f"Pressure Low - {remaining_samples}s to EVA"
+                        self.ids.EVA_occuring.color = 1, 1, 0  # Yellow
+                        self.ids.leak_timer.text = f"~{remaining_samples}s"
+                        self.ids.Crewlock_Status_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/eva/DepressLights.png"
+                else:
+                    # No AOS, reset tracking and show waiting status
+                    self._low_pressure_start_time = None
+                    self._low_pressure_samples = 0
+                    self._low_pressure_triggered = False
+                    self.ids.EVA_occuring.text = "Waiting for Telemetry"
+                    self.ids.EVA_occuring.color = 1, 1, 0  # Yellow
+                    self.ids.leak_timer.text = "No AOS"
+                    self.ids.Crewlock_Status_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/eva/BlankLights.png"
             
             # Repress
-            elif airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres >= 3 and airlockpres < 734:
+            elif airlock_pump_voltage == 1 and airlock_pump_switch == 1 and crewlockpres >= 3 and crewlockpres < 734:
                 self.eva_in_progress = False
                 self.ids.EVA_occuring.color = 0, 0, 1
                 self.ids.EVA_occuring.text = "Crewlock Repressurizing"
                 self.ids.Crewlock_Status_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/eva/RepressLights.png"
+                # Reset low pressure tracking when repressurizing
+                self._low_pressure_start_time = None
+                self._low_pressure_samples = 0
+                self._low_pressure_triggered = False
             
             # Update pressure needle and bar
             psi_value = 0.0193368 * float(crewlockpres)
