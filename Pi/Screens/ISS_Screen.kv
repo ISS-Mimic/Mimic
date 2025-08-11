@@ -43,7 +43,7 @@
         # Service Module (SM) Button and Label
         ToggleButton:
             id: SM_button
-            size_hint: 0.25, 0.2
+            size_hint: 0.22, 0.2
             pos_hint: {"center_x": 0.2, "center_y": 0.51}
             group: "modules"
             opacity: 0.5
@@ -62,7 +62,7 @@
         # Functional Cargo Block (FGB) Button and Label
         ToggleButton:
             id: FGB_button
-            size_hint: 0.25, 0.2
+            size_hint: 0.22, 0.2
             pos_hint: {"center_x": 0.4, "center_y": 0.51}
             group: "modules"
             opacity: 0.5
@@ -81,7 +81,7 @@
         # Node 1 Button and Label
         ToggleButton:
             id: Node1_button
-            size_hint: 0.13, 0.18
+            size_hint: 0.13, 0.1
             pos_hint: {"center_x": 0.57, "center_y": 0.51}
             group: "modules"
             opacity: 0.5
@@ -100,13 +100,13 @@
         # Airlock Button and Label
         ToggleButton:
             id: Airlock_button
-            size_hint: 0.1, 0.2
+            size_hint: 0.1, 0.15
             pos_hint: {"center_x": 0.58, "center_y": 0.4}
             group: "modules"
             opacity: 0.5
             on_press: root.select_module("AL")
         Label:
-            pos_hint: {"center_x": 0.585, "center_y": 0.43}
+            pos_hint: {"center_x": 0.585, "center_y": 0.42}
             text: 'Airlock'
             markup: True
             color: 0,0,0
@@ -119,7 +119,7 @@
         # Node 3 Button and Label
         ToggleButton:
             id: Node3_button
-            size_hint: 0.1, 0.25
+            size_hint: 0.08, 0.13
             pos_hint: {"center_x": 0.585, "center_y": 0.68}
             group: "modules"
             opacity: 0.5
@@ -138,8 +138,8 @@
         # PMM Button and Label
         ToggleButton:
             id: PMM_button
-            size_hint: 0.13, 0.13
-            pos_hint: {"center_x": 0.67, "center_y": 0.68}
+            size_hint: 0.1, 0.13
+            pos_hint: {"center_x": 0.67, "center_y": 0.69}
             group: "modules"
             opacity: 0.5
             on_press: root.select_module("PMM")
@@ -158,7 +158,7 @@
         ToggleButton:
             id: BEAM_button
             size_hint: 0.05, 0.1
-            pos_hint: {"center_x": 0.53, "center_y": 0.69}
+            pos_hint: {"center_x": 0.52, "center_y": 0.69}
             group: "modules"
             opacity: 0.5
             on_press: root.select_module("BEAM")
@@ -176,7 +176,7 @@
         # US Lab Button and Label
         ToggleButton:
             id: USLab_button
-            size_hint: 0.17, 0.18
+            size_hint: 0.15, 0.16
             pos_hint: {"center_x": 0.69, "center_y": 0.51}
             group: "modules"
             opacity: 0.5
@@ -195,8 +195,8 @@
         # Node 2 Button and Label
         ToggleButton:
             id: Node2_button
-            size_hint: 0.14, 0.18
-            pos_hint: {"center_x": 0.81, "center_y": 0.51}
+            size_hint: 0.13, 0.17
+            pos_hint: {"center_x": 0.825, "center_y": 0.51}
             group: "modules"
             opacity: 0.5
             on_press: root.select_module("Node2")
@@ -214,8 +214,8 @@
         # Columbus Button and Label
         ToggleButton:
             id: Columbus_button
-            size_hint: 0.1, 0.18
-            pos_hint: {"center_x": 0.81, "center_y": 0.36}
+            size_hint: 0.1, 0.17
+            pos_hint: {"center_x": 0.825, "center_y": 0.36}
             group: "modules"
             opacity: 0.5
             on_press: root.select_module("Col")
@@ -233,13 +233,13 @@
         # JLP Button and Label
         ToggleButton:
             id: JLP_button
-            size_hint: 0.1, 0.1
-            pos_hint: {"center_x": 0.81, "center_y": 0.74}
+            size_hint: 0.08, 0.1
+            pos_hint: {"center_x": 0.83, "center_y": 0.74}
             group: "modules"
             opacity: 0.5
             on_press: root.select_module("JLP")
         Label:
-            pos_hint: {"center_x": 0.82, "center_y": 0.74}
+            pos_hint: {"center_x": 0.825, "center_y": 0.74}
             text: 'JLP'
             markup: True
             color: 0,0,0
@@ -252,8 +252,8 @@
         # JEM Button and Label
         ToggleButton:
             id: JEM_button
-            size_hint: 0.1, 0.1
-            pos_hint: {"center_x": 0.82, "center_y": 0.66}
+            size_hint: 0.08, 0.1
+            pos_hint: {"center_x": 0.825, "center_y": 0.66}
             group: "modules"
             opacity: 0.5
             on_press: root.select_module("JEM")
