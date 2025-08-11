@@ -160,7 +160,13 @@ def main():
                             items=["TIME_000001"],
                             fields=["TimeStamp", "Value", "Status.Class", "Status.Indicator"])
 
-    db = sqlite3.connect("/dev/shm/iss_telemetry.db", isolation_level=None, check_same_thread=False)
+    # Cross-platform database path handling
+    import pathlib
+    db_path = pathlib.Path('/dev/shm/iss_telemetry.db')
+    if not db_path.exists():
+        db_path = pathlib.Path.home() / '.mimic_data' / 'iss_telemetry.db'
+    
+    db = sqlite3.connect(str(db_path), isolation_level=None, check_same_thread=False)
     main_sub.addListener(MainListener(db))
     time_sub.addListener(TimeListener(db))
 

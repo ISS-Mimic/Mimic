@@ -44,7 +44,14 @@ def log_error(message):
 # URL Constants
 wikiurl = 'https://en.wikipedia.org/wiki/International_Space_Station'
 nasaurl = 'https://www.nasa.gov/international-space-station/space-station-visiting-vehicles/'
-vv_db_path = '/dev/shm/vv.db'
+
+# Cross-platform database path handling
+import pathlib
+vv_db_path = pathlib.Path('/dev/shm/vv.db')
+if not vv_db_path.exists():
+    vv_db_path = pathlib.Path.home() / '.mimic_data' / 'vv.db'
+vv_db_path = str(vv_db_path)
+
 output_file = str(mimic_data_directory) + '/vv.png'
 
 # Define a mapping to standardize mission names
