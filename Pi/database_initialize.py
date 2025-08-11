@@ -439,9 +439,13 @@ def validate_telemetry_data(data):
 def get_db_path(db_name):
     """Get database path with cross-platform handling."""
     try:
-        shm = pathlib.Path(f'/dev/shm/{db_name}')
-        if shm.exists():
-            return str(shm)
+        # On Linux, prioritize /dev/shm/ for in-memory filesystem
+        shm_dir = pathlib.Path('/dev/shm')
+        if shm_dir.exists() and shm_dir.is_dir():
+            # /dev/shm exists and is a directory, use it
+            return str(shm_dir / db_name)
+        
+        # Fallback to home directory for Windows or if /dev/shm doesn't exist
         fallback = pathlib.Path.home() / '.mimic_data' / db_name
         # Ensure the directory exists
         fallback.parent.mkdir(parents=True, exist_ok=True)
