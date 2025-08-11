@@ -1,6 +1,7 @@
 from os import environ
 from twisted.internet.defer import inlineCallbacks
 from autobahn.twisted.wamp import ApplicationSession, ApplicationRunner
+from twisted.internet import reactor
 import sqlite3
 from utils.logger import log_info, log_error
 
@@ -45,6 +46,7 @@ initialize_database()
 
 
 def update_active_tdrs(msg, tdrs_id, active_tdrs):
+    log_info(f"Updating active TDRS for TDRS-{tdrs_id}")
     """
     Updates the ActiveTDRS list based on the provided message and TDRS ID.
 
@@ -81,6 +83,7 @@ def update_active_tdrs(msg, tdrs_id, active_tdrs):
 
 
 def update_database(active_tdrs, timestamp):
+    log_info(f"Updating database with active TDRS: {active_tdrs}, timestamp: {timestamp}")
     """
     Updates the database with the active TDRS IDs and timestamp.
 
@@ -130,6 +133,7 @@ class Component(ApplicationSession):
         def onevent(msg):
             """Processes incoming messages and updates the database."""
             try:
+                log_info(f"Received message: {type(msg)} - {msg}")
                 log_info("Processing incoming TDRS status message")
                 active_tdrs = [0, 0]
                 timestamp = 0
@@ -140,14 +144,34 @@ class Component(ApplicationSession):
                         timestamp = ts
 
                 log_info(f"Active TDRS summary: {active_tdrs}, Timestamp: {timestamp}")
-                update_database(active_tdrs, timestamp)
+                
+                # Only update database if we have meaningful data
+                if active_tdrs != [0, 0] or timestamp != 0:
+                    update_database(active_tdrs, timestamp)
+                else:
+                    log_info("No active TDRS data to update in database")
                 
             except Exception as e:
                 log_error(f"Error processing TDRS status message: {e}")
+                import traceback
+                traceback.print_exc()
 
         log_info("Subscribing to TDRS activity channel")
-        yield self.subscribe(onevent, u'gov.nasa.gsfc.scan_now.sn.activity')
-        log_info("Successfully subscribed to TDRS activity channel")
+        try:
+            yield self.subscribe(onevent, u'gov.nasa.gsfc.scan_now.sn.activity')
+            log_info("Successfully subscribed to TDRS activity channel")
+            
+            # Set up periodic status check
+            def status_check():
+                log_info("TDRS check script is running and monitoring for messages...")
+                reactor.callLater(60, status_check)  # Check every 60 seconds
+            
+            reactor.callLater(10, status_check)  # Start first check after 10 seconds
+            
+        except Exception as e:
+            log_error(f"Failed to subscribe to TDRS activity channel: {e}")
+            import traceback
+            traceback.print_exc()
 
 
 if __name__ == '__main__':
@@ -164,8 +188,17 @@ if __name__ == '__main__':
         log_info(f"Connecting to WAMP router: {url}")
         log_info(f"WAMP realm: {realm}")
 
+        # Add connection timeout
         runner = ApplicationRunner(url, realm)
         log_info("Starting WAMP application runner")
+        
+        # Set a timeout for the connection
+        def connection_timeout():
+            log_error("Connection timeout - WAMP router not responding")
+            reactor.stop()
+        
+        reactor.callLater(30, connection_timeout)  # 30 second timeout
+        
         runner.run(Component)
         
     except Exception as e:
