@@ -5,7 +5,7 @@ from kivy.properties import StringProperty
 from kivy.lang import Builder
 from kivy.clock import Clock
 from ._base import MimicBase
-from utils import log_info, log_error
+from utils.logger import log_info, log_error
 from utils.serial import serialWrite
 import sqlite3
 from datetime import datetime
