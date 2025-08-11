@@ -450,62 +450,52 @@ def get_db_path(db_name):
         log_error(f"Error resolving database path for {db_name}: {e}")
         raise
 
-def main():
-    """Main function to initialize all databases with error handling."""
-    try:
-        log_info("Starting database initialization process...")
+# run code if this file is run directly or imported
+try:
+    log_info("Starting database initialization process...")
 
-        # Validate telemetry data
-        validate_telemetry_data(telemetry_data)
+    # Validate telemetry data
+    validate_telemetry_data(telemetry_data)
 
-        iss_telemetry_db_path = get_db_path('iss_telemetry.db')
-        tdrs_db_path = get_db_path('tdrs.db')
-        vv_db_path = get_db_path('vv.db')
+    iss_telemetry_db_path = get_db_path('iss_telemetry.db')
+    tdrs_db_path = get_db_path('tdrs.db')
+    vv_db_path = get_db_path('vv.db')
 
-        log_info(f"Database paths resolved:")
-        log_info(f"  ISS Telemetry: {iss_telemetry_db_path}")
-        log_info(f"  TDRS: {tdrs_db_path}")
-        log_info(f"  VV: {vv_db_path}")
+    log_info(f"Database paths resolved:")
+    log_info(f"  ISS Telemetry: {iss_telemetry_db_path}")
+    log_info(f"  TDRS: {tdrs_db_path}")
+    log_info(f"  VV: {vv_db_path}")
 
-        # Remove any existing databases at startup
-        for db_path, db_name in [(iss_telemetry_db_path, 'ISS telemetry'), (tdrs_db_path, 'TDRS')]:
-            if os.path.exists(db_path):
-                try:
-                    os.remove(db_path)
-                    log_info(f"Removed existing {db_name} database")
-                except OSError as e:
-                    log_error(f"Error removing existing {db_name} database: {e}")
-                    raise
+    # Remove any existing databases at startup
+    for db_path, db_name in [(iss_telemetry_db_path, 'ISS telemetry'), (tdrs_db_path, 'TDRS')]:
+        if os.path.exists(db_path):
+            try:
+                os.remove(db_path)
+                log_info(f"Removed existing {db_name} database")
+            except OSError as e:
+                log_error(f"Error removing existing {db_name} database: {e}")
+                raise
 
-        # Create the VV database and table
-        log_info("Starting VV database creation...")
-        create_vv_database(vv_db_path, 'vv')
+    # Create the VV database and table
+    log_info("Starting VV database creation...")
+    create_vv_database(vv_db_path, 'vv')
 
-        # Create the TDRS database and table
-        log_info("Starting TDRS database creation...")
-        create_tdrs_database(tdrs_db_path, 'tdrs')
+    # Create the TDRS database and table
+    log_info("Starting TDRS database creation...")
+    create_tdrs_database(tdrs_db_path, 'tdrs')
 
-        # Create the ISS telemetry database and table
-        log_info("Starting ISS telemetry database creation...")
-        create_iss_telemetry_database(iss_telemetry_db_path, 'telemetry', telemetry_data)
+    # Create the ISS telemetry database and table
+    log_info("Starting ISS telemetry database creation...")
+    create_iss_telemetry_database(iss_telemetry_db_path, 'telemetry', telemetry_data)
 
-        log_info("All databases initialized successfully!")
+    log_info("All databases initialized successfully!")
+    
+    # Verify databases were created
+    for db_path, db_name in [(iss_telemetry_db_path, 'ISS telemetry'), (tdrs_db_path, 'TDRS'), (vv_db_path, 'VV')]:
+        if not os.path.exists(db_path):
+            raise FileNotFoundError(f"Database {db_name} was not created at {db_path}")
+        log_info(f"Verified {db_name} database exists at {db_path}")
         
-        # Verify databases were created
-        for db_path, db_name in [(iss_telemetry_db_path, 'ISS telemetry'), (tdrs_db_path, 'TDRS'), (vv_db_path, 'VV')]:
-            if not os.path.exists(db_path):
-                raise FileNotFoundError(f"Database {db_name} was not created at {db_path}")
-            log_info(f"Verified {db_name} database exists at {db_path}")
-            
-    except Exception as e:
-        log_error(f"Database initialization failed: {e}")
-        raise
-
-if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        log_error(f"Fatal error during database initialization: {e}")
-        import traceback
-        traceback.print_exc()
-        exit(1)
+except Exception as e:
+    log_error(f"Database initialization failed: {e}")
+    raise
