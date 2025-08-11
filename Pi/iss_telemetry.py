@@ -3,37 +3,17 @@
 from datetime import datetime, timedelta, timezone
 import sqlite3
 import os.path as op #use for getting mimic directory
-import logging
-from logging.handlers import RotatingFileHandler
+
+from utils import log_info, log_error
 
 from lightstreamer.client import LightstreamerClient, ConsoleLoggerProvider, ConsoleLogLevel, Subscription
+
 
 from telemetry_ids import IDENTIFIERS
 
 mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
-# Set up basic configuration for the logging system
-log_file_path = mimic_directory + '/Mimic/Pi/Logs/mimiclog_telemetry.log'
 
-logger = logging.getLogger('MyLogger')
-logger.setLevel(logging.INFO)  # Set logger to INFO level
-
-# Create handler
-handler = RotatingFileHandler(log_file_path, maxBytes=1048576, backupCount=5)
-handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
-handler.setLevel(logging.INFO)  # Set handler to INFO level
-
-# Add handler to logger
-if not logger.hasHandlers():
-    logger.addHandler(handler)
-
-logger.info("This is a test INFO message right after logger setup.")
-
-def log_info(message):
-    logger.info(message)
-
-def log_error(message):
-    logger.error(message)
 
 log_info("Initialized Telemetry Log")
 
