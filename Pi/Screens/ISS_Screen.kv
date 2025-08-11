@@ -81,7 +81,7 @@
         # Node 1 Button and Label
         ToggleButton:
             id: Node1_button
-            size_hint: 0.13, 0.1
+            size_hint: 0.13, 0.13
             pos_hint: {"center_x": 0.57, "center_y": 0.51}
             group: "modules"
             opacity: 0.5
@@ -101,7 +101,7 @@
         ToggleButton:
             id: Airlock_button
             size_hint: 0.1, 0.15
-            pos_hint: {"center_x": 0.58, "center_y": 0.4}
+            pos_hint: {"center_x": 0.58, "center_y": 0.385}
             group: "modules"
             opacity: 0.5
             on_press: root.select_module("AL")
@@ -119,8 +119,8 @@
         # Node 3 Button and Label
         ToggleButton:
             id: Node3_button
-            size_hint: 0.08, 0.13
-            pos_hint: {"center_x": 0.585, "center_y": 0.68}
+            size_hint: 0.08, 0.16
+            pos_hint: {"center_x": 0.585, "center_y": 0.67}
             group: "modules"
             opacity: 0.5
             on_press: root.select_module("Node3")
@@ -258,7 +258,7 @@
             opacity: 0.5
             on_press: root.select_module("JEM")
         Label:
-            pos_hint: {"center_x": 0.83, "center_y": 0.66}
+            pos_hint: {"center_x": 0.83, "center_y": 0.645}
             text: 'JEM'
             markup: True
             color: 0,0,0
