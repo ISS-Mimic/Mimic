@@ -1,6 +1,7 @@
 import sqlite3
 import os
 import pathlib
+from utils.logger import log_info, log_error
 
 telemetry_data = [
     ('psarj', '0', '0', 'S0000004', 0),
@@ -302,16 +303,20 @@ telemetry_data = [
 ]
 
 def create_vv_database(database_path, table_name):
-    # Open a connection to the database
-    with sqlite3.connect(database_path) as conn:
+    try:
+        log_info(f"Creating VV database at: {database_path}")
+        # Open a connection to the database
+        conn = sqlite3.connect(database_path)
         conn.isolation_level = None
         c = conn.cursor()
 
         # Set the journal mode to WAL
         c.execute("PRAGMA journal_mode=WAL")
+        log_info("Set VV database journal mode to WAL")
 
         # Drop the table if it exists
         c.execute(f"DROP TABLE IF EXISTS {table_name}")
+        log_info(f"Dropped existing VV table: {table_name}")
 
         # Create the table with the correct structure
         c.execute(f'''
@@ -326,99 +331,181 @@ def create_vv_database(database_path, table_name):
                 Departure TEXT
             )
         ''')
+        log_info(f"Created VV table: {table_name}")
 
-        # Insert initial data if the table is empty
         c.execute(f"INSERT OR IGNORE INTO {table_name} (Spacecraft, Type, Mission, Event, Date, Location, Arrival, Departure) VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
-                  ('0', '0', '0', '0', '0', '0', '0', '0'))
-    
+                          ('0', '0', '0', '0', '0', '0', '0', '0'))
+        log_info("Inserted initial VV data")
+
         # Close the connection to the database
         conn.close()
-
-def create_vv_database(database_path, table_name):
-    # Open a connection to the database
-    conn = sqlite3.connect(database_path)
-    conn.isolation_level = None
-    c = conn.cursor()
-
-    # Set the journal mode to WAL
-    c.execute("PRAGMA journal_mode=WAL")
-
-    # Drop the table if it exists
-    c.execute(f"DROP TABLE IF EXISTS {table_name}")
-
-    # Create the table with the correct structure
-    c.execute(f'''
-        CREATE TABLE IF NOT EXISTS {table_name} (
-            Spacecraft TEXT,
-            Type TEXT,
-            Mission TEXT,
-            Event TEXT,
-            Date DATE,
-            Location TEXT,
-            Arrival TEXT,
-            Departure TEXT
-        )
-    ''')
-
-    c.execute(f"INSERT OR IGNORE INTO {table_name} (Spacecraft, Type, Mission, Event, Date, Location, Arrival, Departure) VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
-                      ('0', '0', '0', '0', '0', '0', '0', '0'))
-
-    # Close the connection to the database
-    conn.close()
+        log_info("VV database creation completed successfully")
+        
+    except sqlite3.Error as e:
+        log_error(f"SQLite error creating VV database: {e}")
+        raise
+    except Exception as e:
+        log_error(f"Unexpected error creating VV database: {e}")
+        raise
 
 def create_tdrs_database(database_path, table_name):
-    # Open a connection to the database
-    conn = sqlite3.connect(database_path)
-    conn.isolation_level = None
-    c = conn.cursor()
+    try:
+        log_info(f"Creating TDRS database at: {database_path}")
+        # Open a connection to the database
+        conn = sqlite3.connect(database_path)
+        conn.isolation_level = None
+        c = conn.cursor()
 
-    # Create the table and populate it with data if it doesn't already exist
-    c.execute("pragma journal_mode=wal")
-    c.execute(f"CREATE TABLE IF NOT EXISTS {table_name} (`TDRS1` TEXT, `TDRS2` TEXT, `Timestamp` TEXT)")
-    c.execute(f"INSERT OR IGNORE INTO {table_name} VALUES(?, ?, ?)", ('0', '0', '0'))
+        # Create the table and populate it with data if it doesn't already exist
+        c.execute("pragma journal_mode=wal")
+        log_info("Set TDRS database journal mode to WAL")
+        
+        c.execute(f"CREATE TABLE IF NOT EXISTS {table_name} (`TDRS1` TEXT, `TDRS2` TEXT, `Timestamp` TEXT)")
+        log_info(f"Created TDRS table: {table_name}")
+        
+        c.execute(f"INSERT OR IGNORE INTO {table_name} VALUES(?, ?, ?)", ('0', '0', '0'))
+        log_info("Inserted initial TDRS data")
 
-    # Close the connection to the database
-    conn.close()
+        # Close the connection to the database
+        conn.close()
+        log_info("TDRS database creation completed successfully")
+        
+    except sqlite3.Error as e:
+        log_error(f"SQLite error creating TDRS database: {e}")
+        raise
+    except Exception as e:
+        log_error(f"Unexpected error creating TDRS database: {e}")
+        raise
 
 def create_iss_telemetry_database(database_path, table_name, data):
-    # Open a connection to the database
-    conn = sqlite3.connect(database_path)
-    conn.isolation_level = None
-    c = conn.cursor()
+    try:
+        log_info(f"Creating ISS telemetry database at: {database_path}")
+        log_info(f"Will create table: {table_name} with {len(data)} telemetry records")
+        
+        # Open a connection to the database
+        conn = sqlite3.connect(database_path)
+        conn.isolation_level = None
+        c = conn.cursor()
 
-    # Create the table and populate it with data if it doesn't already exist
-    c.execute("pragma journal_mode=wal")
-    c.execute(f"CREATE TABLE IF NOT EXISTS {table_name} (`Label` TEXT PRIMARY KEY, `Timestamp` TEXT, `Value` TEXT, `ID` TEXT, `dbID` NUMERIC)")
-    c.executemany(f"INSERT OR IGNORE INTO {table_name} VALUES(?, ?, ?, ?, ?)", data)
+        # Create the table and populate it with data if it doesn't already exist
+        c.execute("pragma journal_mode=wal")
+        log_info("Set ISS telemetry database journal mode to WAL")
+        
+        c.execute(f"CREATE TABLE IF NOT EXISTS {table_name} (`Label` TEXT PRIMARY KEY, `Timestamp` TEXT, `Value` TEXT, `ID` TEXT, `dbID` NUMERIC)")
+        log_info(f"Created ISS telemetry table: {table_name}")
+        
+        c.executemany(f"INSERT OR IGNORE INTO {table_name} VALUES(?, ?, ?, ?, ?)", data)
+        log_info(f"Inserted {len(data)} telemetry records")
 
-    # Close the connection to the database
-    conn.close()
+        # Close the connection to the database
+        conn.close()
+        log_info("ISS telemetry database creation completed successfully")
+        
+    except sqlite3.Error as e:
+        log_error(f"SQLite error creating ISS telemetry database: {e}")
+        raise
+    except Exception as e:
+        log_error(f"Unexpected error creating ISS telemetry database: {e}")
+        raise
+
+def validate_telemetry_data(data):
+    """Validate that telemetry data has the correct structure."""
+    try:
+        if not data or len(data) == 0:
+            raise ValueError("Telemetry data is empty")
+        
+        expected_fields = 5  # Label, Timestamp, Value, ID, dbID
+        for i, record in enumerate(data):
+            if not isinstance(record, (list, tuple)):
+                raise ValueError(f"Record {i} is not a list/tuple: {type(record)}")
+            if len(record) != expected_fields:
+                raise ValueError(f"Record {i} has {len(record)} fields, expected {expected_fields}: {record}")
+            
+            # Validate that dbID is numeric
+            try:
+                int(record[4])  # dbID should be convertible to int
+            except (ValueError, TypeError):
+                raise ValueError(f"Record {i} has non-numeric dbID: {record[4]}")
+        
+        log_info(f"Telemetry data validation passed: {len(data)} records with correct structure")
+        return True
+        
+    except Exception as e:
+        log_error(f"Telemetry data validation failed: {e}")
+        raise
 
 # Define the paths to the databases
 # Cross-platform database path handling
 def get_db_path(db_name):
     """Get database path with cross-platform handling."""
-    shm = pathlib.Path(f'/dev/shm/{db_name}')
-    if shm.exists():
-        return str(shm)
-    return str(pathlib.Path.home() / '.mimic_data' / db_name)
+    try:
+        shm = pathlib.Path(f'/dev/shm/{db_name}')
+        if shm.exists():
+            return str(shm)
+        fallback = pathlib.Path.home() / '.mimic_data' / db_name
+        # Ensure the directory exists
+        fallback.parent.mkdir(parents=True, exist_ok=True)
+        return str(fallback)
+    except Exception as e:
+        log_error(f"Error resolving database path for {db_name}: {e}")
+        raise
 
-iss_telemetry_db_path = get_db_path('iss_telemetry.db')
-tdrs_db_path = get_db_path('tdrs.db')
-vv_db_path = get_db_path('vv.db')
+def main():
+    """Main function to initialize all databases with error handling."""
+    try:
+        log_info("Starting database initialization process...")
 
-# Remove any existing databases at startup
-if os.path.exists(iss_telemetry_db_path):
-    os.remove(iss_telemetry_db_path)
+        # Validate telemetry data
+        validate_telemetry_data(telemetry_data)
 
-if os.path.exists(tdrs_db_path):
-    os.remove(tdrs_db_path)
+        iss_telemetry_db_path = get_db_path('iss_telemetry.db')
+        tdrs_db_path = get_db_path('tdrs.db')
+        vv_db_path = get_db_path('vv.db')
 
-# Create the VV database and table
-create_vv_database(vv_db_path, 'vv')
+        log_info(f"Database paths resolved:")
+        log_info(f"  ISS Telemetry: {iss_telemetry_db_path}")
+        log_info(f"  TDRS: {tdrs_db_path}")
+        log_info(f"  VV: {vv_db_path}")
 
-# Create the TDRS database and table
-create_tdrs_database(tdrs_db_path, 'tdrs')
+        # Remove any existing databases at startup
+        for db_path, db_name in [(iss_telemetry_db_path, 'ISS telemetry'), (tdrs_db_path, 'TDRS')]:
+            if os.path.exists(db_path):
+                try:
+                    os.remove(db_path)
+                    log_info(f"Removed existing {db_name} database")
+                except OSError as e:
+                    log_error(f"Error removing existing {db_name} database: {e}")
+                    raise
 
-# Create the ISS telemetry database and table
-create_iss_telemetry_database(iss_telemetry_db_path, 'telemetry', telemetry_data)
+        # Create the VV database and table
+        log_info("Starting VV database creation...")
+        create_vv_database(vv_db_path, 'vv')
+
+        # Create the TDRS database and table
+        log_info("Starting TDRS database creation...")
+        create_tdrs_database(tdrs_db_path, 'tdrs')
+
+        # Create the ISS telemetry database and table
+        log_info("Starting ISS telemetry database creation...")
+        create_iss_telemetry_database(iss_telemetry_db_path, 'telemetry', telemetry_data)
+
+        log_info("All databases initialized successfully!")
+        
+        # Verify databases were created
+        for db_path, db_name in [(iss_telemetry_db_path, 'ISS telemetry'), (tdrs_db_path, 'TDRS'), (vv_db_path, 'VV')]:
+            if not os.path.exists(db_path):
+                raise FileNotFoundError(f"Database {db_name} was not created at {db_path}")
+            log_info(f"Verified {db_name} database exists at {db_path}")
+            
+    except Exception as e:
+        log_error(f"Database initialization failed: {e}")
+        raise
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as e:
+        log_error(f"Fatal error during database initialization: {e}")
+        import traceback
+        traceback.print_exc()
+        exit(1)
