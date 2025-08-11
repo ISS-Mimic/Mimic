@@ -191,11 +191,6 @@ class ISS_Screen(MimicBase):
         """Select a module and update the display."""
         self.selected_module = mod_name
         
-        # Update app's current module
-        app = self.get_running_app()
-        if hasattr(app, 'current_module'):
-            app.current_module = mod_name
-
         log_info(f"ISS Screen: selected -> {mod_name}")
 
         # Serial write the module name to the arduino

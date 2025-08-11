@@ -12,7 +12,8 @@ from kivy.clock import Clock
 from kivy.app import App
 
 from ._base import MimicBase            # gives mimic_directory + signalcolor
-from utils.serial import log_info, log_error   # if you re-exported these; else import logging
+from utils.logger import log_info, log_error   # if you re-exported these; else import logging
+from utils.serial import serialWrite
 
 # ── load KV next to this file ──────────────────────────────────────────────
 kv_path = pathlib.Path(__file__).with_name("Playback_Screen.kv")
