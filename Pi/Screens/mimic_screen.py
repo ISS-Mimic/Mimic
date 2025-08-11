@@ -17,6 +17,7 @@ kv_path = pathlib.Path(__file__).with_name("MimicScreen.kv")
 Builder.load_file(str(kv_path))
 
 class MimicScreen(MimicBase):
+    log_info("MimicScreen loaded")
     """
     Live ISS telemetry hub.
     Starts / stops iss_telemetry.py and TDRScheck.py, toggled by a
