@@ -1,6 +1,7 @@
 from os import environ
 from twisted.internet.defer import inlineCallbacks
 from autobahn.twisted.wamp import ApplicationSession, ApplicationRunner
+from twisted.internet import reactor
 import sqlite3
 from utils.logger import log_info, log_error
 
@@ -63,6 +64,7 @@ class Component(ApplicationSession):
     def onConnect(self):
         """Called when the client connects to the WAMP router."""
         log_info("Connected to WAMP router")
+        log_info("Attempting to join WAMP session...")
         
     def onDisconnect(self):
         """Called when the client disconnects from the WAMP router."""
@@ -72,10 +74,19 @@ class Component(ApplicationSession):
         """Called when the connection to the WAMP router fails."""
         log_error(f"Failed to connect to WAMP router: {reason}")
         
+    def onChallenge(self, challenge):
+        """Called when the server sends a challenge for authentication."""
+        log_info(f"Received authentication challenge: {challenge}")
+        
+    def onWelcome(self, details):
+        """Called when the server welcomes the client."""
+        log_info(f"Server welcome details: {details}")
+        
     @inlineCallbacks
     def onJoin(self, details):
         """Handles joining the WAMP session."""
         log_info(f"Successfully joined WAMP session: {details}")
+        log_info("Now setting up message subscription...")
 
         def onevent(msg):
             """Processes incoming messages and updates the database."""
@@ -101,6 +112,7 @@ class Component(ApplicationSession):
         try:
             yield self.subscribe(onevent, u'gov.nasa.gsfc.scan_now.sn.activity')
             log_info("Successfully subscribed to TDRS activity channel")
+            log_info("TDRS monitoring is now active and waiting for messages...")
         except Exception as e:
             log_error(f"Failed to subscribe to TDRS activity channel: {e}")
             import traceback
@@ -121,6 +133,15 @@ if __name__ == '__main__':
         log_info(f"Connecting to WAMP router: {url}")
         log_info(f"WAMP realm: {realm}")
 
+        # Add connection timeout
+        def connection_timeout():
+            log_error("Connection timeout - WAMP router not responding or session join failed")
+            log_error("This could indicate authentication issues or network problems")
+            reactor.stop()
+        
+        # Set a longer timeout since WAMP connections can take time
+        reactor.callLater(60, connection_timeout)  # 60 second timeout
+        
         runner = ApplicationRunner(url, realm)
         log_info("Starting WAMP application runner")
         runner.run(Component)
