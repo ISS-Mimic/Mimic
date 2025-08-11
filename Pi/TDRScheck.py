@@ -18,26 +18,30 @@ if not tdrs_db_path.parent.exists():
     tdrs_db_path.parent.mkdir(exist_ok=True)
     log_info(f"Created fallback directory: {tdrs_db_path.parent}")
 
-log_info(f"Connecting to TDRS database at: {tdrs_db_path}")
+log_info(f"TDRS database path: {tdrs_db_path}")
 
-try:
-    conn = sqlite3.connect(str(tdrs_db_path), isolation_level=None)
-    c = conn.cursor()
-    log_info("Successfully connected to TDRS database")
+def initialize_database():
+    """Initialize the TDRS database table."""
+    try:
+        log_info("Initializing TDRS database table")
+        conn = sqlite3.connect(str(tdrs_db_path), isolation_level=None)
+        c = conn.cursor()
+        
+        c.execute("CREATE TABLE IF NOT EXISTS tdrs (TDRS1 TEXT, TDRS2 TEXT, Timestamp TEXT)")
+        c.execute("INSERT OR IGNORE INTO tdrs VALUES(?, ?, ?)", ('0', '0', '0'))
+        conn.commit()
+        conn.close()
+        log_info("TDRS database initialized successfully")
+        
+    except sqlite3.Error as e:
+        log_error(f"SQLite error during database initialization: {e}")
+        raise
+    except Exception as e:
+        log_error(f"Unexpected error during database initialization: {e}")
+        raise
 
-    # Initialize database if it doesn't exist
-    log_info("Initializing TDRS database table")
-    c.execute("CREATE TABLE IF NOT EXISTS tdrs (TDRS1 TEXT, TDRS2 TEXT, Timestamp TEXT)")
-    c.execute("INSERT OR IGNORE INTO tdrs VALUES(?, ?, ?)", ('0', '0', '0'))
-    conn.commit()
-    log_info("TDRS database initialized successfully")
-    
-except sqlite3.Error as e:
-    log_error(f"SQLite error during database initialization: {e}")
-    raise
-except Exception as e:
-    log_error(f"Unexpected error during database initialization: {e}")
-    raise
+# Initialize the database at startup
+initialize_database()
 
 
 def update_active_tdrs(msg, tdrs_id, active_tdrs):
@@ -86,11 +90,15 @@ def update_database(active_tdrs, timestamp):
     try:
         log_info(f"Updating database with active TDRS: {active_tdrs}, timestamp: {timestamp}")
         
+        conn = sqlite3.connect(str(tdrs_db_path), isolation_level=None)
+        c = conn.cursor()
+        
         c.execute("UPDATE tdrs SET TDRS1 = ?", (active_tdrs[0],))
         c.execute("UPDATE tdrs SET TDRS2 = ?", (active_tdrs[1],))
         c.execute("UPDATE tdrs SET Timestamp = ?", (timestamp,))
         
         conn.commit()
+        conn.close()
         log_info("Database updated successfully")
         
     except sqlite3.Error as e:
@@ -142,15 +150,6 @@ class Component(ApplicationSession):
         log_info("Successfully subscribed to TDRS activity channel")
 
 
-def cleanup_database():
-    """Clean up database connection."""
-    try:
-        if 'conn' in globals() and conn:
-            conn.close()
-            log_info("Database connection closed")
-    except Exception as e:
-        log_error(f"Error closing database connection: {e}")
-
 if __name__ == '__main__':
     try:
         import six
@@ -173,6 +172,4 @@ if __name__ == '__main__':
         log_error(f"Fatal error in TDRS check application: {e}")
         import traceback
         traceback.print_exc()
-    finally:
-        cleanup_database()
         exit(1)
