@@ -3,17 +3,13 @@
 from datetime import datetime, timedelta, timezone
 import sqlite3
 import os.path as op #use for getting mimic directory
-
-from utils import log_info, log_error
+from utils.logger import log_info, log_error
 
 from lightstreamer.client import LightstreamerClient, ConsoleLoggerProvider, ConsoleLogLevel, Subscription
-
 
 from telemetry_ids import IDENTIFIERS
 
 mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-
-
 
 log_info("Initialized Telemetry Log")
 

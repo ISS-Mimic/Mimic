@@ -184,13 +184,21 @@ def parse_tty_name(device, val):
 
 def get_tty_dev_names(context):
     """ Checks ID_VENDOR string of tty devices to identify Arduinos. """
+    if not PYUDEV_AVAILABLE:
+        # Return empty list on Windows where pyudev is not available
+        return []
+    
     names = []
-    devices = context.list_devices(subsystem='tty')
-    for d in devices:
-        for k, v in d.items():
-            # Check for both ID_VENDOR and ID_USB_VENDOR
-            if k in ['ID_VENDOR', 'ID_USB_VENDOR']:
-                names.append(parse_tty_name(d, v))
+    try:
+        devices = context.list_devices(subsystem='tty')
+        for d in devices:
+            for k, v in d.items():
+                # Check for both ID_VENDOR and ID_USB_VENDOR
+                if k in ['ID_VENDOR', 'ID_USB_VENDOR']:
+                    names.append(parse_tty_name(d, v))
+    except Exception as e:
+        print(f"Warning: Could not enumerate TTY devices: {e}")
+        return []
     return names
         
 def get_config_data():
@@ -233,9 +241,20 @@ else:
 
 SERIAL_PORTS = get_serial_ports(context, USE_CONFIG_JSON)
 OPEN_SERIAL_PORTS = []
-open_serial_ports(SERIAL_PORTS)
-log_str = "Serial ports opened: %s" % str(SERIAL_PORTS)
-log_info(log_str)
+
+# Only try to open serial ports if we have any
+if SERIAL_PORTS:
+    try:
+        open_serial_ports(SERIAL_PORTS)
+        log_str = "Serial ports opened: " + str(SERIAL_PORTS)
+        log_info(log_str)
+    except Exception as e:
+        log_error(f"Could not open serial ports: {e}")
+        SERIAL_PORTS = []
+        OPEN_SERIAL_PORTS = []
+else:
+    log_info("No serial ports available (this is normal on Windows)")
+
 if not USE_CONFIG_JSON and PYUDEV_AVAILABLE and TTY_OBSERVER:
     TTY_OBSERVER.start()
     log_str = "Started monitoring serial ports."
@@ -349,26 +368,72 @@ class MainApp(App):
         mimicbutton = value
 
     def build(self):
-        # 1. instantiate once, store in a dict
-        self.screens = {sid: cls(name=sid) for sid, cls in SCREEN_DEFS.items()}
+        try:
+            log_info("Starting build process...")
+            # 1. instantiate once, store in a dict
+            log_info("Creating screens...")
+            self.screens = {}
+            for sid, cls in SCREEN_DEFS.items():
+                try:
+                    log_info(f"Creating screen: {sid}")
+                    screen = cls(name=sid)
+                    self.screens[sid] = screen
+                    log_info(f"Successfully created screen: {sid}")
+                except Exception as e:
+                    log_error(f"Error creating screen {sid}: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    # Continue with other screens instead of crashing
+                    continue
+            log_info(f"Created {len(self.screens)} screens")
 
-        # 2. ScreenManager wiring
-        root = MainScreenManager(transition=NoTransition())
-        for scr in self.screens.values():
-            root.add_widget(scr)
-        root.current = "main"
+            # 2. ScreenManager wiring
+            log_info("Creating screen manager...")
+            root = MainScreenManager(transition=NoTransition())
+            log_info("Adding screens to manager...")
+            for sid, scr in self.screens.items():
+                try:
+                    log_info(f"Adding screen {sid} to manager...")
+                    root.add_widget(scr)
+                    log_info(f"Successfully added screen {sid} to manager")
+                except Exception as e:
+                    log_error(f"Error adding screen {sid} to manager: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    # Continue with other screens instead of crashing
+                    continue
+            log_info("All screens added")
+            
+            if not self.screens:
+                log_error("No screens were created successfully!")
+                raise Exception("No screens available")
+                
+            root.current = "main"
+            log_info("Set current screen to main")
 
-        Clock.schedule_interval(self.update_labels, 1) #all telemetry wil refresh and get pushed to arduinos every half second!
-        Clock.schedule_interval(self.animate3, 0.1)
-        #Clock.schedule_interval(self.checkCrew, 600) #disabling for now issue #407
-        #Clock.schedule_once(self.checkCrew, 30) #disabling for now issue #407
+            log_info("Scheduling update functions...")
+            Clock.schedule_interval(self.update_labels, 1) #all telemetry wil refresh and get pushed to arduinos every half second!
+            Clock.schedule_interval(self.animate3, 0.1)
+            #Clock.schedule_interval(self.checkCrew, 600) #disabling for now issue #407
+            #Clock.schedule_once(self.checkCrew, 30) #disabling for now issue #407
 
-        Clock.schedule_interval(self._schedule_internet_probe,
-                                self.INTERNET_POLL_S) # check for active internet connection
+            Clock.schedule_interval(self._schedule_internet_probe,
+                                    self.INTERNET_POLL_S) # check for active internet connection
 
-        Clock.schedule_interval(self.updateArduinoCount, 5)
+            Clock.schedule_interval(self.updateArduinoCount, 5)
+            log_info("All functions scheduled")
 
-        return root
+            log_info("Build process completed successfully")
+            return root
+            
+        except Exception as e:
+            log_error(f"Error during build: {e}")
+            import traceback
+            traceback.print_exc()
+            # Return a simple error screen instead of crashing
+            from kivy.uix.label import Label
+            error_label = Label(text=f'Error loading application:\n{str(e)}')
+            return error_label
 
     def _schedule_internet_probe(self, _dt) -> None:
         # Callbacks run async; keep lambda tiny.
@@ -849,4 +914,21 @@ class MainApp(App):
             serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + str(v1as) + " " + "V2A=" + str(v2as) + " " + "V3A=" + str(v3as) + " " + "V4A=" + str(v4as) + " " + "V1B=" + str(v1bs) + " " + "V2B=" + str(v2bs) + " " + "V3B=" + str(v3bs) + " " + "V4B=" + str(v4bs) + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
 
 if __name__ == '__main__':
-    MainApp().run()
+    try:
+        log_info("Starting ISS Mimic Program")
+        log_info("Mimic Program Directory: " + mimic_directory + "/Mimic/Pi")
+        log_info("Mimic Data Directory: " + str(mimic_data_directory))
+        
+        # Create the app and run it
+        app = MainApp()
+        log_info("MainApp created successfully")
+        app.run()
+        log_info("Application finished normally")
+        
+    except Exception as e:
+        log_error(f"Fatal error during startup: {e}")
+        import traceback
+        traceback.print_exc()
+        
+        # Keep the console open so the user can see the error
+        input("Press Enter to exit...")
