@@ -4,14 +4,15 @@
         AsyncImage:
             id: EVAimage
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/EVA_Image1.jpg'
-            fit_mode: "contain"
+            fit_mode: "scale-down"
+            size_hintY: 0.7
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
             opacity: 1.0
         Button:
             size_hint: 0.1,0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
-            on_release: app.root.current = 'ct'
+            on_release: app.root.current = 'us_eva'
         Image:
             id: signal
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
