@@ -23,17 +23,17 @@ args = parse_arguments()
 
 if args.debug or args.verbose:
     os.environ['MIMIC_LOG_LEVEL'] = 'INFO'
-    print("Debug logging enabled - INFO level and above will be logged")
+    #print("Debug logging enabled - INFO level and above will be logged")
 elif args.quiet:
     os.environ['MIMIC_LOG_LEVEL'] = 'CRITICAL'
-    print("Quiet mode enabled - only critical errors will be logged")
+    #print("Quiet mode enabled - only critical errors will be logged")
 else:
     os.environ['MIMIC_LOG_LEVEL'] = 'ERROR'
-    print("Normal mode - ERROR level and above will be logged")
+    #print("Normal mode - ERROR level and above will be logged")
 
 if args.console_logging:
     os.environ['MIMIC_CONSOLE_LOGGING'] = '1'
-    print("Console logging enabled")
+    #print("Console logging enabled")
 
 # Now import the rest of the modules
 import os.path as op
@@ -123,10 +123,6 @@ from utils.logger import log_info, log_error
 
 mimic_data_directory = Path.home() / '.mimic_data'
 mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
-
-print("Starting ISS Mimic Program")
-print("Mimic Program Directory: " + mimic_directory + "/Mimic/Pi")
-print("Mimic Data Directory: " + str(mimic_data_directory))
 
 # Constants
 SERIAL_SPEED = 9600
@@ -235,7 +231,7 @@ def get_tty_dev_names(context):
                 if k in ['ID_VENDOR', 'ID_USB_VENDOR']:
                     names.append(parse_tty_name(d, v))
     except Exception as e:
-        print(f"Warning: Could not enumerate TTY devices: {e}")
+        log_error(f"Warning: Could not enumerate TTY devices: {e}")
         return []
     return names
         
@@ -960,6 +956,8 @@ if __name__ == '__main__':
         print(f"Logging Level: {log_level}")
         print(f"Console Logging: {'Enabled' if console_enabled else 'Disabled'}")
         print(f"Log File: ~/Mimic/Pi/Logs/mimic.log")
+        print("Mimic Program Directory: " + mimic_directory + "/Mimic/Pi")
+        print("Mimic Data Directory: " + str(mimic_data_directory))
         print(f"=====================")
         
         log_info("Starting ISS Mimic Program")
