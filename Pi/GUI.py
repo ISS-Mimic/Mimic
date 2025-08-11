@@ -224,102 +224,6 @@ c = conn.cursor()
 def staleTelemetry():
     c.execute("UPDATE telemetry SET Value = 'Unsubscribed' where Label = 'Lightstreamer'")
 #----------------------------------Variables---------------------------------------------
-LS_Subscription = False
-isslocationsuccess = False
-testfactor = -1
-crew_mention= False
-mimicbutton = False
-playbackboolean = False
-demoboolean = False
-switchtofake = False
-isscrew = 0
-val = ""
-tdrs1 = 0
-tdrs2 = 0
-tdrs_timestamp = 0
-lastsignal = 0
-testvalue = 0
-obtained_EVA_crew = False
-unixconvert = time.gmtime(time.time())
-EVAstartTime = float(unixconvert[7])*24+unixconvert[3]+float(unixconvert[4])/60+float(unixconvert[5])/3600
-alternate = True
-startingAnim = True
-runningDemo = False
-oldtdrs = "n/a"
-logged = False
-mt_speed = 0.00
-
-sizeX = 0.00
-sizeY = 0.00
-psarj2 = 1.0
-ssarj2 = 1.0
-new_x = 0
-new_y = 0
-new_x2 = 0
-new_y2 = 0
-aos = 0.00
-los = 0.00
-
-seconds2 = 260
-oldLOS = 0.00
-psarjmc = 0.00
-ssarjmc = 0.00
-ptrrjmc = 0.00
-strrjmc = 0.00
-beta1bmc = 0.00
-beta1amc = 0.00
-beta2bmc = 0.00
-beta2amc = 0.00
-beta3bmc = 0.00
-beta3amc = 0.00
-beta4bmc = 0.00
-beta4amc = 0.00
-US_EVAinProgress = False
-leak_hold = False
-firstcrossing = True
-oldAirlockPump = 0.00
-position_x = 0.00
-position_y = 0.00
-position_z = 0.00
-velocity_x = 0.00
-velocity_y = 0.00
-velocity_z = 0.00
-velocity = 0.00
-altitude = 0.00
-mass = 0.00
-crewlockpres = 758
-EVA_activities = False
-repress = False
-depress = False
-seconds = 0
-minutes = 0
-hours = 0
-leak_hold = False
-EV1 = ""
-EV2 = ""
-numEVAs1 = ""
-EVAtime_hours1 = ""
-EVAtime_minutes1 = ""
-numEVAs2 = ""
-EVAtime_hours2 = ""
-EVAtime_minutes2 = ""
-holdstartTime = float(unixconvert[7])*24+unixconvert[3]+float(unixconvert[4])/60+float(unixconvert[5])/3600
-eva = False
-standby = False
-prebreath1 = False
-prebreath2 = False
-depress1 = False
-depress2 = False
-leakhold = False
-repress = False
-ISS_TLE_Acquired = False
-stationmode = 0.00
-tdrs = ""
-EVA_picture_urls = []
-urlindex = 0
-module = ""
-old_mt_timestamp = 0.00
-old_mt_position = 0.00
 
 SCREEN_DEFS = {
     "main":            screens.MainScreen,
@@ -648,11 +552,7 @@ class MainApp(App):
 
 
     def update_labels(self, dt): #THIS IS THE IMPORTANT FUNCTION
-        global mimicbutton, switchtofake, demoboolean, runningDemo, playbackboolean, psarj2, ssarj2, aos, los, oldLOS, psarjmc, ssarjmc, ptrrjmc, strrjmc, beta1bmc, beta1amc, beta2bmc, beta2amc, beta3bmc, beta3amc, beta4bmc, beta4amc, US_EVAinProgress, position_x, position_y, position_z, velocity_x, velocity_y, velocity_z, testvalue, testfactor, airlock_pump, crewlockpres, leak_hold, firstcrossing, EVA_activities, repress, depress, oldAirlockPump, obtained_EVA_crew, EVAstartTime
-        global holdstartTime, LS_Subscription
-        global Disco, eva, standby, prebreath1, prebreath2, depress1, depress2, leakhold, repress
-        global tdrs, module
-        global old_mt_timestamp, old_mt_position, mt_speed
+        global mimicbutton, demoboolean, runningDemo, Disco
 
         if runningDemo:
             self.screens["playback"].ids.DemoStart.disabled = True
@@ -672,61 +572,17 @@ class MainApp(App):
         client_status = str((values[256])[0]) #lightstreamer client checker
 
         psarj = "{:.2f}".format(float((values[0])[0]))
-        if not switchtofake:
-            psarj2 = float(psarj)
-        if not App.get_running_app().manual_control:
-            psarjmc = float(psarj)
         ssarj = "{:.2f}".format(float((values[1])[0]))
-        if not switchtofake:
-            ssarj2 = float(ssarj)
-        if not App.get_running_app().manual_control:
-            ssarjmc = float(ssarj)
         ptrrj = "{:.2f}".format(float((values[2])[0]))
-        if not App.get_running_app().manual_control:
-            ptrrjmc = float(ptrrj)
         strrj = "{:.2f}".format(float((values[3])[0]))
-        if not App.get_running_app().manual_control:
-            strrjmc = float(strrj)
         beta1b = "{:.2f}".format(float((values[4])[0]))
-        if not switchtofake:
-            beta1b2 = float(beta1b)
-        if not App.get_running_app().manual_control:
-            beta1bmc = float(beta1b)
         beta1a = "{:.2f}".format(float((values[5])[0]))
-        if not switchtofake:
-            beta1a2 = float(beta1a)
-        if not App.get_running_app().manual_control:
-            beta1amc = float(beta1a)
         beta2b = "{:.2f}".format(float((values[6])[0]))
-        if not switchtofake:
-            beta2b2 = float(beta2b) #+ 20.00
-        if not App.get_running_app().manual_control:
-            beta2bmc = float(beta2b)
         beta2a = "{:.2f}".format(float((values[7])[0]))
-        if not switchtofake:
-            beta2a2 = float(beta2a)
-        if not App.get_running_app().manual_control:
-            beta2amc = float(beta2a)
         beta3b = "{:.2f}".format(float((values[8])[0]))
-        if not switchtofake:
-            beta3b2 = float(beta3b)
-        if not App.get_running_app().manual_control:
-            beta3bmc = float(beta3b)
         beta3a = "{:.2f}".format(float((values[9])[0]))
-        if not switchtofake:
-            beta3a2 = float(beta3a)
-        if not App.get_running_app().manual_control:
-            beta3amc = float(beta3a)
         beta4b = "{:.2f}".format(float((values[10])[0]))
-        if not switchtofake:
-            beta4b2 = float(beta4b)
-        if not App.get_running_app().manual_control:
-            beta4bmc = float(beta4b)
         beta4a = "{:.2f}".format(float((values[11])[0]))
-        if not switchtofake:
-            beta4a2 = float(beta4a) #+ 20.00
-        if not App.get_running_app().manual_control:
-            beta4amc = float(beta4a)
 
         aos = "{:.2f}".format(int((values[12])[0]))
         los = "{:.2f}".format(int((values[13])[0]))
@@ -739,10 +595,6 @@ class MainApp(App):
             sasa_xmit = True
         else:
             sasa_xmit = False
-
-
-        # Station mode logic moved to ISS_Screen
-
 
         #Crew Screen Stuff
         
@@ -804,24 +656,7 @@ class MainApp(App):
         #ISS altitude too low
         #Russion hook status - make sure all modules remain docked
 
-        # ISS mass logic moved to ISS_Screen
 
-
-#        if (difference > -10) and (isinstance(App.get_running_app().root_window.children[0], Popup)==False):
-#            LOSpopup = Popup(title='Loss of Signal', content=Label(text='Possible LOS Soon'), size_hint=(0.3, 0.2), auto_dismiss=True)
-#            LOSpopup.open()
-
-        ##-------------------Fake Orbit Simulator-------------------##
-        #self.screens["playback"].ids.psarj.text = str(psarj)
-        #self.screens["playback"].ids.ssarj.text = str(ssarj)
-        #self.screens["playback"].ids.beta1a.text = str(beta1a)
-        #self.screens["playback"].ids.beta1b.text = str(beta1b)
-        #self.screens["playback"].ids.beta2a.text = str(beta2a)
-        #self.screens["playback"].ids.beta2b.text = str(beta2b)
-        #self.screens["playback"].ids.beta3a.text = str(beta3a)
-        #self.screens["playback"].ids.beta3b.text = str(beta3b)
-        #self.screens["playback"].ids.beta4a.text = str(beta4a)
-        #self.screens["playback"].ids.beta4b.text = str(beta4b)
 
         #initialize array statuses to discharge
         v1as = 1
@@ -936,7 +771,7 @@ class MainApp(App):
             if Disco:
                 serialWrite("Disco ")
                 Disco = False
-            serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + str(v1as) + " " + "V2A=" + str(v2as) + " " + "V3A=" + str(v3as) + " " + "V4A=" + str(v4as) + " " + "V1B=" + str(v1bs) + " " + "V2B=" + str(v2bs) + " " + "V3B=" + str(v3bs) + " " + "V4B=" + str(v4bs) + " " + "ISS=" + module + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
+            serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + str(v1as) + " " + "V2A=" + str(v2as) + " " + "V3A=" + str(v3as) + " " + "V4A=" + str(v4as) + " " + "V1B=" + str(v1bs) + " " + "V2B=" + str(v2bs) + " " + "V3B=" + str(v3bs) + " " + "V4B=" + str(v4bs) + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
 
         
         #UHF telemetry updates now handled in CT_UHF_Screen
@@ -960,11 +795,10 @@ class MainApp(App):
                sasa_xmit = 0
         else:
             self.signal_unsubscribed()
-        #else:
-        #    self.signal_unsubscribed()
+
 
         if mimicbutton: # and float(aos) == 1.00):
-            serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + str(v1as) + " " + "V2A=" + str(v2as) + " " + "V3A=" + str(v3as) + " " + "V4A=" + str(v4as) + " " + "V1B=" + str(v1bs) + " " + "V2B=" + str(v2bs) + " " + "V3B=" + str(v3bs) + " " + "V4B=" + str(v4bs) + " " + "ISS=" + module + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
+            serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + str(v1as) + " " + "V2A=" + str(v2as) + " " + "V3A=" + str(v3as) + " " + "V4A=" + str(v4as) + " " + "V1B=" + str(v1bs) + " " + "V2B=" + str(v2bs) + " " + "V3B=" + str(v3bs) + " " + "V4B=" + str(v4bs) + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
 
 if __name__ == '__main__':
     MainApp().run()
