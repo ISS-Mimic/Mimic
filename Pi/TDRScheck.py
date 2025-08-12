@@ -1,7 +1,6 @@
 from os import environ
 from twisted.internet.defer import inlineCallbacks
 from autobahn.twisted.wamp import ApplicationSession, ApplicationRunner
-from twisted.internet import reactor
 import sqlite3
 from utils.logger import log_info, log_error
 
@@ -19,26 +18,16 @@ def update_active_tdrs(msg, tdrs_id, active_tdrs):
     :param active_tdrs: The current list of active TDRS IDs.
     :return: Updated timestamp if found, otherwise None.
     """
-    try:
-        tdrs_key = f'TDRS-{tdrs_id}'
-        tdrs_data = msg.get(tdrs_key, {}).get('connected', {}).get('ISS')
-        if tdrs_data:
-            timestamp = tdrs_data.get('Time_Tag', 0)
-            if active_tdrs[0] == 0:
-                active_tdrs[0] = tdrs_id
-                log_info(f"TDRS-{tdrs_id} assigned to slot 1")
-            elif active_tdrs[1] == 0:
-                active_tdrs[1] = tdrs_id
-                log_info(f"TDRS-{tdrs_id} assigned to slot 2")
-            else:
-                log_info(f"TDRS-{tdrs_id} is connected but no available slots")
-            return timestamp
-        else:
-            log_info(f"TDRS-{tdrs_id} is not connected to ISS")
-            return None
-    except Exception as e:
-        log_error(f"Error in update_active_tdrs for TDRS-{tdrs_id}: {e}")
-        return None
+    tdrs_key = f'TDRS-{tdrs_id}'
+    tdrs_data = msg.get(tdrs_key, {}).get('connected', {}).get('ISS')
+    if tdrs_data:
+        timestamp = tdrs_data.get('Time_Tag', 0)
+        if active_tdrs[0] == 0:
+            active_tdrs[0] = tdrs_id
+        elif active_tdrs[1] == 0:
+            active_tdrs[1] = tdrs_id
+        return timestamp
+    return None
 
 
 def update_database(active_tdrs, timestamp):
@@ -61,45 +50,15 @@ def update_database(active_tdrs, timestamp):
 
 
 class Component(ApplicationSession):
-    def onConnect(self):
-        """Called when the client connects to the WAMP router."""
-        log_info("Connected to WAMP router")
-        log_info("Attempting to join WAMP session...")
-        
-    def onDisconnect(self):
-        """Called when the client disconnects from the WAMP router."""
-        log_info("Disconnected from WAMP router")
-        
-    def onConnectFailure(self, reason):
-        """Called when the connection to the WAMP router fails."""
-        log_error(f"Failed to connect to WAMP router: {reason}")
-        
-    def onChallenge(self, challenge):
-        """Called when the server sends a challenge for authentication."""
-        log_info(f"Received authentication challenge: {challenge}")
-        
-    def onWelcome(self, details):
-        """Called when the server welcomes the client."""
-        log_info(f"Server welcome details: {details}")
-        
-    def onLeave(self, details):
-        """Called when the client leaves the session."""
-        log_info(f"Left WAMP session: {details}")
-        
-    def onClose(self, wasClean):
-        """Called when the connection is closed."""
-        log_info(f"WAMP connection closed, wasClean: {wasClean}")
-        
     @inlineCallbacks
     def onJoin(self, details):
         """Handles joining the WAMP session."""
-        log_info(f"Successfully joined WAMP session: {details}")
-        log_info("Now setting up message subscription...")
+        log_info(f"Successfully joined WAMP session")
 
         def onevent(msg):
             """Processes incoming messages and updates the database."""
             try:
-                log_info(f"Received message: {type(msg)}")
+                log_info(f"Received TDRS message")
                 active_tdrs = [0, 0]
                 timestamp = 0
 
@@ -117,14 +76,8 @@ class Component(ApplicationSession):
                 traceback.print_exc()
 
         log_info("Subscribing to TDRS activity channel")
-        try:
-            yield self.subscribe(onevent, u'gov.nasa.gsfc.scan_now.sn.activity')
-            log_info("Successfully subscribed to TDRS activity channel")
-            log_info("TDRS monitoring is now active and waiting for messages...")
-        except Exception as e:
-            log_error(f"Failed to subscribe to TDRS activity channel: {e}")
-            import traceback
-            traceback.print_exc()
+        yield self.subscribe(onevent, u'gov.nasa.gsfc.scan_now.sn.activity')
+        log_info("Successfully subscribed to TDRS activity channel")
 
 
 if __name__ == '__main__':
@@ -141,23 +94,8 @@ if __name__ == '__main__':
         log_info(f"Connecting to WAMP router: {url}")
         log_info(f"WAMP realm: {realm}")
 
-        # Add connection timeout
-        def connection_timeout():
-            log_error("Connection timeout - WAMP router not responding or session join failed")
-            log_error("This could indicate authentication issues or network problems")
-            reactor.stop()
-        
-        # Set a longer timeout since WAMP connections can take time
-        reactor.callLater(60, connection_timeout)  # 60 second timeout
-        
-        # Try with explicit authentication parameters
-        extra = {
-            'authid': 'mimic_client',
-            'authrole': 'anonymous'
-        }
-        
-        runner = ApplicationRunner(url, realm, extra=extra)
-        log_info("Starting WAMP application runner with auth parameters")
+        runner = ApplicationRunner(url, realm)
+        log_info("Starting WAMP application runner")
         runner.run(Component)
         
     except Exception as e:
