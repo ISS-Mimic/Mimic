@@ -18,21 +18,13 @@
         pos_hint: {"center_x": 0.4, "center_y": 0.88}
         color: 0, 1, 0, 1
         
-    # Help button
-    Button:
-        text: '?'
-        font_size: '18sp'
-        size_hint: 0.05, 0.05
-        pos_hint: {"center_x": 0.8, "center_y": 0.88}
-        background_color: 0.3, 0.3, 0.8, 1
-        on_release: root.show_help()
     
     # ===== COLOR SELECTOR SECTION =====
     Label:
         text: 'Select Color'
         font_size: '18sp'
         size_hint: 0.8, 0.05
-        pos_hint: {"center_x": 0.5, "center_y": 0.8}
+        pos_hint: {"center_x": 0.5, "center_y": 0.815 }
         color: 1, 1, 0, 1
         
     # Color Grid (4x4 layout)
@@ -187,46 +179,6 @@
             on_release: root.test_solar_array('4b')
             background_color: 0.2, 0.6, 1, 1
     
-    # ===== PATTERNS SECTION =====
-    Label:
-        text: 'Patterns'
-        font_size: '18sp'
-        size_hint: 0.8, 0.05
-        pos_hint: {"center_x": 0.5, "center_y": 0.42}
-        color: 1, 1, 0, 1
-        
-    # Pattern Grid
-    GridLayout:
-        cols: 4
-        rows: 1
-        size_hint: 0.8, 0.08
-        pos_hint: {"center_x": 0.5, "center_y": 0.36}
-        spacing: '10dp'
-        padding: '5dp'
-        
-        Button:
-            text: 'Rainbow'
-            size_hint: 1, 1
-            on_release: root.test_rainbow_pattern()
-            background_color: 1, 0.3, 0.8, 1
-            
-        Button:
-            text: 'Alternating'
-            size_hint: 1, 1
-            on_release: root.test_alternating_pattern()
-            background_color: 0.8, 0.3, 1, 1
-            
-        Button:
-            text: 'Red Alert'
-            size_hint: 1, 1
-            on_release: root.test_red_alert_pattern()
-            background_color: 1, 0, 0, 1
-            
-        Button:
-            text: 'Blue Pattern'
-            size_hint: 1, 1
-            on_release: root.test_blue_pattern()
-            background_color: 0, 0, 1, 1
     
     # ===== ANIMATIONS SECTION =====
     Label:
@@ -279,7 +231,7 @@
         
     # Special Functions Grid
     GridLayout:
-        cols: 4
+        cols: 3
         rows: 1
         size_hint: 0.8, 0.08
         pos_hint: {"center_x": 0.5, "center_y": 0.08}
@@ -304,11 +256,6 @@
             on_release: root.reset_leds()
             background_color: 1, 0.6, 0.3, 1
             
-        Button:
-            text: 'Help'
-            size_hint: 1, 1
-            on_release: root.show_help()
-            background_color: 0.3, 0.3, 0.8, 1
     
     # Back button
     Button:
