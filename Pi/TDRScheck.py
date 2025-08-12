@@ -82,6 +82,14 @@ class Component(ApplicationSession):
         """Called when the server welcomes the client."""
         log_info(f"Server welcome details: {details}")
         
+    def onLeave(self, details):
+        """Called when the client leaves the session."""
+        log_info(f"Left WAMP session: {details}")
+        
+    def onClose(self, wasClean):
+        """Called when the connection is closed."""
+        log_info(f"WAMP connection closed, wasClean: {wasClean}")
+        
     @inlineCallbacks
     def onJoin(self, details):
         """Handles joining the WAMP session."""
@@ -142,8 +150,14 @@ if __name__ == '__main__':
         # Set a longer timeout since WAMP connections can take time
         reactor.callLater(60, connection_timeout)  # 60 second timeout
         
-        runner = ApplicationRunner(url, realm)
-        log_info("Starting WAMP application runner")
+        # Try with explicit authentication parameters
+        extra = {
+            'authid': 'mimic_client',
+            'authrole': 'anonymous'
+        }
+        
+        runner = ApplicationRunner(url, realm, extra=extra)
+        log_info("Starting WAMP application runner with auth parameters")
         runner.run(Component)
         
     except Exception as e:
