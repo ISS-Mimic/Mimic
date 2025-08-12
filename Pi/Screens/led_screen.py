@@ -117,6 +117,10 @@ class LED_Screen(MimicBase):
         """Test disco animation."""
         self.test_animation("DISCO")
     
+    def test_disco_mode(self):
+        """Test disco mode (alias for disco animation)."""
+        self.test_animation("DISCO")
+    
     def stop_animations(self):
         """Stop all running animations."""
         try:
@@ -129,6 +133,17 @@ class LED_Screen(MimicBase):
             log_error(f"LED Screen: Error stopping animations: {e}")
     
     # ===== SPECIAL FUNCTIONS =====
+    def light_everything(self):
+        """Turn on all LEDs to current color."""
+        try:
+            command = f"LED_ALL={self._current_color}"
+            log_info(f"LED Screen: Lighting everything {self._current_color}: {command}")
+            serialWrite(command)
+            self._current_test = f"All LEDs: {self._current_color}"
+            self._start_test_timer()
+        except Exception as e:
+            log_error(f"LED Screen: Error lighting everything: {e}")
+    
     def turn_off_all_leds(self):
         """Turn off all LEDs."""
         try:
@@ -139,6 +154,10 @@ class LED_Screen(MimicBase):
             self._start_test_timer()
         except Exception as e:
             log_error(f"LED Screen: Error turning off all LEDs: {e}")
+    
+    def turn_off_all(self):
+        """Turn off all LEDs (alias for turn_off_all_leds)."""
+        self.turn_off_all_leds()
     
     def reset_leds(self):
         """Reset all LEDs to default state."""
