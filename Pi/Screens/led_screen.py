@@ -19,9 +19,12 @@ class LED_Screen(MimicBase):
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        # Initialize attributes immediately to avoid KV file errors
         self._test_mode = False
         self._current_test = None
         self._current_color = "White"
+        self._status_event = None
+        log_info("LED Screen: __init__ complete")
         
     def on_enter(self):
         """Called when the screen is entered."""
@@ -98,7 +101,7 @@ class LED_Screen(MimicBase):
             log_info(f"LED Screen: Testing animation {animation_name}: {command}")
             serialWrite(command)
             self._current_test = f"Animation: {animation_name.title()}"
-            # Don't auto-timeout animations - they run continuously
+            self._start_test_timer()
         except Exception as e:
             log_error(f"LED Screen: Error testing animation {animation_name}: {e}")
     
@@ -110,19 +113,12 @@ class LED_Screen(MimicBase):
         """Test chase animation."""
         self.test_animation("CHASE")
     
-    def test_disco_mode(self):
-        """Test disco mode."""
-        try:
-            command = "DISCO"
-            log_info(f"LED Screen: Testing disco mode: {command}")
-            serialWrite(command)
-            self._current_test = "Disco Mode"
-            # Don't auto-timeout disco mode
-        except Exception as e:
-            log_error(f"LED Screen: Error testing disco mode: {e}")
+    def test_disco_animation(self):
+        """Test disco animation."""
+        self.test_animation("DISCO")
     
     def stop_animations(self):
-        """Stop all animations."""
+        """Stop all running animations."""
         try:
             command = "ANIMATE_STOP"
             log_info(f"LED Screen: Stopping animations: {command}")
@@ -133,18 +129,7 @@ class LED_Screen(MimicBase):
             log_error(f"LED Screen: Error stopping animations: {e}")
     
     # ===== SPECIAL FUNCTIONS =====
-    def light_everything(self):
-        """Turn on all LEDs to current color."""
-        try:
-            command = f"LED_ALL={self._current_color}"
-            log_info(f"LED Screen: Lighting everything {self._current_color}: {command}")
-            serialWrite(command)
-            self._current_test = f"All LEDs: {self._current_color}"
-            self._start_test_timer()
-        except Exception as e:
-            log_error(f"LED Screen: Error lighting everything: {e}")
-    
-    def turn_off_all(self):
+    def turn_off_all_leds(self):
         """Turn off all LEDs."""
         try:
             command = "LED_ALL=Off"
@@ -169,8 +154,11 @@ class LED_Screen(MimicBase):
     # ===== UTILITY FUNCTIONS =====
     def _start_test_timer(self):
         """Start a timer to automatically turn off test mode after 5 seconds."""
-        if self._current_test:
-            Clock.schedule_once(self._end_test, 5.0)
+        try:
+            if self._current_test:
+                Clock.schedule_once(self._end_test, 5.0)
+        except Exception as e:
+            log_error(f"LED Screen: Error starting test timer: {e}")
     
     def _end_test(self, dt):
         """End the current test mode."""
@@ -183,9 +171,16 @@ class LED_Screen(MimicBase):
     
     def get_test_status(self) -> str:
         """Get the current test status for display."""
-        if self._current_test:
-            return f"Testing: {self._current_test}"
-        return f"Ready - Color: {self._current_color}"
+        try:
+            # Simple, safe access to attributes
+            if hasattr(self, '_current_test') and self._current_test:
+                return f"Testing: {self._current_test}"
+            if hasattr(self, '_current_color'):
+                return f"Ready - Color: {self._current_color}"
+            return "Initializing..."
+        except Exception as e:
+            log_error(f"LED Screen: Error in get_test_status: {e}")
+            return "Status: Error"
     
     def _update_status(self, dt):
         """Update the test status display."""
@@ -193,7 +188,7 @@ class LED_Screen(MimicBase):
             if hasattr(self, 'ids') and 'test_status' in self.ids:
                 self.ids.test_status.text = self.get_test_status()
                 # Change color based on status
-                if self._current_test:
+                if hasattr(self, '_current_test') and self._current_test:
                     self.ids.test_status.color = (1, 1, 0, 1)  # Yellow when testing
                 else:
                     self.ids.test_status.color = (0, 1, 0, 1)  # Green when ready
