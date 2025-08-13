@@ -96,10 +96,10 @@
             font_size: dp(20)
             bold: True
         
-        # Main Crew Display Area
+        # Main Crew Display Area (Left Side)
         ScrollView:
-            pos_hint: {"center_x": 0.5, "center_y": 0.5}
-            size_hint: 0.8, 0.6
+            pos_hint: {"center_x": 0.35, "center_y": 0.5}
+            size_hint: 0.6, 0.6
             
             GridLayout:
                 id: crew_container
@@ -109,6 +109,49 @@
                 size_hint_y: None
                 height: self.minimum_height
                 # Crew widgets will be added here dynamically
+        
+        # Right Side - Expedition Mission Patch
+        Image:
+            id: expedition_patch
+            pos_hint: {"center_x": 0.8, "center_y": 0.75}
+            size_hint: 0.25, 0.25
+            source: f'{root.mimic_directory}/Mimic/Pi/imgs/crew/Expedition_Patch.png'
+            fit_mode: "scale-down"
+        
+        Label:
+            id: expedition_patch_label
+            pos_hint: {"center_x": 0.8, "center_y": 0.65}
+            text: root.expedition_number
+            markup: True
+            color: 1, 1, 1, 1
+            font_size: dp(14)
+            bold: True
+            halign: 'center'
+        
+        # Right Side - Crewed Vehicles Section
+        Label:
+            id: crewed_vehicles_title
+            pos_hint: {"center_x": 0.8, "center_y": 0.55}
+            text: 'Crewed Vehicles Docked'
+            markup: True
+            color: 1, 1, 1, 1
+            font_size: dp(16)
+            bold: True
+            halign: 'center'
+        
+        # Crewed Vehicles List
+        ScrollView:
+            pos_hint: {"center_x": 0.8, "center_y": 0.35}
+            size_hint: 0.25, 0.25
+            
+            GridLayout:
+                id: crewed_vehicles_container
+                cols: 1
+                spacing: dp(5)
+                padding: dp(5)
+                size_hint_y: None
+                height: self.minimum_height
+                # Crewed vehicle widgets will be added here dynamically
         
         # Legend
         BoxLayout:

@@ -206,6 +206,7 @@ class Crew_Screen(MimicBase):
             
             # Update the UI
             self.update_crew_display()
+            self.update_expedition_patch()
             
         except Exception as e:
             log_error(f"Error loading crew data: {e}")
@@ -326,17 +327,145 @@ class Crew_Screen(MimicBase):
     def update_crewed_vehicles_display(self):
         """Update the crewed vehicles on orbit display."""
         try:
-            vehicles = self.get_crewed_vehicles_on_orbit()
+            vehicles = self.get_crewed_vehicles_from_vv_db()
             total_crew = sum(v['crew_count'] for v in vehicles)
             
             # Update the crew count display
             if hasattr(self.ids, 'total_crew_count'):
                 self.ids.total_crew_count.text = str(total_crew)
             
+            # Update the crewed vehicles list
+            self.update_crewed_vehicles_list(vehicles)
+            
             log_info(f"Updated crewed vehicles display: {len(vehicles)} vehicles, {total_crew} total crew")
             
         except Exception as e:
             log_error(f"Error updating crewed vehicles display: {e}")
+    
+    def get_crewed_vehicles_from_vv_db(self) -> List[Dict]:
+        """Get crewed vehicles from the VV database."""
+        try:
+            from GUI import get_db_path
+            vv_db_path = get_db_path('vv.db')
+            
+            if not Path(vv_db_path).exists():
+                log_error(f"VV database not found at {vv_db_path}")
+                return []
+            
+            conn = sqlite3.connect(vv_db_path)
+            cursor = conn.cursor()
+            
+            # Check if vehicles table exists
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='vehicles'")
+            if not cursor.fetchone():
+                log_error("Vehicles table not found in VV database")
+                conn.close()
+                return []
+            
+            # Get crewed vehicles
+            cursor.execute("""
+                SELECT Mission, Spacecraft, Arrival, Location 
+                FROM vehicles 
+                WHERE Type = 'Crewed' 
+                ORDER BY Arrival DESC
+            """)
+            
+            crewed_vehicles = []
+            for row in cursor.fetchall():
+                mission, spacecraft, arrival, location = row
+                if mission and spacecraft:
+                    # Estimate crew count based on spacecraft type
+                    crew_count = 4 if 'Crew' in str(spacecraft) else 3  # SpaceX Crew-7 has 4, Soyuz has 3
+                    
+                    crewed_vehicles.append({
+                        'mission': str(mission),
+                        'spacecraft': str(spacecraft),
+                        'arrival': str(arrival) if arrival else 'Unknown',
+                        'location': str(location) if location else 'Unknown',
+                        'crew_count': crew_count
+                    })
+            
+            conn.close()
+            log_info(f"Found {len(crewed_vehicles)} crewed vehicles in VV database")
+            return crewed_vehicles
+            
+        except Exception as e:
+            log_error(f"Error getting crewed vehicles from VV database: {e}")
+            return []
+    
+    def update_crewed_vehicles_list(self, vehicles: List[Dict]):
+        """Update the crewed vehicles list display."""
+        try:
+            crewed_container = self.ids.crewed_vehicles_container
+            if not hasattr(crewed_container, 'clear_widgets'):
+                return
+            
+            # Clear existing widgets
+            crewed_container.clear_widgets()
+            
+            # Add vehicle widgets
+            for vehicle in vehicles:
+                vehicle_widget = self.create_vehicle_widget(vehicle)
+                crewed_container.add_widget(vehicle_widget)
+            
+            log_info(f"Updated crewed vehicles list with {len(vehicles)} vehicles")
+            
+        except Exception as e:
+            log_error(f"Error updating crewed vehicles list: {e}")
+    
+    def create_vehicle_widget(self, vehicle: Dict) -> BoxLayout:
+        """Create a widget for displaying vehicle information."""
+        from kivy.uix.boxlayout import BoxLayout
+        from kivy.uix.label import Label
+        
+        widget = BoxLayout(orientation='vertical', size_hint_y=None, height=dp(60))
+        
+        # Mission name
+        mission_label = Label(
+            text=vehicle['mission'],
+            color=(1, 1, 1, 1),
+            font_size=dp(12),
+            bold=True,
+            size_hint_y=0.5
+        )
+        
+        # Spacecraft and arrival info
+        info_label = Label(
+            text=f"{vehicle['spacecraft']}\nArrived: {vehicle['arrival']}",
+            color=(0.8, 0.8, 0.8, 1),
+            font_size=dp(10),
+            size_hint_y=0.5
+        )
+        
+        widget.add_widget(mission_label)
+        widget.add_widget(info_label)
+        
+        return widget
+    
+    def update_expedition_patch(self):
+        """Update the expedition patch image based on current expedition."""
+        try:
+            if hasattr(self.ids, 'expedition_patch'):
+                # Try to find the appropriate patch image
+                expedition = self.expedition_number.lower().replace(' ', '')
+                
+                # Check for specific expedition patches
+                patch_paths = [
+                    f"{self.mimic_directory}/Mimic/Pi/imgs/crew/{expedition}_patch.png",
+                    f"{self.mimic_directory}/Mimic/Pi/imgs/crew/{expedition}_Patch.png",
+                    f"{self.mimic_directory}/Mimic/Pi/imgs/crew/Expedition_Patch.png",  # Generic fallback
+                ]
+                
+                for patch_path in patch_paths:
+                    if Path(patch_path).exists():
+                        self.ids.expedition_patch.source = patch_path
+                        log_info(f"Updated expedition patch to: {patch_path}")
+                        break
+                else:
+                    log_info("No expedition patch found, using default")
+                    
+        except Exception as e:
+            log_error(f"Error updating expedition patch: {e}")
     
     def get_crew_statistics(self) -> Dict:
         """Get statistics about the current crew."""

@@ -38,12 +38,12 @@ def update_database(active_tdrs, timestamp):
     :param timestamp: Timestamp to update.
     """
     try:
-        log_info(f"Updating database with active TDRS: {active_tdrs}, timestamp: {timestamp}")
+        #log_info(f"Updating database with active TDRS: {active_tdrs}, timestamp: {timestamp}")
         c.execute("UPDATE tdrs SET TDRS1 = ?", (active_tdrs[0],))
         c.execute("UPDATE tdrs SET TDRS2 = ?", (active_tdrs[1],))
         c.execute("UPDATE tdrs SET Timestamp = ?", (timestamp,))
         conn.commit()
-        log_info("Database updated successfully")
+        #log_info("Database updated successfully")
     except Exception as e:
         log_error(f"Error updating database: {e}")
         raise
@@ -58,7 +58,7 @@ class Component(ApplicationSession):
         def onevent(msg):
             """Processes incoming messages and updates the database."""
             try:
-                log_info(f"Received TDRS message")
+                #log_info(f"Received TDRS message")
                 active_tdrs = [0, 0]
                 timestamp = 0
 
@@ -67,7 +67,7 @@ class Component(ApplicationSession):
                     if ts:
                         timestamp = ts
 
-                log_info(f"Active TDRS: {active_tdrs}, Timestamp: {timestamp}")
+                #log_info(f"Active TDRS: {active_tdrs}, Timestamp: {timestamp}")
                 update_database(active_tdrs, timestamp)
 
             except Exception as e:
@@ -75,15 +75,15 @@ class Component(ApplicationSession):
                 import traceback
                 traceback.print_exc()
 
-        log_info("Subscribing to TDRS activity channel")
+        #log_info("Subscribing to TDRS activity channel")
         yield self.subscribe(onevent, u'gov.nasa.gsfc.scan_now.sn.activity')
-        log_info("Successfully subscribed to TDRS activity channel")
+        #log_info("Successfully subscribed to TDRS activity channel")
 
 
 if __name__ == '__main__':
     try:
         import six
-        log_info("Starting TDRS check application")
+        #log_info("Starting TDRS check application")
 
         # Updated URL with port 8443
         url = environ.get("AUTOBAHN_DEMO_ROUTER", u"wss://scan-now.gsfc.nasa.gov:8443/messages")
