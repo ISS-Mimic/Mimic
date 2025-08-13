@@ -115,6 +115,7 @@ class MimicScreen(MimicBase):
                 stdout, stderr = app.TDRSproc.communicate()
                 log_error(f"TDRScheck.py failed to start: {stderr}")
                 app.TDRSproc = None
+                
             if app.VVproc.poll() is not None:
                 stdout, stderr = app.VVproc.communicate()
                 log_error(f"VVcheck.py failed to start: {stderr}")
