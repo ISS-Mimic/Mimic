@@ -349,12 +349,21 @@ class Crew_Screen(MimicBase):
             from GUI import get_db_path
             vv_db_path = get_db_path('vv.db')
             
+            log_info(f"Attempting to access VV database at: {vv_db_path}")
+            
             if not Path(vv_db_path).exists():
                 log_error(f"VV database not found at {vv_db_path}")
                 return []
             
+            log_info(f"VV database exists, size: {Path(vv_db_path).stat().st_size} bytes")
+            
             conn = sqlite3.connect(vv_db_path)
             cursor = conn.cursor()
+            
+            # Check what tables exist
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+            tables = cursor.fetchall()
+            log_info(f"VV database tables: {[t[0] for t in tables]}")
             
             # Check if vehicles table exists
             cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='vehicles'")
@@ -362,6 +371,21 @@ class Crew_Screen(MimicBase):
                 log_error("Vehicles table not found in VV database")
                 conn.close()
                 return []
+            
+            # Check vehicles table structure
+            cursor.execute("PRAGMA table_info(vehicles)")
+            columns = cursor.fetchall()
+            log_info(f"Vehicles table structure: {[col[1] for col in columns]}")
+            
+            # Check total vehicle count
+            cursor.execute("SELECT COUNT(*) FROM vehicles")
+            total_count = cursor.fetchone()[0]
+            log_info(f"Total vehicles in database: {total_count}")
+            
+            # Check crewed vehicle count
+            cursor.execute("SELECT COUNT(*) FROM vehicles WHERE Type = 'Crewed'")
+            crewed_count = cursor.fetchone()[0]
+            log_info(f"Crewed vehicles in database: {crewed_count}")
             
             # Get crewed vehicles
             cursor.execute("""
@@ -487,7 +511,10 @@ class Crew_Screen(MimicBase):
             expedition_page_url = f"https://en.wikipedia.org/wiki/Expedition_{expedition_num}"
             
             # Look for the patch image in the page content
-            response = requests.get(expedition_page_url, timeout=10)
+            headers = {
+                'User-Agent': 'ISS Mimic Bot (https://github.com/ISS-Mimic; iss.mimic@gmail.com)'
+            }
+            response = requests.get(expedition_page_url, headers=headers, timeout=10)
             response.raise_for_status()
             
             # Parse the HTML to find the patch image
@@ -530,7 +557,7 @@ class Crew_Screen(MimicBase):
             log_info(f"Found patch image URL: {img_url}")
             
             # Download the image
-            img_response = requests.get(img_url, timeout=15)
+            img_response = requests.get(img_url, headers=headers, timeout=15)
             img_response.raise_for_status()
             
             # Save to cache

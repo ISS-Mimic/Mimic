@@ -70,7 +70,10 @@ def getVV_Image(page_url, output):
     """Download and process visiting vehicle image from NASA website."""
     try:
         #log_info(f"Fetching visiting vehicle image from: {page_url}")
-        response = requests.get(page_url, timeout=30)
+        headers = {
+            'User-Agent': 'ISS Mimic Bot (https://github.com/ISS-Mimic; iss.mimic@gmail.com)'
+        }
+        response = requests.get(page_url, headers=headers, timeout=30)
         response.raise_for_status()
         #log_info("Successfully retrieved NASA webpage")
 
@@ -138,7 +141,10 @@ def get_nasa_data(url):
     """Fetch visiting vehicle data from NASA website."""
     try:
         #log_info(f"Fetching NASA visiting vehicle data from: {url}")
-        response = requests.get(url, timeout=30)
+        headers = {
+            'User-Agent': 'Mimic ISS Display System (https://github.com/your-repo; contact@example.com)'
+        }
+        response = requests.get(url, headers=headers, timeout=30)
         response.raise_for_status()
         #log_info("Successfully retrieved NASA visiting vehicle data")
         
@@ -354,7 +360,9 @@ def print_database_events(db_path='iss_vehicles.db'):
 
 
 
-def update_database(correlated_df, undock_df, db_path='iss_vehicles.db'):
+def update_database(correlated_df, undock_df, db_path=None):
+    if db_path is None:
+        db_path = vv_db_path
     """Update the visiting vehicle database with new data."""
     try:
         log_info(f"Updating database at: {db_path}")
