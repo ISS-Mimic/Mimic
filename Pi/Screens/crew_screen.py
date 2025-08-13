@@ -141,6 +141,21 @@ class Crew_Screen(MimicBase):
         from GUI import get_db_path as central_get_db_path
         db_path = central_get_db_path('iss_crew.db')
         log_info(f"Using centralized database path: {db_path}")
+        
+        # Additional debugging
+        import os
+        import platform
+        log_info(f"Platform: {platform.system()}")
+        log_info(f"OS name: {os.name}")
+        log_info(f"Current working directory: {os.getcwd()}")
+        
+        # Check if the path actually exists
+        from pathlib import Path
+        db_file = Path(db_path)
+        log_info(f"Database file exists: {db_file.exists()}")
+        if db_file.exists():
+            log_info(f"Database file size: {db_file.stat().st_size} bytes")
+        
         return db_path
     
     def load_crew_data(self):
@@ -150,19 +165,38 @@ class Crew_Screen(MimicBase):
             log_info(f"Attempting to load crew data from: {db_path}")
             
             # Check if database file exists
-            if not Path(db_path).exists():
+            db_file = Path(db_path)
+            if not db_file.exists():
                 log_error(f"Database file does not exist: {db_path}")
                 raise FileNotFoundError(f"Database not found: {db_path}")
             
-            log_info(f"Database file exists, size: {Path(db_path).stat().st_size} bytes")
+            log_info(f"Database file exists, size: {db_file.stat().st_size} bytes")
             
+            # Try to connect to database
+            log_info("Attempting to connect to database...")
             conn = sqlite3.connect(db_path)
             cursor = conn.cursor()
+            log_info("Database connection successful")
             
             # Check what tables exist
             cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
             tables = cursor.fetchall()
             log_info(f"Available tables: {[t[0] for t in tables]}")
+            
+            # Check if current_crew table exists
+            if 'current_crew' not in [t[0] for t in tables]:
+                log_error("current_crew table not found!")
+                raise Exception("current_crew table missing")
+            
+            # Check current_crew table structure
+            cursor.execute("PRAGMA table_info(current_crew)")
+            columns = cursor.fetchall()
+            log_info(f"current_crew table structure: {[col[1] for col in columns]}")
+            
+            # Check current_crew table count
+            cursor.execute("SELECT COUNT(*) FROM current_crew")
+            count = cursor.fetchone()[0]
+            log_info(f"current_crew table row count: {count}")
             
             # Get current crew members
             cursor.execute("""
