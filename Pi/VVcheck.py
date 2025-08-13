@@ -314,7 +314,7 @@ wikipedia_df = get_wikipedia_data(wikiurl)
 if wikipedia_df is not None:
     #log_info("Successfully retrieved Wikipedia data")
     #log_info("Cleaning citation references from Wikipedia data")
-    wikipedia_df = wikipedia_df.map(clean_citations)
+    wikipedia_df = wikipedia_df.applymap(clean_citations)
     #log_info("Applying location and mission name standardizations")
     wikipedia_df = clean_wikipedia_data(wikipedia_df)
     #log_info("Wikipedia data processing completed successfully")
