@@ -136,18 +136,12 @@ class Crew_Screen(MimicBase):
         super().on_pre_leave()
     
     def get_db_path(self) -> str:
-        """Get the database path, prioritizing /dev/shm on Linux."""
-        if Path("/dev/shm").exists() and Path("/dev/shm").is_dir():
-            db_path = "/dev/shm/iss_crew.db"
-            log_info(f"Using Linux path: {db_path}")
-            return db_path
-        else:
-            # Windows fallback
-            data_dir = Path.home() / ".mimic_data"
-            data_dir.mkdir(exist_ok=True)
-            db_path = str(data_dir / "iss_crew.db")
-            log_info(f"Using Windows path: {db_path}")
-            return db_path
+        """Get the database path using the centralized function."""
+        # Import the centralized function from GUI
+        from GUI import get_db_path as central_get_db_path
+        db_path = central_get_db_path('iss_crew.db')
+        log_info(f"Using centralized database path: {db_path}")
+        return db_path
     
     def load_crew_data(self):
         """Load crew data from the database."""
