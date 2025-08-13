@@ -138,19 +138,37 @@ class Crew_Screen(MimicBase):
     def get_db_path(self) -> str:
         """Get the database path, prioritizing /dev/shm on Linux."""
         if Path("/dev/shm").exists() and Path("/dev/shm").is_dir():
-            return "/dev/shm/iss_crew.db"
+            db_path = "/dev/shm/iss_crew.db"
+            log_info(f"Using Linux path: {db_path}")
+            return db_path
         else:
             # Windows fallback
             data_dir = Path.home() / ".mimic_data"
             data_dir.mkdir(exist_ok=True)
-            return str(data_dir / "iss_crew.db")
+            db_path = str(data_dir / "iss_crew.db")
+            log_info(f"Using Windows path: {db_path}")
+            return db_path
     
     def load_crew_data(self):
         """Load crew data from the database."""
         try:
             db_path = self.get_db_path()
+            log_info(f"Attempting to load crew data from: {db_path}")
+            
+            # Check if database file exists
+            if not Path(db_path).exists():
+                log_error(f"Database file does not exist: {db_path}")
+                raise FileNotFoundError(f"Database not found: {db_path}")
+            
+            log_info(f"Database file exists, size: {Path(db_path).stat().st_size} bytes")
+            
             conn = sqlite3.connect(db_path)
             cursor = conn.cursor()
+            
+            # Check what tables exist
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+            tables = cursor.fetchall()
+            log_info(f"Available tables: {[t[0] for t in tables]}")
             
             # Get current crew members
             cursor.execute("""
@@ -160,6 +178,8 @@ class Crew_Screen(MimicBase):
             """)
             
             crew_members = cursor.fetchall()
+            log_info(f"Raw crew data from database: {crew_members}")
+            
             self.crew_data = [
                 {
                     'name': row[0],
