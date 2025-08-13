@@ -253,54 +253,100 @@ def identify_current_docked(dock_df, undock_df):
 current_docked_df = identify_current_docked(nasa_dock_df, nasa_undock_df)
 
 def get_wikipedia_data(wikiurl):
-    tables = pd.read_html(wikiurl)
-    
-    # Iterate through all tables to find the one with "Arrival" column
-    for table in tables:
-        if 'Arrival' in table.columns: # Using "Arrival" as the unique identifier of the table we want (sometimes the table # changes)
-            #print(table)
-            return table
-    
-    raise ValueError("Mission table not found on the Wikipedia page.")
+    """Fetch visiting vehicle data from Wikipedia."""
+    try:
+        log_info(f"Fetching Wikipedia visiting vehicle data from: {wikiurl}")
+        headers = {
+            'User-Agent': 'ISS Mimic Bot (https://github.com/ISS-Mimic; iss.mimic@gmail.com)'
+        }
+        
+        # Use requests to get the page content first
+        response = requests.get(wikiurl, headers=headers, timeout=30)
+        response.raise_for_status()
+        
+        # Parse tables from the HTML content
+        tables = pd.read_html(response.content)
+        log_info(f"Found {len(tables)} tables on Wikipedia page")
+        
+        # Iterate through all tables to find the one with "Arrival" column
+        for i, table in enumerate(tables):
+            if 'Arrival' in table.columns: # Using "Arrival" as the unique identifier of the table we want (sometimes the table # changes)
+                log_info(f"Found mission table at index {i} with {len(table)} rows")
+                return table
+        
+        log_error("Mission table not found on the Wikipedia page")
+        raise ValueError("Mission table not found on the Wikipedia page.")
+        
+    except requests.exceptions.RequestException as e:
+        log_error(f"Failed to retrieve Wikipedia data: {e}")
+        raise
+    except Exception as e:
+        log_error(f"Error fetching Wikipedia data: {e}")
+        raise
 
 def convert_net_date(date_str):
-    if 'early' in date_str.lower():
-        day = 5
-    elif 'mid' in date_str.lower():
-        day = 15
-    elif 'late' in date_str.lower():
-        day = 25
-    else:
-        day = date_str.split()[-3]
+    """Convert NET (No Earlier Than) dates to datetime objects."""
     try:
-        return pd.to_datetime(f"{date_str.split()[-1]}-{date_str.split()[-2]}-{day}", format='%Y-%B-%d',
-                              errors='coerce')
-    except ValueError:
-        return pd.to_datetime(f"{date_str.split()[-1]}-{date_str.split()[-2]}-01", format='%Y-%B-%d', errors='coerce')
+        if 'early' in date_str.lower():
+            day = 5
+        elif 'mid' in date_str.lower():
+            day = 15
+        elif 'late' in date_str.lower():
+            day = 25
+        else:
+            day = date_str.split()[-3]
+        
+        log_info(f"Converting NET date: {date_str} -> day {day}")
+        
+        try:
+            return pd.to_datetime(f"{date_str.split()[-1]}-{date_str.split()[-2]}-{day}", format='%Y-%B-%d',
+                                  errors='coerce')
+        except ValueError:
+            log_info(f"Fallback conversion for date: {date_str}")
+            return pd.to_datetime(f"{date_str.split()[-1]}-{date_str.split()[-2]}-01", format='%Y-%B-%d', errors='coerce')
+    except Exception as e:
+        log_error(f"Error converting NET date '{date_str}': {e}")
+        return pd.NaT
 
 def clean_wikipedia_data(df):
-    location_replacements = {
-        'Harmony': 'Node 2',
-        'Poisk': 'MRM-2',
-        'Rassvet': 'MRM-1',
-        'Prichal': 'RS Node',
-        'Zvezda': 'Service Module',
-        'Unity': 'Node 1',
-        'Zarya': 'FGB',
-        'forward': 'Forward',
-        'aft': 'Aft',
-        'zenith': 'Zenith',
-        'nadir': 'Nadir',
-    }
-    df['Port'] = df['Port'].replace(location_replacements, regex=True)
-    df['Mission'] = df['Mission'].apply(lambda x: f'Cygnus {x}' if x.startswith('NG-') else x)
-    df['Mission'] = df['Mission'].apply(lambda x: f'SpaceX {x}' if x.startswith('Crew-') else x)
-    df['Mission'] = df['Mission'].apply(lambda x: f'SpaceX {x}' if x.startswith('Cargo-') else x)
-    df['Arrival'] = pd.to_datetime(df['Arrival'], errors='coerce')
-    df['Departure'] = df['Departure'].apply(
-        lambda x: convert_net_date(x) if 'NET' in x or 'early' in x or 'mid' in x or 'late' in x
-        else pd.to_datetime(x, errors='coerce'))
-    return df
+    """Clean and standardize Wikipedia visiting vehicle data."""
+    try:
+        log_info(f"Cleaning Wikipedia data with {len(df)} rows")
+        
+        location_replacements = {
+            'Harmony': 'Node 2',
+            'Poisk': 'MRM-2',
+            'Rassvet': 'MRM-1',
+            'Prichal': 'RS Node',
+            'Zvezda': 'Service Module',
+            'Unity': 'Node 1',
+            'Zarya': 'FGB',
+            'forward': 'Forward',
+            'aft': 'Aft',
+            'zenith': 'Zenith',
+            'nadir': 'Nadir',
+        }
+        
+        log_info("Applying location replacements")
+        df['Port'] = df['Port'].replace(location_replacements, regex=True)
+        
+        log_info("Standardizing mission names")
+        df['Mission'] = df['Mission'].apply(lambda x: f'Cygnus {x}' if x.startswith('NG-') else x)
+        df['Mission'] = df['Mission'].apply(lambda x: f'SpaceX {x}' if x.startswith('Crew-') else x)
+        df['Mission'] = df['Mission'].apply(lambda x: f'SpaceX {x}' if x.startswith('Cargo-') else x)
+        
+        log_info("Converting arrival and departure dates")
+        df['Arrival'] = pd.to_datetime(df['Arrival'], errors='coerce')
+        df['Departure'] = df['Departure'].apply(
+            lambda x: convert_net_date(x) if 'NET' in x or 'early' in x or 'mid' in x or 'late' in x
+            else pd.to_datetime(x, errors='coerce'))
+        
+        log_info("Wikipedia data cleaning completed successfully")
+        return df
+        
+    except Exception as e:
+        log_error(f"Error cleaning Wikipedia data: {e}")
+        return df
 
 def clean_citations(text):
     if isinstance(text, str):
@@ -309,134 +355,201 @@ def clean_citations(text):
     else:
         return text
 
-wikipedia_df = get_wikipedia_data(wikiurl)
-#print(wikipedia_df)
-wikipedia_df = wikipedia_df.applymap(clean_citations)
-#print(wikipedia_df)
-wikipedia_df = clean_wikipedia_data(wikipedia_df)
-#print(wikipedia_df)
+# Fetch and process Wikipedia data
+log_info("Fetching Wikipedia visiting vehicle data")
+try:
+    wikipedia_df = get_wikipedia_data(wikiurl)
+    log_info(f"Retrieved Wikipedia data with {len(wikipedia_df)} rows")
+    
+    log_info("Cleaning citations from Wikipedia data")
+    wikipedia_df = wikipedia_df.applymap(clean_citations)
+    
+    log_info("Cleaning and standardizing Wikipedia data")
+    wikipedia_df = clean_wikipedia_data(wikipedia_df)
+    
+    log_info("Wikipedia data processing completed successfully")
+    
+except Exception as e:
+    log_error(f"Failed to process Wikipedia data: {e}")
+    wikipedia_df = pd.DataFrame()
 
 def correlate_data(nasa_df, wiki_df):
-    correlated_data = []
-    for _, nasa_row in nasa_df.iterrows():
-        if pd.isnull(nasa_row['Date']):
-            continue
-        # Allow a tolerance of +/- 1 day when matching dates
-        start_date = nasa_row['Date'] - pd.Timedelta(days=1)
-        end_date = nasa_row['Date'] + pd.Timedelta(days=1)
-        matching_wiki_rows = wiki_df[wiki_df['Arrival'].between(start_date, end_date)]
-        for _, wiki_row in matching_wiki_rows.iterrows():
-            correlated_data.append({
-                'Spacecraft': wiki_row['Spacecraft'],
-                'Type': wiki_row['Type'],
-                'Mission': wiki_row['Mission'],
-                'Event': nasa_row['Event'],
-                'Date': nasa_row['Date'],
-                'Location': wiki_row['Port'],
-                'Arrival': wiki_row['Arrival'],
-                'Departure': wiki_row['Departure']
-            })
-    return pd.DataFrame(correlated_data)
+    """Correlate NASA and Wikipedia visiting vehicle data."""
+    try:
+        log_info("Correlating NASA and Wikipedia data")
+        correlated_data = []
+        
+        for _, nasa_row in nasa_df.iterrows():
+            if pd.isnull(nasa_row['Date']):
+                continue
+            # Allow a tolerance of +/- 1 day when matching dates
+            start_date = nasa_row['Date'] - pd.Timedelta(days=1)
+            end_date = nasa_row['Date'] + pd.Timedelta(days=1)
+            matching_wiki_rows = wiki_df[wiki_df['Arrival'].between(start_date, end_date)]
+            
+            for _, wiki_row in matching_wiki_rows.iterrows():
+                correlated_data.append({
+                    'Spacecraft': wiki_row['Spacecraft'],
+                    'Type': wiki_row['Type'],
+                    'Mission': wiki_row['Mission'],
+                    'Event': nasa_row['Event'],
+                    'Date': nasa_row['Date'],
+                    'Location': wiki_row['Port'],
+                    'Arrival': wiki_row['Arrival'],
+                    'Departure': wiki_row['Departure']
+                })
+        
+        log_info(f"Correlated {len(correlated_data)} data entries")
+        return pd.DataFrame(correlated_data)
+        
+    except Exception as e:
+        log_error(f"Error correlating data: {e}")
+        return pd.DataFrame()
 
 
+# Correlate NASA and Wikipedia data
+log_info("Starting data correlation")
 correlated_df = correlate_data(current_docked_df, wikipedia_df)
-#print(correlated_df)
+log_info(f"Data correlation completed: {len(correlated_df)} correlated entries")
 
 def print_database_events(db_path='iss_vehicles.db'):
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute('SELECT Event FROM vehicles')
-    rows = cursor.fetchall()
-    for row in rows:
-        print(row[0])
-    conn.close()
+    """Print all events from the vehicles database."""
+    try:
+        log_info(f"Printing database events from: {db_path}")
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        cursor.execute('SELECT Event FROM vehicles')
+        rows = cursor.fetchall()
+        log_info(f"Found {len(rows)} events in database")
+        for row in rows:
+            log_info(f"Event: {row[0]}")
+        conn.close()
+    except Exception as e:
+        log_error(f"Error printing database events: {e}")
 
 #print("Existing events in the database:")
 #print_database_events(db_path=vv_db_path)
 
 def update_database(correlated_df, undock_df, db_path='iss_vehicles.db'):
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
+    """Update the visiting vehicle database with new data."""
+    try:
+        log_info(f"Updating database at: {db_path}")
+        log_info(f"Correlated data: {len(correlated_df)} entries")
+        log_info(f"Undock data: {len(undock_df)} entries")
+        
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
 
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS vehicles (
-            Spacecraft TEXT,
-            Type TEXT,
-            Mission TEXT,
-            Event TEXT,
-            Date TEXT,
-            Location TEXT,
-            Arrival TEXT,
-            Departure TEXT
-        )
-    ''')
-
-    # Clear the database first
-    cursor.execute('DELETE FROM vehicles')
-
-    # Print existing events before deletion for debugging
-    #print("Existing events in the database before deletion:")
-    #cursor.execute('SELECT Event FROM vehicles')
-    #rows = cursor.fetchall()
-    #for row in rows:
-    #    print(row[0])
-
-    # Remove vehicles that are no longer docked based on the undock events
-    for _, row in undock_df.iterrows():
-        event = row['Event']
-        #print(f"Attempting to remove event: {event}")
-        cursor.execute('DELETE FROM vehicles WHERE Event LIKE ?', ('%' + event + '%',))
-        #print(f"Rows affected: {cursor.rowcount}")
-
-    # Insert new data
-    for _, row in correlated_df.iterrows():
-        #print(row['Port'])
+        # Create table if it doesn't exist
+        log_info("Creating vehicles table if it doesn't exist")
         cursor.execute('''
-            INSERT INTO vehicles (Spacecraft, Type, Mission, Event, Date, Location, Arrival, Departure)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            row['Spacecraft'],
-            row['Type'],
-            row['Mission'],
-            row['Event'],
-            row['Date'].strftime('%Y-%m-%d %H:%M:%S') if pd.notnull(row['Date']) else None,
-            row['Location'],
-            row['Arrival'].strftime('%Y-%m-%d %H:%M:%S') if pd.notnull(row['Arrival']) else None,
-            row['Departure'].strftime('%Y-%m-%d %H:%M:%S') if pd.notnull(row['Departure']) else None
-        ))
+            CREATE TABLE IF NOT EXISTS vehicles (
+                Spacecraft TEXT,
+                Type TEXT,
+                Mission TEXT,
+                Event TEXT,
+                Date TEXT,
+                Location TEXT,
+                Arrival TEXT,
+                Departure TEXT
+            )
+        ''')
 
-    
-    conn.commit()
-    conn.close()
+        # Clear the database first
+        log_info("Clearing existing vehicle data")
+        cursor.execute('DELETE FROM vehicles')
+        log_info(f"Cleared {cursor.rowcount} existing records")
+
+        # Remove vehicles that are no longer docked based on the undock events
+        log_info("Processing undock events to remove departed vehicles")
+        for _, row in undock_df.iterrows():
+            event = row['Event']
+            log_info(f"Removing vehicles with event: {event}")
+            cursor.execute('DELETE FROM vehicles WHERE Event LIKE ?', ('%' + event + '%',))
+            log_info(f"Removed {cursor.rowcount} records for event: {event}")
+
+        # Insert new data
+        log_info("Inserting new correlated vehicle data")
+        for _, row in correlated_df.iterrows():
+            cursor.execute('''
+                INSERT INTO vehicles (Spacecraft, Type, Mission, Event, Date, Location, Arrival, Departure)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                row['Spacecraft'],
+                row['Type'],
+                row['Mission'],
+                row['Event'],
+                row['Date'].strftime('%Y-%m-%d %H:%M:%S') if pd.notnull(row['Date']) else None,
+                row['Location'],
+                row['Arrival'].strftime('%Y-%m-%d %H:%M:%S') if pd.notnull(row['Arrival']) else None,
+                row['Departure'].strftime('%Y-%m-%d %H:%M:%S') if pd.notnull(row['Departure']) else None
+            ))
+
+        log_info(f"Inserted {len(correlated_df)} new vehicle records")
+        
+        conn.commit()
+        conn.close()
+        log_info("Database update completed successfully")
+        
+    except Exception as e:
+        log_error(f"Error updating database: {e}")
+        if 'conn' in locals():
+            conn.close()
 
 
-update_database(correlated_df, nasa_undock_df, db_path=vv_db_path)
+# Update the database with new data
+log_info("Starting database update process")
+try:
+    update_database(correlated_df, nasa_undock_df, db_path=vv_db_path)
+    log_info("Database update process completed successfully")
+except Exception as e:
+    log_error(f"Database update process failed: {e}")
 
 
 # Function to verify and display data from the database
 def verify_database(db_path='iss_vehicles.db'):
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
+    """Verify and display data from the vehicles database."""
+    try:
+        log_info(f"Verifying database at: {db_path}")
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
 
-    # Query to select all data from the vehicles table
-    cursor.execute('SELECT * FROM vehicles')
+        # Query to select all data from the vehicles table
+        cursor.execute('SELECT * FROM vehicles')
+        rows = cursor.fetchall()
 
-    # Fetch all results
-    rows = cursor.fetchall()
+        # Check if there are any results
+        if rows:
+            log_info(f"Found {len(rows)} records in database:")
+            for i, row in enumerate(rows):
+                log_info(f"Record {i+1}: {row}")
+        else:
+            log_info("No data found in the database.")
 
-    # Check if there are any results
-    if rows:
-        # Print the results
-        for row in rows:
-            print(row)
-    else:
-        print("No data found in the database.")
+        # Close the connection
+        conn.close()
+        
+    except Exception as e:
+        log_error(f"Error verifying database: {e}")
 
-    # Close the connection
-    conn.close()
 
-# Call the function to verify data
+# Call the function to verify data (uncomment for debugging)
 #verify_database(db_path=vv_db_path)
 
 
-log_info("Database updated successfully.")
+def main():
+    """Main function to run the visiting vehicle check process."""
+    try:
+        log_info("Starting VVcheck.py main execution")
+        
+        # All the processing logic is already executed at module level
+        # This function provides a clean entry point if needed
+        
+        log_info("VVcheck.py main execution completed successfully")
+        
+    except Exception as e:
+        log_error(f"VVcheck.py main execution failed: {e}")
+        raise
+
+if __name__ == "__main__":
+    main()
