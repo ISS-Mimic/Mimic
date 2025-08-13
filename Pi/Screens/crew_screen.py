@@ -406,10 +406,28 @@ class Crew_Screen(MimicBase):
                     # Estimate crew count based on spacecraft type
                     crew_count = 4 if 'Crew' in str(spacecraft) else 3  # SpaceX Crew-7 has 4, Soyuz has 3
                     
+                    # Format arrival date to show only the date part (YYYY-MM-DD)
+                    arrival_date = 'Unknown'
+                    if arrival:
+                        try:
+                            # If arrival is already a datetime object, format it
+                            if hasattr(arrival, 'strftime'):
+                                arrival_date = arrival.strftime('%Y-%m-%d')
+                            else:
+                                # If it's a string, try to parse it and format
+                                arrival_str = str(arrival)
+                                if ' ' in arrival_str:  # Contains time component
+                                    arrival_date = arrival_str.split(' ')[0]  # Take just the date part
+                                else:
+                                    arrival_date = arrival_str
+                        except Exception as e:
+                            log_error(f"Error formatting arrival date '{arrival}': {e}")
+                            arrival_date = 'Unknown'
+                    
                     crewed_vehicles.append({
                         'mission': str(mission),
                         'spacecraft': str(spacecraft),
-                        'arrival': str(arrival) if arrival else 'Unknown',
+                        'arrival': arrival_date,
                         'location': str(location) if location else 'Unknown',
                         'crew_count': crew_count
                     })

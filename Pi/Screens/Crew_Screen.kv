@@ -11,11 +11,11 @@
         # Top Left - Expedition Title
         Label:
             id: expedition_title
-            pos_hint: {"center_x": 0.25, "center_y": 0.92}
+            pos_hint: {"center_x": 0.2, "center_y": 0.88}
             text: root.expedition_number
             markup: True
             color: 0, 1, 0, 1  # Bright green
-            font_size: dp(32)
+            font_size: dp(40)
             bold: True
         
         # Top Center - Expedition Duration Timer
@@ -42,7 +42,7 @@
         Label:
             id: iss_crewed_time_label
             pos_hint: {"center_x": 0.85, "center_y": 0.92}
-            text: 'ISS HAS BEEN CONTINUOUSLY CREWED FOR:'
+            text: 'ISS CONTINUOUSLY CREWED FOR:'
             markup: True
             color: 1, 1, 1, 1
             font_size: dp(16)
@@ -84,7 +84,7 @@
             font_size: dp(12)
         
         Label:
-            pos_hint: {"center_x": 0.80, "center_y": 0.82}
+            pos_hint: {"center_x": 0.815, "center_y": 0.82}
             text: 'Months'
             markup: True
             color: 1, 1, 1, 1
@@ -100,8 +100,8 @@
         # Total People on the ISS
         Label:
             id: total_crew_count_label
-            pos_hint: {"center_x": 0.85, "center_y": 0.75}
-            text: 'Number of People on ISS'
+            pos_hint: {"center_x": 0.82, "center_y": 0.78}
+            text: 'Number of People on ISS: '
             markup: True
             color: 1, 1, 1, 1
             font_size: dp(14)
@@ -109,11 +109,11 @@
         
         Label:
             id: total_crew_count
-            pos_hint: {"center_x": 0.85, "center_y": 0.70}
+            pos_hint: {"center_x": 0.9, "center_y": 0.78}
             text: '7'
             markup: True
             color: 0, 1, 0, 1
-            font_size: dp(20)
+            font_size: dp(14)
             bold: True
         
         # Main Crew Display Area (Left Side)
@@ -138,27 +138,6 @@
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/crew/Expedition_Patch.png'
             fit_mode: "scale-down"
         
-        Label:
-            id: expedition_patch_label
-            pos_hint: {"center_x": 0.83, "center_y": 0.55}
-            text: root.expedition_number
-            markup: True
-            color: 1, 1, 1, 1
-            font_size: dp(14)
-            bold: True
-            halign: 'center'
-        
-        # Right Side - Crewed Vehicles Section
-        Label:
-            id: crewed_vehicles_title
-            pos_hint: {"center_x": 0.83, "center_y": 0.45}
-            text: 'Crewed Vehicles Docked'
-            markup: True
-            color: 1, 1, 1, 1
-            font_size: dp(16)
-            bold: True
-            halign: 'center'
-        
         # Crewed Vehicles List
         ScrollView:
             pos_hint: {"center_x": 0.83, "center_y": 0.35}
@@ -175,7 +154,7 @@
         
         # Legend
         BoxLayout:
-            pos_hint: {"center_x": 0.5, "center_y": 0.16}
+            pos_hint: {"center_x": 0.5, "center_y": 0.18}
             size_hint: 0.8, 0.1
             orientation: 'horizontal'
             spacing: dp(20)
