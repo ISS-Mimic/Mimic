@@ -116,7 +116,7 @@ from functools import partial
 from kivy.network.urlrequest import UrlRequest
 
 #from screens import SCREEN_DEFS # import list of mimic screens
-import database_initialize # create and populate database script
+
 import Screens as screens
 from utils.serial import serialWrite # custom Serial Write function
 from utils.logger import log_info, log_error
@@ -448,8 +448,7 @@ class MainApp(App):
             log_info("Scheduling update functions...")
             Clock.schedule_interval(self.update_labels, 1) #all telemetry wil refresh and get pushed to arduinos every half second!
             Clock.schedule_interval(self.animate3, 0.1)
-            #Clock.schedule_interval(self.checkCrew, 600) #disabling for now issue #407
-            #Clock.schedule_once(self.checkCrew, 30) #disabling for now issue #407
+
 
             Clock.schedule_interval(self._schedule_internet_probe,
                                     self.INTERNET_POLL_S) # check for active internet connection
@@ -743,56 +742,7 @@ class MainApp(App):
         else:
             sasa_xmit = False
 
-        #Crew Screen Stuff
-        
-        #ISS has been crewed since 9:23 Nov 2nd 2000 UTC
-        ISS_Expedition_1_Start = datetime(2000, 11, 2, 9, 23, 0)
-
-        # Get the current date and time
-        crew_now = datetime.now()
-
-        # Calculate the difference including years, months, days, hours, minutes, and seconds
-        crew_difference = relativedelta(crew_now, ISS_Expedition_1_Start)
-        
-        years_timedelta = crew_difference.years
-        months_timedelta = crew_difference.months
-        days_timedelta = crew_difference.days
-        hours_timedelta = crew_difference.hours
-        minutes_timedelta = crew_difference.minutes
-        seconds_timedelta = crew_difference.seconds
-
-        # Extract years, months, days, hours, minutes, and seconds
-        self.screens["crew"].ids.ISS_crewed_years.text = str(years_timedelta)
-        self.screens["crew"].ids.ISS_crewed_months.text = str(months_timedelta)
-        self.screens["crew"].ids.ISS_crewed_days.text = str(days_timedelta)
-        
-        self.screens["crew"].ids.ISS_crewed_time.text = (f"{years_timedelta}:{months_timedelta:02}:{days_timedelta:02}/{hours_timedelta:02}:{minutes_timedelta:02}:{seconds_timedelta:02}")
-
-        # Crew Launch Dates
-        dragon10launch = datetime(2025, 3, 13) 
-        soyuz73launch = datetime(2025, 4, 8) 
-
-        # Calculate Days since crew launch
-        dragon10count = (crew_now - dragon10launch).days
-        soyuz73count = (crew_now - soyuz73launch).days
-
-        # Calculate Cumulative Days for each astro
-        dragon10_1 = 205+dragon10count
-        dragon10_2 = 0+dragon10count
-        dragon10_3 = 115+dragon10count
-        dragon10_4 = 0+dragon10count
-        soyuz73_1 = 357+soyuz73count
-        soyuz73_2 = 0+soyuz73count
-        soyuz73_3 = 0+soyuz73count
-
-        #Identify variables for Crew Screen
-        self.screens["crew"].ids.dragon10_1.text = str(dragon10count) + " / " + str(dragon10_1)
-        self.screens["crew"].ids.dragon10_2.text = str(dragon10count) + " / " + str(dragon10_2)
-        self.screens["crew"].ids.dragon10_3.text = str(dragon10count) + " / " + str(dragon10_3)
-        self.screens["crew"].ids.dragon10_4.text = str(dragon10count) + " / " + str(dragon10_4)
-        self.screens["crew"].ids.soyuz73_1.text = str(soyuz73count) + " / " + str(soyuz73_1)
-        self.screens["crew"].ids.soyuz73_2.text = str(soyuz73count) + " / " + str(soyuz73_2)
-        self.screens["crew"].ids.soyuz73_3.text = str(soyuz73count) + " / " + str(soyuz73_3)        
+       
 
         ## ISS Potential Problems ##
         #ISS Leak - Check Pressure Levels
@@ -802,7 +752,6 @@ class MainApp(App):
         #Loss of attitude control, loss of cmg control
         #ISS altitude too low
         #Russion hook status - make sure all modules remain docked
-
 
 
         #initialize array statuses to discharge
@@ -961,6 +910,8 @@ if __name__ == '__main__':
         print("run: \"python GUI.py --debug\" to enable debug logging")
         print(f"=====================")
         
+        print("Importing database_initialize")
+        import database_initialize # create and populate database script
         log_info("Starting ISS Mimic Program")
         log_info("Mimic Program Directory: " + mimic_directory + "/Mimic/Pi")
         log_info("Mimic Data Directory: " + str(mimic_data_directory))
