@@ -10,6 +10,7 @@ from kivy.clock import Clock
 from kivy.metrics import dp
 import pathlib
 import sqlite3
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Dict, Optional
@@ -443,29 +444,105 @@ class Crew_Screen(MimicBase):
         return widget
     
     def update_expedition_patch(self):
-        """Update the expedition patch image based on current expedition."""
+        """Update the expedition patch image by fetching from Wikipedia."""
         try:
             if hasattr(self.ids, 'expedition_patch'):
-                # Try to find the appropriate patch image
-                expedition = self.expedition_number.lower().replace(' ', '')
+                # Extract expedition number from expedition_number (e.g., "Expedition 73" -> "73")
+                expedition_match = re.search(r'Expedition\s+(\d+)', self.expedition_number)
+                if not expedition_match:
+                    log_info("Could not extract expedition number, using default patch")
+                    return
                 
-                # Check for specific expedition patches
-                patch_paths = [
-                    f"{self.mimic_directory}/Mimic/Pi/imgs/crew/{expedition}_patch.png",
-                    f"{self.mimic_directory}/Mimic/Pi/imgs/crew/{expedition}_Patch.png",
-                    f"{self.mimic_directory}/Mimic/Pi/imgs/crew/Expedition_Patch.png",  # Generic fallback
-                ]
+                expedition_num = expedition_match.group(1)
+                log_info(f"Fetching patch for Expedition {expedition_num}")
                 
-                for patch_path in patch_paths:
-                    if Path(patch_path).exists():
-                        self.ids.expedition_patch.source = patch_path
-                        log_info(f"Updated expedition patch to: {patch_path}")
-                        break
+                # Try to get the patch from Wikipedia
+                patch_url = self.fetch_expedition_patch_from_wikipedia(expedition_num)
+                if patch_url:
+                    self.ids.expedition_patch.source = patch_url
+                    log_info(f"Updated expedition patch to: {patch_url}")
                 else:
-                    log_info("No expedition patch found, using default")
+                    log_info("Could not fetch expedition patch from Wikipedia")
                     
         except Exception as e:
             log_error(f"Error updating expedition patch: {e}")
+    
+    def fetch_expedition_patch_from_wikipedia(self, expedition_num: str) -> str:
+        """Fetch expedition patch from Wikipedia using MediaWiki API."""
+        try:
+            import requests
+            
+            # Create cache directory for patches
+            cache_dir = Path.home() / ".mimic_data" / "patches"
+            cache_dir.mkdir(exist_ok=True)
+            
+            # Check if we already have this patch cached
+            cached_patch = cache_dir / f"expedition_{expedition_num}_patch.png"
+            if cached_patch.exists():
+                log_info(f"Using cached patch for Expedition {expedition_num}")
+                return str(cached_patch)
+            
+            # Try to fetch from Wikipedia MediaWiki API
+            # First, get the file info from the expedition page
+            expedition_page_url = f"https://en.wikipedia.org/wiki/Expedition_{expedition_num}"
+            
+            # Look for the patch image in the page content
+            response = requests.get(expedition_page_url, timeout=10)
+            response.raise_for_status()
+            
+            # Parse the HTML to find the patch image
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Look for the patch image - it's usually in the infobox or near the top
+            patch_img = None
+            
+            # Try multiple selectors to find the patch image
+            selectors = [
+                'img[src*="ISS_Expedition"]',
+                'img[src*="Expedition"]',
+                'img[src*="patch"]',
+                'img[src*="Patch"]'
+            ]
+            
+            for selector in selectors:
+                patch_img = soup.select_one(selector)
+                if patch_img and 'patch' in patch_img.get('src', '').lower():
+                    break
+            
+            if not patch_img:
+                log_info(f"No patch image found on Expedition {expedition_num} page")
+                return ""
+            
+            # Get the image URL
+            img_src = patch_img.get('src')
+            if not img_src:
+                return ""
+            
+            # Convert to full URL if it's relative
+            if img_src.startswith('//'):
+                img_url = 'https:' + img_src
+            elif img_src.startswith('/'):
+                img_url = 'https://en.wikipedia.org' + img_src
+            else:
+                img_url = img_src
+            
+            log_info(f"Found patch image URL: {img_url}")
+            
+            # Download the image
+            img_response = requests.get(img_url, timeout=15)
+            img_response.raise_for_status()
+            
+            # Save to cache
+            with open(cached_patch, 'wb') as f:
+                f.write(img_response.content)
+            
+            log_info(f"Downloaded and cached patch for Expedition {expedition_num}")
+            return str(cached_patch)
+            
+        except Exception as e:
+            log_error(f"Error fetching expedition patch from Wikipedia: {e}")
+            return ""
     
     def get_crew_statistics(self) -> Dict:
         """Get statistics about the current crew."""
