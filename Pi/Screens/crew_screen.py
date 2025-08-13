@@ -30,14 +30,18 @@ class CrewMemberWidget(BoxLayout):
     mission_days = StringProperty("0")
     total_days = StringProperty("0")
     role = StringProperty("FE")
+    mimic_directory = StringProperty("")
     
-    def __init__(self, crew_data: Dict, **kwargs):
+    def __init__(self, crew_data: Dict, mimic_dir: str = "", **kwargs):
         super().__init__(**kwargs)
         self.orientation = 'vertical'
         self.size_hint_y = None
         self.height = dp(200)
         self.padding = dp(10)
         self.spacing = dp(5)
+        
+        # Store mimic directory
+        self.mimic_directory = mimic_dir
         
         # Update properties
         self.name = crew_data.get('name', 'Unknown')
@@ -274,7 +278,7 @@ class Crew_Screen(MimicBase):
             
             # Create new crew widgets
             for crew_data in self.crew_data:
-                crew_widget = CrewMemberWidget(crew_data)
+                crew_widget = CrewMemberWidget(crew_data, mimic_dir=self.mimic_directory)
                 crew_container.add_widget(crew_widget)
                 self.crew_widgets.append(crew_widget)
             
