@@ -18,11 +18,31 @@
             font_size: dp(32)
             bold: True
         
+        # Top Center - Expedition Duration Timer
+        Label:
+            id: expedition_duration_label
+            pos_hint: {"center_x": 0.5, "center_y": 0.92}
+            text: 'EXPEDITION DURATION:'
+            markup: True
+            color: 1, 1, 1, 1
+            font_size: dp(16)
+            bold: True
+        
+        Label:
+            id: expedition_duration_timer
+            pos_hint: {"center_x": 0.5, "center_y": 0.86}
+            text: root.expedition_duration
+            markup: True
+            color: 0, 1, 1, 1  # Cyan for timer
+            font_size: dp(24)
+            bold: True
+            halign: 'center'
+        
         # Top Right - ISS Continuously Crewed Time
         Label:
             id: iss_crewed_time_label
             pos_hint: {"center_x": 0.85, "center_y": 0.92}
-            text: 'ISS CONTINUOUSLY CREWED'
+            text: 'ISS HAS BEEN CONTINUOUSLY CREWED FOR:'
             markup: True
             color: 1, 1, 1, 1
             font_size: dp(16)
@@ -77,11 +97,11 @@
             color: 1, 1, 1, 1
             font_size: dp(12)
         
-        # Crewed Vehicles on Orbit
+        # Total People on the ISS
         Label:
-            id: crewed_vehicles_label
+            id: total_crew_count_label
             pos_hint: {"center_x": 0.85, "center_y": 0.75}
-            text: 'Crewed Vehicles on Orbit'
+            text: 'Number of People on ISS'
             markup: True
             color: 1, 1, 1, 1
             font_size: dp(14)
@@ -113,14 +133,14 @@
         # Right Side - Expedition Mission Patch
         Image:
             id: expedition_patch
-            pos_hint: {"center_x": 0.8, "center_y": 0.75}
+            pos_hint: {"center_x": 0.83, "center_y": 0.65}
             size_hint: 0.25, 0.25
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/crew/Expedition_Patch.png'
             fit_mode: "scale-down"
         
         Label:
             id: expedition_patch_label
-            pos_hint: {"center_x": 0.8, "center_y": 0.65}
+            pos_hint: {"center_x": 0.83, "center_y": 0.55}
             text: root.expedition_number
             markup: True
             color: 1, 1, 1, 1
@@ -131,7 +151,7 @@
         # Right Side - Crewed Vehicles Section
         Label:
             id: crewed_vehicles_title
-            pos_hint: {"center_x": 0.8, "center_y": 0.55}
+            pos_hint: {"center_x": 0.83, "center_y": 0.45}
             text: 'Crewed Vehicles Docked'
             markup: True
             color: 1, 1, 1, 1
@@ -141,7 +161,7 @@
         
         # Crewed Vehicles List
         ScrollView:
-            pos_hint: {"center_x": 0.8, "center_y": 0.35}
+            pos_hint: {"center_x": 0.83, "center_y": 0.35}
             size_hint: 0.25, 0.25
             
             GridLayout:
@@ -155,7 +175,7 @@
         
         # Legend
         BoxLayout:
-            pos_hint: {"center_x": 0.5, "center_y": 0.15}
+            pos_hint: {"center_x": 0.5, "center_y": 0.16}
             size_hint: 0.8, 0.1
             orientation: 'horizontal'
             spacing: dp(20)
@@ -206,12 +226,7 @@
             font_size: dp(20)
             size_hint_y: 0.5
         
-        # Refresh Button
-        Button:
-            size_hint: 0.08, 0.08
-            pos_hint: {"center_x": 0.25, "center_y": 0.07}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/control/refresh.png'
-            on_release: root.refresh_crew_data()
+
         
         # Back Button
         Button:

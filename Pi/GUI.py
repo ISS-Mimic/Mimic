@@ -910,7 +910,6 @@ if __name__ == '__main__':
         print("run: \"python GUI.py --debug\" to enable debug logging")
         print(f"=====================")
         
-        print("Importing database_initialize")
         import database_initialize # create and populate database script
         log_info("Starting ISS Mimic Program")
         log_info("Mimic Program Directory: " + mimic_directory + "/Mimic/Pi")

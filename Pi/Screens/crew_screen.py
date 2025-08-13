@@ -113,6 +113,7 @@ class Crew_Screen(MimicBase):
     
     crew_data = ListProperty([])
     expedition_number = StringProperty("Expedition 70")
+    expedition_duration = StringProperty("00:00:00")
     iss_crewed_years = StringProperty("24")
     iss_crewed_months = StringProperty("9")
     iss_crewed_days = StringProperty("10")
@@ -131,13 +132,19 @@ class Crew_Screen(MimicBase):
         # Set up periodic updates
         if self.update_timer:
             self.update_timer.cancel()
-        self.update_timer = Clock.schedule_interval(self.update_crew_data, 300)  # Update every 5 minutes
+        self.update_timer = Clock.schedule_interval(self.update_crew_data, 60)  # Update every 1 minute
+        
+        # Set up expedition duration timer (updates every second)
+        self.expedition_timer = Clock.schedule_interval(self.update_expedition_duration, 1.0)
     
     def on_pre_leave(self):
         """Called when screen is about to be hidden."""
         if self.update_timer:
             self.update_timer.cancel()
             self.update_timer = None
+        if hasattr(self, 'expedition_timer') and self.expedition_timer:
+            self.expedition_timer.cancel()
+            self.expedition_timer = None
         super().on_pre_leave()
     
     def get_db_path(self) -> str:
@@ -314,16 +321,13 @@ class Crew_Screen(MimicBase):
     
     def update_crew_data(self, dt):
         """Periodic update of crew data."""
+        log_info("Automatic crew data update triggered")
         self.load_crew_data()
         self.update_iss_crewed_time()
         self.update_crewed_vehicles_display()
+        log_info("Automatic crew data update completed")
     
-    def refresh_crew_data(self):
-        """Manual refresh of crew data."""
-        log_info("Manual refresh of crew data requested")
-        self.load_crew_data()
-        self.update_iss_crewed_time()
-        self.update_crewed_vehicles_display()
+
     
     def update_crewed_vehicles_display(self):
         """Update the crewed vehicles on orbit display."""
@@ -593,3 +597,42 @@ class Crew_Screen(MimicBase):
         except Exception as e:
             log_error(f"Error calculating crew statistics: {e}")
             return {}
+    
+    def update_expedition_duration(self, dt):
+        """Update the expedition duration timer every second."""
+        try:
+            # Calculate time since expedition started
+            # Try to get the earliest launch date from current crew
+            expedition_start = None
+            
+            if self.crew_data:
+                # Find the earliest launch date among current crew
+                for crew in self.crew_data:
+                    spacecraft = crew.get('spaceship', '')
+                    if spacecraft:
+                        launch_date = self.get_spacecraft_launch_date(spacecraft)
+                        if expedition_start is None or launch_date < expedition_start:
+                            expedition_start = launch_date
+            
+            # Fallback to a reasonable default if no crew data
+            if expedition_start is None:
+                expedition_start = datetime(2024, 3, 3)  # Example: Expedition 73 start
+            
+            now = datetime.now()
+            duration = now - expedition_start
+            
+            # Format as HH:MM:SS
+            total_seconds = int(duration.total_seconds())
+            hours = total_seconds // 3600
+            minutes = (total_seconds % 3600) // 60
+            seconds = total_seconds % 60
+            
+            self.expedition_duration = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+            
+            # Log every minute to show the timer is working
+            if seconds == 0:
+                log_info(f"Expedition duration updated: {self.expedition_duration}")
+            
+        except Exception as e:
+            log_error(f"Error updating expedition duration: {e}")
+            self.expedition_duration = "00:00:00"
