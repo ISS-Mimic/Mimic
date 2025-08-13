@@ -113,7 +113,6 @@ class Crew_Screen(MimicBase):
     
     crew_data = ListProperty([])
     expedition_number = StringProperty("Expedition 70")
-    expedition_duration = StringProperty("00:00:00")
     iss_crewed_years = StringProperty("24")
     iss_crewed_months = StringProperty("9")
     iss_crewed_days = StringProperty("10")
@@ -133,18 +132,12 @@ class Crew_Screen(MimicBase):
         if self.update_timer:
             self.update_timer.cancel()
         self.update_timer = Clock.schedule_interval(self.update_crew_data, 300)  # Update every 5 minutes
-        
-        # Set up expedition duration timer (updates every second)
-        self.expedition_timer = Clock.schedule_interval(self.update_expedition_duration, 1.0)
     
     def on_pre_leave(self):
         """Called when screen is about to be hidden."""
         if self.update_timer:
             self.update_timer.cancel()
             self.update_timer = None
-        if hasattr(self, 'expedition_timer') and self.expedition_timer:
-            self.expedition_timer.cancel()
-            self.expedition_timer = None
         super().on_pre_leave()
     
     def get_db_path(self) -> str:
