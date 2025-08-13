@@ -228,36 +228,4 @@ class LED_Screen(MimicBase):
     def get_available_animations(self) -> list:
         """Get list of available animations."""
         return ["Pulse", "Chase", "Disco"]
-    
-    def show_help(self):
-        """Show help information about available commands."""
-        try:
-            help_text = "=== LED Screen Help ===\n\n"
-            
-            help_text += "Available Colors:\n"
-            for color in self.get_available_colors():
-                help_text += f"  {color}\n"
-            
-            help_text += "\nSolar Arrays:\n"
-            help_text += "  1A, 1B, 2A, 2B, 3A, 3B, 4A, 4B\n"
-            
-            help_text += "\nPatterns:\n"
-            for pattern in self.get_available_patterns():
-                help_text += f"  {pattern}\n"
-            
-            help_text += "\nAnimations:\n"
-            for animation in self.get_available_animations():
-                help_text += f"  {animation}\n"
-            
-            help_text += "\nCommands Sent:\n"
-            help_text += "  LED_1A=Red, PATTERN_RAINBOW, ANIMATE_PULSE, etc.\n"
-            
-            # Log the help text
-            log_info(f"LED Screen Help:\n{help_text}")
-            
-            # Update status to show help
-            self._current_test = "Help Displayed (see logs)"
-            self._start_test_timer()
-            
-        except Exception as e:
-            log_error(f"LED Screen: Error showing help: {e}")
+        

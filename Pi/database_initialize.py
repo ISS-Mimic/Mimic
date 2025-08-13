@@ -434,6 +434,56 @@ def validate_telemetry_data(data):
         log_error(f"Telemetry data validation failed: {e}")
         raise
 
+def create_crew_database(db_path, table_name):
+    """Create the crew database and tables."""
+    try:
+        log_info(f"Creating crew database at {db_path}")
+        
+        # Create a connection to the database
+        conn = sqlite3.connect(db_path)
+        conn.isolation_level = None  # Enable autocommit mode
+        
+        # Create the tables
+        conn.executescript("""
+            PRAGMA journal_mode=WAL;
+            PRAGMA synchronous=NORMAL;
+
+            CREATE TABLE IF NOT EXISTS snapshots (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                fetched_at TEXT NOT NULL,          -- ISO 8601 UTC
+                checksum TEXT NOT NULL UNIQUE      -- checksum of normalized payload
+            );
+
+            CREATE TABLE IF NOT EXISTS crew_members (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                snapshot_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                country TEXT NOT NULL,
+                spaceship TEXT NOT NULL,
+                expedition TEXT NOT NULL,
+                FOREIGN KEY(snapshot_id) REFERENCES snapshots(id) ON DELETE CASCADE
+            );
+
+            -- Convenience view/table that always mirrors the latest snapshot, for quick reads:
+            CREATE TABLE IF NOT EXISTS current_crew (
+                name TEXT NOT NULL,
+                country TEXT NOT NULL,
+                spaceship TEXT NOT NULL,
+                expedition TEXT NOT NULL
+            );
+        """)
+        
+        # Close the connection to the database
+        conn.close()
+        log_info("Crew database creation completed successfully")
+        
+    except sqlite3.Error as e:
+        log_error(f"SQLite error creating crew database: {e}")
+        raise
+    except Exception as e:
+        log_error(f"Unexpected error creating crew database: {e}")
+        raise
+
 # Define the paths to the databases
 # Cross-platform database path handling
 def get_db_path(db_name):
@@ -464,14 +514,16 @@ try:
     iss_telemetry_db_path = get_db_path('iss_telemetry.db')
     tdrs_db_path = get_db_path('tdrs.db')
     vv_db_path = get_db_path('vv.db')
+    crew_db_path = get_db_path('iss_crew.db')
 
     log_info(f"Database paths resolved:")
     log_info(f"  ISS Telemetry: {iss_telemetry_db_path}")
     log_info(f"  TDRS: {tdrs_db_path}")
     log_info(f"  VV: {vv_db_path}")
+    log_info(f"  Crew: {crew_db_path}")
 
     # Remove any existing databases at startup
-    for db_path, db_name in [(iss_telemetry_db_path, 'ISS telemetry'), (tdrs_db_path, 'TDRS')]:
+    for db_path, db_name in [(iss_telemetry_db_path, 'ISS telemetry'), (tdrs_db_path, 'TDRS'), (crew_db_path, 'Crew')]:
         if os.path.exists(db_path):
             try:
                 os.remove(db_path)
@@ -492,10 +544,14 @@ try:
     log_info("Starting ISS telemetry database creation...")
     create_iss_telemetry_database(iss_telemetry_db_path, 'telemetry', telemetry_data)
 
+    # Create the crew database and tables
+    log_info("Starting crew database creation...")
+    create_crew_database(crew_db_path, 'crew')
+
     log_info("All databases initialized successfully!")
     
     # Verify databases were created
-    for db_path, db_name in [(iss_telemetry_db_path, 'ISS telemetry'), (tdrs_db_path, 'TDRS'), (vv_db_path, 'VV')]:
+    for db_path, db_name in [(iss_telemetry_db_path, 'ISS telemetry'), (tdrs_db_path, 'TDRS'), (vv_db_path, 'VV'), (crew_db_path, 'Crew')]:
         if not os.path.exists(db_path):
             raise FileNotFoundError(f"Database {db_name} was not created at {db_path}")
         log_info(f"Verified {db_name} database exists at {db_path}")
