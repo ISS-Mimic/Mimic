@@ -132,7 +132,7 @@ class Crew_Screen(MimicBase):
         # Set up periodic updates
         if self.update_timer:
             self.update_timer.cancel()
-        self.update_timer = Clock.schedule_interval(self.update_crew_data, 60)  # Update every 1 minute
+        self.update_timer = Clock.schedule_interval(self.update_crew_data, 300)  # Update every 5 minutes
         
         # Set up expedition duration timer (updates every second)
         self.expedition_timer = Clock.schedule_interval(self.update_expedition_duration, 1.0)
@@ -167,18 +167,18 @@ class Crew_Screen(MimicBase):
                 log_error(f"Database file does not exist: {db_path}")
                 raise FileNotFoundError(f"Database not found: {db_path}")
             
-            log_info(f"Database file exists, size: {db_file.stat().st_size} bytes")
+            #log_info(f"Database file exists, size: {db_file.stat().st_size} bytes")
             
             # Try to connect to database
-            log_info("Attempting to connect to database...")
+            #log_info("Attempting to connect to database...")
             conn = sqlite3.connect(db_path)
             cursor = conn.cursor()
-            log_info("Database connection successful")
+            #log_info("Database connection successful")
             
             # Check what tables exist
             cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
             tables = cursor.fetchall()
-            log_info(f"Available tables: {[t[0] for t in tables]}")
+            #log_info(f"Available tables: {[t[0] for t in tables]}")
             
             # Get current crew members
             cursor.execute("""
@@ -210,7 +210,7 @@ class Crew_Screen(MimicBase):
                     self.expedition_number = self._extract_expedition_number()
             
             conn.close()
-            log_info(f"Loaded {len(self.crew_data)} crew members from database")
+            #log_info(f"Loaded {len(self.crew_data)} crew members from database")
             
             # Update the UI
             self.update_crew_display()
@@ -321,13 +321,16 @@ class Crew_Screen(MimicBase):
     
     def update_crew_data(self, dt):
         """Periodic update of crew data."""
-        log_info("Automatic crew data update triggered")
         self.load_crew_data()
         self.update_iss_crewed_time()
         self.update_crewed_vehicles_display()
-        log_info("Automatic crew data update completed")
     
-
+    def refresh_crew_data(self):
+        """Manual refresh of crew data."""
+        log_info("Manual refresh of crew data requested")
+        self.load_crew_data()
+        self.update_iss_crewed_time()
+        self.update_crewed_vehicles_display()
     
     def update_crewed_vehicles_display(self):
         """Update the crewed vehicles on orbit display."""
@@ -406,28 +409,10 @@ class Crew_Screen(MimicBase):
                     # Estimate crew count based on spacecraft type
                     crew_count = 4 if 'Crew' in str(spacecraft) else 3  # SpaceX Crew-7 has 4, Soyuz has 3
                     
-                    # Format arrival date to show only the date part (YYYY-MM-DD)
-                    arrival_date = 'Unknown'
-                    if arrival:
-                        try:
-                            # If arrival is already a datetime object, format it
-                            if hasattr(arrival, 'strftime'):
-                                arrival_date = arrival.strftime('%Y-%m-%d')
-                            else:
-                                # If it's a string, try to parse it and format
-                                arrival_str = str(arrival)
-                                if ' ' in arrival_str:  # Contains time component
-                                    arrival_date = arrival_str.split(' ')[0]  # Take just the date part
-                                else:
-                                    arrival_date = arrival_str
-                        except Exception as e:
-                            log_error(f"Error formatting arrival date '{arrival}': {e}")
-                            arrival_date = 'Unknown'
-                    
                     crewed_vehicles.append({
                         'mission': str(mission),
                         'spacecraft': str(spacecraft),
-                        'arrival': arrival_date,
+                        'arrival': str(arrival) if arrival else 'Unknown',
                         'location': str(location) if location else 'Unknown',
                         'crew_count': crew_count
                     })
@@ -615,42 +600,3 @@ class Crew_Screen(MimicBase):
         except Exception as e:
             log_error(f"Error calculating crew statistics: {e}")
             return {}
-    
-    def update_expedition_duration(self, dt):
-        """Update the expedition duration timer every second."""
-        try:
-            # Calculate time since expedition started
-            # Try to get the earliest launch date from current crew
-            expedition_start = None
-            
-            if self.crew_data:
-                # Find the earliest launch date among current crew
-                for crew in self.crew_data:
-                    spacecraft = crew.get('spaceship', '')
-                    if spacecraft:
-                        launch_date = self.get_spacecraft_launch_date(spacecraft)
-                        if expedition_start is None or launch_date < expedition_start:
-                            expedition_start = launch_date
-            
-            # Fallback to a reasonable default if no crew data
-            if expedition_start is None:
-                expedition_start = datetime(2024, 3, 3)  # Example: Expedition 73 start
-            
-            now = datetime.now()
-            duration = now - expedition_start
-            
-            # Format as HH:MM:SS
-            total_seconds = int(duration.total_seconds())
-            hours = total_seconds // 3600
-            minutes = (total_seconds % 3600) // 60
-            seconds = total_seconds % 60
-            
-            self.expedition_duration = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-            
-            # Log every minute to show the timer is working
-            if seconds == 0:
-                log_info(f"Expedition duration updated: {self.expedition_duration}")
-            
-        except Exception as e:
-            log_error(f"Error updating expedition duration: {e}")
-            self.expedition_duration = "00:00:00"
