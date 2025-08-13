@@ -77,21 +77,21 @@
         
         # Time format labels
         Label:
-            pos_hint: {"center_x": 0.715, "center_y": 0.82}
+            pos_hint: {"center_x": 0.73, "center_y": 0.82}
             text: 'Years'
             markup: True
             color: 1, 1, 1, 1
             font_size: dp(12)
         
         Label:
-            pos_hint: {"center_x": 0.815, "center_y": 0.82}
+            pos_hint: {"center_x": 0.83, "center_y": 0.82}
             text: 'Months'
             markup: True
             color: 1, 1, 1, 1
             font_size: dp(12)
         
         Label:
-            pos_hint: {"center_x": 0.915, "center_y": 0.82}
+            pos_hint: {"center_x": 0.93, "center_y": 0.82}
             text: 'Days'
             markup: True
             color: 1, 1, 1, 1
@@ -133,7 +133,7 @@
         # Right Side - Expedition Mission Patch
         Image:
             id: expedition_patch
-            pos_hint: {"center_x": 0.83, "center_y": 0.63}
+            pos_hint: {"center_x": 0.83, "center_y": 0.62}
             size_hint: 0.25, 0.25
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/crew/Expedition_Patch.png'
             fit_mode: "scale-down"
@@ -154,8 +154,8 @@
         
         # Legend
         BoxLayout:
-            pos_hint: {"center_x": 0.5, "center_y": 0.18}
-            size_hint: 0.8, 0.1
+            pos_hint: {"center_x": 0.35, "center_y": 0.18}
+            size_hint: 0.6, 0.1
             orientation: 'horizontal'
             spacing: dp(20)
             
@@ -204,8 +204,6 @@
             color: 1, 1, 1, 1
             font_size: dp(20)
             size_hint_y: 0.5
-        
-
         
         # Back Button
         Button:
