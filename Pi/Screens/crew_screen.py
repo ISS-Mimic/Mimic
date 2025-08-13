@@ -141,21 +141,6 @@ class Crew_Screen(MimicBase):
         from GUI import get_db_path as central_get_db_path
         db_path = central_get_db_path('iss_crew.db')
         log_info(f"Using centralized database path: {db_path}")
-        
-        # Additional debugging
-        import os
-        import platform
-        log_info(f"Platform: {platform.system()}")
-        log_info(f"OS name: {os.name}")
-        log_info(f"Current working directory: {os.getcwd()}")
-        
-        # Check if the path actually exists
-        from pathlib import Path
-        db_file = Path(db_path)
-        log_info(f"Database file exists: {db_file.exists()}")
-        if db_file.exists():
-            log_info(f"Database file size: {db_file.stat().st_size} bytes")
-        
         return db_path
     
     def load_crew_data(self):
@@ -183,21 +168,6 @@ class Crew_Screen(MimicBase):
             tables = cursor.fetchall()
             log_info(f"Available tables: {[t[0] for t in tables]}")
             
-            # Check if current_crew table exists
-            if 'current_crew' not in [t[0] for t in tables]:
-                log_error("current_crew table not found!")
-                raise Exception("current_crew table missing")
-            
-            # Check current_crew table structure
-            cursor.execute("PRAGMA table_info(current_crew)")
-            columns = cursor.fetchall()
-            log_info(f"current_crew table structure: {[col[1] for col in columns]}")
-            
-            # Check current_crew table count
-            cursor.execute("SELECT COUNT(*) FROM current_crew")
-            count = cursor.fetchone()[0]
-            log_info(f"current_crew table row count: {count}")
-            
             # Get current crew members
             cursor.execute("""
                 SELECT name, country, spaceship, expedition 
@@ -206,7 +176,7 @@ class Crew_Screen(MimicBase):
             """)
             
             crew_members = cursor.fetchall()
-            log_info(f"Raw crew data from database: {crew_members}")
+            log_info(f"Raw crew data from current_crew table: {crew_members}")
             
             self.crew_data = [
                 {
