@@ -461,6 +461,14 @@ def create_crew_database(db_path, table_name):
                 country TEXT NOT NULL,
                 spaceship TEXT NOT NULL,
                 expedition TEXT NOT NULL,
+                position TEXT,                    -- ISS-CDR, Flight Engineer, etc.
+                launch_date TEXT,                 -- Launch date (YYYY-MM-DD)
+                launch_time TEXT,                 -- Launch time (HH:MM:SS UTC)
+                landing_date TEXT,                -- Landing date (YYYY-MM-DD) or NULL if active
+                landing_time TEXT,                -- Landing time (HH:MM:SS UTC) or NULL if active
+                mission_duration TEXT,            -- Mission duration (e.g., "147d 16h 29m 52s")
+                orbits INTEGER,                   -- Number of orbits completed
+                status TEXT DEFAULT 'active',     -- 'active' or 'returned'
                 FOREIGN KEY(snapshot_id) REFERENCES snapshots(id) ON DELETE CASCADE
             );
 
@@ -469,7 +477,15 @@ def create_crew_database(db_path, table_name):
                 name TEXT NOT NULL,
                 country TEXT NOT NULL,
                 spaceship TEXT NOT NULL,
-                expedition TEXT NOT NULL
+                expedition TEXT NOT NULL,
+                position TEXT,
+                launch_date TEXT,
+                launch_time TEXT,
+                landing_date TEXT,
+                landing_time TEXT,
+                mission_duration TEXT,
+                orbits INTEGER,
+                status TEXT DEFAULT 'active'
             );
         """)
         
