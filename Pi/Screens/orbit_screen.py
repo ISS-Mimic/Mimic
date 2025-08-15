@@ -155,11 +155,12 @@ class Orbit_Screen(MimicBase):
         Clock.schedule_interval(self.update_active_tdrs, 1)
 
         # one-shots that existed in MainApp.build()
-        Clock.schedule_once(self.update_iss_tle, 60)
-        Clock.schedule_once(self.update_tdrs_tle, 7)
-        Clock.schedule_once(self.update_tdrs, 5)
-        Clock.schedule_once(self.update_nightshade, 15)
-        Clock.schedule_once(self.update_sun, 11)
+        Clock.schedule_once(self.update_active_tdrs, 1)
+        Clock.schedule_once(self.update_iss_tle,1)
+        Clock.schedule_once(self.update_tdrs_tle, 1)
+        Clock.schedule_once(self.update_tdrs, 1)
+        Clock.schedule_once(self.update_nightshade, 1)
+        Clock.schedule_once(self.update_sun, 1)
 
         # Update active TDRS circles - ensure hidden immediately when none active
         self._update_tdrs_circles()
@@ -351,7 +352,7 @@ class Orbit_Screen(MimicBase):
 
             # Get TLE epoch
             epoch = self.iss_tle.epoch
-            epoch_dt = datetime.strptime(str(epoch), "%Y/%m/%d %H:%M:%S")
+            epoch_dt = ephem.to_datetime(epoch)
 
             # Calculate orbits since epoch
             now = datetime.utcnow()
@@ -543,7 +544,7 @@ class Orbit_Screen(MimicBase):
             return False
 
         # Convert ephem.Date to naive UTC datetime
-        t_dt = datetime.strptime(str(t_ephem), "%Y/%m/%d %H:%M:%S")
+        t_dt = ephem.to_datetime(t_ephem)
 
         # Use latest live altitude if available; otherwise fallback
         alt_km = float(self.current_altitude_km) if self.current_altitude_km else self._ZOE_ALT_KM
@@ -844,23 +845,15 @@ class Orbit_Screen(MimicBase):
     def update_orbit_map(self, _dt=0):
         """
         Choose base map image:
-        - If Z-belt (7 or 8) active -> use night-only map_nozoe.jpg
-        - Else prefer map_zoe.jpg (if present), fall back to map_nozoe.jpg, then map.jpg
+        - If Z-belt (7 or 8) active -> use map_nozoe.jpg
+        - Otherwise use map_zoe.jpg
         """
         try:
             use_nozoe = any(t in (7, 8) for t in self.active_tdrs if t)
             if use_nozoe:
-                candidates = [self.map_nozoe_jpg, self.map_jpg]
+                src = str(self.map_nozoe_jpg)
             else:
-                candidates = [self.map_zoe_jpg, self.map_nozoe_jpg, self.map_jpg]
-
-            src = None
-            for p in candidates:
-                if p.exists():
-                    src = str(p)
-                    break
-            if src is None:
-                src = str(self.map_jpg)  # last resort
+                src = str(self.map_zoe_jpg)
 
             if self.ids.OrbitMap.source != src:
                 self.ids.OrbitMap.source = src
@@ -1029,7 +1022,7 @@ class Orbit_Screen(MimicBase):
             return
 
         # — localise AOS time for display --------------------------------------
-        utc_dt = datetime.strptime(str(next_pass[0]), "%Y/%m/%d %H:%M:%S")
+        utc_dt = ephem.to_datetime(next_pass[0])
         # For now, use Houston timezone. In the future, this could be configurable
         local = utc_dt.replace(tzinfo=pytz.utc).astimezone(pytz.timezone("America/Chicago"))
 
