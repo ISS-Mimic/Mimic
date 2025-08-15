@@ -22,21 +22,74 @@ import ephem
 from ._base import MimicBase
 from utils.logger import log_info, log_error
 
+
+# ────────────────────────────────────────────────────────────────────────────
+# Exception handler to forward traceback to logs
 class _Reraise(ExceptionHandler):
     def handle_exception(self, inst):
         traceback.print_exception(type(inst), inst, inst.__traceback__, file=sys.stderr)
         logging.getLogger("Mimic").exception("Unhandled Kivy error")
         return ExceptionManager.PASS
 
+
 ExceptionManager.add_handler(_Reraise())
 
 Builder.load_file(str(Path(__file__).with_name("Orbit_Screen.kv")))
 
+
+# ────────────────────────────────────────────────────────────────────────────
+# GEO coverage helpers (spherical Earth model, adequate for LOS logic)
+
+R_EARTH_KM = 6378.137
+GEO_ALT_KM = 35786.0
+GEO_R_KM = R_EARTH_KM + GEO_ALT_KM
+
+
+def _wrap_lon_deg(lon: float) -> float:
+    """Normalize longitude to (-180, 180]."""
+    x = ((lon + 180.0) % 360.0 + 360.0) % 360.0 - 180.0
+    return 180.0 if x == -180.0 else x
+
+
+def _ecef_from_spherical(lat_deg: float, lon_deg: float, radius_km: float):
+    lat = math.radians(lat_deg)
+    lon = math.radians(lon_deg)
+    cl = math.cos(lat)
+    return (
+        radius_km * cl * math.cos(lon),
+        radius_km * cl * math.sin(lon),
+        radius_km * math.sin(lat),
+    )
+
+
+def _vsub(a, b):
+    return (a[0] - b[0], a[1] - b[1], a[2] - b[2])
+
+
+def _vdot(a, b):
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+
+
+def _vnorm(a):
+    m = math.hypot(a[0], a[1])
+    m = math.hypot(m, a[2])
+    return (a[0] / m, a[1] / m, a[2] / m)
+
+
+def _elevation_deg_at_alt(lat_deg: float, lon_deg: float, h_km: float, sat_lon_deg: float) -> float:
+    """Elevation of a GEO satellite at sat_lon_deg from observer (lat, lon, alt)."""
+    o = _ecef_from_spherical(lat_deg, lon_deg, R_EARTH_KM + h_km)
+    s = _ecef_from_spherical(0.0, sat_lon_deg, GEO_R_KM)
+    u = _vsub(s, o)
+    n = _vnorm(o)
+    sin_el = _vdot(u, n) / math.sqrt(_vdot(u, u))
+    sin_el = max(-1.0, min(1.0, sin_el))
+    return math.degrees(math.asin(sin_el))
+
+
 # ────────────────────────────────────────────────────────────────────────────
 class Orbit_Screen(MimicBase):
-    """Everything related to ground tracks, TDRS icons, next-pass timers."""
-    """
-    Everything related to ground tracks, TDRS icons, next-pass timers.
+    """Everything related to ground tracks, TDRS icons, next-pass timers.
     Only six satellites are shown:
         • East  : TDRS 6, 12
         • Z-belt: TDRS 7, 8
@@ -46,21 +99,21 @@ class Orbit_Screen(MimicBase):
     _TDRS_IDS = {"TDRS 6", "TDRS 12", "TDRS 7", "TDRS 8", "TDRS 10", "TDRS 11"}
 
     # ---------------------------------------------------------------- state
-    iss_tle:          Optional[ephem.EarthSatellite] = None
-    tdrs_tles:        dict[str, ephem.EarthSatellite] = {}
-    location         = ephem.Observer()          # reused by many helpers
-    last_map_refresh = 0.                        # epoch seconds
-    
+    iss_tle: Optional[ephem.EarthSatellite] = None
+    tdrs_tles: dict[str, ephem.EarthSatellite] = {}
+    location = ephem.Observer()  # reused by many helpers
+    last_map_refresh = 0.0  # epoch seconds
+
     # User location (default: Houston, TX)
     user_lat: float = 29.7604  # Will be updated from settings
     user_lon: float = -95.3698  # Will be updated from settings
-    
+
     # Active TDRS tracking
     active_tdrs: list[int] = [0, 0]  # TDRS1, TDRS2 from database
-    
+
     # Orbit counting
     last_daily_reset: datetime = None  # Track when we last reset daily counter
-    
+
     # ZOE timing cache (for smooth per-second countdown without heavy recompute)
     _zoe_entry_time: Optional[ephem.Date] = None
     _zoe_exit_time: Optional[ephem.Date] = None
@@ -68,31 +121,45 @@ class Orbit_Screen(MimicBase):
     _zoe_recompute_interval_s: float = 15.0
     _zoe_last_in_state: Optional[bool] = None
 
+    # ---- ZOE / coverage params (no drawing) ----
+    _FALLBACK_TDRS_LONS = {
+        "TDRS 6": -45.0,
+        "TDRS 10": -151.0,
+        "TDRS 11": -174.0,
+        "TDRS 12": -40.0,
+    }
+    _ZOE_LAT_BAND = 52.0  # +/- latitude band where ZOE is considered
+    _ZOE_MIN_EL = 0.0  # deg elevation mask for coverage (per your spec)
+    _ZOE_ALT_KM = 420.0  # fallback ISS altitude if live telem missing
+
+    # Live altitude from telemetry (km); defaults to fallback until set
+    current_altitude_km: float = _ZOE_ALT_KM
+
     # ---------------------------------------------------------------- enter
     def on_enter(self):
         log_info("Orbit Screen Initialized")
-        
+
         # Load user location from settings
         self.load_user_location_from_settings()
-        
+
         # periodic updates
-        Clock.schedule_interval(self.update_orbit,         1)
-        Clock.schedule_interval(self.update_iss,           1)
-        Clock.schedule_interval(self.update_groundtrack,   1)
-        Clock.schedule_interval(self.update_nightshade,  120)
-        Clock.schedule_interval(self.update_orbit_map,    31)
-        Clock.schedule_interval(self.update_globe_image,  55)
-        Clock.schedule_interval(self.update_globe,        31)
-        Clock.schedule_interval(self.update_tdrs,        607)
-        Clock.schedule_interval(self.update_sun,         489) 
-        Clock.schedule_interval(self.update_active_tdrs,   1)
+        Clock.schedule_interval(self.update_orbit, 1)
+        Clock.schedule_interval(self.update_iss, 1)
+        Clock.schedule_interval(self.update_groundtrack, 1)
+        Clock.schedule_interval(self.update_nightshade, 120)
+        Clock.schedule_interval(self.update_orbit_map, 31)
+        Clock.schedule_interval(self.update_globe_image, 55)
+        Clock.schedule_interval(self.update_globe, 31)
+        Clock.schedule_interval(self.update_tdrs, 607)
+        Clock.schedule_interval(self.update_sun, 489)
+        Clock.schedule_interval(self.update_active_tdrs, 1)
 
         # one-shots that existed in MainApp.build()
-        Clock.schedule_once(self.update_iss_tle,          60)
-        Clock.schedule_once(self.update_tdrs_tle,          7)
-        Clock.schedule_once(self.update_tdrs,              5)
-        Clock.schedule_once(self.update_nightshade,       15)
-        Clock.schedule_once(self.update_sun,              11)  
+        Clock.schedule_once(self.update_iss_tle, 60)
+        Clock.schedule_once(self.update_tdrs_tle, 7)
+        Clock.schedule_once(self.update_tdrs, 5)
+        Clock.schedule_once(self.update_nightshade, 15)
+        Clock.schedule_once(self.update_sun, 11)
 
         # Update active TDRS circles - ensure hidden immediately when none active
         self._update_tdrs_circles()
@@ -106,10 +173,10 @@ class Orbit_Screen(MimicBase):
         try:
             config_path = Path.home() / ".mimic_data" / "location_config.json"
             if config_path.exists():
-                with open(config_path, 'r') as f:
+                with open(config_path, "r") as f:
                     data = json.load(f)
-                    self.user_lat = data['lat']
-                    self.user_lon = data['lon']
+                    self.user_lat = data["lat"]
+                    self.user_lon = data["lon"]
                     log_info(f"Loaded user location: {self.user_lat}, {self.user_lon}")
                     # Update the observer location for pass calculations
                     self.location.lat = str(self.user_lat)
@@ -131,7 +198,7 @@ class Orbit_Screen(MimicBase):
         Clock.unschedule(self.update_globe)
         Clock.unschedule(self.update_tdrs)
         Clock.unschedule(self.update_sun)
-        Clock.unschedule(self.update_active_tdrs) 
+        Clock.unschedule(self.update_active_tdrs)
 
     # ─────────────────────── user location ─────────────────────────────────────
     def update_user_location(self, _dt=0) -> None:
@@ -140,21 +207,22 @@ class Orbit_Screen(MimicBase):
             if "user_location" not in self.ids:
                 log_error("User location widget not found in KV file")
                 return
-                
+
             x, y = self.map_px(self.user_lat, self.user_lon)
             self.ids.user_location.center = (x, y)
-            
+
             # Force the widget to be visible and on top
             self.ids.user_location.opacity = 1.0
-            
+
             # Also position the user location label
             if "user_location_label" in self.ids:
                 label = self.ids.user_location_label
                 label.pos = (x + 5, y - 5)  # Small offset from the dot
-            
+
         except Exception as exc:
             log_error(f"Update user location failed: {exc}")
             import traceback
+
             traceback.print_exc()
 
     def update_active_tdrs(self, _dt=0) -> None:
@@ -170,30 +238,33 @@ class Orbit_Screen(MimicBase):
                     # Still update labels to reflect no-active state
                     self._update_tdrs_labels()
                     return
-                
+
             conn = sqlite3.connect(str(tdrs_db_path))
             cursor = conn.cursor()
             cursor.execute("SELECT TDRS1, TDRS2 FROM tdrs LIMIT 1")
             result = cursor.fetchone()
             conn.close()
-            
+
             if result:
-                new_active_tdrs = [int(result[0]) if result[0] != '0' else 0, 
-                                  int(result[1]) if result[1] != '0' else 0]
-                
+                new_active_tdrs = [
+                    int(result[0]) if result[0] != "0" else 0,
+                    int(result[1]) if result[1] != "0" else 0,
+                ]
+
                 # Update list if changed
                 if new_active_tdrs != self.active_tdrs:
                     self.active_tdrs = new_active_tdrs
                     log_info(f"Active TDRS updated: {self.active_tdrs}")
                     # Update circles immediately
                     self._update_tdrs_circles()
-            
+
             # Always refresh group labels color/position promptly
             self._update_tdrs_labels()
-            
+
         except Exception as exc:
             log_error(f"Update active TDRS failed: {exc}")
             import traceback
+
             traceback.print_exc()
 
     def _update_tdrs_circles(self) -> None:
@@ -201,13 +272,13 @@ class Orbit_Screen(MimicBase):
         try:
             # TDRS IDs that can be active
             tdrs_ids = [6, 7, 8, 10, 11, 12]
-            
+
             for tdrs_id in tdrs_ids:
                 circle_id = f"TDRS{tdrs_id}_active_circle"
-                
+
                 if circle_id in self.ids:
                     circle_widget = self.ids[circle_id]
-                    
+
                     # Show circle if this TDRS is active
                     if tdrs_id in self.active_tdrs:
                         circle_widget.opacity = 1.0
@@ -216,44 +287,41 @@ class Orbit_Screen(MimicBase):
                         circle_widget.center = tdrs_widget.center
                     else:
                         circle_widget.opacity = 0.0
-                        
+
         except Exception as exc:
             log_error(f"Update TDRS circles failed: {exc}")
             import traceback
+
             traceback.print_exc()
 
     def _update_tdrs_labels(self) -> None:
         """Position TDRS group labels dynamically based on satellite positions."""
         try:
             # TDRS groups: East (6,12), Z-Belt (7,8), West (10,11)
-            tdrs_groups = {
-                'east': [6, 12],
-                'zbelt': [7, 8], 
-                'west': [10, 11]
-            }
-            
+            tdrs_groups = {"east": [6, 12], "zbelt": [7, 8], "west": [10, 11]}
+
             for group_name, tdrs_ids in tdrs_groups.items():
                 # Find the first visible TDRS in this group to position the label
                 label_id = f"tdrs_{group_name}_label"
                 if label_id not in self.ids:
                     continue
-                    
+
                 label_widget = self.ids[label_id]
                 label_positioned = False
                 group_active = False
-                
+
                 # Check if any TDRS in this group is active
                 for tdrs_id in tdrs_ids:
                     if tdrs_id in self.active_tdrs:
                         group_active = True
                         break
-                
+
                 # Set label color based on group activity
                 if group_active:
                     label_widget.color = (1, 0, 1, 1)  # Magenta when active
                 else:
                     label_widget.color = (1, 1, 1, 1)  # White when inactive
-                
+
                 for tdrs_id in tdrs_ids:
                     tdrs_name = f"TDRS{tdrs_id}"
                     if tdrs_name in self.ids:
@@ -264,14 +332,15 @@ class Orbit_Screen(MimicBase):
                         label_widget.pos = (label_x, label_y)
                         label_positioned = True
                         break
-                
+
                 # If no TDRS in group is visible, hide the label
                 if not label_positioned:
                     label_widget.pos = (-1000, -1000)  # Move off-screen
-                    
+
         except Exception as exc:
             log_error(f"Update TDRS labels failed: {exc}")
             import traceback
+
             traceback.print_exc()
 
     def calculate_total_orbits(self) -> int:
@@ -279,34 +348,30 @@ class Orbit_Screen(MimicBase):
         try:
             if not self.iss_tle:
                 return 0
-                
+
             # Get TLE epoch
             epoch = self.iss_tle.epoch
             epoch_dt = datetime.strptime(str(epoch), "%Y/%m/%d %H:%M:%S")
-            
+
             # Calculate orbits since epoch
             now = datetime.utcnow()
             time_since_epoch = (now - epoch_dt).total_seconds()
-            
+
             # ISS orbital period is approximately 92.5 minutes
             orbital_period_seconds = 92.5 * 60
             orbits_since_epoch = int(time_since_epoch / orbital_period_seconds)
-            
+
             # Extract revolutions directly from TLE line 2 (characters 64-68)
-            # We need to get the raw TLE data
             cfg = Path.home() / ".mimic_data" / "iss_tle_config.json"
             lines = json.loads(cfg.read_text())
             tle_line2 = lines["ISS_TLE_Line2"]
-            
-            # Extract revolutions (characters 64-68, 1-indexed)
             revolutions_str = tle_line2[63:68].strip()  # 0-indexed, so 63:68
             epoch_revolutions = int(revolutions_str)
-            
+
             # Total = TLE revolutions + 100,000 + orbits since epoch
             total_orbits = epoch_revolutions + 100000 + orbits_since_epoch
-            
             return total_orbits
-            
+
         except Exception as exc:
             log_error(f"Calculate total orbits failed: {exc}")
             return 0
@@ -316,27 +381,18 @@ class Orbit_Screen(MimicBase):
         try:
             if not self.iss_tle:
                 return 0
-                
-            # Get user's timezone (default to Houston)
+
             user_tz = pytz.timezone("America/Chicago")  # Houston timezone
-            
-            # Get current time in user's timezone
             now_utc = datetime.utcnow()
             now_local = now_utc.replace(tzinfo=pytz.utc).astimezone(user_tz)
-            
-            # Get midnight today in user's timezone
             midnight_local = now_local.replace(hour=0, minute=0, second=0, microsecond=0)
             midnight_utc = midnight_local.astimezone(pytz.utc)
-            
-            # Calculate time since midnight (both times are now timezone-aware)
             time_since_midnight = (now_utc.replace(tzinfo=pytz.utc) - midnight_utc).total_seconds()
-            
-            # ISS orbital period is approximately 92.5 minutes
+
             orbital_period_seconds = 92.5 * 60
             daily_orbits = int(time_since_midnight / orbital_period_seconds)
-            
             return daily_orbits
-            
+
         except Exception as exc:
             log_error(f"Calculate daily orbits failed: {exc}")
             return 0
@@ -344,9 +400,6 @@ class Orbit_Screen(MimicBase):
     def get_telemetry_data(self) -> tuple[list, list]:
         """Get telemetry data from the database."""
         try:
-            import sqlite3
-            from pathlib import Path
-            
             # Database path - cross-platform handling
             db_path = Path("/dev/shm/iss_telemetry.db")
             if not db_path.exists():
@@ -354,18 +407,18 @@ class Orbit_Screen(MimicBase):
                 if not db_path.exists():
                     log_error("Telemetry database not found")
                     return [], []
-            
+
             conn = sqlite3.connect(str(db_path))
             c = conn.cursor()
-            
-            c.execute('select Value from telemetry')
+
+            c.execute("select Value from telemetry")
             values = c.fetchall()
-            c.execute('select Timestamp from telemetry')
+            c.execute("select Timestamp from telemetry")
             timestamps = c.fetchall()
-            
+
             conn.close()
             return values, timestamps
-            
+
         except Exception as exc:
             log_error(f"Get telemetry data failed: {exc}")
             return [], []
@@ -375,43 +428,45 @@ class Orbit_Screen(MimicBase):
         try:
             # Helper functions
             def dot(a, b):
-                return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]
-            
+                return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+
             def cross(a, b):
-                return [a[1]*b[2] - a[2]*b[1],
-                       a[2]*b[0] - a[0]*b[2],
-                       a[0]*b[1] - a[1]*b[0]]
-            
+                return [
+                    a[1] * b[2] - a[2] * b[1],
+                    a[2] * b[0] - a[0] * b[2],
+                    a[0] * b[1] - a[1] * b[0],
+                ]
+
             def safe_divide(numerator, denominator):
                 return numerator / denominator if denominator != 0 else 0
-            
+
             # Earth's gravitational parameter (km³/s²)
             mu = 398600.4418
-            
+
             # Calculate position and velocity magnitudes
             pos_mag = math.sqrt(dot(pos_vec, pos_vec))
             vel_mag = math.sqrt(dot(vel_vec, vel_vec))
-            
+
             # Calculate altitude (distance from Earth's surface)
             altitude_km = pos_mag - 6371.0  # Earth radius in km
-            
+
             # Calculate specific angular momentum vector
             h_vec = cross(pos_vec, vel_vec)
             h_mag = math.sqrt(dot(h_vec, h_vec))
-            
+
             # Calculate inclination (angle between h and z-axis)
             inc_rad = math.acos(safe_divide(h_vec[2], h_mag))
             inc_deg = math.degrees(inc_rad)
-            
+
             # Calculate eccentricity vector
             v_radial = safe_divide(dot(vel_vec, pos_vec), pos_mag)
-            
+
             # e = (v² - μ/r)r - (r·v)v / μ
-            e_term1 = [x * (vel_mag**2 - mu/pos_mag) for x in pos_vec]
+            e_term1 = [x * (vel_mag**2 - mu / pos_mag) for x in pos_vec]
             e_term2 = [x * (pos_mag * v_radial) for x in vel_vec]
             e_vec = [(e_term1[i] - e_term2[i]) / mu for i in range(3)]
             e_mag = math.sqrt(dot(e_vec, e_vec))
-            
+
             # Calculate orbital period
             # T = 2π * sqrt(a³/μ) where a is semi-major axis
             # a = h² / (μ(1-e²))
@@ -420,244 +475,208 @@ class Orbit_Screen(MimicBase):
                 period_minutes = (2 * math.pi * math.sqrt(a**3 / mu)) / 60
             else:
                 period_minutes = 0
-            
+
             return {
-                'altitude_km': altitude_km,
-                'inc_deg': inc_deg,
-                'period_minutes': period_minutes,
-                'e_mag': e_mag
+                "altitude_km": altitude_km,
+                "inc_deg": inc_deg,
+                "period_minutes": period_minutes,
+                "e_mag": e_mag,
             }
-            
+
         except Exception as exc:
             log_error(f"Calculate orbital parameters failed: {exc}")
             return {
-                'altitude_km': 0,
-                'inc_deg': 0,
-                'period_minutes': 0,
-                'beta_deg': 0,
-                'e_mag': 0
+                "altitude_km": 0,
+                "inc_deg": 0,
+                "period_minutes": 0,
+                "beta_deg": 0,
+                "e_mag": 0,
             }
 
-    def get_static_zoe_boundary(self) -> list:
-        """Get a static ZOE boundary as a simple ellipse centered at 0° lat, 70° lon."""
-        # Create a simple elliptical boundary
-        center_lat = 0.0
-        center_lon = 70.0
-        lat_radius = 52.0  # ±52° latitude
-        lon_radius = 20.0  # ±20° longitude
-        
-        # Generate ellipse points
-        points = []
-        num_points = 32  # Number of points to create smooth ellipse
-        
-        for i in range(num_points):
-            angle = 2 * math.pi * i / num_points
-            lat = center_lat + lat_radius * math.sin(angle)
-            lon = center_lon + lon_radius * math.cos(angle)
-            points.append((lat, lon))
-        
-        # Close the ellipse
-        points.append(points[0])
-        
-        return points
+    # ─────────────────────── ZOE / coverage logic (NO drawing) ────────────────
+    def _tdrs_sublongitudes_at(self, t_dt: datetime) -> dict[str, float]:
+        """Return current GEO longitudes for non-Z-belt TDRS, with fallbacks."""
+        lons: dict[str, float] = {}
+        for name in ("TDRS 6", "TDRS 10", "TDRS 11", "TDRS 12"):
+            lon = None
+            sat = self.tdrs_tles.get(name)
+            if sat is not None:
+                try:
+                    sat.compute(t_dt)
+                    lon = math.degrees(sat.sublong)
+                except Exception:
+                    lon = None
+            if lon is None:
+                lon = self._FALLBACK_TDRS_LONS[name]
+            lons[name] = _wrap_lon_deg(lon)
+        return lons
 
-    def is_point_in_zoe(self, lat: float, lon: float, zoe_boundary_points: list) -> bool:
-        """Check if a point is inside the ZOE ellipse using simple distance check."""
-        try:
-            # Simple distance check from center
-            center_lat = 0.0
-            center_lon = 70.0
-            lat_radius = 52.0
-            lon_radius = 20.0
-            
-            # Calculate normalized distance from center
-            lat_dist = abs(lat - center_lat) / lat_radius
-            lon_dist = abs(lon - center_lon) / lon_radius
-            
-            # Point is inside if normalized distance <= 1
-            return (lat_dist**2 + lon_dist**2) <= 1.0
-            
-        except Exception as exc:
-            log_error(f"Check point in ZOE failed: {exc}")
+    def _has_tdrs_coverage(
+        self, lat: float, lon: float, alt_km: float, tdt: datetime, min_el_deg: float
+    ) -> bool:
+        """True if any of TDRS-6/10/11/12 meets min elevation at (lat,lon,alt_km)."""
+        slots = self._tdrs_sublongitudes_at(tdt)
+        for _, slon in slots.items():
+            if _elevation_deg_at_alt(lat, lon, alt_km, slon) >= min_el_deg:
+                return True
+        return False
+
+    def _in_zoe_at(self, t_ephem: ephem.Date) -> bool:
+        """
+        True if ISS is inside ZOE at time t_ephem:
+        - ZOE does not apply if Z-belt (7 or 8) is active -> always False.
+        - Otherwise, no coverage from 6/10/11/12 AND |lat| <= ZOE band.
+        Uses live ISS altitude from telemetry; falls back to 420 km if missing.
+        """
+        if any(t in (7, 8) for t in self.active_tdrs if t):
             return False
 
-    def calculate_zoe_timing(self) -> tuple:
-        """Calculate time until ZOE entry (LOS) and exit (AOS).
-        - If currently outside ZOE: look ahead up to 90 minutes to find first entry, then up to 30 minutes after entry for exit.
-        - If currently inside ZOE: look ahead up to 30 minutes to find exit.
-        Returns (entry_time, exit_time) as ephem.Date or (None, None) if not found in windows.
+        if not self.iss_tle:
+            return False
+
+        # ISS subpoint at time t_ephem
+        self.iss_tle.compute(t_ephem)
+        lat = math.degrees(self.iss_tle.sublat)
+        lon = math.degrees(self.iss_tle.sublong)
+
+        if abs(lat) > self._ZOE_LAT_BAND:
+            return False
+
+        # Convert ephem.Date to naive UTC datetime
+        t_dt = datetime.strptime(str(t_ephem), "%Y/%m/%d %H:%M:%S")
+
+        # Use latest live altitude if available; otherwise fallback
+        alt_km = float(self.current_altitude_km) if self.current_altitude_km else self._ZOE_ALT_KM
+
+        return not self._has_tdrs_coverage(lat, lon, alt_km, t_dt, self._ZOE_MIN_EL)
+
+    def calculate_zoe_los_aos(self) -> tuple[Optional[ephem.Date], Optional[ephem.Date]]:
+        """
+        Return (LOS_entry_time, AOS_exit_time) as ephem.Date or (None, None).
+        - If currently outside ZOE: search entry within ~120 min, then exit within ~45 min.
+        - If currently inside ZOE: search exit within ~45 min.
+        Resolutions are coarse (30 s) then refined with a binary search to ~1 s.
         """
         try:
             if not self.iss_tle:
                 return None, None
 
-            # Static ellipse boundary
-            zoe_boundary_points = self.get_static_zoe_boundary()
-
-            # Helper to check ZOE at a given time
-            def in_zoe_at(t: ephem.Date) -> bool:
-                self.iss_tle.compute(t)
-                lat = math.degrees(self.iss_tle.sublat)
-                lon = math.degrees(self.iss_tle.sublong)
-                return self.is_point_in_zoe(lat, lon, zoe_boundary_points)
+            # If Z-belt active, ZOE off
+            if any(t in (7, 8) for t in self.active_tdrs if t):
+                return None, None
 
             now = ephem.now()
-            in_zoe_now = in_zoe_at(now)
+            in_now = self._in_zoe_at(now)
 
-            entry_time = None
-            exit_time = None
+            step_sec = 30
+            horizon_entry = 120 * 60
+            horizon_exit = 45 * 60
 
-            # Time windows and resolution
-            step_sec = 30  # 30-second resolution
-            lookahead_entry_sec = 90 * 60  # 90 minutes
-            lookahead_exit_sec = 30 * 60   # 30 minutes
+            def bsearch_transition(t0: ephem.Date, t1: ephem.Date, target_in: bool) -> ephem.Date:
+                lo, hi = t0, t1
+                for _ in range(24):  # refine ~ 2^-24 of interval
+                    mid = lo + (hi - lo) / 2
+                    if self._in_zoe_at(mid) == target_in:
+                        hi = mid
+                    else:
+                        lo = mid
+                return hi
 
-            if in_zoe_now:
-                # Find exit within 30 minutes
-                for s in range(step_sec, lookahead_exit_sec + step_sec, step_sec):
+            if in_now:
+                # Find AOS exit
+                for s in range(step_sec, horizon_exit + step_sec, step_sec):
                     t = now + s * ephem.second
-                    if not in_zoe_at(t):
-                        exit_time = t
-                        break
-                # No entry_time when already inside
-                entry_time = None
+                    if not self._in_zoe_at(t):
+                        exit_t = bsearch_transition(t - step_sec * ephem.second, t, target_in=False)
+                        return None, exit_t
+                return None, None
             else:
-                # Find entry within 90 minutes
-                for s in range(step_sec, lookahead_entry_sec + step_sec, step_sec):
+                # Find LOS entry
+                entry_t = None
+                for s in range(step_sec, horizon_entry + step_sec, step_sec):
                     t = now + s * ephem.second
-                    if in_zoe_at(t):
-                        entry_time = t
+                    if self._in_zoe_at(t):
+                        entry_t = bsearch_transition(t - step_sec * ephem.second, t, target_in=True)
                         break
-                # If an entry was found, also find exit within 30 minutes after entry
-                if entry_time is not None:
-                    for s in range(step_sec, lookahead_exit_sec + step_sec, step_sec):
-                        t = entry_time + s * ephem.second
-                        if not in_zoe_at(t):
-                            exit_time = t
-                            break
-
-            return entry_time, exit_time
-
+                if entry_t is None:
+                    return None, None
+                # Find AOS exit after entry
+                for s in range(step_sec, horizon_exit + step_sec, step_sec):
+                    t = entry_t + s * ephem.second
+                    if not self._in_zoe_at(t):
+                        exit_t = bsearch_transition(t - step_sec * ephem.second, t, target_in=False)
+                        return entry_t, exit_t
+                return entry_t, None
         except Exception as exc:
-            log_error(f"Calculate ZOE timing failed: {exc}")
+            log_error(f"calculate_zoe_los_aos failed: {exc}")
             return None, None
 
-    def update_zoe_region(self) -> None:
-        """Update the ZOE region display using static boundary."""
+    def _update_zoe_timers(self) -> None:
+        """Update the LOS/AOS countdown label text if present (no drawing)."""
         try:
-            # Hide ZOE entirely if Z-belt (7/8) is active (no ZOE during Z-belt coverage)
-            zoe_should_show = not any(t in (7, 8) for t in self.active_tdrs if t)
-            if 'ZOE_boundary' in self.ids:
-                self.ids.ZOE_boundary.opacity = 1.0 if zoe_should_show else 0.0
-            if 'ZOElabel' in self.ids:
-                self.ids.ZOElabel.opacity = 1.0 if zoe_should_show else 0.0
-            if not zoe_should_show:
-                # Clear timers when ZOE does not apply
-                if 'zoe_loss_timer' in self.ids:
-                    self.ids.zoe_loss_timer.text = "--:--"
-                if 'zoe_acquisition_timer' in self.ids:
-                    self.ids.zoe_acquisition_timer.text = "--:--"
+            if "zoe_loss_timer" not in self.ids or "zoe_acquisition_timer" not in self.ids:
                 return
 
-            # Refresh cached entry/exit times sparingly
-            self._refresh_zoe_times_if_needed()
+            # If Z-belt active, timers off
+            if any(t in (7, 8) for t in self.active_tdrs if t):
+                self.ids.zoe_loss_timer.text = "--:--"
+                self.ids.zoe_acquisition_timer.text = "--:--"
+                return
 
-            # Use static ZOE boundary for drawing
-            zoe_boundary_points = self.get_static_zoe_boundary()
-
-            # Update timing labels using cached times for smooth per-second countdown
+            now = ephem.now()
             entry_time = self._zoe_entry_time
             exit_time = self._zoe_exit_time
 
-            if 'zoe_loss_timer' in self.ids and 'zoe_acquisition_timer' in self.ids:
-                now = ephem.now()
+            # LOS countdown (to entry)
+            if entry_time and entry_time > now:
+                dtm = entry_time - now
+                total_minutes = int(dtm * 24 * 60)
+                minutes = total_minutes % 60
+                seconds = int((dtm * 24 * 60 - total_minutes) * 60)
+                self.ids.zoe_loss_timer.text = f"{minutes:02d}:{seconds:02d}"
+            else:
+                self.ids.zoe_loss_timer.text = "--:--"
 
-                # zoe_loss_timer shows time until ISS enters ZOE (loses signal)
-                if entry_time and entry_time > now:
-                    time_to_entry = entry_time - now
-                    total_minutes = int(time_to_entry * 24 * 60)
-                    minutes = total_minutes % 60
-                    seconds = int((time_to_entry * 24 * 60 - total_minutes) * 60)
-                    self.ids.zoe_loss_timer.text = f"{minutes:02d}:{seconds:02d}"
-                else:
-                    self.ids.zoe_loss_timer.text = "--:--"
-
-                # zoe_acquisition_timer shows time until ISS exits ZOE (regains signal)
-                if exit_time and exit_time > now:
-                    time_to_exit = exit_time - now
-                    total_minutes = int(time_to_exit * 24 * 60)
-                    minutes = total_minutes % 60
-                    seconds = int((time_to_exit * 24 * 60 - total_minutes) * 60)
-                    self.ids.zoe_acquisition_timer.text = f"{minutes:02d}:{seconds:02d}"
-                else:
-                    self.ids.zoe_acquisition_timer.text = "--:--"
-
-            # Update ZOE boundary display
-            if 'ZOE_boundary' in self.ids and zoe_boundary_points:
-                # Convert lat/lon points to screen coordinates
-                screen_points = []
-                for lat, lon in zoe_boundary_points:
-                    x, y = self.map_px(lat, lon)
-                    screen_points.extend([x, y])
-
-                # Update the ZOE boundary widget
-                for instruction in self.ids.ZOE_boundary.canvas.children:
-                    if hasattr(instruction, 'points'):
-                        instruction.points = screen_points
-                        break
-
-            # Update ZOE label position
-            if 'ZOElabel' in self.ids:
-                # Center of ZOE region
-                zoe_center_lat = 0  # Equator
-                zoe_center_lon = 70  # Center of Indian Ocean region
-                x, y = self.map_px(zoe_center_lat, zoe_center_lon)
-                self.ids.ZOElabel.pos = (x - self.ids.ZOElabel.width/2, y - self.ids.ZOElabel.height/2)
-
-            # Check if ISS is currently in the ZOE
-            if self.iss_tle and 'ZOE_boundary' in self.ids:
-                self.iss_tle.compute(ephem.now())
-                iss_lat = math.degrees(self.iss_tle.sublat)
-                iss_lon = math.degrees(self.iss_tle.sublong)
-
-                # Check if ISS is in ZOE
-                in_zoe = self.is_point_in_zoe(iss_lat, iss_lon, zoe_boundary_points)
-
-                if in_zoe:
-                    # ISS is in ZOE - make it more visible
-                    self.ids.ZOE_boundary.col = (1, 0, 0, 0.8)  # Red, more opaque
-                else:
-                    # ISS is not in ZOE - normal appearance
-                    self.ids.ZOE_boundary.col = (1, 0, 1, 0.5)  # Magenta, semi-transparent
-
+            # AOS countdown (to exit)
+            if exit_time and exit_time > now:
+                dtm = exit_time - now
+                total_minutes = int(dtm * 24 * 60)
+                minutes = total_minutes % 60
+                seconds = int((dtm * 24 * 60 - total_minutes) * 60)
+                self.ids.zoe_acquisition_timer.text = f"{minutes:02d}:{seconds:02d}"
+            else:
+                self.ids.zoe_acquisition_timer.text = "--:--"
         except Exception as exc:
-            log_error(f"Update ZOE region failed: {exc}")
+            log_error(f"_update_zoe_timers failed: {exc}")
 
+    # ─────────────────────── crew sleep timer, telemetry, etc. ────────────────
     def update_crew_sleep_timer(self) -> None:
         """Update the crew sleep timer based on standard sleep schedule (21:30-06:00 GMT)."""
         try:
             utc_now = datetime.utcnow()
             current_time = utc_now.time()
-            
+
             # Define sleep schedule (21:30 to 06:00 GMT)
             sleep_start = datetime.strptime("21:30", "%H:%M").time()
             sleep_end = datetime.strptime("06:00", "%H:%M").time()
-            
+
             # Check if currently in sleep period
             if sleep_start <= current_time or current_time < sleep_end:
                 # During sleep period - show elapsed time
                 if current_time < sleep_end:
                     # Sleep started yesterday at 21:30
-                    sleep_start_dt = utc_now.replace(hour=21, minute=30, second=0, microsecond=0) - timedelta(days=1)
+                    sleep_start_dt = utc_now.replace(hour=21, minute=30, second=0, microsecond=0) - timedelta(
+                        days=1
+                    )
                 else:
                     # Sleep started today at 21:30
                     sleep_start_dt = utc_now.replace(hour=21, minute=30, second=0, microsecond=0)
-                
+
                 elapsed = utc_now - sleep_start_dt
                 hours = int(elapsed.total_seconds() // 3600)
                 minutes = int((elapsed.total_seconds() % 3600) // 60)
                 seconds = int(elapsed.total_seconds() % 60)
-                
+
                 self.ids.crew_sleep_timer.text = f"+{hours:02d}:{minutes:02d}:{seconds:02d}"
                 self.ids.crew_sleep_timer.color = (0.5, 0, 0.5, 1)  # Magenta during sleep
             else:
@@ -667,22 +686,24 @@ class Orbit_Screen(MimicBase):
                     sleep_start_dt = utc_now.replace(hour=21, minute=30, second=0, microsecond=0)
                 else:
                     # Sleep starts tomorrow
-                    sleep_start_dt = utc_now.replace(hour=21, minute=30, second=0, microsecond=0) + timedelta(days=1)
-                
+                    sleep_start_dt = utc_now.replace(hour=21, minute=30, second=0, microsecond=0) + timedelta(
+                        days=1
+                    )
+
                 countdown = sleep_start_dt - utc_now
                 hours = int(countdown.total_seconds() // 3600)
                 minutes = int((countdown.total_seconds() % 3600) // 60)
                 seconds = int(countdown.total_seconds() % 60)
-                
+
                 self.ids.crew_sleep_timer.text = f"-{hours:02d}:{minutes:02d}:{seconds:02d}"
                 self.ids.crew_sleep_timer.color = (1, 1, 1, 1)  # White countdown
-                
+
         except Exception as exc:
             log_error(f"Update crew sleep timer failed: {exc}")
             self.ids.crew_sleep_timer.text = "Sleep: --:--"
 
     def update_telemetry_values(self) -> None:
-        """Update all telemetry values using accurate state vectors."""
+        """Update all telemetry values using accurate state vectors, and cache live altitude."""
         try:
             # Get telemetry data from database
             values, timestamps = self.get_telemetry_data()
@@ -690,7 +711,7 @@ class Orbit_Screen(MimicBase):
             if not values or len(values) < 61:
                 log_error("Insufficient telemetry data")
                 return
-            
+
             # Extract ISS state vectors (indices 55-60 from GUI.py)
             position_x = float(values[55][0])  # km
             position_y = float(values[56][0])  # km
@@ -698,53 +719,58 @@ class Orbit_Screen(MimicBase):
             velocity_x = float(values[58][0]) / 1000.0  # convert to km/s
             velocity_y = float(values[59][0]) / 1000.0  # convert to km/s
             velocity_z = float(values[60][0]) / 1000.0  # convert to km/s
-            
+
             # Get solar beta directly from telemetry (index 176 from GUI.py)
             solar_beta = float(values[176][0])  # degrees
-            
+
             # Create position and velocity vectors
             pos_vec = [position_x, position_y, position_z]
             vel_vec = [velocity_x, velocity_y, velocity_z]
-            
+
             # Calculate accurate orbital parameters
             orbital_params = self.calculate_orbital_parameters(pos_vec, vel_vec)
-            
+
+            # Cache LIVE altitude for ZOE coverage checks (fallback remains if NaN/err)
+            alt_km = float(orbital_params["altitude_km"])
+            if alt_km > 0:
+                self.current_altitude_km = alt_km
+
             # Calculate latitude and longitude from position vector
-            # Convert Cartesian to spherical coordinates
             lat_rad = math.asin(position_z / math.sqrt(position_x**2 + position_y**2 + position_z**2))
             lon_rad = math.atan2(position_y, position_x)
-            
+
             lat_deg = math.degrees(lat_rad)
             lon_deg = math.degrees(lon_rad)
-            
+
             # Update UI elements with accurate values
-            if 'latitude' in self.ids:
+            if "latitude" in self.ids:
                 self.ids.latitude.text = f"{lat_deg:.2f}°"
-            if 'longitude' in self.ids:
+            if "longitude" in self.ids:
                 self.ids.longitude.text = f"{lon_deg:.2f}°"
-            if 'altitude' in self.ids:
+            if "altitude" in self.ids:
                 self.ids.altitude.text = f"{orbital_params['altitude_km']:.1f} km"
-            if 'inc' in self.ids:
+            if "inc" in self.ids:
                 self.ids.inc.text = f"{orbital_params['inc_deg']:.2f}°"
-            if 'period' in self.ids:
+            if "period" in self.ids:
                 self.ids.period.text = f"{orbital_params['period_minutes']:.1f}m"
-            if 'solarbeta' in self.ids:
+            if "solarbeta" in self.ids:
                 self.ids.solarbeta.text = f"{solar_beta:.1f}°"
-                
+
         except Exception as exc:
             log_error(f"Update telemetry values failed: {exc}")
             import traceback
+
             traceback.print_exc()
 
     def set_user_location(self, lat: float, lon: float) -> None:
         """Set the user location and update the display."""
         self.user_lat = lat
         self.user_lon = lon
-        
+
         # Update the observer location for pass calculations
         self.location.lat = str(lat)
         self.location.lon = str(lon)
-        
+
         # Update the display
         self.update_user_location()
 
@@ -762,53 +788,85 @@ class Orbit_Screen(MimicBase):
         mp = self.ids.OrbitMap
         tw, th = mp.texture_size
         if tw == 0 or th == 0:
-            return 0, 0                           # texture not loaded yet
-    
+            return 0, 0  # texture not loaded yet
+
         nw, nh = mp.norm_image_size
-        pad_x  = (mp.width  - nw) / 2             # black bars left/right
-        pad_y  = (mp.height - nh) / 2             # black bars top/bottom
-    
-        fx = (lon + 180.0) / 360.0                # west→east  0 … 1
-        fy = (lat +  90.0) / 180.0                # north→south 0 … 1
-    
+        pad_x = (mp.width - nw) / 2  # black bars left/right
+        pad_y = (mp.height - nh) / 2  # black bars top/bottom
+
+        fx = (lon + 180.0) / 360.0  # west→east  0 … 1
+        fy = (lat + 90.0) / 180.0  # north→south 0 … 1
+
         x = mp.x + pad_x + fx * nw
-        y = mp.y + pad_y + fy * nh        # invert Y
+        y = mp.y + pad_y + fy * nh  # invert Y
         return x, y
-    
-    
+
     # ─────────────────────── Sun updater ───────────────────────────────────────
     def update_sun(self, _dt=0) -> None:
         if "sun_icon" not in self.ids:
-            return                                # KV not built yet
-    
+            return  # KV not built yet
+
         now = ephem.now()
         sun = ephem.Sun(now)
-    
+
         # latitude = declination
         lat = math.degrees(sun.dec)
-    
+
         # longitude: λ = RA − GST  (east-positive, wrap to −180…+180)
-        g = ephem.Observer(); g.lon = '0'; g.lat = '0'; g.date = now
+        g = ephem.Observer()
+        g.lon = "0"
+        g.lat = "0"
+        g.date = now
         lon = math.degrees(sun.ra - g.sidereal_time())
         lon = (lon + 180) % 360 - 180
-    
+
         x, y = self.map_px(lat, lon)
-        
         icon = self.ids.sun_icon
         icon.center = (x, y)
-    
+
     # ---------------------------------------------------------------- files
     @property
     def map_jpg(self) -> Path:
         return Path.home() / ".mimic_data" / "map.jpg"
 
     @property
+    def map_nozoe_jpg(self) -> Path:
+        return Path.home() / ".mimic_data" / "map_nozoe.jpg"
+
+    @property
+    def map_zoe_jpg(self) -> Path:
+        return Path.home() / ".mimic_data" / "map_zoe.jpg"
+
+    @property
     def globe_png(self) -> Path:
         return Path.home() / ".mimic_data" / "globe.png"
 
     def update_orbit_map(self, _dt=0):
-        self.ids.OrbitMap.source = str(self.map_jpg)
-        self.ids.OrbitMap.reload()
+        """
+        Choose base map image:
+        - If Z-belt (7 or 8) active -> use night-only map_nozoe.jpg
+        - Else prefer map_zoe.jpg (if present), fall back to map_nozoe.jpg, then map.jpg
+        """
+        try:
+            use_nozoe = any(t in (7, 8) for t in self.active_tdrs if t)
+            if use_nozoe:
+                candidates = [self.map_nozoe_jpg, self.map_jpg]
+            else:
+                candidates = [self.map_zoe_jpg, self.map_nozoe_jpg, self.map_jpg]
+
+            src = None
+            for p in candidates:
+                if p.exists():
+                    src = str(p)
+                    break
+            if src is None:
+                src = str(self.map_jpg)  # last resort
+
+            if self.ids.OrbitMap.source != src:
+                self.ids.OrbitMap.source = src
+                self.ids.OrbitMap.reload()
+        except Exception as exc:
+            log_error(f"update_orbit_map failed: {exc}")
 
     def update_globe_image(self, _dt=0):
         try:
@@ -849,39 +907,38 @@ class Orbit_Screen(MimicBase):
                 return
 
             for name, sat in self.tdrs_tles.items():
-                id_name = name.replace(" ", "")           # "TDRS 6" ? "TDRS6"
-                if id_name not in self.ids:               # icon missing in KV ? skip
+                id_name = name.replace(" ", "")  # "TDRS 6" → "TDRS6"
+                if id_name not in self.ids:  # icon missing in KV ? skip
                     log_error(f"Missing KV id: {id_name}")
                     continue
 
-                img = self.ids[id_name]                   # the small ellipse icon
+                img = self.ids[id_name]  # the small ellipse icon
 
                 try:
                     sat.compute(datetime.utcnow())
-                    lon = sat.sublong * 180 / math.pi      # ephem radians?deg
-                    lat = sat.sublat  * 180 / math.pi
+                    lon = sat.sublong * 180 / math.pi  # ephem radians→deg
+                    lat = sat.sublat * 180 / math.pi
                 except Exception as exc:
                     log_error(f"{name} compute failed: {exc}")
                     continue
 
-                tex_w, tex_h  = self.ids.OrbitMap.texture_size
+                tex_w, tex_h = self.ids.OrbitMap.texture_size
                 norm_w, norm_h = self.ids.OrbitMap.norm_image_size
                 nX = 1 if tex_w == 0 else norm_w / tex_w
                 nY = 1 if tex_h == 0 else norm_h / tex_h
 
-                x, y = self.map_px(lat, lon)        # root-pixel centre of the dot
-                img.pos = (x - img.width  * nX / 2,
-                           y - img.height * nY / 2)
+                x, y = self.map_px(lat, lon)  # root-pixel centre of the dot
+                img.pos = (x - img.width * nX / 2, y - img.height * nY / 2)
 
                 # Update ground track for this TDRS satellite
                 track_id = f"{id_name}_track"
                 if track_id in self.ids:
                     # Generate ground track points (simplified - one orbit ahead)
-                    track_points = []
+                    track_points: list[float] = []
                     t = datetime.utcnow()
                     step = timedelta(minutes=1)
-                    
-                    for _ in range(1496):  # ~ one orbit ahead
+
+                    for _ in range(1496):  # ~ one orbit ahead (GEO path is stationary)
                         try:
                             sat.compute(t)
                             track_lat = math.degrees(sat.sublat)
@@ -892,13 +949,13 @@ class Orbit_Screen(MimicBase):
                         except Exception as exc:
                             log_error(f"{name} track compute failed: {exc}")
                             break
-                    
+
                     # Update the track line
                     for instruction in self.ids[track_id].canvas.children:
-                        if hasattr(instruction, 'points'):
+                        if hasattr(instruction, "points"):
                             instruction.points = track_points
                             break
-                
+
                 # Update active circle position if this TDRS is active
                 circle_id = f"{id_name}_active_circle"
                 if circle_id in self.ids:
@@ -909,33 +966,34 @@ class Orbit_Screen(MimicBase):
 
             # Position TDRS labels dynamically based on satellite positions
             self._update_tdrs_labels()
-        
+
             log_info("Update TDRS done")
-            
+
         except Exception as exc:
             log_error(f"Update TDRS failed: {exc}")
             import traceback
+
             traceback.print_exc()
 
-    # ---------------------------------------------------------------- ISS + next-pass
+    # ----------------------------------------------------------------- ISS + next-pass
     def _update_loc_markers(self) -> None:
         """Place Mission Control Center dots and labels on the map."""
         try:
-            # Define MCCs: (id_dot, id_label, lat, lon, dx, dy) where dx,dy are pixel offsets for label
+            # Define MCCs: (id_dot, id_label, lat, lon, dx, dy)
             loc_defs = [
-                ("mcc_houston",    "mcc_houston_label",    29.550,  -95.097,   0,  -15),  # Houston, TX area
-                ("mcc_quebec",     "mcc_quebec_label",     46.813,  -71.208,   5,  -5),   # Quebec City
-                ("mcc_oberpf",     "mcc_oberpf_label",     48.083,   11.283,   5,  -5),   # Oberpfaffenhofen, DE
-                ("mcc_huntsville", "mcc_huntsville_label", 34.730,  -86.586,   5,  -5),   # Huntsville, AL
-                ("mcc_tsukuba",    "mcc_tsukuba_label",    36.083,  140.083,   5,  -5),   # Tsukuba, JP
-                ("mcc_moscow",     "mcc_moscow_label",     55.752,   37.616,   5,  -5),   # Moscow, RU
+                ("mcc_houston", "mcc_houston_label", 29.550, -95.097, 0, -15),
+                ("mcc_quebec", "mcc_quebec_label", 46.813, -71.208, 5, -5),
+                ("mcc_oberpf", "mcc_oberpf_label", 48.083, 11.283, 5, -5),
+                ("mcc_huntsville", "mcc_huntsville_label", 34.730, -86.586, 5, -5),
+                ("mcc_tsukuba", "mcc_tsukuba_label", 36.083, 140.083, 5, -5),
+                ("mcc_moscow", "mcc_moscow_label", 55.752, 37.616, 5, -5),
             ]
             for dot_id, label_id, lat, lon, dx, dy in loc_defs:
                 if dot_id in self.ids and label_id in self.ids:
                     x, y = self.map_px(lat, lon)
                     # place dot centered on location
                     dot = self.ids[dot_id]
-                    dot.pos = (x - dot.width/2, y - dot.height/2)
+                    dot.pos = (x - dot.width / 2, y - dot.height / 2)
                     # place label with small offset
                     lbl = self.ids[label_id]
                     lbl.pos = (x + dx, y + dy)
@@ -946,95 +1004,92 @@ class Orbit_Screen(MimicBase):
     def update_orbit(self, _dt=0):
         cfg = Path.home() / ".mimic_data" / "iss_tle_config.json"
         try:
-            lines   = json.loads(cfg.read_text())
-            self.iss_tle = ephem.readtle(
-                "ISS (ZARYA)", lines["ISS_TLE_Line1"], lines["ISS_TLE_Line2"]
-            )
+            lines = json.loads(cfg.read_text())
+            self.iss_tle = ephem.readtle("ISS (ZARYA)", lines["ISS_TLE_Line1"], lines["ISS_TLE_Line2"])
         except Exception as exc:
             log_error(f"ISS TLE load failed: {exc}")
             return
-        
+
         # --- observer (user location) ---------------------------------------
-        loc             = self.location
+        loc = self.location
         loc.lat, loc.lon = str(self.user_lat), str(self.user_lon)
-        loc.elevation    = 10
-        loc.date         = ephem.now()          # ← **reset each tick**
-        
+        loc.elevation = 10
+        loc.date = ephem.now()  # ← **reset each tick**
+
         # ----------------------------------------------------------------------
         try:
-            next_pass = loc.next_pass(self.iss_tle)   # (AOS, …, max-el)
+            next_pass = loc.next_pass(self.iss_tle)  # (AOS, …, max-el)
         except Exception as exc:
             log_error(f"next_pass failed: {exc}")
             return
-        if next_pass[0] is None:      # never rises
+        if next_pass[0] is None:  # never rises
             self.ids.iss_next_pass1.text = "n/a"
             self.ids.iss_next_pass2.text = "n/a"
-            self.ids.countdown.text      = "n/a"
+            self.ids.countdown.text = "n/a"
             return
-        
+
         # — localise AOS time for display --------------------------------------
         utc_dt = datetime.strptime(str(next_pass[0]), "%Y/%m/%d %H:%M:%S")
         # For now, use Houston timezone. In the future, this could be configurable
-        local  = utc_dt.replace(tzinfo=pytz.utc)\
-                       .astimezone(pytz.timezone("America/Chicago"))
-        
+        local = utc_dt.replace(tzinfo=pytz.utc).astimezone(pytz.timezone("America/Chicago"))
+
         self.ids.iss_next_pass1.text = local.strftime("%Y-%m-%d")
         self.ids.iss_next_pass2.text = local.strftime("%H:%M:%S")
-        
+
         # — countdown ----------------------------------------------------------
-        delta  = next_pass[0] - loc.date            # loc.date is *now*
-        hrs    = delta * 24.0
-        mins   = (hrs  - math.floor(hrs)) * 60
-        secs   = (mins - math.floor(mins)) * 60
+        delta = next_pass[0] - loc.date  # loc.date is *now*
+        hrs = delta * 24.0
+        mins = (hrs - math.floor(hrs)) * 60
+        secs = (mins - math.floor(mins)) * 60
         self.ids.countdown.text = f"{int(hrs):02d}:{int(mins):02d}:{int(secs):02d}"
-        
+
         # — visible / not visible flag ----------------------------------------
-        sun         = ephem.Sun()
-        loc.date    = next_pass[2]                  # max-elevation time
+        sun = ephem.Sun()
+        loc.date = next_pass[2]  # max-elevation time
         sun.compute(loc)
         self.iss_tle.compute(loc)
         sun_alt = float(str(sun.alt).split(":")[0])
         self.ids.ISSvisible.text = (
-            "Visible Pass!" if (not self.iss_tle.eclipsed and -18 < sun_alt < -6)
-            else "Not Visible"
+            "Visible Pass!" if (not self.iss_tle.eclipsed and -18 < sun_alt < -6) else "Not Visible"
         )
-        
+
         # — update orbit counters --------------------------------------------
-        if 'dailyorbit' in self.ids and 'totalorbits' in self.ids:
+        if "dailyorbit" in self.ids and "totalorbits" in self.ids:
             total_orbits = self.calculate_total_orbits()
             daily_orbits = self.calculate_daily_orbits()
-            
+
             self.ids.totalorbits.text = str(total_orbits)
             self.ids.dailyorbit.text = str(daily_orbits)
-        
+
         # — update telemetry values ------------------------------------------
         self.update_telemetry_values()
-        
+
         # — update UTC time ------------------------------------------------
-        if 'gmtime' in self.ids:
+        if "gmtime" in self.ids:
             utc_now = datetime.utcnow()
             self.ids.gmtime.text = utc_now.strftime("%H:%M:%S UTC")
-        
+
         # — update crew sleep timer -----------------------------------------
-        if 'crew_sleep_timer' in self.ids:
+        if "crew_sleep_timer" in self.ids:
             self.update_crew_sleep_timer()
-        
-        # — update ZOE region ----------------------------------------------
-        self.update_zoe_region()
-        
-        # — update location markers ----------------------------------------------
+
+        # — recompute ZOE timers (no drawing) -------------------------------
+        self._refresh_zoe_times_if_needed()
+        self._update_zoe_timers()
+
+        # — update location markers -----------------------------------------
         self._update_loc_markers()
-        
-        # — update user location ----------------------------------------------
+
+        # — update user location --------------------------------------------
         self.update_user_location()
-        
+
     # ----------------------------------------------------------------- ISS icon + track
     def update_iss(self, _dt=0):
         """
         Update icon centre + rolling ground-track.
         """
         if "iss_icon" not in self.ids or self.iss_tle is None:
-            return            # not ready yet
+            return  # not ready yet
 
         # -- current sub-lat / sub-lon ---------------------------------------
         try:
@@ -1052,7 +1107,7 @@ class Orbit_Screen(MimicBase):
     def update_groundtrack(self, _dt=0) -> None:
         """
         Draw one full upcoming orbit (~96 min) as two Line objects so the
-        path wraps cleanly at +-180 degrees 
+        path wraps cleanly at +-180 degrees
         """
         try:
             if self.iss_tle is None or "OrbitMap" not in self.ids:
@@ -1065,20 +1120,17 @@ class Orbit_Screen(MimicBase):
                 return
 
             #---------- propagate ISS one orbit ahead -----------------------------
-            
             future_pts: list[tuple[float, float]] = []
 
-            t = datetime.utcnow()                 # start time as real datetime
-            step = timedelta(minutes=1)           # 60-s increments
+            t = datetime.utcnow()  # start time as real datetime
+            step = timedelta(minutes=1)  # 60-s increments
 
-            for _ in range(96):                   # ~ one orbit ahead
+            for _ in range(96):  # ~ one orbit ahead
                 self.iss_tle.compute(t)
                 lat = math.degrees(self.iss_tle.sublat)
                 lon = math.degrees(self.iss_tle.sublong)
                 future_pts.append((lat, lon))
-                t += step                         # advance to next minute
-
-        
+                t += step  # advance to next minute
 
             # ---------- split where path crosses dateline ------------------------
             seg_a: list[float] = []
@@ -1087,7 +1139,7 @@ class Orbit_Screen(MimicBase):
 
             last_lon = future_pts[0][1]
             for lat, lon in future_pts:
-                #if jump > 180, switch segments
+                # if jump > 180, switch segments
                 if abs(lon - last_lon) > 180:
                     current = seg_b if current is seg_a else seg_a
                 x, y = self.map_px(lat, lon)
@@ -1097,57 +1149,56 @@ class Orbit_Screen(MimicBase):
             # ---------- push to the Line widgets ---------------------------------
             # Access the line instructions directly from canvas
             for instruction in self.ids.iss_track_line_a.canvas.children:
-                if hasattr(instruction, 'points'):
+                if hasattr(instruction, "points"):
                     instruction.points = seg_a
                     break
             for instruction in self.ids.iss_track_line_b.canvas.children:
-                if hasattr(instruction, 'points'):
+                if hasattr(instruction, "points"):
                     instruction.points = seg_b
                     break
-            
+
         except Exception as exc:
             log_error(f"Update ground track failed: {exc}")
             import traceback
+
             traceback.print_exc()
 
+    # ----------------------------------------------------------------- LOS/AOS cache
     def _refresh_zoe_times_if_needed(self) -> None:
-        """Recompute ZOE entry/exit times sparingly; keep cached for smooth countdown."""
+        """
+        Recompute LOS/AOS sparingly; keep cached for smooth countdown.
+        ZOE suppressed if TDRS-7 or -8 is active.
+        """
         try:
-            # Hide ZOE if Z-belt active; clear cached times
-            zoe_should_show = not any(t in (7, 8) for t in self.active_tdrs if t)
-            if not zoe_should_show:
+            if any(t in (7, 8) for t in self.active_tdrs if t):
                 self._zoe_entry_time = None
                 self._zoe_exit_time = None
                 self._zoe_last_in_state = None
                 return
-            
-            # Current in/out state
+
             if not self.iss_tle:
                 return
+
             now = ephem.now()
-            self.iss_tle.compute(now)
-            cur_lat = math.degrees(self.iss_tle.sublat)
-            cur_lon = math.degrees(self.iss_tle.sublong)
-            in_zoe_now = self.is_point_in_zoe(cur_lat, cur_lon, self.get_static_zoe_boundary())
-            
-            # Determine if we need to recompute
-            should_recompute = False
+            in_now = self._in_zoe_at(now)
+
+            need = False
             if self._zoe_entry_time is None and self._zoe_exit_time is None:
-                should_recompute = True
+                need = True
             elif (time.time() - self._zoe_last_compute_time) > self._zoe_recompute_interval_s:
-                should_recompute = True
+                need = True
             elif self._zoe_exit_time is not None and now >= self._zoe_exit_time:
-                should_recompute = True
-            elif self._zoe_entry_time is not None and now >= self._zoe_entry_time and not in_zoe_now:
-                should_recompute = True
-            elif self._zoe_last_in_state is None or self._zoe_last_in_state != in_zoe_now:
-                should_recompute = True
-            
-            if should_recompute:
-                entry, exit_ = self.calculate_zoe_timing()
+                need = True
+            elif self._zoe_entry_time is not None and now >= self._zoe_entry_time and not in_now:
+                need = True
+            elif self._zoe_last_in_state is None or self._zoe_last_in_state != in_now:
+                need = True
+
+            if need:
+                entry, exit_ = self.calculate_zoe_los_aos()
                 self._zoe_entry_time = entry
                 self._zoe_exit_time = exit_
                 self._zoe_last_compute_time = time.time()
-                self._zoe_last_in_state = in_zoe_now
+                self._zoe_last_in_state = in_now
         except Exception as exc:
-            log_error(f"Refresh ZOE times failed: {exc}")
+            log_error(f"_refresh_zoe_times_if_needed failed: {exc}")

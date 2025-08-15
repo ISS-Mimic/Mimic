@@ -94,6 +94,7 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
             
             if not crew_table:
                 log_info("No ISS crew table found on Spacefacts.de")
+                print(f"No ISS crew table found on Spacefacts.de")
 
                 return []
             
@@ -200,6 +201,7 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
                     continue
             
             log_info(f"Successfully fetched {len(crew_info)} crew members from Spacefacts.de")
+            print(crew_info)
             return crew_info
             
         except requests.RequestException as exc:
