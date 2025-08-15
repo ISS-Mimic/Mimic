@@ -117,6 +117,9 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
                     continue
                 
                 try:
+                    # Debug: Log what we're getting from each cell
+                    log_info(f"Row cells ({len(cells)}): {[cell.get_text(strip=True) for cell in cells]}")
+                    
                     # Parse the table row - adjust indices based on actual table structure
                     # Based on the Spacefacts.de table structure from the user's example
                     crew_member = {
@@ -133,6 +136,9 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
                         'orbits': cells[12].get_text(strip=True) if len(cells) > 12 else None,  # Orbits
                         'expedition': 'Expedition 73'  # Default, will be updated from Wikipedia
                     }
+                    
+                    # Debug: Log the parsed crew member data
+                    log_info(f"Parsed crew member: {crew_member}")
                     
                     # Clean up the data
                     crew_member['name'] = crew_member['name'].strip()
