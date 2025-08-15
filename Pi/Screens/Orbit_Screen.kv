@@ -3,10 +3,6 @@
 # --------------------------------------------------------------------------
 #  Re-usable mixins
 # --------------------------------------------------------------------------
-<TelemetryLabel@Label>:
-    color: root.signalcolor
-    font_size: min(self.height * 0.2, dp(30))  # Responsive with max size
-    size_hint_y: 0.2
 
 <PassLabel@Label>:
     color: 1, 1, 1, 1
@@ -23,6 +19,11 @@
 # --------------------------------------------------------------------------
 <Orbit_Screen>:
     name: "orbit"
+
+    <TelemetryLabel@Label>:
+        color: root.signalcolor
+        font_size: min(self.height * 0.2, dp(30))  # Responsive with max size
+        size_hint_y: 0.2
 
     # ───────────────────────── Background & static images ──────────────────
     Image:
