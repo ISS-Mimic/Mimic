@@ -342,7 +342,7 @@ class Orbit_Screen(MimicBase):
                     label_widget.pos = (-1000, -1000)  # Move off-screen
 
             # Update ZOE label visibility based on TDRS 7/8 status
-            self._update_zoe_label_position()  # Temporarily disabled to debug screen loading
+            #self._update_zoe_label_position()  # Temporarily disabled to debug screen loading
 
         except Exception as exc:
             log_error(f"Update TDRS labels failed: {exc}")
@@ -658,81 +658,15 @@ class Orbit_Screen(MimicBase):
 
     def _update_zoe_label_position(self) -> None:
         """Position the ZOE label at 0° latitude, 77° longitude on the map (once) and control visibility based on TDRS status."""
-        try:
-            if "ZOElabel" not in self.ids:
-                log_info("ZOElabel widget not found in ids")
-                return
             
-            zoe_label = self.ids.ZOElabel
-            log_info(f"Found ZOElabel widget: {zoe_label}")
-            
-            # Position the label only if it hasn't been positioned yet
-            if not hasattr(zoe_label, '_positioned'):
-                log_info("Positioning ZOE label for the first time")
-                # Fixed position: 0° latitude, 77° longitude
-                lat = 0.0
-                lon = 77.0
+        zoe_label = self.ids.ZOElabel
+         
+        lat = 0.0
+        lon = 77.0
                 
-                # Convert to map pixel coordinates
-                x, y = self.map_px(lat, lon)
-                log_info(f"ZOE label map coordinates: lat={lat}, lon={lon} -> x={x}, y={y}")
-                
-                # Check if coordinates are valid (not off-screen)
-                if x < 0 or y < 0 or x > 10000 or y > 10000:
-                    log_error(f"ZOE label coordinates seem invalid: x={x}, y={y}")
-                    return
-                
-                # Position the label
-                if hasattr(zoe_label, 'pos'):
-                    zoe_label.pos = (x, y)
-                    log_info(f"Set ZOE label pos to ({x}, {y})")
-                elif hasattr(zoe_label, 'center'):
-                    zoe_label.center = (x, y)
-                    log_info(f"Set ZOE label center to ({x}, {y})")
-                
-                # Mark as positioned
-                zoe_label._positioned = True
-                log_info("ZOE label marked as positioned")
-            else:
-                log_info("ZOE label already positioned, updating visibility only")
-            
-            # Control visibility based on TDRS 7/8 status
-            if any(t in (7, 8) for t in self.active_tdrs if t):
-                # Z-belt active, hide ZOE label
-                zoe_label.opacity = 0
-                log_info("Z-belt active, hiding ZOE label (opacity=0)")
-            else:
-                # Z-belt not active, show ZOE label
-                zoe_label.opacity = 1
-                log_info("Z-belt not active, showing ZOE label (opacity=1)")
-                
-                # Force the label to be visible and on top
-                zoe_label.opacity = 1.0
-                zoe_label.color = (1, 0, 0, 1)  # Bright red for debugging
-                zoe_label.font_size = 24  # Make it larger
-                zoe_label.bold = True  # Make it bold
-                
-                # Try to bring the label to the front
-                try:
-                    if hasattr(zoe_label, 'bring_to_front'):
-                        zoe_label.bring_to_front()
-                    elif hasattr(zoe_label.parent, 'remove_widget') and hasattr(zoe_label.parent, 'add_widget'):
-                        # Remove and re-add to bring to front
-                        zoe_label.parent.remove_widget(zoe_label)
-                        zoe_label.parent.add_widget(zoe_label)
-                        log_info("Re-added ZOE label to bring it to front")
-                except Exception as e:
-                    log_info(f"Could not bring ZOE label to front: {e}")
-                
-                log_info("Forced ZOE label to be bright red, large, and bold for debugging")
-            
-            # Additional debug info
-            log_info(f"ZOE label final state: opacity={zoe_label.opacity}, pos={getattr(zoe_label, 'pos', 'N/A')}, center={getattr(zoe_label, 'center', 'N/A')}, size={getattr(zoe_label, 'size', 'N/A')}, text='{getattr(zoe_label, 'text', 'N/A')}, color={getattr(zoe_label, 'color', 'N/A')}, font_size={getattr(zoe_label, 'font_size', 'N/A')}")
-                
-        except Exception as exc:
-            log_error(f"_update_zoe_label_position failed: {exc}")
-            import traceback
-            traceback.print_exc()
+        x, y = self.map_px(lat, lon)
+        zoe_label.pos = (x, y)
+  
 
     # ─────────────────────── crew sleep timer, telemetry, etc. ────────────────
     def update_crew_sleep_timer(self) -> None:
