@@ -572,7 +572,7 @@ class Orbit_Screen(MimicBase):
             if any(t in (7, 8) for t in self.active_tdrs if t):
                 return None, None
 
-            now = ephem.now()
+            now = ephem.Date(ephem.now())
             in_now = self._in_zoe_at(now)
 
             step_sec = 30
@@ -630,7 +630,7 @@ class Orbit_Screen(MimicBase):
                 self.ids.zoe_acquisition_timer.text = "--:--"
                 return
 
-            now = ephem.now()
+            now = ephem.Date(ephem.now())
             entry_time = self._zoe_entry_time
             exit_time = self._zoe_exit_time
 
@@ -660,38 +660,51 @@ class Orbit_Screen(MimicBase):
         """Position the ZOE label at 0° latitude, 77° longitude on the map (once) and control visibility based on TDRS status."""
         try:
             if "ZOElabel" not in self.ids:
+                log_info("ZOElabel widget not found in ids")
                 return
             
             zoe_label = self.ids.ZOElabel
+            log_info(f"Found ZOElabel widget: {zoe_label}")
             
             # Position the label only if it hasn't been positioned yet
             if not hasattr(zoe_label, '_positioned'):
+                log_info("Positioning ZOE label for the first time")
                 # Fixed position: 0° latitude, 77° longitude
                 lat = 0.0
                 lon = 77.0
                 
                 # Convert to map pixel coordinates
                 x, y = self.map_px(lat, lon)
+                log_info(f"ZOE label map coordinates: lat={lat}, lon={lon} -> x={x}, y={y}")
                 
                 # Position the label
                 if hasattr(zoe_label, 'pos'):
                     zoe_label.pos = (x, y)
+                    log_info(f"Set ZOE label pos to ({x}, {y})")
                 elif hasattr(zoe_label, 'center'):
                     zoe_label.center = (x, y)
+                    log_info(f"Set ZOE label center to ({x}, {y})")
                 
                 # Mark as positioned
                 zoe_label._positioned = True
+                log_info("ZOE label marked as positioned")
+            else:
+                log_info("ZOE label already positioned, updating visibility only")
             
             # Control visibility based on TDRS 7/8 status
             if any(t in (7, 8) for t in self.active_tdrs if t):
                 # Z-belt active, hide ZOE label
                 zoe_label.opacity = 0
+                log_info("Z-belt active, hiding ZOE label (opacity=0)")
             else:
                 # Z-belt not active, show ZOE label
                 zoe_label.opacity = 1
+                log_info("Z-belt not active, showing ZOE label (opacity=1)")
                 
         except Exception as exc:
             log_error(f"_update_zoe_label_position failed: {exc}")
+            import traceback
+            traceback.print_exc()
 
     # ─────────────────────── crew sleep timer, telemetry, etc. ────────────────
     def update_crew_sleep_timer(self) -> None:
@@ -1211,7 +1224,7 @@ class Orbit_Screen(MimicBase):
             if not self.iss_tle:
                 return
 
-            now = ephem.now()
+            now = ephem.Date(ephem.now())
             in_now = self._in_zoe_at(now)
 
             need = False
