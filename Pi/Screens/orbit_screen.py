@@ -1057,7 +1057,7 @@ class Orbit_Screen(MimicBase):
             return
 
         # — localise AOS time for display --------------------------------------
-        utc_dt = ephem.to_datetime(next_pass[0]) if hasattr(next_pass[0], 'datetime') else next_pass[0]
+        utc_dt = next_pass[0].datetime()
         # For now, use Houston timezone. In the future, this could be configurable
         local = utc_dt.replace(tzinfo=pytz.utc).astimezone(pytz.timezone("America/Chicago"))
 
