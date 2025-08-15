@@ -677,6 +677,11 @@ class Orbit_Screen(MimicBase):
                 x, y = self.map_px(lat, lon)
                 log_info(f"ZOE label map coordinates: lat={lat}, lon={lon} -> x={x}, y={y}")
                 
+                # Check if coordinates are valid (not off-screen)
+                if x < 0 or y < 0 or x > 10000 or y > 10000:
+                    log_error(f"ZOE label coordinates seem invalid: x={x}, y={y}")
+                    return
+                
                 # Position the label
                 if hasattr(zoe_label, 'pos'):
                     zoe_label.pos = (x, y)
@@ -700,6 +705,9 @@ class Orbit_Screen(MimicBase):
                 # Z-belt not active, show ZOE label
                 zoe_label.opacity = 1
                 log_info("Z-belt not active, showing ZOE label (opacity=1)")
+            
+            # Additional debug info
+            log_info(f"ZOE label final state: opacity={zoe_label.opacity}, pos={getattr(zoe_label, 'pos', 'N/A')}, center={getattr(zoe_label, 'center', 'N/A')}, size={getattr(zoe_label, 'size', 'N/A')}, text='{getattr(zoe_label, 'text', 'N/A')}'")
                 
         except Exception as exc:
             log_error(f"_update_zoe_label_position failed: {exc}")
@@ -1078,7 +1086,7 @@ class Orbit_Screen(MimicBase):
             return
 
         # — localise AOS time for display --------------------------------------
-        utc_dt = next_pass[0].datetime()
+        utc_dt = ephem.to_datetime(next_pass[0]) if hasattr(next_pass[0], 'datetime') else next_pass[0]
         # For now, use Houston timezone. In the future, this could be configurable
         local = utc_dt.replace(tzinfo=pytz.utc).astimezone(pytz.timezone("America/Chicago"))
 
