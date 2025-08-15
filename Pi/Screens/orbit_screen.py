@@ -167,7 +167,7 @@ class Orbit_Screen(MimicBase):
         self._update_tdrs_labels()
 
         # Position ZOE label once and set initial visibility
-        # self._update_zoe_label_position()  # Temporarily disabled to debug screen loading
+        self._update_zoe_label_position()  # Temporarily disabled to debug screen loading
 
         self._update_loc_markers()
         self.update_user_location()
@@ -342,7 +342,7 @@ class Orbit_Screen(MimicBase):
                     label_widget.pos = (-1000, -1000)  # Move off-screen
 
             # Update ZOE label visibility based on TDRS 7/8 status
-            # self._update_zoe_label_position()  # Temporarily disabled to debug screen loading
+            self._update_zoe_label_position()  # Temporarily disabled to debug screen loading
 
         except Exception as exc:
             log_error(f"Update TDRS labels failed: {exc}")
