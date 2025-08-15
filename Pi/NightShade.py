@@ -14,11 +14,11 @@ GEO_ALT_KM = 35786.0
 GEO_R_KM = R_EARTH_KM + GEO_ALT_KM
 
 # TDRS subsatellite longitudes (deg East; negative = West)
-TDRS_LONS = [-45.0, -151.0, -174.0, -40.0]
+TDRS_LONS = [-45.0, 174.0, -174.0, -40.0]
 
 # Default sampling and masks
-DEFAULT_LAT_MIN = -52
-DEFAULT_LAT_MAX = 52
+DEFAULT_LAT_MIN = -60
+DEFAULT_LAT_MAX = 60
 DEFAULT_DLAT = 1.0  # deg
 DEFAULT_DLON = 1.0  # deg
 DEFAULT_E_MIN = 0.0  # deg elevation mask
