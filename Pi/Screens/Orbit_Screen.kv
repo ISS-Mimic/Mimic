@@ -501,9 +501,12 @@
     Label:
         id: ZOElabel
         text: "ZOE"
-        color: 1, 0, 1, 1
-        font_size: min(self.height * 0.30, dp(24))  # Responsive with max size
-        markup: True
+        color: 1, 0, 1, 1 
+        font_size: min(dp(20), self.parent.width * 0.024)  # Much larger text
+        bold: True
+        size_hint: None, None
+        size: self.texture_size
+        pos: 0, 0  # Will be positioned dynamically in Python
 
     # ─────── orbit counters (left column) ───────
     TelemetryLabel:
