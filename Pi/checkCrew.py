@@ -73,34 +73,34 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
             # Find the ISS crew table - look for the crew data table
             tables = soup.find_all('table')
 
-            print(f"Found {len(tables)} tables")
+            #print(f"Found {len(tables)} tables")
 
             crew_table = None
             # Look for the crew data table with the specific structure
             for i, table in enumerate(tables):
                 table_text = str(table)
-                print(f"Table {i}: {table_text[:200]}...")  # Show first 200 chars of each table
+                #print(f"Table {i}: {table_text[:200]}...")  # Show first 200 chars of each table
                 
                 # Look for the crew table with the specific headers
                 if ('No.' in table_text and 'Nation' in table_text and 'Surname' in table_text and 
                     'Given names' in table_text and 'Position' in table_text):
                     crew_table = table
-                    print(f"Found crew table at index {i}")
+                    #print(f"Found crew table at index {i}")
                     break
             
             if not crew_table:
-                log_info("No ISS crew table found on Spacefacts.de")
-                print(f"No ISS crew table found on Spacefacts.de")
+                log_error("No ISS crew table found on Spacefacts.de")
+                #print(f"No ISS crew table found on Spacefacts.de")
 
                 return []
             
-            print(f"Found crew table with {len(crew_table.find_all('tr'))} rows")
+            #print(f"Found crew table with {len(crew_table.find_all('tr'))} rows")
             
             # Debug: Show the header row to understand the structure
             header_row = crew_table.find_all('tr')[0] if crew_table.find_all('tr') else None
             if header_row:
                 header_cells = header_row.find_all(['td', 'th'])
-                print(f"Header row has {len(header_cells)} cells: {[cell.get_text(strip=True) for cell in header_cells]}")
+                #print(f"Header row has {len(header_cells)} cells: {[cell.get_text(strip=True) for cell in header_cells]}")
             
             crew_info = []
             rows = crew_table.find_all('tr')[1:]  # Skip header row
@@ -111,20 +111,17 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
                 #print(f"Cells: {cells}")
                 # Skip rows that don't have enough data or are header rows
                 if len(cells) < 13:  # Need at least 13 columns for complete crew data
-                    print(f"Skipping row with {len(cells)} cells")
+                    #print(f"Skipping row with {len(cells)} cells")
                     continue
                 
                 # Check if this row contains crew data (should have a number in first cell)
                 first_cell = cells[0].get_text(strip=True)
                 # Look for crew number pattern (1, 2, 3, etc.)
                 if not first_cell.isdigit():
-                    print(f"Skipping row with no crew number: {first_cell}")
+                    #print(f"Skipping row with no crew number: {first_cell}")
                     continue
                 
                 try:
-                    # Debug: Log what we're getting from each cell
-                    log_info(f"Row cells ({len(cells)}): {[cell.get_text(strip=True) for cell in cells]}")
-                    
                     # Extract country from flag image
                     country_cell = cells[1]
                     country = "Unknown"
@@ -140,14 +137,37 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
                                 country = 'Russia'
                             elif 'japan.gif' in src:
                                 country = 'Japan'
-                    
-                    # Normalize country names
-                    if country == 'Russian Federation':
-                        country = 'Russia'
+                            elif 'canada.gif' in src:
+                                country = 'Canada'
+                            elif 'china.gif' in src:
+                                country = 'China'
+                            elif 'gb.gif' in src:
+                                country = 'United Kingdom'
+                            elif 'italy.gif' in src:
+                                country = 'Italy'
+                            elif 'france.gif' in src:
+                                country = 'France'
+                            elif 'germany.gif' in src:
+                                country = 'Germany'
+                            elif 'netherlands.gif' in src:
+                                country = 'Netherlands'
+                            elif 'sweden.gif' in src:
+                                country = 'Sweden'
+                            elif 'norway.gif' in src:
+                                country = 'Norway'
+                            elif 'denmark.gif' in src:
+                                country = 'Denmark'
+                            elif 'poland.gif' in src:
+                                country = 'Poland'
+                            elif 'belgium.gif' in src:
+                                country = 'Belgium'
+                            elif 'spain.gif' in src:
+                                country = 'Spain'
+
                     
                     # Parse the table row based on the Expedition 73 table structure
                     crew_member = {
-                        'name': f"{cells[3].get_text(strip=True)} {cells[2].get_text(strip=True)}",  # Given names + Surname
+                        'name': f"{cells[3].get_text(strip=True).split()[0]} {cells[2].get_text(strip=True)}",  # First name + Surname only
                         'country': country,  # Nation extracted from flag image
                         'position': cells[4].get_text(strip=True),  # Position
                         'spaceship': cells[5].get_text(strip=True),  # Spacecraft (launch)
@@ -156,13 +176,13 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
                         'landing_spacecraft': cells[8].get_text(strip=True),  # Spacecraft (landing)
                         'landing_date': cells[9].get_text(strip=True),  # Landing date
                         'landing_time': cells[10].get_text(strip=True),  # Landing time
-                        'mission_duration': cells[11].get_text(strip=True),  # Mission duration
+                        'mission_duration': '',  # Will be calculated by crew screen based on launch time
                         'orbits': cells[12].get_text(strip=True),  # Orbits
                         'expedition': 'Expedition 73'  # Default expedition
                     }
                     
                     # Debug: Log the parsed crew member data
-                    log_info(f"Parsed crew member: {crew_member}")
+                    #log_info(f"Parsed crew member: {crew_member}")
                     
                     # Clean up the data
                     crew_member['name'] = crew_member['name'].strip()
@@ -231,7 +251,6 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
                     continue
             
             log_info(f"Successfully fetched {len(crew_info)} crew members from Spacefacts.de")
-            print(crew_info)
             return crew_info
             
         except requests.RequestException as exc:
