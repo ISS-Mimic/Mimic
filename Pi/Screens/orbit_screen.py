@@ -336,12 +336,12 @@ class Orbit_Screen(MimicBase):
                         
                         # Special handling for TDRS West label - constrain to left side of screen
                         if group_name == "west":
-                            # Ensure the label never goes past the left edge (with some margin)
-                            # Assuming screen width is available, constrain to left 1/3 of screen
+                            # Ensure the label never goes too far right (when TDRS is on positive longitude)
+                            # Assuming screen width is available, constrain to left 2/3 of screen
                             screen_width = self.width if hasattr(self, 'width') else 1200  # fallback
-                            max_left_x = screen_width * 0.3  # Left 30% of screen
-                            if label_x > max_left_x:
-                                label_x = max_left_x
+                            max_right_x = screen_width * 0.65  # Left 65% of screen (prevent overlap with right-side info)
+                            if label_x > max_right_x:
+                                label_x = max_right_x
                         
                         label_widget.pos = (label_x, label_y)
                         label_positioned = True
