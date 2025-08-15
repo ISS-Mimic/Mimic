@@ -582,17 +582,23 @@ class Orbit_Screen(MimicBase):
             if any(t in (7, 8) for t in self.active_tdrs if t):
                 return None, None
 
-            now = ephem.Date(ephem.now())
+            now = ephem.now()
             in_now = self._in_zoe_at(now)
 
             step_sec = 30
             horizon_entry = 120 * 60
             horizon_exit = 45 * 60
 
+            def _as_date(val) -> ephem.Date:
+                # Ensure we always carry ephem.Date through the pipeline
+                return val if isinstance(val, ephem.Date) else ephem.Date(val)
+
             def bsearch_transition(t0: ephem.Date, t1: ephem.Date, target_in: bool) -> ephem.Date:
-                lo, hi = t0, t1
-                for _ in range(24):  # refine ~ 2^-24 of interval
-                    mid = lo + (hi - lo) / 2
+                lo = _as_date(t0)
+                hi = _as_date(t1)
+                for _ in range(24):  # ~1s resolution after refinements
+                    # (hi - lo) is float days; wrap result back into an ephem.Date
+                    mid = ephem.Date(lo + (hi - lo) / 2.0)
                     if self._in_zoe_at(mid) == target_in:
                         hi = mid
                     else:
@@ -602,31 +608,34 @@ class Orbit_Screen(MimicBase):
             if in_now:
                 # Find AOS exit
                 for s in range(step_sec, horizon_exit + step_sec, step_sec):
-                    t = now + s * ephem.second
+                    t = ephem.Date(now + s * ephem.second)
                     if not self._in_zoe_at(t):
-                        exit_t = bsearch_transition(t - step_sec * ephem.second, t, target_in=False)
+                        exit_t = bsearch_transition(ephem.Date(t - step_sec * ephem.second), t, target_in=False)
                         return None, exit_t
                 return None, None
             else:
                 # Find LOS entry
                 entry_t = None
                 for s in range(step_sec, horizon_entry + step_sec, step_sec):
-                    t = now + s * ephem.second
+                    t = ephem.Date(now + s * ephem.second)
                     if self._in_zoe_at(t):
-                        entry_t = bsearch_transition(t - step_sec * ephem.second, t, target_in=True)
+                        entry_t = bsearch_transition(ephem.Date(t - step_sec * ephem.second), t, target_in=True)
                         break
                 if entry_t is None:
                     return None, None
+
                 # Find AOS exit after entry
                 for s in range(step_sec, horizon_exit + step_sec, step_sec):
-                    t = entry_t + s * ephem.second
+                    t = ephem.Date(entry_t + s * ephem.second)
                     if not self._in_zoe_at(t):
-                        exit_t = bsearch_transition(t - step_sec * ephem.second, t, target_in=False)
+                        exit_t = bsearch_transition(ephem.Date(t - step_sec * ephem.second), t, target_in=False)
                         return entry_t, exit_t
                 return entry_t, None
+
         except Exception as exc:
             log_error(f"calculate_zoe_los_aos failed: {exc}")
             return None, None
+
 
     def _update_zoe_timers(self) -> None:
         """Update the LOS/AOS countdown label text if present (no drawing)."""
