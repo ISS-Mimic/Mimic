@@ -342,7 +342,7 @@ class Orbit_Screen(MimicBase):
                     label_widget.pos = (-1000, -1000)  # Move off-screen
 
             # Update ZOE label visibility based on TDRS 7/8 status
-            #self._update_zoe_label_position()  # Temporarily disabled to debug screen loading
+            self._update_zoe_label_position()
 
         except Exception as exc:
             log_error(f"Update TDRS labels failed: {exc}")
@@ -661,12 +661,19 @@ class Orbit_Screen(MimicBase):
             
         zoe_label = self.ids.ZOElabel
          
-        lat = -10.0
-        lon = 68.0
+        lat = -70.0
+        lon = 57.0
                 
         x, y = self.map_px(lat, lon)
         zoe_label.pos = (x, y)
-  
+        
+        # Control visibility based on TDRS 7/8 status
+        if any(t in (7, 8) for t in self.active_tdrs if t):
+            # Z-belt active, hide ZOE label
+            zoe_label.opacity = 0
+        else:
+            # Z-belt not active, show ZOE label
+            zoe_label.opacity = 1
 
     # ─────────────────────── crew sleep timer, telemetry, etc. ────────────────
     def update_crew_sleep_timer(self) -> None:
