@@ -36,7 +36,6 @@ ExceptionManager.add_handler(_Reraise())
 
 Builder.load_file(str(Path(__file__).with_name("Orbit_Screen.kv")))
 
-
 # ────────────────────────────────────────────────────────────────────────────
 # GEO coverage helpers (spherical Earth model, adequate for LOS logic)
 
