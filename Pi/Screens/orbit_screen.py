@@ -339,7 +339,7 @@ class Orbit_Screen(MimicBase):
                             # Ensure the label never goes too far right (when TDRS is on positive longitude)
                             # Assuming screen width is available, constrain to left 2/3 of screen
                             screen_width = self.width if hasattr(self, 'width') else 1200  # fallback
-                            max_right_x = screen_width * 0.65  # Left 65% of screen (prevent overlap with right-side info)
+                            max_right_x = screen_width * 0.20  # Left 20% of screen (prevent overlap with right-side info)
                             if label_x > max_right_x:
                                 label_x = max_right_x
                         
