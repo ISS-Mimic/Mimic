@@ -24,20 +24,20 @@ wikiurl = 'https://en.wikipedia.org/wiki/International_Space_Station'
 nasaurl = 'https://www.nasa.gov/international-space-station/space-station-visiting-vehicles/'
 
 # Cross-platform database path handling
-log_info("Setting up cross-platform database paths")
+#log_info("Setting up cross-platform database paths")
 vv_db_path = Path('/dev/shm/vv.db')
 if not vv_db_path.exists():
-    log_info("SHM path not available, using fallback path")
+    #log_info("SHM path not available, using fallback path")
     vv_db_path = Path.home() / '.mimic_data' / 'vv.db'
     # Ensure the directory exists
     vv_db_path.parent.mkdir(parents=True, exist_ok=True)
-    log_info(f"Created fallback directory: {vv_db_path.parent}")
+    #log_info(f"Created fallback directory: {vv_db_path.parent}")
 
 vv_db_path = str(vv_db_path)
-log_info(f"VV database path: {vv_db_path}")
+#log_info(f"VV database path: {vv_db_path}")
 
 output_file = str(mimic_data_directory) + '/vv.png'
-log_info(f"Output image path: {output_file}")
+#log_info(f"Output image path: {output_file}")
 
 # Define a mapping to standardize mission names
 mission_name_mapping = {
@@ -49,13 +49,13 @@ mission_name_mapping = {
 def get_image_hash(image_path):
     """Calculate MD5 hash of an image file."""
     try:
-        log_info(f"Calculating image hash for: {image_path}")
+        #log_info(f"Calculating image hash for: {image_path}")
         hasher = hashlib.md5()
         with open(image_path, 'rb') as img_file:
             buf = img_file.read()
             hasher.update(buf)
         hash_value = hasher.hexdigest()
-        log_info(f"Image hash calculated: {hash_value[:8]}...")
+        #log_info(f"Image hash calculated: {hash_value[:8]}...")
         return hash_value
     except FileNotFoundError:
         log_error(f"Image file not found: {image_path}")
@@ -67,17 +67,17 @@ def get_image_hash(image_path):
 def getVV_Image(page_url, output):
     """Download and process visiting vehicle image from NASA website."""
     try:
-        log_info(f"Fetching visiting vehicle image from: {page_url}")
+        #log_info(f"Fetching visiting vehicle image from: {page_url}")
         headers = {
             'User-Agent': 'ISS Mimic Bot (https://github.com/ISS-Mimic; iss.mimic@gmail.com)'
         }
         response = requests.get(page_url, headers=headers, timeout=30)
         response.raise_for_status()
-        log_info("Successfully retrieved NASA webpage")
+        #log_info("Successfully retrieved NASA webpage")
 
         soup = BeautifulSoup(response.content, 'html.parser')
         image_tags = soup.find_all('img')
-        log_info(f"Found {len(image_tags)} image tags on page")
+        #log_info(f"Found {len(image_tags)} image tags on page")
 
         filtered_image_urls = []
         for image_tag in image_tags:
@@ -89,40 +89,35 @@ def getVV_Image(page_url, output):
             if re.search(r'/wp-content/uploads/\d{4}/\d{2}/iss-\d{2}-\d{2}-\d{2}(-\d)?\.png', image_url):
                 filtered_image_urls.append(image_url)
 
-        log_info(f"Filtered to {len(filtered_image_urls)} matching ISS images")
+        #log_info(f"Filtered to {len(filtered_image_urls)} matching ISS images")
 
         if filtered_image_urls:
             target_image_url = sorted(filtered_image_urls)[-1]
-            log_info(f"Selected target image: {target_image_url}")
+            #log_info(f"Selected target image: {target_image_url}")
             
             context = ssl._create_unverified_context()
-            log_info("Downloading target image")
+            #log_info("Downloading target image")
 
             with urllib.request.urlopen(target_image_url, context=context) as response:
                 new_image_data = response.read()
 
             new_image_hash = hashlib.md5(new_image_data).hexdigest()
-            log_info(f"Downloaded image hash: {new_image_hash[:8]}...")
+            #log_info(f"Downloaded image hash: {new_image_hash[:8]}...")
 
             if Path(output).exists():
                 current_image_hash = get_image_hash(output)
                 if current_image_hash:
-                    log_info(f"Current image hash: {current_image_hash[:8]}...")
+                    #log_info(f"Current image hash: {current_image_hash[:8]}...")
                     if new_image_hash == current_image_hash:
-                        log_info("Image has not changed, not downloading.")
+                        #log_info("Image has not changed, not downloading.")
                         return False
-                    else:
-                        log_info("Image has changed, will download new version.")
-                else:
-                    log_info("Could not calculate current image hash, will download new version.")
-            else:
-                log_info("No existing image found, will download new version.")
+
 
             # Save the new image
-            log_info(f"Saving new image to: {output}")
+            #log_info(f"Saving new image to: {output}")
             with open(output, 'wb') as out_file:
                 out_file.write(new_image_data)
-            log_info("New image saved successfully")
+            #log_info("New image saved successfully")
             return True
         else:
             log_error("No matching image URL found.")
@@ -135,20 +130,20 @@ def getVV_Image(page_url, output):
 def get_nasa_data(url):
     """Fetch visiting vehicle data from NASA website."""
     try:
-        log_info(f"Fetching NASA visiting vehicle data from: {url}")
+        #log_info(f"Fetching NASA visiting vehicle data from: {url}")
         headers = {
             'User-Agent': 'ISS Mimic Bot (https://github.com/ISS-Mimic; iss.mimic@gmail.com)'
         }
         response = requests.get(url, headers=headers, timeout=30)
         response.raise_for_status()
-        log_info("Successfully retrieved NASA visiting vehicle data")
+        #log_info("Successfully retrieved NASA visiting vehicle data")
         
         soup = BeautifulSoup(response.content, 'html.parser')
         paragraphs = soup.find_all('p')
         nasa_data = []
         date_pattern = re.compile(r'\b\d{1,2}/\d{1,2}/\d{2,4}\b')
         
-        log_info(f"Processing {len(paragraphs)} paragraphs for date patterns")
+        #log_info(f"Processing {len(paragraphs)} paragraphs for date patterns")
         
         for paragraph in paragraphs:
             for event in paragraph:
@@ -156,7 +151,7 @@ def get_nasa_data(url):
                     if date_pattern.search(event.get_text()):
                         nasa_data.append(event.get_text())
         
-        log_info(f"Found {len(nasa_data)} NASA data entries with dates")
+        #log_info(f"Found {len(nasa_data)} NASA data entries with dates")
         return nasa_data
         
     except requests.exceptions.RequestException as e:
@@ -183,7 +178,7 @@ def standardize_mission_names(event, mapping):
 def parse_nasa_data(data):
     """Parse NASA visiting vehicle data into dock and undock events."""
     try:
-        log_info(f"Parsing {len(data)} NASA data entries")
+        ##log_info(f"Parsing {len(data)} NASA data entries")
         dock_events = []
         undock_events = []
         
@@ -200,35 +195,33 @@ def parse_nasa_data(data):
         dock_df = pd.DataFrame(dock_events)
         undock_df = pd.DataFrame(undock_events)
         
-        log_info(f"Parsed {len(dock_events)} dock events and {len(undock_events)} undock events")
+        ##log_info(f"Parsed {len(dock_events)} dock events and {len(undock_events)} undock events")
         return dock_df, undock_df
         
     except Exception as e:
         log_error(f"Error parsing NASA data: {e}")
         return pd.DataFrame(), pd.DataFrame()
 
-log_info("Starting visiting vehicle data processing")
+#log_info("Starting visiting vehicle data processing")
 
 # Download visiting vehicle image
-log_info("Downloading visiting vehicle image")
+##log_info("Downloading visiting vehicle image")
 image_downloaded = getVV_Image(nasaurl, output_file)
-if image_downloaded:
-    log_info("Visiting vehicle image updated")
-else:
-    log_info("Visiting vehicle image unchanged or download failed")
+
 
 # Fetch and parse NASA data
-log_info("Fetching and parsing NASA visiting vehicle data")
+##log_info("Fetching and parsing NASA visiting vehicle data")
 nasa_data = get_nasa_data(nasaurl)
+
 if nasa_data:
     nasa_dock_df, nasa_undock_df = parse_nasa_data(nasa_data)
     
     # Apply the mapping to standardize mission names in both DataFrames
-    log_info("Standardizing mission names using mapping")
+    ##log_info("Standardizing mission names using mapping")
     nasa_dock_df['Event'] = nasa_dock_df['Event'].apply(lambda x: standardize_mission_names(x, mission_name_mapping))
     nasa_undock_df['Event'] = nasa_undock_df['Event'].apply(lambda x: standardize_mission_names(x, mission_name_mapping))
     
-    log_info("NASA data processing completed successfully")
+    ##log_info("NASA data processing completed successfully")
 else:
     log_error("Failed to fetch NASA data, creating empty DataFrames")
     nasa_dock_df, nasa_undock_df = pd.DataFrame(), pd.DataFrame()
@@ -236,14 +229,14 @@ else:
 def identify_current_docked(dock_df, undock_df):
     """Identify currently docked vehicles by removing undock events."""
     try:
-        log_info("Identifying currently docked vehicles")
+        ##log_info("Identifying currently docked vehicles")
         current_docked = dock_df.copy()
         current_docked['Status'] = 'Docked'
         for index, row in undock_df.iterrows():
             event = row['Event'].replace('Undock', 'Dock').replace('Release', 'Capture').replace('Splashdown', 'Dock')
             current_docked = current_docked[~current_docked['Event'].str.contains(event)]
         
-        log_info(f"Currently docked vehicles identified: {len(current_docked)} vehicles")
+        ##log_info(f"Currently docked vehicles identified: {len(current_docked)} vehicles")
         return current_docked
         
     except Exception as e:
@@ -255,7 +248,7 @@ current_docked_df = identify_current_docked(nasa_dock_df, nasa_undock_df)
 def get_wikipedia_data(wikiurl):
     """Fetch visiting vehicle data from Wikipedia."""
     try:
-        log_info(f"Fetching Wikipedia visiting vehicle data from: {wikiurl}")
+        ##log_info(f"Fetching Wikipedia visiting vehicle data from: {wikiurl}")
         headers = {
             'User-Agent': 'ISS Mimic Bot (https://github.com/ISS-Mimic; iss.mimic@gmail.com)'
         }
@@ -266,12 +259,12 @@ def get_wikipedia_data(wikiurl):
         
         # Parse tables from the HTML content
         tables = pd.read_html(response.content)
-        log_info(f"Found {len(tables)} tables on Wikipedia page")
+        ##log_info(f"Found {len(tables)} tables on Wikipedia page")
         
         # Iterate through all tables to find the one with "Arrival" column
         for i, table in enumerate(tables):
             if 'Arrival' in table.columns: # Using "Arrival" as the unique identifier of the table we want (sometimes the table # changes)
-                log_info(f"Found mission table at index {i} with {len(table)} rows")
+                #log_info(f"Found mission table at index {i} with {len(table)} rows")
                 return table
         
         log_error("Mission table not found on the Wikipedia page")
@@ -296,13 +289,13 @@ def convert_net_date(date_str):
         else:
             day = date_str.split()[-3]
         
-        log_info(f"Converting NET date: {date_str} -> day {day}")
+        ##log_info(f"Converting NET date: {date_str} -> day {day}")
         
         try:
             return pd.to_datetime(f"{date_str.split()[-1]}-{date_str.split()[-2]}-{day}", format='%Y-%B-%d',
                                   errors='coerce')
         except ValueError:
-            log_info(f"Fallback conversion for date: {date_str}")
+            ##log_info(f"Fallback conversion for date: {date_str}")
             return pd.to_datetime(f"{date_str.split()[-1]}-{date_str.split()[-2]}-01", format='%Y-%B-%d', errors='coerce')
     except Exception as e:
         log_error(f"Error converting NET date '{date_str}': {e}")
@@ -311,7 +304,7 @@ def convert_net_date(date_str):
 def clean_wikipedia_data(df):
     """Clean and standardize Wikipedia visiting vehicle data."""
     try:
-        log_info(f"Cleaning Wikipedia data with {len(df)} rows")
+        ##log_info(f"Cleaning Wikipedia data with {len(df)} rows")
         
         location_replacements = {
             'Harmony': 'Node 2',
@@ -327,21 +320,21 @@ def clean_wikipedia_data(df):
             'nadir': 'Nadir',
         }
         
-        log_info("Applying location replacements")
+        ##log_info("Applying location replacements")
         df['Port'] = df['Port'].replace(location_replacements, regex=True)
         
-        log_info("Standardizing mission names")
+        ##log_info("Standardizing mission names")
         df['Mission'] = df['Mission'].apply(lambda x: f'Cygnus {x}' if x.startswith('NG-') else x)
         df['Mission'] = df['Mission'].apply(lambda x: f'SpaceX {x}' if x.startswith('Crew-') else x)
         df['Mission'] = df['Mission'].apply(lambda x: f'SpaceX {x}' if x.startswith('Cargo-') else x)
         
-        log_info("Converting arrival and departure dates")
+        ##log_info("Converting arrival and departure dates")
         df['Arrival'] = pd.to_datetime(df['Arrival'], errors='coerce')
         df['Departure'] = df['Departure'].apply(
             lambda x: convert_net_date(x) if 'NET' in x or 'early' in x or 'mid' in x or 'late' in x
             else pd.to_datetime(x, errors='coerce'))
         
-        log_info("Wikipedia data cleaning completed successfully")
+        ##log_info("Wikipedia data cleaning completed successfully")
         return df
         
     except Exception as e:
@@ -356,18 +349,18 @@ def clean_citations(text):
         return text
 
 # Fetch and process Wikipedia data
-log_info("Fetching Wikipedia visiting vehicle data")
+##log_info("Fetching Wikipedia visiting vehicle data")
 try:
     wikipedia_df = get_wikipedia_data(wikiurl)
-    log_info(f"Retrieved Wikipedia data with {len(wikipedia_df)} rows")
+    ##log_info(f"Retrieved Wikipedia data with {len(wikipedia_df)} rows")
     
-    log_info("Cleaning citations from Wikipedia data")
+    ##log_info("Cleaning citations from Wikipedia data")
     wikipedia_df = wikipedia_df.applymap(clean_citations)
     
-    log_info("Cleaning and standardizing Wikipedia data")
+    ##log_info("Cleaning and standardizing Wikipedia data")
     wikipedia_df = clean_wikipedia_data(wikipedia_df)
     
-    log_info("Wikipedia data processing completed successfully")
+    ##log_info("Wikipedia data processing completed successfully")
     
 except Exception as e:
     log_error(f"Failed to process Wikipedia data: {e}")
@@ -376,7 +369,7 @@ except Exception as e:
 def correlate_data(nasa_df, wiki_df):
     """Correlate NASA and Wikipedia visiting vehicle data."""
     try:
-        log_info("Correlating NASA and Wikipedia data")
+        ##log_info("Correlating NASA and Wikipedia data")
         correlated_data = []
         
         for _, nasa_row in nasa_df.iterrows():
@@ -399,7 +392,7 @@ def correlate_data(nasa_df, wiki_df):
                     'Departure': wiki_row['Departure']
                 })
         
-        log_info(f"Correlated {len(correlated_data)} data entries")
+        ##log_info(f"Correlated {len(correlated_data)} data entries")
         return pd.DataFrame(correlated_data)
         
     except Exception as e:
@@ -408,21 +401,21 @@ def correlate_data(nasa_df, wiki_df):
 
 
 # Correlate NASA and Wikipedia data
-log_info("Starting data correlation")
+##log_info("Starting data correlation")
 correlated_df = correlate_data(current_docked_df, wikipedia_df)
-log_info(f"Data correlation completed: {len(correlated_df)} correlated entries")
+##log_info(f"Data correlation completed: {len(correlated_df)} correlated entries")
 
 def print_database_events(db_path='iss_vehicles.db'):
     """Print all events from the vehicles database."""
     try:
-        log_info(f"Printing database events from: {db_path}")
+        ##log_info(f"Printing database events from: {db_path}")
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         cursor.execute('SELECT Event FROM vehicles')
         rows = cursor.fetchall()
-        log_info(f"Found {len(rows)} events in database")
-        for row in rows:
-            log_info(f"Event: {row[0]}")
+        ##log_info(f"Found {len(rows)} events in database")
+        #for row in rows:
+            #log_info(f"Event: {row[0]}")
         conn.close()
     except Exception as e:
         log_error(f"Error printing database events: {e}")
@@ -433,15 +426,15 @@ def print_database_events(db_path='iss_vehicles.db'):
 def update_database(correlated_df, undock_df, db_path='iss_vehicles.db'):
     """Update the visiting vehicle database with new data."""
     try:
-        log_info(f"Updating database at: {db_path}")
-        log_info(f"Correlated data: {len(correlated_df)} entries")
-        log_info(f"Undock data: {len(undock_df)} entries")
+        ##log_info(f"Updating database at: {db_path}")
+        ##log_info(f"Correlated data: {len(correlated_df)} entries")
+        ##log_info(f"Undock data: {len(undock_df)} entries")
         
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
 
         # Create table if it doesn't exist
-        log_info("Creating vehicles table if it doesn't exist")
+        ##log_info("Creating vehicles table if it doesn't exist")
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS vehicles (
                 Spacecraft TEXT,
@@ -456,20 +449,20 @@ def update_database(correlated_df, undock_df, db_path='iss_vehicles.db'):
         ''')
 
         # Clear the database first
-        log_info("Clearing existing vehicle data")
+        ##log_info("Clearing existing vehicle data")
         cursor.execute('DELETE FROM vehicles')
-        log_info(f"Cleared {cursor.rowcount} existing records")
+        ##log_info(f"Cleared {cursor.rowcount} existing records")
 
         # Remove vehicles that are no longer docked based on the undock events
-        log_info("Processing undock events to remove departed vehicles")
+        ##log_info("Processing undock events to remove departed vehicles")
         for _, row in undock_df.iterrows():
             event = row['Event']
-            log_info(f"Removing vehicles with event: {event}")
+            ##log_info(f"Removing vehicles with event: {event}")
             cursor.execute('DELETE FROM vehicles WHERE Event LIKE ?', ('%' + event + '%',))
-            log_info(f"Removed {cursor.rowcount} records for event: {event}")
+            ##log_info(f"Removed {cursor.rowcount} records for event: {event}")
 
         # Insert new data
-        log_info("Inserting new correlated vehicle data")
+        ##log_info("Inserting new correlated vehicle data")
         for _, row in correlated_df.iterrows():
             cursor.execute('''
                 INSERT INTO vehicles (Spacecraft, Type, Mission, Event, Date, Location, Arrival, Departure)
@@ -485,11 +478,11 @@ def update_database(correlated_df, undock_df, db_path='iss_vehicles.db'):
                 row['Departure'].strftime('%Y-%m-%d %H:%M:%S') if pd.notnull(row['Departure']) else None
             ))
 
-        log_info(f"Inserted {len(correlated_df)} new vehicle records")
+        ##log_info(f"Inserted {len(correlated_df)} new vehicle records")
         
         conn.commit()
         conn.close()
-        log_info("Database update completed successfully")
+        #log_info("Database update completed successfully")
         
     except Exception as e:
         log_error(f"Error updating database: {e}")
@@ -498,10 +491,10 @@ def update_database(correlated_df, undock_df, db_path='iss_vehicles.db'):
 
 
 # Update the database with new data
-log_info("Starting database update process")
+#log_info("Starting database update process")
 try:
     update_database(correlated_df, nasa_undock_df, db_path=vv_db_path)
-    log_info("Database update process completed successfully")
+    #log_info("Database update process completed successfully")
 except Exception as e:
     log_error(f"Database update process failed: {e}")
 
@@ -510,7 +503,7 @@ except Exception as e:
 def verify_database(db_path='iss_vehicles.db'):
     """Verify and display data from the vehicles database."""
     try:
-        log_info(f"Verifying database at: {db_path}")
+        #log_info(f"Verifying database at: {db_path}")
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
 
@@ -518,13 +511,6 @@ def verify_database(db_path='iss_vehicles.db'):
         cursor.execute('SELECT * FROM vehicles')
         rows = cursor.fetchall()
 
-        # Check if there are any results
-        if rows:
-            log_info(f"Found {len(rows)} records in database:")
-            for i, row in enumerate(rows):
-                log_info(f"Record {i+1}: {row}")
-        else:
-            log_info("No data found in the database.")
 
         # Close the connection
         conn.close()
@@ -544,8 +530,7 @@ def main():
         
         # All the processing logic is already executed at module level
         # This function provides a clean entry point if needed
-        
-        log_info("VVcheck.py main execution completed successfully")
+
         
     except Exception as e:
         log_error(f"VVcheck.py main execution failed: {e}")
