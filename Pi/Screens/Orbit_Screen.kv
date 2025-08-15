@@ -1,26 +1,28 @@
 #:import dp kivy.metrics.dp
 
 # --------------------------------------------------------------------------
+#  Re-usable mixins
+# --------------------------------------------------------------------------
+<TelemetryLabel@Label>:
+    color: 1, 1, 1, 1
+    font_size: min(self.height * 0.2, dp(30))  # Responsive with max size
+    size_hint_y: 0.2
+
+<PassLabel@Label>:
+    color: 1, 1, 1, 1
+    halign: "center"
+    font_size: min(self.height * 0.17, dp(18))  # Responsive with max size
+    size_hint_y: 0.2
+
+<NavButton@Button>:
+    size_hint: .12, .18
+    background_down: self.background_normal.replace("Unlit", "Down") if self.background_normal else ""
+
+# --------------------------------------------------------------------------
 #  Orbit screen — telemetry, ISS pass, nav
 # --------------------------------------------------------------------------
 <Orbit_Screen>:
     name: "orbit"
-    
-    # ───────────────────────── Re-usable mixins (scoped to this screen) ─────────────────
-    <TelemetryLabel@Label>:
-        color: root.signalcolor
-        font_size: min(self.height * 0.2, dp(30))  # Responsive with max size
-        size_hint_y: 0.2
-
-    <PassLabel@Label>:
-        color: 1, 1, 1, 1
-        halign: "center"
-        font_size: min(self.height * 0.17, dp(18))  # Responsive with max size
-        size_hint_y: 0.2
-
-    <NavButton@Button>:
-        size_hint: .12, .18
-        background_down: self.background_normal.replace("Unlit", "Down") if self.background_normal else ""
 
     # ───────────────────────── Background & static images ──────────────────
     Image:
