@@ -38,7 +38,7 @@ class MimicScreen(MimicBase):
     def startproc(self) -> None:
         log_info(f"Start Proc")
         """
-        Launches the two collector scripts in the background.
+        Launches the collector scripts in the background.
         Keeps Popen handles on the App instance so MainScreen EXIT can kill them.
         """
         app  = App.get_running_app()
