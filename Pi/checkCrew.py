@@ -137,9 +137,13 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
                             if 'usa.gif' in src:
                                 country = 'USA'
                             elif 'russia.gif' in src:
-                                country = 'Russian Federation'
+                                country = 'Russia'
                             elif 'japan.gif' in src:
                                 country = 'Japan'
+                    
+                    # Normalize country names
+                    if country == 'Russian Federation':
+                        country = 'Russia'
                     
                     # Parse the table row based on the Expedition 73 table structure
                     crew_member = {
@@ -211,12 +215,16 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
                     except:
                         crew_member['orbits'] = None
                     
-                    # Only include crew members who have launched (have a launch date)
-                    if crew_member['launch_date'] and crew_member['launch_date'].strip():
+                    # Only include crew members who have actually launched (have a launch date and specific launch time)
+                    if (crew_member['launch_date'] and crew_member['launch_date'].strip() and 
+                        crew_member['launch_time'] and crew_member['launch_time'].strip() != 'UTC'):
                         crew_info.append(crew_member)
                         print(f"Added crew member: {crew_member['name']} from {crew_member['country']}")
                     else:
-                        print(f"Skipping crew member without launch date: {crew_member['name']}")
+                        if crew_member['launch_time'] and crew_member['launch_time'].strip() == 'UTC':
+                            print(f"Skipping future crew member: {crew_member['name']} (launch time not set)")
+                        else:
+                            print(f"Skipping crew member without launch date: {crew_member['name']}")
                         
                 except Exception as e:
                     log_error(f"Error parsing crew member row: {e}")
