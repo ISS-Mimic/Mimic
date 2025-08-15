@@ -167,7 +167,7 @@ class Orbit_Screen(MimicBase):
         self._update_tdrs_labels()
 
         # Position ZOE label once and set initial visibility
-        self._update_zoe_label_position()  # Temporarily disabled to debug screen loading
+        self._update_zoe_label_position() 
 
         self._update_loc_markers()
         self.update_user_location()
