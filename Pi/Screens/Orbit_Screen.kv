@@ -4,7 +4,7 @@
 #  Re-usable mixins
 # --------------------------------------------------------------------------
 <TelemetryLabel@Label>:
-    color: app.root.get_screen('orbit').signalcolor
+    color: 1, 1, 1, 1
     font_size: min(self.height * 0.2, dp(30))  # Responsive with max size
     size_hint_y: 0.2
 
@@ -521,36 +521,42 @@
     
     TelemetryLabel:
         id: latitude
+        color: root.signalcolor
         pos_hint: {"center_x": .12, "center_y": .22}  # Moved higher
         text: "0.00"
         font_size: min(dp(20), self.parent.width * 0.014)  # Larger text
         
     TelemetryLabel:
         id: altitude
+        color: root.signalcolor
         pos_hint: {"center_x": .35, "center_y": .22}  # Moved higher
         text: "0.00"
         font_size: min(dp(20), self.parent.width * 0.014)  # Larger text
         
     TelemetryLabel:
         id: solarbeta
+        color: root.signalcolor
         pos_hint: {"center_x": .575, "center_y": .22}  # Moved higher
         text: "0.00"
         font_size: min(dp(20), self.parent.width * 0.014)  # Larger text
 
     TelemetryLabel:
         id: longitude
+        color: root.signalcolor
         pos_hint: {"center_x": .13, "center_y": .18}  # Moved higher
         text: "0.00"
         font_size: min(dp(20), self.parent.width * 0.014)  # Larger text
         
     TelemetryLabel:
         id: inc
+        color: root.signalcolor
         pos_hint: {"center_x": .35, "center_y": .18}  # Moved higher
         text: "0.00"
         font_size: min(dp(20), self.parent.width * 0.014)  # Larger text
         
     TelemetryLabel:
         id: period
+        color: root.signalcolor
         pos_hint: {"center_x": .575, "center_y": .18}  # Moved higher
         text: "0.00"
         font_size: min(dp(20), self.parent.width * 0.014)  # Larger text
