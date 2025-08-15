@@ -167,6 +167,10 @@ class Orbit_Screen(MimicBase):
         # Also update group labels initially
         self._update_tdrs_labels()
 
+        # Position ZOE label once and set initial visibility
+        self._update_zoe_label_position()
+
+        self._update_loc_markers()
         self.update_user_location()
 
     def load_user_location_from_settings(self):
@@ -338,6 +342,9 @@ class Orbit_Screen(MimicBase):
                 if not label_positioned:
                     label_widget.pos = (-1000, -1000)  # Move off-screen
 
+            # Update ZOE label visibility based on TDRS 7/8 status
+            self._update_zoe_label_position()
+
         except Exception as exc:
             log_error(f"Update TDRS labels failed: {exc}")
             import traceback
@@ -352,7 +359,7 @@ class Orbit_Screen(MimicBase):
 
             # Get TLE epoch
             epoch = self.iss_tle.epoch
-            epoch_dt = ephem.to_datetime(epoch)
+            epoch_dt = epoch.datetime()
 
             # Calculate orbits since epoch
             now = datetime.utcnow()
@@ -544,7 +551,7 @@ class Orbit_Screen(MimicBase):
             return False
 
         # Convert ephem.Date to naive UTC datetime
-        t_dt = ephem.to_datetime(t_ephem)
+        t_dt = t_ephem.datetime()
 
         # Use latest live altitude if available; otherwise fallback
         alt_km = float(self.current_altitude_km) if self.current_altitude_km else self._ZOE_ALT_KM
@@ -649,6 +656,43 @@ class Orbit_Screen(MimicBase):
                 self.ids.zoe_acquisition_timer.text = "--:--"
         except Exception as exc:
             log_error(f"_update_zoe_timers failed: {exc}")
+
+    def _update_zoe_label_position(self) -> None:
+        """Position the ZOE label at 0° latitude, 77° longitude on the map (once) and control visibility based on TDRS status."""
+        try:
+            if "ZOElabel" not in self.ids:
+                return
+            
+            zoe_label = self.ids.ZOElabel
+            
+            # Position the label only if it hasn't been positioned yet
+            if not hasattr(zoe_label, '_positioned'):
+                # Fixed position: 0° latitude, 77° longitude
+                lat = 0.0
+                lon = 77.0
+                
+                # Convert to map pixel coordinates
+                x, y = self.map_px(lat, lon)
+                
+                # Position the label
+                if hasattr(zoe_label, 'pos'):
+                    zoe_label.pos = (x, y)
+                elif hasattr(zoe_label, 'center'):
+                    zoe_label.center = (x, y)
+                
+                # Mark as positioned
+                zoe_label._positioned = True
+            
+            # Control visibility based on TDRS 7/8 status
+            if any(t in (7, 8) for t in self.active_tdrs if t):
+                # Z-belt active, hide ZOE label
+                zoe_label.opacity = 0
+            else:
+                # Z-belt not active, show ZOE label
+                zoe_label.opacity = 1
+                
+        except Exception as exc:
+            log_error(f"_update_zoe_label_position failed: {exc}")
 
     # ─────────────────────── crew sleep timer, telemetry, etc. ────────────────
     def update_crew_sleep_timer(self) -> None:
@@ -1022,7 +1066,7 @@ class Orbit_Screen(MimicBase):
             return
 
         # — localise AOS time for display --------------------------------------
-        utc_dt = ephem.to_datetime(next_pass[0])
+        utc_dt = next_pass[0].datetime()
         # For now, use Houston timezone. In the future, this could be configurable
         local = utc_dt.replace(tzinfo=pytz.utc).astimezone(pytz.timezone("America/Chicago"))
 
@@ -1070,11 +1114,7 @@ class Orbit_Screen(MimicBase):
         self._refresh_zoe_times_if_needed()
         self._update_zoe_timers()
 
-        # — update location markers -----------------------------------------
-        self._update_loc_markers()
 
-        # — update user location --------------------------------------------
-        self.update_user_location()
 
     # ----------------------------------------------------------------- ISS icon + track
     def update_iss(self, _dt=0):

@@ -498,18 +498,6 @@
         size: self.texture_size
         pos: 0, 0
 
-    # ───────────────────────────── ZOE & ISS icons ─────────────────────────
-    # ZOE boundary widget (will be drawn as a polygon)
-    Widget:
-        id: ZOE_boundary
-        canvas:
-            Color:
-                rgba: 1, 0, 1, 0.3  # Magenta, semi-transparent
-            Line:
-                points: []  # Will be populated with ZOE boundary points
-                width: 2
-                close: True
-
     Label:
         id: ZOElabel
         text: "ZOE"
