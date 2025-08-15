@@ -705,9 +705,29 @@ class Orbit_Screen(MimicBase):
                 # Z-belt not active, show ZOE label
                 zoe_label.opacity = 1
                 log_info("Z-belt not active, showing ZOE label (opacity=1)")
+                
+                # Force the label to be visible and on top
+                zoe_label.opacity = 1.0
+                zoe_label.color = (1, 0, 0, 1)  # Bright red for debugging
+                zoe_label.font_size = 24  # Make it larger
+                zoe_label.bold = True  # Make it bold
+                
+                # Try to bring the label to the front
+                try:
+                    if hasattr(zoe_label, 'bring_to_front'):
+                        zoe_label.bring_to_front()
+                    elif hasattr(zoe_label.parent, 'remove_widget') and hasattr(zoe_label.parent, 'add_widget'):
+                        # Remove and re-add to bring to front
+                        zoe_label.parent.remove_widget(zoe_label)
+                        zoe_label.parent.add_widget(zoe_label)
+                        log_info("Re-added ZOE label to bring it to front")
+                except Exception as e:
+                    log_info(f"Could not bring ZOE label to front: {e}")
+                
+                log_info("Forced ZOE label to be bright red, large, and bold for debugging")
             
             # Additional debug info
-            log_info(f"ZOE label final state: opacity={zoe_label.opacity}, pos={getattr(zoe_label, 'pos', 'N/A')}, center={getattr(zoe_label, 'center', 'N/A')}, size={getattr(zoe_label, 'size', 'N/A')}, text='{getattr(zoe_label, 'text', 'N/A')}'")
+            log_info(f"ZOE label final state: opacity={zoe_label.opacity}, pos={getattr(zoe_label, 'pos', 'N/A')}, center={getattr(zoe_label, 'center', 'N/A')}, size={getattr(zoe_label, 'size', 'N/A')}, text='{getattr(zoe_label, 'text', 'N/A')}, color={getattr(zoe_label, 'color', 'N/A')}, font_size={getattr(zoe_label, 'font_size', 'N/A')}")
                 
         except Exception as exc:
             log_error(f"_update_zoe_label_position failed: {exc}")
