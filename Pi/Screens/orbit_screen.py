@@ -661,8 +661,8 @@ class Orbit_Screen(MimicBase):
             
         zoe_label = self.ids.ZOElabel
          
-        lat = 0.0
-        lon = 77.0
+        lat = -10.0
+        lon = 68.0
                 
         x, y = self.map_px(lat, lon)
         zoe_label.pos = (x, y)
