@@ -3528,9 +3528,9 @@ class MainApp(App):
         soyuz73count = (crew_now - soyuz73launch).days
 
         # Calculate Cumulative Days for each astro
-        dragon11_1 = 381+dragon11count
+        dragon11_1 = 382+dragon11count
         dragon11_2 = 0+dragon11count
-        dragon11_3 = 141+dragon11count
+        dragon11_3 = 142+dragon11count
         dragon11_4 = 0+dragon11count
         soyuz73_1 = 357+soyuz73count
         soyuz73_2 = 0+soyuz73count
