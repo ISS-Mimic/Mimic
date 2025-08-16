@@ -274,3 +274,9 @@
         color: 0.7, 0.7, 1, 1  # Light blue for spacecraft
         font_size: dp(10)
         size_hint_y: 0.15
+        size_hint_x: 1.0  # Take full width
+        text_size: self.size  # Allow text to use full available size
+        halign: 'center'  # Center the text horizontally
+        valign: 'middle'  # Center the text vertically
+        shorten: False  # Don't shorten the text
+        markup: False  # Disable markup to prevent any formatting issues
