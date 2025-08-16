@@ -65,7 +65,7 @@ class CrewMemberWidget(BoxLayout):
         self.image_url = image_url
         
         if self.image_url:
-            log_info(f"Crew member {self.name} image URL: {self.image_url}")
+            #log_info(f"Crew member {self.name} image URL: {self.image_url}")
             # Force a property update to trigger the KV binding
             self.property('image_url').dispatch(self)
         else:
@@ -187,9 +187,10 @@ class Crew_Screen(MimicBase):
                 current_checksum = checksum_row[0] if checksum_row else None
                 
                 # If checksum hasn't changed, skip the update
-                if current_checksum == self._last_checksum and self.crew_data:
+                if current_checksum == self._last_checksum and self.crew_data or current_checksum == None:
                     log_info("Crew data unchanged, skipping update")
                     return
+                
                 
                 log_info(f"Database checksum changed from {self._last_checksum} to {current_checksum}")
                 self._last_checksum = current_checksum

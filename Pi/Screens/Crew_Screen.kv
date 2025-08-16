@@ -225,7 +225,7 @@
     size_hint_y: None
     height: dp(200)
     padding: dp(10)
-    spacing: dp(5)
+    spacing: dp(2)
     
     # Crew Member Photo
     AsyncImage:
@@ -280,3 +280,7 @@
         valign: 'middle'  # Center the text vertically
         shorten: False  # Don't shorten the text
         markup: False  # Disable markup to prevent any formatting issues
+        padding: dp(2), dp(0)  # Add some horizontal padding
+        # Ensure text doesn't get clipped
+        text_halign: 'center'
+        text_valign: 'middle'
