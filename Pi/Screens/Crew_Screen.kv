@@ -283,3 +283,8 @@
         color: 0.7, 0.7, 1, 1  # Light blue for spacecraft
         font_size: dp(10)
         size_hint_y: 0.15
+        text_size: self.width, None     # measure against available width
+        shorten: True                   # show "…" instead of wrapping
+        shorten_from: "right"           # trim from the right
+        halign: "center"                # (optional) keep it centered
+        max_lines: 1                    # only if your Kivy version supports it
