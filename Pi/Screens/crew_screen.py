@@ -100,6 +100,7 @@ class Crew_Screen(MimicBase):
         self.update_timer = None
         self.poll_timer = None
         self.expedition_timer = None
+        self._last_checksum = None  # Track database changes
 
     # ─────────────── Lifecycle & scheduling ────────────────
     def on_pre_enter(self):
@@ -151,7 +152,7 @@ class Crew_Screen(MimicBase):
 
     # ─────────────────── Data loading ──────────────────────
     def load_crew_data(self) -> None:
-        """Load current crew from SQLite into self.crew_data and refresh UI."""
+        """Load current crew from SQLite into self.crew_data and refresh UI only if changed."""
         try:
             db_path = self.get_db_path()
             p = Path(db_path)
@@ -164,6 +165,21 @@ class Crew_Screen(MimicBase):
             with sqlite3.connect(db_path) as conn:
                 conn.row_factory = sqlite3.Row
                 cur = conn.cursor()
+                
+                # First check if data has changed by comparing checksums
+                cur.execute("SELECT checksum FROM snapshots ORDER BY id DESC LIMIT 1")
+                checksum_row = cur.fetchone()
+                current_checksum = checksum_row[0] if checksum_row else None
+                
+                # If checksum hasn't changed, skip the update
+                if current_checksum == self._last_checksum and self.crew_data:
+                    log_info("Crew data unchanged, skipping update")
+                    return
+                
+                log_info(f"Database checksum changed from {self._last_checksum} to {current_checksum}")
+                self._last_checksum = current_checksum
+                
+                # Load the actual crew data
                 cur.execute(
                     """
                     SELECT
@@ -271,10 +287,10 @@ class Crew_Screen(MimicBase):
             if oldest:
                 self.expedition_duration = self._format_counter(oldest)
             else:
-                self.expedition_duration = "00:00-00:00"
+                self.expedition_duration = "00:00:00:00"
         except Exception as e:
             log_error(f"Error updating expedition duration: {e}")
-            self.expedition_duration = "00:00-00:00"
+            self.expedition_duration = "00:00:00:00"
 
     # "ISS crewed time" (since first crew on Nov 2, 2000)
     def _update_iss_crewed_time(self):
@@ -292,7 +308,8 @@ class Crew_Screen(MimicBase):
 
     # ───────────────── Periodic updates ────────────────────
     def update_crew_data(self, _dt):
-        self.load_crew_data()
+        """Periodic update - only refresh if database has changed."""
+        self.load_crew_data()  # This now checks checksum internally
         self._update_iss_crewed_time()
         self.update_crewed_vehicles_display()
 
@@ -495,9 +512,11 @@ class Crew_Screen(MimicBase):
 
     def _poll_for_crew(self, _dt):
         """Poll frequently until first data appears, then switch cadence."""
-        prev = len(self.crew_data)
-        self.load_crew_data()
-        if self.crew_data and len(self.crew_data) != prev:
+        prev_checksum = self._last_checksum
+        self.load_crew_data()  # This now checks checksum internally
+        
+        # Check if we got new data (checksum changed)
+        if self._last_checksum != prev_checksum and self.crew_data:
             self._cancel_timer("poll_timer")
             if not self.update_timer:
                 self.update_timer = Clock.schedule_interval(self.update_crew_data, UPDATE_INTERVAL_S)
