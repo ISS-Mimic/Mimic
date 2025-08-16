@@ -259,13 +259,13 @@ class Crew_Screen(MimicBase):
         return ", ".join(parts)
 
     def _format_counter(self, start: datetime, end: Optional[datetime] = None) -> str:
-        """Format duration as mm:dd-hh:ss counter."""
+        """Format duration as mm:dd:hh:ss counter."""
         end = end or datetime.now()
         delta = end - start
         total_seconds = int(delta.total_seconds())
         
         if total_seconds < 0:
-            return "00:00-00:00"
+            return "00:00:00:00"
         
         days = total_seconds // 86400
         remaining_seconds = total_seconds % 86400
@@ -273,7 +273,7 @@ class Crew_Screen(MimicBase):
         minutes = (remaining_seconds % 3600) // 60
         seconds = remaining_seconds % 60
         
-        return f"{days:02d}:{hours:02d}-{minutes:02d}:{seconds:02d}"
+        return f"{days:02d}:{hours:02d}:{minutes:02d}:{seconds:02d}"
 
     # Expedition duration (oldest launch to now) - formatted as counter
     def _update_expedition_duration(self, *_):
