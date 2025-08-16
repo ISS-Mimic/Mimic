@@ -105,6 +105,7 @@ class Crew_Screen(MimicBase):
         super().__init__(**kwargs)
         self.crew_widgets = []
         self.update_timer = None
+        self.poll_timer = None
         
     def on_pre_enter(self):
         """Called when screen is about to be displayed."""
@@ -112,10 +113,15 @@ class Crew_Screen(MimicBase):
         self.load_crew_data()
         self.update_iss_crewed_time()
         
-        # Set up periodic updates
+        # switchable scheduling: poll fast until data appears
+        if self.poll_timer:
+            self.poll_timer.cancel()
         if self.update_timer:
             self.update_timer.cancel()
-        self.update_timer = Clock.schedule_interval(self.update_crew_data, 300)  # Update every 5 minutes
+        if self.crew_data:
+            self.update_timer = Clock.schedule_interval(self.update_crew_data, 300)
+        else:
+            self.poll_timer = Clock.schedule_interval(self._poll_for_crew, 2.0)
         
         # Set up expedition duration timer (updates every second)
         self.expedition_timer = Clock.schedule_interval(self.update_expedition_duration, 1.0)
@@ -125,6 +131,9 @@ class Crew_Screen(MimicBase):
         if self.update_timer:
             self.update_timer.cancel()
             self.update_timer = None
+        if self.poll_timer:
+            self.poll_timer.cancel()
+            self.poll_timer = None
         if hasattr(self, 'expedition_timer') and self.expedition_timer:
             self.expedition_timer.cancel()
             self.expedition_timer = None
@@ -147,8 +156,9 @@ class Crew_Screen(MimicBase):
             # Check if database file exists
             db_file = Path(db_path)
             if not db_file.exists():
-                log_error(f"Database file does not exist: {db_path}")
-                raise FileNotFoundError(f"Database not found: {db_path}")
+                log_info(f"Database not ready yet: {db_path}")
+                self.crew_data = []
+                return
             
             #log_info(f"Database file exists, size: {db_file.stat().st_size} bytes")
             
@@ -372,6 +382,18 @@ class Crew_Screen(MimicBase):
             crew_container = self.ids.crew_container
             if hasattr(crew_container, 'clear_widgets'):
                 crew_container.clear_widgets()
+            self.crew_widgets.clear()
+            
+            # Create new crew widgets
+            for crew_data in self.crew_data:
+                crew_widget = CrewMemberWidget(crew_data, mimic_dir=self.mimic_directory)
+                crew_container.add_widget(crew_widget)
+                self.crew_widgets.append(crew_widget)
+            
+            log_info(f"Updated crew display with {len(self.crew_data)} members")
+            
+        except Exception as e:
+            log_error(f"Error updating crew display: {e}")
             
             # Create new crew widgets
             for crew_data in self.crew_data:
@@ -385,24 +407,42 @@ class Crew_Screen(MimicBase):
             log_error(f"Error updating crew display: {e}")
     
     def update_iss_crewed_time(self):
-        """Update the ISS continuously crewed time display."""
+        """Update the ISS crewed time display."""
         try:
-            # Calculate time since ISS became continuously crewed
-            # ISS Expedition 1 began on November 2, 2000
-            expedition_start = datetime(2000, 11, 2)
-            now = datetime.now()
-            duration = now - expedition_start
+            if not self.crew_data:
+                self.iss_crewed_years = "0"
+                self.iss_crewed_months = "0"
+                self.iss_crewed_days = "0"
+                return
             
-            years = duration.days // 365
-            remaining_days = duration.days % 365
-            months = remaining_days // 30
-            days = remaining_days % 30
+            # Find the oldest launch date among current crew
+            oldest_launch = None
+            for crew in self.crew_data:
+                launch_date = crew.get('launch_date')
+                if launch_date:
+                    try:
+                        # Parse the launch date (YYYY-MM-DD format)
+                        parsed_date = datetime.strptime(launch_date, '%Y-%m-%d')
+                        if oldest_launch is None or parsed_date < oldest_launch:
+                            oldest_launch = parsed_date
+                    except ValueError:
+                        continue
             
-            self.iss_crewed_years = str(years)
-            self.iss_crewed_months = str(months)
-            self.iss_crewed_days = str(days)
-            
-            log_info(f"Updated ISS crewed time: {years} years, {months} months, {days} days")
+            if oldest_launch:
+                # Calculate days since oldest launch
+                now = datetime.now()
+                duration = now - oldest_launch
+                
+                years = duration.days // 365
+                remaining_days = duration.days % 365
+                months = remaining_days // 30
+                days = remaining_days % 30
+                
+                self.iss_crewed_years = str(years)
+                self.iss_crewed_months = str(months)
+                self.iss_crewed_days = str(days)
+                
+                log_info(f"Updated ISS crewed time: {years} years, {months} months, {days} days")
             
         except Exception as e:
             log_error(f"Error updating ISS crewed time: {e}")
@@ -688,3 +728,17 @@ class Crew_Screen(MimicBase):
         except Exception as e:
             log_error(f"Error calculating crew statistics: {e}")
             return {}
+
+    def _poll_for_crew(self, dt):
+        """Fast polling until crew data is available, then switch to normal interval."""
+        prev_count = len(self.crew_data)
+        self.load_crew_data()
+        if self.crew_data and len(self.crew_data) != prev_count:
+            # first time data appears: stop polling, switch to normal interval
+            if self.poll_timer:
+                self.poll_timer.cancel()
+                self.poll_timer = None
+            if not self.update_timer:
+                self.update_timer = Clock.schedule_interval(self.update_crew_data, 300)
+            # kick vehicles update shortly after
+            Clock.schedule_once(lambda _dt: self.update_crewed_vehicles_display(), 1.0)
