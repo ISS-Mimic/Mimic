@@ -229,12 +229,14 @@
     
     # Crew Member Photo
     AsyncImage:
-        source: 'https://spacefacts.de/bios/portraits2/astronauts/kim_jonny.jpg'
+        id: crew_photo
+        source: root.image_url if root.image_url else f'{root.mimic_directory}/Mimic/Pi/imgs/crew/CrewBase.png'
         size_hint: 0.4, 0.6
         pos_hint: {"center_x": 0.5, "center_y": 0.8}
         fit_mode: "contain"
         allow_stretch: False
         keep_ratio: True
+        nocache: True  # Force reload when source changes
     
     # Crew Member Name
     Label:

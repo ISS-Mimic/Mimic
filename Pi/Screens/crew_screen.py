@@ -59,10 +59,17 @@ class CrewMemberWidget(BoxLayout):
         # Use DB-provided fields when present
         self.mission_days = str(crew_data.get("current_mission_duration", 0))
         self.total_days = str(crew_data.get("total_time_in_space", 0))
-        self.image_url = crew_data.get("image_url", "") or ""
-
+        
+        # Set image URL and log it
+        image_url = crew_data.get("image_url", "") or ""
+        self.image_url = image_url
+        
         if self.image_url:
             log_info(f"Crew member {self.name} image URL: {self.image_url}")
+            # Force a property update to trigger the KV binding
+            self.property('image_url').dispatch(self)
+        else:
+            log_info(f"Crew member {self.name} has no image URL, using fallback")
 
     def _determine_role(self, crew_data: Dict) -> str:
         """Map DB 'position' text into a compact role label."""
@@ -81,6 +88,14 @@ class CrewMemberWidget(BoxLayout):
         if "Commander" in (crew_data.get("expedition") or ""):
             return "CMDR"
         return "FE"
+
+    def update_image(self, new_url: str):
+        """Update the image URL and force refresh."""
+        if new_url != self.image_url:
+            self.image_url = new_url
+            log_info(f"Updated {self.name} image to: {new_url}")
+            # Force the AsyncImage to reload
+            self.property('image_url').dispatch(self)
 
 
 # ──────────────────────── Screen ───────────────────────────
