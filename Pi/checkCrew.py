@@ -56,6 +56,10 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
     Fetch detailed crew data from Spacefacts.de ISS table.
     Returns list of dicts with enhanced crew information.
     """
+    # Get the latest expedition URL dynamically
+    current_url = get_spacefacts_url()
+    log_info(f"Fetching crew data from: {current_url}")
+    
     headers = {
         "User-Agent": "ISS-Mimic/1.0 (+https://github.com/ISS-Mimic; iss.mimic@gmail.com)"
     }
@@ -64,7 +68,7 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
     for attempt in range(max_attempts):
         try:
             log_info(f"Attempting to fetch Spacefacts.de crew data (attempt {attempt + 1}/{max_attempts})")
-            r = requests.get(SPACEFACTS_URL, headers=headers, timeout=timeout)
+            r = requests.get(current_url, headers=headers, timeout=timeout)
             r.raise_for_status()
             
             # Parse the HTML table
@@ -76,7 +80,7 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
             #print(f"Found {len(tables)} tables")
 
             crew_table = None
-            # Look for the crew data table with the specific structure
+            # Look for the crew table with the specific structure
             for i, table in enumerate(tables):
                 table_text = str(table)
                 #print(f"Table {i}: {table_text[:200]}...")  # Show first 200 chars of each table
@@ -164,10 +168,25 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
                             elif 'spain.gif' in src:
                                 country = 'Spain'
 
+                    if country == 'Russian Federation':
+                        country = 'Russia'
                     
                     # Parse the table row based on the Expedition 73 table structure
+                    # Extract name with preference for nicknames in quotes
+                    given_names = cells[3].get_text(strip=True)
+                    surname = cells[2].get_text(strip=True)
+                    
+                    # Check for nickname in quotes (e.g., "Annimal", "Vapor", "Jonny")
+                    nickname_match = re.search(r'"([^"]+)"', given_names)
+                    if nickname_match:
+                        # Use the nickname instead of first name
+                        first_name = nickname_match.group(1)
+                    else:
+                        # Use the first word of given names
+                        first_name = given_names.split()[0]
+                    
                     crew_member = {
-                        'name': f"{cells[3].get_text(strip=True).split()[0]} {cells[2].get_text(strip=True)}",  # First name + Surname only
+                        'name': f"{first_name} {surname}",  # Nickname (if available) + Surname
                         'country': country,  # Nation extracted from flag image
                         'position': cells[4].get_text(strip=True),  # Position
                         'spaceship': cells[5].get_text(strip=True),  # Spacecraft (launch)
@@ -178,7 +197,7 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
                         'landing_time': cells[10].get_text(strip=True),  # Landing time
                         'mission_duration': '',  # Will be calculated by crew screen based on launch time
                         'orbits': cells[12].get_text(strip=True),  # Orbits
-                        'expedition': 'Expedition 73'  # Default expedition
+                        'expedition': f"Expedition {get_latest_expedition_number()}"  # Dynamic expedition name
                     }
                     
                     # Debug: Log the parsed crew member data
@@ -346,6 +365,91 @@ def fetch_iss_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict[str, s
     log_error(error_msg)
     raise RuntimeError(error_msg)
 
+def get_latest_expedition_number() -> int:
+    """
+    Discover the latest ISS expedition number by checking Spacefacts.de.
+    Returns the expedition number as an integer.
+    """
+    base_url = "https://spacefacts.de/iss/english/"
+    headers = {
+        "User-Agent": "ISS-Mimic/1.0 (+https://github.com/ISS-Mimic; iss.mimic@gmail.com)"
+    }
+    
+    def is_valid_expedition_page(soup, expected_exp_num):
+        """Check if the page actually contains data for the expected expedition number."""
+        # Look for expedition-specific content
+        page_text = str(soup).lower()
+        
+        # Check if the page contains the expected expedition number
+        if f"expedition {expected_exp_num}" not in page_text and f"exp {expected_exp_num}" not in page_text:
+            return False
+        
+        # Check if it has the crew table structure we expect
+        tables = soup.find_all('table')
+        for table in tables:
+            table_text = str(table)
+            if ('No.' in table_text and 'Nation' in table_text and 'Surname' in table_text and 
+                'Given names' in table_text and 'Position' in table_text):
+                # Found the crew table, now verify it's not just a redirect
+                rows = table.find_all('tr')
+                if len(rows) > 1:  # Has at least header + data rows
+                    return True
+        
+        return False
+    
+    try:
+        # Start from a reasonable recent number and work down
+        # We know Expedition 73 exists, so start from there and work up
+        for exp_num in range(73, 85):  # Try expeditions 73 up to 84
+            test_url = f"{base_url}exp_{exp_num}.htm"
+            try:
+                r = requests.get(test_url, headers=headers, timeout=5)
+                if r.status_code == 200:
+                    # Check if this page actually contains the right expedition data
+                    soup = BeautifulSoup(r.content, 'html.parser')
+                    if is_valid_expedition_page(soup, exp_num):
+                        log_info(f"Found valid expedition page: {exp_num}")
+                        print(f"Found valid expedition page: {exp_num}")
+                        return exp_num
+                    else:
+                        log_info(f"Expedition {exp_num} page exists but doesn't contain valid data")
+                        print(f"Expedition {exp_num} page exists but doesn't contain valid data")
+            except Exception as e:
+                log_info(f"Error checking expedition {exp_num}: {e}")
+                continue
+        
+        # If we can't find any working expeditions above 73, try a few below
+        log_info("Could not find expedition above 73, trying lower numbers")
+        for exp_num in range(72, 69, -1):  # Try expeditions 72 down to 69
+            test_url = f"{base_url}exp_{exp_num}.htm"
+            try:
+                r = requests.get(test_url, headers=headers, timeout=5)
+                if r.status_code == 200:
+                    soup = BeautifulSoup(r.content, 'html.parser')
+                    if is_valid_expedition_page(soup, exp_num):
+                        log_info(f"Found valid expedition page: {exp_num}")
+                        print(f"Found valid expedition page: {exp_num}")
+                        return exp_num
+            except Exception as e:
+                log_info(f"Error checking expedition {exp_num}: {e}")
+                continue
+        
+        # If all else fails, return a reasonable default
+        log_info("Could not determine expedition number, using default: 73")
+        print(f"Could not determine expedition number, using default: 73")
+        return 73
+        
+    except Exception as e:
+        log_error(f"Error determining latest expedition: {e}")
+        print(f"Error determining latest expedition: {e}")
+        return 73
+
+def get_spacefacts_url() -> str:
+    """
+    Get the Spacefacts.de URL for the latest expedition.
+    """
+    expedition_num = get_latest_expedition_number()
+    return f"https://spacefacts.de/iss/english/exp_{expedition_num}.htm"
 
 # --- Persistence ------------------------------------------------------------ #
 
