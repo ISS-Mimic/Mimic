@@ -53,8 +53,12 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
     Fetch detailed crew data from Spacefacts.de ISS table.
     Returns list of dicts with enhanced crew information.
     """
+    # Get the latest expedition number once at the beginning
+    expedition_number = get_latest_expedition_number()
+    log_info(f"Found expedition number: {expedition_number}")
+    
     # Get the latest expedition URL dynamically
-    current_url = get_spacefacts_url()
+    current_url = get_spacefacts_url(expedition_number)
     log_info(f"Fetching crew data from: {current_url}")
     
     headers = {
@@ -214,7 +218,7 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
                         'landing_time': cells[10].get_text(strip=True),  # Landing time
                         'mission_duration': '',  # Will be calculated by crew screen based on launch time
                         'orbits': cells[12].get_text(strip=True),  # Orbits
-                        'expedition': f"Expedition {get_latest_expedition_number()}",  # Dynamic expedition name
+                        'expedition': f"Expedition {expedition_number}",  # Use expedition number found at start
                         'image_url': image_url,  # URL to astronaut's personal page with image
                         'total_time_in_space': mission_data['total_time_in_space'],  # Total lifetime days in space
                         'current_mission_duration': mission_data['current_mission_duration']  # Current mission duration in days
@@ -424,16 +428,15 @@ def get_latest_expedition_number() -> int:
                     # Check if this page actually contains the right expedition data
                     soup = BeautifulSoup(r.content, 'html.parser')
                     if is_valid_expedition_page(soup, exp_num):
-                        log_info(f"Found valid expedition page: {exp_num}")
                         return exp_num
-                    else:
-                        log_info(f"Expedition {exp_num} page exists but doesn't contain valid data")
+                    # else:
+                    #     log_info(f"Expedition {exp_num} page exists but doesn't contain valid data")
             except Exception as e:
-                log_info(f"Error checking expedition {exp_num}: {e}")
+                # log_info(f"Error checking expedition {exp_num}: {e}")
                 continue
         
         # If we can't find any working expeditions above 73, try a few below
-        log_info("Could not find expedition above 73, trying lower numbers")
+        # log_info("Could not find expedition above 73, trying lower numbers")
         for exp_num in range(72, 69, -1):  # Try expeditions 72 down to 69
             test_url = f"{base_url}exp_{exp_num}.htm"
             try:
@@ -441,10 +444,9 @@ def get_latest_expedition_number() -> int:
                 if r.status_code == 200:
                     soup = BeautifulSoup(r.content, 'html.parser')
                     if is_valid_expedition_page(soup, exp_num):
-                        log_info(f"Found valid expedition page: {exp_num}")
                         return exp_num
             except Exception as e:
-                log_info(f"Error checking expedition {exp_num}: {e}")
+                # log_info(f"Error checking expedition {exp_num}: {e}")
                 continue
         
         # If all else fails, return a reasonable default
@@ -455,11 +457,13 @@ def get_latest_expedition_number() -> int:
         log_error(f"Error determining latest expedition: {e}")
         return 73
 
-def get_spacefacts_url() -> str:
+def get_spacefacts_url(expedition_num: int = None) -> str:
     """
-    Get the Spacefacts.de URL for the latest expedition.
+    Get the Spacefacts.de URL for the specified expedition.
+    If no expedition number is provided, discover the latest one.
     """
-    expedition_num = get_latest_expedition_number()
+    if expedition_num is None:
+        expedition_num = get_latest_expedition_number()
     return f"https://spacefacts.de/iss/english/exp_{expedition_num}.htm"
 
 def get_astronaut_image_url(astronaut_page_url: str) -> str:
