@@ -116,6 +116,15 @@
             font_size: dp(14)
             bold: True
         
+        Label:
+            id: loading
+            pos_hint: {"center_x": 0.35, "center_y": 0.5}
+            text: 'Loading...'
+            markup: True
+            color: 1, 1, 1, 1
+            font_size: dp(14)
+            bold: True
+
         # Main Crew Display Area (Left Side)
         ScrollView:
             pos_hint: {"center_x": 0.35, "center_y": 0.5}
@@ -274,13 +283,3 @@
         color: 0.7, 0.7, 1, 1  # Light blue for spacecraft
         font_size: dp(10)
         size_hint_y: 0.15
-        size_hint_x: 1.0  # Take full width
-        text_size: self.size  # Allow text to use full available size
-        halign: 'center'  # Center the text horizontally
-        valign: 'middle'  # Center the text vertically
-        shorten: False  # Don't shorten the text
-        markup: False  # Disable markup to prevent any formatting issues
-        padding: dp(2), dp(0)  # Add some horizontal padding
-        # Ensure text doesn't get clipped
-        text_halign: 'center'
-        text_valign: 'middle'

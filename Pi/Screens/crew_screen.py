@@ -231,6 +231,11 @@ class Crew_Screen(MimicBase):
             if not crew_container or not hasattr(crew_container, "clear_widgets"):
                 return
 
+            # Hide the loading label once we have data
+            loading_label = getattr(self.ids, "loading", None)
+            if loading_label:
+                loading_label.opacity = 0 if self.crew_data else 1
+
             crew_container.clear_widgets()
             self.crew_widgets.clear()
 
