@@ -290,7 +290,45 @@ class Crew_Screen(MimicBase):
         
         return f"{days:02d}:{hours:02d}:{minutes:02d}:{seconds:02d}"
 
-    # Expedition duration (oldest launch to now) - formatted as counter
+    def _format_expedition_duration(self, start: datetime, end: Optional[datetime] = None) -> str:
+        """Format expedition duration as months, days, hours, seconds."""
+        end = end or datetime.now()
+        delta = end - start
+        
+        if delta.total_seconds() < 0:
+            return "0 months, 0 days, 0 hours, 0 seconds"
+        
+        total_seconds = int(delta.total_seconds())
+        
+        # Calculate months (approximate - using 30 days per month)
+        months = total_seconds // (30 * 24 * 3600)
+        remaining_seconds = total_seconds % (30 * 24 * 3600)
+        
+        # Calculate days
+        days = remaining_seconds // (24 * 3600)
+        remaining_seconds = remaining_seconds % (24 * 3600)
+        
+        # Calculate hours
+        hours = remaining_seconds // 3600
+        remaining_seconds = remaining_seconds % 3600
+        
+        # Remaining seconds
+        seconds = remaining_seconds
+        
+        # Build the formatted string
+        parts = []
+        if months > 0:
+            parts.append(f"{months} m{'s' if months != 1 else ''}")
+        if days > 0:
+            parts.append(f"{days} d{'s' if days != 1 else ''}")
+        if hours > 0:
+            parts.append(f"{hours} h{'s' if hours != 1 else ''}")
+        if seconds > 0 or not parts:  # Always show at least seconds
+            parts.append(f"{seconds} s{'s' if seconds != 1 else ''}")
+        
+        return ", ".join(parts)
+
+    # Expedition duration (oldest launch to now) - formatted as months, days, hours, seconds
     def _update_expedition_duration(self, *_):
         try:
             oldest = None
@@ -300,12 +338,12 @@ class Crew_Screen(MimicBase):
                     oldest = dt
 
             if oldest:
-                self.expedition_duration = self._format_counter(oldest)
+                self.expedition_duration = self._format_expedition_duration(oldest)
             else:
-                self.expedition_duration = "00:00:00:00"
+                self.expedition_duration = "0 months, 0 days, 0 hours, 0 seconds"
         except Exception as e:
             log_error(f"Error updating expedition duration: {e}")
-            self.expedition_duration = "00:00:00:00"
+            self.expedition_duration = "0 months, 0 days, 0 hours, 0 seconds"
 
     # "ISS crewed time" (since first crew on Nov 2, 2000)
     def _update_iss_crewed_time(self):
