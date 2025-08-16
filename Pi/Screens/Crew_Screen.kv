@@ -27,16 +27,6 @@
             color: 1, 1, 1, 1
             font_size: dp(16)
             bold: True
-
-        # Credit to the amazing spacefacts.de
-        Label:
-            id: crew_info_credit_label
-            pos_hint: {"center_x": 0.35, "center_y": 0.82}
-            text: 'credit: spacefacts.de'
-            markup: True
-            color: 1, 1, 1, 1
-            font_size: dp(8)
-            bold: True
         
         Label:
             id: expedition_duration_timer
@@ -164,10 +154,10 @@
         
         # Legend
         BoxLayout:
-            pos_hint: {"center_x": 0.35, "center_y": 0.18}
-            size_hint: 0.6, 0.1
+            pos_hint: {"center_x": 0.3, "center_y": 0.18}
+            size_hint: 0.65, 0.1
             orientation: 'horizontal'
-            spacing: dp(20)
+            spacing: dp(10)
             
             Label:
                 text: 'CMDR = Commander'
@@ -182,7 +172,7 @@
                 bold: True
             
             Label:
-                text: 'Mission: Current mission duration\nTotal: Lifetime in space'
+                text: 'Credit: spacefacts.de'
                 color: 1, 1, 1, 1
                 font_size: dp(12)
                 bold: True
