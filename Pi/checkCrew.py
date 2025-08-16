@@ -61,7 +61,7 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
     log_info(f"Fetching crew data from: {current_url}")
     
     headers = {
-        "User-Agent": "ISS-Mimic/1.0 (+https://github.com/ISS-Mimic; iss.mimic@gmail.com)"
+        "User-Agent": "ISS-Mimic Bot (+https://github.com/ISS-Mimic; iss.mimic@gmail.com)"
     }
 
     last_exc = None
@@ -185,6 +185,48 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
                         # Use the first word of given names
                         first_name = given_names.split()[0]
                     
+                    # Extract astronaut image URL from surname link
+                    image_url = None
+                    surname_cell = cells[2]
+                    if surname_cell.find('a'):
+                        link = surname_cell.find('a')
+                        href = link.get('href', '')
+                        if href:
+                            # Convert relative URL to absolute URL using the actual href from the table
+                            if href.startswith('..'):
+                                #print(f"HREF: {href}")
+                                # Handle relative paths like "../../bios/international/english/onishi_takuya.htm"
+                                # Convert to absolute URL by going up the path and then down to the bios directory
+                                path_parts = href.split('/')
+                                #print(f"Path parts: {path_parts}")
+                                # Remove the ".." parts and construct the full URL
+                                if len(path_parts) >= 4:  # Should have at least ../../bios/category/language/filename
+                                    category = path_parts[3]  # e.g., "international", "cosmonauts", "astronauts"
+                                    language = path_parts[4]  # e.g., "english"
+                                    filename = path_parts[5]  # e.g., "onishi_takuya.htm"
+                                    astronaut_page_url = f"https://spacefacts.de/bios/{category}/{language}/{filename}"
+                                    #print(f"Constructed astronaut page URL: {astronaut_page_url}")
+                                else:
+                                    astronaut_page_url = None
+                            elif href.startswith('/'):
+                                # Handle absolute paths
+                                astronaut_page_url = f"https://spacefacts.de{href}"
+                            elif href.startswith('http'):
+                                # Already absolute URL
+                                astronaut_page_url = href
+                            else:
+                                astronaut_page_url = None
+                            
+                            # Now fetch the actual image URL from the astronaut's page
+                            if astronaut_page_url:
+                                image_url = get_astronaut_image_url(astronaut_page_url)
+                                if image_url:
+                                    print(f"Found image for {first_name} {surname}: {image_url}")
+                                else:
+                                    print(f"No image found for {first_name} {surname}")
+                            else:
+                                print(f"Could not construct astronaut page URL for {first_name} {surname}")
+                    
                     crew_member = {
                         'name': f"{first_name} {surname}",  # Nickname (if available) + Surname
                         'country': country,  # Nation extracted from flag image
@@ -197,9 +239,10 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
                         'landing_time': cells[10].get_text(strip=True),  # Landing time
                         'mission_duration': '',  # Will be calculated by crew screen based on launch time
                         'orbits': cells[12].get_text(strip=True),  # Orbits
-                        'expedition': f"Expedition {get_latest_expedition_number()}"  # Dynamic expedition name
+                        'expedition': f"Expedition {get_latest_expedition_number()}",  # Dynamic expedition name
+                        'image_url': image_url  # URL to astronaut's personal page with image
                     }
-                    
+
                     # Debug: Log the parsed crew member data
                     #log_info(f"Parsed crew member: {crew_member}")
                     
@@ -255,13 +298,17 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
                         crew_member['orbits'] = None
                     
                     # Only include crew members who have actually launched (have a launch date and specific launch time)
+                    # AND are currently active (not returned)
                     if (crew_member['launch_date'] and crew_member['launch_date'].strip() and 
-                        crew_member['launch_time'] and crew_member['launch_time'].strip() != 'UTC'):
+                        crew_member['launch_time'] and crew_member['launch_time'].strip() != 'UTC' and
+                        crew_member['status'] == 'active'):
                         crew_info.append(crew_member)
                         print(f"Added crew member: {crew_member['name']} from {crew_member['country']}")
                     else:
                         if crew_member['launch_time'] and crew_member['launch_time'].strip() == 'UTC':
                             print(f"Skipping future crew member: {crew_member['name']} (launch time not set)")
+                        elif crew_member['status'] == 'returned':
+                            print(f"Skipping returned crew member: {crew_member['name']}")
                         else:
                             print(f"Skipping crew member without launch date: {crew_member['name']}")
                         
@@ -451,6 +498,97 @@ def get_spacefacts_url() -> str:
     expedition_num = get_latest_expedition_number()
     return f"https://spacefacts.de/iss/english/exp_{expedition_num}.htm"
 
+def get_astronaut_image_url(astronaut_page_url: str) -> str:
+    """
+    Extract the astronaut's image URL from their personal page.
+    Returns the direct image URL or None if not found.
+    """
+    if not astronaut_page_url:
+        return None
+    
+    headers = {
+        "User-Agent": "ISS-Mimic Bot (+https://github.com/ISS-Mimic; iss.mimic@gmail.com)"
+    }
+    
+    try:
+        r = requests.get(astronaut_page_url, headers=headers, timeout=10)
+        r.raise_for_status()
+        
+        soup = BeautifulSoup(r.content, 'html.parser')
+        
+        # First, look for the high-resolution portrait link that's often in the page
+        # Based on the example page, it's often a link to "hi res version"
+        portrait_links = soup.find_all('a', href=re.compile(r'portraits.*\.jpg'))
+        if portrait_links:
+            for link in portrait_links:
+                href = link.get('href', '')
+                if 'portraits' in href and href.endswith('.jpg'):
+                    if href.startswith('..'):
+                        # Convert relative path to absolute
+                        return f"https://spacefacts.de/portraits_hi/cosmonauts/{href.split('/')[-1]}"
+                    elif href.startswith('/'):
+                        return f"https://spacefacts.de{href}"
+                    elif href.startswith('http'):
+                        return href
+                    else:
+                        # Assume it's relative to the current page
+                        base_url = '/'.join(astronaut_page_url.split('/')[:-1])
+                        return f"{base_url}/{href}"
+        
+        # Look for the astronaut's photo - typically in a table or specific div
+        # Common patterns: look for images with astronaut names or in specific table cells
+        images = soup.find_all('img')
+        
+        for img in images:
+            src = img.get('src', '')
+            alt = img.get('alt', '').lower()
+            title = img.get('title', '').lower()
+            
+            # Look for images that are likely astronaut photos
+            if any(keyword in alt or keyword in title for keyword in ['astronaut', 'cosmonaut', 'photo', 'portrait']):
+                if src.startswith('..'):
+                    # Convert relative path to absolute
+                    # Extract the category from the astronaut page URL to use the correct path
+                    if 'bios/' in astronaut_page_url:
+                        category = astronaut_page_url.split('bios/')[1].split('/')[0]
+                        return f"https://spacefacts.de/bios/{category}/english/{src.split('/')[-1]}"
+                    else:
+                        return f"https://spacefacts.de/bios/international/english/{src.split('/')[-1]}"
+                elif src.startswith('/'):
+                    return f"https://spacefacts.de{src}"
+                elif src.startswith('http'):
+                    return src
+                else:
+                    # Assume it's relative to the current page
+                    base_url = '/'.join(astronaut_page_url.split('/')[:-1])
+                    return f"{base_url}/{src}"
+        
+        # Fallback: look for any image that might be the astronaut photo
+        # Often the first image after the name/title
+        for img in images:
+            src = img.get('src', '')
+            if src and not src.endswith('.gif') and 'flag' not in src.lower():
+                if src.startswith('..'):
+                    # Extract the category from the astronaut page URL to use the correct path
+                    if 'bios/' in astronaut_page_url:
+                        category = astronaut_page_url.split('bios/')[1].split('/')[0]
+                        return f"https://spacefacts.de/bios/{category}/english/{src.split('/')[-1]}"
+                    else:
+                        return f"https://spacefacts.de/bios/international/english/{src.split('/')[-1]}"
+                elif src.startswith('/'):
+                    return f"https://spacefacts.de{src}"
+                elif src.startswith('http'):
+                    return src
+                else:
+                    base_url = '/'.join(astronaut_page_url.split('/')[:-1])
+                    return f"{base_url}/{src}"
+        
+        return None
+        
+    except Exception as e:
+        log_error(f"Error fetching astronaut image from {astronaut_page_url}: {e}")
+        return None
+
 # --- Persistence ------------------------------------------------------------ #
 
 def ensure_schema(conn: sqlite3.Connection) -> None:
@@ -492,7 +630,8 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
                 landing_time TEXT,                -- Landing time (HH:MM:SS UTC) or NULL if active
                 mission_duration TEXT,            -- Mission duration (e.g., "147d 16h 29m 52s")
                 orbits INTEGER,                   -- Number of orbits completed
-                status TEXT DEFAULT 'active'      -- 'active' or 'returned'
+                status TEXT DEFAULT 'active',     -- 'active' or 'returned'
+                image_url TEXT                    -- URL to astronaut's photo
             );
 
             CREATE TABLE current_crew (
@@ -508,7 +647,8 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
                 landing_time TEXT,
                 mission_duration TEXT,
                 orbits INTEGER,
-                status TEXT DEFAULT 'active'
+                status TEXT DEFAULT 'active',
+                image_url TEXT                    -- URL to astronaut's photo
             );
         """)
         conn.commit()
@@ -566,14 +706,14 @@ def insert_snapshot(conn: sqlite3.Connection, crew: List[Dict[str, str]], checks
         
         cur.executemany(
             """
-            INSERT INTO crew_members (snapshot_id, name, country, spaceship, expedition, position, launch_date, launch_time, landing_spacecraft, landing_date, landing_time, mission_duration, orbits, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO crew_members (snapshot_id, name, country, spaceship, expedition, position, launch_date, launch_time, landing_spacecraft, landing_date, landing_time, mission_duration, orbits, status, image_url)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             [
                 (snapshot_id, m["name"], m["country"], m["spaceship"], m["expedition"], 
                  m.get("position"), m.get("launch_date"), m.get("launch_time"), 
                  m.get("landing_spacecraft"), m.get("landing_date"), m.get("landing_time"), m.get("mission_duration"), 
-                 m.get("orbits"), m.get("status", "active"))
+                 m.get("orbits"), m.get("status", "active"), m.get("image_url"))
                 for m in crew
             ],
         )
@@ -583,13 +723,13 @@ def insert_snapshot(conn: sqlite3.Connection, crew: List[Dict[str, str]], checks
         cur.executemany(
             """
             INSERT INTO current_crew (name, country, spaceship, expedition, position, launch_date, launch_time, 
-                landing_spacecraft, landing_date, landing_time, mission_duration, orbits, status) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                landing_spacecraft, landing_date, landing_time, mission_duration, orbits, status, image_url) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             [(m["name"], m["country"], m["spaceship"], m["expedition"], 
             m.get("position"), m.get("launch_date"), m.get("launch_time"), 
             m.get("landing_spacecraft"), m.get("landing_date"), m.get("landing_time"),
-            m.get("mission_duration"), m.get("orbits"), m.get("status", "active")) for m in crew],
+            m.get("mission_duration"), m.get("orbits"), m.get("status", "active"), m.get("image_url")) for m in crew],
         )
 
 
@@ -676,7 +816,8 @@ if __name__ == "__main__":
                 'landing_time': None,
                 'mission_duration': '1d',
                 'orbits': 1,
-                'status': 'active'
+                'status': 'active',
+                'image_url': 'https://example.com/test.jpg'
             }]
             
             checksum = compute_checksum(test_crew)
