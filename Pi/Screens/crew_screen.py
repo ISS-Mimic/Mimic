@@ -242,7 +242,24 @@ class Crew_Screen(MimicBase):
             parts.append(f"{d} day{'s' if d != 1 else ''}")
         return ", ".join(parts)
 
-    # Expedition duration (oldest launch to now)
+    def _format_counter(self, start: datetime, end: Optional[datetime] = None) -> str:
+        """Format duration as mm:dd-hh:ss counter."""
+        end = end or datetime.now()
+        delta = end - start
+        total_seconds = int(delta.total_seconds())
+        
+        if total_seconds < 0:
+            return "00:00-00:00"
+        
+        days = total_seconds // 86400
+        remaining_seconds = total_seconds % 86400
+        hours = remaining_seconds // 3600
+        minutes = (remaining_seconds % 3600) // 60
+        seconds = remaining_seconds % 60
+        
+        return f"{days:02d}:{hours:02d}-{minutes:02d}:{seconds:02d}"
+
+    # Expedition duration (oldest launch to now) - formatted as counter
     def _update_expedition_duration(self, *_):
         try:
             oldest = None
@@ -252,31 +269,26 @@ class Crew_Screen(MimicBase):
                     oldest = dt
 
             if oldest:
-                y, m, d = self._duration_parts(oldest)
-                self.expedition_duration = self._format_parts(y, m, d)
+                self.expedition_duration = self._format_counter(oldest)
             else:
-                self.expedition_duration = "0 days"
+                self.expedition_duration = "00:00-00:00"
         except Exception as e:
             log_error(f"Error updating expedition duration: {e}")
-            self.expedition_duration = "0 days"
+            self.expedition_duration = "00:00-00:00"
 
-    # “ISS crewed time” (reuse same notion of oldest launch)
+    # "ISS crewed time" (since first crew on Nov 2, 2000)
     def _update_iss_crewed_time(self):
         try:
-            oldest = None
-            for c in self.crew_data:
-                dt = self._parse_date(c.get("launch_date"))
-                if dt and (oldest is None or dt < oldest):
-                    oldest = dt
-
-            if oldest:
-                y, m, d = self._duration_parts(oldest)
-                self.iss_crewed_years, self.iss_crewed_months, self.iss_crewed_days = map(str, (y, m, d))
-                log_info(f"ISS crewed time: {y}y {m}m {d}d")
-            else:
-                self.iss_crewed_years = self.iss_crewed_months = self.iss_crewed_days = "0"
+            # First ISS crew arrived on November 2nd, 2000 at 09:23 UTC
+            first_crew_date = datetime(2000, 11, 2, 9, 23, 0)
+            now = datetime.utcnow()
+            
+            y, m, d = self._duration_parts(first_crew_date, now)
+            self.iss_crewed_years, self.iss_crewed_months, self.iss_crewed_days = map(str, (y, m, d))
+            log_info(f"ISS crewed time: {y}y {m}m {d}d")
         except Exception as e:
             log_error(f"Error updating ISS crewed time: {e}")
+            self.iss_crewed_years = self.iss_crewed_months = self.iss_crewed_days = "0"
 
     # ───────────────── Periodic updates ────────────────────
     def update_crew_data(self, _dt):
