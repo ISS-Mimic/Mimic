@@ -3520,27 +3520,27 @@ class MainApp(App):
         self.crew_screen.ids.ISS_crewed_time.text = (f"{years_timedelta}:{months_timedelta:02}:{days_timedelta:02}/{hours_timedelta:02}:{minutes_timedelta:02}:{seconds_timedelta:02}")
 
         # Crew Launch Dates
-        dragon10launch = datetime(2025, 3, 13) 
+        dragon11launch = datetime(2025, 8, 1) 
         soyuz73launch = datetime(2025, 4, 8) 
 
         # Calculate Days since crew launch
-        dragon10count = (crew_now - dragon10launch).days
+        dragon11count = (crew_now - dragon11launch).days
         soyuz73count = (crew_now - soyuz73launch).days
 
         # Calculate Cumulative Days for each astro
-        dragon10_1 = 205+dragon10count
-        dragon10_2 = 0+dragon10count
-        dragon10_3 = 115+dragon10count
-        dragon10_4 = 0+dragon10count
+        dragon11_1 = 381+dragon11count
+        dragon11_2 = 0+dragon11count
+        dragon11_3 = 141+dragon11count
+        dragon11_4 = 0+dragon11count
         soyuz73_1 = 357+soyuz73count
         soyuz73_2 = 0+soyuz73count
         soyuz73_3 = 0+soyuz73count
 
         #Identify variables for Crew_screen
-        self.crew_screen.ids.dragon10_1.text = str(dragon10count) + " / " + str(dragon10_1)
-        self.crew_screen.ids.dragon10_2.text = str(dragon10count) + " / " + str(dragon10_2)
-        self.crew_screen.ids.dragon10_3.text = str(dragon10count) + " / " + str(dragon10_3)
-        self.crew_screen.ids.dragon10_4.text = str(dragon10count) + " / " + str(dragon10_4)
+        self.crew_screen.ids.dragon11_1.text = str(dragon11count) + " / " + str(dragon11_1)
+        self.crew_screen.ids.dragon11_2.text = str(dragon11count) + " / " + str(dragon11_2)
+        self.crew_screen.ids.dragon11_3.text = str(dragon11count) + " / " + str(dragon11_3)
+        self.crew_screen.ids.dragon11_4.text = str(dragon11count) + " / " + str(dragon11_4)
         self.crew_screen.ids.soyuz73_1.text = str(soyuz73count) + " / " + str(soyuz73_1)
         self.crew_screen.ids.soyuz73_2.text = str(soyuz73count) + " / " + str(soyuz73_2)
         self.crew_screen.ids.soyuz73_3.text = str(soyuz73count) + " / " + str(soyuz73_3)        
