@@ -141,13 +141,13 @@
         # Crewed Vehicles List
         ScrollView:
             pos_hint: {"center_x": 0.83, "center_y": 0.35}
-            size_hint: 0.25, 0.25
+            size_hint: 0.25, 0.3
             
             GridLayout:
                 id: crewed_vehicles_container
                 cols: 1
-                spacing: dp(5)
-                padding: dp(5)
+                spacing: dp(2)
+                padding: dp(0)
                 size_hint_y: None
                 height: self.minimum_height
                 # Crewed vehicle widgets will be added here dynamically
