@@ -291,12 +291,12 @@ class Crew_Screen(MimicBase):
         return f"{days:02d}:{hours:02d}:{minutes:02d}:{seconds:02d}"
 
     def _format_expedition_duration(self, start: datetime, end: Optional[datetime] = None) -> str:
-        """Format expedition duration as months, days, hours, seconds."""
+        """Format expedition duration as months, days, hours."""
         end = end or datetime.now()
         delta = end - start
         
         if delta.total_seconds() < 0:
-            return "0 months, 0 days, 0 hours, 0 seconds"
+            return "0m 0d 0h"
         
         total_seconds = int(delta.total_seconds())
         
@@ -318,13 +318,11 @@ class Crew_Screen(MimicBase):
         # Build the formatted string
         parts = []
         if months > 0:
-            parts.append(f"{months} m{'s' if months != 1 else ''}")
+            parts.append(f"{months} m")
         if days > 0:
-            parts.append(f"{days} d{'s' if days != 1 else ''}")
+            parts.append(f"{days} d")
         if hours > 0:
-            parts.append(f"{hours} h{'s' if hours != 1 else ''}")
-        if seconds > 0 or not parts:  # Always show at least seconds
-            parts.append(f"{seconds} s{'s' if seconds != 1 else ''}")
+            parts.append(f"{hours} h")
         
         return ", ".join(parts)
 
@@ -340,10 +338,10 @@ class Crew_Screen(MimicBase):
             if oldest:
                 self.expedition_duration = self._format_expedition_duration(oldest)
             else:
-                self.expedition_duration = "0 months, 0 days, 0 hours, 0 seconds"
+                self.expedition_duration = "0m 0d 0h"
         except Exception as e:
             log_error(f"Error updating expedition duration: {e}")
-            self.expedition_duration = "0 months, 0 days, 0 hours, 0 seconds"
+            self.expedition_duration = "0m 0d 0h"
 
     # "ISS crewed time" (since first crew on Nov 2, 2000)
     def _update_iss_crewed_time(self):
