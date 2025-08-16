@@ -94,7 +94,9 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
             crew_info = []
             rows = crew_table.find_all('tr')[1:]  # Skip header row
 
-            for row in rows:
+            # Collect all astronaut URLs first, then fetch them all
+            astronaut_urls = []
+            for row_index, row in enumerate(rows):
                 cells = row.find_all(['td', 'th'])
                 # Skip rows that don't have enough data or are header rows
                 if len(cells) < 13:  # Need at least 13 columns for complete crew data
@@ -395,67 +397,33 @@ def get_latest_expedition_number() -> int:
         "User-Agent": "ISS-Mimic/1.0 (+https://github.com/ISS-Mimic; iss.mimic@gmail.com)"
     }
     
-    def is_valid_expedition_page(soup, expected_exp_num):
-        """Check if the page actually contains data for the expected expedition number."""
-        # Look for expedition-specific content
-        page_text = str(soup).lower()
-        
-        # Check if the page contains the expected expedition number
-        if f"expedition {expected_exp_num}" not in page_text and f"exp {expected_exp_num}" not in page_text:
-            return False
-        
-        # Check if it has the crew table structure we expect
-        tables = soup.find_all('table')
-        for table in tables:
-            table_text = str(table)
-            if ('No.' in table_text and 'Nation' in table_text and 'Surname' in table_text and 
-                'Given names' in table_text and 'Position' in table_text):
-                # Found the crew table, now verify it's not just a redirect
-                rows = table.find_all('tr')
-                if len(rows) > 1:  # Has at least header + data rows
-                    return True
-        
-        return False
+    # Start from a known good number and work up/down more efficiently
+    # We know Expedition 73 exists, so start there
+    for exp_num in range(73, 85):  # Try expeditions 73 up to 84
+        test_url = f"{base_url}exp_{exp_num}.htm"
+        try:
+            r = requests.get(test_url, headers=headers, timeout=5)
+            if r.status_code == 200:
+                # Quick check - just look for expedition number in text
+                if f"expedition {exp_num}" in r.text.lower():
+                    return exp_num
+        except Exception:
+            continue
     
-    try:
-        # Start from a reasonable recent number and work down
-        # We know Expedition 73 exists, so start from there and work up
-        for exp_num in range(73, 85):  # Try expeditions 73 up to 84
-            test_url = f"{base_url}exp_{exp_num}.htm"
-            try:
-                r = requests.get(test_url, headers=headers, timeout=5)
-                if r.status_code == 200:
-                    # Check if this page actually contains the right expedition data
-                    soup = BeautifulSoup(r.content, 'html.parser')
-                    if is_valid_expedition_page(soup, exp_num):
-                        return exp_num
-                    # else:
-                    #     log_info(f"Expedition {exp_num} page exists but doesn't contain valid data")
-            except Exception as e:
-                # log_info(f"Error checking expedition {exp_num}: {e}")
-                continue
-        
-        # If we can't find any working expeditions above 73, try a few below
-        # log_info("Could not find expedition above 73, trying lower numbers")
-        for exp_num in range(72, 69, -1):  # Try expeditions 72 down to 69
-            test_url = f"{base_url}exp_{exp_num}.htm"
-            try:
-                r = requests.get(test_url, headers=headers, timeout=5)
-                if r.status_code == 200:
-                    soup = BeautifulSoup(r.content, 'html.parser')
-                    if is_valid_expedition_page(soup, exp_num):
-                        return exp_num
-            except Exception as e:
-                # log_info(f"Error checking expedition {exp_num}: {e}")
-                continue
-        
-        # If all else fails, return a reasonable default
-        log_info("Could not determine expedition number, using default: 73")
-        return 73
-        
-    except Exception as e:
-        log_error(f"Error determining latest expedition: {e}")
-        return 73
+    # If we can't find any working expeditions above 73, try a few below
+    for exp_num in range(72, 69, -1):  # Try expeditions 72 down to 69
+        test_url = f"{base_url}exp_{exp_num}.htm"
+        try:
+            r = requests.get(test_url, headers=headers, timeout=5)
+            if r.status_code == 200:
+                if f"expedition {exp_num}" in r.text.lower():
+                    return exp_num
+        except Exception:
+            continue
+    
+    # If all else fails, return a reasonable default
+    log_info("Could not determine expedition number, using default: 73")
+    return 73
 
 def get_spacefacts_url(expedition_num: int = None) -> str:
     """
@@ -827,7 +795,6 @@ def insert_snapshot(conn: sqlite3.Connection, crew: List[Dict[str, str]], checks
         raise
 
 def main() -> int:
-    """Main function to fetch and store ISS crew data."""
     try:
         db_path = get_db_path()
         log_info(f"Using database: {db_path}")
