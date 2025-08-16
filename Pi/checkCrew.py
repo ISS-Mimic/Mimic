@@ -675,10 +675,10 @@ def format_duration_days(days: int) -> str:
 def ensure_schema(conn: sqlite3.Connection) -> None:
     """Ensure the database schema exists."""
     try:
-        log_info("Creating/updating crew database schema")
+        #log_info("Creating/updating crew database schema")
         
         # Force recreation of tables to ensure correct schema
-        log_info("Recreating database tables to ensure correct schema")
+        #log_info("Recreating database tables to ensure correct schema")
         conn.executescript("""
             DROP TABLE IF EXISTS crew_members;
             DROP TABLE IF EXISTS current_crew;
@@ -737,15 +737,15 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
             );
         """)
         conn.commit()
-        log_info("Database schema recreated successfully")
+        #log_info("Database schema recreated successfully")
         
         # Verify the schema was created correctly
         cursor = conn.cursor()
         cursor.execute("PRAGMA table_info(crew_members)")
         columns = cursor.fetchall()
-        log_info(f"crew_members table has {len(columns)} columns:")
-        for col in columns:
-            log_info(f"  {col[1]} ({col[2]})")
+        #log_info(f"crew_members table has {len(columns)} columns:")
+        #for col in columns:
+        #    log_info(f"  {col[1]} ({col[2]})")
         
     except sqlite3.Error as e:
         log_error(f"Failed to create database schema: {e}")
@@ -779,7 +779,7 @@ def insert_snapshot(conn: sqlite3.Connection, crew: List[Dict[str, str]], checks
         fetched_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         cur = conn.cursor()
         
-        log_info(f"Inserting new crew snapshot with {len(crew)} members")
+        #log_info(f"Inserting new crew snapshot with {len(crew)} members")
         cur.execute("INSERT INTO snapshots (fetched_at, checksum) VALUES (?, ?)", (fetched_at, checksum))
         snapshot_id = cur.lastrowid
 
@@ -831,14 +831,14 @@ def main() -> int:
         # Check if database directory exists
         db_file = Path(db_path)
         db_dir = db_file.parent
-        log_info(f"Database directory: {db_dir}")
-        log_info(f"Database directory exists: {db_dir.exists()}")
+        #log_info(f"Database directory: {db_dir}")
+        #log_info(f"Database directory exists: {db_dir.exists()}")
         
         # Add timeout to database connection
         conn = sqlite3.connect(db_path, timeout=30.0)
         conn.isolation_level = None  # Enable autocommit mode
         
-        log_info("Database connection successful")
+        #log_info("Database connection successful")
         ensure_schema(conn)
 
         log_info("Fetching current ISS crew data from Spacefacts.de")

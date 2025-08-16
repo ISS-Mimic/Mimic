@@ -84,6 +84,7 @@ class Crew_Screen(MimicBase):
     
     crew_data = ListProperty([])
     expedition_number = StringProperty("Expedition 70")
+    expedition_duration = StringProperty("0 days")
     iss_crewed_years = StringProperty("24")
     iss_crewed_months = StringProperty("9")
     iss_crewed_days = StringProperty("10")
@@ -103,12 +104,18 @@ class Crew_Screen(MimicBase):
         if self.update_timer:
             self.update_timer.cancel()
         self.update_timer = Clock.schedule_interval(self.update_crew_data, 300)  # Update every 5 minutes
+        
+        # Set up expedition duration timer (updates every second)
+        self.expedition_timer = Clock.schedule_interval(self.update_expedition_duration, 1.0)
     
     def on_pre_leave(self):
         """Called when screen is about to be hidden."""
         if self.update_timer:
             self.update_timer.cancel()
             self.update_timer = None
+        if hasattr(self, 'expedition_timer') and self.expedition_timer:
+            self.expedition_timer.cancel()
+            self.expedition_timer = None
         super().on_pre_leave()
     
     def get_db_path(self) -> str:
@@ -194,6 +201,7 @@ class Crew_Screen(MimicBase):
             # Update the UI
             self.update_crew_display()
             self.update_expedition_patch()
+            self.update_expedition_duration()
             
         except Exception as e:
             log_error(f"Error loading crew data: {e}")
@@ -224,6 +232,38 @@ class Crew_Screen(MimicBase):
             parts.append(f"{final_days} day{'s' if final_days != 1 else ''}")
         
         return ", ".join(parts) if parts else "0 days"
+    
+    def update_expedition_duration(self):
+        """Update the expedition duration timer based on oldest crew launch date."""
+        try:
+            if not self.crew_data:
+                self.expedition_duration = "0 days"
+                return
+            
+            # Find the oldest launch date among current crew
+            oldest_launch = None
+            for crew in self.crew_data:
+                launch_date = crew.get('launch_date')
+                if launch_date:
+                    try:
+                        # Parse the launch date (YYYY-MM-DD format)
+                        parsed_date = datetime.strptime(launch_date, '%Y-%m-%d')
+                        if oldest_launch is None or parsed_date < oldest_launch:
+                            oldest_launch = parsed_date
+                    except ValueError:
+                        continue
+            
+            if oldest_launch:
+                # Calculate days since oldest launch
+                today = datetime.now()
+                duration_days = (today - oldest_launch).days
+                self.expedition_duration = self.format_duration_days(duration_days)
+            else:
+                self.expedition_duration = "0 days"
+                
+        except Exception as e:
+            log_error(f"Error updating expedition duration: {e}")
+            self.expedition_duration = "0 days"
     
     def get_crewed_vehicles_on_orbit(self) -> List[Dict]:
         """Get information about crewed vehicles currently on orbit."""
