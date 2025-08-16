@@ -32,6 +32,7 @@ class CrewMemberWidget(BoxLayout):
     total_days = StringProperty("0")
     role = StringProperty("FE")
     mimic_directory = StringProperty("")
+    image_url = StringProperty("")
     
     def __init__(self, crew_data: Dict, mimic_dir: str = "", **kwargs):
         super().__init__(**kwargs)
@@ -51,62 +52,32 @@ class CrewMemberWidget(BoxLayout):
         self.expedition = crew_data.get('expedition', 'Unknown')
         self.role = self._determine_role(crew_data)
         
-        # Calculate mission duration using actual launch dates
-        self.mission_days = str(self._calculate_mission_days(crew_data))
-        self.total_days = self._calculate_total_days(crew_data)
+        # Use actual data from database instead of hardcoded estimates
+        self.mission_days = str(crew_data.get('current_mission_duration', 0))
+        self.total_days = str(crew_data.get('total_time_in_space', 0))
+        self.image_url = crew_data.get('image_url', '')
     
     def _determine_role(self, crew_data: Dict) -> str:
         """Determine crew role based on available data."""
-        # This is a simplified approach - in reality you'd need more data
+        # Use actual position data from database if available
+        position = crew_data.get('position', '')
+        if position:
+            # Extract role from position (e.g., "ISS-CDR" -> "CMDR", "Flight Engineer" -> "FE")
+            if 'CDR' in position.upper() or 'Commander' in position:
+                return "CMDR"
+            elif 'Engineer' in position:
+                return "FE"
+            elif 'Specialist' in position:
+                return "MS"
+            else:
+                # Return first 3 characters of position if it's short enough
+                return position[:3].upper() if len(position) <= 3 else position[:3].upper()
+        
+        # Fallback to expedition-based logic
         if "Commander" in crew_data.get('expedition', ''):
             return "CMDR"
         return "FE"
-    
-    def _calculate_mission_days(self, crew_data: Dict) -> int:
-        """Calculate days on current mission."""
-        # Get the parent screen to access the mission duration calculation
-        parent_screen = self.parent
-        while parent_screen and not hasattr(parent_screen, 'calculate_mission_duration'):
-            parent_screen = parent_screen.parent
-        
-        if parent_screen and hasattr(parent_screen, 'calculate_mission_duration'):
-            spacecraft = crew_data.get('spaceship', '')
-            return parent_screen.calculate_mission_duration(spacecraft)
-        
-        # Fallback to estimates if parent screen not found
-        spacecraft = crew_data.get('spaceship', '').lower()
-        if 'spacex crew-7' in spacecraft:
-            return 152  # Launched Aug 26, 2023
-        elif 'soyuz ms-24' in spacecraft:
-            return 126  # Launched Sep 15, 2023
-        elif 'spacex crew-8' in spacecraft:
-            return 52   # Launched Mar 3, 2024
-        else:
-            return 100  # Default estimate
-    
-    def _calculate_total_days(self, crew_data: Dict) -> str:
-        """Calculate total days in space across all missions."""
-        # This is a placeholder - you'd need actual mission history
-        # For now, return reasonable estimates based on crew member
-        name = crew_data.get('name', '').lower()
-        
-        # Estimate based on known crew members
-        if 'moghbeli' in name:
-            return "277"  # First mission
-        elif 'borisov' in name:
-            return "215"  # First mission
-        elif 'chub' in name:
-            return "483"  # Multiple missions
-        elif 'mogensen' in name:
-            return "415"  # Multiple missions
-        elif 'kononenko' in name:
-            return "834"  # Multiple missions
-        elif "o'hara" in name:
-            return "126"  # First mission
-        elif 'furukawa' in name:
-            return "206"  # Multiple missions
-        else:
-            return "200"  # Default estimate
+
 
 class Crew_Screen(MimicBase):
     """Dynamic crew screen that automatically displays current ISS crew."""
@@ -173,9 +144,12 @@ class Crew_Screen(MimicBase):
             tables = cursor.fetchall()
             #log_info(f"Available tables: {[t[0] for t in tables]}")
             
-            # Get current crew members
+            # Get current crew members with all available fields
             cursor.execute("""
-                SELECT name, country, spaceship, expedition 
+                SELECT name, country, spaceship, expedition, position, launch_date, 
+                       launch_time, landing_spacecraft, landing_date, landing_time,
+                       mission_duration, orbits, status, image_url, total_time_in_space, 
+                       current_mission_duration
                 FROM current_crew 
                 ORDER BY name
             """)
@@ -188,7 +162,19 @@ class Crew_Screen(MimicBase):
                     'name': row[0],
                     'country': row[1],
                     'spaceship': row[2],
-                    'expedition': row[3]
+                    'expedition': row[3],
+                    'position': row[4],
+                    'launch_date': row[5],
+                    'launch_time': row[6],
+                    'landing_spacecraft': row[7],
+                    'landing_date': row[8],
+                    'landing_time': row[9],
+                    'mission_duration': row[10],
+                    'orbits': row[11],
+                    'status': row[12],
+                    'image_url': row[13],
+                    'total_time_in_space': row[14],
+                    'current_mission_duration': row[15]
                 }
                 for row in crew_members
             ]
@@ -211,39 +197,33 @@ class Crew_Screen(MimicBase):
             
         except Exception as e:
             log_error(f"Error loading crew data: {e}")
-            # Fallback to sample data for development
-            self.crew_data = [
-                {'name': 'Moghbeli', 'country': 'USA', 'spaceship': 'SpaceX Crew-7', 'expedition': 'Expedition 70'},
-                {'name': 'Borisov', 'country': 'Russia', 'spaceship': 'Soyuz MS-24', 'expedition': 'Expedition 70'},
-                {'name': 'Chub', 'country': 'Russia', 'spaceship': 'Soyuz MS-24', 'expedition': 'Expedition 70'},
-                {'name': 'Mogensen', 'country': 'Denmark', 'spaceship': 'SpaceX Crew-7', 'expedition': 'Expedition 70'},
-                {'name': 'Kononenko', 'country': 'Russia', 'spaceship': 'Soyuz MS-24', 'expedition': 'Expedition 70'},
-                {'name': "O'Hara", 'country': 'USA', 'spaceship': 'SpaceX Crew-7', 'expedition': 'Expedition 70'},
-                {'name': 'Furukawa', 'country': 'Japan', 'spaceship': 'SpaceX Crew-7', 'expedition': 'Expedition 70'}
-            ]
+            # No fallback data needed - we'll handle empty crew gracefully
+            self.crew_data = []
             self.update_crew_display()
     
-    def get_spacecraft_launch_date(self, spacecraft: str) -> datetime:
-        """Get launch date for a specific spacecraft."""
-        # This would ideally come from a database or API
-        # For now, return hardcoded launch dates
-        launch_dates = {
-            'SpaceX Crew-7': datetime(2023, 8, 26),
-            'Soyuz MS-24': datetime(2023, 9, 15),
-            'SpaceX Crew-8': datetime(2024, 3, 3),
-            'Soyuz MS-25': datetime(2024, 3, 21),
-        }
-        
-        return launch_dates.get(spacecraft, datetime.now())
+
     
-    def calculate_mission_duration(self, spacecraft: str) -> int:
-        """Calculate days since spacecraft launch."""
-        try:
-            launch_date = self.get_spacecraft_launch_date(spacecraft)
-            duration = datetime.now() - launch_date
-            return duration.days
-        except:
-            return 0
+    def format_duration_days(self, days: int) -> str:
+        """
+        Format duration in days to human-readable format (e.g., "2 years, 3 months, 15 days").
+        """
+        if days is None or days < 1:
+            return "Less than 1 day"
+        
+        years = days // 365
+        remaining_days = days % 365
+        months = remaining_days // 30
+        final_days = remaining_days % 30
+        
+        parts = []
+        if years > 0:
+            parts.append(f"{years} year{'s' if years != 1 else ''}")
+        if months > 0:
+            parts.append(f"{months} month{'s' if months != 1 else ''}")
+        if final_days > 0:
+            parts.append(f"{final_days} day{'s' if final_days != 1 else ''}")
+        
+        return ", ".join(parts) if parts else "0 days"
     
     def get_crewed_vehicles_on_orbit(self) -> List[Dict]:
         """Get information about crewed vehicles currently on orbit."""

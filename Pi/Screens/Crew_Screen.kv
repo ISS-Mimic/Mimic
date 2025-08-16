@@ -27,6 +27,16 @@
             color: 1, 1, 1, 1
             font_size: dp(16)
             bold: True
+
+        # Credit to the amazing spacefacts.de
+        Label:
+            id: crew_info_credit_label
+            pos_hint: {"center_x": 0.35, "center_y": 0.82}
+            text: 'credit: spacefacts.de'
+            markup: True
+            color: 1, 1, 1, 1
+            font_size: dp(8)
+            bold: True
         
         Label:
             id: expedition_duration_timer
@@ -110,7 +120,7 @@
         Label:
             id: total_crew_count
             pos_hint: {"center_x": 0.93, "center_y": 0.78}
-            text: '7'
+            text: '0'
             markup: True
             color: 0, 1, 0, 1
             font_size: dp(14)
@@ -118,8 +128,8 @@
         
         # Main Crew Display Area (Left Side)
         ScrollView:
-            pos_hint: {"center_x": 0.35, "center_y": 0.5}
-            size_hint: 0.6, 0.6
+            pos_hint: {"center_x": 0.3, "center_y": 0.5}
+            size_hint: 0.65, 0.6
             
             GridLayout:
                 id: crew_container
@@ -172,7 +182,7 @@
                 bold: True
             
             Label:
-                text: 'Days on Orbit / Total Days in Space'
+                text: 'Mission: Current mission duration\nTotal: Lifetime in space'
                 color: 1, 1, 1, 1
                 font_size: dp(12)
                 bold: True
@@ -227,9 +237,9 @@
     padding: dp(10)
     spacing: dp(5)
     
-    # Crew Member Photo (placeholder)
+    # Crew Member Photo (use actual image if available, otherwise placeholder)
     Image:
-        source: f'{root.mimic_directory}/Mimic/Pi/imgs/crew/CrewBase.png'
+        source: root.image_url if root.image_url else f'{root.mimic_directory}/Mimic/Pi/imgs/crew/CrewBase.png'
         size_hint: 0.8, 0.4
         pos_hint: {"center_x": 0.5, "center_y": 0.8}
         fit_mode: "scale-down"
@@ -242,7 +252,7 @@
         bold: True
         size_hint_y: 0.2
     
-    # Country Flag (placeholder - would need actual flag images)
+    # Country
     Label:
         text: root.country
         color: 0.8, 0.8, 0.8, 1
@@ -257,12 +267,12 @@
         bold: True
         size_hint_y: 0.15
     
-    # Mission Days / Total Days
+    # Mission Days / Total Days in Space
     Label:
-        text: f"{root.mission_days} / {root.total_days}"
+        text: f"Mission: {root.mission_days} days\nTotal: {root.total_days} days"
         color: 1, 1, 1, 1
         font_size: dp(12)
-        size_hint_y: 0.15
+        size_hint_y: 0.2
     
     # Spacecraft Info
     Label:

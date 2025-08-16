@@ -194,6 +194,13 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
                             # Now fetch the actual image URL from the astronaut's page
                             if astronaut_page_url:
                                 image_url = get_astronaut_image_url(astronaut_page_url)
+                                
+                                # Also fetch mission data for total time in space calculation
+                                mission_data = get_astronaut_mission_data(astronaut_page_url)
+                                #print(mission_data)
+                            else:
+                                image_url = None
+                                mission_data = {'total_time_in_space': 0, 'current_mission_duration': 0}
                     
                     crew_member = {
                         'name': f"{first_name} {surname}",  # Nickname (if available) + Surname
@@ -208,7 +215,9 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
                         'mission_duration': '',  # Will be calculated by crew screen based on launch time
                         'orbits': cells[12].get_text(strip=True),  # Orbits
                         'expedition': f"Expedition {get_latest_expedition_number()}",  # Dynamic expedition name
-                        'image_url': image_url  # URL to astronaut's personal page with image
+                        'image_url': image_url,  # URL to astronaut's personal page with image
+                        'total_time_in_space': mission_data['total_time_in_space'],  # Total lifetime days in space
+                        'current_mission_duration': mission_data['current_mission_duration']  # Current mission duration in days
                     }
 
                     # Clean up the data
@@ -557,6 +566,110 @@ def get_astronaut_image_url(astronaut_page_url: str) -> str:
         log_error(f"Error fetching astronaut image from {astronaut_page_url}: {e}")
         return None
 
+def get_astronaut_mission_data(astronaut_page_url: str) -> dict:
+    """
+    Extract mission data from the astronaut's Spaceflights table.
+    Returns dict with total_time_in_space and current_mission_duration.
+    """
+    if not astronaut_page_url:
+        return {'total_time_in_space': 0, 'current_mission_duration': 0}
+    
+    headers = {
+        "User-Agent": "ISS-Mimic Bot (+https://github.com/ISS-Mimic; iss.mimic@gmail.com)"
+    }
+    
+    try:
+        r = requests.get(astronaut_page_url, headers=headers, timeout=10)
+        r.raise_for_status()
+        
+        soup = BeautifulSoup(r.content, 'html.parser')
+        
+        # Look for the Spaceflights table
+        spaceflights_header = soup.find('h3', string='Spaceflights')
+        if not spaceflights_header:
+            return {'total_time_in_space': 0, 'current_mission_duration': 0}
+        
+        # Find the table after the Spaceflights header
+        table = spaceflights_header.find_next('table')
+        if not table:
+            return {'total_time_in_space': 0, 'current_mission_duration': 0}
+        
+        total_time = 0
+        current_mission_days = 0
+        today = datetime.now()
+        
+        # Parse each row in the table
+        rows = table.find_all('tr')[1:]  # Skip header row
+        for row in rows:
+            cells = row.find_all('td')
+            if len(cells) < 5:
+                continue
+            
+            # Check if this is a summary row (Total)
+            if 'Total' in str(cells[0]):
+                continue
+            
+            # Check if this row has mission data
+            mission_cell = cells[1].get_text(strip=True)
+            if not mission_cell or mission_cell.isspace():
+                continue
+            
+            # Get the time column (4th column, index 3)
+            time_cell = cells[3].get_text(strip=True)
+            if not time_cell or time_cell.isspace():
+                continue
+            
+            # Parse the time range
+            if ' - ' in time_cell:
+                # Completed mission: "19.10.2016 - 10.04.2017"
+                try:
+                    start_date_str, end_date_str = time_cell.split(' - ')
+                    start_date = datetime.strptime(start_date_str.strip(), '%d.%m.%Y')
+                    end_date = datetime.strptime(end_date_str.strip(), '%d.%m.%Y')
+                    mission_duration = (end_date - start_date).days
+                    total_time += mission_duration
+                except ValueError:
+                    continue
+            else:
+                # Current mission: "08.04.2025" (single date)
+                try:
+                    launch_date = datetime.strptime(time_cell.strip(), '%d.%m.%Y')
+                    current_mission_days = (today - launch_date).days
+                    total_time += current_mission_days
+                except ValueError:
+                    continue
+        
+        return {
+            'total_time_in_space': total_time,
+            'current_mission_duration': current_mission_days
+        }
+        
+    except Exception as e:
+        log_error(f"Error fetching astronaut mission data from {astronaut_page_url}: {e}")
+        return {'total_time_in_space': 0, 'current_mission_duration': 0}
+
+def format_duration_days(days: int) -> str:
+    """
+    Format duration in days to human-readable format (e.g., "2 years, 3 months, 15 days").
+    """
+    if days < 1:
+        return "Less than 1 day"
+    
+    years = days // 365
+    remaining_days = days % 365
+    months = remaining_days // 30
+    final_days = remaining_days % 30
+    
+    parts = []
+    if years > 0:
+        parts.append(f"{years} year{'s' if years != 1 else ''}")
+    if months > 0:
+        parts.append(f"{months} month{'s' if months != 1 else ''}")
+    if final_days > 0:
+        parts.append(f"{final_days} day{'s' if final_days != 1 else ''}")
+    
+    return ", ".join(parts) if parts else "0 days"
+
 # --- Persistence ------------------------------------------------------------ #
 
 def ensure_schema(conn: sqlite3.Connection) -> None:
@@ -599,7 +712,9 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
                 mission_duration TEXT,            -- Mission duration (e.g., "147d 16h 29m 52s")
                 orbits INTEGER,                   -- Number of orbits completed
                 status TEXT DEFAULT 'active',     -- 'active' or 'returned'
-                image_url TEXT                    -- URL to astronaut's photo
+                image_url TEXT,                   -- URL to astronaut's photo
+                total_time_in_space INTEGER,      -- Total lifetime days in space
+                current_mission_duration INTEGER  -- Current mission duration in days
             );
 
             CREATE TABLE current_crew (
@@ -616,7 +731,9 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
                 mission_duration TEXT,
                 orbits INTEGER,
                 status TEXT DEFAULT 'active',
-                image_url TEXT                    -- URL to astronaut's photo
+                image_url TEXT,                   -- URL to astronaut's photo
+                total_time_in_space INTEGER,      -- Total lifetime days in space
+                current_mission_duration INTEGER  -- Current mission duration in days
             );
         """)
         conn.commit()
@@ -668,14 +785,15 @@ def insert_snapshot(conn: sqlite3.Connection, crew: List[Dict[str, str]], checks
 
         cur.executemany(
             """
-            INSERT INTO crew_members (snapshot_id, name, country, spaceship, expedition, position, launch_date, launch_time, landing_spacecraft, landing_date, landing_time, mission_duration, orbits, status, image_url)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO crew_members (snapshot_id, name, country, spaceship, expedition, position, launch_date, launch_time, landing_spacecraft, landing_date, landing_time, mission_duration, orbits, status, image_url, total_time_in_space, current_mission_duration)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             [
                 (snapshot_id, m["name"], m["country"], m["spaceship"], m["expedition"], 
                  m.get("position"), m.get("launch_date"), m.get("launch_time"), 
                  m.get("landing_spacecraft"), m.get("landing_date"), m.get("landing_time"), m.get("mission_duration"), 
-                 m.get("orbits"), m.get("status", "active"), m.get("image_url"))
+                 m.get("orbits"), m.get("status", "active"), m.get("image_url"), 
+                 m.get("total_time_in_space", 0), m.get("current_mission_duration", 0))
                 for m in crew
             ],
         )
@@ -685,13 +803,14 @@ def insert_snapshot(conn: sqlite3.Connection, crew: List[Dict[str, str]], checks
         cur.executemany(
             """
             INSERT INTO current_crew (name, country, spaceship, expedition, position, launch_date, launch_time, 
-                landing_spacecraft, landing_date, landing_time, mission_duration, orbits, status, image_url) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                landing_spacecraft, landing_date, landing_time, mission_duration, orbits, status, image_url, total_time_in_space, current_mission_duration) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             [(m["name"], m["country"], m["spaceship"], m["expedition"], 
             m.get("position"), m.get("launch_date"), m.get("launch_time"), 
             m.get("landing_spacecraft"), m.get("landing_date"), m.get("landing_time"),
-            m.get("mission_duration"), m.get("orbits"), m.get("status", "active"), m.get("image_url")) for m in crew],
+            m.get("mission_duration"), m.get("orbits"), m.get("status", "active"), m.get("image_url"),
+            m.get("total_time_in_space", 0), m.get("current_mission_duration", 0)) for m in crew],
         )
 
 
@@ -709,10 +828,17 @@ def main() -> int:
         db_path = get_db_path()
         log_info(f"Using database: {db_path}")
         
+        # Check if database directory exists
+        db_file = Path(db_path)
+        db_dir = db_file.parent
+        log_info(f"Database directory: {db_dir}")
+        log_info(f"Database directory exists: {db_dir.exists()}")
+        
         # Add timeout to database connection
         conn = sqlite3.connect(db_path, timeout=30.0)
         conn.isolation_level = None  # Enable autocommit mode
         
+        log_info("Database connection successful")
         ensure_schema(conn)
 
         log_info("Fetching current ISS crew data from Spacefacts.de")
@@ -775,7 +901,9 @@ if __name__ == "__main__":
                 'mission_duration': '1d',
                 'orbits': 1,
                 'status': 'active',
-                'image_url': 'https://example.com/test.jpg'
+                'image_url': 'https://example.com/test.jpg',
+                'total_time_in_space': 365,
+                'current_mission_duration': 30
             }]
             
             checksum = compute_checksum(test_crew)
