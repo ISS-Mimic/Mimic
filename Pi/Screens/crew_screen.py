@@ -56,6 +56,18 @@ class CrewMemberWidget(BoxLayout):
         self.mission_days = str(crew_data.get('current_mission_duration', 0))
         self.total_days = str(crew_data.get('total_time_in_space', 0))
         self.image_url = crew_data.get('image_url', '')
+        
+        # Debug logging for image URLs
+        if self.image_url:
+            log_info(f"Crew member {self.name} has image URL: {self.image_url}")
+        else:
+            log_info(f"Crew member {self.name} has no image URL")
+        
+        # Download the astronaut image if we have a URL
+        if self.image_url:
+            # We need to get the parent screen to call download_astronaut_image
+            # For now, we'll store the URL and handle downloading in the parent
+            pass
     
     def _determine_role(self, crew_data: Dict) -> str:
         """Determine crew role based on available data."""
@@ -162,7 +174,7 @@ class Crew_Screen(MimicBase):
             """)
             
             crew_members = cursor.fetchall()
-            log_info(f"Raw crew data from current_crew table: {crew_members}")
+            #log_info(f"Raw crew data from current_crew table: {crew_members}")
             
             self.crew_data = [
                 {
@@ -264,6 +276,69 @@ class Crew_Screen(MimicBase):
         except Exception as e:
             log_error(f"Error updating expedition duration: {e}")
             self.expedition_duration = "0 days"
+    
+    def verify_image_url(self, url: str) -> bool:
+        """Verify if an image URL is accessible."""
+        if not url:
+            return False
+        
+        try:
+            import requests
+            headers = {
+                "User-Agent": "ISS-Mimic Bot (+https://github.com/ISS-Mimic; iss.mimic@gmail.com)"
+            }
+            response = requests.head(url, headers=headers, timeout=5)
+            return response.status_code == 200
+        except Exception as e:
+            log_error(f"Error verifying image URL {url}: {e}")
+            return False
+    
+    def download_astronaut_image(self, url: str, astronaut_name: str) -> str:
+        """Download astronaut image and return local path."""
+        if not url:
+            return ""
+        
+        try:
+            import requests
+            import os
+            from pathlib import Path
+            
+            # Create crew images directory if it doesn't exist
+            crew_dir = Path(self.mimic_directory) / "Mimic" / "Pi" / "imgs" / "crew" / "astronauts"
+            crew_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Create a safe filename from astronaut name
+            safe_name = "".join(c for c in astronaut_name if c.isalnum() or c in (' ', '-', '_')).rstrip()
+            safe_name = safe_name.replace(' ', '_')
+            
+            # Determine file extension from URL
+            if url.endswith('.jpg') or url.endswith('.jpeg'):
+                ext = '.jpg'
+            elif url.endswith('.png'):
+                ext = '.png'
+            else:
+                ext = '.jpg'  # Default to jpg
+            
+            local_path = crew_dir / f"{safe_name}{ext}"
+            
+            # Download the image if it doesn't exist
+            if not local_path.exists():
+                headers = {
+                    "User-Agent": "ISS-Mimic Bot (+https://github.com/ISS-Mimic; iss.mimic@gmail.com)"
+                }
+                response = requests.get(url, headers=headers, timeout=10)
+                response.raise_for_status()
+                
+                with open(local_path, 'wb') as f:
+                    f.write(response.content)
+                
+                log_info(f"Downloaded astronaut image: {local_path}")
+            
+            return str(local_path)
+            
+        except Exception as e:
+            log_error(f"Error downloading astronaut image from {url}: {e}")
+            return ""
     
     def get_crewed_vehicles_on_orbit(self) -> List[Dict]:
         """Get information about crewed vehicles currently on orbit."""

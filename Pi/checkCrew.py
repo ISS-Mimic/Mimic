@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Fetch current ISS crew from Wikipedia and store in SQLite.
+Fetch current ISS crew from Wikipedia/Spacefacts and store in SQLite.
 
 - Runs once and exits (subprocess-friendly).
-- Creates schema on first run.
+- Creates schema on first run (idempotent).
 - Saves a historical snapshot only when data changes (by checksum).
 - Keeps a "current" table always reflecting the latest snapshot.
 
@@ -22,12 +22,15 @@ import json
 import re
 import sqlite3
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 from bs4 import BeautifulSoup
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from utils.logger import log_info, log_error
 
@@ -35,6 +38,38 @@ WIKI_API_URL = (
     "https://en.wikipedia.org/w/api.php"
     "?action=parse&page=Template:People_currently_in_space&prop=wikitext&format=json"
 )
+
+# ------------------------- Precompiled regexes ------------------------------
+
+RE_NICKNAME = re.compile(r'"([^"]+)"')
+RE_WIKILINK = re.compile(r"\[\[([^\]]+)\]\]")
+RE_COUNTRY = re.compile(r"size=15px\|([^}\n]+)")
+RE_SECTION = re.compile(
+    r"International Space Station.*?(?=Tiangong space station|$)",
+    re.DOTALL
+)
+
+# ------------------------- HTTP session helper ------------------------------
+
+def make_session() -> requests.Session:
+    s = requests.Session()
+    retries = Retry(
+        total=4, connect=3, read=3, backoff_factor=0.5,
+        status_forcelist=(500, 502, 503, 504),
+        allowed_methods=frozenset(["GET", "HEAD"]),
+        raise_on_status=False,
+    )
+    adapter = HTTPAdapter(max_retries=retries, pool_connections=10, pool_maxsize=10)
+    s.mount("http://", adapter)
+    s.mount("https://", adapter)
+    s.headers.update({
+        "User-Agent": "ISS-Mimic Bot (+https://github.com/ISS-Mimic; iss.mimic@gmail.com)",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Connection": "keep-alive",
+    })
+    return s
+
+# ------------------------- DB path ------------------------------------------
 
 def get_db_path() -> str:
     """Get the database path, prioritizing /dev/shm on Linux."""
@@ -46,252 +81,246 @@ def get_db_path() -> str:
         data_dir.mkdir(exist_ok=True)
         return str(data_dir / "iss_crew.db")
 
-# --- Network / scraping ----------------------------------------------------- #
+# ------------------------- Network / scraping -------------------------------
 
-def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict[str, str]]:
+def get_latest_expedition_number(session: requests.Session) -> int:
     """
-    Fetch detailed crew data from Spacefacts.de ISS table.
-    Returns list of dicts with enhanced crew information.
+    Discover the latest ISS expedition number by checking Spacefacts.de.
+    Returns the expedition number as an integer.
     """
-    # Get the latest expedition number once at the beginning
-    expedition_number = get_latest_expedition_number()
+    base_url = "https://spacefacts.de/iss/english/"
+
+    def is_valid_expedition_page(soup, expected_exp_num):
+        """Check if the page actually contains data for the expected expedition number."""
+        page_text = str(soup).lower()
+        if f"expedition {expected_exp_num}" not in page_text and f"exp {expected_exp_num}" not in page_text:
+            return False
+        tables = soup.find_all('table')
+        for table in tables:
+            table_text = str(table)
+            if ('No.' in table_text and 'Nation' in table_text and 'Surname' in table_text and
+                'Given names' in table_text and 'Position' in table_text):
+                rows = table.find_all('tr')
+                if len(rows) > 1:
+                    return True
+        return False
+
+    try:
+        # Try a reasonable range (adjust if needed)
+        for exp_num in range(73, 85):  # 73..84
+            test_url = f"{base_url}exp_{exp_num}.htm"
+            try:
+                r = session.get(test_url, timeout=5)
+                if r.status_code == 200:
+                    soup = BeautifulSoup(r.content, 'lxml')
+                    if is_valid_expedition_page(soup, exp_num):
+                        return exp_num
+            except Exception:
+                continue
+
+        # fallback a bit lower
+        for exp_num in range(72, 69, -1):  # 72..70
+            test_url = f"{base_url}exp_{exp_num}.htm"
+            try:
+                r = session.get(test_url, timeout=5)
+                if r.status_code == 200:
+                    soup = BeautifulSoup(r.content, 'lxml')
+                    if is_valid_expedition_page(soup, exp_num):
+                        return exp_num
+            except Exception:
+                continue
+
+        log_info("Could not determine expedition number, using default: 73")
+        return 73
+
+    except Exception as e:
+        log_error(f"Error determining latest expedition: {e}")
+        return 73
+
+def get_spacefacts_url(expedition_num: int | None = None) -> str:
+    if expedition_num is None:
+        # Note: main() determines with a session; this fallback is unused there.
+        expedition_num = 73
+    return f"https://spacefacts.de/iss/english/exp_{expedition_num}.htm"
+
+def _country_from_flag_cell(country_cell) -> str:
+    """Extract country name from a flag <img> within a cell."""
+    country = "Unknown"
+    img = country_cell.find('img')
+    if img:
+        country = img.get('title', img.get('alt', 'Unknown'))
+        if country == 'Unknown':
+            src = img.get('src', '') or ''
+            # crude filename fallbacks
+            mapping = {
+                'usa.gif': 'USA', 'russia.gif': 'Russia', 'japan.gif': 'Japan',
+                'canada.gif': 'Canada', 'china.gif': 'China', 'gb.gif': 'United Kingdom',
+                'italy.gif': 'Italy', 'france.gif': 'France', 'germany.gif': 'Germany',
+                'netherlands.gif': 'Netherlands', 'sweden.gif': 'Sweden', 'norway.gif': 'Norway',
+                'denmark.gif': 'Denmark', 'poland.gif': 'Poland', 'belgium.gif': 'Belgium',
+                'spain.gif': 'Spain'
+            }
+            for key, val in mapping.items():
+                if key in src.lower():
+                    country = val
+                    break
+    if country == 'Russian Federation':
+        country = 'Russia'
+    return country
+
+def _name_from_given_and_surname(given_names: str, surname: str) -> str:
+    """Prefer nickname in quotes; else first given name."""
+    m = RE_NICKNAME.search(given_names)
+    first = m.group(1) if m else (given_names.split()[0] if given_names else "")
+    return f"{first} {surname}".strip()
+
+def _abs_url_from_relative(base_page: str, href: str) -> Optional[str]:
+    if not href:
+        return None
+    if href.startswith('http'):
+        return href
+    if href.startswith('/'):
+        return f"https://spacefacts.de{href}"
+    if href.startswith('..'):
+        # handle "../../bios/category/lang/file.htm"
+        parts = href.split('/')
+        if len(parts) >= 4:
+            category = parts[3]  # astronauts/cosmonauts/international
+            language = parts[4] if len(parts) > 4 else 'english'
+            filename = parts[-1]
+            return f"https://spacefacts.de/bios/{category}/{language}/{filename}"
+        return None
+    # relative to base dir
+    base = '/'.join(base_page.split('/')[:-1])
+    return f"{base}/{href}"
+
+def fetch_spacefacts_crew(session: requests.Session, max_attempts: int = 3, timeout: int = 10) -> List[Dict[str, str]]:
+    """
+    Build base rows (no slow per-astronaut enrichment yet).
+    Returns list of dicts.
+    """
+    expedition_number = get_latest_expedition_number(session)
     log_info(f"Found expedition number: {expedition_number}")
-    
-    # Get the latest expedition URL dynamically
     current_url = get_spacefacts_url(expedition_number)
     log_info(f"Fetching crew data from: {current_url}")
-    
-    headers = {
-        "User-Agent": "ISS-Mimic Bot (+https://github.com/ISS-Mimic; iss.mimic@gmail.com)"
-    }
 
     last_exc = None
     for attempt in range(max_attempts):
         try:
-            log_info(f"Attempting to fetch Spacefacts.de crew data (attempt {attempt + 1}/{max_attempts})")
-            r = requests.get(current_url, headers=headers, timeout=timeout)
+            log_info(f"Attempting Spacefacts fetch (attempt {attempt + 1}/{max_attempts})")
+            r = session.get(current_url, timeout=timeout)
             r.raise_for_status()
-            
-            # Parse the HTML table
-            soup = BeautifulSoup(r.content, 'html.parser')
-            
-            # Find the ISS crew table - look for the crew data table
-            tables = soup.find_all('table')
+            soup = BeautifulSoup(r.content, 'lxml')
 
+            tables = soup.find_all('table')
             crew_table = None
-            # Look for the crew table with the specific structure
             for table in tables:
                 table_text = str(table)
-                if ('No.' in table_text and 'Nation' in table_text and 'Surname' in table_text and 
+                if ('No.' in table_text and 'Nation' in table_text and 'Surname' in table_text and
                     'Given names' in table_text and 'Position' in table_text):
                     crew_table = table
                     break
-            
+
             if not crew_table:
                 log_error("No ISS crew table found on Spacefacts.de")
                 return []
-            
-            crew_info = []
-            rows = crew_table.find_all('tr')[1:]  # Skip header row
+
+            base_rows: List[Dict[str, str]] = []
+            rows = crew_table.find_all('tr')[1:]  # skip header
 
             for row in rows:
                 cells = row.find_all(['td', 'th'])
-                # Skip rows that don't have enough data or are header rows
-                if len(cells) < 13:  # Need at least 13 columns for complete crew data
+                if len(cells) < 13:
                     continue
-                
-                # Check if this row contains crew data (should have a number in first cell)
                 first_cell = cells[0].get_text(strip=True)
-                # Look for crew number pattern (1, 2, 3, etc.)
                 if not first_cell.isdigit():
                     continue
-                
-                try:
-                    # Extract country from flag image
-                    country_cell = cells[1]
-                    country = "Unknown"
-                    if country_cell.find('img'):
-                        img = country_cell.find('img')
-                        country = img.get('title', img.get('alt', 'Unknown'))
-                        if country == 'Unknown':
-                            # Try to extract from the image filename
-                            src = img.get('src', '')
-                            if 'usa.gif' in src:
-                                country = 'USA'
-                            elif 'russia.gif' in src:
-                                country = 'Russia'
-                            elif 'japan.gif' in src:
-                                country = 'Japan'
-                            elif 'canada.gif' in src:
-                                country = 'Canada'
-                            elif 'china.gif' in src:
-                                country = 'China'
-                            elif 'gb.gif' in src:
-                                country = 'United Kingdom'
-                            elif 'italy.gif' in src:
-                                country = 'Italy'
-                            elif 'france.gif' in src:
-                                country = 'France'
-                            elif 'germany.gif' in src:
-                                country = 'Germany'
-                            elif 'netherlands.gif' in src:
-                                country = 'Netherlands'
-                            elif 'sweden.gif' in src:
-                                country = 'Sweden'
-                            elif 'norway.gif' in src:
-                                country = 'Norway'
-                            elif 'denmark.gif' in src:
-                                country = 'Denmark'
-                            elif 'poland.gif' in src:
-                                country = 'Poland'
-                            elif 'belgium.gif' in src:
-                                country = 'Belgium'
-                            elif 'spain.gif' in src:
-                                country = 'Spain'
 
-                    if country == 'Russian Federation':
-                        country = 'Russia'
-                    
-                    # Parse the table row based on the Expedition 73 table structure
-                    # Extract name with preference for nicknames in quotes
+                try:
+                    country = _country_from_flag_cell(cells[1])
                     given_names = cells[3].get_text(strip=True)
                     surname = cells[2].get_text(strip=True)
-                    
-                    # Check for nickname in quotes (e.g., "Annimal", "Vapor", "Jonny")
-                    nickname_match = re.search(r'"([^"]+)"', given_names)
-                    if nickname_match:
-                        # Use the nickname instead of first name
-                        first_name = nickname_match.group(1)
-                    else:
-                        # Use the first word of given names
-                        first_name = given_names.split()[0]
-                    
-                    # Extract astronaut image URL from surname link
-                    image_url = None
+                    full_name = _name_from_given_and_surname(given_names, surname)
+
+                    # astronaut page url (for enrichment later)
+                    astronaut_page_url = None
                     surname_cell = cells[2]
                     if surname_cell.find('a'):
-                        link = surname_cell.find('a')
-                        href = link.get('href', '')
-                        if href:
-                            # Convert relative URL to absolute URL using the actual href from the table
-                            if href.startswith('..'):
-                                # Handle relative paths like "../../bios/international/english/onishi_takuya.htm"
-                                # Convert to absolute URL by going up the path and then down to the bios directory
-                                path_parts = href.split('/')
-                                # Remove the ".." parts and construct the full URL
-                                if len(path_parts) >= 4:  # Should have at least ../../bios/category/language/filename
-                                    category = path_parts[3]  # e.g., "international", "cosmonauts", "astronauts"
-                                    language = path_parts[4]  # e.g., "english"
-                                    filename = path_parts[5]  # e.g., "onishi_takuya.htm"
-                                    astronaut_page_url = f"https://spacefacts.de/bios/{category}/{language}/{filename}"
-                                else:
-                                    astronaut_page_url = None
-                            elif href.startswith('/'):
-                                # Handle absolute paths
-                                astronaut_page_url = f"https://spacefacts.de{href}"
-                            elif href.startswith('http'):
-                                # Already absolute URL
-                                astronaut_page_url = href
-                            else:
-                                astronaut_page_url = None
-                            
-                            # Now fetch the actual image URL from the astronaut's page
-                            if astronaut_page_url:
-                                image_url = get_astronaut_image_url(astronaut_page_url)
-                                
-                                # Also fetch mission data for total time in space calculation
-                                mission_data = get_astronaut_mission_data(astronaut_page_url)
-                                #print(mission_data)
-                            else:
-                                image_url = None
-                                mission_data = {'total_time_in_space': 0, 'current_mission_duration': 0}
-                    
-                    crew_member = {
-                        'name': f"{first_name} {surname}",  # Nickname (if available) + Surname
-                        'country': country,  # Nation extracted from flag image
-                        'position': cells[4].get_text(strip=True),  # Position
-                        'spaceship': cells[5].get_text(strip=True),  # Spacecraft (launch)
-                        'launch_date': cells[6].get_text(strip=True),  # Launch date
-                        'launch_time': cells[7].get_text(strip=True),  # Launch time
-                        'landing_spacecraft': cells[8].get_text(strip=True),  # Spacecraft (landing)
-                        'landing_date': cells[9].get_text(strip=True),  # Landing date
-                        'landing_time': cells[10].get_text(strip=True),  # Landing time
-                        'mission_duration': '',  # Will be calculated by crew screen based on launch time
-                        'orbits': cells[12].get_text(strip=True),  # Orbits
-                        'expedition': f"Expedition {expedition_number}",  # Use expedition number found at start
-                        'image_url': image_url,  # URL to astronaut's personal page with image
-                        'total_time_in_space': mission_data['total_time_in_space'],  # Total lifetime days in space
-                        'current_mission_duration': mission_data['current_mission_duration']  # Current mission duration in days
+                        href = surname_cell.find('a').get('href', '')
+                        astronaut_page_url = _abs_url_from_relative(current_url, href)
+
+                    # build row
+                    row_dict: Dict[str, Optional[str | int]] = {
+                        'name': full_name,
+                        'country': country,
+                        'position': cells[4].get_text(strip=True),
+                        'spaceship': cells[5].get_text(strip=True),
+                        'launch_date': cells[6].get_text(strip=True),
+                        'launch_time': cells[7].get_text(strip=True),
+                        'landing_spacecraft': cells[8].get_text(strip=True),
+                        'landing_date': cells[9].get_text(strip=True),
+                        'landing_time': cells[10].get_text(strip=True),
+                        'mission_duration': '',  # computed elsewhere if needed
+                        'orbits': cells[12].get_text(strip=True),
+                        'expedition': f"Expedition {expedition_number}",
+                        'status': 'active',
+                        'astronaut_page_url': astronaut_page_url,
                     }
 
-                    # Clean up the data
-                    crew_member['name'] = crew_member['name'].strip()
-                    crew_member['country'] = crew_member['country'].strip()
-                    crew_member['position'] = crew_member['position'].strip()
-                    
-                    # Parse launch date (DD.MM.YYYY format)
-                    if crew_member['launch_date'] and crew_member['launch_date'] != '':
+                    # normalize launch_date (DD.MM.YYYY -> YYYY-MM-DD)
+                    if row_dict['launch_date']:
                         try:
-                            day, month, year = crew_member['launch_date'].split('.')
-                            crew_member['launch_date'] = f"{year}-{month.zfill(2)}-{day.zfill(2)}"
-                        except:
-                            crew_member['launch_date'] = None
+                            day, month, year = str(row_dict['launch_date']).split('.')
+                            row_dict['launch_date'] = f"{year}-{month.zfill(2)}-{day.zfill(2)}"
+                        except Exception:
+                            row_dict['launch_date'] = None
                     else:
-                        crew_member['launch_date'] = None
-                    
-                    # Parse landing date
-                    if crew_member['landing_date'] and crew_member['landing_date'] not in ['', '(??.01.2026)', '(09.12.2025)']:
+                        row_dict['launch_date'] = None
+
+                    # landing_date normalization + status
+                    if row_dict['landing_date'] and row_dict['landing_date'] not in ['', '(??.01.2026)', '(09.12.2025)']:
                         try:
-                            if crew_member['landing_date'].startswith('(') and crew_member['landing_date'].endswith(')'):
-                                # Future landing date, extract the date part
-                                date_part = crew_member['landing_date'][1:-1]
+                            ld = str(row_dict['landing_date'])
+                            if ld.startswith('(') and ld.endswith(')'):
+                                date_part = ld[1:-1]
                                 if '.' in date_part:
-                                    day, month, year = date_part.split('.')
-                                    crew_member['landing_date'] = f"{year}-{month.zfill(2)}-{day.zfill(2)}"
-                                    crew_member['status'] = 'active'
+                                    d, m, y = date_part.split('.')
+                                    row_dict['landing_date'] = f"{y}-{m.zfill(2)}-{d.zfill(2)}"
+                                    row_dict['status'] = 'active'
                                 else:
-                                    crew_member['landing_date'] = None
-                                    crew_member['status'] = 'active'
+                                    row_dict['landing_date'] = None
+                                    row_dict['status'] = 'active'
                             else:
-                                # Past landing date
-                                day, month, year = crew_member['landing_date'].split('.')
-                                crew_member['landing_date'] = f"{year}-{month.zfill(2)}-{day.zfill(2)}"
-                                crew_member['status'] = 'returned'
-                        except:
-                            crew_member['landing_date'] = None
-                            crew_member['status'] = 'active'
+                                d, m, y = ld.split('.')
+                                row_dict['landing_date'] = f"{y}-{m.zfill(2)}-{d.zfill(2)}"
+                                row_dict['status'] = 'returned'
+                        except Exception:
+                            row_dict['landing_date'] = None
+                            row_dict['status'] = 'active'
                     else:
-                        crew_member['landing_date'] = None
-                        crew_member['status'] = 'active'
-                    
-                    # Parse orbits (remove any non-numeric characters)
+                        row_dict['landing_date'] = None
+                        row_dict['status'] = 'active'
+
+                    # orbits numeric
                     try:
-                        orbits_text = crew_member['orbits'].strip()
-                        if orbits_text and orbits_text != '':
-                            orbits_num = int(''.join(filter(str.isdigit, orbits_text)))
-                            crew_member['orbits'] = orbits_num
-                        else:
-                            crew_member['orbits'] = None
-                    except:
-                        crew_member['orbits'] = None
-                    
-                    # Only include crew members who have actually launched (have a launch date and specific launch time)
-                    # AND are currently active (not returned)
-                    if (crew_member['launch_date'] and crew_member['launch_date'].strip() and 
-                        crew_member['launch_time'] and crew_member['launch_time'].strip() != 'UTC' and
-                        crew_member['status'] == 'active'):
-                        crew_info.append(crew_member)
-                    else:
-                        # Skip crew members who haven't launched or have returned
-                        pass
-                        
+                        orbits_text = str(row_dict['orbits']).strip()
+                        row_dict['orbits'] = int(''.join(filter(str.isdigit, orbits_text))) if orbits_text else None
+                    except Exception:
+                        row_dict['orbits'] = None
+
+                    # Only include launched & active
+                    if (row_dict['launch_date'] and str(row_dict['launch_date']).strip() and
+                        row_dict['launch_time'] and str(row_dict['launch_time']).strip() != 'UTC' and
+                        row_dict['status'] == 'active'):
+                        base_rows.append(row_dict)  # enrichment later
+
                 except Exception as e:
                     log_error(f"Error parsing crew member row: {e}")
                     continue
-            
-            log_info(f"Successfully fetched {len(crew_info)} crew members from Spacefacts.de")
-            return crew_info
-            
+
+            log_info(f"Successfully fetched {len(base_rows)} crew members (base rows) from Spacefacts.de")
+            return base_rows
+
         except requests.RequestException as exc:
             last_exc = exc
             log_error(f"Request failed on attempt {attempt + 1}: {exc}")
@@ -299,44 +328,30 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
             last_exc = exc
             log_error(f"Unexpected error on attempt {attempt + 1}: {exc}")
 
-    # If we get here, all attempts failed
-    error_msg = f"Failed to fetch Spacefacts.de crew data after {max_attempts} attempts: {last_exc}"
-    log_error(error_msg)
-    return []  # Return empty list instead of raising, so Wikipedia fallback can work
+    log_error(f"Failed to fetch Spacefacts.de crew data after {max_attempts} attempts: {last_exc}")
+    return []
 
-def fetch_iss_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict[str, str]]:
+def fetch_iss_crew(session: requests.Session, max_attempts: int = 3, timeout: int = 10) -> List[Dict[str, str]]:
     """
-    Returns list of dicts: [{name, spaceship, country, expedition}, ...]
+    Wikipedia fallback. Returns base rows (no slow enrichment).
     """
-    headers = {
-        "User-Agent": "ISS-Mimic/1.0 (+https://example.local; admin@localhost)"
-    }
-
     last_exc = None
     for attempt in range(max_attempts):
         try:
-            log_info(f"Attempting to fetch ISS crew data (attempt {attempt + 1}/{max_attempts})")
-            r = requests.get(WIKI_API_URL, headers=headers, timeout=timeout)
+            log_info(f"Attempting to fetch ISS crew via Wikipedia (attempt {attempt + 1}/{max_attempts})")
+            r = session.get(WIKI_API_URL, timeout=timeout)
             r.raise_for_status()
             data = r.json()
             template_content = data["parse"]["wikitext"]["*"]
 
-            # Isolate ISS section up to Tiangong (section order can vary occasionally)
-            iss_match = re.search(
-                r"International Space Station.*?(?=Tiangong space station|$)",
-                template_content,
-                re.DOTALL,
-            )
-            if not iss_match:
+            m = RE_SECTION.search(template_content)
+            if not m:
                 log_info("No ISS section found in Wikipedia template")
                 return []
 
-            iss_section = iss_match.group(0)
-
-            # Extract wikilinks and tiny flag "country" labels
-            # Example link tokens often look like [[Sergey Prokopyev (cosmonaut)|Sergey Prokopyev]]
-            links = re.findall(r"\[\[([^\]]+)\]\]", iss_section)
-            countries = re.findall(r"size=15px\|([^}\n]+)", iss_section)
+            iss_section = m.group(0)
+            links = RE_WIKILINK.findall(iss_section)
+            countries = RE_COUNTRY.findall(iss_section)
 
             crew_info: List[Dict[str, str]] = []
             current_ship = ""
@@ -344,8 +359,6 @@ def fetch_iss_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict[str, s
             country_idx = 0
 
             def clean_link_token(tok: str) -> str:
-                # Use the display text if present; otherwise the link target
-                # e.g. "Name (astronaut)|Name" -> "Name"
                 parts = tok.split("|")
                 text = parts[-1].strip()
                 return re.sub(r"\s+", " ", text)
@@ -361,7 +374,7 @@ def fetch_iss_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict[str, s
                     current_ship = text
                     continue
 
-                # Otherwise: astronaut name
+                # astronaut name
                 country = countries[country_idx].strip() if country_idx < len(countries) else "Unknown"
                 country_idx += 1
                 crew_info.append(
@@ -370,260 +383,123 @@ def fetch_iss_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict[str, s
                         "spaceship": current_ship or "Unknown",
                         "country": country,
                         "expedition": expedition or "Unknown",
+                        "position": None,
+                        "launch_date": None,
+                        "launch_time": None,
+                        "landing_spacecraft": None,
+                        "landing_date": None,
+                        "landing_time": None,
+                        "mission_duration": "",
+                        "orbits": None,
+                        "status": "active",
+                        "astronaut_page_url": None,
                     }
                 )
 
-            log_info(f"Successfully fetched {len(crew_info)} crew members")
+            log_info(f"Successfully fetched {len(crew_info)} crew members (Wikipedia base rows)")
             return crew_info
 
         except requests.RequestException as exc:
             last_exc = exc
             log_error(f"Request failed on attempt {attempt + 1}: {exc}")
 
-    # If we get here, all attempts failed
-    error_msg = f"Failed to fetch ISS crew after {max_attempts} attempts: {last_exc}"
+    error_msg = f"Failed to fetch ISS crew via Wikipedia after {max_attempts} attempts: {last_exc}"
     log_error(error_msg)
-    raise RuntimeError(error_msg)
+    return []
 
-def get_latest_expedition_number() -> int:
-    """
-    Discover the latest ISS expedition number by checking Spacefacts.de.
-    Returns the expedition number as an integer.
-    """
-    base_url = "https://spacefacts.de/iss/english/"
-    headers = {
-        "User-Agent": "ISS-Mimic/1.0 (+https://github.com/ISS-Mimic; iss.mimic@gmail.com)"
-    }
-    
-    def is_valid_expedition_page(soup, expected_exp_num):
-        """Check if the page actually contains data for the expected expedition number."""
-        # Look for expedition-specific content
-        page_text = str(soup).lower()
-        
-        # Check if the page contains the expected expedition number
-        if f"expedition {expected_exp_num}" not in page_text and f"exp {expected_exp_num}" not in page_text:
-            return False
-        
-        # Check if it has the crew table structure we expect
-        tables = soup.find_all('table')
-        for table in tables:
-            table_text = str(table)
-            if ('No.' in table_text and 'Nation' in table_text and 'Surname' in table_text and 
-                'Given names' in table_text and 'Position' in table_text):
-                # Found the crew table, now verify it's not just a redirect
-                rows = table.find_all('tr')
-                if len(rows) > 1:  # Has at least header + data rows
-                    return True
-        
-        return False
-    
-    try:
-        # Start from a reasonable recent number and work down
-        # We know Expedition 73 exists, so start from there and work up
-        for exp_num in range(73, 85):  # Try expeditions 73 up to 84
-            test_url = f"{base_url}exp_{exp_num}.htm"
-            try:
-                r = requests.get(test_url, headers=headers, timeout=5)
-                if r.status_code == 200:
-                    # Check if this page actually contains the right expedition data
-                    soup = BeautifulSoup(r.content, 'html.parser')
-                    if is_valid_expedition_page(soup, exp_num):
-                        return exp_num
-                    # else:
-                    #     log_info(f"Expedition {exp_num} page exists but doesn't contain valid data")
-            except Exception as e:
-                # log_info(f"Error checking expedition {exp_num}: {e}")
-                continue
-        
-        # If we can't find any working expeditions above 73, try a few below
-        # log_info("Could not find expedition above 73, trying lower numbers")
-        for exp_num in range(72, 69, -1):  # Try expeditions 72 down to 69
-            test_url = f"{base_url}exp_{exp_num}.htm"
-            try:
-                r = requests.get(test_url, headers=headers, timeout=5)
-                if r.status_code == 200:
-                    soup = BeautifulSoup(r.content, 'html.parser')
-                    if is_valid_expedition_page(soup, exp_num):
-                        return exp_num
-            except Exception as e:
-                # log_info(f"Error checking expedition {exp_num}: {e}")
-                continue
-        
-        # If all else fails, return a reasonable default
-        log_info("Could not determine expedition number, using default: 73")
-        return 73
-        
-    except Exception as e:
-        log_error(f"Error determining latest expedition: {e}")
-        return 73
-
-def get_spacefacts_url(expedition_num: int = None) -> str:
-    """
-    Get the Spacefacts.de URL for the specified expedition.
-    If no expedition number is provided, discover the latest one.
-    """
-    if expedition_num is None:
-        expedition_num = get_latest_expedition_number()
-    return f"https://spacefacts.de/iss/english/exp_{expedition_num}.htm"
-
-def get_astronaut_image_url(astronaut_page_url: str) -> str:
+def get_astronaut_image_url(session: requests.Session, astronaut_page_url: str) -> Optional[str]:
     """
     Extract the astronaut's image URL from their personal page.
     Returns the direct image URL or None if not found.
     """
     if not astronaut_page_url:
         return None
-    
-    headers = {
-        "User-Agent": "ISS-Mimic Bot (+https://github.com/ISS-Mimic; iss.mimic@gmail.com)"
-    }
-    
+
     try:
-        r = requests.get(astronaut_page_url, headers=headers, timeout=10)
+        r = session.get(astronaut_page_url, timeout=10)
         r.raise_for_status()
-        
-        soup = BeautifulSoup(r.content, 'html.parser')
-        
-        # First, look for the high-resolution portrait link that's often in the page
-        # Based on the example page, it's often a link to "hi res version"
+        soup = BeautifulSoup(r.content, 'lxml')
+
+        # Look for hi-res portrait links first
         portrait_links = soup.find_all('a', href=re.compile(r'portraits.*\.jpg'))
         if portrait_links:
             for link in portrait_links:
                 href = link.get('href', '')
-                if 'portraits' in href and href.endswith('.jpg'):
-                    if href.startswith('..'):
-                        # Convert relative path to absolute
-                        # Extract the category from the astronaut page URL to use the correct path
-                        if 'bios/' in astronaut_page_url:
-                            category = astronaut_page_url.split('bios/')[1].split('/')[0]
-                            # Handle different portrait directories based on category
-                            if category == 'cosmonauts':
-                                return f"https://spacefacts.de/bios/portraits_hi/cosmonauts/{href.split('/')[-1]}"
-                            elif category == 'astronauts':
-                                return f"https://spacefacts.de/bios/portraits2/astronauts/{href.split('/')[-1]}"
-                            else:
-                                # Default to portraits_hi for other categories
-                                return f"https://spacefacts.de/bios/portraits_hi/{category}/{href.split('/')[-1]}"
-                        else:
-                            # Fallback if we can't determine category
-                            return f"https://spacefacts.de/bios/portraits_hi/international/{href.split('/')[-1]}"
-                    elif href.startswith('/'):
-                        return f"https://spacefacts.de{href}"
-                    elif href.startswith('http'):
-                        return href
+                if not href:
+                    continue
+                if href.startswith('http'):
+                    return href
+                if href.startswith('/'):
+                    return f"https://spacefacts.de{href}"
+                # map relative hi-res by category inferred from page url
+                if 'bios/' in astronaut_page_url:
+                    category = astronaut_page_url.split('bios/')[1].split('/')[0]
+                    filename = href.split('/')[-1]
+                    if category == 'cosmonauts':
+                        return f"https://spacefacts.de/bios/portraits_hi/cosmonauts/{filename}"
+                    elif category == 'astronauts':
+                        return f"https://spacefacts.de/bios/portraits2/astronauts/{filename}"
                     else:
-                        # Assume it's relative to the current page
-                        base_url = '/'.join(astronaut_page_url.split('/')[:-1])
-                        return f"{base_url}/{href}"
-        
-        # Look for the astronaut's photo - typically in a table or specific div
-        # Common patterns: look for images with astronaut names or in specific table cells
+                        return f"https://spacefacts.de/bios/portraits_hi/{category}/{filename}"
+
+        # Fallback: first plausible <img>
         images = soup.find_all('img')
-        
         for img in images:
             src = img.get('src', '')
-            alt = img.get('alt', '').lower()
-            title = img.get('title', '').lower()
-            
-            # Look for images that are likely astronaut photos
-            if any(keyword in alt or keyword in title for keyword in ['astronaut', 'cosmonaut', 'photo', 'portrait']):
-                if src.startswith('..'):
-                    # Convert relative path to absolute
-                    # Extract the category from the astronaut page URL to use the correct path
-                    if 'bios/' in astronaut_page_url:
-                        category = astronaut_page_url.split('bios/')[1].split('/')[0]
-                        return f"https://spacefacts.de/bios/{category}/english/{src.split('/')[-1]}"
-                    else:
-                        return f"https://spacefacts.de/bios/international/english/{src.split('/')[-1]}"
-                elif src.startswith('/'):
-                    return f"https://spacefacts.de{src}"
-                elif src.startswith('http'):
-                    return src
-                else:
-                    # Assume it's relative to the current page
-                    base_url = '/'.join(astronaut_page_url.split('/')[:-1])
-                    return f"{base_url}/{src}"
-        
-        # Fallback: look for any image that might be the astronaut photo
-        # Often the first image after the name/title
-        for img in images:
-            src = img.get('src', '')
-            if src and not src.endswith('.gif') and 'flag' not in src.lower():
-                if src.startswith('..'):
-                    # Extract the category from the astronaut page URL to use the correct path
-                    if 'bios/' in astronaut_page_url:
-                        category = astronaut_page_url.split('bios/')[1].split('/')[0]
-                        return f"https://spacefacts.de/bios/{category}/english/{src.split('/')[-1]}"
-                    else:
-                        return f"https://spacefacts.de/bios/international/english/{src.split('/')[-1]}"
-                elif src.startswith('/'):
-                    return f"https://spacefacts.de{src}"
-                elif src.startswith('http'):
-                    return src
-                else:
-                    base_url = '/'.join(astronaut_page_url.split('/')[:-1])
-                    return f"{base_url}/{src}"
-        
+            if not src or src.lower().endswith('.gif') or 'flag' in src.lower():
+                continue
+            if src.startswith('http'):
+                return src
+            if src.startswith('/'):
+                return f"https://spacefacts.de{src}"
+            base = '/'.join(astronaut_page_url.split('/')[:-1])
+            return f"{base}/{src}"
+
         return None
-        
+
     except Exception as e:
         log_error(f"Error fetching astronaut image from {astronaut_page_url}: {e}")
         return None
 
-def get_astronaut_mission_data(astronaut_page_url: str) -> dict:
+def get_astronaut_mission_data(session: requests.Session, astronaut_page_url: str) -> dict:
     """
     Extract mission data from the astronaut's Spaceflights table.
-    Returns dict with total_time_in_space and current_mission_duration.
+    Returns dict with total_time_in_space and current_mission_duration (days).
     """
     if not astronaut_page_url:
         return {'total_time_in_space': 0, 'current_mission_duration': 0}
-    
-    headers = {
-        "User-Agent": "ISS-Mimic Bot (+https://github.com/ISS-Mimic; iss.mimic@gmail.com)"
-    }
-    
+
     try:
-        r = requests.get(astronaut_page_url, headers=headers, timeout=10)
+        r = session.get(astronaut_page_url, timeout=10)
         r.raise_for_status()
-        
-        soup = BeautifulSoup(r.content, 'html.parser')
-        
-        # Look for the Spaceflights table
+        soup = BeautifulSoup(r.content, 'lxml')
+
         spaceflights_header = soup.find('h3', string='Spaceflights')
         if not spaceflights_header:
             return {'total_time_in_space': 0, 'current_mission_duration': 0}
-        
-        # Find the table after the Spaceflights header
+
         table = spaceflights_header.find_next('table')
         if not table:
             return {'total_time_in_space': 0, 'current_mission_duration': 0}
-        
+
         total_time = 0
         current_mission_days = 0
         today = datetime.now()
-        
-        # Parse each row in the table
-        rows = table.find_all('tr')[1:]  # Skip header row
+
+        rows = table.find_all('tr')[1:]
         for row in rows:
             cells = row.find_all('td')
             if len(cells) < 5:
                 continue
-            
-            # Check if this is a summary row (Total)
             if 'Total' in str(cells[0]):
                 continue
-            
-            # Check if this row has mission data
             mission_cell = cells[1].get_text(strip=True)
-            if not mission_cell or mission_cell.isspace():
+            if not mission_cell:
                 continue
-            
-            # Get the time column (4th column, index 3)
             time_cell = cells[3].get_text(strip=True)
-            if not time_cell or time_cell.isspace():
+            if not time_cell:
                 continue
-            
-            # Parse the time range
+
             if ' - ' in time_cell:
                 # Completed mission: "19.10.2016 - 10.04.2017"
                 try:
@@ -635,19 +511,19 @@ def get_astronaut_mission_data(astronaut_page_url: str) -> dict:
                 except ValueError:
                     continue
             else:
-                # Current mission: "08.04.2025" (single date)
+                # Current mission: "08.04.2025"
                 try:
                     launch_date = datetime.strptime(time_cell.strip(), '%d.%m.%Y')
                     current_mission_days = (today - launch_date).days
                     total_time += current_mission_days
                 except ValueError:
                     continue
-        
+
         return {
             'total_time_in_space': total_time,
             'current_mission_duration': current_mission_days
         }
-        
+
     except Exception as e:
         log_error(f"Error fetching astronaut mission data from {astronaut_page_url}: {e}")
         return {'total_time_in_space': 0, 'current_mission_duration': 0}
@@ -658,12 +534,12 @@ def format_duration_days(days: int) -> str:
     """
     if days < 1:
         return "Less than 1 day"
-    
+
     years = days // 365
     remaining_days = days % 365
     months = remaining_days // 30
     final_days = remaining_days % 30
-    
+
     parts = []
     if years > 0:
         parts.append(f"{years} year{'s' if years != 1 else ''}")
@@ -671,105 +547,120 @@ def format_duration_days(days: int) -> str:
         parts.append(f"{months} month{'s' if months != 1 else ''}")
     if final_days > 0:
         parts.append(f"{final_days} day{'s' if final_days != 1 else ''}")
-    
+
     return ", ".join(parts) if parts else "0 days"
 
-# --- Persistence ------------------------------------------------------------ #
+# ------------------------- Persistence --------------------------------------
 
 def ensure_schema(conn: sqlite3.Connection) -> None:
-    """Ensure the database schema exists."""
-    try:
-        #log_info("Creating/updating crew database schema")
-        
-        # Force recreation of tables to ensure correct schema
-        #log_info("Recreating database tables to ensure correct schema")
-        conn.executescript("""
-            DROP TABLE IF EXISTS crew_members;
-            DROP TABLE IF EXISTS current_crew;
-            DROP TABLE IF EXISTS snapshots;
-        """)
-        
-        # Create tables explicitly without IF NOT EXISTS
-        conn.executescript("""
-            PRAGMA journal_mode=WAL;
-            PRAGMA synchronous=NORMAL;
+    """Ensure the database schema exists (no dropping)."""
+    cur = conn.cursor()
+    # Pragmas once per connection
+    cur.execute("PRAGMA journal_mode=WAL;")
+    cur.execute("PRAGMA synchronous=NORMAL;")
+    cur.execute("PRAGMA temp_store=MEMORY;")
+    cur.execute("PRAGMA mmap_size=134217728;")  # 128 MiB
 
-            CREATE TABLE snapshots (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                fetched_at TEXT NOT NULL,          -- ISO 8601 UTC
-                checksum TEXT NOT NULL UNIQUE      -- checksum of normalized payload
-            );
+    cur.executescript("""
+        CREATE TABLE IF NOT EXISTS snapshots (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            fetched_at TEXT NOT NULL,          -- ISO 8601 UTC
+            checksum TEXT NOT NULL UNIQUE      -- checksum of normalized payload
+        );
 
-            CREATE TABLE crew_members (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                snapshot_id INTEGER NOT NULL,
-                name TEXT NOT NULL,
-                country TEXT NOT NULL,
-                spaceship TEXT NOT NULL,
-                expedition TEXT NOT NULL,
-                position TEXT,                    -- ISS-CDR, Flight Engineer, etc.
-                launch_date TEXT,                 -- Launch date (YYYY-MM-DD)
-                launch_time TEXT,                 -- Launch time (HH:MM:SS UTC)
-                landing_spacecraft TEXT,          -- Spacecraft (landing) or NULL if active
-                landing_date TEXT,                -- Landing date (YYYY-MM-DD) or NULL if active
-                landing_time TEXT,                -- Landing time (HH:MM:SS UTC) or NULL if active
-                mission_duration TEXT,            -- Mission duration (e.g., "147d 16h 29m 52s")
-                orbits INTEGER,                   -- Number of orbits completed
-                status TEXT DEFAULT 'active',     -- 'active' or 'returned'
-                image_url TEXT,                   -- URL to astronaut's photo
-                total_time_in_space INTEGER,      -- Total lifetime days in space
-                current_mission_duration INTEGER  -- Current mission duration in days
-            );
+        CREATE TABLE IF NOT EXISTS crew_members (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            snapshot_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            country TEXT NOT NULL,
+            spaceship TEXT NOT NULL,
+            expedition TEXT NOT NULL,
+            position TEXT,
+            launch_date TEXT,
+            launch_time TEXT,
+            landing_spacecraft TEXT,
+            landing_date TEXT,
+            landing_time TEXT,
+            mission_duration TEXT,
+            orbits INTEGER,
+            status TEXT DEFAULT 'active',
+            image_url TEXT,
+            total_time_in_space INTEGER,
+            current_mission_duration INTEGER
+        );
 
-            CREATE TABLE current_crew (
-                name TEXT NOT NULL,
-                country TEXT NOT NULL,
-                spaceship TEXT NOT NULL,
-                expedition TEXT NOT NULL,
-                position TEXT,
-                launch_date TEXT,
-                launch_time TEXT,
-                landing_spacecraft TEXT,
-                landing_date TEXT,
-                landing_time TEXT,
-                mission_duration TEXT,
-                orbits INTEGER,
-                status TEXT DEFAULT 'active',
-                image_url TEXT,                   -- URL to astronaut's photo
-                total_time_in_space INTEGER,      -- Total lifetime days in space
-                current_mission_duration INTEGER  -- Current mission duration in days
-            );
-        """)
-        conn.commit()
-        #log_info("Database schema recreated successfully")
-        
-        # Verify the schema was created correctly
-        cursor = conn.cursor()
-        cursor.execute("PRAGMA table_info(crew_members)")
-        columns = cursor.fetchall()
-        #log_info(f"crew_members table has {len(columns)} columns:")
-        #for col in columns:
-        #    log_info(f"  {col[1]} ({col[2]})")
-        
-    except sqlite3.Error as e:
-        log_error(f"Failed to create database schema: {e}")
-        raise
+        CREATE TABLE IF NOT EXISTS current_crew (
+            name TEXT NOT NULL,
+            country TEXT NOT NULL,
+            spaceship TEXT NOT NULL,
+            expedition TEXT NOT NULL,
+            position TEXT,
+            launch_date TEXT,
+            launch_time TEXT,
+            landing_spacecraft TEXT,
+            landing_date TEXT,
+            landing_time TEXT,
+            mission_duration TEXT,
+            orbits INTEGER,
+            status TEXT DEFAULT 'active',
+            image_url TEXT,
+            total_time_in_space INTEGER,
+            current_mission_duration INTEGER
+        );
 
-def normalize_for_checksum(crew: List[Dict[str, str]]) -> str:
+        -- tiny cache for astronaut-page enrichment
+        CREATE TABLE IF NOT EXISTS astronaut_cache (
+            page_url TEXT PRIMARY KEY,
+            image_url TEXT,
+            total_time_in_space INTEGER,
+            current_mission_duration INTEGER,
+            updated_at TEXT NOT NULL
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_snapshots_id ON snapshots(id);
+        CREATE INDEX IF NOT EXISTS idx_current_crew_name ON current_crew(name);
+    """)
+    conn.commit()
+
+def normalize_for_checksum(crew: List[Dict[str, object]]) -> str:
     """
     Build a stable string for checksumming (order-independent).
     """
     normalized = sorted(
-        [{k: v.strip() if isinstance(v, str) else v for k, v in member.items()} for member in crew],
-        key=lambda m: (m["name"], m["spaceship"], m["country"], m["expedition"]),
+        [{k: (v.strip() if isinstance(v, str) else v) for k, v in member.items()} for member in crew],
+        key=lambda m: (m.get("name"), m.get("spaceship"), m.get("country"), m.get("expedition")),
     )
     return json.dumps(normalized, ensure_ascii=False, separators=(",", ":"))
 
-def compute_checksum(crew: List[Dict[str, str]]) -> str:
+def compute_checksum(crew: List[Dict[str, object]]) -> str:
     norm = normalize_for_checksum(crew)
     return hashlib.sha256(norm.encode("utf-8")).hexdigest()
 
-def get_last_checksum(conn: sqlite3.Connection) -> str | None:
+def compute_light_checksum(base_rows: List[Dict[str, object]]) -> str:
+    """
+    Only identity/stable fields—skip enrichment so we can short-circuit quickly.
+    """
+    minimal = [
+        {
+            "name": r.get("name"),
+            "country": r.get("country"),
+            "spaceship": r.get("spaceship"),
+            "expedition": r.get("expedition"),
+            "position": r.get("position"),
+            "launch_date": r.get("launch_date"),
+            "launch_time": r.get("launch_time"),
+            "landing_spacecraft": r.get("landing_spacecraft"),
+            "landing_date": r.get("landing_date"),
+            "landing_time": r.get("landing_time"),
+            "orbits": r.get("orbits"),
+            "status": r.get("status", "active"),
+        }
+        for r in base_rows
+    ]
+    minimal = sorted(minimal, key=lambda m: (m.get("name"), m.get("spaceship"), m.get("country"), m.get("expedition")))
+    return hashlib.sha256(json.dumps(minimal, separators=(",", ":"), ensure_ascii=False).encode("utf-8")).hexdigest()
+
+def get_last_checksum(conn: sqlite3.Connection) -> Optional[str]:
     try:
         row = conn.execute("SELECT checksum FROM snapshots ORDER BY id DESC LIMIT 1").fetchone()
         return row[0] if row else None
@@ -777,93 +668,196 @@ def get_last_checksum(conn: sqlite3.Connection) -> str | None:
         log_error(f"Failed to get last checksum: {e}")
         return None
 
-def insert_snapshot(conn: sqlite3.Connection, crew: List[Dict[str, str]], checksum: str) -> int:
-    """Insert a new crew snapshot into the database."""
+# --------- enrichment cache (24h TTL) ---------------------------------------
+
+CACHE_TTL_HOURS = 24
+
+def cache_get(conn: sqlite3.Connection, page_url: Optional[str]) -> Optional[dict]:
+    if not page_url:
+        return None
+    row = conn.execute(
+        "SELECT image_url, total_time_in_space, current_mission_duration, updated_at "
+        "FROM astronaut_cache WHERE page_url = ?;", (page_url,)
+    ).fetchone()
+    if not row:
+        return None
+    image_url, total_time, current_days, updated = row
     try:
-        fetched_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-        cur = conn.cursor()
-        
-        #log_info(f"Inserting new crew snapshot with {len(crew)} members")
-        cur.execute("INSERT INTO snapshots (fetched_at, checksum) VALUES (?, ?)", (fetched_at, checksum))
+        updated_dt = datetime.fromisoformat(updated.replace("Z", "+00:00"))
+    except Exception:
+        return None
+    if datetime.now(timezone.utc) - updated_dt > timedelta(hours=CACHE_TTL_HOURS):
+        return None
+    return {
+        "image_url": image_url,
+        "total_time_in_space": total_time or 0,
+        "current_mission_duration": current_days or 0
+    }
+
+def cache_put(conn: sqlite3.Connection, page_url: str, data: dict) -> None:
+    conn.execute(
+        """
+        INSERT INTO astronaut_cache(page_url, image_url, total_time_in_space, current_mission_duration, updated_at)
+        VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT(page_url) DO UPDATE SET
+          image_url=excluded.image_url,
+          total_time_in_space=excluded.total_time_in_space,
+          current_mission_duration=excluded.current_mission_duration,
+          updated_at=excluded.updated_at;
+        """,
+        (
+            page_url, data.get("image_url"),
+            data.get("total_time_in_space", 0),
+            data.get("current_mission_duration", 0),
+            datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        )
+    )
+
+def enrich_crew(session: requests.Session, conn: sqlite3.Connection, base_rows: List[Dict[str, object]]) -> List[Dict[str, object]]:
+    def work(row: Dict[str, object]) -> Dict[str, object]:
+        page = row.get("astronaut_page_url")
+        # try cache first
+        cached = cache_get(conn, page)
+        if cached:
+            row.update({
+                "image_url": cached.get("image_url"),
+                "total_time_in_space": cached.get("total_time_in_space", 0),
+                "current_mission_duration": cached.get("current_mission_duration", 0),
+            })
+            return row
+
+        # fetch if we have a page
+        if page:
+            img = get_astronaut_image_url(session, str(page))
+            md = get_astronaut_mission_data(session, str(page))
+            row.update({
+                "image_url": img,
+                "total_time_in_space": md.get("total_time_in_space", 0),
+                "current_mission_duration": md.get("current_mission_duration", 0),
+            })
+            try:
+                cache_put(conn, str(page), {
+                    "image_url": row.get("image_url"),
+                    "total_time_in_space": row.get("total_time_in_space", 0),
+                    "current_mission_duration": row.get("current_mission_duration", 0),
+                })
+            except Exception as e:
+                log_error(f"cache_put failed: {e}")
+        else:
+            row.setdefault("image_url", None)
+            row.setdefault("total_time_in_space", 0)
+            row.setdefault("current_mission_duration", 0)
+        return row
+
+    # modest pool size to respect remote site
+    with ThreadPoolExecutor(max_workers=6) as ex:
+        futures = [ex.submit(work, dict(r)) for r in base_rows]
+        out: List[Dict[str, object]] = []
+        for f in as_completed(futures):
+            out.append(f.result())
+    return out
+
+def insert_snapshot(conn: sqlite3.Connection, crew: List[Dict[str, object]], checksum: str) -> int:
+    """Insert a new crew snapshot into the database (single transaction)."""
+    fetched_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    cur = conn.cursor()
+    cur.execute("BEGIN IMMEDIATE;")
+    try:
+        cur.execute("INSERT INTO snapshots (fetched_at, checksum) VALUES (?, ?);", (fetched_at, checksum))
         snapshot_id = cur.lastrowid
 
         cur.executemany(
             """
-            INSERT INTO crew_members (snapshot_id, name, country, spaceship, expedition, position, launch_date, launch_time, landing_spacecraft, landing_date, landing_time, mission_duration, orbits, status, image_url, total_time_in_space, current_mission_duration)
+            INSERT INTO crew_members (
+                snapshot_id, name, country, spaceship, expedition, position,
+                launch_date, launch_time, landing_spacecraft, landing_date, landing_time,
+                mission_duration, orbits, status, image_url, total_time_in_space, current_mission_duration
+            )
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             [
-                (snapshot_id, m["name"], m["country"], m["spaceship"], m["expedition"], 
-                 m.get("position"), m.get("launch_date"), m.get("launch_time"), 
-                 m.get("landing_spacecraft"), m.get("landing_date"), m.get("landing_time"), m.get("mission_duration"), 
-                 m.get("orbits"), m.get("status", "active"), m.get("image_url"), 
-                 m.get("total_time_in_space", 0), m.get("current_mission_duration", 0))
+                (
+                    snapshot_id, m["name"], m["country"], m["spaceship"], m["expedition"],
+                    m.get("position"), m.get("launch_date"), m.get("launch_time"),
+                    m.get("landing_spacecraft"), m.get("landing_date"), m.get("landing_time"),
+                    m.get("mission_duration"), m.get("orbits"), m.get("status", "active"),
+                    m.get("image_url"), m.get("total_time_in_space", 0), m.get("current_mission_duration", 0)
+                )
                 for m in crew
             ],
         )
 
-        # Refresh current_crew to mirror this snapshot
-        cur.execute("DELETE FROM current_crew")
+        # refresh current_crew atomically
+        cur.execute("DELETE FROM current_crew;")
         cur.executemany(
             """
-            INSERT INTO current_crew (name, country, spaceship, expedition, position, launch_date, launch_time, 
-                landing_spacecraft, landing_date, landing_time, mission_duration, orbits, status, image_url, total_time_in_space, current_mission_duration) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO current_crew (
+                name, country, spaceship, expedition, position, launch_date, launch_time,
+                landing_spacecraft, landing_date, landing_time, mission_duration, orbits, status,
+                image_url, total_time_in_space, current_mission_duration
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """,
-            [(m["name"], m["country"], m["spaceship"], m["expedition"], 
-            m.get("position"), m.get("launch_date"), m.get("launch_time"), 
-            m.get("landing_spacecraft"), m.get("landing_date"), m.get("landing_time"),
-            m.get("mission_duration"), m.get("orbits"), m.get("status", "active"), m.get("image_url"),
-            m.get("total_time_in_space", 0), m.get("current_mission_duration", 0)) for m in crew],
+            [
+                (
+                    m["name"], m["country"], m["spaceship"], m["expedition"],
+                    m.get("position"), m.get("launch_date"), m.get("launch_time"),
+                    m.get("landing_spacecraft"), m.get("landing_date"), m.get("landing_time"),
+                    m.get("mission_duration"), m.get("orbits"), m.get("status", "active"),
+                    m.get("image_url"), m.get("total_time_in_space", 0), m.get("current_mission_duration", 0)
+                )
+                for m in crew
+            ],
         )
-
 
         conn.commit()
         log_info(f"Successfully inserted snapshot {snapshot_id}")
         return snapshot_id
-        
-    except sqlite3.Error as e:
+    except Exception as e:
+        conn.rollback()
         log_error(f"Failed to insert crew snapshot: {e}")
         raise
+
+# ------------------------- Main ---------------------------------------------
 
 def main() -> int:
     """Main function to fetch and store ISS crew data."""
     try:
         db_path = get_db_path()
         log_info(f"Using database: {db_path}")
-        
-        # Check if database directory exists
-        db_file = Path(db_path)
-        db_dir = db_file.parent
-        #log_info(f"Database directory: {db_dir}")
-        #log_info(f"Database directory exists: {db_dir.exists()}")
-        
-        # Add timeout to database connection
-        conn = sqlite3.connect(db_path, timeout=30.0)
-        conn.isolation_level = None  # Enable autocommit mode
-        
-        #log_info("Database connection successful")
+
+        conn = sqlite3.connect(db_path, timeout=30.0, isolation_level=None)
         ensure_schema(conn)
 
-        log_info("Fetching current ISS crew data from Spacefacts.de")
-        crew = fetch_spacefacts_crew()
-        
-        # If Spacefacts.de fails, fall back to Wikipedia
-        if not crew:
-            log_info("Spacefacts.de fetch failed, falling back to Wikipedia")
-            crew = fetch_iss_crew()
-        
-        # If fetch returns empty (unexpected), we still write a snapshot so the
-        # main app can notice the empty state if it changed.
-        checksum = compute_checksum(crew)
-        log_info(f"Computed checksum: {checksum[:8]}...")
+        session = make_session()
 
+        log_info("Fetching current ISS crew data from Spacefacts.de (base rows)")
+        base_rows = fetch_spacefacts_crew(session)
+
+        # If Spacefacts.de fails, fall back to Wikipedia
+        if not base_rows:
+            log_info("Spacefacts.de fetch failed, falling back to Wikipedia")
+            base_rows = fetch_iss_crew(session)
+
+        # If fetch returns empty, still handle checksum+write so app can notice change.
+        light_ck = compute_light_checksum(base_rows)
         last = get_last_checksum(conn)
-        if last == checksum:
-            log_info("No changes detected in crew data")
+
+        if last == light_ck:
+            log_info("No changes in crew identities; skipping enrichment & DB write")
             return 0
 
-        log_info("Crew data has changed, inserting new snapshot")
+        # Enrich only when identities changed
+        log_info("Crew identities changed; enriching with astronaut pages (parallel + cache)")
+        crew = enrich_crew(session, conn, base_rows)
+
+        # Final checksum includes enriched fields
+        checksum = compute_checksum(crew)
+        if last == checksum:
+            log_info("No net changes after enrichment")
+            return 0
+
+        log_info("Inserting new snapshot")
         insert_snapshot(conn, crew, checksum)
         log_info("Crew data update completed successfully")
         return 0
@@ -880,17 +874,15 @@ def main() -> int:
         except Exception as e:
             log_error(f"Error closing database connection: {e}")
 
+# ------------------------- CLI ----------------------------------------------
 
 if __name__ == "__main__":
-    # Add a simple test mode
     if len(sys.argv) > 1 and sys.argv[1] == "--test":
         try:
             db_path = get_db_path()
-            conn = sqlite3.connect(db_path, timeout=10.0)
-            conn.isolation_level = None
-            
+            conn = sqlite3.connect(db_path, timeout=10.0, isolation_level=None)
             ensure_schema(conn)
-            
+
             # Test with dummy data
             test_crew = [{
                 'name': 'Test Astronaut',
@@ -909,12 +901,12 @@ if __name__ == "__main__":
                 'total_time_in_space': 365,
                 'current_mission_duration': 30
             }]
-            
+
             checksum = compute_checksum(test_crew)
             insert_snapshot(conn, test_crew, checksum)
             conn.close()
             sys.exit(0)
-            
+
         except Exception as e:
             import traceback
             traceback.print_exc()
