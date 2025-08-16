@@ -36,8 +36,6 @@ WIKI_API_URL = (
     "?action=parse&page=Template:People_currently_in_space&prop=wikitext&format=json"
 )
 
-SPACEFACTS_URL = "https://spacefacts.de/iss/english/exp_73.htm"
-
 def get_db_path() -> str:
     """Get the database path, prioritizing /dev/shm on Linux."""
     if Path("/dev/shm").exists() and Path("/dev/shm").is_dir():
@@ -51,7 +49,6 @@ def get_db_path() -> str:
 # --- Network / scraping ----------------------------------------------------- #
 
 def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict[str, str]]:
-    print("Fetching Spacefacts.de crew data")
     """
     Fetch detailed crew data from Spacefacts.de ISS table.
     Returns list of dicts with enhanced crew information.
@@ -77,52 +74,32 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
             # Find the ISS crew table - look for the crew data table
             tables = soup.find_all('table')
 
-            #print(f"Found {len(tables)} tables")
-
             crew_table = None
             # Look for the crew table with the specific structure
-            for i, table in enumerate(tables):
+            for table in tables:
                 table_text = str(table)
-                #print(f"Table {i}: {table_text[:200]}...")  # Show first 200 chars of each table
-                
-                # Look for the crew table with the specific headers
                 if ('No.' in table_text and 'Nation' in table_text and 'Surname' in table_text and 
                     'Given names' in table_text and 'Position' in table_text):
                     crew_table = table
-                    #print(f"Found crew table at index {i}")
                     break
             
             if not crew_table:
                 log_error("No ISS crew table found on Spacefacts.de")
-                #print(f"No ISS crew table found on Spacefacts.de")
-
                 return []
-            
-            #print(f"Found crew table with {len(crew_table.find_all('tr'))} rows")
-            
-            # Debug: Show the header row to understand the structure
-            header_row = crew_table.find_all('tr')[0] if crew_table.find_all('tr') else None
-            if header_row:
-                header_cells = header_row.find_all(['td', 'th'])
-                #print(f"Header row has {len(header_cells)} cells: {[cell.get_text(strip=True) for cell in header_cells]}")
             
             crew_info = []
             rows = crew_table.find_all('tr')[1:]  # Skip header row
 
-            
             for row in rows:
                 cells = row.find_all(['td', 'th'])
-                #print(f"Cells: {cells}")
                 # Skip rows that don't have enough data or are header rows
                 if len(cells) < 13:  # Need at least 13 columns for complete crew data
-                    #print(f"Skipping row with {len(cells)} cells")
                     continue
                 
                 # Check if this row contains crew data (should have a number in first cell)
                 first_cell = cells[0].get_text(strip=True)
                 # Look for crew number pattern (1, 2, 3, etc.)
                 if not first_cell.isdigit():
-                    #print(f"Skipping row with no crew number: {first_cell}")
                     continue
                 
                 try:
@@ -194,18 +171,15 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
                         if href:
                             # Convert relative URL to absolute URL using the actual href from the table
                             if href.startswith('..'):
-                                #print(f"HREF: {href}")
                                 # Handle relative paths like "../../bios/international/english/onishi_takuya.htm"
                                 # Convert to absolute URL by going up the path and then down to the bios directory
                                 path_parts = href.split('/')
-                                #print(f"Path parts: {path_parts}")
                                 # Remove the ".." parts and construct the full URL
                                 if len(path_parts) >= 4:  # Should have at least ../../bios/category/language/filename
                                     category = path_parts[3]  # e.g., "international", "cosmonauts", "astronauts"
                                     language = path_parts[4]  # e.g., "english"
                                     filename = path_parts[5]  # e.g., "onishi_takuya.htm"
                                     astronaut_page_url = f"https://spacefacts.de/bios/{category}/{language}/{filename}"
-                                    #print(f"Constructed astronaut page URL: {astronaut_page_url}")
                                 else:
                                     astronaut_page_url = None
                             elif href.startswith('/'):
@@ -220,12 +194,6 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
                             # Now fetch the actual image URL from the astronaut's page
                             if astronaut_page_url:
                                 image_url = get_astronaut_image_url(astronaut_page_url)
-                                if image_url:
-                                    print(f"Found image for {first_name} {surname}: {image_url}")
-                                else:
-                                    print(f"No image found for {first_name} {surname}")
-                            else:
-                                print(f"Could not construct astronaut page URL for {first_name} {surname}")
                     
                     crew_member = {
                         'name': f"{first_name} {surname}",  # Nickname (if available) + Surname
@@ -243,9 +211,6 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
                         'image_url': image_url  # URL to astronaut's personal page with image
                     }
 
-                    # Debug: Log the parsed crew member data
-                    #log_info(f"Parsed crew member: {crew_member}")
-                    
                     # Clean up the data
                     crew_member['name'] = crew_member['name'].strip()
                     crew_member['country'] = crew_member['country'].strip()
@@ -303,14 +268,9 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
                         crew_member['launch_time'] and crew_member['launch_time'].strip() != 'UTC' and
                         crew_member['status'] == 'active'):
                         crew_info.append(crew_member)
-                        print(f"Added crew member: {crew_member['name']} from {crew_member['country']}")
                     else:
-                        if crew_member['launch_time'] and crew_member['launch_time'].strip() == 'UTC':
-                            print(f"Skipping future crew member: {crew_member['name']} (launch time not set)")
-                        elif crew_member['status'] == 'returned':
-                            print(f"Skipping returned crew member: {crew_member['name']}")
-                        else:
-                            print(f"Skipping crew member without launch date: {crew_member['name']}")
+                        # Skip crew members who haven't launched or have returned
+                        pass
                         
                 except Exception as e:
                     log_error(f"Error parsing crew member row: {e}")
@@ -456,11 +416,9 @@ def get_latest_expedition_number() -> int:
                     soup = BeautifulSoup(r.content, 'html.parser')
                     if is_valid_expedition_page(soup, exp_num):
                         log_info(f"Found valid expedition page: {exp_num}")
-                        print(f"Found valid expedition page: {exp_num}")
                         return exp_num
                     else:
                         log_info(f"Expedition {exp_num} page exists but doesn't contain valid data")
-                        print(f"Expedition {exp_num} page exists but doesn't contain valid data")
             except Exception as e:
                 log_info(f"Error checking expedition {exp_num}: {e}")
                 continue
@@ -475,7 +433,6 @@ def get_latest_expedition_number() -> int:
                     soup = BeautifulSoup(r.content, 'html.parser')
                     if is_valid_expedition_page(soup, exp_num):
                         log_info(f"Found valid expedition page: {exp_num}")
-                        print(f"Found valid expedition page: {exp_num}")
                         return exp_num
             except Exception as e:
                 log_info(f"Error checking expedition {exp_num}: {e}")
@@ -483,12 +440,10 @@ def get_latest_expedition_number() -> int:
         
         # If all else fails, return a reasonable default
         log_info("Could not determine expedition number, using default: 73")
-        print(f"Could not determine expedition number, using default: 73")
         return 73
         
     except Exception as e:
         log_error(f"Error determining latest expedition: {e}")
-        print(f"Error determining latest expedition: {e}")
         return 73
 
 def get_spacefacts_url() -> str:
@@ -525,7 +480,20 @@ def get_astronaut_image_url(astronaut_page_url: str) -> str:
                 if 'portraits' in href and href.endswith('.jpg'):
                     if href.startswith('..'):
                         # Convert relative path to absolute
-                        return f"https://spacefacts.de/portraits_hi/cosmonauts/{href.split('/')[-1]}"
+                        # Extract the category from the astronaut page URL to use the correct path
+                        if 'bios/' in astronaut_page_url:
+                            category = astronaut_page_url.split('bios/')[1].split('/')[0]
+                            # Handle different portrait directories based on category
+                            if category == 'cosmonauts':
+                                return f"https://spacefacts.de/bios/portraits_hi/cosmonauts/{href.split('/')[-1]}"
+                            elif category == 'astronauts':
+                                return f"https://spacefacts.de/bios/portraits2/astronauts/{href.split('/')[-1]}"
+                            else:
+                                # Default to portraits_hi for other categories
+                                return f"https://spacefacts.de/bios/portraits_hi/{category}/{href.split('/')[-1]}"
+                        else:
+                            # Fallback if we can't determine category
+                            return f"https://spacefacts.de/bios/portraits_hi/international/{href.split('/')[-1]}"
                     elif href.startswith('/'):
                         return f"https://spacefacts.de{href}"
                     elif href.startswith('http'):
@@ -698,12 +666,6 @@ def insert_snapshot(conn: sqlite3.Connection, crew: List[Dict[str, str]], checks
         cur.execute("INSERT INTO snapshots (fetched_at, checksum) VALUES (?, ?)", (fetched_at, checksum))
         snapshot_id = cur.lastrowid
 
-        # Debug: Log the first crew member's data structure
-        if crew:
-            first_member = crew[0]
-            log_info(f"First crew member data: {first_member}")
-            log_info(f"Values to insert: snapshot_id={snapshot_id}, name={first_member['name']}, country={first_member['country']}, spaceship={first_member['spaceship']}, expedition={first_member['expedition']}, position={first_member.get('position')}, launch_date={first_member.get('launch_date')}, launch_time={first_member.get('launch_time')}, landing_date={first_member.get('landing_date')}, landing_time={first_member.get('landing_time')}, mission_duration={first_member.get('mission_duration')}, orbits={first_member.get('orbits')}, status={first_member.get('status', 'active')}")
-        
         cur.executemany(
             """
             INSERT INTO crew_members (snapshot_id, name, country, spaceship, expedition, position, launch_date, launch_time, landing_spacecraft, landing_date, landing_time, mission_duration, orbits, status, image_url)
@@ -792,16 +754,12 @@ def main() -> int:
 if __name__ == "__main__":
     # Add a simple test mode
     if len(sys.argv) > 1 and sys.argv[1] == "--test":
-        print("Running in test mode - testing database operations only")
         try:
             db_path = get_db_path()
-            print(f"Database path: {db_path}")
-            
             conn = sqlite3.connect(db_path, timeout=10.0)
             conn.isolation_level = None
             
             ensure_schema(conn)
-            print("Schema created successfully")
             
             # Test with dummy data
             test_crew = [{
@@ -821,17 +779,11 @@ if __name__ == "__main__":
             }]
             
             checksum = compute_checksum(test_crew)
-            print(f"Test checksum: {checksum[:8]}...")
-            
             insert_snapshot(conn, test_crew, checksum)
-            print("Test data inserted successfully")
-            
             conn.close()
-            print("Test completed successfully")
             sys.exit(0)
             
         except Exception as e:
-            print(f"Test failed: {e}")
             import traceback
             traceback.print_exc()
             sys.exit(1)
