@@ -24,7 +24,7 @@ Builder.load_file(str(KV_PATH))
 # ───────────────────── Configuration ───────────────────────
 POLL_INTERVAL_S = 2.0         # fast polling until DB shows data
 UPDATE_INTERVAL_S = 300.0     # periodic DB refresh
-EXPEDITION_TICK_S = 1.0
+EXPEDITION_TICK_S = 60.0      # 1 minute
 
 # ──────────────────────── Widgets ──────────────────────────
 class CrewMemberWidget(BoxLayout):
@@ -318,13 +318,13 @@ class Crew_Screen(MimicBase):
         # Build the formatted string
         parts = []
         if months > 0:
-            parts.append(f"{months} m")
+            parts.append(f"{months}m")
         if days > 0:
-            parts.append(f"{days} d")
+            parts.append(f"{days}d")
         if hours > 0:
-            parts.append(f"{hours} h")
+            parts.append(f"{hours}h")
         
-        return ", ".join(parts)
+        return " ".join(parts)
 
     # Expedition duration (oldest launch to now) - formatted as months, days, hours, seconds
     def _update_expedition_duration(self, *_):
@@ -462,6 +462,19 @@ class Crew_Screen(MimicBase):
 
     def _make_vehicle_widget(self, vehicle: Dict) -> BoxLayout:
         widget = BoxLayout(orientation="vertical", size_hint_y=None, height=dp(60))
+        
+        # Format arrival date to show only the date part
+        arrival_date = vehicle.get('arrival', 'Unknown')
+        if arrival_date and arrival_date != 'Unknown':
+            try:
+                # Parse the full datetime string and extract just the date
+                if ' ' in arrival_date:
+                    date_part = arrival_date.split(' ')[0]  # Get "2025-04-08" from "2025-04-08 00:00:00"
+                    arrival_date = date_part
+            except Exception:
+                # If parsing fails, keep the original value
+                pass
+        
         mission_label = Label(
             text=vehicle.get("mission", "Unknown"),
             color=(1, 1, 1, 1),
@@ -470,7 +483,7 @@ class Crew_Screen(MimicBase):
             size_hint_y=0.5,
         )
         info_label = Label(
-            text=f"{vehicle.get('spacecraft','Unknown')}\nArrived: {vehicle.get('arrival','Unknown')}",
+            text=f"{vehicle.get('spacecraft','Unknown')}\nArrived: {arrival_date}",
             color=(0.8, 0.8, 0.8, 1),
             font_size=dp(10),
             size_hint_y=0.5,
