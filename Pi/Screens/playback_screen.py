@@ -60,17 +60,11 @@ class Playback_Screen(MimicBase):
         try:
             app = App.get_running_app()
             arduino_count = getattr(app, 'arduino_count', 0)
+            print(f"Arduino count: {arduino_count}")
             self.arduino_connected = arduino_count > 0
             
             # Update the arduino status label
-            arduino_status = getattr(self.ids, 'arduino_status', None)
-            if arduino_status:
-                if self.arduino_connected:
-                    arduino_status.text = 'Arduino: Connected'
-                    arduino_status.color = (0, 1, 0, 1)  # Green
-                else:
-                    arduino_status.text = 'Arduino: Disconnected'
-                    arduino_status.color = (1, 0, 0, 1)  # Red
+
                     
         except Exception as e:
             log_error(f"Error checking Arduino connection: {e}")
