@@ -147,23 +147,29 @@
         
         # Playback Controls
         BoxLayout:
-            size_hint: 0.4, 0.1
-            pos_hint: {"center_x": 0.5, "center_y": 0.45}
+            orientation: 'horizontal'
+            size_hint: 0.8, 0.3
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
             spacing: dp(20)
             
             Button:
-                text: 'Start' if not root.is_playing else 'Playing...'
-                disabled: not root.current_file or not root.arduino_connected
-                on_release: root.start_playback()
-                background_color: 0.2, 0.6, 0.2, 1
-                size_hint_x: 0.5
+                text: 'Start'
+                size_hint: 0.4, 1
+                disabled: not root.current_file or root.arduino_connected == False
+                on_press: root.start_playback()
             
             Button:
                 text: 'Stop'
+                size_hint: 0.4, 1
                 disabled: not root.is_playing
-                on_release: root.stop_playback()
-                background_color: 0.8, 0.2, 0.2, 1
-                size_hint_x: 0.5
+                on_press: root.stop_playback()
+            
+            Button:
+                id: loop_button
+                text: 'Loop'
+                size_hint: 0.2, 1
+                background_color: (0.6, 0.6, 0.6, 1)  # Default gray
+                on_press: root.toggle_loop()
         
         # Status Display
         Label:

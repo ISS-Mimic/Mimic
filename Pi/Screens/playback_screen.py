@@ -17,6 +17,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.image import Image
 from kivy.app import App
 from kivy.uix.screenmanager import Screen
+from subprocess import Popen, TimeoutExpired
 
 from ._base import MimicBase
 from utils.logger import log_info, log_error
@@ -35,10 +36,11 @@ class Playback_Screen(MimicBase):
     # Playback state
     is_playing = BooleanProperty(False)
     current_file = StringProperty("")
-    playback_speed = NumericProperty(1.0)  # 1.0 = real-time, 2.0 = 2x speed, etc.
+    playback_speed = NumericProperty(10.0)  # 1.0 = real-time, 2.0 = 2x speed, etc.
     
     # Arduino connection status
     arduino_connected = BooleanProperty(False)
+    loop_enabled = BooleanProperty(False)  # New property for loop state
     
     # Playback data
     _playback_data = []
@@ -218,17 +220,40 @@ class Playback_Screen(MimicBase):
             return
             
         try:
-            # TODO: Start the actual playback
-            # This will involve:
-            # 1. Reading the data file
-            # 2. Setting up a timer to send data at the right intervals
-            # 3. Sending data to Arduino via serialWrite
+            # Determine the data folder path
+            if "(USB)" in self.current_file:
+                # USB drive file
+                drive_name = self.current_file.replace(" (USB)", "")
+                data_folder = f"/media/pi/{drive_name}"
+            else:
+                # Built-in demo
+                demo_name = self.current_file.replace(" Demo", "").lower()
+                data_folder = str(Path(self.mimic_directory) / "Mimic/Pi/RecordedData" / demo_name)
+            
+            # Build command with loop option
+            cmd = [
+                "python3",
+                str(Path(self.mimic_directory) / "Mimic/Pi/RecordedData/playback_engine.py"),
+                data_folder,
+                str(self.playback_speed)
+            ]
+            
+            # Add loop flag if enabled
+            if self.loop_enabled:
+                cmd.append("--loop")
+            
+            # Launch the playback engine
+            app = App.get_running_app()
+            if hasattr(app, 'playback_proc') and app.playback_proc:
+                log_info("Playback already running")
+                return
+                
+            proc = Popen(cmd)
+            app.playback_proc = proc
             
             self.is_playing = True
-            log_info(f"Started playback of {self.current_file}")
-            
-            # For now, just simulate playback
-            self._start_playback_timer()
+            loop_status = "with looping" if self.loop_enabled else ""
+            log_info(f"Started playback of {self.current_file} at {self.playback_speed}x speed {loop_status}")
             
         except Exception as e:
             log_error(f"Error starting playback: {e}")
@@ -240,39 +265,43 @@ class Playback_Screen(MimicBase):
             return
             
         try:
-            self._stop_playback_timer()
+            # Stop the playback engine
+            app = App.get_running_app()
+            if hasattr(app, 'playback_proc') and app.playback_proc:
+                # Try graceful termination first
+                app.playback_proc.terminate()
+                
+                # Wait a bit for graceful shutdown
+                try:
+                    app.playback_proc.wait(timeout=3)
+                except TimeoutExpired:
+                    # Force kill if it doesn't respond
+                    log_info("Force killing playback process")
+                    app.playback_proc.kill()
+                    app.playback_proc.wait()
+                
+                app.playback_proc = None
+            
             self.is_playing = False
             log_info("Playback stopped")
             
         except Exception as e:
             log_error(f"Error stopping playback: {e}")
-
-    def _start_playback_timer(self):
-        """Start the timer for sending playback data."""
-        # Calculate interval based on playback speed
-        # If original data was sent every 100ms and speed is 2x, send every 50ms
-        base_interval = 0.1  # 100ms base interval
-        interval = base_interval / self.playback_speed
+    
+    def toggle_loop(self):
+        """Toggle loop mode on/off."""
+        self.loop_enabled = not self.loop_enabled
+        status = "enabled" if self.loop_enabled else "disabled"
+        log_info(f"Loop mode {status}")
         
-        self._playback_timer = Clock.schedule_interval(self._send_playback_data, interval)
-
-    def _stop_playback_timer(self):
-        """Stop the playback timer."""
-        if self._playback_timer:
-            self._playback_timer.cancel()
-            self._playback_timer = None
-
-    def _send_playback_data(self, dt):
-        """Send the next piece of playback data to Arduino."""
-        try:
-            # TODO: Get the next data point from self._playback_data
-            # For now, just send a placeholder
-            if self.arduino_connected:
-                serialWrite("PLAYBACK_DATA")
-                
-        except Exception as e:
-            log_error(f"Error sending playback data: {e}")
-
+        # Update button appearance
+        loop_button = getattr(self.ids, 'loop_button', None)
+        if loop_button:
+            if self.loop_enabled:
+                loop_button.background_color = (0.2, 0.8, 0.2, 1)  # Green
+            else:
+                loop_button.background_color = (0.6, 0.6, 0.6, 1)  # Gray
+            
     # ---------------------------------------------------------------- Speed Control
     def set_playback_speed(self, speed: float):
         """Set the playback speed multiplier."""
