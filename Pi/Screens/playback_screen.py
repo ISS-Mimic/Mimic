@@ -68,13 +68,10 @@ class Playback_Screen(MimicBase):
                 if arduino_count_text and arduino_count_text.isdigit():
                     arduino_count = int(arduino_count_text)
                     self.arduino_connected = arduino_count > 0
-                    #print(f"Arduino count from label: {arduino_count}")
                 else:
                     self.arduino_connected = False
-                    #print("Arduino count label is empty or not a number")
             else:
                 self.arduino_connected = False
-                #print("No arduino_count label found")
                 
         except Exception as e:
             log_error(f"Error checking Arduino connection: {e}")
@@ -119,7 +116,7 @@ class Playback_Screen(MimicBase):
                 usb_files = [f"{d} (USB)" for d in sorted(drives)]
                 
                 # Add built-in demos
-                builtin_demos = ["HTV Demo", "OFT-2 Demo", "Standard Demo"]
+                builtin_demos = ["HTV", "OFT2", "Disco"]
                 
                 dropdown.values = usb_files + builtin_demos
                 
@@ -146,19 +143,20 @@ class Playback_Screen(MimicBase):
     def _load_usb_file(self, drive_name: str):
         """Load playback data from USB drive."""
         try:
-            # Look for common data file formats
+            # Look for data folders (not CSV files anymore)
             usb_path = Path(f"/media/pi/{drive_name}")
             
-            # Find data files (you can customize this based on your format)
-            data_files = list(usb_path.glob("*.csv")) + list(usb_path.glob("*.json"))
+            # Find data folders (like HTV, OFT2, etc.)
+            data_folders = [d.name for d in usb_path.iterdir() if d.is_dir()]
             
-            if not data_files:
-                self._show_error("No data files found on USB drive")
+            if not data_folders:
+                self._show_error("No data folders found on USB drive")
                 return
                 
-            # For now, just show the first file found
-            # Later we can add file selection
-            self._load_data_file(data_files[0])
+            # For now, just show the first folder found
+            # Later we can add folder selection
+            self.current_file = f"{drive_name} (USB)"
+            log_info(f"Loaded USB data folder: {data_folders[0]}")
             
         except Exception as e:
             log_error(f"Error loading USB file: {e}")
@@ -169,40 +167,50 @@ class Playback_Screen(MimicBase):
         try:
             demo_path = Path(self.mimic_directory) / "Mimic/Pi/RecordedData"
             
-            if demo_name == "HTV Demo":
-                data_file = demo_path / "htv_data.csv"  # or whatever format you use
-            elif demo_name == "OFT-2 Demo":
-                data_file = demo_path / "oft2_data.csv"
-            elif demo_name == "Standard Demo":
-                data_file = demo_path / "standard_data.csv"
+            if demo_name == "HTV":
+                data_folder = demo_path / "HTV"
+            elif demo_name == "OFT2":
+                data_folder = demo_path / "OFT2"
+            elif demo_name == "Disco":
+                data_folder = demo_path / "Disco"
             else:
                 self._show_error(f"Unknown demo: {demo_name}")
                 return
                 
-            if not data_file.exists():
-                self._show_error(f"Demo file not found: {data_file}")
+            if not data_folder.exists():
+                self._show_error(f"Demo folder not found: {data_folder}")
                 return
                 
-            self._load_data_file(data_file)
+            self.current_file = demo_name
+            log_info(f"Loaded demo folder: {data_folder}")
             
         except Exception as e:
             log_error(f"Error loading demo: {e}")
             self._show_error(f"Error loading demo: {e}")
 
-    def _load_data_file(self, file_path: Path):
-        """Load and parse the actual data file."""
+    # ---------------------------------------------------------------- Disco Mode
+    def start_disco_mode(self):
+        """All-in-one disco mode: set data source, speed, and auto-start."""
         try:
-            # This is where you'd implement your data loading logic
-            # For now, just set the filename
-            self.current_file = file_path.name
-            log_info(f"Loaded data file: {file_path}")
+            # Set data source to Disco
+            self.current_file = "Disco"
             
-            # TODO: Parse the actual data file and store in self._playback_data
-            # This will depend on your data format (CSV, JSON, etc.)
+            # Set playback speed to 1x
+            self.playback_speed = 1.0
+            
+            # Update the speed dropdown to show 1x
+            speed_dropdown = getattr(self.ids, 'speed_dropdown', None)
+            if speed_dropdown:
+                speed_dropdown.text = '1x'
+            
+            log_info("Disco mode activated: Disco data at 1x speed")
+            
+            # Auto-start the playback
+            self.start_playback()
             
         except Exception as e:
-            log_error(f"Error loading data file: {e}")
-            self._show_error(f"Error loading data file: {e}")
+            log_error(f"Error starting disco mode: {e}")
+            self._show_error(f"Error starting disco mode: {e}")
 
     # ---------------------------------------------------------------- Playback Control
     def start_playback(self):
@@ -227,7 +235,7 @@ class Playback_Screen(MimicBase):
                 data_folder = f"/media/pi/{drive_name}"
             else:
                 # Built-in demo
-                demo_name = self.current_file.replace(" Demo", "").lower()
+                demo_name = self.current_file
                 data_folder = str(Path(self.mimic_directory) / "Mimic/Pi/RecordedData" / demo_name)
             
             # Build command with loop option
@@ -303,19 +311,26 @@ class Playback_Screen(MimicBase):
                 loop_button.background_color = (0.6, 0.6, 0.6, 1)  # Gray
             
     # ---------------------------------------------------------------- Speed Control
-    def set_playback_speed(self, speed: float):
-        """Set the playback speed multiplier."""
-        if speed <= 0:
-            return
+    def set_playback_speed(self, speed_str: str):
+        """Set the playback speed multiplier from dropdown text."""
+        try:
+            # Extract numeric value from "10x", "20x", etc.
+            speed_value = float(speed_str.replace('x', ''))
             
-        self.playback_speed = speed
-        
-        # If currently playing, restart timer with new speed
-        if self.is_playing:
-            self._stop_playback_timer()
-            self._start_playback_timer()
+            if speed_value <= 0:
+                return
+                
+            self.playback_speed = speed_value
             
-        log_info(f"Playback speed set to {speed}x")
+            # If currently playing, restart timer with new speed
+            if self.is_playing:
+                self._stop_playback_timer()
+                self._start_playback_timer()
+                
+            log_info(f"Playback speed set to {speed_value}x")
+            
+        except ValueError:
+            log_error(f"Invalid speed format: {speed_str}")
 
     # ---------------------------------------------------------------- Error Handling
     def _show_error(self, message: str):
