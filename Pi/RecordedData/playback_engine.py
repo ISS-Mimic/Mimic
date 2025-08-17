@@ -51,9 +51,9 @@ class PlaybackEngine:
         self.db_path = self._get_db_path()
         print(f"Using database: {self.db_path}")
         
-        # Data storage
-        self.telemetry_data: Dict[int, List[Tuple[float, float]]] = {}
-        self.current_indices: Dict[int, int] = {}
+        # Data storage - Updated for string IDs
+        self.telemetry_data: Dict[str, List[Tuple[float, float]]] = {}
+        self.current_indices: Dict[str, int] = {}
         self.start_time: Optional[float] = None
         
         # Signal handling for clean shutdown
@@ -138,13 +138,16 @@ class PlaybackEngine:
             traceback.print_exc()
             return False
     
-    def _extract_telemetry_id(self, filename: str) -> Optional[int]:
+    # ---------------------------------------------------------------- Telemetry ID extraction - Updated for strings
+    def _extract_telemetry_id(self, filename: str) -> Optional[str]:
         """Extract telemetry ID from filename."""
         try:
-            # Remove .txt extension and convert to int
-            telemetry_id = int(filename.replace('.txt', ''))
+            # Remove .txt extension and return the alphanumeric ID
+            telemetry_id = filename.replace('.txt', '')
+            print(f"Extracted telemetry ID: {telemetry_id}")
             return telemetry_id
-        except ValueError:
+        except Exception as e:
+            print(f"ERROR extracting telemetry ID from {filename}: {e}")
             return None
     
     def _load_telemetry_file(self, file_path: Path) -> List[Tuple[float, float]]:
@@ -270,7 +273,8 @@ class PlaybackEngine:
             traceback.print_exc()
             self.running = False
     
-    def _update_telemetry_stream(self, telemetry_id: int, data: List[Tuple[float, float]], 
+    # ---------------------------------------------------------------- Type hints updated
+    def _update_telemetry_stream(self, telemetry_id: str, data: List[Tuple[float, float]], 
                                 target_timestamp: float) -> bool:
         """Update a single telemetry stream."""
         try:
@@ -296,18 +300,20 @@ class PlaybackEngine:
             print(f"ERROR: Error updating telemetry stream {telemetry_id}: {e}")
             return True  # Mark as complete on error
     
-    def _send_telemetry_value(self, telemetry_id: int, value: float):
+    # ---------------------------------------------------------------- Database update - Updated for string IDs
+    def _send_telemetry_value(self, telemetry_id: str, value: float):
         """Send a telemetry value to the database."""
         try:
             # For testing, just print the values instead of writing to database
             print(f"TELEMETRY: ID={telemetry_id}, Value={value}")
             
             # Uncomment this when you want to actually write to database
+            # The database expects: UPDATE telemetry SET Value = ?, Timestamp = ? WHERE ID = ?
             # with sqlite3.connect(self.db_path) as conn:
             #     cursor = conn.cursor()
             #     cursor.execute(
-            #         "UPDATE telemetry SET Value = ?, Timestamp = ? WHERE id = ?",
-            #         (value, datetime.now().isoformat(), telemetry_id)
+            #         "UPDATE telemetry SET Value = ?, Timestamp = ? WHERE ID = ?",
+            #         (str(value), datetime.now().isoformat(), telemetry_id)
             #     )
             #     conn.commit()
                 
