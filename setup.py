@@ -18,6 +18,8 @@ import subprocess
 import argparse
 import shutil
 from pathlib import Path
+import time
+import shlex
 
 # ANSI escape codes for some colors
 RED = '\033[91m'
@@ -98,6 +100,29 @@ print("Deleting 3D print folders to free up space")
 os.system('rm -rf 3D_Printing*')
 os.system('rm -rf Blender')
 
+def _pids(cmd):
+    try:
+        out = subprocess.check_output(shlex.split(cmd), stderr=subprocess.DEVNULL).decode().strip()
+        return [int(x) for x in out.split() if x.strip().isdigit()]
+    except subprocess.CalledProcessError:
+        return []
+
+
+def wait_for_apt_locks(timeout=1800, poll=3):
+    """Wait until apt/dpkg locks are free (up to timeout seconds)."""
+    start = time.time()
+    while True:
+        # Any other apt/dpkg/unattended-upgrades processes?
+        others = set(_pids("pgrep -x apt-get") + _pids("pgrep -x apt") +
+                     _pids("pgrep -x dpkg") + _pids("pgrep -x unattended-upgrade") +
+                     _pids("pgrep -x unattended-upgrades"))
+        if not others:
+            return True
+        if time.time() - start > timeout:
+            print(f"{YELLOW}Timed out waiting for apt/dpkg locks. PIDs: {sorted(others)}{RESET}")
+            return False
+        time.sleep(poll)
+
 
 def run_command(cmd: list[str] | str, env: dict | None = None, check: bool = True) -> int:
     """Run a shell command, stream output live, and return exit code.
@@ -128,13 +153,13 @@ def run_command(cmd: list[str] | str, env: dict | None = None, check: bool = Tru
 
 
 def apt(subcmd_and_args: list[str]) -> int:
-    """Run apt-get with non-interactive, safe defaults everywhere."""
+    if not wait_for_apt_locks():
+        # Last resort: try to proceed; apt will still fail cleanly if locked.
+        print(f"{YELLOW}Proceeding despite potential locks...{RESET}")
     base = [
-        "sudo",
-        "env",
+        "sudo", "env",
         *(f"{k}={v}" for k, v in APT_ENV.items()),
-        "apt-get",
-        "-yq",  # assume-yes + quiet
+        "apt-get", "-yq",
         *DPKG_FORCE,
     ]
     return run_command(base + subcmd_and_args)
