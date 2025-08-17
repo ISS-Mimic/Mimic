@@ -55,12 +55,15 @@ class PlaybackEngine:
         self.current_indices: Dict[str, int] = {}
         self.start_time: Optional[float] = None
         
+        # Initialize update counter
+        self._update_count = 0
+        
         # Signal handling for clean shutdown
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
         
         print("PlaybackEngine ready")
-        
+    
     def _get_db_path(self) -> str:
         """Get the telemetry database path."""
         # Try /dev/shm first (Linux), then fallback to local
@@ -181,6 +184,18 @@ class PlaybackEngine:
         
         try:
             print(f"Starting playback at {self.playback_speed}x speed")
+            
+            # Test database connection first
+            print("Testing database connection...")
+            try:
+                with sqlite3.connect(self.db_path) as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT COUNT(*) FROM telemetry")
+                    count = cursor.fetchone()[0]
+                    print(f"Database connected successfully. Found {count} telemetry records.")
+            except Exception as e:
+                print(f"WARNING: Database connection test failed: {e}")
+            
             self.running = True
             self.start_time = time.time()
             
@@ -223,6 +238,15 @@ class PlaybackEngine:
                 loop_count += 1
                 if loop_count % 1000 == 0:
                     print(f"Playback: {elapsed_real_time:.1f}s elapsed, {target_timestamp:.1f}s target")
+                    
+                    # Show some sample telemetry values being sent
+                    if self.telemetry_data:
+                        sample_id = list(self.telemetry_data.keys())[0]
+                        sample_data = self.telemetry_data[sample_id]
+                        current_idx = self.current_indices[sample_id]
+                        if current_idx < len(sample_data):
+                            timestamp, value = sample_data[current_idx]
+                            print(f"Sample: {sample_id} = {value:.2f}")
                 
                 # Update all telemetry streams
                 all_complete = True
@@ -307,12 +331,10 @@ class PlaybackEngine:
                 )
                 conn.commit()
                 
-            # Only print every 100th update to reduce spam
-            if hasattr(self, '_update_count'):
-                self._update_count += 1
-            else:
-                self._update_count = 0
+            # Increment update counter
+            self._update_count += 1
                 
+            # Print every 100th update to reduce spam
             if self._update_count % 100 == 0:
                 print(f"DB Update: {self._update_count} values sent to database")
                 
