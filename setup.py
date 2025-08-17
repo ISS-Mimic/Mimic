@@ -43,6 +43,10 @@ APT_ENV = {
     "APT_LISTCHANGES_FRONTEND": "none",      # no changelog pager
 }
 
+# How long to wait for locks before we start killing (seconds)
+LOCK_WAIT_SECONDS = 300  # 5 minutes
+LOCK_POLL_SECONDS = 3
+
 # ─────────────────────────── Utilities ────────────────────────────
 def run_command(cmd, env_extra=None, check=True):
     """
@@ -71,16 +75,20 @@ def run_command(cmd, env_extra=None, check=True):
         bufsize=1,
         universal_newlines=True,
     )
+    buf = []
     try:
         for line in proc.stdout:
-            # Stream output as it arrives
+            buf.append(line)
             print(line.rstrip())
     finally:
         proc.wait()
 
     if check and proc.returncode != 0:
         print(f"{RED}Command failed with exit code {proc.returncode}{RESET}")
-        raise subprocess.CalledProcessError(proc.returncode, pretty)
+        # Attach combined output for higher-level handlers if needed
+        e = subprocess.CalledProcessError(proc.returncode, pretty)
+        e.output = "".join(buf)
+        raise e
 
     return proc.returncode
 
@@ -93,45 +101,89 @@ def _pids(cmd):
         return []
 
 
-def wait_for_apt_locks(timeout=1800, poll=3):
+def list_apt_like_pids():
+    """Return set of PIDs of apt/dpkg/unattended-upgrades processes."""
+    return set(_pids("pgrep -x apt-get") + _pids("pgrep -x apt") +
+               _pids("pgrep -x dpkg") + _pids("pgrep -x unattended-upgrade") +
+               _pids("pgrep -x unattended-upgrades"))
+
+
+def kill_pids(pids):
+    """TERM then KILL stubborn PIDs."""
+    if not pids:
+        return
+    print(f"{YELLOW}Attempting to terminate lingering apt/dpkg PIDs: {sorted(pids)}{RESET}")
+    try:
+        run_command(["sudo", "kill", "-TERM"] + [str(p) for p in pids], check=False)
+    except Exception:
+        pass
+    time.sleep(5)
+    still = [p for p in pids if subprocess.call(["ps", "-p", str(p)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0]
+    if still:
+        print(f"{YELLOW}Forcing kill of PIDs: {sorted(still)}{RESET}")
+        try:
+            run_command(["sudo", "kill", "-9"] + [str(p) for p in still], check=False)
+        except Exception:
+            pass
+
+
+def repair_dpkg():
+    """Try to repair interrupted dpkg/apt state."""
+    print(f"{YELLOW}Attempting to repair dpkg/apt state...{RESET}")
+    run_command("sudo dpkg --configure -a", check=False)
+    run_command("sudo apt-get -y -f install", env_extra=APT_ENV, check=False)
+
+
+def wait_for_apt_locks_or_kill(timeout=LOCK_WAIT_SECONDS, poll=LOCK_POLL_SECONDS):
     """
-    Wait until apt/dpkg-related processes are gone (up to timeout seconds).
-    Returns True on success, False on timeout (caller may proceed and let apt fail).
+    Wait until apt/dpkg-related processes are gone.
+    If timeout expires, try to kill them and return.
     """
     start = time.time()
     while True:
-        # Look for apt/dpkg/unattended-upgrades processes
-        others = set(_pids("pgrep -x apt-get") + _pids("pgrep -x apt") +
-                     _pids("pgrep -x dpkg") + _pids("pgrep -x unattended-upgrade") +
-                     _pids("pgrep -x unattended-upgrades"))
+        others = list_apt_like_pids()
         if not others:
-            return True
+            return
         waited = int(time.time() - start)
-        if waited % 15 == 0:  # occasional status
+        if waited % 15 == 0:
             print(f"{YELLOW}Waiting for apt/dpkg locks... PIDs: {sorted(others)}  ({waited}s){RESET}")
-        if time.time() - start > timeout:
-            print(f"{YELLOW}Timed out waiting for apt/dpkg locks. PIDs still present: {sorted(others)}{RESET}")
-            return False
+        if waited >= timeout:
+            # Kill and try to continue
+            kill_pids(others)
+            return
         time.sleep(poll)
 
 
-def apt(args_list):
+def apt(args_list, retries=1):
     """
     Run apt-get with non-interactive flags and dpkg config-file policy.
-    Example: apt(['update']), apt(['upgrade']), apt(['install', 'pkg1', 'pkg2'])
+    Will auto-repair and retry once if dpkg was interrupted.
     """
-    # Ensure no lock races
-    wait_for_apt_locks()
+    if isinstance(args_list, str):
+        args_list = [args_list]
+
+    # Ensure no lock races (and kill if they overstay)
+    wait_for_apt_locks_or_kill()
 
     base = [
         "sudo", "env",
         *(f"{k}={v}" for k, v in APT_ENV.items()),
         "apt-get", "-yq",
         *DPKG_FORCE,
+        *args_list
     ]
-    if isinstance(args_list, str):
-        args_list = [args_list]
-    return run_command(base + args_list)
+
+    try:
+        return run_command(base)
+    except subprocess.CalledProcessError as e:
+        msg = (getattr(e, "output", "") or "")
+        # If dpkg was interrupted, attempt repair and one retry
+        if retries > 0 and ("dpkg was interrupted" in msg or "dpkg --configure -a" in msg or e.returncode == 100):
+            repair_dpkg()
+            wait_for_apt_locks_or_kill()
+            return apt(args_list, retries=retries - 1)
+        # Otherwise bubble up
+        raise
 
 
 def pip_install(packages: str):
@@ -142,19 +194,16 @@ def pip_install(packages: str):
     try:
         run_command(f"python3 -m pip install --upgrade pip")
     except Exception:
-        # It's okay if pip upgrade fails (older images)
         pass
 
     try:
-        run_command(f"python3 -m pip install --break-system-packages {packages}")
+        run_command(f"python3 -m pip install --no-input --disable-pip-version-check --break-system-packages {packages}")
     except subprocess.CalledProcessError:
-        run_command(f"python3 -m pip install {packages}")
+        run_command(f"python3 -m pip install --no-input --disable-pip-version-check {packages}")
 
 
 def run_install(packages: str, method: str):
-    """
-    method: 'apt' or 'pip'
-    """
+    """method: 'apt' or 'pip'"""
     if method == "apt":
         apt(["install"] + packages.split())
     elif method == "pip":
@@ -212,7 +261,7 @@ def main():
     # Determine the calling user (works under sudo too)
     username = os.environ.get("SUDO_USER") or getuser()
 
-    # ── APT: update/upgrade/autoremove (non-interactive & lock-safe) ──
+    # ── APT: update/upgrade/autoremove (non-interactive, lock-safe, auto-repair) ──
     apt(["update"])
     apt(["upgrade"])
     apt(["autoremove"])
@@ -230,7 +279,6 @@ def main():
     run_install("python3-autobahn", "apt")  # websocket deps (TDRS status)
     run_install("python3-ephem", "apt")     # pyephem
     if bullseye:
-        # Older image: pytz via pip (system pip may be older)
         run_install("pytz", "pip")
     else:
         run_install("python3-pytzdata", "apt")
@@ -246,7 +294,6 @@ def main():
     try:
         run_command("python3 -c 'import kivy; print(kivy.__version__)'")
     except Exception:
-        # Continue even if import prints warnings
         pass
 
     print("Replacing Kivy config file")
@@ -284,7 +331,6 @@ if __name__ == '__main__':
     try:
         main()
     except subprocess.CalledProcessError as e:
-        # Fail fast with a clear message
         print(f"{RED}Setup failed: {e}{RESET}")
         sys.exit(e.returncode)
     except KeyboardInterrupt:
