@@ -1,450 +1,344 @@
 #!/usr/bin/env python3
 """
-ISS Telemetry Playback Engine
+ISS Telemetry Playback Engine (Python, C++-equivalent)
 
-Reads recorded telemetry data from text files and feeds it into the database
-at controlled playback speeds. Each telemetry ID has its own file with
-timestamp and value columns.
+Replays recorded telemetry from a folder of text files into an SQLite database,
+mirroring the behavior of `mimic-fakedata.cpp`:
 
-Usage:
-    python playback_engine.py <data_folder> <playback_speed> [--loop]
-    
+- Anchors playback time to the **earliest** timestamp across all streams.
+- Merges all samples into a single time-ordered stream (like a C++ multimap).
+- Updates `telemetry.Value` by `ID` as time advances.
+- Paces loop at ~100 ms with an accelerated real-time factor.
+
+Usage (match your current workflow):
+    python playback_engine.py <data_folder> [playback_speed] [--loop] [--db-path PATH] [--discover]
+
 Examples:
-    python playback_engine.py HTV 10          # Play HTV data at 10x speed
-    python playback_engine.py OFT2 60         # Play OFT2 data at 60x speed
-    python playback_engine.py HTV 20 --loop   # Loop HTV data at 20x speed
+    python playback_engine.py HTV 10
+    python playback_engine.py OFT2 60 --loop
+    python playback_engine.py ./data 60 --db-path /dev/shm/iss_telemetry.db
+
+Notes:
+- By default we use the same **hard-coded** telemetry ID list as the C++ tool.
+  If your folder has a different set of files and you want to include every
+  `*.txt` present, pass `--discover` to scan dynamically.
+- File format: each `<ID>.txt` contains lines with `timestamp value` (space-separated).
+  Timestamps are **hours** (floats allowed).
 """
 
 import argparse
-import os
+import heapq
+import signal
+import sqlite3
 import sys
 import time
-import sqlite3
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional
-from datetime import datetime, timedelta
-import signal
-import threading
+from typing import Dict, List, Optional, Tuple
 
-# Add the parent directory to the path so we can import utils
-sys.path.append(str(Path(__file__).parent.parent))
-try:
-    from utils.logger import log_info, log_error
-except ImportError:
-    # Fallback if utils.logger not available
-    def log_info(msg): print(f"INFO: {msg}")
-    def log_error(msg): print(f"ERROR: {msg}")
 
-class PlaybackEngine:
-    """Engine for playing back recorded telemetry data."""
-    
-    def __init__(self, data_folder: str, playback_speed: float, loop: bool = False):
-        print(f"Initializing PlaybackEngine: {data_folder} at {playback_speed}x speed")
-        
-        self.data_folder = Path(data_folder)
+# --- IDs used by the original C++ playback tool ---
+HARD_CODED_IDS = [
+    'AIRLOCK000001', 'AIRLOCK000002', 'AIRLOCK000003', 'AIRLOCK000004', 'AIRLOCK000005', 'AIRLOCK000006',
+    'AIRLOCK000007', 'AIRLOCK000008', 'AIRLOCK000009', 'AIRLOCK000010', 'AIRLOCK000011', 'AIRLOCK000012',
+    'AIRLOCK000013', 'AIRLOCK000014', 'AIRLOCK000015', 'AIRLOCK000016', 'AIRLOCK000017', 'AIRLOCK000018',
+    'AIRLOCK000049', 'AIRLOCK000054', 'AIRLOCK000055', 'AIRLOCK000056', 'AIRLOCK000057', 'NODE2000001',
+    'NODE2000002', 'NODE2000006', 'NODE2000007', 'NODE3000004', 'NODE3000005', 'NODE3000008',
+    'NODE3000009', 'NODE3000011', 'NODE3000012', 'NODE3000013', 'NODE3000017', 'NODE3000019',
+    'P1000001', 'P1000002', 'P1000003', 'P1000004', 'P1000005', 'P4000001',
+    'P4000002', 'P4000004', 'P4000005', 'P4000007', 'P4000008', 'P6000001',
+    'P6000002', 'P6000004', 'P6000005', 'P6000007', 'P6000008', 'S1000001',
+    'S1000002', 'S1000003', 'S1000007', 'S1000008', 'S4000001', 'S4000002',
+    'S4000004', 'S4000005', 'S4000007', 'S4000008', 'S6000001', 'S6000002',
+    'S6000004', 'S6000005', 'S6000007', 'S6000008', 'USLAB000006', 'USLAB000007',
+    'USLAB000008', 'USLAB000009', 'USLAB000010', 'USLAB000016', 'USLAB000018', 'USLAB000019',
+    'USLAB000020', 'USLAB000021', 'USLAB000022', 'USLAB000023', 'USLAB000024', 'USLAB000025',
+    'USLAB000026', 'USLAB000027', 'USLAB000028', 'USLAB000029', 'USLAB000030', 'USLAB000031',
+    'USLAB000032', 'USLAB000033', 'USLAB000034', 'USLAB000035', 'USLAB000036', 'USLAB000037',
+    'USLAB000038', 'USLAB000040', 'USLAB000043', 'USLAB000044', 'USLAB000045', 'USLAB000046',
+    'USLAB000047', 'USLAB000057', 'USLAB000058', 'USLAB000059', 'USLAB000060', 'USLAB000061',
+    'USLAB000062', 'USLAB000063', 'USLAB000064', 'USLAB000066', 'USLAB000067', 'USLAB000068',
+    'USLAB000069', 'USLAB000070', 'USLAB000071', 'USLAB000072', 'USLAB000073', 'USLAB000074',
+    'USLAB000075', 'USLAB000076', 'USLAB000077', 'USLAB000079', 'USLAB000080', 'USLAB000081',
+    'USLAB000082', 'USLAB000083', 'USLAB000084', 'USLAB000085', 'USLAB000086', 'USLAB000087',
+    'USLAB000089', 'USLAB000090', 'USLAB000091', 'USLAB000092', 'USLAB000093', 'USLAB000094',
+    'USLAB000095', 'USLAB000096', 'USLAB000097', 'USLAB000098', 'USLAB000099', 'USLAB000100',
+    'USLAB000101', 'USLAB000102', 'USLAB000103', 'USLAB000104', 'USLAB000105', 'USLAB000106',
+    'USLAB000107', 'USLAB000108', 'USLAB000109', 'USLAB000111', 'USLAB000112', 'USLAB000113',
+    'USLAB000114', 'USLAB000115', 'USLAB000116', 'USLAB000117', 'USLAB000118', 'USLAB000119',
+    'USLAB000121', 'USLAB000122', 'USLAB000123', 'USLAB000124', 'USLAB000125', 'USLAB000126',
+    'USLAB000127', 'USLAB000128', 'USLAB000129', 'USLAB000130', 'USLAB000131', 'USLAB000132',
+    'USLAB000134', 'USLAB000137', 'USLAB000138', 'USLAB000139', 'USLAB000140', 'USLAB000141',
+    'USLAB000146', 'USLAB000147', 'USLAB000148', 'USLAB000149', 'USLAB000150', 'USLAB000151',
+    'USLAB000152', 'USLAB000153', 'USLAB000154', 'USLAB000155', 'USLAB000156', 'USLAB000157',
+    'USLAB000158', 'USLAB000159', 'USLAB000160', 'USLAB000161', 'USLAB000162', 'USLAB000163',
+    'USLAB000164', 'USLAB000165', 'USLAB000166', 'USLAB000167', 'USLAB000168', 'USLAB000169',
+    'USLAB000170', 'USLAB000171', 'USLAB000172', 'USLAB000173', 'USLAB000174', 'USLAB000175',
+    'USLAB000176', 'USLAB000177', 'USLAB000178', 'USLAB000179', 'USLAB000180', 'USLAB000181',
+    'USLAB000182', 'USLAB000183', 'USLAB000184', 'USLAB000185', 'USLAB000186', 'USLAB000187',
+    'USLAB000188', 'USLAB000189', 'USLAB000190', 'USLAB000192', 'USLAB000193', 'USLAB000194',
+    'USLAB000195', 'USLAB000196', 'USLAB000197', 'USLAB000198', 'USLAB000199', 'CSASPDM0001',
+    'CSASPDM0002', 'CSASPDM0003', 'CSASPDM0004', 'CSASPDM0005', 'CSASPDM0006',
+    'CSASPDM0007', 'CSASPDM0008', 'CSASPDM0009', 'CSASPDM0010', 'CSASPDM0011', 'CSASPDM0012',
+    'CSASPDM0013', 'CSASPDM0014', 'CSASPDM0015', 'CSASPDM0016', 'CSASPDM0017', 'CSASPDM0018',
+    'CSASPDM0019', 'CSASPDM0020', 'CSASPDM0021', 'CSASPDM0022', 'CSAMBS00001', 'CSAMBS00002',
+    'CSAMBA00003', 'CSAMBA00004'
+]
+
+
+class Options:
+    def __init__(self, data_folder: Path, playback_speed: float = 60.0, loop: bool = False,
+                 db_path: Optional[Path] = None, discover: bool = False) -> None:
+        self.data_folder = data_folder
         self.playback_speed = playback_speed
         self.loop = loop
-        self.running = False
-        self.paused = False
-        
-        # Database path
-        self.db_path = self._get_db_path()
-        
-        # Data storage
+        self.db_path = db_path
+        self.discover = discover
+
+
+class PlaybackEngine:
+    """Replay recorded telemetry into SQLite, matching the C++ semantics."""
+
+    def __init__(self, opts: Options) -> None:
+        self.opts = opts
+        self.running: bool = False
+        self.paused: bool = False
+
+        # Data: per-ID time series and a merged event heap
         self.telemetry_data: Dict[str, List[Tuple[float, float]]] = {}
-        self.current_indices: Dict[str, int] = {}
-        self.start_time: Optional[float] = None
-        
-        # Initialize update counter
-        self._update_count = 0
-        
-        # Signal handling for clean shutdown
-        signal.signal(signal.SIGINT, self._signal_handler)
-        signal.signal(signal.SIGTERM, self._signal_handler)
-        
-        print("PlaybackEngine ready")
-    
-    def _get_db_path(self) -> str:
-        """Get the telemetry database path."""
-        # Try /dev/shm first (Linux), then fallback to local
-        if Path("/dev/shm").exists():
-            return "/dev/shm/iss_telemetry.db"
-        else:
-            # Windows fallback
-            data_dir = Path.home() / ".mimic_data"
-            data_dir.mkdir(exist_ok=True)
-            return str(data_dir / "iss_telemetry.db")
-    
-    def _signal_handler(self, signum, frame):
-        """Handle shutdown signals gracefully."""
-        print(f"Received signal {signum}, shutting down...")
-        self.stop()
-        sys.exit(0)
-    
+        self.events: List[Tuple[float, int, str, float]] = []  # (time, seq, id, value)
+        self.data_epoch: Optional[float] = None
+
+        # For diagnostics
+        self._update_count: int = 0
+
+    # ------------- Public API -------------
+
     def load_data(self) -> bool:
-        """Load all telemetry data from the specified folder."""
-        try:
-            if not self.data_folder.exists():
-                print(f"ERROR: Data folder not found: {self.data_folder}")
-                return False
-            
-            print(f"Loading data from: {self.data_folder}")
-            
-            # Find all telemetry files
-            telemetry_files = list(self.data_folder.glob("*.txt"))
-            if not telemetry_files:
-                print(f"ERROR: No telemetry files found in {self.data_folder}")
-                return False
-            
-            # Load each telemetry file
-            for file_path in telemetry_files:
-                try:
-                    # Extract telemetry ID from filename
-                    telemetry_id = self._extract_telemetry_id(file_path.name)
-                    if telemetry_id is None:
-                        print(f"ERROR: Could not extract telemetry ID from filename: {file_path.name}")
-                        continue
-                    
-                    # Load the data
-                    data = self._load_telemetry_file(file_path)
-                    if data:
-                        self.telemetry_data[telemetry_id] = data
-                        self.current_indices[telemetry_id] = 0
-                    else:
-                        print(f"WARNING: No data loaded from {file_path.name}")
-                    
-                except Exception as e:
-                    print(f"ERROR: Error loading file {file_path}: {e}")
-                    continue
-            
-            if not self.telemetry_data:
-                print("ERROR: No valid telemetry data loaded")
-                return False
-            
-            print(f"Loaded {len(self.telemetry_data)} telemetry streams")
-            return True
-            
-        except Exception as e:
-            print(f"ERROR: Error loading data: {e}")
-            import traceback
-            traceback.print_exc()
+        """Load telemetry from <data_folder> and prepare the merged schedule."""
+        folder = self.opts.data_folder
+        if not folder.exists() or not folder.is_dir():
+            print(f"ERROR: Data folder not found: {folder}");
             return False
-    
-    # ---------------------------------------------------------------- Telemetry ID extraction - Updated for strings
-    def _extract_telemetry_id(self, filename: str) -> Optional[str]:
-        """Extract telemetry ID from filename."""
+
+        ids: List[str]
+        if self.opts.discover:
+            ids = sorted([p.stem for p in folder.glob("*.txt")])
+            if not ids:
+                print(f"ERROR: No .txt files found in {folder} (discover mode).");
+                return False
+        else:
+            # Only include files that exist in the folder, preserving C++ list order
+            ids = [i for i in HARD_CODED_IDS if (folder / f"{i}.txt").exists()]
+            if not ids:
+                print("ERROR: None of the hard-coded C++ IDs were found in the folder.")
+                return False
+
+        self.telemetry_data.clear()
+        total_samples = 0
+        for tid in ids:
+            series = self._load_telemetry_file(folder / f"{tid}.txt")
+            if series:
+                self.telemetry_data[tid] = series
+                total_samples += len(series)
+
+        if not self.telemetry_data:
+            print("ERROR: No valid telemetry data parsed.")
+            return False
+
+        # Compute earliest timestamp across all streams
+        firsts = [series[0][0] for series in self.telemetry_data.values() if series]
+        if not firsts:
+            print("ERROR: No timestamps found in any telemetry files.")
+            return False
+        self.data_epoch = min(firsts)
+
+        # Build a single min-heap of (timestamp, tie_seq, id, value).
+        # Tie-break with insertion sequence that mimics the C++ behavior:
+        # the C++ inserts all samples of the first ID, then the next, ...
+        # so equal-time samples from earlier IDs should come out first.
+        self.events.clear()
+        seq = 0
+        for tid in ids:
+            series = self.telemetry_data.get(tid, [])
+            for (t, v) in series:
+                self.events.append((t, seq, tid, v))
+                seq += 1
+        heapq.heapify(self.events)
+
+        print(f"Loaded {len(self.telemetry_data)} streams, {total_samples} samples; earliest t={self.data_epoch} h")
+        return True
+
+    def start(self) -> bool:
+        if not self.events or self.data_epoch is None:
+            print("ERROR: Data not loaded. Call load_data() first.")
+            return False
+
+        print(f"Starting playback at {self.opts.playback_speed}x speed; loop={self.opts.loop}; DB={self._get_db_path()}")        
+        self.running = True
+        self.paused = False
+
         try:
-            # Remove .txt extension and return the alphanumeric ID
-            telemetry_id = filename.replace('.txt', '')
-            return telemetry_id
-        except Exception as e:
-            print(f"ERROR extracting telemetry ID from {filename}: {e}")
-            return None
-    
+            # Run in the current thread (simpler for a CLI tool).
+            self._playback_loop()
+            return True
+        finally:
+            self.running = False
+
+    def stop(self) -> None:
+        self.running = False
+
+    def pause(self) -> None:
+        self.paused = True
+
+    def resume(self) -> None:
+        self.paused = False
+
+    # ------------- Internals -------------
+
     def _load_telemetry_file(self, file_path: Path) -> List[Tuple[float, float]]:
-        """Load telemetry data from a single file."""
-        data = []
-        
+        """Load a single file. Do NOT normalize timestamps."""
+        out: List[Tuple[float, float]] = []
         try:
-            with open(file_path, 'r') as f:
-                for line_num, line in enumerate(f, 1):
-                    line = line.strip()
+            with file_path.open("r", encoding="utf-8", errors="replace") as f:
+                for line_num, raw in enumerate(f, 1):
+                    line = raw.strip()
                     if not line or line.startswith('#'):
                         continue
-                    
-                    try:
-                        # Parse timestamp and value
-                        parts = line.split()
-                        if len(parts) >= 2:
-                            timestamp = float(parts[0])
-                            value = float(parts[1])
-                            data.append((timestamp, value))
-                        else:
-                            print(f"WARNING: Invalid line format at line {line_num}: {line}")
-                            
-                    except ValueError as e:
-                        print(f"WARNING: Error parsing line {line_num}: {line} - {e}")
+                    parts = line.split()
+                    if len(parts) < 2:
+                        print(f"WARNING: Bad line ({file_path.name}:{line_num}): {line}")
                         continue
-            
-            if data:
-                # Sort by timestamp
-                data.sort(key=lambda x: x[0])
-                
-                # Normalize timestamps to start at 0
-                first_timestamp = data[0][0]
-                normalized_data = []
-                for timestamp, value in data:
-                    normalized_timestamp = timestamp - first_timestamp
-                    normalized_data.append((normalized_timestamp, value))
-                
-                print(f"DEBUG: {file_path.name} - original range: {first_timestamp:.6f} to {data[-1][0]:.6f} hours")
-                print(f"DEBUG: {file_path.name} - normalized range: 0.000000 to {normalized_data[-1][0]:.6f} hours")
-                
-                return normalized_data
-            else:
-                return []
-            
-        except Exception as e:
-            print(f"ERROR: Error reading file {file_path}: {e}")
-            import traceback
-            traceback.print_exc()
+                    try:
+                        t = float(parts[0])  # hours
+                        v = float(parts[1])
+                    except ValueError:
+                        print(f"WARNING: Parse error ({file_path.name}:{line_num}): {line}")
+                        continue
+                    out.append((t, v))
+        except FileNotFoundError:
+            # silently skip missing, caller decides
             return []
-    
-    def start(self):
-        """Start the playback engine."""
-        if not self.telemetry_data:
-            print("ERROR: No data loaded, cannot start playback")
-            return False
-        
+        except Exception as e:
+            print(f"ERROR: Reading {file_path} failed: {e}")
+            return []
+
+        # Ensure ordering by timestamp (important for tie-seq semantics)
+        out.sort(key=lambda x: x[0])
+        return out
+
+    def _get_db_path(self) -> Path:
+        if self.opts.db_path:
+            return self.opts.db_path
+        shm = Path("/dev/shm/iss_telemetry.db")
+        if shm.exists() or shm.parent.exists():
+            return shm
+        return Path.cwd() / "iss_telemetry.db"
+
+    def _playback_loop(self) -> None:
+        # Open DB in autocommit mode to mirror C++ sqlite3_exec behavior
+        db_path = self._get_db_path()
+        conn = sqlite3.connect(str(db_path), isolation_level=None, timeout=5.0, check_same_thread=True)
         try:
-            print(f"Starting playback at {self.playback_speed}x speed")
-            
-            # Test database connection first
-            print("Testing database connection...")
+            cur = conn.cursor()
+            # Fast pragmas (safe on RAM disk; adjust if needed)
             try:
-                with sqlite3.connect(self.db_path) as conn:
-                    cursor = conn.cursor()
-                    cursor.execute("SELECT COUNT(*) FROM telemetry")
-                    count = cursor.fetchone()[0]
-                    print(f"Database connected successfully. Found {count} telemetry records.")
-                    
-                    # Test a simple update using the correct method
-                    print("Testing database write...")
-                    cursor.execute("SELECT Label FROM telemetry WHERE ID = 'S6000004'")
-                    result = cursor.fetchone()
-                    if result:
-                        label = result[0]
-                        cursor.execute("UPDATE telemetry SET Value = 'TEST456' WHERE Label = ?", (label,))
-                        conn.commit()
-                        print(f"Test update completed for Label '{label}'")
-                    else:
-                        print("Could not find S6000004 record")
-                    
-            except Exception as e:
-                print(f"WARNING: Database connection test failed: {e}")
-            
-            self.running = True
-            self.start_time = time.time()
-            
-            # Start playback thread
-            playback_thread = threading.Thread(target=self._playback_loop, daemon=True)
-            playback_thread.start()
-            
-            print("Playback started - press Ctrl+C to stop")
-            
-            # Wait for completion or interruption
-            try:
-                while self.running and playback_thread.is_alive():
+                cur.execute("PRAGMA journal_mode=MEMORY;")
+                cur.execute("PRAGMA synchronous=OFF;")
+                cur.execute("PRAGMA temp_store=MEMORY;")
+                cur.execute("PRAGMA busy_timeout=5000;")
+            except Exception:
+                pass
+
+            update_sql = "UPDATE telemetry SET Value = ? WHERE ID = ?"
+
+            # Local working heap
+            heap: List[Tuple[float, int, str, float]] = list(self.events)
+            heapq.heapify(heap)
+
+            program_epoch = time.monotonic()
+
+            while self.running:
+                if self.paused:
                     time.sleep(0.1)
-                        
-            except KeyboardInterrupt:
-                print("Playback interrupted by user")
-                self.stop()
-            
-            print("Playback engine finished")
-            return True
-            
-        except Exception as e:
-            print(f"ERROR: Error starting playback: {e}")
-            import traceback
-            traceback.print_exc()
-            return False
-    
-    def _playback_loop(self):
-        """Main playback loop."""
-        try:
-            loop_count = 0
-            while self.running and not self.paused:
-                current_time = time.time()
-                elapsed_real_time = current_time - self.start_time
-                
-                # Calculate what timestamp we should be at (in fractional hours)
-                # Convert elapsed seconds to hours, then multiply by playback speed
-                target_timestamp_hours = (elapsed_real_time * self.playback_speed) / 3600.0
-                
-                # Print status every 1000 loops (about every 10 seconds at 100Hz)
-                loop_count += 1
-                if loop_count % 1000 == 0:
-                    print(f"Playback: {elapsed_real_time:.1f}s elapsed, target={target_timestamp_hours:.6f} hours")
-                    
-                    # Show some sample telemetry values being sent
-                    if self.telemetry_data:
-                        sample_id = list(self.telemetry_data.keys())[0]
-                        sample_data = self.telemetry_data[sample_id]
-                        current_idx = self.current_indices[sample_id]
-                        if current_idx < len(sample_data):
-                            timestamp, value = sample_data[current_idx]
-                            print(f"Sample: {sample_id} = {value:.2f} (at {timestamp:.6f} hours)")
-                
-                # Update all telemetry streams
-                all_complete = True
-                for telemetry_id, data in self.telemetry_data.items():
-                    if not self._update_telemetry_stream(telemetry_id, data, target_timestamp_hours):
-                        all_complete = False
-                
-                # Check if we've reached the end
-                if all_complete:
-                    if self.loop:
-                        print("Reached end of data, looping...")
-                        self._reset_playback()
+                    continue
+
+                # Compute simulated 'now' anchored to earliest data timestamp
+                elapsed = time.monotonic() - program_epoch  # seconds
+                now_ts = self.data_epoch + (self.opts.playback_speed * elapsed) / 3600.0
+
+                # Flush all due events
+                wrote = False
+                while heap and heap[0][0] <= now_ts:
+                    t, seq, tid, val = heapq.heappop(heap)
+                    try:
+                        cur.execute(update_sql, (float(val), tid))
+                        self._update_count += 1
+                    except sqlite3.Error as e:
+                        print(f"ERROR: DB update failed for ID={tid} at t={t}: {e}");
+                    wrote = True
+
+                # Done?
+                if not heap:
+                    if self.opts.loop:
+                        # rebuild for loop
+                        heap = list(self.events)
+                        heapq.heapify(heap)
+                        program_epoch = time.monotonic()
+                        continue
                     else:
-                        print("Playback complete")
-                        self.running = False
                         break
-                
-                # Sleep for a short interval
-                time.sleep(0.01)  # 100Hz update rate
-                
-        except Exception as e:
-            print(f"ERROR: Error in playback loop: {e}")
-            import traceback
-            traceback.print_exc()
-            self.running = False
-    
-    # ---------------------------------------------------------------- Type hints updated
-    def _update_telemetry_stream(self, telemetry_id: str, data: List[Tuple[float, float]], 
-                                target_timestamp: float) -> bool:
-        """Update a single telemetry stream."""
-        try:
-            current_index = self.current_indices[telemetry_id]
-            
-            # Find the next data point to send
-            while current_index < len(data):
-                timestamp, value = data[current_index]
-                
-                if timestamp <= target_timestamp:
-                    # Send this data point
-                    self._send_telemetry_value(telemetry_id, value)
-                    current_index += 1
-                    self.current_indices[telemetry_id] = current_index
-                else:
-                    # We haven't reached this timestamp yet
-                    break
-            
-            # Return True if we've sent all data for this stream
-            return current_index >= len(data)
-            
-        except Exception as e:
-            print(f"ERROR: Error updating telemetry stream {telemetry_id}: {e}")
-            return True  # Mark as complete on error
-    
-    def _verify_database_update(self, telemetry_id: str, value: float):
-        """Verify that the database was updated correctly."""
-        try:
-            with sqlite3.connect(self.db_path) as conn:
-                cursor = conn.cursor()
-                cursor.execute(
-                    "SELECT Value, Timestamp FROM telemetry WHERE ID = ?",
-                    (telemetry_id,)
-                )
-                result = cursor.fetchone()
-                if result:
-                    db_value, db_timestamp = result
-                    print(f"DB VERIFY: ID={telemetry_id}, DB Value={db_value}, DB Timestamp={db_timestamp}")
-                else:
-                    print(f"DB VERIFY: ID={telemetry_id} not found in database!")
-                    
-        except Exception as e:
-            print(f"ERROR: Could not verify database update: {e}")
 
-    def _send_telemetry_value(self, telemetry_id: str, value: float):
-        """Send a telemetry value to the database."""
-        try:
-            print(f"DEBUG: Updating {telemetry_id} = {value}")
-            
-            # Write to database
-            with sqlite3.connect(self.db_path) as conn:
-                cursor = conn.cursor()
-                
-                # First, find the record by ID and get its Label (primary key)
-                cursor.execute("SELECT Label FROM telemetry WHERE ID = ?", (telemetry_id,))
-                result = cursor.fetchone()
-                
-                if result:
-                    label = result[0]
-                    
-                    # Update just the Value (no timestamp needed)
-                    cursor.execute(
-                        "UPDATE telemetry SET Value = ? WHERE Label = ?",
-                        (str(value), label)
-                    )
-                    
-                    rows_affected = cursor.rowcount
-                    print(f"DEBUG: Updated {telemetry_id} to {value} (affected {rows_affected} rows)")
-                    conn.commit()
-                    
-                else:
-                    print(f"ERROR: No record found with ID '{telemetry_id}'")
-                
-            # Increment update counter
-            self._update_count += 1
-                
-            # Show every update for now
-            print(f"DB Update: {self._update_count} values sent to database")
-                
-        except Exception as e:
-            print(f"ERROR: Error sending telemetry value {telemetry_id}={value}: {e}")
-            import traceback
-            traceback.print_exc()
-    
-    def _reset_playback(self):
-        """Reset playback to start for looping."""
-        print("Resetting playback to beginning...")
-        self.start_time = time.time()
-        for telemetry_id in self.current_indices:
-            self.current_indices[telemetry_id] = 0
-        print("Playback reset to beginning")
-    
-    def pause(self):
-        """Pause playback."""
-        self.paused = True
-        print("Playback paused")
-    
-    def resume(self):
-        """Resume playback."""
-        self.paused = False
-        print("Playback resumed")
-    
-    def stop(self):
-        """Stop playback."""
-        print("Stopping playback...")
-        self.running = False
-        print("Playback stopped")
+                # Match C++ pacing
+                time.sleep(0.1)
 
-def main():
-    """Main entry point."""
-    print("=== ISS Telemetry Playback Engine ===")
-    
-    parser = argparse.ArgumentParser(description='ISS Telemetry Playback Engine')
-    parser.add_argument('data_folder', help='Folder containing telemetry data files')
-    parser.add_argument('playback_speed', type=float, help='Playback speed multiplier (e.g., 10 for 10x)')
-    parser.add_argument('--loop', action='store_true', help='Loop playback when reaching end')
-    parser.add_argument('--db-path', help='Custom database path')
-    
-    args = parser.parse_args()
-    
-    # Validate arguments
-    if args.playback_speed <= 0:
-        print("ERROR: Playback speed must be positive")
-        sys.exit(1)
-    
-    # Create and run playback engine
-    engine = PlaybackEngine(args.data_folder, args.playback_speed, args.loop)
-    
-    if args.db_path:
-        engine.db_path = args.db_path
-    
-    # Load data
+            print(f"Playback complete. Total updates: {self._update_count}.")
+        finally:
+            try:
+                conn.close()
+            except Exception:
+                pass
+
+
+# ------------- CLI -------------
+
+def parse_args(argv: List[str]) -> Options:
+    p = argparse.ArgumentParser(description="ISS telemetry playback (Python, C++-equivalent)")
+    p.add_argument("data_folder", type=Path, help="Folder containing <ID>.txt files")
+    p.add_argument("playback_speed", type=float, nargs='?', default=60.0,
+                   help="Acceleration factor (e.g., 60 for 60x). Default: 60.")
+    p.add_argument("--loop", action="store_true", help="Loop playback when finished")
+    p.add_argument("--db-path", type=Path, default=None, help="SQLite DB path (default: /dev/shm/iss_telemetry.db or ./iss_telemetry.db)")
+    p.add_argument("--discover", action="store_true", help="Discover all *.txt files instead of the hard-coded C++ ID list")
+    args = p.parse_args(argv)
+
+    return Options(
+        data_folder=args.data_folder,
+        playback_speed=args.playback_speed,
+        loop=args.loop,
+        db_path=args.db_path,
+        discover=args.discover,
+    )
+
+
+def main(argv: Optional[List[str]] = None) -> int:
+    if argv is None:
+        argv = sys.argv[1:]
+    opts = parse_args(argv)
+
+    engine = PlaybackEngine(opts)
+
+    # Clean shutdown on Ctrl+C
+    def handle_sigint(sig, frame):
+        print("\nSIGINT received: stopping...")
+        engine.stop()
+    signal.signal(signal.SIGINT, handle_sigint)
+
     if not engine.load_data():
-        print("ERROR: Failed to load telemetry data")
-        sys.exit(1)
-    
-    # Start playback
-    if not engine.start():
-        print("ERROR: Failed to start playback")
-        sys.exit(1)
-    
-    print("Playback engine finished normally")
+        return 2
+
+    ok = engine.start()
+    return 0 if ok else 1
+
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
