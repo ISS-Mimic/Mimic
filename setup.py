@@ -43,8 +43,7 @@ APT_ENV = {
     "APT_LISTCHANGES_FRONTEND": "none",      # no changelog pager
 }
 
-# How long to wait for locks before we start killing (seconds)
-LOCK_WAIT_SECONDS = 300  # 5 minutes
+LOCK_WAIT_SECONDS = 300  # 5 minutes before we start killing lock holders
 LOCK_POLL_SECONDS = 3
 
 # ─────────────────────────── Utilities ────────────────────────────
@@ -85,7 +84,6 @@ def run_command(cmd, env_extra=None, check=True):
 
     if check and proc.returncode != 0:
         print(f"{RED}Command failed with exit code {proc.returncode}{RESET}")
-        # Attach combined output for higher-level handlers if needed
         e = subprocess.CalledProcessError(proc.returncode, pretty)
         e.output = "".join(buf)
         raise e
@@ -127,13 +125,6 @@ def kill_pids(pids):
             pass
 
 
-def repair_dpkg():
-    """Try to repair interrupted dpkg/apt state."""
-    print(f"{YELLOW}Attempting to repair dpkg/apt state...{RESET}")
-    run_command("sudo dpkg --configure -a", check=False)
-    run_command("sudo apt-get -y -f install", env_extra=APT_ENV, check=False)
-
-
 def wait_for_apt_locks_or_kill(timeout=LOCK_WAIT_SECONDS, poll=LOCK_POLL_SECONDS):
     """
     Wait until apt/dpkg-related processes are gone.
@@ -148,27 +139,50 @@ def wait_for_apt_locks_or_kill(timeout=LOCK_WAIT_SECONDS, poll=LOCK_POLL_SECONDS
         if waited % 15 == 0:
             print(f"{YELLOW}Waiting for apt/dpkg locks... PIDs: {sorted(others)}  ({waited}s){RESET}")
         if waited >= timeout:
-            # Kill and try to continue
             kill_pids(others)
             return
         time.sleep(poll)
 
 
+def _ucf_env_for_conf_mode():
+    """
+    Mirror CONF_MODE_ENV for ucf so dpkg --configure -a never prompts on conffiles.
+    old -> keep local changes; new -> take maintainer version.
+    """
+    if CONF_MODE_ENV == "new":
+        return {"UCF_FORCE_CONFFNEW": "1"}
+    else:
+        return {"UCF_FORCE_CONFFOLD": "1"}
+
+
+def repair_dpkg():
+    """Try to repair interrupted dpkg/apt state (fully non-interactive)."""
+    print(f"{YELLOW}Attempting to repair dpkg/apt state...{RESET}")
+    env_ucf = _ucf_env_for_conf_mode()
+    # Finish any pending package configuration without prompts
+    run_command(["sudo", "dpkg", "--configure", "-a"], env_extra={**APT_ENV, **env_ucf}, check=False)
+    # Fix broken deps quietly
+    run_command(
+        ["sudo", "env", *(f"{k}={v}" for k, v in APT_ENV.items()), "apt-get", "-yq", "install", "-f"],
+        check=False
+    )
+
+
 def apt(args_list, retries=1):
     """
     Run apt-get with non-interactive flags and dpkg config-file policy.
-    Will auto-repair and retry once if dpkg was interrupted.
+    Auto-waits (and kills) locks, auto-repairs interrupted dpkg, retries once.
     """
     if isinstance(args_list, str):
         args_list = [args_list]
 
-    # Ensure no lock races (and kill if they overstay)
     wait_for_apt_locks_or_kill()
 
     base = [
         "sudo", "env",
         *(f"{k}={v}" for k, v in APT_ENV.items()),
         "apt-get", "-yq",
+        "-o", "Acquire::Retries=3",
         *DPKG_FORCE,
         *args_list
     ]
@@ -177,12 +191,10 @@ def apt(args_list, retries=1):
         return run_command(base)
     except subprocess.CalledProcessError as e:
         msg = (getattr(e, "output", "") or "")
-        # If dpkg was interrupted, attempt repair and one retry
         if retries > 0 and ("dpkg was interrupted" in msg or "dpkg --configure -a" in msg or e.returncode == 100):
             repair_dpkg()
             wait_for_apt_locks_or_kill()
             return apt(args_list, retries=retries - 1)
-        # Otherwise bubble up
         raise
 
 
@@ -192,7 +204,7 @@ def pip_install(packages: str):
     Tries --break-system-packages (Bookworm), falls back if not supported.
     """
     try:
-        run_command(f"python3 -m pip install --upgrade pip")
+        run_command("python3 -m pip install --upgrade pip")
     except Exception:
         pass
 
