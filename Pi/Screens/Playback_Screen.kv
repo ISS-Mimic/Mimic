@@ -90,29 +90,6 @@
             id: Playback_Background
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/SimulatedOrbitBackground.png'
             fit_mode: "fill"
-
-        # Title
-        Label:
-            text: 'Orbit Data Playback'
-            size_hint: None, None
-            font_size: dp(28)
-            color: 0, 1, 0, 1  # Bright green like the background
-            text_size: self.width, None
-            halign: 'center'
-            valign: 'middle'
-            width: dp(400)
-            height: dp(50)
-            pos_hint: {"center_x": 0.5, "top": 0.98}
-        
-        # ---------- LEFT PANEL: LOAD DATA ----------
-        Label:
-            text: 'LOAD DATA'
-            size_hint: None, None
-            font_size: dp(18)
-            color: 0, 1, 0, 1  # Green text
-            width: dp(150)
-            height: dp(30)
-            pos_hint: {"center_x": 0.17, "top": 0.88}
         
         Spinner:
             id: file_dropdown
@@ -122,19 +99,10 @@
             height: dp(40)
             values: ['HTV Demo', 'OFT2 Demo', 'Demo Demo']
             on_text: root.on_file_selected(args[1])
-            pos_hint: {"center_x": 0.17, "top": 0.78}
+            pos_hint: {"center_x": 0.17, "center_y": 0.78}
             background_color: 0.3, 0.3, 0.3, 1  # Dark metallic look
         
         # ---------- MIDDLE PANEL: PLAYBACK SPEED ----------
-        Label:
-            text: 'PLAYBACK SPEED'
-            size_hint: None, None
-            font_size: dp(18)
-            color: 0, 1, 0, 1  # Green text
-            width: dp(180)
-            height: dp(30)
-            pos_hint: {"center_x": 0.5, "top": 0.88}
-        
         Spinner:
             id: speed_dropdown
             text: 'Select SPEED'
@@ -143,55 +111,19 @@
             height: dp(40)
             values: ['10x', '20x', '60x', '90x']
             on_text: root.set_playback_speed(args[1])
-            pos_hint: {"center_x": 0.5, "top": 0.78}
+            pos_hint: {"center_x": 0.5, "center_y": 0.78}
             background_color: 0.3, 0.3, 0.3, 1  # Dark metallic look
         
         # ---------- RIGHT PANEL: DISCO MODE ----------
-        Label:
-            text: 'DISCO MODE'
-            size_hint: None, None
-            font_size: dp(18)
-            color: 0, 1, 0, 1  # Green text
-            width: dp(150)
-            height: dp(30)
-            pos_hint: {"center_x": 0.83, "top": 0.88}
-        
         Button:
             text: 'DISCO'
             size_hint: None, None
             width: dp(120)
-            height: dp(50)
+            height: dp(120)
             background_color: 0.8, 0.2, 0.8, 1  # Purple/pink disco color
             on_press: root.start_disco_mode()
-            pos_hint: {"center_x": 0.83, "top": 0.78}
+            pos_hint: {"center_x": 0.83, "center_y": 0.5}
         
-        # ---------- INSTRUCTIONS ----------
-        Label:
-            text: 'Select data to playback - Insert USB for recorded'
-            size_hint: None, None
-            font_size: dp(14)
-            color: 0, 1, 0, 1  # Green text
-            width: dp(600)
-            height: dp(24)
-            pos_hint: {"center_x": 0.5, "center_y": 0.65}
-        
-        Label:
-            text: 'Select speed to run playback (can adjust with +/-)'
-            size_hint: None, None
-            font_size: dp(14)
-            color: 0, 1, 0, 1  # Green text
-            width: dp(600)
-            height: dp(24)
-            pos_hint: {"center_x": 0.5, "center_y": 0.60}
-        
-        Label:
-            text: 'Or select Disco Mode'
-            size_hint: None, None
-            font_size: dp(14)
-            color: 0, 1, 0, 1  # Green text
-            width: dp(600)
-            height: dp(24)
-            pos_hint: {"center_x": 0.5, "center_y": 0.55}
         
         # ---------- MAIN PLAYBACK CONTROLS ----------
         # Green Start Button (Bottom Left)
@@ -203,7 +135,7 @@
             background_color: 0, 0.8, 0, 1  # Green
             disabled: (not root.current_file) or (root.arduino_connected == False)
             on_press: root.start_playback()
-            pos_hint: {"center_x": 0.25, "center_y": 0.35}
+            pos_hint: {"center_x": 0.2, "center_y": 0.25}
         
         # Red Stop Button (Bottom Right)
         Button:
@@ -213,8 +145,8 @@
             height: dp(60)
             background_color: 0.8, 0, 0, 1  # Red
             disabled: not root.is_playing
-            on_press: root.stop_playback()
-            pos_hint: {"center_x": 0.75, "center_y": 0.35}
+            on_press: root.scenter_y_playback()
+            pos_hint: {"center_x": 0.8, "center_y": 0.25}
         
         # Loop Button (Center Bottom)
         Button:
@@ -224,7 +156,7 @@
             height: dp(50)
             background_color: (0.2, 0.8, 0.2, 1) if root.loop_enabled else (0.6, 0.6, 0.6, 1)
             on_press: root.toggle_loop()
-            pos_hint: {"center_x": 0.5, "center_y": 0.35}
+            pos_hint: {"center_x": 0.48, "center_y": 0.4}
         
         # ---------- STATUS DISPLAY (Bottom Rectangle) ----------
         Label:
@@ -235,11 +167,11 @@
             height: dp(40)
             background_color: 0, 0, 0, 0.8  # Semi-transparent black
             color: 0, 1, 0, 1  # Green text
-            font_size: dp(16)
+            font_size: dp(28)
             text_size: self.size
             halign: 'center'
             valign: 'middle'
-            pos_hint: {"center_x": 0.5, "bottom": 0.15}
+            pos_hint: {"center_x": 0.55, "bottom": 0.2}
         
         # ---------- BOTTOM TOOLBAR ----------
         Image:
