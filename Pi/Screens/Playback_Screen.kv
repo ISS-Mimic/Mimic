@@ -86,6 +86,11 @@
     name: 'playback'
     
     FloatLayout:
+        Image:
+        id: Playback_Background
+        source: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/SimulatedOrbitBackground.png'
+        fit_mode: "fill"
+
         # Title
         Label:
             text: 'Orbit Data Playback'
@@ -237,67 +242,32 @@
             pos_hint: {"center_x": 0.5, "bottom": 0.15}
         
         # ---------- BOTTOM TOOLBAR ----------
-        # Signal Icon
         Image:
             id: signal
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/signalred.zip"
-            size_hint: None, None
-            width: dp(48)
-            height: dp(48)
+            size_hint_y: 0.112
             anim_delay: 0.05
             anim_loop: 0
-            allow_stretch: True
-            keep_ratio: True
-            pos_hint: {"center_x": 0.06, "center_y": 0.08}
-        
-        # Arduino Icon
+            fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.05, "center_y": 0.07}
         Image:
             id: arduino
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
-            size_hint: None, None
-            width: dp(54)
-            height: dp(54)
+            size_hint_y: 0.15
             anim_delay: 0.2
             anim_loop: 0
-            allow_stretch: True
-            keep_ratio: True
+            fit_mode: "scale-down"
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
-        
-        # Arduino Count
         Label:
             id: arduino_count
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
             text: ''
             markup: True
-            color: 1, 1, 1, 1
-            size_hint: None, None
-            font_size: dp(18)
-            width: dp(80)
-            height: dp(28)
-            text_size: self.size
-            halign: 'left'
-            valign: 'middle'
-            pos_hint: {"center_x": 0.20, "center_y": 0.08}
-        
-        # Arduino Status
-        Label:
-            id: arduino_status
-            text: 'Arduino: Disconnected'
-            size_hint: None, None
-            font_size: dp(14)
-            color: 1, 0, 0, 1  # Red
-            width: dp(200)
-            height: dp(24)
-            text_size: self.size
-            halign: 'left'
-            valign: 'middle'
-            pos_hint: {"center_x": 0.30, "center_y": 0.08}
-        
-        # Back Button (Bottom Right)
+            color: 1,1,1
+            font_size: self.height * 0.3
+            size_hint_y: 0.5
         Button:
-            size_hint: None, None
-            width: dp(80)
-            height: dp(56)
+            size_hint: 0.1,0.11
+            pos_hint: {"center_x": 0.9375, "center_y": 0.082}
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
-            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: app.root.current = 'main'
-            pos_hint: {"right": 0.98, "center_y": 0.08}
