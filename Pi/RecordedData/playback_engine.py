@@ -244,13 +244,14 @@ class PlaybackEngine:
                 current_time = time.time()
                 elapsed_real_time = current_time - self.start_time
                 
-                # Calculate what timestamp we should be at
-                target_timestamp = elapsed_real_time * self.playback_speed
+                # Calculate what timestamp we should be at (in fractional hours)
+                # Convert elapsed seconds to hours, then multiply by playback speed
+                target_timestamp_hours = (elapsed_real_time * self.playback_speed) / 3600.0
                 
                 # Print status every 1000 loops (about every 10 seconds at 100Hz)
                 loop_count += 1
                 if loop_count % 1000 == 0:
-                    print(f"Playback: {elapsed_real_time:.1f}s elapsed, {target_timestamp:.1f}s target")
+                    print(f"Playback: {elapsed_real_time:.1f}s elapsed, {target_timestamp_hours:.6f} hours target")
                     
                     # Show some sample telemetry values being sent
                     if self.telemetry_data:
@@ -259,12 +260,12 @@ class PlaybackEngine:
                         current_idx = self.current_indices[sample_id]
                         if current_idx < len(sample_data):
                             timestamp, value = sample_data[current_idx]
-                            print(f"Sample: {sample_id} = {value:.2f}")
+                            print(f"Sample: {sample_id} = {value:.2f} (at {timestamp:.6f} hours)")
                 
                 # Update all telemetry streams
                 all_complete = True
                 for telemetry_id, data in self.telemetry_data.items():
-                    if not self._update_telemetry_stream(telemetry_id, data, target_timestamp):
+                    if not self._update_telemetry_stream(telemetry_id, data, target_timestamp_hours):
                         all_complete = False
                 
                 # Check if we've reached the end
@@ -335,50 +336,29 @@ class PlaybackEngine:
     def _send_telemetry_value(self, telemetry_id: str, value: float):
         """Send a telemetry value to the database."""
         try:
-            # Temporarily show every update for debugging
-            print(f"DEBUG: Attempting to update {telemetry_id} = {value}")
+            print(f"DEBUG: Updating {telemetry_id} = {value}")
             
             # Write to database
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 
                 # First, find the record by ID and get its Label (primary key)
-                cursor.execute("SELECT Label, Value, Timestamp FROM telemetry WHERE ID = ?", (telemetry_id,))
+                cursor.execute("SELECT Label FROM telemetry WHERE ID = ?", (telemetry_id,))
                 result = cursor.fetchone()
                 
                 if result:
-                    label, current_value, current_timestamp = result
-                    print(f"DEBUG: Found record - Label='{label}', Current Value='{current_value}', Current Timestamp='{current_timestamp}'")
+                    label = result[0]
                     
-                    # Try updating just the Value first
-                    print(f"DEBUG: Updating Value to '{str(value)}'")
+                    # Update just the Value (no timestamp needed)
                     cursor.execute(
                         "UPDATE telemetry SET Value = ? WHERE Label = ?",
                         (str(value), label)
                     )
                     
-                    # Now try updating the Timestamp separately
-                    new_timestamp = datetime.now().isoformat()
-                    print(f"DEBUG: Attempting to update Timestamp to '{new_timestamp}'")
-                    
-                    cursor.execute(
-                        "UPDATE telemetry SET Timestamp = ? WHERE Label = ?",
-                        (new_timestamp, label)
-                    )
-                    
                     rows_affected = cursor.rowcount
-                    print(f"DEBUG: Timestamp UPDATE affected {rows_affected} rows")
+                    print(f"DEBUG: Updated {telemetry_id} to {value} (affected {rows_affected} rows)")
                     conn.commit()
-                    print(f"DEBUG: Commit completed")
                     
-                    # Verify the update
-                    cursor.execute("SELECT Label, Value, Timestamp, ID FROM telemetry WHERE Label = ?", (label,))
-                    result = cursor.fetchone()
-                    if result:
-                        db_label, db_value, db_timestamp, db_id = result
-                        print(f"DEBUG: After update - Label='{db_label}', Value='{db_value}', Timestamp='{db_timestamp}', ID='{db_id}'")
-                    else:
-                        print(f"DEBUG: Could not verify update for Label '{label}'")
                 else:
                     print(f"ERROR: No record found with ID '{telemetry_id}'")
                 
