@@ -117,6 +117,7 @@
         
         # ---------- RIGHT PANEL: DISCO MODE ----------
         Button:
+            id: disco_button
             size_hint: None, None
             width: dp(160)
             height: dp(160)
@@ -153,7 +154,7 @@
             height: dp(60)
             background_color: 0.8, 0, 0, 1  # Red
             disabled: not root.is_playing
-            on_press: root.scenter_y_playback()
+            on_press: root.stop_playback()
             pos_hint: {"center_x": 0.65, "center_y": 0.235}
         
         # Loop Button (Center Bottom)
@@ -179,7 +180,7 @@
             text_size: self.size
             halign: 'center'
             valign: 'middle'
-            pos_hint: {"center_x": 0.6, "center_y": 0.081}
+            pos_hint: {"center_x": 0.57, "center_y": 0.08}
         
         # ---------- BOTTOM TOOLBAR ----------
         Image:

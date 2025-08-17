@@ -279,17 +279,22 @@ class Playback_Screen(MimicBase):
         except Exception as e:
             log_error(f"Error updating status: {e}")
 
+    # ---------------------------------------------------------------- Button State Management
     def _update_playback_buttons(self):
-        """Update the state of playback control buttons."""
+        """Update the state of all playback control buttons."""
         try:
             start_button = getattr(self.ids, 'start_button', None)
             stop_button = getattr(self.ids, 'stop_button', None)
+            disco_button = getattr(self.ids, 'disco_button', None)
             
             if start_button:
                 start_button.disabled = self.is_playing
                 
             if stop_button:
                 stop_button.disabled = not self.is_playing
+                
+            if disco_button:
+                disco_button.disabled = self.is_playing
                 
         except Exception as e:
             log_error(f"Error updating playback buttons: {e}")
@@ -368,7 +373,7 @@ class Playback_Screen(MimicBase):
             # Update status to show playback is active
             self._update_status()
             
-            # Disable start button and enable stop button
+            # Update all button states
             self._update_playback_buttons()
             
         except Exception as e:
@@ -381,32 +386,44 @@ class Playback_Screen(MimicBase):
             return
             
         try:
+            log_info("Stopping playback...")
+            
             # Stop the playback engine
             app = App.get_running_app()
             if hasattr(app, 'playback_proc') and app.playback_proc:
+                log_info(f"Terminating process {app.playback_proc.pid}")
+                
                 # Try graceful termination first
                 app.playback_proc.terminate()
                 
                 # Wait a bit for graceful shutdown
                 try:
                     app.playback_proc.wait(timeout=3)
+                    log_info("Process terminated gracefully")
                 except TimeoutExpired:
                     # Force kill if it doesn't respond
                     log_info("Force killing playback process")
                     app.playback_proc.kill()
                     app.playback_proc.wait()
+                    log_info("Process force killed")
                 
                 app.playback_proc = None
+            else:
+                log_info("No playback process found to stop")
             
             self.is_playing = False
             log_info("Playback stopped")
             
-            # Update status and re-enable start button
+            # Update status and re-enable all buttons
             self._update_status()
             self._update_playback_buttons()
             
         except Exception as e:
             log_error(f"Error stopping playback: {e}")
+            # Even if there's an error, mark as not playing
+            self.is_playing = False
+            self._update_status()
+            self._update_playback_buttons()
     
     def toggle_loop(self):
         """Toggle loop mode on/off."""
