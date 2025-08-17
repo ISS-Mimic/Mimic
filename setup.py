@@ -127,12 +127,17 @@ def _ucf_env_for_conf_mode():
 def repair_dpkg():
     """Repair interrupted dpkg/apt state (fully non-interactive)."""
     print(f"{YELLOW}Attempting to repair dpkg/apt state...{RESET}")
-    env_ucf = _ucf_env_for_conf_mode()
-    # Finish any pending configuration without prompts
-    run_command(["sudo", "dpkg", "--configure", "-a"], env_extra={**APT_ENV, **env_ucf}, check=False)
-    # Fix broken deps quietly
+    # choose dpkg force flag to match your MIMIC_FORCE_CONF_MODE
+    dpkg_force = "--force-confnew" if CONF_MODE_ENV == "new" else "--force-confold"
+    # finish pending config without prompts (dpkg conffiles respect --force-conf*)
     run_command(["sudo", "env", *(f"{k}={v}" for k, v in APT_ENV.items()),
-                 "apt-get", "-yq", "install", "-f"], check=False)
+                 "dpkg", dpkg_force, "--configure", "-a"],
+                check=False)
+    # fix broken deps quietly
+    run_command(["sudo", "env", *(f"{k}={v}" for k, v in APT_ENV.items()),
+                 "apt-get", "-yq", "install", "-f"],
+                check=False)
+
 
 
 def apt(args_list, retries=1):
