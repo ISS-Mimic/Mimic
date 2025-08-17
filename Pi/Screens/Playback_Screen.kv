@@ -174,10 +174,11 @@
         
         # Arduino Connection Status
         Label:
-            text: f'Arduino: {"Connected" if root.arduino_connected else "Disconnected"}'
+            id: arduino_status
+            text: 'Arduino: Disconnected'
             pos_hint: {"center_x": 0.5, "center_y": 0.25}
             font_size: dp(16)
-            color: 0, 1, 0, 1 if root.arduino_connected else 1, 0, 0, 1
+            color: 1, 0, 0, 1
         
         # Back Button
         Button:
