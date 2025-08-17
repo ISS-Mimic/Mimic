@@ -95,24 +95,24 @@
             id: file_dropdown
             text: 'Select DATA'
             size_hint: None, None
-            width: dp(160)
+            width: dp(150)
             height: dp(40)
             values: ['HTV', 'OFT2', 'Standard']
-            on_text: root.on_file_selected_and_close(args[1], self)
+            on_text: root.on_dropdown_select_data(self.text)
             background_color: 0.3, 0.3, 0.3, 1  # Dark metallic look
-            pos_hint: {"center_x": 0.16, "center_y": 0.545}
+            pos_hint: {"center_x": 0.157, "center_y": 0.547}
         
         # ---------- MIDDLE PANEL: PLAYBACK SPEED ----------
         Spinner:
             id: speed_dropdown
             text: 'Select SPEED'
             size_hint: None, None
-            width: dp(160)
+            width: dp(150)
             height: dp(40)
             values: ['10x', '20x', '60x', '90x']
-            on_text: root.on_dropdown_select(self.text)
+            on_text: root.on_dropdown_select_speed(self.text)
             background_color: 0.3, 0.3, 0.3, 1  # Dark metallic look
-            pos_hint: {"center_x": 0.49, "center_y": 0.545}
+            pos_hint: {"center_x": 0.487, "center_y": 0.547}
 
         
         # ---------- RIGHT PANEL: DISCO MODE ----------

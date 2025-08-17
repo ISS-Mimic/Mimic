@@ -127,7 +127,7 @@ class Playback_Screen(MimicBase):
             log_error(f"Error updating dropdown: {e}")
 
     # ---------------------------------------------------------------- File Selection
-    def on_dropdown_select(self, filename):
+    def on_dropdown_select_data(self, filename):
         """Called when user selects a file from dropdown and close it."""
         if not filename:
             return
@@ -226,7 +226,7 @@ class Playback_Screen(MimicBase):
             self._show_error(f"Error starting disco mode: {e}")
 
     # ---------------------------------------------------------------- Speed Control
-    def set_playback_speed_and_close(self, speed_str: str, dropdown):
+    def on_dropdown_select_speed(self, speed_str):
         """Set the playback speed multiplier from dropdown text and close it."""
         try:
             # Extract numeric value from "10x", "20x", etc.
@@ -244,8 +244,6 @@ class Playback_Screen(MimicBase):
                 
             log_info(f"Playback speed set to {speed_value}x")
             
-            # Close the dropdown
-            dropdown.close()
             
             # Update status and check if start button should be enabled
             self._update_status()
