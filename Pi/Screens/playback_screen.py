@@ -127,7 +127,7 @@ class Playback_Screen(MimicBase):
             log_error(f"Error updating dropdown: {e}")
 
     # ---------------------------------------------------------------- File Selection
-    def on_file_selected_and_close(self, filename: str, dropdown):
+    def on_dropdown_select(self, filename):
         """Called when user selects a file from dropdown and close it."""
         if not filename:
             return
@@ -143,8 +143,7 @@ class Playback_Screen(MimicBase):
             # Built-in demo
             self._load_builtin_demo(filename)
         
-        # Close the dropdown
-        dropdown.close()
+ 
         
         # Update status and check if start button should be enabled
         self._update_status()
