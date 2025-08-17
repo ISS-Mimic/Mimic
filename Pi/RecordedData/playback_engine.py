@@ -335,6 +335,7 @@ class PlaybackEngine:
     def _send_telemetry_value(self, telemetry_id: str, value: float):
         """Send a telemetry value to the database."""
         try:
+            # Temporarily show every update for debugging
             print(f"DEBUG: Attempting to update {telemetry_id} = {value}")
             
             # Write to database
@@ -342,22 +343,33 @@ class PlaybackEngine:
                 cursor = conn.cursor()
                 
                 # First, find the record by ID and get its Label (primary key)
-                cursor.execute("SELECT Label FROM telemetry WHERE ID = ?", (telemetry_id,))
+                cursor.execute("SELECT Label, Value, Timestamp FROM telemetry WHERE ID = ?", (telemetry_id,))
                 result = cursor.fetchone()
                 
                 if result:
-                    label = result[0]
-                    print(f"DEBUG: Found record with Label '{label}' for ID '{telemetry_id}'")
+                    label, current_value, current_timestamp = result
+                    print(f"DEBUG: Found record - Label='{label}', Current Value='{current_value}', Current Timestamp='{current_timestamp}'")
                     
-                    # Update using the Label (primary key)
+                    # Try updating just the Value first
+                    print(f"DEBUG: Updating Value to '{str(value)}'")
                     cursor.execute(
-                        "UPDATE telemetry SET Value = ?, Timestamp = ? WHERE Label = ?",
-                        (str(value), datetime.now().isoformat(), label)
+                        "UPDATE telemetry SET Value = ? WHERE Label = ?",
+                        (str(value), label)
+                    )
+                    
+                    # Now try updating the Timestamp separately
+                    new_timestamp = datetime.now().isoformat()
+                    print(f"DEBUG: Attempting to update Timestamp to '{new_timestamp}'")
+                    
+                    cursor.execute(
+                        "UPDATE telemetry SET Timestamp = ? WHERE Label = ?",
+                        (new_timestamp, label)
                     )
                     
                     rows_affected = cursor.rowcount
-                    print(f"DEBUG: UPDATE affected {rows_affected} rows")
+                    print(f"DEBUG: Timestamp UPDATE affected {rows_affected} rows")
                     conn.commit()
+                    print(f"DEBUG: Commit completed")
                     
                     # Verify the update
                     cursor.execute("SELECT Label, Value, Timestamp, ID FROM telemetry WHERE Label = ?", (label,))
@@ -373,9 +385,8 @@ class PlaybackEngine:
             # Increment update counter
             self._update_count += 1
                 
-            # Print every 100th update to reduce spam
-            if self._update_count % 100 == 0:
-                print(f"DB Update: {self._update_count} values sent to database")
+            # Show every update for now
+            print(f"DB Update: {self._update_count} values sent to database")
                 
         except Exception as e:
             print(f"ERROR: Error sending telemetry value {telemetry_id}={value}: {e}")
