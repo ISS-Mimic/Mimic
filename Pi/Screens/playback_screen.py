@@ -260,11 +260,16 @@ class Playback_Screen(MimicBase):
             if not status_label:
                 return
                 
+            if self.is_playing:
+                # Show playback status
+                status_label.text = f"Playing back {self.current_file} data at {self.playback_speed}x"
+                return
+                
             if not self.current_file:
                 status_label.text = "Select Data to Playback"
                 return
                 
-            if self.playback_speed == 0:  # Changed from "not self.playback_speed"
+            if self.playback_speed == 0:
                 status_label.text = f"{self.current_file} selected, choose playback speed"
                 return
                 
@@ -274,6 +279,21 @@ class Playback_Screen(MimicBase):
         except Exception as e:
             log_error(f"Error updating status: {e}")
 
+    def _update_playback_buttons(self):
+        """Update the state of playback control buttons."""
+        try:
+            start_button = getattr(self.ids, 'start_button', None)
+            stop_button = getattr(self.ids, 'stop_button', None)
+            
+            if start_button:
+                start_button.disabled = self.is_playing
+                
+            if stop_button:
+                stop_button.disabled = not self.is_playing
+                
+        except Exception as e:
+            log_error(f"Error updating playback buttons: {e}")
+
     def _check_start_button_state(self):
         """Check if start button should be enabled and update its state."""
         try:
@@ -281,10 +301,11 @@ class Playback_Screen(MimicBase):
             if not start_button:
                 return
                 
-            # Enable start button if all conditions are met
+            # Only enable start button if not currently playing AND all conditions are met
             should_enable = (
+                not self.is_playing and
                 self.current_file and 
-                self.playback_speed > 0 and  # Changed from "self.playback_speed"
+                self.playback_speed > 0 and 
                 self.arduino_connected
             )
             
@@ -344,6 +365,12 @@ class Playback_Screen(MimicBase):
             loop_status = "with looping" if self.loop_enabled else ""
             log_info(f"Started playback of {self.current_file} at {self.playback_speed}x speed {loop_status}")
             
+            # Update status to show playback is active
+            self._update_status()
+            
+            # Disable start button and enable stop button
+            self._update_playback_buttons()
+            
         except Exception as e:
             log_error(f"Error starting playback: {e}")
             self._show_error(f"Error starting playback: {e}")
@@ -373,6 +400,10 @@ class Playback_Screen(MimicBase):
             
             self.is_playing = False
             log_info("Playback stopped")
+            
+            # Update status and re-enable start button
+            self._update_status()
+            self._update_playback_buttons()
             
         except Exception as e:
             log_error(f"Error stopping playback: {e}")
