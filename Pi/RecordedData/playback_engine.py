@@ -166,9 +166,23 @@ class PlaybackEngine:
                         print(f"WARNING: Error parsing line {line_num}: {line} - {e}")
                         continue
             
-            # Sort by timestamp
-            data.sort(key=lambda x: x[0])
-            return data
+            if data:
+                # Sort by timestamp
+                data.sort(key=lambda x: x[0])
+                
+                # Normalize timestamps to start at 0
+                first_timestamp = data[0][0]
+                normalized_data = []
+                for timestamp, value in data:
+                    normalized_timestamp = timestamp - first_timestamp
+                    normalized_data.append((normalized_timestamp, value))
+                
+                print(f"DEBUG: {file_path.name} - original range: {first_timestamp:.6f} to {data[-1][0]:.6f} hours")
+                print(f"DEBUG: {file_path.name} - normalized range: 0.000000 to {normalized_data[-1][0]:.6f} hours")
+                
+                return normalized_data
+            else:
+                return []
             
         except Exception as e:
             print(f"ERROR: Error reading file {file_path}: {e}")
@@ -251,7 +265,7 @@ class PlaybackEngine:
                 # Print status every 1000 loops (about every 10 seconds at 100Hz)
                 loop_count += 1
                 if loop_count % 1000 == 0:
-                    print(f"Playback: {elapsed_real_time:.1f}s elapsed, {target_timestamp_hours:.6f} hours target")
+                    print(f"Playback: {elapsed_real_time:.1f}s elapsed, target={target_timestamp_hours:.6f} hours")
                     
                     # Show some sample telemetry values being sent
                     if self.telemetry_data:
