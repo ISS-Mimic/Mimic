@@ -492,7 +492,7 @@ class Playback_Screen(MimicBase):
                 f"SASA_AZ={str(float(sasa_az))} "
                 f"SASA_EL={str(float(sasa_el))} "
             )
-            
+            log_info(f"Serial command: {serial_cmd}")
             return serial_cmd
             
         except Exception as e:
