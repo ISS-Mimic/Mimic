@@ -542,11 +542,7 @@ class MainApp(App):
 
         if arduino_count > 0:
             self.screens["mimic"].ids.mimicstartbutton.disabled = False
-            self.screens["playback"].ids.DemoStart.disabled = False
-            self.screens["playback"].ids.HTVDemoStart.disabled = False
-            self.screens["playback"].ids.OFT2DemoStart.disabled = False
-            self.screens["manualcontrol"].ids.set90.disabled = False
-            self.screens["manualcontrol"].ids.set0.disabled = False
+
             if mimic_is_tx:
                 self.screens["mimic"].ids.mimicstartbutton.disabled = True
             else:
@@ -554,11 +550,7 @@ class MainApp(App):
         else:
             self.screens["mimic"].ids.mimicstartbutton.disabled = True
             self.screens["mimic"].ids.mimicstartbutton.text = "Transmit"
-            self.screens["playback"].ids.DemoStart.disabled = True
-            self.screens["playback"].ids.HTVDemoStart.disabled = True
-            self.screens["playback"].ids.OFT2DemoStart.disabled = True
-            self.screens["manualcontrol"].ids.set90.disabled = True
-            self.screens["manualcontrol"].ids.set0.disabled = True
+
     
     def flashROBObutton(self, instance):
         #log_info("Function call - flashRobo")
@@ -698,16 +690,8 @@ class MainApp(App):
 
 
     def update_labels(self, dt): #THIS IS THE IMPORTANT FUNCTION
-        global mimicbutton, demoboolean, runningDemo, Disco
+        global mimicbutton
 
-        if runningDemo:
-            self.screens["playback"].ids.DemoStart.disabled = True
-            self.screens["playback"].ids.HTVDemoStart.disabled = True
-            self.screens["playback"].ids.DemoStop.disabled = False
-            self.screens["playback"].ids.HTVDemoStop.disabled = False
-            self.screens["playback"].ids.OFT2DemoStart.disabled = True
-            self.screens["playback"].ids.OFT2DemoStop.disabled = False
-            self.screens["playback"].ids.arduino.source = mimic_directory + "/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
 
         c.execute('select Value from telemetry')
         values = c.fetchall()
