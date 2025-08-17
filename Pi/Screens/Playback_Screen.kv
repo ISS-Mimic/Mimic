@@ -65,7 +65,7 @@
                     valign: 'middle'
 
                 Label:
-                    text: 'DEmo orbit 2'
+                    text: 'Demo orbit 2'
                     padding: 10, 10
                     halign: 'center'
                     text_size: self.width - 20, None
@@ -81,21 +81,21 @@
         # Background or title
         Label:
             text: 'Playback Control'
-            pos_hint: {"center_x": 0.5, "top": 0.95}
+            pos_hint: {"center_x": 0.5, "y": 0.95}
             font_size: dp(24)
             color: 1, 1, 1, 1
         
         # File Selection Dropdown
         Label:
             text: 'Data Source:'
-            pos_hint: {"x": 0.1, "top": 0.85}
+            pos_hint: 0.1, 0.85
             font_size: dp(16)
             color: 1, 1, 1, 1
         
         Spinner:
             id: file_dropdown
             text: 'Select Data File'
-            pos_hint: {"x": 0.1, "top": 0.8}
+            pos_hint: 0.1, 0.8
             size_hint: 0.3, 0.05
             values: ['HTV Demo', 'OFT2 Demo', 'Demo Demo']
             on_text: root.on_file_selected(args[1])
@@ -103,14 +103,14 @@
         # Speed Selection Dropdown
         Label:
             text: 'Playback Speed:'
-            pos_hint: {"x": 0.5, "top": 0.85}
+            pos_hint: 0.5, 0.85 
             font_size: dp(16)
             color: 1, 1, 1, 1
         
         Spinner:
             id: speed_dropdown
             text: '10x'
-            pos_hint: {"x": 0.5, "top": 0.8}
+            pos_hint: 0.5, 0.8
             size_hint: 0.2, 0.05
             values: ['10x', '20x', '60x', '90x']
             on_text: root.set_playback_speed(args[1])
@@ -118,28 +118,28 @@
         # Current File Display
         Label:
             text: 'No file selected'
-            pos_hint: {"center_x": 0.5, "top": 0.7}
+            pos_hint: 0.5, 0.7
             font_size: dp(14)
             color: 0.8, 0.8, 0.8, 1
         
         # Playback Controls
         Button:
             text: 'Start'
-            pos_hint: {"x": 0.2, "top": 0.6}
+            pos_hint: 0.2, 0.6
             size_hint: 0.15, 0.08
             disabled: not root.current_file or root.arduino_connected == False
             on_press: root.start_playback()
         
         Button:
             text: 'Stop'
-            pos_hint: {"x": 0.4, "top": 0.6}
+            pos_hint: 0.4, 0.6
             size_hint: 0.15, 0.08
             disabled: not root.is_playing
             on_press: root.stop_playback()
         
         Button:
             text: 'Loop'
-            pos_hint: {"x": 0.6, "top": 0.6}
+            pos_hint: 0.6, 0.6
             size_hint: 0.15, 0.08
             background_color: (0.2, 0.8, 0.2, 1) if root.loop_enabled else (0.6, 0.6, 0.6, 1)
             on_press: root.toggle_loop()
@@ -147,13 +147,13 @@
         # Status Information
         Label:
             text: 'Playback Status:'
-            pos_hint: {"x": 0.1, "top": 0.45}
+            pos_hint: 0.1, 0.45
             font_size: dp(16)
             color: 1, 1, 1, 1
         
         Label:
             text: 'Stopped'
-            pos_hint: {"x": 0.1, "top": 0.4}
+            pos_hint: 0.1, 0.4
             font_size: dp(14)
             color: 0.8, 0.8, 0.8, 1
         
@@ -165,33 +165,32 @@
             font_size: dp(16)
             color: 1, 0, 0, 1
         
-        # System Status Icons (top right)
-        BoxLayout:
-            pos_hint: {"right": 0.95, "top": 0.95}
-            size_hint: 0.2, 0.05
-            spacing: dp(10)
-            
-            Image:
-                source: f'{root.mimic_directory}/Mimic/Pi/imgs/main/signal.png'
-                size_hint: 0.2, 1
-                allow_stretch: True
-                keep_ratio: True
-            
-            Image:
-                source: f'{root.mimic_directory}/Mimic/Pi/imgs/main/arduino.png'
-                size_hint: 0.2, 1
-                allow_stretch: True
-                keep_ratio: True
-            
-            Label:
-                id: arduino_count
-                text: '0'
-                size_hint: 0.2, 1
-                color: 1, 1, 1, 1
-        
-        # Back Button
+        Image:
+            id: signal
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/signalred.zip"
+            size_hint_y: 0.112
+            anim_delay: 0.05
+            anim_loop: 0
+            fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.05, "center_y": 0.07}
+        Image:
+            id: arduino
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
+            size_hint_y: 0.15
+            anim_delay: 0.2
+            anim_loop: 0
+            fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+        Label:
+            id: arduino_count
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+            text: ''
+            markup: True
+            color: 1,1,1
+            font_size: self.height * 0.3
+            size_hint_y: 0.5
         Button:
-            text: 'Back'
-            pos_hint: {"x": 0.05, "bottom": 0.05}
-            size_hint: 0.1, 0.06
-            on_press: root.manager.current = 'mimic'
+            size_hint: 0.1,0.11
+            pos_hint: {"center_x": 0.9375, "center_y": 0.082}
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            on_release: app.root.current = 'orbit'
