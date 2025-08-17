@@ -194,11 +194,17 @@ class PlaybackEngine:
                     count = cursor.fetchone()[0]
                     print(f"Database connected successfully. Found {count} telemetry records.")
                     
-                    # Test a simple update
+                    # Test a simple update using the correct method
                     print("Testing database write...")
-                    cursor.execute("UPDATE telemetry SET Value = 'TEST123' WHERE ID = 'S6000004'")
-                    conn.commit()
-                    print("Test update completed")
+                    cursor.execute("SELECT Label FROM telemetry WHERE ID = 'S6000004'")
+                    result = cursor.fetchone()
+                    if result:
+                        label = result[0]
+                        cursor.execute("UPDATE telemetry SET Value = 'TEST456' WHERE Label = ?", (label,))
+                        conn.commit()
+                        print(f"Test update completed for Label '{label}'")
+                    else:
+                        print("Could not find S6000004 record")
                     
             except Exception as e:
                 print(f"WARNING: Database connection test failed: {e}")
@@ -335,31 +341,34 @@ class PlaybackEngine:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 
-                # First, check if the record exists
-                cursor.execute("SELECT COUNT(*) FROM telemetry WHERE ID = ?", (telemetry_id,))
-                count = cursor.fetchone()[0]
-                print(f"DEBUG: Found {count} records with ID {telemetry_id}")
+                # First, find the record by ID and get its Label (primary key)
+                cursor.execute("SELECT Label FROM telemetry WHERE ID = ?", (telemetry_id,))
+                result = cursor.fetchone()
                 
-                if count > 0:
-                    # Update the record
+                if result:
+                    label = result[0]
+                    print(f"DEBUG: Found record with Label '{label}' for ID '{telemetry_id}'")
+                    
+                    # Update using the Label (primary key)
                     cursor.execute(
-                        "UPDATE telemetry SET Value = ?, Timestamp = ? WHERE ID = ?",
-                        (str(value), datetime.now().isoformat(), telemetry_id)
+                        "UPDATE telemetry SET Value = ?, Timestamp = ? WHERE Label = ?",
+                        (str(value), datetime.now().isoformat(), label)
                     )
+                    
                     rows_affected = cursor.rowcount
                     print(f"DEBUG: UPDATE affected {rows_affected} rows")
                     conn.commit()
                     
                     # Verify the update
-                    cursor.execute("SELECT Value, Timestamp FROM telemetry WHERE ID = ?", (telemetry_id,))
+                    cursor.execute("SELECT Label, Value, Timestamp, ID FROM telemetry WHERE Label = ?", (label,))
                     result = cursor.fetchone()
                     if result:
-                        db_value, db_timestamp = result
-                        print(f"DEBUG: After update - ID={telemetry_id}, DB Value={db_value}, DB Timestamp={db_timestamp}")
+                        db_label, db_value, db_timestamp, db_id = result
+                        print(f"DEBUG: After update - Label='{db_label}', Value='{db_value}', Timestamp='{db_timestamp}', ID='{db_id}'")
                     else:
-                        print(f"DEBUG: Could not verify update for {telemetry_id}")
+                        print(f"DEBUG: Could not verify update for Label '{label}'")
                 else:
-                    print(f"ERROR: No record found with ID {telemetry_id}")
+                    print(f"ERROR: No record found with ID '{telemetry_id}'")
                 
             # Increment update counter
             self._update_count += 1
