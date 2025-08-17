@@ -76,6 +76,9 @@ class Playback_Screen(MimicBase):
         except Exception as e:
             log_error(f"Error checking Arduino connection: {e}")
             self.arduino_connected = False
+        
+        # Check start button state whenever Arduino connection changes
+        self._check_start_button_state()
 
     # ---------------------------------------------------------------- USB Monitoring
     def _start_usb_monitor(self):
@@ -139,6 +142,10 @@ class Playback_Screen(MimicBase):
         else:
             # Built-in demo
             self._load_builtin_demo(filename)
+        
+        # Update status and check if start button should be enabled
+        self._update_status()
+        self._check_start_button_state()
 
     def _load_usb_file(self, drive_name: str):
         """Load playback data from USB drive."""
@@ -205,12 +212,83 @@ class Playback_Screen(MimicBase):
             
             log_info("Disco mode activated: Disco data at 1x speed")
             
+            # Update status and check start button
+            self._update_status()
+            self._check_start_button_state()
+            
             # Auto-start the playback
             self.start_playback()
             
         except Exception as e:
             log_error(f"Error starting disco mode: {e}")
             self._show_error(f"Error starting disco mode: {e}")
+
+    # ---------------------------------------------------------------- Speed Control
+    def set_playback_speed(self, speed_str: str):
+        """Set the playback speed multiplier from dropdown text."""
+        try:
+            # Extract numeric value from "10x", "20x", etc.
+            speed_value = float(speed_str.replace('x', ''))
+            
+            if speed_value <= 0:
+                return
+                
+            self.playback_speed = speed_value
+            
+            # If currently playing, restart timer with new speed
+            if self.is_playing:
+                self._stop_playback_timer()
+                self._start_playback_timer()
+                
+            log_info(f"Playback speed set to {speed_value}x")
+            
+            # Update status and check if start button should be enabled
+            self._update_status()
+            self._check_start_button_state()
+            
+        except ValueError:
+            log_error(f"Invalid speed format: {speed_str}")
+
+    # ---------------------------------------------------------------- Status Updates
+    def _update_status(self):
+        """Update the status label with current selections and next steps."""
+        try:
+            status_label = getattr(self.ids, 'status_label', None)
+            if not status_label:
+                return
+                
+            if not self.current_file:
+                status_label.text = "Select Data to Playback"
+                return
+                
+            if not self.playback_speed:
+                status_label.text = f"{self.current_file} selected, choose playback speed"
+                return
+                
+            # Both data and speed are selected
+            status_label.text = f"{self.current_file} at {self.playback_speed}x - Ready to Start!"
+            
+        except Exception as e:
+            log_error(f"Error updating status: {e}")
+
+    def _check_start_button_state(self):
+        """Check if start button should be enabled and update its state."""
+        try:
+            start_button = getattr(self.ids, 'start_button', None)
+            if not start_button:
+                return
+                
+            # Enable start button if all conditions are met
+            should_enable = (
+                self.current_file and 
+                self.playback_speed > 0 and 
+                self.arduino_connected
+            )
+            
+            start_button.disabled = not should_enable
+            
+        except Exception as e:
+            log_error(f"Error checking start button state: {e}")
 
     # ---------------------------------------------------------------- Playback Control
     def start_playback(self):
@@ -310,28 +388,6 @@ class Playback_Screen(MimicBase):
             else:
                 loop_button.background_color = (0.6, 0.6, 0.6, 1)  # Gray
             
-    # ---------------------------------------------------------------- Speed Control
-    def set_playback_speed(self, speed_str: str):
-        """Set the playback speed multiplier from dropdown text."""
-        try:
-            # Extract numeric value from "10x", "20x", etc.
-            speed_value = float(speed_str.replace('x', ''))
-            
-            if speed_value <= 0:
-                return
-                
-            self.playback_speed = speed_value
-            
-            # If currently playing, restart timer with new speed
-            if self.is_playing:
-                self._stop_playback_timer()
-                self._start_playback_timer()
-                
-            log_info(f"Playback speed set to {speed_value}x")
-            
-        except ValueError:
-            log_error(f"Invalid speed format: {speed_str}")
-
     # ---------------------------------------------------------------- Error Handling
     def _show_error(self, message: str):
         """Show an error popup."""

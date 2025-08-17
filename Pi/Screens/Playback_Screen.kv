@@ -134,12 +134,13 @@
         # ---------- MAIN PLAYBACK CONTROLS ----------
         # Green Start Button (Bottom Left)
         Button:
+            id: start_button
             text: 'START'
             size_hint: None, None
             width: dp(120)
             height: dp(60)
             background_color: 0, 0.8, 0, 1  # Green
-            disabled: (not root.current_file) or (root.arduino_connected == False)
+            disabled: True  # Start disabled by default
             on_press: root.start_playback()
             pos_hint: {"center_x": 0.35, "center_y": 0.235}
         
