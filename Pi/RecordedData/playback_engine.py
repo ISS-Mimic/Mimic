@@ -300,22 +300,41 @@ class PlaybackEngine:
             print(f"ERROR: Error updating telemetry stream {telemetry_id}: {e}")
             return True  # Mark as complete on error
     
-    # ---------------------------------------------------------------- Database update - Updated for string IDs
+    def _verify_database_update(self, telemetry_id: str, value: float):
+        """Verify that the database was updated correctly."""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT Value, Timestamp FROM telemetry WHERE ID = ?",
+                    (telemetry_id,)
+                )
+                result = cursor.fetchone()
+                if result:
+                    db_value, db_timestamp = result
+                    print(f"DB VERIFY: ID={telemetry_id}, DB Value={db_value}, DB Timestamp={db_timestamp}")
+                else:
+                    print(f"DB VERIFY: ID={telemetry_id} not found in database!")
+                    
+        except Exception as e:
+            print(f"ERROR: Could not verify database update: {e}")
+
     def _send_telemetry_value(self, telemetry_id: str, value: float):
         """Send a telemetry value to the database."""
         try:
-            # For testing, just print the values instead of writing to database
             print(f"TELEMETRY: ID={telemetry_id}, Value={value}")
             
-            # Uncomment this when you want to actually write to database
-            # The database expects: UPDATE telemetry SET Value = ?, Timestamp = ? WHERE ID = ?
-            # with sqlite3.connect(self.db_path) as conn:
-            #     cursor = conn.cursor()
-            #     cursor.execute(
-            #         "UPDATE telemetry SET Value = ?, Timestamp = ? WHERE ID = ?",
-            #         (str(value), datetime.now().isoformat(), telemetry_id)
-            #     )
-            #     conn.commit()
+            # Write to database
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "UPDATE telemetry SET Value = ?, Timestamp = ? WHERE ID = ?",
+                    (str(value), datetime.now().isoformat(), telemetry_id)
+                )
+                conn.commit()
+                
+            # Verify the update
+            self._verify_database_update(telemetry_id, value)
                 
         except Exception as e:
             print(f"ERROR: Error sending telemetry value {telemetry_id}={value}: {e}")
