@@ -79,9 +79,9 @@
     
     FloatLayout:
         # Background
-        Image:
-            source: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/SimulatedOrbitBackground.png'
-            fit_mode: "fill"
+        #Image:
+        #    source: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/SimulatedOrbitBackground.png'
+        #    fit_mode: "fill"
         
         # Title
         Label:
@@ -119,23 +119,23 @@
             spacing: dp(10)
             
             Button:
-                text: '0.5x'
-                on_release: root.set_playback_speed(0.5)
+                text: '10x'
+                on_release: root.set_playback_speed(10)
                 background_color: 0.3, 0.3, 0.3, 1
             
             Button:
-                text: '1x'
-                on_release: root.set_playback_speed(1.0)
+                text: '20x'
+                on_release: root.set_playback_speed(20)
                 background_color: 0.2, 0.6, 0.2, 1
             
             Button:
-                text: '2x'
-                on_release: root.set_playback_speed(2.0)
+                text: '60x'
+                on_release: root.set_playback_speed(60)
                 background_color: 0.3, 0.3, 0.3, 1
             
             Button:
-                text: '5x'
-                on_release: root.set_playback_speed(5.0)
+                text: '90x'
+                on_release: root.set_playback_speed(60)
                 background_color: 0.3, 0.3, 0.3, 1
         
         # Current File Display
