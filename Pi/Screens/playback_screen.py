@@ -46,6 +46,10 @@ class Playback_Screen(MimicBase):
     _playback_data = []
     _current_index = 0
     _playback_timer = None
+    
+    # Serial writing
+    _serial_timer = None
+    _serial_update_interval = 0.1  # Update every 100ms (10Hz)
 
     def __init__(self, **kw):
         super().__init__(**kw)
@@ -319,6 +323,196 @@ class Playback_Screen(MimicBase):
         except Exception as e:
             log_error(f"Error checking start button state: {e}")
 
+    # ---------------------------------------------------------------- Serial Writing
+    def _start_serial_writer(self):
+        """Start the serial writer timer to continuously send telemetry data."""
+        if self._serial_timer:
+            Clock.unschedule(self._serial_timer)
+        
+        self._serial_timer = Clock.schedule_interval(self._send_telemetry_serial, self._serial_update_interval)
+        log_info("Serial writer started")
+
+    def _stop_serial_writer(self):
+        """Stop the serial writer timer."""
+        if self._serial_timer:
+            Clock.unschedule(self._serial_timer)
+            self._serial_timer = None
+            log_info("Serial writer stopped")
+
+    def _send_telemetry_serial(self, dt):
+        """Read telemetry values from database and send to Arduino."""
+        if not self.is_playing or not self.arduino_connected:
+            return
+            
+        try:
+            # Read current telemetry values from database
+            telemetry_values = self._read_current_telemetry()
+            
+            if telemetry_values:
+                # Build the serial command string
+                serial_cmd = self._build_serial_command(telemetry_values)
+                
+                # Send to Arduino
+                serialWrite(serial_cmd)
+                
+        except Exception as e:
+            log_error(f"Error sending telemetry serial: {e}")
+
+    def _read_current_telemetry(self):
+        """Read current telemetry values from the database."""
+        try:
+            import sqlite3
+            
+            db_path = self._get_db_path()
+            if not db_path:
+                return None
+                
+            with sqlite3.connect(db_path) as conn:
+                cursor = conn.cursor()
+                
+                # Map the Arduino command names to actual database IDs
+                telemetry_mapping = {
+                    'PSARJ': 'S0000004',      # psarj
+                    'SSARJ': 'S0000003',      # ssarj
+                    'PTRRJ': 'S0000002',      # ptrrj
+                    'STRRJ': 'S0000001',      # strrj
+                    'B1B': 'S6000008',        # beta1b
+                    'B1A': 'S4000007',        # beta1a
+                    'B2B': 'P6000008',        # beta2b
+                    'B2A': 'P4000007',        # beta2a
+                    'B3B': 'S6000007',        # beta3b
+                    'B3A': 'S4000008',        # beta3a
+                    'B4B': 'P6000007',        # beta4b
+                    'B4A': 'P4000008',        # beta4a
+                    'AOS': 'AOS',             # aos
+                    'V1A': 'S4000001',        # voltage_1a
+                    'V2A': 'P4000001',        # voltage_2a
+                    'V3A': 'S4000004',        # voltage_3a
+                    'V4A': 'P4000004',        # voltage_4a
+                    'V1B': 'S6000004',        # voltage_1b
+                    'V2B': 'P6000004',        # voltage_2b
+                    'V3B': 'S6000001',        # voltage_3b
+                    'V4B': 'P6000001',        # voltage_4b
+                    'ISS': 'USLAB000086',     # iss_mode
+                    'Sgnt_el': 'Z1000014',    # sgant_elevation
+                    'Sgnt_xel': 'Z1000015',   # sgant_xel
+                    'Sgnt_xmit': 'Z1000013',  # kuband_transmit
+                    'SASA_Xmit': 'S1000009',  # sasa1_status
+                    'SASA_AZ': 'S1000004',    # sasa1_azimuth
+                    'SASA_EL': 'S1000005'     # sasa1_elevation
+                }
+                
+                # Get the actual database IDs we need to query
+                db_ids = list(telemetry_mapping.values())
+                
+                # Build query to get all values at once
+                placeholders = ','.join(['?' for _ in db_ids])
+                query = f"SELECT ID, Value FROM telemetry WHERE ID IN ({placeholders})"
+                
+                cursor.execute(query, db_ids)
+                results = cursor.fetchall()
+                
+                # Convert to dictionary with Arduino command names as keys
+                telemetry_dict = {}
+                for db_id, value in results:
+                    # Find the Arduino command name for this database ID
+                    for cmd_name, actual_db_id in telemetry_mapping.items():
+                        if actual_db_id == db_id:
+                            telemetry_dict[cmd_name] = value
+                            break
+                
+                return telemetry_dict
+                
+        except Exception as e:
+            log_error(f"Error reading telemetry from database: {e}")
+            return None
+
+    def _build_serial_command(self, telemetry_values):
+        """Build the serial command string from telemetry values."""
+        try:
+            # Extract values with defaults
+            psarj = telemetry_values.get('PSARJ', 0)
+            ssarj = telemetry_values.get('SSARJ', 0)
+            ptrrj = telemetry_values.get('PTRRJ', 0)
+            strrj = telemetry_values.get('STRRJ', 0)
+            b1b = telemetry_values.get('B1B', 0)
+            b1a = telemetry_values.get('B1A', 0)
+            b2b = telemetry_values.get('B2B', 0)
+            b2a = telemetry_values.get('B2A', 0)
+            b3b = telemetry_values.get('B3B', 0)
+            b3a = telemetry_values.get('B3A', 0)
+            b4b = telemetry_values.get('B4B', 0)
+            b4a = telemetry_values.get('B4A', 0)
+            aos = telemetry_values.get('AOS', 0)
+            v1as = telemetry_values.get('V1A', 0)
+            v2as = telemetry_values.get('V2A', 0)
+            v3as = telemetry_values.get('V3A', 0)
+            v4as = telemetry_values.get('V4A', 0)
+            v1bs = telemetry_values.get('V1B', 0)
+            v2bs = telemetry_values.get('V2B', 0)
+            v3bs = telemetry_values.get('V3B', 0)
+            v4bs = telemetry_values.get('V4B', 0)
+            module = telemetry_values.get('ISS', 0)
+            sgant_elevation = telemetry_values.get('Sgnt_el', 0)
+            sgant_xelevation = telemetry_values.get('Sgnt_xel', 0)
+            sgant_transmit = telemetry_values.get('Sgnt_xmit', 0)
+            sasa_xmit = telemetry_values.get('SASA_Xmit', 0)
+            sasa_az = telemetry_values.get('SASA_AZ', 0)
+            sasa_el = telemetry_values.get('SASA_EL', 0)
+            
+            # Build the command string exactly as specified
+            serial_cmd = (
+                f"PSARJ={psarj} "
+                f"SSARJ={ssarj} "
+                f"PTRRJ={ptrrj} "
+                f"STRRJ={strrj} "
+                f"B1B={b1b} "
+                f"B1A={b1a} "
+                f"B2B={b2b} "
+                f"B2A={b2a} "
+                f"B3B={b3b} "
+                f"B3A={b3a} "
+                f"B4B={b4b} "
+                f"B4A={b4a} "
+                f"AOS={aos} "
+                f"V1A={str(v1as)} "
+                f"V2A={str(v2as)} "
+                f"V3A={str(v3as)} "
+                f"V4A={str(v4as)} "
+                f"V1B={str(v1bs)} "
+                f"V2B={str(v2bs)} "
+                f"V3B={str(v3bs)} "
+                f"V4B={str(v4bs)} "
+                f"ISS={module} "
+                f"Sgnt_el={str(int(sgant_elevation))} "
+                f"Sgnt_xel={str(int(sgant_xelevation))} "
+                f"Sgnt_xmit={str(int(sgant_transmit))} "
+                f"SASA_Xmit={str(int(sasa_xmit))} "
+                f"SASA_AZ={str(float(sasa_az))} "
+                f"SASA_EL={str(float(sasa_el))} "
+            )
+            
+            return serial_cmd
+            
+        except Exception as e:
+            log_error(f"Error building serial command: {e}")
+            return ""
+
+    def _get_db_path(self):
+        """Get the database path based on platform."""
+        try:
+            import platform
+            if platform.system() == "Linux":
+                return "/dev/shm/iss_telemetry.db"
+            else:
+                # Windows path
+                import os
+                home = os.path.expanduser("~")
+                return os.path.join(home, ".mimic_data", "iss_telemetry.db")
+        except Exception as e:
+            log_error(f"Error getting database path: {e}")
+            return None
+
     # ---------------------------------------------------------------- Playback Control
     def start_playback(self):
         """Start playing back the selected data file."""
@@ -370,6 +564,9 @@ class Playback_Screen(MimicBase):
             loop_status = "with looping" if self.loop_enabled else ""
             log_info(f"Started playback of {self.current_file} at {self.playback_speed}x speed {loop_status}")
             
+            # Start serial writer
+            self._start_serial_writer()
+            
             # Update status to show playback is active
             self._update_status()
             
@@ -387,6 +584,9 @@ class Playback_Screen(MimicBase):
             
         try:
             log_info("Stopping playback...")
+            
+            # Stop serial writer first
+            self._stop_serial_writer()
             
             # Stop the playback engine
             app = App.get_running_app()
@@ -422,6 +622,7 @@ class Playback_Screen(MimicBase):
             log_error(f"Error stopping playback: {e}")
             # Even if there's an error, mark as not playing
             self.is_playing = False
+            self._stop_serial_writer()
             self._update_status()
             self._update_playback_buttons()
     
