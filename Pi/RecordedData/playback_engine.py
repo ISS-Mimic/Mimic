@@ -39,7 +39,7 @@ class PlaybackEngine:
     """Engine for playing back recorded telemetry data."""
     
     def __init__(self, data_folder: str, playback_speed: float, loop: bool = False):
-        print(f"Initializing PlaybackEngine with folder: {data_folder}, speed: {playback_speed}, loop: {loop}")
+        print(f"Initializing PlaybackEngine: {data_folder} at {playback_speed}x speed")
         
         self.data_folder = Path(data_folder)
         self.playback_speed = playback_speed
@@ -49,9 +49,8 @@ class PlaybackEngine:
         
         # Database path
         self.db_path = self._get_db_path()
-        print(f"Using database: {self.db_path}")
         
-        # Data storage - Updated for string IDs
+        # Data storage
         self.telemetry_data: Dict[str, List[Tuple[float, float]]] = {}
         self.current_indices: Dict[str, int] = {}
         self.start_time: Optional[float] = None
@@ -60,7 +59,7 @@ class PlaybackEngine:
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
         
-        print("PlaybackEngine initialized successfully")
+        print("PlaybackEngine ready")
         
     def _get_db_path(self) -> str:
         """Get the telemetry database path."""
@@ -82,17 +81,14 @@ class PlaybackEngine:
     def load_data(self) -> bool:
         """Load all telemetry data from the specified folder."""
         try:
-            print(f"Checking if data folder exists: {self.data_folder}")
             if not self.data_folder.exists():
                 print(f"ERROR: Data folder not found: {self.data_folder}")
                 return False
             
-            print(f"Loading telemetry data from: {self.data_folder}")
+            print(f"Loading data from: {self.data_folder}")
             
             # Find all telemetry files
             telemetry_files = list(self.data_folder.glob("*.txt"))
-            print(f"Found {len(telemetry_files)} telemetry files: {[f.name for f in telemetry_files]}")
-            
             if not telemetry_files:
                 print(f"ERROR: No telemetry files found in {self.data_folder}")
                 return False
@@ -100,23 +96,17 @@ class PlaybackEngine:
             # Load each telemetry file
             for file_path in telemetry_files:
                 try:
-                    print(f"Processing file: {file_path.name}")
-                    
                     # Extract telemetry ID from filename
                     telemetry_id = self._extract_telemetry_id(file_path.name)
                     if telemetry_id is None:
                         print(f"ERROR: Could not extract telemetry ID from filename: {file_path.name}")
                         continue
                     
-                    print(f"Extracted telemetry ID: {telemetry_id}")
-                    
                     # Load the data
                     data = self._load_telemetry_file(file_path)
                     if data:
                         self.telemetry_data[telemetry_id] = data
                         self.current_indices[telemetry_id] = 0
-                        print(f"Loaded {len(data)} data points for telemetry ID {telemetry_id}")
-                        print(f"First few data points: {data[:3]}")
                     else:
                         print(f"WARNING: No data loaded from {file_path.name}")
                     
@@ -128,8 +118,7 @@ class PlaybackEngine:
                 print("ERROR: No valid telemetry data loaded")
                 return False
             
-            print(f"Successfully loaded {len(self.telemetry_data)} telemetry streams")
-            print(f"Telemetry IDs: {list(self.telemetry_data.keys())}")
+            print(f"Loaded {len(self.telemetry_data)} telemetry streams")
             return True
             
         except Exception as e:
@@ -144,7 +133,6 @@ class PlaybackEngine:
         try:
             # Remove .txt extension and return the alphanumeric ID
             telemetry_id = filename.replace('.txt', '')
-            print(f"Extracted telemetry ID: {telemetry_id}")
             return telemetry_id
         except Exception as e:
             print(f"ERROR extracting telemetry ID from {filename}: {e}")
@@ -155,7 +143,6 @@ class PlaybackEngine:
         data = []
         
         try:
-            print(f"Opening file: {file_path}")
             with open(file_path, 'r') as f:
                 for line_num, line in enumerate(f, 1):
                     line = line.strip()
@@ -176,11 +163,8 @@ class PlaybackEngine:
                         print(f"WARNING: Error parsing line {line_num}: {line} - {e}")
                         continue
             
-            print(f"Loaded {len(data)} data points from {file_path.name}")
-            
             # Sort by timestamp
             data.sort(key=lambda x: x[0])
-            print(f"Sorted data, timestamp range: {data[0][0] if data else 'N/A'} to {data[-1][0] if data else 'N/A'}")
             return data
             
         except Exception as e:
@@ -191,8 +175,6 @@ class PlaybackEngine:
     
     def start(self):
         """Start the playback engine."""
-        print("Starting playback engine...")
-        
         if not self.telemetry_data:
             print("ERROR: No data loaded, cannot start playback")
             return False
@@ -203,20 +185,15 @@ class PlaybackEngine:
             self.start_time = time.time()
             
             # Start playback thread
-            print("Starting playback thread...")
             playback_thread = threading.Thread(target=self._playback_loop, daemon=True)
             playback_thread.start()
             
-            print("Playback thread started, entering main loop...")
+            print("Playback started - press Ctrl+C to stop")
             
             # Wait for completion or interruption
             try:
                 while self.running and playback_thread.is_alive():
                     time.sleep(0.1)
-                    if time.time() - self.start_time > 1:  # Print status every second
-                        elapsed = time.time() - self.start_time
-                        print(f"Playback running for {elapsed:.1f} seconds...")
-                        self.start_time = time.time()  # Reset timer
                         
             except KeyboardInterrupt:
                 print("Playback interrupted by user")
@@ -233,7 +210,6 @@ class PlaybackEngine:
     
     def _playback_loop(self):
         """Main playback loop."""
-        print("Entering playback loop...")
         try:
             loop_count = 0
             while self.running and not self.paused:
@@ -243,10 +219,10 @@ class PlaybackEngine:
                 # Calculate what timestamp we should be at
                 target_timestamp = elapsed_real_time * self.playback_speed
                 
-                # Print status every 100 loops
+                # Print status every 1000 loops (about every 10 seconds at 100Hz)
                 loop_count += 1
-                if loop_count % 100 == 0:
-                    print(f"Playback loop: elapsed={elapsed_real_time:.1f}s, target_timestamp={target_timestamp:.1f}")
+                if loop_count % 1000 == 0:
+                    print(f"Playback: {elapsed_real_time:.1f}s elapsed, {target_timestamp:.1f}s target")
                 
                 # Update all telemetry streams
                 all_complete = True
@@ -322,8 +298,6 @@ class PlaybackEngine:
     def _send_telemetry_value(self, telemetry_id: str, value: float):
         """Send a telemetry value to the database."""
         try:
-            print(f"TELEMETRY: ID={telemetry_id}, Value={value}")
-            
             # Write to database
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
@@ -333,8 +307,14 @@ class PlaybackEngine:
                 )
                 conn.commit()
                 
-            # Verify the update
-            self._verify_database_update(telemetry_id, value)
+            # Only print every 100th update to reduce spam
+            if hasattr(self, '_update_count'):
+                self._update_count += 1
+            else:
+                self._update_count = 0
+                
+            if self._update_count % 100 == 0:
+                print(f"DB Update: {self._update_count} values sent to database")
                 
         except Exception as e:
             print(f"ERROR: Error sending telemetry value {telemetry_id}={value}: {e}")
@@ -375,29 +355,23 @@ def main():
     
     args = parser.parse_args()
     
-    print(f"Arguments: folder={args.data_folder}, speed={args.playback_speed}, loop={args.loop}")
-    
     # Validate arguments
     if args.playback_speed <= 0:
         print("ERROR: Playback speed must be positive")
         sys.exit(1)
     
     # Create and run playback engine
-    print("Creating playback engine...")
     engine = PlaybackEngine(args.data_folder, args.playback_speed, args.loop)
     
     if args.db_path:
         engine.db_path = args.db_path
-        print(f"Using custom database path: {args.db_path}")
     
     # Load data
-    print("Loading telemetry data...")
     if not engine.load_data():
         print("ERROR: Failed to load telemetry data")
         sys.exit(1)
     
     # Start playback
-    print("Starting playback...")
     if not engine.start():
         print("ERROR: Failed to start playback")
         sys.exit(1)
