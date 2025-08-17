@@ -68,13 +68,13 @@ class Playback_Screen(MimicBase):
                 if arduino_count_text and arduino_count_text.isdigit():
                     arduino_count = int(arduino_count_text)
                     self.arduino_connected = arduino_count > 0
-                    print(f"Arduino count from label: {arduino_count}")
+                    #print(f"Arduino count from label: {arduino_count}")
                 else:
                     self.arduino_connected = False
-                    print("Arduino count label is empty or not a number")
+                    #print("Arduino count label is empty or not a number")
             else:
                 self.arduino_connected = False
-                print("No arduino_count label found")
+                #print("No arduino_count label found")
                 
         except Exception as e:
             log_error(f"Error checking Arduino connection: {e}")
