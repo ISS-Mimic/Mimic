@@ -36,11 +36,11 @@ class Playback_Screen(MimicBase):
     # Playback state
     is_playing = BooleanProperty(False)
     current_file = StringProperty("")
-    playback_speed = NumericProperty(10.0)  # 1.0 = real-time, 2.0 = 2x speed, etc.
+    playback_speed = NumericProperty(0)  # Changed from 10.0 to 0 (no default)
     
     # Arduino connection status
     arduino_connected = BooleanProperty(False)
-    loop_enabled = BooleanProperty(False)  # New property for loop state
+    loop_enabled = BooleanProperty(False)
     
     # Playback data
     _playback_data = []
@@ -127,8 +127,8 @@ class Playback_Screen(MimicBase):
             log_error(f"Error updating dropdown: {e}")
 
     # ---------------------------------------------------------------- File Selection
-    def on_file_selected(self, filename: str):
-        """Called when user selects a file from dropdown."""
+    def on_file_selected_and_close(self, filename: str, dropdown):
+        """Called when user selects a file from dropdown and close it."""
         if not filename:
             return
             
@@ -142,6 +142,9 @@ class Playback_Screen(MimicBase):
         else:
             # Built-in demo
             self._load_builtin_demo(filename)
+        
+        # Close the dropdown
+        dropdown.close()
         
         # Update status and check if start button should be enabled
         self._update_status()
@@ -224,8 +227,8 @@ class Playback_Screen(MimicBase):
             self._show_error(f"Error starting disco mode: {e}")
 
     # ---------------------------------------------------------------- Speed Control
-    def set_playback_speed(self, speed_str: str):
-        """Set the playback speed multiplier from dropdown text."""
+    def set_playback_speed_and_close(self, speed_str: str, dropdown):
+        """Set the playback speed multiplier from dropdown text and close it."""
         try:
             # Extract numeric value from "10x", "20x", etc.
             speed_value = float(speed_str.replace('x', ''))
@@ -241,6 +244,9 @@ class Playback_Screen(MimicBase):
                 self._start_playback_timer()
                 
             log_info(f"Playback speed set to {speed_value}x")
+            
+            # Close the dropdown
+            dropdown.close()
             
             # Update status and check if start button should be enabled
             self._update_status()
@@ -261,7 +267,7 @@ class Playback_Screen(MimicBase):
                 status_label.text = "Select Data to Playback"
                 return
                 
-            if not self.playback_speed:
+            if self.playback_speed == 0:  # Changed from "not self.playback_speed"
                 status_label.text = f"{self.current_file} selected, choose playback speed"
                 return
                 
@@ -281,7 +287,7 @@ class Playback_Screen(MimicBase):
             # Enable start button if all conditions are met
             should_enable = (
                 self.current_file and 
-                self.playback_speed > 0 and 
+                self.playback_speed > 0 and  # Changed from "self.playback_speed"
                 self.arduino_connected
             )
             
