@@ -11,13 +11,8 @@ from pathlib import Path
 from getpass import getuser
 
 # ───────────────────────────── Colors ─────────────────────────────
-RED = '\033[91m'
-GREEN = '\033[92m'
-YELLOW = '\033[93m'
-BLUE = '\033[94m'
-MAGENTA = '\033[95m'
-CYAN = '\033[96m'
-RESET = '\033[0m'
+RED = '\033[91m'; GREEN = '\033[92m'; YELLOW = '\033[93m'
+BLUE = '\033[94m'; CYAN = '\033[96m'; RESET = '\033[0m'
 
 # ─────────────────────────── Paths / layout ───────────────────────
 home_dir = Path.home()
@@ -25,9 +20,7 @@ source_dir = home_dir / 'Mimic' / 'Pi' / 'InitialFiles'
 destination_dir = home_dir / '.mimic_data'
 
 # ────────────────────────── Apt non-interactive ───────────────────
-# DPKG config-file behavior:
-#   conf_mode = "old"  -> keep local changes (default)
-#   conf_mode = "new"  -> take maintainer version
+# "old" keeps local config files; "new" takes maintainer versions
 CONF_MODE_ENV = os.environ.get("MIMIC_FORCE_CONF_MODE", "old").strip().lower()
 if CONF_MODE_ENV not in {"old", "new"}:
     CONF_MODE_ENV = "old"
@@ -39,26 +32,22 @@ DPKG_FORCE = [
 
 APT_ENV = {
     "DEBIAN_FRONTEND": "noninteractive",
-    "NEEDRESTART_MODE": "a",                 # auto-restart services if needed
-    "APT_LISTCHANGES_FRONTEND": "none",      # no changelog pager
+    "NEEDRESTART_MODE": "a",            # auto-restart services if needed
+    "APT_LISTCHANGES_FRONTEND": "none", # no changelog pager
 }
 
-LOCK_WAIT_SECONDS = 300  # 5 minutes before we start killing lock holders
+LOCK_WAIT_SECONDS = 300  # 5 minutes before killing lock holders
 LOCK_POLL_SECONDS = 3
 
 # ─────────────────────────── Utilities ────────────────────────────
 def run_command(cmd, env_extra=None, check=True):
-    """
-    Run a command (list or str), stream stdout/stderr live, return exit code.
-    Raises CalledProcessError if check=True and exit!=0.
-    """
+    """Run a command, stream output live, return exit code (raise if check=True and nonzero)."""
     if isinstance(cmd, str):
         popen_args = {"args": cmd, "shell": True}
         pretty = cmd
     else:
         popen_args = {"args": cmd, "shell": False}
         pretty = " ".join(shlex.quote(c) for c in cmd)
-
     print(f"$ {pretty}", flush=True)
 
     env = os.environ.copy()
@@ -87,7 +76,6 @@ def run_command(cmd, env_extra=None, check=True):
         e = subprocess.CalledProcessError(proc.returncode, pretty)
         e.output = "".join(buf)
         raise e
-
     return proc.returncode
 
 
@@ -100,36 +88,24 @@ def _pids(cmd):
 
 
 def list_apt_like_pids():
-    """Return set of PIDs of apt/dpkg/unattended-upgrades processes."""
     return set(_pids("pgrep -x apt-get") + _pids("pgrep -x apt") +
                _pids("pgrep -x dpkg") + _pids("pgrep -x unattended-upgrade") +
                _pids("pgrep -x unattended-upgrades"))
 
 
 def kill_pids(pids):
-    """TERM then KILL stubborn PIDs."""
-    if not pids:
-        return
+    if not pids: return
     print(f"{YELLOW}Attempting to terminate lingering apt/dpkg PIDs: {sorted(pids)}{RESET}")
-    try:
-        run_command(["sudo", "kill", "-TERM"] + [str(p) for p in pids], check=False)
-    except Exception:
-        pass
+    run_command(["sudo", "kill", "-TERM"] + [str(p) for p in pids], check=False)
     time.sleep(5)
-    still = [p for p in pids if subprocess.call(["ps", "-p", str(p)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0]
+    still = [p for p in pids if subprocess.call(["ps", "-p", str(p)],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0]
     if still:
         print(f"{YELLOW}Forcing kill of PIDs: {sorted(still)}{RESET}")
-        try:
-            run_command(["sudo", "kill", "-9"] + [str(p) for p in still], check=False)
-        except Exception:
-            pass
+        run_command(["sudo", "kill", "-9"] + [str(p) for p in still], check=False)
 
 
 def wait_for_apt_locks_or_kill(timeout=LOCK_WAIT_SECONDS, poll=LOCK_POLL_SECONDS):
-    """
-    Wait until apt/dpkg-related processes are gone.
-    If timeout expires, try to kill them and return.
-    """
     start = time.time()
     while True:
         others = list_apt_like_pids()
@@ -139,40 +115,28 @@ def wait_for_apt_locks_or_kill(timeout=LOCK_WAIT_SECONDS, poll=LOCK_POLL_SECONDS
         if waited % 15 == 0:
             print(f"{YELLOW}Waiting for apt/dpkg locks... PIDs: {sorted(others)}  ({waited}s){RESET}")
         if waited >= timeout:
-            kill_pids(others)
-            return
+            kill_pids(others); return
         time.sleep(poll)
 
 
 def _ucf_env_for_conf_mode():
-    """
-    Mirror CONF_MODE_ENV for ucf so dpkg --configure -a never prompts on conffiles.
-    old -> keep local changes; new -> take maintainer version.
-    """
-    if CONF_MODE_ENV == "new":
-        return {"UCF_FORCE_CONFFNEW": "1"}
-    else:
-        return {"UCF_FORCE_CONFFOLD": "1"}
+    # Ensure dpkg --configure -a never prompts on conffiles
+    return {"UCF_FORCE_CONFFNEW": "1"} if CONF_MODE_ENV == "new" else {"UCF_FORCE_CONFFOLD": "1"}
 
 
 def repair_dpkg():
-    """Try to repair interrupted dpkg/apt state (fully non-interactive)."""
+    """Repair interrupted dpkg/apt state (fully non-interactive)."""
     print(f"{YELLOW}Attempting to repair dpkg/apt state...{RESET}")
     env_ucf = _ucf_env_for_conf_mode()
-    # Finish any pending package configuration without prompts
+    # Finish any pending configuration without prompts
     run_command(["sudo", "dpkg", "--configure", "-a"], env_extra={**APT_ENV, **env_ucf}, check=False)
     # Fix broken deps quietly
-    run_command(
-        ["sudo", "env", *(f"{k}={v}" for k, v in APT_ENV.items()), "apt-get", "-yq", "install", "-f"],
-        check=False
-    )
+    run_command(["sudo", "env", *(f"{k}={v}" for k, v in APT_ENV.items()),
+                 "apt-get", "-yq", "install", "-f"], check=False)
 
 
 def apt(args_list, retries=1):
-    """
-    Run apt-get with non-interactive flags and dpkg config-file policy.
-    Auto-waits (and kills) locks, auto-repairs interrupted dpkg, retries once.
-    """
+    """Run apt-get with non-interactive flags, auto-wait/kill locks, auto-repair once."""
     if isinstance(args_list, str):
         args_list = [args_list]
 
@@ -186,7 +150,6 @@ def apt(args_list, retries=1):
         *DPKG_FORCE,
         *args_list
     ]
-
     try:
         return run_command(base)
     except subprocess.CalledProcessError as e:
@@ -199,15 +162,9 @@ def apt(args_list, retries=1):
 
 
 def pip_install(packages: str):
-    """
-    Install with pip in a way that works on Raspberry Pi images (system Python).
-    Tries --break-system-packages (Bookworm), falls back if not supported.
-    """
-    try:
-        run_command("python3 -m pip install --upgrade pip")
-    except Exception:
-        pass
-
+    """pip install that works on Bookworm system Python."""
+    try: run_command("python3 -m pip install --upgrade pip")
+    except Exception: pass
     try:
         run_command(f"python3 -m pip install --no-input --disable-pip-version-check --break-system-packages {packages}")
     except subprocess.CalledProcessError:
@@ -215,7 +172,6 @@ def pip_install(packages: str):
 
 
 def run_install(packages: str, method: str):
-    """method: 'apt' or 'pip'"""
     if method == "apt":
         apt(["install"] + packages.split())
     elif method == "pip":
@@ -241,14 +197,12 @@ def main():
     print("double checking correct path for Mimic")
     expected_dir_name = 'Mimic'
     current_dir = Path.cwd()
-
     if current_dir.name != expected_dir_name:
         new_dir = current_dir.parent / expected_dir_name
         if new_dir.exists():
             print(f"{RED}Error: A directory named '{expected_dir_name}' already exists.{RESET}")
             sys.exit(1)
-        current_dir.rename(new_dir)
-        os.chdir(new_dir)
+        current_dir.rename(new_dir); os.chdir(new_dir)
     else:
         print("Path is correct")
 
@@ -258,55 +212,51 @@ def main():
     print(" This install takes between 10-30 minutes on average \n")
     print("If you encounter an error, try re-running the script and ensure a stable internet connection. "
           "If the problem persists, file an issue on github and/or contact the mimic team on discord")
-
     print("Raspbian distro: " + distro.codename())
-
     bullseye = ("bullseye" in distro.codename())
-    if bullseye:
-        print("bullseye detected \n")
+    if bullseye: print("bullseye detected \n")
 
-    # Free some space for smaller cards
+    # Free some space
     print("Deleting 3D print folders to free up space")
-    os.system('rm -rf 3D_Printing*')
-    os.system('rm -rf Blender')
+    os.system('rm -rf 3D_Printing*'); os.system('rm -rf Blender')
 
-    # Determine the calling user (works under sudo too)
     username = os.environ.get("SUDO_USER") or getuser()
 
-    # ── APT: update/upgrade/autoremove (non-interactive, lock-safe, auto-repair) ──
+    # ── PRE-FLIGHT: clean up any broken state before touching apt ──
+    wait_for_apt_locks_or_kill()
+    repair_dpkg()  # ensure no pending config prompts linger
+
+    # ── APT: update/upgrade/autoremove ──
     apt(["update"])
-    apt(["upgrade"])
+    apt(["upgrade"])          # change to ["full-upgrade"] if you want kernel/firmware too
     apt(["autoremove"])
 
     # ── Packages ──
     run_install("rdate", "apt")
-    run_install("vim", "apt")               # test editor
-    run_install("sqlite3", "apt")           # telemetry database
-    run_install("python3-sdl2", "apt")      # required for kivy window
-    run_install("python3-cartopy", "apt")   # required for nightshade
-    run_install("python3-scipy", "apt")     # required for nightshade
-    run_install("python3-pandas", "apt")    # pandas used for correlating NASA VV page with wiki
-    run_install("libatlas-base-dev", "apt") # fix numpy issues on Pi
-    run_install("python3-twisted", "apt")   # websocket deps (TDRS status)
-    run_install("python3-autobahn", "apt")  # websocket deps (TDRS status)
-    run_install("python3-ephem", "apt")     # pyephem
+    run_install("vim", "apt")
+    run_install("sqlite3", "apt")
+    run_install("python3-sdl2", "apt")
+    run_install("python3-cartopy", "apt")
+    run_install("python3-scipy", "apt")
+    run_install("python3-pandas", "apt")
+    run_install("libatlas-base-dev", "apt")
+    run_install("python3-twisted", "apt")
+    run_install("python3-autobahn", "apt")
+    run_install("python3-ephem", "apt")
     if bullseye:
         run_install("pytz", "pip")
     else:
         run_install("python3-pytzdata", "apt")
     run_install("python3-matplotlib", "apt")
     run_install("python3-pyudev", "apt")
-    run_install("lightstreamer-client-lib", "pip")  # ISS telemetry service client
+    run_install("lightstreamer-client-lib", "pip")
 
-    # ── Kivy (pip preferred for latest) ──
+    # ── Kivy ──
     print("\nInstalling Kivy requirements and package.")
     run_install("kivy", "pip")
-
-    # Trigger Kivy init to create ~/.kivy/config.ini
     try:
         run_command("python3 -c 'import kivy; print(kivy.__version__)'")
-    except Exception:
-        pass
+    except Exception: pass
 
     print("Replacing Kivy config file")
     replace_kivy_config(username)
@@ -316,10 +266,8 @@ def main():
     try:
         for item in source_dir.iterdir():
             dest = destination_dir / item.name
-            if item.is_dir():
-                shutil.copytree(item, dest, dirs_exist_ok=True)
-            else:
-                shutil.copy2(item, dest)
+            if item.is_dir(): shutil.copytree(item, dest, dirs_exist_ok=True)
+            else:             shutil.copy2(item, dest)
     except Exception as e:
         print(f"{YELLOW}Warning copying initial files: {e}{RESET}")
 
