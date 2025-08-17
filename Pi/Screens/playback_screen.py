@@ -56,16 +56,24 @@ class Playback_Screen(MimicBase):
 
     # ---------------------------------------------------------------- Arduino Check
     def _check_arduino_connection(self, dt):
-        """Check if Arduino is connected by checking the app's arduino count."""
+        """Check if Arduino is connected by checking the arduino count text."""
         try:
-            app = App.get_running_app()
-            arduino_count = getattr(app, 'arduino_count', 0)
-            print(f"Arduino count: {arduino_count}")
-            self.arduino_connected = arduino_count > 0
-            
-            # Update the arduino status label
-
-                    
+            # Get arduino count from the screen's own arduino_count label
+            # This gets updated by the main app's updateArduinoCount method
+            arduino_count_label = getattr(self.ids, 'arduino_count', None)
+            if arduino_count_label:
+                arduino_count_text = arduino_count_label.text.strip()
+                if arduino_count_text and arduino_count_text.isdigit():
+                    arduino_count = int(arduino_count_text)
+                    self.arduino_connected = arduino_count > 0
+                    print(f"Arduino count from label: {arduino_count}")
+                else:
+                    self.arduino_connected = False
+                    print("Arduino count label is empty or not a number")
+            else:
+                self.arduino_connected = False
+                print("No arduino_count label found")
+                
         except Exception as e:
             log_error(f"Error checking Arduino connection: {e}")
             self.arduino_connected = False
