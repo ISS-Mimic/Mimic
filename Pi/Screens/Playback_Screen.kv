@@ -1,27 +1,28 @@
+#:kivy 2.0.0
 #:import Factory kivy.factory.Factory
 #:import dp kivy.metrics.dp
 
 <DescriptionPopup@Popup>:
     title: 'Recorded ISS Data Descriptions'
-    size_hint: 0.6, 0.4
+    size_hint: 0.8, 0.8
     auto_dismiss: True
-
+    
     BoxLayout:
         orientation: 'vertical'
         padding: dp(12)
         spacing: dp(8)
-
+        
         ScrollView:
             do_scroll_x: False
             do_scroll_y: True
-
+            
             GridLayout:
                 cols: 1
                 size_hint_y: None
                 height: self.minimum_height
                 padding: dp(8), dp(8)
                 spacing: dp(8)
-
+                
                 Label:
                     text: 'This will playback recorded data from when the Japanese HTV spacecraft berthed to the ISS. During berthing, the SARJs and nadir BGAs lock but the zenith BGAs autotrack'
                     size_hint_y: None
@@ -29,7 +30,8 @@
                     text_size: self.width, None
                     halign: 'left'
                     valign: 'middle'
-
+                    color: 1, 1, 1, 1
+                
                 Label:
                     text: 'ISS Info 2: [More ISS info here]'
                     size_hint_y: None
@@ -37,7 +39,8 @@
                     text_size: self.width, None
                     halign: 'left'
                     valign: 'middle'
-
+                    color: 1, 1, 1, 1
+                
                 Label:
                     text: 'ISS Info 3: [More ISS info here]'
                     size_hint_y: None
@@ -45,7 +48,8 @@
                     text_size: self.width, None
                     halign: 'left'
                     valign: 'middle'
-
+                    color: 1, 1, 1, 1
+                
                 Label:
                     text: 'ISS Info 4: [More ISS info here]'
                     size_hint_y: None
@@ -53,7 +57,8 @@
                     text_size: self.width, None
                     halign: 'left'
                     valign: 'middle'
-
+                    color: 1, 1, 1, 1
+                
                 Label:
                     text: 'ISS Info 5: [More ISS info here]'
                     size_hint_y: None
@@ -61,7 +66,8 @@
                     text_size: self.width, None
                     halign: 'left'
                     valign: 'middle'
-
+                    color: 1, 1, 1, 1
+                
                 Label:
                     text: 'Demo orbit 2'
                     size_hint_y: None
@@ -69,7 +75,7 @@
                     text_size: self.width, None
                     halign: 'center'
                     valign: 'middle'
-
+                    color: 1, 1, 1, 1
 
 # If you need an image button later, define it like this and set source per instance:
 # <ImageButton@ButtonBehavior+Image>:
@@ -78,144 +84,160 @@
 
 <Playback_Screen>:
     name: 'playback'
-
+    
     FloatLayout:
-
         # Title
         Label:
-            text: 'Playback Control'
+            text: 'Orbit Data Playback'
             size_hint: None, None
-            font_size: dp(24)
-            color: 1, 1, 1, 1
-            text_size: self.width, None
-            halign: 'center'
-            valign: 'middle'
-            width: dp(300)
-            height: dp(40)
-            pos_hint: {"center_x": 0.5, "top": 0.98}
-
-        # ---------- Data Source ----------
-        Label:
-            text: 'Data Source:'
-            size_hint: None, None
-            font_size: dp(16)
-            color: 1, 1, 1, 1
-            width: dp(120)
-            height: dp(36)
-            pos_hint: {"x": 0.05, "top": 0.88}
-
-        Spinner:
-            id: file_dropdown
-            text: 'Select Data File'
-            size_hint: None, None
-            width: dp(260)
-            height: dp(36)
-            values: ['HTV Demo', 'OFT2 Demo', 'Demo Demo']
-            on_text: root.on_file_selected(args[1])
-            pos_hint: {"x": 0.05, "top": 0.82}
-
-        # ---------- Playback Speed ----------
-        Label:
-            text: 'Playback Speed:'
-            size_hint: None, None
-            font_size: dp(16)
-            color: 1, 1, 1, 1
-            width: dp(140)
-            height: dp(36)
-            pos_hint: {"x": 0.55, "top": 0.88}
-
-        Spinner:
-            id: speed_dropdown
-            text: '10x'
-            size_hint: None, None
-            width: dp(160)
-            height: dp(36)
-            values: ['10x', '20x', '60x', '90x']
-            on_text: root.set_playback_speed(args[1])
-            pos_hint: {"x": 0.55, "top": 0.82}
-
-        # ---------- Current File ----------
-        Label:
-            text: root.current_file if root.current_file else 'No file selected'
-            size_hint: None, None
-            font_size: dp(14)
-            color: 0.8, 0.8, 0.8, 1
+            font_size: dp(28)
+            color: 0, 1, 0, 1  # Bright green like the background
             text_size: self.width, None
             halign: 'center'
             valign: 'middle'
             width: dp(400)
-            height: dp(24)
-            pos_hint: {"center_x": 0.5, "top": 0.72}
-
-        # ---------- Playback Controls ----------
-        Button:
-            text: 'Start'
-            size_hint: None, None
-            width: dp(140)
-            height: dp(48)
-            disabled: (not root.current_file) or (root.arduino_connected == False)
-            on_press: root.start_playback()
-            pos_hint: {"center_x": 0.25, "center_y": 0.56}
-
-        Button:
-            text: 'Stop'
-            size_hint: None, None
-            width: dp(140)
-            height: dp(48)
-            disabled: not root.is_playing
-            on_press: root.stop_playback()
-            pos_hint: {"center_x": 0.50, "center_y": 0.56}
-
-        Button:
-            text: 'Loop'
-            size_hint: None, None
-            width: dp(140)
-            height: dp(48)
-            background_color: (0.2, 0.8, 0.2, 1) if root.loop_enabled else (0.6, 0.6, 0.6, 1)
-            on_press: root.toggle_loop()
-            pos_hint: {"center_x": 0.75, "center_y": 0.56}
-
-        # ---------- Status ----------
+            height: dp(50)
+            pos_hint: {"center_x": 0.5, "top": 0.98}
+        
+        # ---------- LEFT PANEL: LOAD DATA ----------
         Label:
-            text: 'Playback Status:'
+            text: 'LOAD DATA'
             size_hint: None, None
-            font_size: dp(16)
-            color: 1, 1, 1, 1
-            text_size: self.size
-            halign: 'right'
-            valign: 'middle'
-            width: dp(160)
-            height: dp(28)
-            pos_hint: {"x": 0.05, "center_y": 0.45}
-
+            font_size: dp(18)
+            color: 0, 1, 0, 1  # Green text
+            width: dp(150)
+            height: dp(30)
+            pos_hint: {"center_x": 0.17, "top": 0.88}
+        
+        Spinner:
+            id: file_dropdown
+            text: 'Select DATA'
+            size_hint: None, None
+            width: dp(200)
+            height: dp(40)
+            values: ['HTV Demo', 'OFT2 Demo', 'Demo Demo']
+            on_text: root.on_file_selected(args[1])
+            pos_hint: {"center_x": 0.17, "top": 0.78}
+            background_color: 0.3, 0.3, 0.3, 1  # Dark metallic look
+        
+        # ---------- MIDDLE PANEL: PLAYBACK SPEED ----------
         Label:
-            id: status_label
-            text: 'Stopped'  # bind this from Python as state changes
+            text: 'PLAYBACK SPEED'
+            size_hint: None, None
+            font_size: dp(18)
+            color: 0, 1, 0, 1  # Green text
+            width: dp(180)
+            height: dp(30)
+            pos_hint: {"center_x": 0.5, "top": 0.88}
+        
+        Spinner:
+            id: speed_dropdown
+            text: 'Select SPEED'
+            size_hint: None, None
+            width: dp(200)
+            height: dp(40)
+            values: ['10x', '20x', '60x', '90x']
+            on_text: root.set_playback_speed(args[1])
+            pos_hint: {"center_x": 0.5, "top": 0.78}
+            background_color: 0.3, 0.3, 0.3, 1  # Dark metallic look
+        
+        # ---------- RIGHT PANEL: DISCO MODE ----------
+        Label:
+            text: 'DISCO MODE'
+            size_hint: None, None
+            font_size: dp(18)
+            color: 0, 1, 0, 1  # Green text
+            width: dp(150)
+            height: dp(30)
+            pos_hint: {"center_x": 0.83, "top": 0.88}
+        
+        Button:
+            text: 'DISCO'
+            size_hint: None, None
+            width: dp(120)
+            height: dp(50)
+            background_color: 0.8, 0.2, 0.8, 1  # Purple/pink disco color
+            on_press: root.start_disco_mode()
+            pos_hint: {"center_x": 0.83, "top": 0.78}
+        
+        # ---------- INSTRUCTIONS ----------
+        Label:
+            text: 'Select data to playback - Insert USB for recorded'
             size_hint: None, None
             font_size: dp(14)
-            color: 0.8, 0.8, 0.8, 1
-            text_size: self.size
-            halign: 'left'
-            valign: 'middle'
-            width: dp(220)
-            height: dp(28)
-            pos_hint: {"x": 0.22, "center_y": 0.45}
-
-        # ---------- Arduino Status ----------
+            color: 0, 1, 0, 1  # Green text
+            width: dp(600)
+            height: dp(24)
+            pos_hint: {"center_x": 0.5, "center_y": 0.65}
+        
         Label:
-            id: arduino_status
-            text: 'Arduino: Disconnected'
+            text: 'Select speed to run playback (can adjust with +/-)'
             size_hint: None, None
+            font_size: dp(14)
+            color: 0, 1, 0, 1  # Green text
+            width: dp(600)
+            height: dp(24)
+            pos_hint: {"center_x": 0.5, "center_y": 0.60}
+        
+        Label:
+            text: 'Or select Disco Mode'
+            size_hint: None, None
+            font_size: dp(14)
+            color: 0, 1, 0, 1  # Green text
+            width: dp(600)
+            height: dp(24)
+            pos_hint: {"center_x": 0.5, "center_y": 0.55}
+        
+        # ---------- MAIN PLAYBACK CONTROLS ----------
+        # Green Start Button (Bottom Left)
+        Button:
+            text: 'START'
+            size_hint: None, None
+            width: dp(120)
+            height: dp(60)
+            background_color: 0, 0.8, 0, 1  # Green
+            disabled: (not root.current_file) or (root.arduino_connected == False)
+            on_press: root.start_playback()
+            pos_hint: {"center_x": 0.25, "center_y": 0.35}
+        
+        # Red Stop Button (Bottom Right)
+        Button:
+            text: 'STOP'
+            size_hint: None, None
+            width: dp(120)
+            height: dp(60)
+            background_color: 0.8, 0, 0, 1  # Red
+            disabled: not root.is_playing
+            on_press: root.stop_playback()
+            pos_hint: {"center_x": 0.75, "center_y": 0.35}
+        
+        # Loop Button (Center Bottom)
+        Button:
+            text: 'LOOP'
+            size_hint: None, None
+            width: dp(100)
+            height: dp(50)
+            background_color: (0.2, 0.8, 0.2, 1) if root.loop_enabled else (0.6, 0.6, 0.6, 1)
+            on_press: root.toggle_loop()
+            pos_hint: {"center_x": 0.5, "center_y": 0.35}
+        
+        # ---------- STATUS DISPLAY (Bottom Rectangle) ----------
+        Label:
+            id: status_label
+            text: 'Status: Ready to playback'
+            size_hint: None, None
+            width: dp(600)
+            height: dp(40)
+            background_color: 0, 0, 0, 0.8  # Semi-transparent black
+            color: 0, 1, 0, 1  # Green text
             font_size: dp(16)
-            color: 1, 0, 0, 1
             text_size: self.size
-            halign: 'left'
+            halign: 'center'
             valign: 'middle'
-            width: dp(300)
-            height: dp(32)
-            pos_hint: {"x": 0.05, "center_y": 0.32}
-
-        # ---------- Bottom Left Icons ----------
+            pos_hint: {"center_x": 0.5, "bottom": 0.15}
+        
+        # ---------- BOTTOM TOOLBAR ----------
+        # Signal Icon
         Image:
             id: signal
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/signalred.zip"
@@ -226,8 +248,9 @@
             anim_loop: 0
             allow_stretch: True
             keep_ratio: True
-            pos_hint: {"center_x": 0.06, "center_y": 0.10}
-
+            pos_hint: {"center_x": 0.06, "center_y": 0.08}
+        
+        # Arduino Icon
         Image:
             id: arduino
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
@@ -238,8 +261,9 @@
             anim_loop: 0
             allow_stretch: True
             keep_ratio: True
-            pos_hint: {"center_x": 0.14, "center_y": 0.10}
-
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+        
+        # Arduino Count
         Label:
             id: arduino_count
             text: ''
@@ -252,9 +276,23 @@
             text_size: self.size
             halign: 'left'
             valign: 'middle'
-            pos_hint: {"center_x": 0.20, "center_y": 0.10}
-
-        # ---------- Back Button (Bottom Right) ----------
+            pos_hint: {"center_x": 0.20, "center_y": 0.08}
+        
+        # Arduino Status
+        Label:
+            id: arduino_status
+            text: 'Arduino: Disconnected'
+            size_hint: None, None
+            font_size: dp(14)
+            color: 1, 0, 0, 1  # Red
+            width: dp(200)
+            height: dp(24)
+            text_size: self.size
+            halign: 'left'
+            valign: 'middle'
+            pos_hint: {"center_x": 0.30, "center_y": 0.08}
+        
+        # Back Button (Bottom Right)
         Button:
             size_hint: None, None
             width: dp(80)
@@ -262,4 +300,4 @@
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: app.root.current = 'main'
-            pos_hint: {"right": 0.98, "center_y": 0.10}
+            pos_hint: {"right": 0.98, "center_y": 0.08}
