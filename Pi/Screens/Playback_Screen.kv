@@ -98,9 +98,9 @@
             width: dp(160)
             height: dp(40)
             values: ['HTV Demo', 'OFT2 Demo', 'Demo Demo']
-            on_text: root.on_file_selected(args[1])
-            pos_hint: {"center_x": 0.15, "center_y": 0.545}
+            on_text: root.on_file_selected(args[1]); self.close()
             background_color: 0.3, 0.3, 0.3, 1  # Dark metallic look
+            pos_hint: {"center_x": 0.16, "center_y": 0.545}
         
         # ---------- MIDDLE PANEL: PLAYBACK SPEED ----------
         Spinner:
@@ -110,13 +110,12 @@
             width: dp(160)
             height: dp(40)
             values: ['10x', '20x', '60x', '90x']
-            on_text: root.set_playback_speed(args[1])
-            pos_hint: {"center_x": 0.49, "center_y": 0.545}
+            on_text: root.set_playback_speed(args[1]); self.close()
             background_color: 0.3, 0.3, 0.3, 1  # Dark metallic look
+            pos_hint: {"center_x": 0.49, "center_y": 0.545}
         
         # ---------- RIGHT PANEL: DISCO MODE ----------
         Button:
-            text: 'DISCO'
             size_hint: None, None
             width: dp(160)
             height: dp(160)
@@ -126,16 +125,10 @@
             
             canvas.before:
                 Color:
-                    rgba: 0.8, 0.2, 0.8, 1  # Purple/pink disco color
+                    rgba: 1, 1, 1, 0.1  # Purple/pink disco color
                 Ellipse:
                     pos: self.pos
                     size: self.size
-                # Optional: Add a subtle border
-                Color:
-                    rgba: 1, 1, 1, 0.3  # White border with transparency
-                Line:
-                    circle: self.center_x, self.center_y, min(self.width, self.height)/2
-                    width: dp(2)
         
         
         # ---------- MAIN PLAYBACK CONTROLS ----------
