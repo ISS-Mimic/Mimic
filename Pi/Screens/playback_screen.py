@@ -354,6 +354,7 @@ class Playback_Screen(MimicBase):
                 
                 # Send to Arduino
                 serialWrite(serial_cmd)
+                log_info(f"Sent serial command: {serial_cmd}")
                 
         except Exception as e:
             log_error(f"Error sending telemetry serial: {e}")
