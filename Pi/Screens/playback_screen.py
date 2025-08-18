@@ -352,11 +352,16 @@ class Playback_Screen(MimicBase):
             telemetry_values = self._read_current_telemetry()
             
             if telemetry_values:
-                # Build the serial command string
-                serial_cmd = self._build_serial_command(telemetry_values)
+                # Build the telemetry command string (without LED commands)
+                telemetry_cmd = self._build_telemetry_command(telemetry_values)
                 
-                # Send to Arduino
-                serialWrite(serial_cmd)
+                # Send telemetry data to Arduino
+                serialWrite(telemetry_cmd)
+                
+                # Build and send LED commands separately
+                led_cmd = self._build_led_command(telemetry_values)
+                if led_cmd:
+                    serialWrite(led_cmd)
                 
         except Exception as e:
             log_error(f"Error sending telemetry serial: {e}")
@@ -430,8 +435,8 @@ class Playback_Screen(MimicBase):
             log_error(f"Error reading telemetry from database: {e}")
             return None
 
-    def _build_serial_command(self, telemetry_values):
-        """Build the serial command string from telemetry values."""
+    def _build_telemetry_command(self, telemetry_values):
+        """Build the telemetry command string (without LED commands)."""
         try:
             # Extract values with defaults
             psarj = "{:.1f}".format(float(telemetry_values.get('PSARJ', 0)))
@@ -455,7 +460,40 @@ class Playback_Screen(MimicBase):
             sasa_az = "{:.1f}".format(float(telemetry_values.get('SASA_AZ', 0)))
             sasa_el = "{:.1f}".format(float(telemetry_values.get('SASA_EL', 0)))
             
-            # Get LED colors based on voltage values
+            # Build the telemetry command string (without LED commands)
+            telemetry_cmd = (
+                f"PSARJ={str(psarj)} "
+                f"SSARJ={str(ssarj)} "
+                f"PTRRJ={str(ptrrj)} "
+                f"STRRJ={str(strrj)} "
+                f"B1B={str(b1b)} "
+                f"B1A={str(b1a)} "
+                f"B2B={str(b2b)} "
+                f"B2A={str(b2a)} "
+                f"B3B={str(b3b)} "
+                f"B3A={str(b3a)} "
+                f"B4B={str(b4b)} "
+                f"B4A={str(b4a)} "
+                f"AOS={str(aos)} "
+                f"ISS={str(module)} "
+                f"Sgnt_el={str(sgant_elevation)} "
+                f"Sgnt_xel={str(sgant_xelevation)} "
+                f"Sgnt_xmit={str(sgant_transmit)} "
+                f"SASA_Xmit={str(sasa_xmit)} "
+                f"SASA_AZ={str(sasa_az)} "
+                f"SASA_EL={str(sasa_el)}"
+            )
+            
+            return telemetry_cmd
+            
+        except Exception as e:
+            log_error(f"Error building telemetry command: {e}")
+            return ""
+
+    def _build_led_command(self, telemetry_values):
+        """Build the LED command string separately."""
+        try:
+            # Get voltage values for LED control
             v1a = float(telemetry_values.get('V1A', 0))
             v1b = float(telemetry_values.get('V1B', 0))
             v2a = float(telemetry_values.get('V2A', 0))
@@ -488,21 +526,8 @@ class Playback_Screen(MimicBase):
                 led_4a = self._get_voltage_color(v4a)
                 led_4b = self._get_voltage_color(v4b)
             
-            # Build the command string with LED commands instead of voltage values
-            serial_cmd = (
-                f"PSARJ={str(psarj)} "
-                f"SSARJ={str(ssarj)} "
-                f"PTRRJ={str(ptrrj)} "
-                f"STRRJ={str(strrj)} "
-                f"B1B={str(b1b)} "
-                f"B1A={str(b1a)} "
-                f"B2B={str(b2b)} "
-                f"B2A={str(b2a)} "
-                f"B3B={str(b3b)} "
-                f"B3A={str(b3a)} "
-                f"B4B={str(b4b)} "
-                f"B4A={str(b4a)} "
-                f"AOS={str(aos)} "
+            # Build LED command string
+            led_cmd = (
                 f"LED_1A={led_1a} "
                 f"LED_2A={led_2a} "
                 f"LED_3A={led_3a} "
@@ -510,20 +535,14 @@ class Playback_Screen(MimicBase):
                 f"LED_1B={led_1b} "
                 f"LED_2B={led_2b} "
                 f"LED_3B={led_3b} "
-                f"LED_4B={led_4b} "
-                f"ISS={str(module)} "
-                f"Sgnt_el={str(sgant_elevation)} "
-                f"Sgnt_xel={str(sgant_xelevation)} "
-                f"Sgnt_xmit={str(sgant_transmit)} "
-                f"SASA_Xmit={str(sasa_xmit)} "
-                f"SASA_AZ={str(sasa_az)} "
-                f"SASA_EL={str(sasa_el)} "
+                f"LED_4B={led_4b}"
             )
-            log_info(f"Serial command: {serial_cmd}")
-            return serial_cmd
+            
+            log_info(f"LED command: {led_cmd}")
+            return led_cmd
             
         except Exception as e:
-            log_error(f"Error building serial command: {e}")
+            log_error(f"Error building LED command: {e}")
             return ""
 
     def _get_db_path(self):
