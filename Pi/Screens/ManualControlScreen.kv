@@ -9,7 +9,7 @@
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/control/ControlBackground.png"
             fit_mode: "fill"
 
-        # ---- LEFT TRUSS -----------------------------------------------------
+        # ---- STBD TRUSS -----------------------------------------------------
         Button:
             id: Beta1B_Button
             size_hint: 0.08, 0.30
@@ -128,7 +128,7 @@
             pos_hint: {"center_x": 0.85, "center_y": 0.62}
             text: "Calibrate Zero"
             font_size: dp(20)
-            on_press: root.zero_joints()
+            on_press: root.calibrate_zero()
 
         # Increment buttons
         Button:
