@@ -633,14 +633,6 @@ class Playback_Screen(MimicBase):
             b4b = "{:.1f}".format(float(telemetry_values.get('B4B', 0)))
             b4a = "{:.1f}".format(float(telemetry_values.get('B4A', 0)))
             aos = telemetry_values.get('AOS', 0)
-            v1as = "{:.1f}".format(float(telemetry_values.get('V1A', 0)))
-            v2as = "{:.1f}".format(float(telemetry_values.get('V2A', 0)))
-            v3as = "{:.1f}".format(float(telemetry_values.get('V3A', 0)))
-            v4as = "{:.1f}".format(float(telemetry_values.get('V4A', 0)))
-            v1bs = "{:.1f}".format(float(telemetry_values.get('V1B', 0)))
-            v2bs = "{:.1f}".format(float(telemetry_values.get('V2B', 0)))
-            v3bs = "{:.1f}".format(float(telemetry_values.get('V3B', 0)))
-            v4bs = "{:.1f}".format(float(telemetry_values.get('V4B', 0)))
             module = telemetry_values.get('ISS', 0)
             sgant_elevation = "{:.1f}".format(float(telemetry_values.get('Sgnt_el', 0)))
             sgant_xelevation = "{:.1f}".format(float(telemetry_values.get('Sgnt_xel', 0)))
@@ -649,7 +641,40 @@ class Playback_Screen(MimicBase):
             sasa_az = "{:.1f}".format(float(telemetry_values.get('SASA_AZ', 0)))
             sasa_el = "{:.1f}".format(float(telemetry_values.get('SASA_EL', 0)))
             
-            # Build the command string with 1 decimal place formatting
+            # Get LED colors based on voltage values
+            v1a = float(telemetry_values.get('V1A', 0))
+            v1b = float(telemetry_values.get('V1B', 0))
+            v2a = float(telemetry_values.get('V2A', 0))
+            v2b = float(telemetry_values.get('V2B', 0))
+            v3a = float(telemetry_values.get('V3A', 0))
+            v3b = float(telemetry_values.get('V3B', 0))
+            v4a = float(telemetry_values.get('V4A', 0))
+            v4b = float(telemetry_values.get('V4B', 0))
+            
+            # Determine LED colors
+            if self.current_file == "Disco":
+                # Disco mode: random colors
+                import random
+                led_1a = random.choice(self._disco_colors)
+                led_1b = random.choice(self._disco_colors)
+                led_2a = random.choice(self._disco_colors)
+                led_2b = random.choice(self._disco_colors)
+                led_3a = random.choice(self._disco_colors)
+                led_3b = random.choice(self._disco_colors)
+                led_4a = random.choice(self._disco_colors)
+                led_4b = random.choice(self._disco_colors)
+            else:
+                # Normal mode: voltage-based colors
+                led_1a = self._get_voltage_color(v1a)
+                led_1b = self._get_voltage_color(v1b)
+                led_2a = self._get_voltage_color(v2a)
+                led_2b = self._get_voltage_color(v2b)
+                led_3a = self._get_voltage_color(v3a)
+                led_3b = self._get_voltage_color(v3b)
+                led_4a = self._get_voltage_color(v4a)
+                led_4b = self._get_voltage_color(v4b)
+            
+            # Build the command string with LED commands instead of voltage values
             serial_cmd = (
                 f"PSARJ={str(psarj)} "
                 f"SSARJ={str(ssarj)} "
@@ -664,14 +689,14 @@ class Playback_Screen(MimicBase):
                 f"B4B={str(b4b)} "
                 f"B4A={str(b4a)} "
                 f"AOS={str(aos)} "
-                f"V1A={str(v1as)} "
-                f"V2A={str(v2as)} "
-                f"V3A={str(v3as)} "
-                f"V4A={str(v4as)} "
-                f"V1B={str(v1bs)} "
-                f"V2B={str(v2bs)} "
-                f"V3B={str(v3bs)} "
-                f"V4B={str(v4bs)} "
+                f"LED_1A={led_1a} "
+                f"LED_2A={led_2a} "
+                f"LED_3A={led_3a} "
+                f"LED_4A={led_4a} "
+                f"LED_1B={led_1b} "
+                f"LED_2B={led_2b} "
+                f"LED_3B={led_3b} "
+                f"LED_4B={led_4b} "
                 f"ISS={str(module)} "
                 f"Sgnt_el={str(sgant_elevation)} "
                 f"Sgnt_xel={str(sgant_xelevation)} "
