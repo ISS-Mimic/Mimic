@@ -52,8 +52,6 @@ class Playback_Screen(MimicBase):
     _serial_update_interval = 0.1  # Update every 100ms (10Hz)
     
     # LED control
-    _led_timer = None
-    _led_update_interval = 0.5  # Update LEDs every 500ms (2Hz)
     _disco_colors = ["Red", "Green", "Blue", "Yellow", "Purple", "Cyan", "White", "Orange"]
 
     def __init__(self, **kw):
@@ -328,95 +326,6 @@ class Playback_Screen(MimicBase):
         except Exception as e:
             log_error(f"Error checking start button state: {e}")
 
-    # ---------------------------------------------------------------- LED Control
-    def _start_led_controller(self):
-        """Start the LED controller timer."""
-        if self._led_timer:
-            Clock.unschedule(self._led_timer)
-        
-        self._led_timer = Clock.schedule_interval(self._update_leds, self._led_update_interval)
-        log_info("LED controller started")
-
-    def _stop_led_controller(self):
-        """Stop the LED controller timer."""
-        if self._led_timer:
-            Clock.unschedule(self._led_timer)
-            self._led_timer = None
-            log_info("LED controller stopped")
-
-    def _update_leds(self, dt):
-        """Update LED states based on telemetry values or disco mode."""
-        if not self.is_playing or not self.arduino_connected:
-            return
-            
-        try:
-            if self.current_file == "Disco":
-                # Disco mode: random colors for all arrays
-                self._send_disco_leds()
-            else:
-                # Normal mode: voltage-based LED control
-                self._send_voltage_based_leds()
-                
-        except Exception as e:
-            log_error(f"Error updating LEDs: {e}")
-
-
-    def _get_voltage_color(self, voltage):
-        """Determine LED color based on voltage threshold."""
-        if voltage < 151.5:
-            return "Blue"      # Discharging
-        elif voltage < 160.0:
-            return "Yellow"    # Charging
-        else:
-            return "White"     # Fully charged
-
-    def _read_voltage_telemetry(self):
-        """Read only voltage telemetry values for LED control."""
-        try:
-            import sqlite3
-            
-            db_path = self._get_db_path()
-            if not db_path:
-                return None
-                
-            with sqlite3.connect(db_path) as conn:
-                cursor = conn.cursor()
-                
-                # Only read voltage values for LED control
-                voltage_ids = ['S4000001', 'S6000004', 'P4000001', 'P6000004', 
-                             'S4000004', 'S6000001', 'P4000004', 'P6000001']
-                
-                placeholders = ','.join(['?' for _ in voltage_ids])
-                query = f"SELECT ID, Value FROM telemetry WHERE ID IN ({placeholders})"
-                
-                cursor.execute(query, voltage_ids)
-                results = cursor.fetchall()
-                
-                # Convert to dictionary with voltage names as keys
-                voltage_mapping = {
-                    'S4000001': 'V1A',  # voltage_1a
-                    'S6000004': 'V1B',  # voltage_1b
-                    'P4000001': 'V2A',  # voltage_2a
-                    'P6000004': 'V2B',  # voltage_2b
-                    'S4000004': 'V3A',  # voltage_3a
-                    'S6000001': 'V3B',  # voltage_3b
-                    'P4000004': 'V4A',  # voltage_4a
-                    'P6000001': 'V4B'   # voltage_4b
-                }
-                
-                voltage_dict = {}
-                for db_id, value in results:
-                    for voltage_name, actual_db_id in voltage_mapping.items():
-                        if actual_db_id == db_id:
-                            voltage_dict[voltage_name] = value
-                            break
-                
-                return voltage_dict
-                
-        except Exception as e:
-            log_error(f"Error reading voltage telemetry: {e}")
-            return None
-
     # ---------------------------------------------------------------- Serial Writing
     def _start_serial_writer(self):
         """Start the serial writer timer to continuously send telemetry data."""
@@ -632,6 +541,15 @@ class Playback_Screen(MimicBase):
             log_error(f"Error getting database path: {e}")
             return None
 
+    def _get_voltage_color(self, voltage):
+        """Determine LED color based on voltage threshold."""
+        if voltage < 151.5:
+            return "Blue"      # Discharging
+        elif voltage < 160.0:
+            return "Yellow"    # Charging
+        else:
+            return "White"     # Fully charged
+
     # ---------------------------------------------------------------- Playback Control
     def start_playback(self):
         """Start playing back the selected data file."""
@@ -683,9 +601,8 @@ class Playback_Screen(MimicBase):
             loop_status = "with looping" if self.loop_enabled else ""
             log_info(f"Started playback of {self.current_file} at {self.playback_speed}x speed {loop_status}")
             
-            # Start serial writer and LED controller
+            # Start serial writer
             self._start_serial_writer()
-            self._start_led_controller()
             
             # Update status to show playback is active
             self._update_status()
@@ -705,9 +622,8 @@ class Playback_Screen(MimicBase):
         try:
             log_info("Stopping playback...")
             
-            # Stop serial writer and LED controller first
+            # Stop serial writer first
             self._stop_serial_writer()
-            self._stop_led_controller()
             
             # Stop the playback engine
             app = App.get_running_app()
@@ -744,7 +660,6 @@ class Playback_Screen(MimicBase):
             # Even if there's an error, mark as not playing
             self.is_playing = False
             self._stop_serial_writer()
-            self._stop_led_controller()
             self._update_status()
             self._update_playback_buttons()
     
