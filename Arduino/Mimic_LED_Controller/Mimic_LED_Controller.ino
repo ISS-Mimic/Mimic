@@ -91,7 +91,7 @@ void setup()
   setAllLEDs("Off");
   
   // Test: turn on first LED of each side to verify hardware is working
-  Serial.println(F("Testing hardware - turning on first LED of each side"));
+  // Serial.println(F("Testing hardware - turning on first LED of each side"));
   portLEDs[0] = CRGB::Red;
   stbdLEDs[0] = CRGB::Blue;
   FastLED.show();
@@ -102,7 +102,7 @@ void setup()
   stbdLEDs[0] = CRGB::Black;
   FastLED.show();
   
-  Serial.println(F("Mimic LED Controller Ready (FastLED)"));
+  // Serial.println(F("Mimic LED Controller Ready (FastLED)"));
 }
 
 void loop() 
@@ -110,7 +110,63 @@ void loop()
   // Check for serial commands (non-blocking)
   if (Serial.available()) 
   {
-    checkSerial();
+    char buffer[64];  // Increased buffer size
+    int bufferIndex = 0;
+    
+    // Read all available characters
+    while (Serial.available() && bufferIndex < 63) {
+      char c = Serial.read();
+      if (c == '\n' || c == '\r') {
+        break;
+      }
+      buffer[bufferIndex++] = c;
+    }
+    
+    buffer[bufferIndex] = '\0';
+    
+    if (bufferIndex == 0) return;
+    
+    // Debug: show what we received
+    // Serial.print(F("Received: '"));
+    // Serial.print(buffer);
+    // Serial.println(F("'"));
+    
+    // Parse command
+    if (strncmp(buffer, "LED_", 4) == 0) {
+      // Serial.println(F("Processing LED command"));
+      parseLEDCommand(buffer);
+    } else if (strncmp(buffer, "PATTERN_", 8) == 0) {
+      parsePatternCommand(buffer);
+    } else if (strncmp(buffer, "ANIMATE_", 8) == 0) {
+      parseAnimationCommand(buffer);
+    } else if (strncmp(buffer, "BRIGHTNESS_", 11) == 0) {
+      parseBrightnessCommand(buffer);
+    } else if (strcmp(buffer, "DISCO") == 0) {
+      discoMode = true;
+      pulseMode = false;
+      chaseMode = false;
+      rainbowMode = false;
+      // Serial.println(F("Disco mode ON"));
+    } else if (strcmp(buffer, "RESET") == 0) {
+      resetAllLEDs();
+      // Serial.println(F("Reset complete"));
+    } else if (strcmp(buffer, "STATUS") == 0) {
+      printStatus();
+    } else if (strcmp(buffer, "HELP") == 0) {
+      printHelp();
+    } else if (strcmp(buffer, "TEST") == 0) {
+      // Serial.println(F("Running TEST command"));
+      parseLEDCommand("LED_1A=Red");
+    } else if (strcmp(buffer, "RED") == 0) {
+      // Serial.println(F("Setting all LEDs to RED"));
+      setAllLEDs("Red");
+    } else if (strcmp(buffer, "OFF") == 0) {
+      // Serial.println(F("Turning all LEDs OFF"));
+      setAllLEDs("Off");
+    }
+    
+    // Reset buffer
+    bufferIndex = 0;
   }
 
   // Handle animations (non-blocking)
@@ -164,13 +220,13 @@ void checkSerial()
   if (bufferIndex == 0) return;
   
   // Debug: show what we received
-  Serial.print(F("Received: '"));
-  Serial.print(buffer);
-  Serial.println(F("'"));
+  // Serial.print(F("Received: '"));
+  // Serial.print(buffer);
+  // Serial.println(F("'"));
   
   // Parse command
   if (strncmp(buffer, "LED_", 4) == 0) {
-    Serial.println(F("Processing LED command"));
+    // Serial.println(F("Processing LED command"));
     parseLEDCommand(buffer);
   } else if (strncmp(buffer, "PATTERN_", 8) == 0) {
     parsePatternCommand(buffer);
@@ -183,40 +239,56 @@ void checkSerial()
     pulseMode = false;
     chaseMode = false;
     rainbowMode = false;
-    Serial.println(F("Disco mode ON"));
+    // Serial.println(F("Disco mode ON"));
   } else if (strcmp(buffer, "RESET") == 0) {
     resetAllLEDs();
-    Serial.println(F("Reset complete"));
+    // Serial.println(F("Reset complete"));
   } else if (strcmp(buffer, "STATUS") == 0) {
     printStatus();
   } else if (strcmp(buffer, "HELP") == 0) {
     printHelp();
   } else if (strcmp(buffer, "TEST") == 0) {
-    Serial.println(F("Running TEST command"));
+    // Serial.println(F("Running TEST command"));
     parseLEDCommand("LED_1A=Red");
   } else if (strcmp(buffer, "RED") == 0) {
-    Serial.println(F("Setting all LEDs to RED"));
+    // Serial.println(F("Setting all LEDs to RED"));
     setAllLEDs("Red");
   } else if (strcmp(buffer, "OFF") == 0) {
-    Serial.println(F("Turning all LEDs OFF"));
+    // Serial.println(F("Turning all LEDs OFF"));
     setAllLEDs("Off");
   }
 }
 
 void parseLEDCommand(const char* command) {
-  Serial.print(F("Parsing LED command: '"));
-  Serial.print(command);
-  Serial.println(F("'"));
+  // Serial.print(F("Parsing LED command: '"));
+  // Serial.print(command);
+  // Serial.println(F("'"));
   
+  // Split the command by spaces and process each LED command
+  char* commandCopy = strdup(command);  // Make a copy we can modify
+  char* token = strtok(commandCopy, " ");
+  
+  while (token != NULL) {
+    // Check if this token is an LED command
+    if (strncmp(token, "LED_", 4) == 0) {
+      parseSingleLEDCommand(token);
+    }
+    token = strtok(NULL, " ");
+  }
+  
+  free(commandCopy);  // Free the memory we allocated
+}
+
+void parseSingleLEDCommand(const char* command) {
   const char* equalsPos = strchr(command, '=');
   if (equalsPos == NULL) {
-    Serial.println(F("No '=' found in command"));
+    // Serial.println(F("No '=' found in LED command"));
     return;
   }
   
   int groupLen = equalsPos - command - 4;
   if (groupLen <= 0) {
-    Serial.println(F("Invalid group length"));
+    // Serial.println(F("Invalid group length"));
     return;
   }
   
@@ -226,58 +298,61 @@ void parseLEDCommand(const char* command) {
   
   const char* colorName = equalsPos + 1;
   
-  Serial.print(F("Group: '"));
-  Serial.print(group);
-  Serial.print(F("', Color: '"));
-  Serial.print(colorName);
-  Serial.println(F("'"));
+  // Serial.print(F("Group: '"));
+  // Serial.print(group);
+  // Serial.print(F("', Color: '"));
+  // Serial.print(colorName);
+  // Serial.println(F("'"));
   
   // Find the color in our lookup table
   Color* color = findColor(colorName);
   if (color == NULL) {
-    Serial.println(F("Color not found"));
+    // Serial.println(F("Color not found"));
     return;
   }
   
-  Serial.print(F("Found color - R:"));
-  Serial.print(color->r);
-  Serial.print(F(" G:"));
-  Serial.print(color->g);
-  Serial.print(F(" B:"));
-  Serial.println(color->b);
+  // Serial.print(F("Found color - R:"));
+  // Serial.print(color->r);
+  // Serial.print(F(" G:"));
+  // Serial.print(color->g);
+  // Serial.print(F(" B:"));
+  // Serial.println(color->b);
   
   // Apply color to the specified LED group
   if (strcmp(group, "1A") == 0) {
-    Serial.println(F("Setting 1A LEDs"));
+    // Serial.println(F("Setting 1A LEDs"));
     setLEDGroup(stbdLEDs, stbd_LEDs_1A, 6, *color);
   } else if (strcmp(group, "1B") == 0) {
-    Serial.println(F("Setting 1B LEDs"));
+    // Serial.println(F("Setting 1B LEDs"));
     setLEDGroup(stbdLEDs, stbd_LEDs_1B, 6, *color);
   } else if (strcmp(group, "2A") == 0) {
-    Serial.println(F("Setting 2A LEDs"));
+    // Serial.println(F("Setting 2A LEDs"));
     setLEDGroup(portLEDs, port_LEDs_2A, 6, *color);
   } else if (strcmp(group, "2B") == 0) {
-    Serial.println(F("Setting 2B LEDs"));
+    // Serial.println(F("Setting 2B LEDs"));
     setLEDGroup(portLEDs, port_LEDs_2B, 6, *color);
   } else if (strcmp(group, "3A") == 0) {
-    Serial.println(F("Setting 3A LEDs"));
+    // Serial.println(F("Setting 3A LEDs"));
     setLEDGroup(stbdLEDs, stbd_LEDs_3A, 6, *color);
   } else if (strcmp(group, "3B") == 0) {
-    Serial.println(F("Setting 3B LEDs"));
+    // Serial.println(F("Setting 3B LEDs"));
     setLEDGroup(stbdLEDs, stbd_LEDs_3B, 6, *color);
   } else if (strcmp(group, "4A") == 0) {
-    Serial.println(F("Setting 4A LEDs"));
+    // Serial.println(F("Setting 4A LEDs"));
     setLEDGroup(portLEDs, port_LEDs_4A, 6, *color);
   } else if (strcmp(group, "4B") == 0) {
-    Serial.println(F("Setting 4B LEDs"));
+    // Serial.println(F("Setting 4B LEDs"));
     setLEDGroup(portLEDs, port_LEDs_4B, 6, *color);
   } else if (strcmp(group, "ALL") == 0) {
-    Serial.println(F("Setting ALL LEDs"));
+    // Serial.println(F("Setting ALL LEDs"));
     setAllLEDs(colorName);
   } else {
-    Serial.print(F("Unknown group: "));
-    Serial.println(group);
+    // Serial.print(F("Unknown LED group: "));
+    // Serial.println(group);
   }
+  
+  // Update the display
+  FastLED.show();
 }
 
 void parsePatternCommand(const char* command) {
@@ -496,45 +571,45 @@ void updateRainbowAnimation(unsigned long currentTime) {
 }
 
 void printStatus() {
-  Serial.println(F("=== LED Controller Status ==="));
-  Serial.print(F("Disco Mode: ")); Serial.println(discoMode ? F("ON") : F("OFF"));
-  Serial.print(F("Pulse Mode: ")); Serial.println(pulseMode ? F("ON") : F("OFF"));
-  Serial.print(F("Chase Mode: ")); Serial.println(chaseMode ? F("ON") : F("OFF"));
-  Serial.print(F("Rainbow Mode: ")); Serial.println(rainbowMode ? F("ON") : F("OFF"));
-  Serial.print(F("Global Brightness: ")); Serial.println(masterBrightness);
-  Serial.println(F("============================="));
+  // Serial.println(F("=== LED Controller Status ==="));
+  // Serial.print(F("Disco Mode: ")); Serial.println(discoMode ? F("ON") : F("OFF"));
+  // Serial.print(F("Pulse Mode: ")); Serial.println(pulseMode ? F("ON") : F("OFF"));
+  // Serial.print(F("Chase Mode: ")); Serial.println(chaseMode ? F("ON") : F("OFF"));
+  // Serial.print(F("Rainbow Mode: ")); Serial.println(rainbowMode ? F("ON") : F("OFF"));
+  // Serial.print(F("Global Brightness: ")); Serial.println(masterBrightness);
+  // Serial.println(F("============================="));
 }
 
 void printHelp() {
-  Serial.println(F("=== Available Commands ==="));
-  Serial.println(F("LED Commands:"));
-  Serial.println(F("  LED_1A=Red, LED_2B=Blue, etc."));
-  Serial.println(F("  LED_ALL=White (set all arrays)"));
-  Serial.println();
-  Serial.println(F("Pattern Commands:"));
-  Serial.println(F("  PATTERN_RAINBOW"));
-  Serial.println(F("  PATTERN_ALTERNATING"));
-  Serial.println(F("  PATTERN_RED_ALERT"));
-  Serial.println(F("  PATTERN_BLUE_PATTERN"));
-  Serial.println();
-  Serial.println(F("Animation Commands:"));
-  Serial.println(F("  ANIMATE_PULSE"));
-  Serial.println(F("  ANIMATE_CHASE"));
-  Serial.println(F("  ANIMATE_DISCO"));
-  Serial.println(F("  ANIMATE_STOP"));
-  Serial.println();
-  Serial.println(F("Brightness Commands:"));
-  Serial.println(F("  BRIGHTNESS_25, BRIGHTNESS_50, BRIGHTNESS_75, BRIGHTNESS_100"));
-  Serial.println();
-  Serial.println(F("Special Commands:"));
-  Serial.println(F("  DISCO, RESET, STATUS, HELP"));
-  Serial.println();
-  Serial.println(F("Available Colors:"));
-  for (int i = 0; i < NUM_COLORS; i++) {
-    const char* colorName = colorTable[i].name;
-    Serial.print(F("  ")); Serial.print(colorName);
-    if ((i + 1) % 5 == 0) Serial.println();
-  }
-  Serial.println();
-  Serial.println(F("========================"));
+  // Serial.println(F("=== Available Commands ==="));
+  // Serial.println(F("LED Commands:"));
+  // Serial.println(F("  LED_1A=Red, LED_2B=Blue, etc."));
+  // Serial.println(F("  LED_ALL=White (set all arrays)"));
+  // Serial.println();
+  // Serial.println(F("Pattern Commands:"));
+  // Serial.println(F("  PATTERN_RAINBOW"));
+  // Serial.println(F("  PATTERN_ALTERNATING"));
+  // Serial.println(F("  PATTERN_RED_ALERT"));
+  // Serial.println(F("  PATTERN_BLUE_PATTERN"));
+  // Serial.println();
+  // Serial.println(F("Animation Commands:"));
+  // Serial.println(F("  ANIMATE_PULSE"));
+  // Serial.println(F("  ANIMATE_CHASE"));
+  // Serial.println(F("  ANIMATE_DISCO"));
+  // Serial.println(F("  ANIMATE_STOP"));
+  // Serial.println();
+  // Serial.println(F("Brightness Commands:"));
+  // Serial.println(F("  BRIGHTNESS_25, BRIGHTNESS_50, BRIGHTNESS_75, BRIGHTNESS_100"));
+  // Serial.println();
+  // Serial.println(F("Special Commands:"));
+  // Serial.println(F("  DISCO, RESET, STATUS, HELP"));
+  // Serial.println();
+  // Serial.println(F("Available Colors:"));
+  // for (int i = 0; i < NUM_COLORS; i++) {
+  //   const char* colorName = colorTable[i].name;
+  //   Serial.print(F("  ")); Serial.print(colorName);
+  //   if ((i + 1) % 5 == 0) Serial.println();
+  // }
+  // Serial.println();
+  // Serial.println(F("========================"));
 }

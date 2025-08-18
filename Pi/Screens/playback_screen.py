@@ -359,70 +359,13 @@ class Playback_Screen(MimicBase):
                 serialWrite(telemetry_cmd)
                 log_info(f"Sent telemetry command: {telemetry_cmd}")
                 
-                # Send LED commands one at a time
-                self._send_led_commands(telemetry_values)
+                # Build and send LED commands separately
+                led_cmd = self._build_led_command(telemetry_values)
+                if led_cmd:
+                    serialWrite(led_cmd)
                 
         except Exception as e:
             log_error(f"Error sending telemetry serial: {e}")
-
-    def _send_led_commands(self, telemetry_values):
-        """Send LED commands one at a time."""
-        try:
-            # Get voltage values for LED control
-            v1a = float(telemetry_values.get('V1A', 0))
-            v1b = float(telemetry_values.get('V1B', 0))
-            v2a = float(telemetry_values.get('V2A', 0))
-            v2b = float(telemetry_values.get('V2B', 0))
-            v3a = float(telemetry_values.get('V3A', 0))
-            v3b = float(telemetry_values.get('V3B', 0))
-            v4a = float(telemetry_values.get('V4A', 0))
-            v4b = float(telemetry_values.get('V4B', 0))
-            
-            # Determine LED colors
-            if self.current_file == "Disco":
-                # Disco mode: random colors
-                import random
-                led_1a = random.choice(self._disco_colors)
-                led_1b = random.choice(self._disco_colors)
-                led_2a = random.choice(self._disco_colors)
-                led_2b = random.choice(self._disco_colors)
-                led_3a = random.choice(self._disco_colors)
-                led_3b = random.choice(self._disco_colors)
-                led_4a = random.choice(self._disco_colors)
-                led_4b = random.choice(self._disco_colors)
-            else:
-                # Normal mode: voltage-based colors
-                led_1a = self._get_voltage_color(v1a)
-                led_1b = self._get_voltage_color(v1b)
-                led_2a = self._get_voltage_color(v2a)
-                led_2b = self._get_voltage_color(v2b)
-                led_3a = self._get_voltage_color(v3a)
-                led_3b = self._get_voltage_color(v3b)
-                led_4a = self._get_voltage_color(v4a)
-                led_4b = self._get_voltage_color(v4b)
-            
-            # Send each LED command individually
-            led_commands = [
-                f"LED_1A={led_1a}",
-                f"LED_2A={led_2a}",
-                f"LED_3A={led_3a}",
-                f"LED_4A={led_4a}",
-                f"LED_1B={led_1b}",
-                f"LED_2B={led_2b}",
-                f"LED_3B={led_3b}",
-                f"LED_4B={led_4b}"
-            ]
-            
-            # Send each command separately with a small delay
-            for i, command in enumerate(led_commands):
-                serialWrite(command)
-                log_info(f"Sent LED command {i+1}/8: {command}")
-                # Small delay between commands to avoid overwhelming the Arduino
-                import time
-                time.sleep(0.01)  # 10ms delay between commands
-                
-        except Exception as e:
-            log_error(f"Error sending LED commands: {e}")
 
     def _read_current_telemetry(self):
         """Read current telemetry values from the database."""
