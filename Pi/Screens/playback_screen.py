@@ -50,6 +50,11 @@ class Playback_Screen(MimicBase):
     # Serial writing
     _serial_timer = None
     _serial_update_interval = 0.1  # Update every 100ms (10Hz)
+    
+    # LED control
+    _led_timer = None
+    _led_update_interval = 0.5  # Update LEDs every 500ms (2Hz)
+    _disco_colors = ["Red", "Green", "Blue", "Yellow", "Purple", "Cyan", "White", "Orange"]
 
     def __init__(self, **kw):
         super().__init__(**kw)
@@ -323,6 +328,190 @@ class Playback_Screen(MimicBase):
         except Exception as e:
             log_error(f"Error checking start button state: {e}")
 
+    # ---------------------------------------------------------------- LED Control
+    def _start_led_controller(self):
+        """Start the LED controller timer."""
+        if self._led_timer:
+            Clock.unschedule(self._led_timer)
+        
+        self._led_timer = Clock.schedule_interval(self._update_leds, self._led_update_interval)
+        log_info("LED controller started")
+
+    def _stop_led_controller(self):
+        """Stop the LED controller timer."""
+        if self._led_timer:
+            Clock.unschedule(self._led_timer)
+            self._led_timer = None
+            log_info("LED controller stopped")
+
+    def _update_leds(self, dt):
+        """Update LED states based on telemetry values or disco mode."""
+        if not self.is_playing or not self.arduino_connected:
+            return
+            
+        try:
+            if self.current_file == "Disco":
+                # Disco mode: random colors for all arrays
+                self._send_disco_leds()
+            else:
+                # Normal mode: voltage-based LED control
+                self._send_voltage_based_leds()
+                
+        except Exception as e:
+            log_error(f"Error updating LEDs: {e}")
+
+    def _send_voltage_based_leds(self):
+        """Send LED commands based on individual solar array voltages."""
+        try:
+            # Read current voltage values from database
+            voltage_values = self._read_voltage_telemetry()
+            
+            if not voltage_values:
+                return
+                
+            # Determine LED colors for each individual solar array
+            led_commands = []
+            
+            # Solar Array 1A
+            v1a = float(voltage_values.get('V1A', 0))
+            sa1a_color = self._get_voltage_color(v1a)
+            led_commands.append(f"LED_1A={sa1a_color}")
+            
+            # Solar Array 1B
+            v1b = float(voltage_values.get('V1B', 0))
+            sa1b_color = self._get_voltage_color(v1b)
+            led_commands.append(f"LED_1B={sa1b_color}")
+            
+            # Solar Array 2A
+            v2a = float(voltage_values.get('V2A', 0))
+            sa2a_color = self._get_voltage_color(v2a)
+            led_commands.append(f"LED_2A={sa2a_color}")
+            
+            # Solar Array 2B
+            v2b = float(voltage_values.get('V2B', 0))
+            sa2b_color = self._get_voltage_color(v2b)
+            led_commands.append(f"LED_2B={sa2b_color}")
+            
+            # Solar Array 3A
+            v3a = float(voltage_values.get('V3A', 0))
+            sa3a_color = self._get_voltage_color(v3a)
+            led_commands.append(f"LED_3A={sa3a_color}")
+            
+            # Solar Array 3B
+            v3b = float(voltage_values.get('V3B', 0))
+            sa3b_color = self._get_voltage_color(v3b)
+            led_commands.append(f"LED_3B={sa3b_color}")
+            
+            # Solar Array 4A
+            v4a = float(voltage_values.get('V4A', 0))
+            sa4a_color = self._get_voltage_color(v4a)
+            led_commands.append(f"LED_4A={sa4a_color}")
+            
+            # Solar Array 4B
+            v4b = float(voltage_values.get('V4B', 0))
+            sa4b_color = self._get_voltage_color(v4b)
+            led_commands.append(f"LED_4B={sa4b_color}")
+            
+            # Send all LED commands
+            for command in led_commands:
+                serialWrite(command)
+                
+            log_info(f"Sent voltage-based LED commands: {led_commands}")
+            
+        except Exception as e:
+            log_error(f"Error sending voltage-based LEDs: {e}")
+
+    def _send_disco_leds(self):
+        """Send random disco LED colors for each individual solar array."""
+        try:
+            import random
+            
+            # Get random colors for each individual solar array
+            sa1a_color = random.choice(self._disco_colors)
+            sa1b_color = random.choice(self._disco_colors)
+            sa2a_color = random.choice(self._disco_colors)
+            sa2b_color = random.choice(self._disco_colors)
+            sa3a_color = random.choice(self._disco_colors)
+            sa3b_color = random.choice(self._disco_colors)
+            sa4a_color = random.choice(self._disco_colors)
+            sa4b_color = random.choice(self._disco_colors)
+            
+            # Send disco LED commands for each array
+            disco_commands = [
+                f"LED_1A={sa1a_color}",
+                f"LED_1B={sa1b_color}",
+                f"LED_2A={sa2a_color}",
+                f"LED_2B={sa2b_color}",
+                f"LED_3A={sa3a_color}",
+                f"LED_3B={sa3b_color}",
+                f"LED_4A={sa4a_color}",
+                f"LED_4B={sa4b_color}"
+            ]
+            
+            for command in disco_commands:
+                serialWrite(command)
+                
+            log_info(f"Sent disco LED commands: {disco_commands}")
+            
+        except Exception as e:
+            log_error(f"Error sending disco LEDs: {e}")
+
+    def _get_voltage_color(self, voltage):
+        """Determine LED color based on voltage threshold."""
+        if voltage < 151.5:
+            return "Blue"      # Discharging
+        elif voltage < 160.0:
+            return "Yellow"    # Charging
+        else:
+            return "White"     # Fully charged
+
+    def _read_voltage_telemetry(self):
+        """Read only voltage telemetry values for LED control."""
+        try:
+            import sqlite3
+            
+            db_path = self._get_db_path()
+            if not db_path:
+                return None
+                
+            with sqlite3.connect(db_path) as conn:
+                cursor = conn.cursor()
+                
+                # Only read voltage values for LED control
+                voltage_ids = ['S4000001', 'S6000004', 'P4000001', 'P6000004', 
+                             'S4000004', 'S6000001', 'P4000004', 'P6000001']
+                
+                placeholders = ','.join(['?' for _ in voltage_ids])
+                query = f"SELECT ID, Value FROM telemetry WHERE ID IN ({placeholders})"
+                
+                cursor.execute(query, voltage_ids)
+                results = cursor.fetchall()
+                
+                # Convert to dictionary with voltage names as keys
+                voltage_mapping = {
+                    'S4000001': 'V1A',  # voltage_1a
+                    'S6000004': 'V1B',  # voltage_1b
+                    'P4000001': 'V2A',  # voltage_2a
+                    'P6000004': 'V2B',  # voltage_2b
+                    'S4000004': 'V3A',  # voltage_3a
+                    'S6000001': 'V3B',  # voltage_3b
+                    'P4000004': 'V4A',  # voltage_4a
+                    'P6000001': 'V4B'   # voltage_4b
+                }
+                
+                voltage_dict = {}
+                for db_id, value in results:
+                    for voltage_name, actual_db_id in voltage_mapping.items():
+                        if actual_db_id == db_id:
+                            voltage_dict[voltage_name] = value
+                            break
+                
+                return voltage_dict
+                
+        except Exception as e:
+            log_error(f"Error reading voltage telemetry: {e}")
+            return None
+
     # ---------------------------------------------------------------- Serial Writing
     def _start_serial_writer(self):
         """Start the serial writer timer to continuously send telemetry data."""
@@ -354,7 +543,6 @@ class Playback_Screen(MimicBase):
                 
                 # Send to Arduino
                 serialWrite(serial_cmd)
-                log_info(f"Sent serial command: {serial_cmd}")
                 
         except Exception as e:
             log_error(f"Error sending telemetry serial: {e}")
@@ -565,8 +753,9 @@ class Playback_Screen(MimicBase):
             loop_status = "with looping" if self.loop_enabled else ""
             log_info(f"Started playback of {self.current_file} at {self.playback_speed}x speed {loop_status}")
             
-            # Start serial writer
+            # Start serial writer and LED controller
             self._start_serial_writer()
+            self._start_led_controller()
             
             # Update status to show playback is active
             self._update_status()
@@ -586,8 +775,9 @@ class Playback_Screen(MimicBase):
         try:
             log_info("Stopping playback...")
             
-            # Stop serial writer first
+            # Stop serial writer and LED controller first
             self._stop_serial_writer()
+            self._stop_led_controller()
             
             # Stop the playback engine
             app = App.get_running_app()
@@ -624,6 +814,7 @@ class Playback_Screen(MimicBase):
             # Even if there's an error, mark as not playing
             self.is_playing = False
             self._stop_serial_writer()
+            self._stop_led_controller()
             self._update_status()
             self._update_playback_buttons()
     
