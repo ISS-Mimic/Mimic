@@ -24,7 +24,7 @@
                 spacing: dp(8)
                 
                 Label:
-                    text: 'This will playback recorded data from when the Japanese HTV spacecraft berthed to the ISS. During berthing, the SARJs and nadir BGAs lock but the zenith BGAs autotrack'
+                    text: 'Select which data set to replay - this is all data recorded during ISS events which can be played back at higher speeds'
                     size_hint_y: None
                     height: self.texture_size[1] + dp(12)
                     text_size: self.width, None
@@ -33,7 +33,7 @@
                     color: 1, 1, 1, 1
                 
                 Label:
-                    text: 'ISS Info 2: [More ISS info here]'
+                    text: 'HTV: Recorded during the visit of the Japanese HTV Cargo Spacecraft, shows the arrays in normal operations and then feathering mode to avoid the thruster plume from the HTV'
                     size_hint_y: None
                     height: self.texture_size[1] + dp(12)
                     text_size: self.width, None
@@ -42,7 +42,7 @@
                     color: 1, 1, 1, 1
                 
                 Label:
-                    text: 'ISS Info 3: [More ISS info here]'
+                    text: 'OFT-2: Recorded during the docking of the Boeing Starliner in 2022'
                     size_hint_y: None
                     height: self.texture_size[1] + dp(12)
                     text_size: self.width, None
@@ -51,7 +51,16 @@
                     color: 1, 1, 1, 1
                 
                 Label:
-                    text: 'ISS Info 4: [More ISS info here]'
+                    text: 'Standard: ISS in normal operations'
+                    size_hint_y: None
+                    height: self.texture_size[1] + dp(12)
+                    text_size: self.width, None
+                    halign: 'left'
+                    valign: 'middle'
+                    color: 1, 1, 1, 1
+
+                Label:
+                    text: 'Disco: press disco button for some fun'
                     size_hint_y: None
                     height: self.texture_size[1] + dp(12)
                     text_size: self.width, None
@@ -60,7 +69,7 @@
                     color: 1, 1, 1, 1
                 
                 Label:
-                    text: 'ISS Info 5: [More ISS info here]'
+                    text: 'USB: Insert a USB drive with telemetry files in a top level folder called "Telemetry", see files in /RecordedData for the format'
                     size_hint_y: None
                     height: self.texture_size[1] + dp(12)
                     text_size: self.width, None
@@ -68,14 +77,6 @@
                     valign: 'middle'
                     color: 1, 1, 1, 1
                 
-                Label:
-                    text: 'Demo orbit 2'
-                    size_hint_y: None
-                    height: self.texture_size[1] + dp(12)
-                    text_size: self.width, None
-                    halign: 'center'
-                    valign: 'middle'
-                    color: 1, 1, 1, 1
 
 # If you need an image button later, define it like this and set source per instance:
 # <ImageButton@ButtonBehavior+Image>:
