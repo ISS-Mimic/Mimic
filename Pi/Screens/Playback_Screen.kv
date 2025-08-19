@@ -108,30 +108,30 @@
         Spinner:
             id: file_dropdown
             text: 'Select DATA'
-            size_hint: 0.12, 0.06
+            size_hint: 0.18, 0.07
             values: ['HTV', 'OFT2', 'Standard']
             on_text: root.on_dropdown_select_data(self.text)
             background_color: 0.3, 0.3, 0.3, 1  # Dark metallic look
             pos_hint: {"center_x": 0.157, "center_y": 0.547}
-            font_size: self.height * 0.4  # Scale font to button height
+            font_size: self.height * 0.5  # Scale font to button height
         
         
         # ---------- MIDDLE PANEL: PLAYBACK SPEED ----------
         Spinner:
             id: speed_dropdown
             text: 'Select SPEED'
-            size_hint: 0.12, 0.06
+            size_hint: 0.18, 0.07
             values: ['10x', '20x', '60x', '90x']
             on_text: root.on_dropdown_select_speed(self.text)
             background_color: 0.3, 0.3, 0.3, 1  # Dark metallic look
             pos_hint: {"center_x": 0.487, "center_y": 0.547}
-            font_size: self.height * 0.4  # Scale font to button height
+            font_size: self.height * 0.5  # Scale font to button height
 
         
         # ---------- RIGHT PANEL: DISCO MODE ----------
         Button:
             id: disco_button
-            size_hint: 0.15, 0.25
+            size_hint_y: 0.3
             background_color: 0, 0, 0, 0  # Transparent background
             on_press: root.start_disco_mode()
             pos_hint: {"center_x": 0.807, "center_y": 0.55}
@@ -213,13 +213,13 @@
             text: ''
             markup: True
             color: 1, 1, 1, 1
-            font_size: min(self.height * 0.3, dp(40))
-            size_hint_y: 0.5
+            font_size: self.height * 0.6
+            size_hint: 0.06, 0.08
         
         # ─────────────────────── Navigation ────────────────────────────────
 
         Button:
             size_hint: 0.1, 0.11
-            pos_hint: {"center_x": 0.9375, "center_y": 0.082}
+            pos_hint: {"center_x": 0.9375, "center_y": 0.08}
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: app.root.current = 'main'
