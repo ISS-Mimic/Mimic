@@ -229,5 +229,6 @@
             Image:
                 source: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
                 fit_mode: 'contain'
-                size_hint: 1, 1
+                size: self.parent.size      # Button isn’t a Layout → bind size explicitly
+                pos: 0, 0                   # child coords are relative to Button
             

@@ -446,7 +446,7 @@ class MainApp(App):
             log_info("Set current screen to main")
 
             log_info("Scheduling update functions...")
-            Clock.schedule_interval(self.update_labels, 1) #all telemetry wil refresh and get pushed to arduinos every half second!
+            #Clock.schedule_interval(self.update_labels, 1) #all telemetry wil refresh and get pushed to arduinos every half second!
             Clock.schedule_interval(self.animate3, 0.1)
 
 
@@ -695,30 +695,13 @@ class MainApp(App):
 
         c.execute('select Value from telemetry')
         values = c.fetchall()
-        c.execute('select Timestamp from telemetry')
-        timestamps = c.fetchall()
+
 
         sub_status = str((values[255])[0]) #lightstreamer subscript checker
-        client_status = str((values[256])[0]) #lightstreamer client checker
-
-        psarj = "{:.2f}".format(float((values[0])[0]))
-        ssarj = "{:.2f}".format(float((values[1])[0]))
-        ptrrj = "{:.2f}".format(float((values[2])[0]))
-        strrj = "{:.2f}".format(float((values[3])[0]))
-        beta1b = "{:.2f}".format(float((values[4])[0]))
-        beta1a = "{:.2f}".format(float((values[5])[0]))
-        beta2b = "{:.2f}".format(float((values[6])[0]))
-        beta2a = "{:.2f}".format(float((values[7])[0]))
-        beta3b = "{:.2f}".format(float((values[8])[0]))
-        beta3a = "{:.2f}".format(float((values[9])[0]))
-        beta4b = "{:.2f}".format(float((values[10])[0]))
-        beta4a = "{:.2f}".format(float((values[11])[0]))
 
         aos = "{:.2f}".format(int((values[12])[0]))
         los = "{:.2f}".format(int((values[13])[0]))
-        sasa_el = "{:.2f}".format(float((values[14])[0]))
-        sasa_az = "{:.2f}".format(float((values[18])[0]))
-        active_sasa = int((values[54])[0])
+
         sasa1_active = int((values[53])[0])
         sasa2_active = int((values[52])[0])
         if sasa1_active or sasa2_active:
@@ -726,7 +709,7 @@ class MainApp(App):
         else:
             sasa_xmit = False
 
-       
+    
 
         ## ISS Potential Problems ##
         #ISS Leak - Check Pressure Levels
@@ -737,131 +720,6 @@ class MainApp(App):
         #ISS altitude too low
         #Russion hook status - make sure all modules remain docked
 
-
-        #initialize array statuses to discharge
-        v1as = 1
-        v1bs = 1
-        v2as = 1
-        v2bs = 1
-        v3as = 1
-        v3bs = 1
-        v4as = 1
-        v4bs = 1
-
-        v1a = "{:.2f}".format(float((values[25])[0]))
-        v1b = "{:.2f}".format(float((values[26])[0]))
-        v2a = "{:.2f}".format(float((values[27])[0]))
-        v2b = "{:.2f}".format(float((values[28])[0]))
-        v3a = "{:.2f}".format(float((values[29])[0]))
-        v3b = "{:.2f}".format(float((values[30])[0]))
-        v4a = "{:.2f}".format(float((values[31])[0]))
-        v4b = "{:.2f}".format(float((values[32])[0]))
-        c1a = "{:.2f}".format(float((values[33])[0]))
-        c1b = "{:.2f}".format(float((values[34])[0]))
-        c2a = "{:.2f}".format(float((values[35])[0]))
-        c2b = "{:.2f}".format(float((values[36])[0]))
-        c3a = "{:.2f}".format(float((values[37])[0]))
-        c3b = "{:.2f}".format(float((values[38])[0]))
-        c4a = "{:.2f}".format(float((values[39])[0]))
-        c4b = "{:.2f}".format(float((values[40])[0]))
-
-        # array status numbers to be sent to arduino
-        # 1 = discharging
-        # 2 = charging
-        # 3 = full
-        # 4 = offline
-
-        if float(v1a) < 151.5: #discharging
-            v1as = 1
-        elif float(v1a) > 160.0: #charged
-            v1as = 3
-        elif float(v1a) >= 151.5:  #charging
-            v1as = 2
-        if float(c1a) > 0.0:    #power channel offline!
-            v1as = 4
-
-        if float(v1b) < 151.5: #discharging
-            v1bs = 1
-        elif float(v1b) > 160.0: #charged
-            v1bs = 3
-        elif float(v1b) >= 151.5:  #charging
-            v1bs = 2
-        if float(c1b) > 0.0:                                  #power channel offline!
-            v1bs = 4
-
-        if float(v2a) < 151.5: #discharging
-            v2as = 1
-        elif float(v2a) > 160.0: #charged
-            v2as = 3
-        elif float(v2a) >= 151.5:  #charging
-            v2as = 2
-        if float(c2a) > 0.0:                                  #power channel offline!
-            v2as = 4
-
-        if float(v2b) < 151.5: #discharging
-            v2bs = 1
-        elif float(v2b) > 160.0: #charged
-            v2bs = 3
-        elif float(v2b) >= 151.5:  #charging
-            v2bs = 2
-        if float(c2b) > 0.0:                                  #power channel offline!
-            v2bs = 4
-
-        if float(v3a) < 151.5: #discharging
-            v3as = 1
-        elif float(v3a) > 160.0: #charged
-            v3as = 3
-        elif float(v3a) >= 151.5:  #charging
-            v3as = 2
-        if float(c3a) > 0.0:                                  #power channel offline!
-            v3as = 4
-
-        if float(v3b) < 151.5: #discharging
-            v3bs = 1
-        elif float(v3b) > 160.0: #charged
-            v3bs = 3
-        elif float(v3b) >= 151.5:  #charging
-            v3bs = 2
-        if float(c3b) > 0.0:                                  #power channel offline!
-            v3bs = 4
-
-        if float(v4a) < 151.5: #discharging
-            v4as = 1
-        elif float(v4a) > 160.0: #charged
-            v4as = 3
-        elif float(v4a) >= 151.5:  #charging
-            v4as = 2
-        if float(c4a) > 0.0:                                  #power channel offline!
-            v4as = 4
-        
-        if float(v4b) < 151.5: #discharging
-            v4bs = 1
-        elif float(v4b) > 160.0: #charged
-            v4bs = 3
-        elif float(v4b) >= 151.5:  #charging
-            v4bs = 2
-        if float(c4b) > 0.0:                                  #power channel offline!
-            v4bs = 4
-
-        sgant_elevation = float((values[15])[0])
-        sgant_xelevation = float((values[17])[0])
-        sgant_transmit = float((values[41])[0])
-
-        if demoboolean:
-            if Disco:
-                serialWrite("Disco ")
-                Disco = False
-            serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + str(v1as) + " " + "V2A=" + str(v2as) + " " + "V3A=" + str(v3as) + " " + "V4A=" + str(v4as) + " " + "V1B=" + str(v1bs) + " " + "V2B=" + str(v2bs) + " " + "V3B=" + str(v3bs) + " " + "V4B=" + str(v4bs) + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
-
-        
-        #UHF telemetry updates now handled in CT_UHF_Screen
-
-
-        # ISS telemetry updates moved to ISS_Screen
-
-        ##-------------------Signal Status Check-------------------##
-
-        #if client_status.split(":")[0] == "CONNECTED": we dont check client status anymore in the python lightstreamer script
         if sub_status == "Subscribed":
             #client connected and subscibed to ISS telemetry
             if float(aos) == 1.00:
@@ -876,10 +734,7 @@ class MainApp(App):
         else:
             self.signal_unsubscribed()
 
-
-        if mimicbutton: # and float(aos) == 1.00):
-            serialWrite("PSARJ=" + psarj + " " + "SSARJ=" + ssarj + " " + "PTRRJ=" + ptrrj + " " + "STRRJ=" + strrj + " " + "B1B=" + beta1b + " " + "B1A=" + beta1a + " " + "B2B=" + beta2b + " " + "B2A=" + beta2a + " " + "B3B=" + beta3b + " " + "B3A=" + beta3a + " " + "B4B=" + beta4b + " " + "B4A=" + beta4a + " " + "AOS=" + aos + " " + "V1A=" + str(v1as) + " " + "V2A=" + str(v2as) + " " + "V3A=" + str(v3as) + " " + "V4A=" + str(v4as) + " " + "V1B=" + str(v1bs) + " " + "V2B=" + str(v2bs) + " " + "V3B=" + str(v3bs) + " " + "V4B=" + str(v4bs) + " " + "Sgnt_el=" + str(int(sgant_elevation)) + " " + "Sgnt_xel=" + str(int(sgant_xelevation)) + " " + "Sgnt_xmit=" + str(int(sgant_transmit)) + " " + "SASA_Xmit=" + str(int(sasa_xmit)) + " SASA_AZ=" + str(float(sasa_az)) + " SASA_EL=" + str(float(sasa_el)) + " ")
-
+        
 if __name__ == '__main__':
     try:
         # Show logging configuration
