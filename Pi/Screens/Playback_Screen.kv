@@ -221,9 +221,13 @@
         Button:
             size_hint: 0.1, 0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.07}
+            background_normal: ''         # hide default bg
+            background_down: ''
+            background_color: 0, 0, 0, 0
             on_release: app.root.current = 'main'
+
             Image:
                 source: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
-                fit_mode: contain
-                size: self.parent.size
+                fit_mode: 'contain'
+                size_hint: 1, 1
             
