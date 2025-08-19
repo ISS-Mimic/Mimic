@@ -126,7 +126,7 @@ class Playback_Screen(MimicBase):
                 usb_files = [f"{d} (USB)" for d in sorted(drives)]
                 
                 # Add built-in demos
-                builtin_demos = ["HTV", "OFT2", "Disco"]
+                builtin_demos = ["HTV", "OFT2", "Standard"]
                 
                 dropdown.values = usb_files + builtin_demos
                 
