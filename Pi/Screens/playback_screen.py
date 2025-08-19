@@ -122,13 +122,21 @@ class Playback_Screen(MimicBase):
         try:
             dropdown = self.ids.file_dropdown
             if dropdown:
-                # Add USB drives
-                usb_files = [f"{d} (USB)" for d in sorted(drives)]
+                # Find Telemetry_ folders on USB drives
+                telemetry_folders = []
+                for drive in drives:
+                    drive_path = Path(f"/media/pi/{drive}")
+                    if drive_path.exists():
+                        # Look for folders starting with "Telemetry_"
+                        telemetry_dirs = [d.name for d in drive_path.iterdir() 
+                                        if d.is_dir() and d.name.startswith("Telemetry_")]
+                        for telemetry_dir in telemetry_dirs:
+                            telemetry_folders.append(f"USB: {telemetry_dir}")
                 
                 # Add built-in demos
                 builtin_demos = ["HTV", "OFT2", "Standard"]
                 
-                dropdown.values = usb_files + builtin_demos
+                dropdown.values = telemetry_folders + builtin_demos
                 
         except Exception as e:
             log_error(f"Error updating dropdown: {e}")
@@ -142,41 +150,65 @@ class Playback_Screen(MimicBase):
         log_info(f"File selected: {filename}")
         
         # Parse the selection
-        if "(USB)" in filename:
-            # USB drive file
-            drive_name = filename.replace(" (USB)", "")
-            self._load_usb_file(drive_name)
+        if filename.startswith("USB: "):
+            # USB telemetry folder
+            telemetry_folder = filename.replace("USB: ", "")
+            self._load_usb_telemetry_folder(telemetry_folder)
         else:
             # Built-in demo
             self._load_builtin_demo(filename)
-        
- 
         
         # Update status and check if start button should be enabled
         self._update_status()
         self._check_start_button_state()
 
-    def _load_usb_file(self, drive_name: str):
-        """Load playback data from USB drive."""
+    def _load_usb_telemetry_folder(self, telemetry_folder: str):
+        """Load playback data from USB telemetry folder."""
         try:
-            # Look for data folders (not CSV files anymore)
-            usb_path = Path(f"/media/pi/{drive_name}")
-            
-            # Find data folders (like HTV, OFT2, etc.)
-            data_folders = [d.name for d in usb_path.iterdir() if d.is_dir()]
-            
-            if not data_folders:
-                self._show_error("No data folders found on USB drive")
+            # Find which USB drive contains this telemetry folder
+            media_dir = Path("/media/pi")
+            if not media_dir.exists():
+                self._show_error("No USB drives found")
                 return
                 
-            # For now, just show the first folder found
-            # Later we can add folder selection
-            self.current_file = f"{drive_name} (USB)"
-            log_info(f"Loaded USB data folder: {data_folders[0]}")
+            # Search through all USB drives for the telemetry folder
+            for drive_dir in media_dir.iterdir():
+                if drive_dir.is_dir():
+                    telemetry_path = drive_dir / telemetry_folder
+                    if telemetry_path.exists() and telemetry_path.is_dir():
+                        # Found the telemetry folder on this USB drive
+                        self.current_file = f"USB: {telemetry_folder}"
+                        log_info(f"Loaded USB telemetry folder: {telemetry_path}")
+                        return
+                        
+            # If we get here, the folder wasn't found
+            self._show_error(f"Telemetry folder '{telemetry_folder}' not found on any USB drive")
             
         except Exception as e:
-            log_error(f"Error loading USB file: {e}")
-            self._show_error(f"Error loading USB file: {e}")
+            log_error(f"Error loading USB telemetry folder: {e}")
+            self._show_error(f"Error loading USB telemetry folder: {e}")
+
+    def _find_usb_telemetry_path(self, telemetry_folder: str) -> str:
+        """Find the full path to a USB telemetry folder."""
+        try:
+            media_dir = Path("/media/pi")
+            if not media_dir.exists():
+                return None
+                
+            # Search through all USB drives for the telemetry folder
+            for drive_dir in media_dir.iterdir():
+                if drive_dir.is_dir():
+                    telemetry_path = drive_dir / telemetry_folder
+                    if telemetry_path.exists() and telemetry_path.is_dir():
+                        # Found the telemetry folder on this USB drive
+                        return str(telemetry_path)
+                        
+            # If we get here, the folder wasn't found
+            return None
+            
+        except Exception as e:
+            log_error(f"Error finding USB telemetry path: {e}")
+            return None
 
     def _load_builtin_demo(self, demo_name: str):
         """Load built-in demo data."""
@@ -187,6 +219,8 @@ class Playback_Screen(MimicBase):
                 data_folder = demo_path / "HTV"
             elif demo_name == "OFT2":
                 data_folder = demo_path / "OFT2"
+            elif demo_name == "Standard":
+                data_folder = demo_path / "Standard"
             elif demo_name == "Disco":
                 data_folder = demo_path / "Disco"
             else:
@@ -587,10 +621,13 @@ class Playback_Screen(MimicBase):
             
         try:
             # Determine the data folder path
-            if "(USB)" in self.current_file:
-                # USB drive file
-                drive_name = self.current_file.replace(" (USB)", "")
-                data_folder = f"/media/pi/{drive_name}"
+            if self.current_file.startswith("USB: "):
+                # USB telemetry folder - find the actual path
+                telemetry_folder = self.current_file.replace("USB: ", "")
+                data_folder = self._find_usb_telemetry_path(telemetry_folder)
+                if not data_folder:
+                    self._show_error(f"Could not find USB telemetry folder: {telemetry_folder}")
+                    return
             else:
                 # Built-in demo
                 demo_name = self.current_file
