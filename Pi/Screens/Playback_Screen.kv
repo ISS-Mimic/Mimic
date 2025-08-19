@@ -112,7 +112,7 @@
             values: ['HTV', 'OFT2', 'Standard']
             on_text: root.on_dropdown_select_data(self.text)
             background_color: 0.3, 0.3, 0.3, 1  # Dark metallic look
-            pos_hint: {"center_x": 0.157, "center_y": 0.547}
+            pos_hint: {"center_x": 0.155, "center_y": 0.548}
             font_size: self.height * 0.5  # Scale font to button height
         
         
@@ -124,14 +124,14 @@
             values: ['10x', '20x', '60x', '90x']
             on_text: root.on_dropdown_select_speed(self.text)
             background_color: 0.3, 0.3, 0.3, 1  # Dark metallic look
-            pos_hint: {"center_x": 0.487, "center_y": 0.547}
+            pos_hint: {"center_x": 0.486, "center_y": 0.548}
             font_size: self.height * 0.5  # Scale font to button height
 
         
         # ---------- RIGHT PANEL: DISCO MODE ----------
         Button:
             id: disco_button
-            size_hint_y: 0.3
+            size_hint: 0.2, 0.31
             background_color: 0, 0, 0, 0  # Transparent background
             on_press: root.start_disco_mode()
             pos_hint: {"center_x": 0.807, "center_y": 0.55}
