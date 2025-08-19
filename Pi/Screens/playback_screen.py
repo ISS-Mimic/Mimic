@@ -136,7 +136,7 @@ class Playback_Screen(MimicBase):
                 # Add built-in demos
                 builtin_demos = ["HTV", "OFT2", "Standard"]
                 
-                dropdown.values = telemetry_folders + builtin_demos
+                dropdown.values = builtin_demos + telemetry_folders
                 
         except Exception as e:
             log_error(f"Error updating dropdown: {e}")
