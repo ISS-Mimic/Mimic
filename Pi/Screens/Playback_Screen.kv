@@ -104,16 +104,6 @@
                 center_x: self.parent.center_x
                 center_y: self.parent.center_y
 
-        # Left Panel Header
-        Label:
-            text: 'LOAD DATA'
-            size_hint: 0.15, 0.05
-            pos_hint: {"center_x": 0.157, "center_y": 0.75}
-            color: 0, 1, 0, 1  # Green text
-            font_size: self.height * 0.6
-            text_size: self.size
-            halign: 'center'
-            valign: 'middle'
         
         Spinner:
             id: file_dropdown
@@ -125,16 +115,6 @@
             pos_hint: {"center_x": 0.157, "center_y": 0.547}
             font_size: self.height * 0.4  # Scale font to button height
         
-        # Middle Panel Header
-        Label:
-            text: 'PLAYBACK SPEED'
-            size_hint: 0.15, 0.05
-            pos_hint: {"center_x": 0.487, "center_y": 0.75}
-            color: 0, 1, 0, 1  # Green text
-            font_size: self.height * 0.6
-            text_size: self.size
-            halign: 'center'
-            valign: 'middle'
         
         # ---------- MIDDLE PANEL: PLAYBACK SPEED ----------
         Spinner:
@@ -147,17 +127,6 @@
             pos_hint: {"center_x": 0.487, "center_y": 0.547}
             font_size: self.height * 0.4  # Scale font to button height
 
-        
-        # Right Panel Header
-        Label:
-            text: 'DISCO MODE'
-            size_hint: 0.15, 0.05
-            pos_hint: {"center_x": 0.807, "center_y": 0.75}
-            color: 0, 1, 0, 1  # Green text
-            font_size: self.height * 0.6
-            text_size: self.size
-            halign: 'center'
-            valign: 'middle'
         
         # ---------- RIGHT PANEL: DISCO MODE ----------
         Button:
@@ -180,7 +149,7 @@
         Button:
             id: start_button
             text: 'START'
-            size_hint: 0.12, 0.08
+            size_hint: 0.15, 0.1
             background_color: 0, 0.8, 0, 1  # Green
             disabled: True  # Start disabled by default
             on_press: root.start_playback()
@@ -190,7 +159,7 @@
         # Red Stop Button (Bottom Right)
         Button:
             text: 'STOP'
-            size_hint: 0.12, 0.08
+            size_hint: 0.15, 0.1
             background_color: 0.8, 0, 0, 1  # Red
             disabled: not root.is_playing
             on_press: root.stop_playback()
@@ -200,7 +169,7 @@
         # Loop Button (Center Bottom)
         Button:
             text: 'LOOP'
-            size_hint: 0.1, 0.06
+            size_hint: 0.15, 0.1
             background_color: (0.2, 0.8, 0.2, 1) if root.loop_enabled else (0.6, 0.6, 0.6, 1)
             on_press: root.toggle_loop()
             pos_hint: {"center_x": 0.49, "center_y": 0.43}
@@ -210,7 +179,7 @@
         Label:
             id: status_label
             text: 'Select Data to Playback'
-            size_hint: 0.8, 0.06
+            size_hint: 1, 0.07
             background_color: 0, 0, 0, 0.8  # Semi-transparent black
             color: 0, 1, 0, 1  # Green text
             font_size: self.height * 0.6  # Scale font to label height
@@ -223,29 +192,34 @@
         Image:
             id: signal
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/signalred.zip"
-            size_hint: 0.08, 0.08
+            size_hint_y: 0.112
             anim_delay: 0.05
             anim_loop: 0
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.05, "center_y": 0.07}
+        
         Image:
             id: arduino
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
-            size_hint: 0.1, 0.1
+            size_hint_y: 0.15
             anim_delay: 0.2
             anim_loop: 0
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
+        
         Label:
             id: arduino_count
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
             text: ''
             markup: True
-            color: 1,1,1
-            font_size: self.height * 0.6
-            size_hint: 0.06, 0.08
+            color: 1, 1, 1, 1
+            font_size: min(self.height * 0.3, dp(40))
+            size_hint_y: 0.5
+        
+        # ─────────────────────── Navigation ────────────────────────────────
+
         Button:
-            size_hint: 0.08, 0.08
+            size_hint: 0.1, 0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.082}
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: app.root.current = 'main'
