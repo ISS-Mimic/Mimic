@@ -221,14 +221,7 @@
         Button:
             size_hint: 0.1, 0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.07}
-            background_normal: ''         # hide default bg
-            background_down: ''
-            background_color: 0, 0, 0, 0
-            on_release: app.root.current = 'main'
-
-            Image:
-                source: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
-                fit_mode: 'contain'
-                size: self.parent.size      # Button isn’t a Layout → bind size explicitly
-                pos: 0, 0                   # child coords are relative to Button
-            
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            border: 0,0,0,0    # avoid 9-slice margins
+            on_release: root.manager.current = 'main'
