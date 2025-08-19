@@ -112,7 +112,7 @@
             values: ['HTV', 'OFT2', 'Standard']
             on_text: root.on_dropdown_select_data(self.text)
             background_color: 0.3, 0.3, 0.3, 1  # Dark metallic look
-            pos_hint: {"center_x": 0.155, "center_y": 0.548}
+            pos_hint: {"center_x": 0.154, "center_y": 0.5475}
             font_size: self.height * 0.5  # Scale font to button height
         
         
@@ -124,7 +124,7 @@
             values: ['10x', '20x', '60x', '90x']
             on_text: root.on_dropdown_select_speed(self.text)
             background_color: 0.3, 0.3, 0.3, 1  # Dark metallic look
-            pos_hint: {"center_x": 0.486, "center_y": 0.548}
+            pos_hint: {"center_x": 0.485, "center_y": 0.5475}
             font_size: self.height * 0.5  # Scale font to button height
 
         
@@ -186,7 +186,7 @@
             text_size: self.size
             halign: 'center'
             valign: 'middle'
-            pos_hint: {"center_x": 0.57, "center_y": 0.078}
+            pos_hint: {"center_x": 0.57, "center_y": 0.07}
         
         # ---------- BOTTOM TOOLBAR ----------
         Image:
@@ -213,13 +213,13 @@
             text: ''
             markup: True
             color: 1, 1, 1, 1
-            font_size: self.height * 0.6
+            font_size: self.height * 1
             size_hint: 0.06, 0.08
         
         # ─────────────────────── Navigation ────────────────────────────────
 
         Button:
             size_hint: 0.1, 0.11
-            pos_hint: {"center_x": 0.9375, "center_y": 0.08}
+            pos_hint: {"center_x": 0.9375, "center_y": 0.07}
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             on_release: app.root.current = 'main'
