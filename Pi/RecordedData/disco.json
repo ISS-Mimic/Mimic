@@ -5,7 +5,7 @@
       90,
       180
     ],
-    "duration": 60
+    "duration": 15
   },
   {
     "type": "stepseq",
@@ -15,7 +15,7 @@
       90,
       135
     ],
-    "duration": 20
+    "duration": 15
   },
   {
     "type": "random",
@@ -28,7 +28,7 @@
     "type": "sine",
     "amp": 90,
     "offset": 0,
-    "period": 120,
+    "period": 12,
     "duration": 60,
     "quant": 5
   }
