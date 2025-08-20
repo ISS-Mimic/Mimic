@@ -103,12 +103,15 @@ class Playback_Screen(MimicBase):
                 
             if not self.arduino_connected:
                 # No Arduino connected - show offline
+                print("No Arduino connected - showing offline")
                 arduino_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
             elif self.is_playing:
                 # Playing - show transmit animation
+                print("Playing - showing transmit")
                 arduino_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_transmit.zip"
             else:
                 # Connected but not playing - show normal
+                print("Connected but not playing - showing normal")
                 arduino_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
                 
         except Exception as e:
