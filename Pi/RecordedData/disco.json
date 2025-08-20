@@ -8,28 +8,18 @@
     "duration": 15
   },
   {
-    "type": "stepseq",
-    "seq": [
-      0,
-      45,
-      90,
-      135
-    ],
-    "duration": 15
+    "type": "sine",
+    "amp": 90,
+    "offset": 0,
+    "period": 6,
+    "duration": 30,
+    "quant": 5
   },
   {
     "type": "random",
     "low": -235,
     "high": 235,
-    "duration": 30,
+    "duration": 15,
     "seed": 123
-  },
-  {
-    "type": "sine",
-    "amp": 90,
-    "offset": 0,
-    "period": 12,
-    "duration": 60,
-    "quant": 5
   }
 ]
