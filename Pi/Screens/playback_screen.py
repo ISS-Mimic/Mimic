@@ -50,37 +50,17 @@ class Playback_Screen(MimicBase):
     # Serial writing
     _serial_timer = None
     _serial_update_interval = 0.1  # Update every 100ms (10Hz)
+    _is_writing_serial = False  # Track if we're actively writing serial data
     
     # LED control
     _disco_colors = ["Red", "Green", "Blue", "Yellow", "Purple", "Cyan", "White", "Orange"]
-    
-    # Local process management
-    _local_playback_proc = None
-    
-    def _set_local_playback_proc(self, value, *, reason: str = ""):
-        """Setter for _local_playback_proc to track changes (and avoid spurious clears)."""
-        old_value = self._local_playback_proc
-        print(f"DEBUG: _local_playback_proc changing from {old_value} to {value} (reason={reason})")
-        if old_value and value is None:
-            # If we didn't explicitly stop and the old proc didn't exit normally, ignore the clear.
-            rc = getattr(old_value, "returncode", None)
-            if not self._explicit_stop and rc not in (0, None):
-                print("DEBUG: Spurious clear of _local_playback_proc ignored (not an explicit stop and rc not 0/None).")
-                return
-        self._local_playback_proc = value
-        if value is None:
-            # reset the explicit flag once we accept the clear
-            self._explicit_stop = False
 
     def __init__(self, **kw):
         super().__init__(**kw)
         
         # Start monitoring Arduino connection
         Clock.schedule_interval(self._check_arduino_connection, 5.0)
-
-        self._explicit_stop = False
-        Clock.schedule_interval(lambda dt: self._check_playback_process_status(), 1.0)
-
+        
         # Start monitoring USB drives
         self._start_usb_monitor()
         
@@ -114,88 +94,26 @@ class Playback_Screen(MimicBase):
         # Update Arduino animation when connection status changes
         self._update_arduino_animation()
 
-    # ---------------------------------------------------------------- Playback Process Check
-    def _check_playback_process_status(self):
-        """Only mark not playing when we *know* the process ended normally, or after an explicit stop."""
-        try:
-            print("DEBUG: _check_playback_process_status called")
-            print(f"DEBUG: local_playback_proc: {self._local_playback_proc}")
-
-            if self._local_playback_proc:
-                print(f"DEBUG: local_playback_proc pid: {self._local_playback_proc.pid}")
-                poll_result = self._local_playback_proc.poll()
-                print(f"DEBUG: poll() result: {poll_result}")
-
-                if poll_result is None:
-                    # Still running
-                    if not self.is_playing:
-                        print("DEBUG: Playback process is running but is_playing was False - fixing")
-                        self.is_playing = True
-                else:
-                    # Ended: only treat rc==0 as a definitive stop (natural completion)
-                    if poll_result == 0:
-                        print("DEBUG: Process ended normally (rc=0); marking not playing and clearing handle")
-                        self.is_playing = False
-                        self._set_local_playback_proc(None, reason="proc exited 0")
-                    else:
-                        # Terminated by signal (e.g., -15) or nonzero error: keep state until explicit stop
-                        print(f"DEBUG: Process terminated by signal/nonzero rc ({poll_result}); keeping is_playing True")
-            else:
-                # No handle — try to recover from the App in case something dropped our reference
-                app = App.get_running_app()
-                proc = getattr(app, "playback_proc", None)
-                if proc:
-                    print("DEBUG: Recovered playback_proc from App; restoring handle.")
-                    self._set_local_playback_proc(proc, reason="recover from App")
-                else:
-                    print("DEBUG: No local/app playback proc; leaving is_playing unchanged")
-                    # <= Do NOT force is_playing = False here; avoid false negatives.
-        except Exception as e:
-            log_error(f"Error checking playback process status: {e}")
-            print(f"DEBUG: Exception in _check_playback_process_status: {e}")
-
-
     # ---------------------------------------------------------------- Arduino Animation
     def _update_arduino_animation(self):
-        """Update the Arduino image to show transmit animation when playing, normal when stopped."""
+        """Update the Arduino image to show transmit animation when writing serial data, normal when not."""
         try:
-            # First check if playback process status is correct
-            self._check_playback_process_status()
-            
-            print(f"DEBUG: _update_arduino_animation called")
-            print(f"DEBUG: arduino_connected = {self.arduino_connected}")
-            print(f"DEBUG: is_playing = {self.is_playing}")
-            print(f"DEBUG: mimic_directory = {self.mimic_directory}")
-            
             arduino_image = getattr(self.ids, 'arduino', None)
             if not arduino_image:
-                print("DEBUG: arduino image not found in ids")
                 return
-            else:
-                print(f"DEBUG: arduino image found: {arduino_image}")
-            
-            # Determine what the image should be
+                
             if not self.arduino_connected:
-                target_source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
-                target_state = "offline"
-            elif self.is_playing:
-                target_source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
-                target_state = "transmit"
+                # No Arduino connected - show offline
+                arduino_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
+            elif self._is_writing_serial:
+                # Writing serial data - show transmit animation
+                arduino_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
             else:
-                target_source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
-                target_state = "normal"
-            
-            # Only update if the source is different (avoid unnecessary changes)
-            if arduino_image.source != target_source:
-                print(f"DEBUG: Changing arduino image from {arduino_image.source} to {target_source}")
-                print(f"DEBUG: State: {target_state}")
-                arduino_image.source = target_source
-            else:
-                print(f"DEBUG: Arduino image already correct: {target_state}")
+                # Connected but not writing serial - show normal
+                arduino_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
                 
         except Exception as e:
             log_error(f"Error updating Arduino animation: {e}")
-            print(f"DEBUG: Exception in _update_arduino_animation: {e}")
 
     # ---------------------------------------------------------------- USB Monitoring
     def _start_usb_monitor(self):
@@ -391,6 +309,11 @@ class Playback_Screen(MimicBase):
                 
             self.playback_speed = speed_value
             
+            # If currently playing, restart timer with new speed
+            if self.is_playing:
+                self._stop_playback_timer()
+                self._start_playback_timer()
+                
             log_info(f"Playback speed set to {speed_value}x")
             
             
@@ -475,6 +398,7 @@ class Playback_Screen(MimicBase):
             Clock.unschedule(self._serial_timer)
         
         self._serial_timer = Clock.schedule_interval(self._send_telemetry_serial, self._serial_update_interval)
+        self._is_writing_serial = True
         log_info("Serial writer started")
 
     def _stop_serial_writer(self):
@@ -482,7 +406,8 @@ class Playback_Screen(MimicBase):
         if self._serial_timer:
             Clock.unschedule(self._serial_timer)
             self._serial_timer = None
-            log_info("Serial writer stopped")
+        self._is_writing_serial = False
+        log_info("Serial writer stopped")
 
     def _send_telemetry_serial(self, dt):
         """Read telemetry values from database and send to Arduino."""
@@ -747,13 +672,11 @@ class Playback_Screen(MimicBase):
             
             # Launch the playback engine
             app = App.get_running_app()
-            if self._local_playback_proc:
+            if hasattr(app, 'playback_proc') and app.playback_proc:
                 log_info("Playback already running")
                 return
                 
             proc = Popen(cmd)
-            self._set_local_playback_proc(proc)
-            # Also set it in the app for compatibility
             app.playback_proc = proc
             
             self.is_playing = True
@@ -780,39 +703,55 @@ class Playback_Screen(MimicBase):
         """Stop the current playback."""
         if not self.is_playing:
             return
+            
         try:
-            self._explicit_stop = True  # <-- tell the setter it's OK to clear
             log_info("Stopping playback...")
+            
+            # Stop serial writer first
             self._stop_serial_writer()
-            if self._local_playback_proc:
-                log_info(f"Terminating process {self._local_playback_proc.pid}")
+            
+            # Stop the playback engine
+            app = App.get_running_app()
+            if hasattr(app, 'playback_proc') and app.playback_proc:
+                log_info(f"Terminating process {app.playback_proc.pid}")
+                
+                # Try graceful termination first
                 serialWrite("RESET")
-                self._local_playback_proc.terminate()
+                app.playback_proc.terminate()
+                
+                # Wait a bit for graceful shutdown
                 try:
-                    self._local_playback_proc.wait(timeout=3)
+                    app.playback_proc.wait(timeout=3)
                     log_info("Process terminated gracefully")
                 except TimeoutExpired:
+                    # Force kill if it doesn't respond
                     log_info("Force killing playback process")
-                    self._local_playback_proc.kill()
-                    self._local_playback_proc.wait()
+                    app.playback_proc.kill()
+                    app.playback_proc.wait()
                     log_info("Process force killed")
-                self._set_local_playback_proc(None, reason="stop_playback")
-                app = App.get_running_app()
-                if hasattr(app, 'playback_proc'):
-                    app.playback_proc = None
+                
+                app.playback_proc = None
+            else:
+                log_info("No playback process found to stop")
+            
             self.is_playing = False
+            log_info("Playback stopped")
+            
+            # Update status and re-enable all buttons
             self._update_status()
             self._update_playback_buttons()
+            
+            # Update Arduino animation to show normal
             self._update_arduino_animation()
+            
         except Exception as e:
             log_error(f"Error stopping playback: {e}")
+            # Even if there's an error, mark as not playing
             self.is_playing = False
-            self._explicit_stop = False
             self._stop_serial_writer()
             self._update_status()
             self._update_playback_buttons()
             self._update_arduino_animation()
-
     
     def toggle_loop(self):
         """Toggle loop mode on/off."""
