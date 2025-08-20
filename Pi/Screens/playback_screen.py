@@ -101,33 +101,46 @@ class Playback_Screen(MimicBase):
             app = App.get_running_app()
             print(f"DEBUG: app has playback_proc: {hasattr(app, 'playback_proc')}")
             
-            if hasattr(app, 'playback_proc') and app.playback_proc:
-                print(f"DEBUG: playback_proc exists: {app.playback_proc}")
-                print(f"DEBUG: playback_proc pid: {app.playback_proc.pid}")
+            if hasattr(app, 'playback_proc'):
+                print(f"DEBUG: playback_proc value: {app.playback_proc}")
+                print(f"DEBUG: playback_proc is None: {app.playback_proc is None}")
+                print(f"DEBUG: playback_proc bool: {bool(app.playback_proc)}")
                 
-                # Check if process is still alive
-                poll_result = app.playback_proc.poll()
-                print(f"DEBUG: poll() result: {poll_result}")
-                
-                if poll_result is None:
-                    # Process is still running
-                    print("DEBUG: Process is still running")
-                    if not self.is_playing:
-                        print("DEBUG: Playback process is running but is_playing was False - fixing")
-                        self.is_playing = True
+                if app.playback_proc:
+                    print(f"DEBUG: playback_proc exists: {app.playback_proc}")
+                    print(f"DEBUG: playback_proc pid: {app.playback_proc.pid}")
+                    
+                    # Check if process is still alive
+                    poll_result = app.playback_proc.poll()
+                    print(f"DEBUG: poll() result: {poll_result}")
+                    
+                    if poll_result is None:
+                        # Process is still running
+                        print("DEBUG: Process is still running")
+                        if not self.is_playing:
+                            print("DEBUG: Playback process is running but is_playing was False - fixing")
+                            self.is_playing = True
+                        else:
+                            print("DEBUG: Process running and is_playing is already True")
                     else:
-                        print("DEBUG: Process running and is_playing is already True")
+                        # Process has ended
+                        print(f"DEBUG: Process has ended with return code: {poll_result}")
+                        if self.is_playing:
+                            print("DEBUG: Playback process has ended but is_playing was True - fixing")
+                            self.is_playing = False
+                        else:
+                            print("DEBUG: Process ended and is_playing is already False")
                 else:
-                    # Process has ended
-                    print(f"DEBUG: Process has ended with return code: {poll_result}")
+                    # playback_proc is None or falsy
+                    print("DEBUG: playback_proc is None or falsy")
                     if self.is_playing:
-                        print("DEBUG: Playback process has ended but is_playing was True - fixing")
+                        print("DEBUG: No playback process but is_playing was True - fixing")
                         self.is_playing = False
                     else:
-                        print("DEBUG: Process ended and is_playing is already False")
+                        print("DEBUG: No playback process and is_playing is already False")
             else:
-                # No playback process
-                print("DEBUG: No playback_proc found")
+                # No playback_proc attribute
+                print("DEBUG: No playback_proc attribute found")
                 if self.is_playing:
                     print("DEBUG: No playback process but is_playing was True - fixing")
                     self.is_playing = False
