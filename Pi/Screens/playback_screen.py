@@ -97,26 +97,45 @@ class Playback_Screen(MimicBase):
     def _check_playback_process_status(self):
         """Check if the playback process is still running and update is_playing accordingly."""
         try:
+            print("DEBUG: _check_playback_process_status called")
             app = App.get_running_app()
+            print(f"DEBUG: app has playback_proc: {hasattr(app, 'playback_proc')}")
+            
             if hasattr(app, 'playback_proc') and app.playback_proc:
+                print(f"DEBUG: playback_proc exists: {app.playback_proc}")
+                print(f"DEBUG: playback_proc pid: {app.playback_proc.pid}")
+                
                 # Check if process is still alive
-                if app.playback_proc.poll() is None:
+                poll_result = app.playback_proc.poll()
+                print(f"DEBUG: poll() result: {poll_result}")
+                
+                if poll_result is None:
                     # Process is still running
+                    print("DEBUG: Process is still running")
                     if not self.is_playing:
                         print("DEBUG: Playback process is running but is_playing was False - fixing")
                         self.is_playing = True
+                    else:
+                        print("DEBUG: Process running and is_playing is already True")
                 else:
                     # Process has ended
+                    print(f"DEBUG: Process has ended with return code: {poll_result}")
                     if self.is_playing:
                         print("DEBUG: Playback process has ended but is_playing was True - fixing")
                         self.is_playing = False
+                    else:
+                        print("DEBUG: Process ended and is_playing is already False")
             else:
                 # No playback process
+                print("DEBUG: No playback_proc found")
                 if self.is_playing:
                     print("DEBUG: No playback process but is_playing was True - fixing")
                     self.is_playing = False
+                else:
+                    print("DEBUG: No playback process and is_playing is already False")
         except Exception as e:
             log_error(f"Error checking playback process status: {e}")
+            print(f"DEBUG: Exception in _check_playback_process_status: {e}")
 
     # ---------------------------------------------------------------- Arduino Animation
     def _update_arduino_animation(self):
