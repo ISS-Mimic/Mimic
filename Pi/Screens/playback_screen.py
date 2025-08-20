@@ -531,6 +531,11 @@ class Playback_Screen(MimicBase):
     def _build_led_command(self, telemetry_values):
         """Build the LED command string separately."""
         try:
+            # For disco mode, just return the DISCO command
+            if self.current_file == "Disco":
+                return "DISCO"
+            
+            # Normal mode: voltage-based colors
             # Get voltage values for LED control
             v1a = float(telemetry_values.get('V1A', 0))
             v1b = float(telemetry_values.get('V1B', 0))
@@ -541,29 +546,15 @@ class Playback_Screen(MimicBase):
             v4a = float(telemetry_values.get('V4A', 0))
             v4b = float(telemetry_values.get('V4B', 0))
             
-            # Determine LED colors
-            if self.current_file == "Disco":
-                serialWrite("DISCO")
-                # Disco mode: random colors
-                #import random
-                #led_1a = random.choice(self._disco_colors)
-                #led_1b = random.choice(self._disco_colors)
-               # led_2a = random.choice(self._disco_colors)
-               # led_2b = random.choice(self._disco_colors)
-               # led_3a = random.choice(self._disco_colors)
-               # led_3b = random.choice(self._disco_colors)
-               # led_4a = random.choice(self._disco_colors)
-               # led_4b = random.choice(self._disco_colors)
-            else:
-                # Normal mode: voltage-based colors
-                led_1a = self._get_voltage_color(v1a)
-                led_1b = self._get_voltage_color(v1b)
-                led_2a = self._get_voltage_color(v2a)
-                led_2b = self._get_voltage_color(v2b)
-                led_3a = self._get_voltage_color(v3a)
-                led_3b = self._get_voltage_color(v3b)
-                led_4a = self._get_voltage_color(v4a)
-                led_4b = self._get_voltage_color(v4b)
+            # Determine LED colors based on voltage
+            led_1a = self._get_voltage_color(v1a)
+            led_1b = self._get_voltage_color(v1b)
+            led_2a = self._get_voltage_color(v2a)
+            led_2b = self._get_voltage_color(v2b)
+            led_3a = self._get_voltage_color(v3a)
+            led_3b = self._get_voltage_color(v3b)
+            led_4a = self._get_voltage_color(v4a)
+            led_4b = self._get_voltage_color(v4b)
             
             # Build LED command string
             led_cmd = (
