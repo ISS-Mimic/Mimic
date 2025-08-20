@@ -97,25 +97,42 @@ class Playback_Screen(MimicBase):
     def _update_arduino_animation(self):
         """Update the Arduino image to show transmit animation when playing, normal when stopped."""
         try:
+            print(f"DEBUG: _update_arduino_animation called")
+            print(f"DEBUG: arduino_connected = {self.arduino_connected}")
+            print(f"DEBUG: is_playing = {self.is_playing}")
+            print(f"DEBUG: mimic_directory = {self.mimic_directory}")
+            
             arduino_image = getattr(self.ids, 'arduino', None)
             if not arduino_image:
+                print("DEBUG: arduino image not found in ids")
                 return
+            else:
+                print(f"DEBUG: arduino image found: {arduino_image}")
                 
             if not self.arduino_connected:
                 # No Arduino connected - show offline
                 print("No Arduino connected - showing offline")
-                arduino_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
+                full_path = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
+                print(f"DEBUG: Full path for offline: {full_path}")
+                arduino_image.source = full_path
             elif self.is_playing:
                 # Playing - show transmit animation
                 print("Playing - showing transmit")
-                arduino_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_transmit.zip"
+                full_path = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
+                print(f"DEBUG: Full path for transmit: {full_path}")
+                arduino_image.source = full_path
             else:
                 # Connected but not playing - show normal
                 print("Connected but not playing - showing normal")
-                arduino_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
+                full_path = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
+                print(f"DEBUG: Full path for normal: {full_path}")
+                arduino_image.source = full_path
+                
+            print(f"DEBUG: Set arduino image source to: {arduino_image.source}")
                 
         except Exception as e:
             log_error(f"Error updating Arduino animation: {e}")
+            print(f"DEBUG: Exception in _update_arduino_animation: {e}")
 
     # ---------------------------------------------------------------- USB Monitoring
     def _start_usb_monitor(self):
@@ -311,11 +328,6 @@ class Playback_Screen(MimicBase):
                 
             self.playback_speed = speed_value
             
-            # If currently playing, restart timer with new speed
-            if self.is_playing:
-                self._stop_playback_timer()
-                self._start_playback_timer()
-                
             log_info(f"Playback speed set to {speed_value}x")
             
             
