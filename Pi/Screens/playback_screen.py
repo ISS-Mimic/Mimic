@@ -93,10 +93,38 @@ class Playback_Screen(MimicBase):
         # Update Arduino animation when connection status changes
         self._update_arduino_animation()
 
+    # ---------------------------------------------------------------- Playback Process Check
+    def _check_playback_process_status(self):
+        """Check if the playback process is still running and update is_playing accordingly."""
+        try:
+            app = App.get_running_app()
+            if hasattr(app, 'playback_proc') and app.playback_proc:
+                # Check if process is still alive
+                if app.playback_proc.poll() is None:
+                    # Process is still running
+                    if not self.is_playing:
+                        print("DEBUG: Playback process is running but is_playing was False - fixing")
+                        self.is_playing = True
+                else:
+                    # Process has ended
+                    if self.is_playing:
+                        print("DEBUG: Playback process has ended but is_playing was True - fixing")
+                        self.is_playing = False
+            else:
+                # No playback process
+                if self.is_playing:
+                    print("DEBUG: No playback process but is_playing was True - fixing")
+                    self.is_playing = False
+        except Exception as e:
+            log_error(f"Error checking playback process status: {e}")
+
     # ---------------------------------------------------------------- Arduino Animation
     def _update_arduino_animation(self):
         """Update the Arduino image to show transmit animation when playing, normal when stopped."""
         try:
+            # First check if playback process status is correct
+            self._check_playback_process_status()
+            
             print(f"DEBUG: _update_arduino_animation called")
             print(f"DEBUG: arduino_connected = {self.arduino_connected}")
             print(f"DEBUG: is_playing = {self.is_playing}")
@@ -108,27 +136,25 @@ class Playback_Screen(MimicBase):
                 return
             else:
                 print(f"DEBUG: arduino image found: {arduino_image}")
-                
+            
+            # Determine what the image should be
             if not self.arduino_connected:
-                # No Arduino connected - show offline
-                print("No Arduino connected - showing offline")
-                full_path = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
-                print(f"DEBUG: Full path for offline: {full_path}")
-                arduino_image.source = full_path
+                target_source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
+                target_state = "offline"
             elif self.is_playing:
-                # Playing - show transmit animation
-                print("Playing - showing transmit")
-                full_path = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
-                print(f"DEBUG: Full path for transmit: {full_path}")
-                arduino_image.source = full_path
+                target_source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
+                target_state = "transmit"
             else:
-                # Connected but not playing - show normal
-                print("Connected but not playing - showing normal")
-                full_path = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
-                print(f"DEBUG: Full path for normal: {full_path}")
-                arduino_image.source = full_path
-                
-            print(f"DEBUG: Set arduino image source to: {arduino_image.source}")
+                target_source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
+                target_state = "normal"
+            
+            # Only update if the source is different (avoid unnecessary changes)
+            if arduino_image.source != target_source:
+                print(f"DEBUG: Changing arduino image from {arduino_image.source} to {target_source}")
+                print(f"DEBUG: State: {target_state}")
+                arduino_image.source = target_source
+            else:
+                print(f"DEBUG: Arduino image already correct: {target_state}")
                 
         except Exception as e:
             log_error(f"Error updating Arduino animation: {e}")
