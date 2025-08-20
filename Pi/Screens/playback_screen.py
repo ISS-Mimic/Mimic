@@ -53,6 +53,9 @@ class Playback_Screen(MimicBase):
     
     # LED control
     _disco_colors = ["Red", "Green", "Blue", "Yellow", "Purple", "Cyan", "White", "Orange"]
+    
+    # Local process management
+    _local_playback_proc = None
 
     def __init__(self, **kw):
         super().__init__(**kw)
@@ -98,49 +101,35 @@ class Playback_Screen(MimicBase):
         """Check if the playback process is still running and update is_playing accordingly."""
         try:
             print("DEBUG: _check_playback_process_status called")
-            app = App.get_running_app()
-            print(f"DEBUG: app has playback_proc: {hasattr(app, 'playback_proc')}")
+            print(f"DEBUG: local_playback_proc: {self._local_playback_proc}")
             
-            if hasattr(app, 'playback_proc'):
-                print(f"DEBUG: playback_proc value: {app.playback_proc}")
-                print(f"DEBUG: playback_proc is None: {app.playback_proc is None}")
-                print(f"DEBUG: playback_proc bool: {bool(app.playback_proc)}")
+            if self._local_playback_proc:
+                print(f"DEBUG: local_playback_proc exists: {self._local_playback_proc}")
+                print(f"DEBUG: local_playback_proc pid: {self._local_playback_proc.pid}")
                 
-                if app.playback_proc:
-                    print(f"DEBUG: playback_proc exists: {app.playback_proc}")
-                    print(f"DEBUG: playback_proc pid: {app.playback_proc.pid}")
-                    
-                    # Check if process is still alive
-                    poll_result = app.playback_proc.poll()
-                    print(f"DEBUG: poll() result: {poll_result}")
-                    
-                    if poll_result is None:
-                        # Process is still running
-                        print("DEBUG: Process is still running")
-                        if not self.is_playing:
-                            print("DEBUG: Playback process is running but is_playing was False - fixing")
-                            self.is_playing = True
-                        else:
-                            print("DEBUG: Process running and is_playing is already True")
+                # Check if process is still alive
+                poll_result = self._local_playback_proc.poll()
+                print(f"DEBUG: poll() result: {poll_result}")
+                
+                if poll_result is None:
+                    # Process is still running
+                    print("DEBUG: Process is still running")
+                    if not self.is_playing:
+                        print("DEBUG: Playback process is running but is_playing was False - fixing")
+                        self.is_playing = True
                     else:
-                        # Process has ended
-                        print(f"DEBUG: Process has ended with return code: {poll_result}")
-                        if self.is_playing:
-                            print("DEBUG: Playback process has ended but is_playing was True - fixing")
-                            self.is_playing = False
-                        else:
-                            print("DEBUG: Process ended and is_playing is already False")
+                        print("DEBUG: Process running and is_playing is already True")
                 else:
-                    # playback_proc is None or falsy
-                    print("DEBUG: playback_proc is None or falsy")
+                    # Process has ended
+                    print(f"DEBUG: Process has ended with return code: {poll_result}")
                     if self.is_playing:
-                        print("DEBUG: No playback process but is_playing was True - fixing")
+                        print("DEBUG: Playback process has ended but is_playing was True - fixing")
                         self.is_playing = False
                     else:
-                        print("DEBUG: No playback process and is_playing is already False")
+                        print("DEBUG: Process ended and is_playing is already False")
             else:
-                # No playback_proc attribute
-                print("DEBUG: No playback_proc attribute found")
+                # No local playback process
+                print("DEBUG: No local_playback_proc found")
                 if self.is_playing:
                     print("DEBUG: No playback process but is_playing was True - fixing")
                     self.is_playing = False
@@ -742,11 +731,13 @@ class Playback_Screen(MimicBase):
             
             # Launch the playback engine
             app = App.get_running_app()
-            if hasattr(app, 'playback_proc') and app.playback_proc:
+            if self._local_playback_proc:
                 log_info("Playback already running")
                 return
                 
             proc = Popen(cmd)
+            self._local_playback_proc = proc
+            # Also set it in the app for compatibility
             app.playback_proc = proc
             
             self.is_playing = True
@@ -781,26 +772,29 @@ class Playback_Screen(MimicBase):
             self._stop_serial_writer()
             
             # Stop the playback engine
-            app = App.get_running_app()
-            if hasattr(app, 'playback_proc') and app.playback_proc:
-                log_info(f"Terminating process {app.playback_proc.pid}")
+            if self._local_playback_proc:
+                log_info(f"Terminating process {self._local_playback_proc.pid}")
                 
                 # Try graceful termination first
                 serialWrite("RESET")
-                app.playback_proc.terminate()
+                self._local_playback_proc.terminate()
                 
                 # Wait a bit for graceful shutdown
                 try:
-                    app.playback_proc.wait(timeout=3)
+                    self._local_playback_proc.wait(timeout=3)
                     log_info("Process terminated gracefully")
                 except TimeoutExpired:
                     # Force kill if it doesn't respond
                     log_info("Force killing playback process")
-                    app.playback_proc.kill()
-                    app.playback_proc.wait()
+                    self._local_playback_proc.kill()
+                    self._local_playback_proc.wait()
                     log_info("Process force killed")
                 
-                app.playback_proc = None
+                self._local_playback_proc = None
+                # Also clear it from the app
+                app = App.get_running_app()
+                if hasattr(app, 'playback_proc'):
+                    app.playback_proc = None
             else:
                 log_info("No playback process found to stop")
             
