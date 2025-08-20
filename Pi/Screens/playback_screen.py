@@ -692,6 +692,7 @@ class Playback_Screen(MimicBase):
                 log_info(f"Terminating process {app.playback_proc.pid}")
                 
                 # Try graceful termination first
+                serialWrite("RESET")
                 app.playback_proc.terminate()
                 
                 # Wait a bit for graceful shutdown
