@@ -56,6 +56,16 @@ class Playback_Screen(MimicBase):
     
     # Local process management
     _local_playback_proc = None
+    
+    def _set_local_playback_proc(self, value):
+        """Setter for _local_playback_proc to track changes."""
+        old_value = self._local_playback_proc
+        print(f"DEBUG: _local_playback_proc changing from {old_value} to {value}")
+        if old_value and not value:
+            print("DEBUG: WARNING: _local_playback_proc being set to None!")
+            import traceback
+            traceback.print_stack()
+        self._local_playback_proc = value
 
     def __init__(self, **kw):
         super().__init__(**kw)
@@ -122,9 +132,12 @@ class Playback_Screen(MimicBase):
                 else:
                     # Process has ended
                     print(f"DEBUG: Process has ended with return code: {poll_result}")
+                    print(f"DEBUG: Process args: {self._local_playback_proc.args}")
                     if self.is_playing:
                         print("DEBUG: Playback process has ended but is_playing was True - fixing")
                         self.is_playing = False
+                        # Clear the process reference since it's ended
+                        self._set_local_playback_proc(None)
                     else:
                         print("DEBUG: Process ended and is_playing is already False")
             else:
@@ -736,7 +749,7 @@ class Playback_Screen(MimicBase):
                 return
                 
             proc = Popen(cmd)
-            self._local_playback_proc = proc
+            self._set_local_playback_proc(proc)
             # Also set it in the app for compatibility
             app.playback_proc = proc
             
@@ -790,7 +803,7 @@ class Playback_Screen(MimicBase):
                     self._local_playback_proc.wait()
                     log_info("Process force killed")
                 
-                self._local_playback_proc = None
+                self._set_local_playback_proc(None)
                 # Also clear it from the app
                 app = App.get_running_app()
                 if hasattr(app, 'playback_proc'):
