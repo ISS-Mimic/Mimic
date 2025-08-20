@@ -62,6 +62,9 @@ class Playback_Screen(MimicBase):
         
         # Start monitoring USB drives
         self._start_usb_monitor()
+        
+        # Update Arduino animation initially
+        self._update_arduino_animation()
 
     # ---------------------------------------------------------------- Arduino Check
     def _check_arduino_connection(self, dt):
@@ -86,6 +89,30 @@ class Playback_Screen(MimicBase):
         
         # Check start button state whenever Arduino connection changes
         self._check_start_button_state()
+        
+        # Update Arduino animation when connection status changes
+        self._update_arduino_animation()
+
+    # ---------------------------------------------------------------- Arduino Animation
+    def _update_arduino_animation(self):
+        """Update the Arduino image to show transmit animation when playing, normal when stopped."""
+        try:
+            arduino_image = getattr(self.ids, 'arduino', None)
+            if not arduino_image:
+                return
+                
+            if not self.arduino_connected:
+                # No Arduino connected - show offline
+                arduino_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
+            elif self.is_playing:
+                # Playing - show transmit animation
+                arduino_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_transmit.zip"
+            else:
+                # Connected but not playing - show normal
+                arduino_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
+                
+        except Exception as e:
+            log_error(f"Error updating Arduino animation: {e}")
 
     # ---------------------------------------------------------------- USB Monitoring
     def _start_usb_monitor(self):
@@ -662,6 +689,9 @@ class Playback_Screen(MimicBase):
             # Update all button states
             self._update_playback_buttons()
             
+            # Update Arduino animation to show transmit
+            self._update_arduino_animation()
+            
         except Exception as e:
             log_error(f"Error starting playback: {e}")
             self._show_error(f"Error starting playback: {e}")
@@ -708,6 +738,9 @@ class Playback_Screen(MimicBase):
             self._update_status()
             self._update_playback_buttons()
             
+            # Update Arduino animation to show normal
+            self._update_arduino_animation()
+            
         except Exception as e:
             log_error(f"Error stopping playback: {e}")
             # Even if there's an error, mark as not playing
@@ -715,6 +748,7 @@ class Playback_Screen(MimicBase):
             self._stop_serial_writer()
             self._update_status()
             self._update_playback_buttons()
+            self._update_arduino_animation()
     
     def toggle_loop(self):
         """Toggle loop mode on/off."""
@@ -751,4 +785,6 @@ class Playback_Screen(MimicBase):
     def on_pre_leave(self):
         """Called when leaving the screen."""
         self.stop_playback()
+        # Ensure Arduino animation is reset when leaving
+        self._update_arduino_animation()
         super().on_pre_leave()
