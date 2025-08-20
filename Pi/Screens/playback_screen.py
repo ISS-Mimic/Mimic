@@ -543,16 +543,17 @@ class Playback_Screen(MimicBase):
             
             # Determine LED colors
             if self.current_file == "Disco":
+                serialWrite("DISCO")
                 # Disco mode: random colors
-                import random
-                led_1a = random.choice(self._disco_colors)
-                led_1b = random.choice(self._disco_colors)
-                led_2a = random.choice(self._disco_colors)
-                led_2b = random.choice(self._disco_colors)
-                led_3a = random.choice(self._disco_colors)
-                led_3b = random.choice(self._disco_colors)
-                led_4a = random.choice(self._disco_colors)
-                led_4b = random.choice(self._disco_colors)
+                #import random
+                #led_1a = random.choice(self._disco_colors)
+                #led_1b = random.choice(self._disco_colors)
+               # led_2a = random.choice(self._disco_colors)
+               # led_2b = random.choice(self._disco_colors)
+               # led_3a = random.choice(self._disco_colors)
+               # led_3b = random.choice(self._disco_colors)
+               # led_4a = random.choice(self._disco_colors)
+               # led_4b = random.choice(self._disco_colors)
             else:
                 # Normal mode: voltage-based colors
                 led_1a = self._get_voltage_color(v1a)
