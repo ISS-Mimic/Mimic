@@ -107,7 +107,7 @@ class Playback_Screen(MimicBase):
                 arduino_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
             elif self._is_writing_serial:
                 # Writing serial data - show transmit animation
-                arduino_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/Arduino_Transmit.zip"
+                arduino_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_transmit.zip"
             else:
                 # Connected but not writing serial - show normal
                 arduino_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
