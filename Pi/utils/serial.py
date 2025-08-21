@@ -4,19 +4,22 @@ Serial helper used by multiple screens.
 The OPEN_SERIAL_PORTS list is still defined in GUI.py; we import it
 dynamically so we *don’t* create a circular import at module-load time.
 """
-import importlib, time, serial, os, logging
+import time, serial, os, logging
 
 log_info  = logging.getLogger("MyLogger").info
 log_error = logging.getLogger("MyLogger").error
 
-# Cache the GUI module to prevent reloading
-_GUI_MODULE = None
-
 def _open_ports():
-    global _GUI_MODULE
-    if _GUI_MODULE is None:
-        _GUI_MODULE = importlib.import_module("GUI")
-    return getattr(_GUI_MODULE, "OPEN_SERIAL_PORTS", [])
+    """Get serial ports from the running app instead of importing GUI."""
+    try:
+        from kivy.app import App
+        app = App.get_running_app()
+        if app and hasattr(app, 'OPEN_SERIAL_PORTS'):
+            return app.OPEN_SERIAL_PORTS
+        return []
+    except Exception as e:
+        log_error(f"Could not get serial ports: {e}")
+        return []
 
 def serialWrite(*args):
     """Writes the given bytes to every port in OPEN_SERIAL_PORTS."""
