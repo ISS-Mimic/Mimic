@@ -3,6 +3,7 @@ from __future__ import annotations
 import pathlib
 import time
 import threading
+import os
 from pathlib import Path
 from typing import Optional, Dict, Any
 
@@ -686,13 +687,19 @@ class Playback_Screen(MimicBase):
             if self.loop_enabled:
                 cmd.append("--loop")
             
-            # Launch the playback engine
+            # Launch the playback engine with isolated environment
             app = App.get_running_app()
             if hasattr(app, 'playback_proc') and app.playback_proc:
                 log_info("Playback already running")
                 return
-                
-            proc = Popen(cmd)
+            
+            # Create isolated environment to prevent GUI module reloading
+            env = os.environ.copy()
+            # Remove any Python path variables that might cause module conflicts
+            env.pop('PYTHONPATH', None)
+            env.pop('PYTHONHOME', None)
+            
+            proc = Popen(cmd, env=env)
             app.playback_proc = proc
             
             self.is_playing = True

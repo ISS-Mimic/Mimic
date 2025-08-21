@@ -129,16 +129,12 @@ SERIAL_SPEED = 9600
 
 os.environ['KIVY_GL_BACKEND'] = 'gl' #need this to fix a kivy segfault that occurs with python3 for some reason
 
-# Only show initialization message once
-if not hasattr(log_info, '_initialized'):
-    log_info("--------------------------------")
-    log_info("Initialized Mimic Program")
-    import traceback
-    traceback.print_stack()
-    print("DEBUG: GUI.py module loaded/reloaded at:")
-    traceback.print_stack()
-    # Mark as initialized
-    log_info._initialized = True
+log_info("--------------------------------")
+log_info("Initialized Mimic Program")
+import traceback
+traceback.print_stack()
+print("DEBUG: GUI.py module loaded/reloaded at:")
+traceback.print_stack()
 
 #-------------------------Look for an internet connection-----------------------------------
 
