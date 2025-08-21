@@ -9,9 +9,14 @@ import importlib, time, serial, os, logging
 log_info  = logging.getLogger("MyLogger").info
 log_error = logging.getLogger("MyLogger").error
 
+# Cache the GUI module to prevent reloading
+_GUI_MODULE = None
+
 def _open_ports():
-    GUI = importlib.import_module("GUI")          # imported lazily
-    return getattr(GUI, "OPEN_SERIAL_PORTS", [])
+    global _GUI_MODULE
+    if _GUI_MODULE is None:
+        _GUI_MODULE = importlib.import_module("GUI")
+    return getattr(_GUI_MODULE, "OPEN_SERIAL_PORTS", [])
 
 def serialWrite(*args):
     """Writes the given bytes to every port in OPEN_SERIAL_PORTS."""
