@@ -811,6 +811,8 @@ class Playback_Screen(MimicBase):
     def on_pre_leave(self):
         """Called when leaving the screen."""
         print("DEBUG: on_pre_leave called, stopping playback")
+        print(f"DEBUG: is_playing = {self.is_playing}")
+        print(f"DEBUG: stopped at {time.time()}")
         self.stop_playback()
         # Ensure Arduino animation is reset when leaving
         self._update_arduino_animation()
