@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 # ───────────────────────── Imports ─────────────────────────
+import platform
 import re
 import sqlite3
 from datetime import datetime
@@ -151,24 +152,20 @@ class Crew_Screen(MimicBase):
             setattr(self, attr, None)
 
     # ────────────────── DB path (central) ──────────────────
-    # Cache the GUI module to prevent reloading
-    _GUI_MODULE = None
-    
-    def get_db_path(self) -> str:
-        """Get the database path using the centralized function."""
-        try:
-            global _GUI_MODULE
-            if _GUI_MODULE is None:
-                _GUI_MODULE = __import__("GUI")
-            db_path = _GUI_MODULE.get_db_path("iss_crew.db")
-            log_info(f"Using DB: {db_path}")
-            return db_path
-        except Exception as e:
-            log_error(f"get_db_path failed: {e}")
-            # Fallback to local folder
-            fallback = str(Path.cwd() / "iss_crew.db")
-            log_info(f"Falling back to {fallback}")
-            return fallback
+    def get_db_path(self):
+        """Get the database path based on platform"""
+        # Cross-platform database path
+        if platform.system() == "Windows":
+            # On Windows, use home directory
+            base_path = Path.home() / '.mimic_data'
+            base_path.mkdir(exist_ok=True)  # Ensure directory exists
+            return base_path / 'iss_crew.db'
+        else:
+            # On Linux/Unix, use /dev/shm
+            shm = Path('/dev/shm/iss_crew.db')
+            if shm.exists():
+                return shm
+            return Path.home() / '.mimic_data' / 'iss_crew.db'
 
     # ─────────────────── Data loading ──────────────────────
     def load_crew_data(self) -> None:
@@ -398,10 +395,7 @@ class Crew_Screen(MimicBase):
 
     def get_crewed_vehicles_from_vv_db(self) -> List[Dict]:
         try:
-            global _GUI_MODULE
-            if _GUI_MODULE is None:
-                _GUI_MODULE = __import__("GUI")
-            vv_db_path = _GUI_MODULE.get_db_path("vv.db")
+            vv_db_path = self.get_db_path()
         except Exception as e:
             log_error(f"Could not resolve VV DB path: {e}")
             return []
