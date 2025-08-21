@@ -151,11 +151,16 @@ class Crew_Screen(MimicBase):
             setattr(self, attr, None)
 
     # ────────────────── DB path (central) ──────────────────
+    # Cache the GUI module to prevent reloading
+    _GUI_MODULE = None
+    
     def get_db_path(self) -> str:
         """Get the database path using the centralized function."""
         try:
-            from GUI import get_db_path as central_get_db_path
-            db_path = central_get_db_path("iss_crew.db")
+            global _GUI_MODULE
+            if _GUI_MODULE is None:
+                _GUI_MODULE = __import__("GUI")
+            db_path = _GUI_MODULE.get_db_path("iss_crew.db")
             log_info(f"Using DB: {db_path}")
             return db_path
         except Exception as e:
@@ -393,8 +398,10 @@ class Crew_Screen(MimicBase):
 
     def get_crewed_vehicles_from_vv_db(self) -> List[Dict]:
         try:
-            from GUI import get_db_path
-            vv_db_path = get_db_path("vv.db")
+            global _GUI_MODULE
+            if _GUI_MODULE is None:
+                _GUI_MODULE = __import__("GUI")
+            vv_db_path = _GUI_MODULE.get_db_path("vv.db")
         except Exception as e:
             log_error(f"Could not resolve VV DB path: {e}")
             return []
