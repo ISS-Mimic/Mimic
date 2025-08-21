@@ -720,6 +720,8 @@ class Playback_Screen(MimicBase):
             
         except Exception as e:
             log_error(f"Error starting playback: {e}")
+            import traceback
+            log_error(f"Traceback: {traceback.format_exc()}")
             self._show_error(f"Error starting playback: {e}")
 
     def stop_playback(self):
