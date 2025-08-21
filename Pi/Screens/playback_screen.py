@@ -413,6 +413,10 @@ class Playback_Screen(MimicBase):
 
     def _stop_serial_writer(self):
         """Stop the serial writer timer."""
+        print("DEBUG: _stop_serial_writer called")
+        import traceback
+        traceback.print_stack()
+        
         if self._serial_timer:
             Clock.unschedule(self._serial_timer)
             self._serial_timer = None
