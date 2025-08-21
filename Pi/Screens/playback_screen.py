@@ -41,7 +41,7 @@ class Playback_Screen(MimicBase):
     
     # Arduino connection status
     arduino_connected = BooleanProperty(False)
-    loop_enabled = BooleanProperty(False)
+    loop_enabled = BooleanProperty(True)  # Enable loop by default to prevent premature exit
     
     # Playback data
     _playback_data = []
@@ -320,10 +320,8 @@ class Playback_Screen(MimicBase):
                 
             self.playback_speed = speed_value
             
-            # If currently playing, restart timer with new speed
-            if self.is_playing:
-                self._stop_playback_timer()
-                self._start_playback_timer()
+            # If currently playing, the speed change will take effect on next telemetry update
+            # No need to restart timers - the serial writer will continue with new speed
                 
             log_info(f"Playback speed set to {speed_value}x")
             
