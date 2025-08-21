@@ -131,6 +131,10 @@ os.environ['KIVY_GL_BACKEND'] = 'gl' #need this to fix a kivy segfault that occu
 
 log_info("--------------------------------")
 log_info("Initialized Mimic Program")
+import traceback
+traceback.print_stack()
+print("DEBUG: GUI.py module loaded/reloaded at:")
+traceback.print_stack()
 
 #-------------------------Look for an internet connection-----------------------------------
 

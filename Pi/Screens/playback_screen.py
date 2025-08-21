@@ -56,6 +56,7 @@ class Playback_Screen(MimicBase):
     _disco_colors = ["Red", "Green", "Blue", "Yellow", "Purple", "Cyan", "White", "Orange"]
 
     def __init__(self, **kw):
+        print("DEBUG: PlaybackScreen __init__ called")
         super().__init__(**kw)
         
         # Start monitoring Arduino connection
