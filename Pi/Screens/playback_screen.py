@@ -120,6 +120,7 @@ class Playback_Screen(MimicBase):
             else:
                 # Connected but not writing serial - show normal
                 print("DEBUG: Not writing serial - showing normal")
+                print("DEBUG: showing normal at ", time.time())
                 arduino_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
                 
         except Exception as e:
@@ -413,7 +414,7 @@ class Playback_Screen(MimicBase):
 
     def _stop_serial_writer(self):
         """Stop the serial writer timer."""
-        print("DEBUG: _stop_serial_writer called")
+        print("DEBUG: _stop_serial_writer called at ", time.time())
         import traceback
         traceback.print_stack()
         
