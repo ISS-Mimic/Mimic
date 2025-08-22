@@ -94,8 +94,10 @@ class Playback_Screen(MimicBase):
         # Check start button state whenever Arduino connection changes
         self._check_start_button_state()
         
-        # Update Arduino animation when connection status changes
-        self._update_arduino_animation()
+        # Only update Arduino animation if NOT currently playing
+        # During playback, the animation should be controlled by the serial writer
+        if not self.is_playing:
+            self._update_arduino_animation()
 
     # ---------------------------------------------------------------- Arduino Animation
     def _update_arduino_animation(self):
