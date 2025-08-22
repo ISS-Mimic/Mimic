@@ -4,6 +4,7 @@ import pathlib
 import time
 import threading
 import os
+from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, Any
 
@@ -120,7 +121,7 @@ class Playback_Screen(MimicBase):
             else:
                 # Connected but not writing serial - show normal
                 print("DEBUG: Not writing serial - showing normal")
-                print("DEBUG: showing normal at ", time.time())
+                print("DEBUG: showing normal at ", datetime.now())
                 arduino_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
                 
         except Exception as e:
@@ -414,7 +415,7 @@ class Playback_Screen(MimicBase):
 
     def _stop_serial_writer(self):
         """Stop the serial writer timer."""
-        print("DEBUG: _stop_serial_writer called at ", time.time())
+        print("DEBUG: _stop_serial_writer called at ", datetime.now())
         import traceback
         traceback.print_stack()
         
@@ -441,11 +442,13 @@ class Playback_Screen(MimicBase):
                 # Send telemetry data to Arduino
                 serialWrite(telemetry_cmd)
                 log_info(f"Sent telemetry command: {telemetry_cmd}")
+                print("DEBUG: sent telemetry command at ", datetime.now())
                 
                 # Build and send LED commands separately
                 led_cmd = self._build_led_command(telemetry_values)
                 if led_cmd:
                     serialWrite(led_cmd)
+                    print("DEBUG: sent led command at ", datetime.now())
                 
         except Exception as e:
             log_error(f"Error sending telemetry serial: {e}")
@@ -813,7 +816,7 @@ class Playback_Screen(MimicBase):
         """Called when leaving the screen."""
         print("DEBUG: on_pre_leave called, stopping playback")
         print(f"DEBUG: is_playing = {self.is_playing}")
-        print(f"DEBUG: stopped at {time.time()}")
+        print(f"DEBUG: stopped at {datetime.now()}")
         self.stop_playback()
         # Ensure Arduino animation is reset when leaving
         self._update_arduino_animation()
