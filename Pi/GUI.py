@@ -129,13 +129,6 @@ SERIAL_SPEED = 9600
 
 os.environ['KIVY_GL_BACKEND'] = 'gl' #need this to fix a kivy segfault that occurs with python3 for some reason
 
-log_info("--------------------------------")
-log_info("Initialized Mimic Program")
-import traceback
-traceback.print_stack()
-print("DEBUG: GUI.py module loaded/reloaded at:")
-traceback.print_stack()
-
 #-------------------------Look for an internet connection-----------------------------------
 
 def probe_internet(callback, timeout=1.0) -> None:
@@ -744,6 +737,12 @@ if __name__ == '__main__':
         # Show logging configuration
         log_level = os.environ.get('MIMIC_LOG_LEVEL', 'ERROR')
         console_enabled = os.environ.get('MIMIC_CONSOLE_LOGGING', '0') == '1'
+        log_info("--------------------------------")
+        log_info("Initialized Mimic Program")
+        import traceback
+        traceback.print_stack()
+        print("DEBUG: GUI.py module loaded/reloaded at:")
+        traceback.print_stack()
         print(f"=== ISS Mimic GUI ===")
         print(f"Logging Level: {log_level}")
         print(f"Console Logging: {'Enabled' if console_enabled else 'Disabled'}")

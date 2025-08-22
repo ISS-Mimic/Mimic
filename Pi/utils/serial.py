@@ -10,12 +10,12 @@ log_info  = logging.getLogger("MyLogger").info
 log_error = logging.getLogger("MyLogger").error
 
 def _open_ports():
-    """Get serial ports from the running app instead of importing GUI."""
+    """Get serial ports from GUI module."""
     try:
-        from kivy.app import App
-        app = App.get_running_app()
-        if app and hasattr(app, 'OPEN_SERIAL_PORTS'):
-            return app.OPEN_SERIAL_PORTS
+        # Import GUI module to get OPEN_SERIAL_PORTS
+        import GUI
+        if hasattr(GUI, 'OPEN_SERIAL_PORTS'):
+            return GUI.OPEN_SERIAL_PORTS
         return []
     except Exception as e:
         log_error(f"Could not get serial ports: {e}")
