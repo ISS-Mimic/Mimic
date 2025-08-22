@@ -3,6 +3,7 @@
 import argparse
 import sys
 import os
+import traceback
 
 # Parse command line arguments first, before any other imports
 def parse_arguments():
@@ -412,7 +413,6 @@ class MainApp(App):
                     log_info(f"Successfully created screen: {sid}")
                 except Exception as e:
                     log_error(f"Error creating screen {sid}: {e}")
-                    import traceback
                     traceback.print_exc()
                     # Continue with other screens instead of crashing
                     continue
@@ -429,7 +429,6 @@ class MainApp(App):
                     log_info(f"Successfully added screen {sid} to manager")
                 except Exception as e:
                     log_error(f"Error adding screen {sid} to manager: {e}")
-                    import traceback
                     traceback.print_exc()
                     # Continue with other screens instead of crashing
                     continue
@@ -458,7 +457,6 @@ class MainApp(App):
             
         except Exception as e:
             log_error(f"Error during build: {e}")
-            import traceback
             traceback.print_exc()
             # Return a simple error screen instead of crashing
             from kivy.uix.label import Label
@@ -515,7 +513,11 @@ class MainApp(App):
 
         """
         Refresh the Arduino-status icon & counter on screens that have them.
+        Skip screens that have local animation control.
         """
+        
+        # Screens that should have local animation control (don't override)
+        local_control_screens = {'manualcontrol', 'led', 'playback', 'main'}
         
         for scr in self.screens.values():
             ids = scr.ids
@@ -523,7 +525,17 @@ class MainApp(App):
             # Skip screens without the widgets.
             if "arduino_count" not in ids or "arduino" not in ids:
                 continue
+                
+            # Skip screens that have local animation control
+            if scr.name in local_control_screens:
+                # Only update the count, not the animation source
+                if arduino_count > 0:
+                    ids.arduino_count.text = str(arduino_count)
+                else:
+                    ids.arduino_count.text = ""
+                continue
 
+            # For other screens, update both count and animation
             if arduino_count > 0:
                 ids.arduino_count.text = str(arduino_count)
                 ids.arduino.source = (
@@ -739,9 +751,6 @@ if __name__ == '__main__':
         console_enabled = os.environ.get('MIMIC_CONSOLE_LOGGING', '0') == '1'
         log_info("--------------------------------")
         log_info("Initialized Mimic Program")
-        import traceback
-        traceback.print_stack()
-        print("DEBUG: GUI.py module loaded/reloaded at:")
         traceback.print_stack()
         print(f"=== ISS Mimic GUI ===")
         print(f"Logging Level: {log_level}")
@@ -765,7 +774,6 @@ if __name__ == '__main__':
         
     except Exception as e:
         log_error(f"Fatal error during startup: {e}")
-        import traceback
         traceback.print_exc()
         
         # Keep the console open so the user can see the error
