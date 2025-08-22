@@ -103,7 +103,7 @@
         Button:
             id: popup
             text: ''
-            size_hint: 0.08, 0.08
+            size_hint: min(0.08, 40/root.width), min(0.08, 40/root.height)  # Scale with screen size
             pos_hint: {"center_x": 0.25, "center_y": 0.8}
             background_color: 0,0,0,0
             on_release: Factory.DescriptionPopup().open()
