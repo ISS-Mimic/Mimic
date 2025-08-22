@@ -103,7 +103,7 @@
         Button:
             id: popup
             text: ''
-            size_hint: max(0.08, 100/root.width), min(0.08, 100/root.height)  # Scale with screen size
+            size_hint: 0.1, 0.1
             pos_hint: {"center_x": 0.25, "center_y": 0.8}
             background_color: 0,0,0,0
             on_release: Factory.DescriptionPopup().open()
@@ -111,6 +111,7 @@
                 source: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/InfoIcon.png'
                 center_x: self.parent.center_x
                 center_y: self.parent.center_y
+                fit_mode: contain
 
         
         Spinner:
