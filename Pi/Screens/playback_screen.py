@@ -42,7 +42,7 @@ class Playback_Screen(MimicBase):
     
     # Arduino connection status
     arduino_connected = BooleanProperty(False)
-    loop_enabled = BooleanProperty(True)  # Enable loop by default to prevent premature exit
+    loop_enabled = BooleanProperty(False)  # Enable loop by default to prevent premature exit
     
     # Playback data
     _playback_data = []

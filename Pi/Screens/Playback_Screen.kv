@@ -2,6 +2,14 @@
 #:import Factory kivy.factory.Factory
 #:import dp kivy.metrics.dp
 
+# Custom dropdown option styling
+<CustomSpinnerOption@SpinnerOption>:
+    background_color: 0.3, 0.3, 0.3, 1
+    color: 1, 1, 1, 1
+    font_size: self.height * 0.6  # Scale font to option height
+    size_hint_y: None
+    height: dp(40)  # Fixed height for consistent scaling
+
 <DescriptionPopup@Popup>:
     title: 'Recorded ISS Data Descriptions'
     size_hint: 0.8, 0.8
@@ -114,6 +122,8 @@
             background_color: 0.3, 0.3, 0.3, 1  # Dark metallic look
             pos_hint: {"center_x": 0.154, "center_y": 0.5475}
             font_size: self.height * 0.5  # Scale font to button height
+            # Custom dropdown popup styling
+            option_cls: Factory.CustomSpinnerOption
         
         
         # ---------- MIDDLE PANEL: PLAYBACK SPEED ----------
@@ -126,6 +136,8 @@
             background_color: 0.3, 0.3, 0.3, 1  # Dark metallic look
             pos_hint: {"center_x": 0.485, "center_y": 0.5475}
             font_size: self.height * 0.5  # Scale font to button height
+            # Custom dropdown popup styling
+            option_cls: Factory.CustomSpinnerOption
 
         
         # ---------- RIGHT PANEL: DISCO MODE ----------
