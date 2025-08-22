@@ -427,13 +427,15 @@ class Playback_Screen(MimicBase):
                 # Send telemetry data to Arduino
                 serialWrite(telemetry_cmd)
                 log_info(f"Sent telemetry command: {telemetry_cmd}")
-                #print("DEBUG: sent telemetry command at ", datetime.now())
+                
+                # Small delay to let microcontroller process telemetry command
+                time.sleep(0.05)  # 50ms delay
                 
                 # Build and send LED commands separately
                 led_cmd = self._build_led_command(telemetry_values)
                 if led_cmd:
                     serialWrite(led_cmd)
-                    #print("DEBUG: sent led command at ", datetime.now())
+                    log_info(f"LED command: {led_cmd}")
                 
         except Exception as e:
             log_error(f"Error sending telemetry serial: {e}")
