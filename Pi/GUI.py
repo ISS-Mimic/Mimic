@@ -751,7 +751,6 @@ if __name__ == '__main__':
         console_enabled = os.environ.get('MIMIC_CONSOLE_LOGGING', '0') == '1'
         log_info("--------------------------------")
         log_info("Initialized Mimic Program")
-        traceback.print_stack()
         print(f"=== ISS Mimic GUI ===")
         print(f"Logging Level: {log_level}")
         print(f"Console Logging: {'Enabled' if console_enabled else 'Disabled'}")

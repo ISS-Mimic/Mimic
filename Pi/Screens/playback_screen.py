@@ -58,7 +58,6 @@ class Playback_Screen(MimicBase):
     _disco_colors = ["Red", "Green", "Blue", "Yellow", "Purple", "Cyan", "White", "Orange"]
 
     def __init__(self, **kw):
-        print("DEBUG: PlaybackScreen __init__ called")
         super().__init__(**kw)
         
         # Start monitoring Arduino connection
@@ -103,32 +102,22 @@ class Playback_Screen(MimicBase):
     def _update_arduino_animation(self):
         """Update the Arduino image to show transmit animation when writing serial data, normal when not."""
         try:
-            print(f"DEBUG: _update_arduino_animation called")
-            print(f"DEBUG: _is_writing_serial = {self._is_writing_serial}")
-            print(f"DEBUG: arduino_connected = {self.arduino_connected}")
-            
             arduino_image = getattr(self.ids, 'arduino', None)
             if not arduino_image:
-                print("DEBUG: arduino image not found")
                 return
                 
             if not self.arduino_connected:
                 # No Arduino connected - show offline
-                print("DEBUG: No Arduino connected - showing offline")
                 arduino_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
             elif self._is_writing_serial:
                 # Writing serial data - show transmit animation
-                print("DEBUG: Writing serial - showing transmit")
                 arduino_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_transmit.zip"
             else:
                 # Connected but not writing serial - show normal
-                print("DEBUG: Not writing serial - showing normal")
-                print("DEBUG: showing normal at ", datetime.now())
                 arduino_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
                 
         except Exception as e:
             log_error(f"Error updating Arduino animation: {e}")
-            print(f"DEBUG: Exception in _update_arduino_animation: {e}")
 
     # ---------------------------------------------------------------- USB Monitoring
     def _start_usb_monitor(self):
@@ -412,25 +401,18 @@ class Playback_Screen(MimicBase):
         
         self._serial_timer = Clock.schedule_interval(self._send_telemetry_serial, self._serial_update_interval)
         self._is_writing_serial = True
-        print(f"DEBUG: _start_serial_writer: _is_writing_serial = {self._is_writing_serial}")
         log_info("Serial writer started")
 
     def _stop_serial_writer(self):
         """Stop the serial writer timer."""
-        print("DEBUG: _stop_serial_writer called at ", datetime.now())
-        import traceback
-        traceback.print_stack()
-        
         if self._serial_timer:
             Clock.unschedule(self._serial_timer)
             self._serial_timer = None
         self._is_writing_serial = False
-        print(f"DEBUG: _stop_serial_writer: _is_writing_serial = {self._is_writing_serial}")
         log_info("Serial writer stopped")
 
     def _send_telemetry_serial(self, dt):
         """Read telemetry values from database and send to Arduino."""
-        print("DEBUG: _send_telemetry_serial called at ", datetime.now())
         if not self.is_playing or not self.arduino_connected:
             return
             
@@ -819,9 +801,6 @@ class Playback_Screen(MimicBase):
     # ---------------------------------------------------------------- Cleanup
     def on_pre_leave(self):
         """Called when leaving the screen."""
-        print("DEBUG: on_pre_leave called, stopping playback")
-        print(f"DEBUG: is_playing = {self.is_playing}")
-        print(f"DEBUG: stopped at {datetime.now()}")
         self.stop_playback()
         # Ensure Arduino animation is reset when leaving
         self._update_arduino_animation()
