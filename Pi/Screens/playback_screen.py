@@ -431,11 +431,14 @@ class Playback_Screen(MimicBase):
                 # Small delay to let microcontroller process telemetry command
                 time.sleep(0.05)  # 50ms delay
                 
-                # Build and send LED commands separately
-                led_cmd = self._build_led_command(telemetry_values)
-                if led_cmd:
-                    serialWrite(led_cmd)
-                    log_info(f"LED command: {led_cmd}")
+                # Build and send LED commands individually (like LED control screen)
+                led_commands = self._build_individual_led_commands(telemetry_values)
+                if led_commands:
+                    for led_cmd in led_commands:
+                        serialWrite(led_cmd)
+                        # Small delay between LED commands
+                        time.sleep(0.02)  # 20ms delay
+                    log_info(f"Sent {len(led_commands)} individual LED commands")
                 
         except Exception as e:
             log_error(f"Error sending telemetry serial: {e}")
@@ -564,12 +567,12 @@ class Playback_Screen(MimicBase):
             log_error(f"Error building telemetry command: {e}")
             return ""
 
-    def _build_led_command(self, telemetry_values):
-        """Build the LED command string separately."""
+    def _build_individual_led_commands(self, telemetry_values):
+        """Build individual LED commands (like LED control screen)."""
         try:
             # For disco mode, just return the DISCO command
             if self.current_file == "Disco":
-                return "DISCO"
+                return ["DISCO"]
             
             # Normal mode: voltage-based colors
             # Get voltage values for LED control
@@ -592,24 +595,23 @@ class Playback_Screen(MimicBase):
             led_4a = self._get_voltage_color(v4a)
             led_4b = self._get_voltage_color(v4b)
             
-            # Build LED command string
-            led_cmd = (
-                f"LED_1A={led_1a} "
-                f"LED_2A={led_2a} "
-                f"LED_3A={led_3a} "
-                f"LED_4A={led_4a} "
-                f"LED_1B={led_1b} "
-                f"LED_2B={led_2b} "
-                f"LED_3B={led_3b} "
+            # Build individual LED commands (like LED control screen)
+            led_commands = [
+                f"LED_1A={led_1a}",
+                f"LED_2A={led_2a}",
+                f"LED_3A={led_3a}",
+                f"LED_4A={led_4a}",
+                f"LED_1B={led_1b}",
+                f"LED_2B={led_2b}",
+                f"LED_3B={led_3b}",
                 f"LED_4B={led_4b}"
-            )
+            ]
             
-            log_info(f"LED command: {led_cmd}")
-            return led_cmd
+            return led_commands
             
         except Exception as e:
-            log_error(f"Error building LED command: {e}")
-            return ""
+            log_error(f"Error building individual LED commands: {e}")
+            return []
 
     def _get_db_path(self):
         """Get the database path based on platform."""
