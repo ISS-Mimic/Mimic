@@ -252,6 +252,7 @@
             on_release: root.light_everything()
             background_color: 0.3, 1, 0.3, 1
             font_size: self.height * 0.6
+            disabled: root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0
             
         Button:
             text: 'All Off'
