@@ -43,6 +43,7 @@ class ManualControlScreen(Screen):
     # -------------------------------------------------------------------------
     def on_pre_enter(self, *_):
         self.refresh_buttons()         # text & colour on every visit
+        self._update_status("Click a joint to control it")
 
     # -------------------------------------------------------------------------
     # Public callbacks (bound in KV)
@@ -53,24 +54,29 @@ class ManualControlScreen(Screen):
         log_info(f"ManualControl: active → {joint_key}")
         self._highlight_tiles()
         log_info(f"ManualControl: active_joint is now: {self.active_joint}")
+        self._update_status(f"Selected: {joint_key.upper()}")
 
     def increment_active(self, delta: float) -> None:
         if self.active_joint is None:
             log_info(f"ManualControl: No active joint selected for increment {delta}")
+            self._update_status("No joint selected - click a joint first")
             return
         log_info(f"ManualControl: Incrementing {self.active_joint} by {delta}")
         self._set_angle(self.active_joint, delta=delta)
         self.refresh_buttons()
+        self._update_status(f"Adjusted {self.active_joint.upper()} by {delta}°")
 
     def set_zero(self) -> None:
         for key in self._app().mc_angles:
             self._set_angle(key, absolute=0)
         self.refresh_buttons()
+        self._update_status("All joints set to 0°")
 
     def set_ninety(self) -> None:
         for key in self._app().mc_angles:
             self._set_angle(key, absolute=90)
         self.refresh_buttons()
+        self._update_status("All joints set to 90°")
 
     def calibrate_zero(self) -> None:
         """Tell controller current position = 0 for every joint."""
@@ -83,6 +89,7 @@ class ManualControlScreen(Screen):
             self._set_angle(key, absolute=0, emit=False)
         self.refresh_buttons()
         log_info("ManualControl: calibration sent for all joints.")
+        self._update_status("Calibration sent - all joints set to 0°")
 
     # -------------------------------------------------------------------------
     # Core angle setter  (emit=False skips move cmd; used by calibration)
@@ -172,3 +179,12 @@ class ManualControlScreen(Screen):
                 self._active_color if joint == self.active_joint
                 else self._default_color
             )
+    
+    def _update_status(self, message: str) -> None:
+        """Update the status label with the given message."""
+        try:
+            if hasattr(self, 'ids') and 'status_label' in self.ids:
+                self.ids.status_label.text = message
+                log_info(f"ManualControl: Status updated: {message}")
+        except Exception as exc:
+            log_error(f"Failed to update status label: {exc}")
