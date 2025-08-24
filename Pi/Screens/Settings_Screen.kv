@@ -93,17 +93,15 @@
         CheckBox:
             id: smartflip
             pos_hint: {"center_x": 0.12, "center_y": 0.3}
-            size_hint: None, None
-            size: dp(48), dp(48)
+            size_hint: 0.1,0.1
             on_active: root.checkbox_clicked(self, self.active)
 
         Label:
             text: 'Enable Smartflip (motor behavior)'
-            pos_hint: {"center_x": 0.4, "center_y": 0.3}
-            bold: True
+            pos_hint: {"center_x": 0.25, "center_y": 0.3}
             size_hint_y: 0.1
             font_size: min(self.height * 0.4, dp(56))
-            color: 1, 1, 1, 1
+            color: 0.6, 0.6, 0.6, 1
             halign: 'left'
             valign: 'middle'
         
