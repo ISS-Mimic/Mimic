@@ -17,10 +17,10 @@ Builder.load_file(str(kv_path))
 
 class MainScreen(Screen):
     """
-    Home screen. Handles navigation to other screens and the red EXIT button.
+    Home screen. Handles navigation to other screens and the EXIT button.
     """
 
-    mimic_directory = pathlib.Path(__file__).resolve().parents[3]   # …/Mimic
+    mimic_directory = pathlib.Path(__file__).resolve().parents[2]   # …/Mimic
     
     # ISS animation variables
     _iss1_x: float = 0.0
