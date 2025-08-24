@@ -29,6 +29,11 @@ class MainScreen(Screen):
 
     mimic_directory = pathlib.Path(__file__).resolve().parents[3]   # …/Mimic
     
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        log_info(f"MainScreen: mimic_directory set to: {self.mimic_directory}")
+        log_info(f"MainScreen: Current working directory: {os.getcwd()}")
+    
     # ISS animation variables
     _iss1_x: float = 0.0
     _iss1_y: float = 0.75
@@ -210,17 +215,20 @@ class MainScreen(Screen):
     def _check_github_updates(self):
         """Check if there are GitHub repository updates available."""
         try:
-            # Get the current directory (should be the git repository)
+            # Get the git repository path (should be the Mimic directory)
             repo_path = self.mimic_directory
+            log_info(f"MainScreen: Checking for git repository at: {repo_path}")
             
             # Check if this is a git repository
             git_dir = os.path.join(repo_path, '.git')
+            log_info(f"MainScreen: Looking for .git directory at: {git_dir}")
             if not os.path.exists(git_dir):
-                log_info("MainScreen: Not a git repository, skipping update check")
+                log_info(f"MainScreen: Not a git repository at {repo_path}, skipping update check")
                 return None
             
             # Get current local commit hash
             try:
+                log_info(f"MainScreen: Running git rev-parse HEAD from working directory: {repo_path}")
                 result = subprocess.run(
                     ['git', 'rev-parse', 'HEAD'],
                     cwd=repo_path,
@@ -232,6 +240,7 @@ class MainScreen(Screen):
                     log_error(f"Failed to get local commit hash: {result.stderr}")
                     return None
                 local_commit = result.stdout.strip()
+                log_info(f"MainScreen: Local commit hash: {local_commit[:8]}")
             except subprocess.TimeoutExpired:
                 log_error("Git command timed out")
                 return None
