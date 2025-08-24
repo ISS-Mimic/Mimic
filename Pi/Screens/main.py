@@ -27,7 +27,7 @@ class MainScreen(Screen):
     Home screen. Handles navigation to other screens and the red EXIT button.
     """
 
-    mimic_directory = pathlib.Path(__file__).resolve().parents[3]   # …/Mimic
+    mimic_directory = pathlib.Path(__file__).resolve().parents[2]   # …/Mimic
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -200,15 +200,9 @@ class MainScreen(Screen):
                 if arduino_connected:
                     # Arduino connected - show no_transmit status
                     self.ids.arduino.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
-                    # Update status label
-                    if hasattr(self.ids, 'status_label'):
-                        self.ids.status_label.text = f'Arduinos connected: {arduino_count_text}'
                 else:
                     # No Arduino connected - show offline status
                     self.ids.arduino.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
-                    # Update status label
-                    if hasattr(self.ids, 'status_label'):
-                        self.ids.status_label.text = 'No Arduinos connected'
         except Exception as exc:
             log_error(f"Error updating Arduino status: {exc}")
     
