@@ -386,26 +386,43 @@ class LED_Screen(MimicBase):
                 arduino_count_text = self.ids.arduino_count.text
                 arduino_connected = arduino_count_text and arduino_count_text.strip() != ''
                 
-                # Get all LED control buttons
-                button_ids = [
-                    'test_1a', 'test_1b', 'test_2a', 'test_2b',
-                    'test_3a', 'test_3b', 'test_4a', 'test_4b',
-                    'test_pattern', 'test_animation', 'stop_animations',
-                    'light_everything', 'turn_off_all_leds', 'reset_leds'
-                ]
+                log_info(f"LED Screen: Arduino connected: {arduino_connected}, count: '{arduino_count_text}'")
                 
-                # Enable/disable buttons based on connection status
-                for button_id in button_ids:
-                    if button_id in self.ids:
-                        button = self.ids[button_id]
-                        button.disabled = not arduino_connected
-                        # Update button appearance
-                        if arduino_connected:
-                            button.opacity = 1.0
-                            button.background_color = (0.2, 1, 0.2, 1)  # Green when enabled
-                        else:
-                            button.opacity = 0.5
-                            button.background_color = (0.5, 0.5, 0.5, 1)  # Gray when disabled
+                # Find all buttons in the screen by searching through children
+                def find_and_update_buttons(widget):
+                    """Recursively find and update button states."""
+                    if hasattr(widget, 'children'):
+                        for child in widget.children:
+                            if hasattr(child, 'text') and hasattr(child, 'on_release'):
+                                # This is a button with text and on_release (our LED control buttons)
+                                if child.text in ['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B', 
+                                                'Pulse', 'Chase', 'Disco', 'Stop', 'Light All', 'All Off', 'Reset']:
+                                    log_info(f"LED Screen: Found button '{child.text}', setting disabled={not arduino_connected}")
+                                    child.disabled = not arduino_connected
+                                    # Update button appearance
+                                    if arduino_connected:
+                                        child.opacity = 1.0
+                                        # Restore original colors based on button type
+                                        if child.text in ['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B']:
+                                            child.background_color = (0.2, 0.6, 1, 1)  # Blue for solar arrays
+                                        elif child.text in ['Pulse', 'Light All']:
+                                            child.background_color = (0.3, 1, 0.3, 1)  # Green
+                                        elif child.text in ['Chase', 'Reset']:
+                                            child.background_color = (1, 0.6, 0.3, 1)  # Orange
+                                        elif child.text == 'Disco':
+                                            child.background_color = (1, 0.3, 0.8, 1)  # Pink
+                                        elif child.text == 'Stop':
+                                            child.background_color = (0.8, 0.3, 0.3, 1)  # Red
+                                        elif child.text == 'All Off':
+                                            child.background_color = (0.8, 0.3, 0.3, 1)  # Red
+                                    else:
+                                        child.opacity = 0.5
+                                        child.background_color = (0.5, 0.5, 0.5, 1)  # Gray when disabled
+                            # Recursively search children
+                            find_and_update_buttons(child)
+                
+                # Start searching from the root widget
+                find_and_update_buttons(self)
                 
                 # Update status message
                 if hasattr(self, 'ids') and 'status_label' in self.ids:
