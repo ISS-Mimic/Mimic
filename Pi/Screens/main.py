@@ -209,8 +209,8 @@ class MainScreen(Screen):
     def _check_github_updates(self):
         """Check if there are GitHub repository updates available."""
         try:
-            # Get the git repository path (should be the Mimic directory)
-            repo_path = self.mimic_directory
+            # Get the git repository path (should be the Mimic subdirectory)
+            repo_path = self.mimic_directory / "Mimic"
             log_info(f"MainScreen: Checking for git repository at: {repo_path}")
             
             # Check if this is a git repository
@@ -244,6 +244,7 @@ class MainScreen(Screen):
             
             # Get remote origin URL
             try:
+                log_info(f"MainScreen: Running git remote get-url origin from working directory: {repo_path}")
                 result = subprocess.run(
                     ['git', 'remote', 'get-url', 'origin'],
                     cwd=repo_path,
@@ -255,6 +256,7 @@ class MainScreen(Screen):
                     log_error(f"Failed to get remote URL: {result.stderr}")
                     return None
                 remote_url = result.stdout.strip()
+                log_info(f"MainScreen: Remote URL: {remote_url}")
             except subprocess.TimeoutExpired:
                 log_error("Git remote command timed out")
                 return None
