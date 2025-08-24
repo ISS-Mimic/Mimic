@@ -189,7 +189,7 @@ class Settings_Screen(Screen, EventDispatcher):
         
         # Update status message
         if hasattr(self, 'ids') and 'status_label' in self.ids:
-            status_text = "Smartflip enabled" if active else "Smartflip disabled"
+            status_text = "Smartflip enabled, motors will transition through 0 crossover" if active else "Smartflip disabled, motors will unwind at 0 degree crossover"
             self.ids.status_label.text = status_text
             # Reset to default message after 3 seconds
             Clock.schedule_once(lambda dt: self._reset_status_to_default(), 3.0)
@@ -258,7 +258,7 @@ class Settings_Screen(Screen, EventDispatcher):
                 # Show current location in status bar
                 if hasattr(self, 'current_location') and self.current_location:
                     lat, lon = self.current_location
-                    self.ids.status_label.text = f'Current: {lat:.4f}, {lon:.4f} | Adjust Location or Smartflip'
+                    self.ids.status_label.text = f'Current: {lat:.4f}, {lon:.4f}'
                 else:
                     self.ids.status_label.text = 'Adjust Location or Smartflip'
         except Exception as exc:
