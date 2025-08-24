@@ -103,16 +103,18 @@
         Button:
             id: popup
             text: ''
-            size_hint: 0.04, 0.07
+            size_hint: None, None
+            # scale the button with the smaller dimension of the parent; clamp to a sensible range
+            size: [max(dp(36), min(min(self.parent.width, self.parent.height) * 0.08, dp(120)))] * 2
             pos_hint: {"center_x": 0.25, "center_y": 0.8}
-            background_color: 1,0,0,0.3
+            background_color: 1, 0, 0, 0.3
             on_release: Factory.DescriptionPopup().open()
+
             Image:
                 source: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/InfoIcon.png'
-                center_x: self.parent.center_x
-                center_y: self.parent.center_y
-                size_hint_x: self.parent.width
-                fit_mode: "contain"  # Scale to fit while maintaining aspect ratio
+                size_hint: 1, 1         # fill the button
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                fit_mode: "contain"     # keep aspect ratio, stay inside the button
 
         
         Spinner:
