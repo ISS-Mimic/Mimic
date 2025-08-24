@@ -209,23 +209,43 @@ class ManualControlScreen(Screen):
             log_error(f"Failed to update status label: {exc}")
     
     def _update_button_states(self) -> None:
-        """Enable/disable increment buttons based on Arduino connection."""
+        """Enable/disable buttons based on Arduino connection."""
         try:
-            app = self._app()
-            arduino_connected = hasattr(app, 'arduino_count') and app.arduino_count > 0
+            # Get arduino count from the screen's own arduino_count label
+            # This gets updated by the main app's updateArduinoCount method
+            arduino_count_label = getattr(self.ids, 'arduino_count', None)
+            if arduino_count_label:
+                arduino_count_text = arduino_count_label.text.strip()
+                if arduino_count_text and arduino_count_text.isdigit():
+                    arduino_count = int(arduino_count_text)
+                    arduino_connected = arduino_count > 0
+                else:
+                    arduino_connected = False
+            else:
+                arduino_connected = False
             
-            # Get all increment buttons
-            increment_buttons = [
+            # Get all increment and control buttons
+            control_buttons = [
                 'set0', 'set90', 'calibrate_zero',
                 'minus5', 'plus5', 'minus20', 'plus20', 'minus90', 'plus90'
             ]
             
-            for button_id in increment_buttons:
+            # Get all joint selection buttons
+            joint_buttons = [
+                'Beta1B_Button', 'Beta3B_Button', 'SSARJ_Button', 'Beta3A_Button',
+                'Beta1A_Button', 'STRRJ_Button', 'PTRRJ_Button', 'PSARJ_Button',
+                'Beta2A_Button', 'Beta4A_Button', 'Beta2B_Button', 'Beta4B_Button'
+            ]
+            
+            # Disable/enable all buttons based on Arduino connection
+            all_buttons = control_buttons + joint_buttons
+            
+            for button_id in all_buttons:
                 if button_id in self.ids:
                     self.ids[button_id].disabled = not arduino_connected
             
             if not arduino_connected:
-                self._update_status("No Arduinos connected - buttons disabled")
+                self._update_status("No Arduinos connected - all buttons disabled")
             else:
                 self._update_status("Arduinos connected - ready for manual control")
                 
