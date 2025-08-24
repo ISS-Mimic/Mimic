@@ -220,7 +220,7 @@ class MainScreen(Screen):
                 log_info(f"MainScreen: Not a git repository at {repo_path}, skipping update check")
                 return None
             
-            # Get current local commit hash
+            # Get current local commit hash and branch
             try:
                 log_info(f"MainScreen: Running git rev-parse HEAD from working directory: {repo_path}")
                 result = subprocess.run(
@@ -235,6 +235,20 @@ class MainScreen(Screen):
                     return None
                 local_commit = result.stdout.strip()
                 log_info(f"MainScreen: Local commit hash: {local_commit[:8]}")
+                
+                # Get current branch name
+                result = subprocess.run(
+                    ['git', 'branch', '--show-current'],
+                    cwd=repo_path,
+                    capture_output=True,
+                    text=True,
+                    timeout=10
+                )
+                if result.returncode != 0:
+                    log_error(f"Failed to get current branch: {result.stderr}")
+                    return None
+                current_branch = result.stdout.strip()
+                log_info(f"MainScreen: Current branch: {current_branch}")
             except subprocess.TimeoutExpired:
                 log_error("Git command timed out")
                 return None
@@ -283,7 +297,7 @@ class MainScreen(Screen):
                         log_info("MainScreen: requests module not available, cannot check GitHub API")
                         return None
                         
-                    api_url = f"https://api.github.com/repos/{owner}/{repo}/commits/main"
+                    api_url = f"https://api.github.com/repos/{owner}/{repo}/commits/{current_branch}"
                     try:
                         response = requests.get(api_url, timeout=10)
                         if response.status_code == 200:
