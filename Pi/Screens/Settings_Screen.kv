@@ -23,14 +23,14 @@
         # Manual Input Section
         Label:
             text: 'Enter Coordinates:'
-            pos_hint: {"center_x": 0.2, "center_y": 0.73}
+            pos_hint: {"center_x": 0.15, "center_y": 0.76}
             size_hint_y: 0.1
             font_size: min(self.height * 0.4, dp(48))
-            color: 1, 1, 1, 1
+            color: 1, 0, 1, 1
         
         Label:
             text: 'Latitude:'
-            pos_hint: {"center_x": 0.15, "center_y": 0.68}
+            pos_hint: {"center_x": 0.15, "center_y": 0.72}
             size_hint_y: 0.05
             font_size: min(self.height * 0.6, dp(56))
             color: 1, 1, 1, 1
@@ -38,7 +38,7 @@
         TextInput:
             id: lat_input
             text: '29.7604'
-            pos_hint: {"center_x": 0.25, "center_y": 0.68}
+            pos_hint: {"center_x": 0.25, "center_y": 0.72}
             size_hint: 0.1, 0.05
             font_size: self.height * 0.8
             multiline: False
@@ -46,7 +46,7 @@
         
         Label:
             text: 'Longitude:'
-            pos_hint: {"center_x": 0.35, "center_y": 0.68}
+            pos_hint: {"center_x": 0.15, "center_y": 0.65}
             size_hint_y: 0.05
             font_size: min(self.height * 0.6, dp(56))
             color: 1, 1, 1, 1
@@ -54,7 +54,7 @@
         TextInput:
             id: lon_input
             text: '-95.3698'
-            pos_hint: {"center_x": 0.45, "center_y": 0.68}
+            pos_hint: {"center_x": 0.25, "center_y": 0.65}
             size_hint: 0.1, 0.05
             font_size: self.height * 0.8
             multiline: False
@@ -80,7 +80,7 @@
         # Title
         Label:
             text: 'Motor Settings'
-            pos_hint: {"center_x": 0.15, "center_y": 0.4}
+            pos_hint: {"center_x": 0.12, "center_y": 0.4}
             bold: True
             size_hint_y: 0.1
             font_size: min(self.height * 0.6, dp(56))
@@ -91,14 +91,14 @@
         Label:
             text: "Enable Smartflip (smooth 0 crossing)"
             pos_hint: {"center_x": 0.2, "center_y": 0.3}
-            size_hint_y: 0.1
-            font_size: self.height * 0.6
+            size_hint_y: 0.05
+            font_size: self.height * 0.8
             color: 1, 1, 1, 1
 
         CheckBox:
             id: smartflip
             pos_hint: {"center_x": 0.45, "center_y": 0.3}
-            size_hint_y: 0.1
+            size_hint_y: 0.15
             on_active: root.checkbox_clicked(self, self.active)
         
         # ---------- STATUS DISPLAY (Bottom Rectangle) ----------
