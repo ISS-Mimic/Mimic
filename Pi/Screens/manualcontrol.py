@@ -50,6 +50,8 @@ class ManualControlScreen(Screen):
         # Schedule periodic button state updates
         from kivy.clock import Clock
         self._button_update_event = Clock.schedule_interval(self._update_button_states, 2.0)  # Check every 2 seconds
+        # Flag to track if we've shown the initial connection status
+        self._connection_status_shown = False
     
     def on_pre_leave(self, *_):
         """Clean up scheduled updates when leaving the screen."""
@@ -243,10 +245,20 @@ class ManualControlScreen(Screen):
                 if button_id in self.ids:
                     self.ids[button_id].disabled = not arduino_connected
             
-            if not arduino_connected:
-                self._update_status("No Arduinos connected - all buttons disabled")
-            else:
-                self._update_status("Arduinos connected - ready for manual control")
+            # Only show connection status if it's changed or if we haven't shown it yet
+            current_status = "No Arduinos connected - all buttons disabled" if not arduino_connected else "Arduinos connected - ready for manual control"
+            
+            # Check if this is a new connection status
+            if not hasattr(self, '_last_connection_status') or self._last_connection_status != current_status:
+                if not arduino_connected:
+                    # Always show disconnection messages
+                    self._update_status(current_status)
+                elif not self._connection_status_shown:
+                    # Show initial connection message only once
+                    self._update_status(current_status)
+                    self._connection_status_shown = True
+                
+                self._last_connection_status = current_status
                 
         except Exception as exc:
             log_error(f"Failed to update button states: {exc}")
