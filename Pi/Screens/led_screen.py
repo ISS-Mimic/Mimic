@@ -34,6 +34,8 @@ class LED_Screen(MimicBase):
         log_info("LED Screen: on_enter")
         # Start status updates
         self._status_event = Clock.schedule_interval(self._update_status, 0.5)
+        # Start Arduino monitoring
+        self._start_arduino_monitoring()
         # Initialize Arduino widget to correct state
         self._initialize_arduino_widget()
         
@@ -45,11 +47,20 @@ class LED_Screen(MimicBase):
         if hasattr(self, '_status_event') and self._status_event:
             self._status_event.cancel()
             self._status_event = None
+        # Stop Arduino monitoring
+        self._stop_arduino_monitoring()
     
     # ===== SOLAR ARRAY TESTING =====
     def test_solar_array(self, array_name: str):
         """Test LED functionality for a specific solar array with current color."""
         try:
+            # Check if button is enabled (Arduino connected)
+            button_id = f'test_{array_name.lower()}'
+            if hasattr(self, 'ids') and button_id in self.ids:
+                if self.ids[button_id].disabled:
+                    log_info(f"LED Screen: Button {button_id} is disabled - no Arduino connected")
+                    return
+            
             command = f"LED_{array_name.upper()}={self._current_color}"
             log_info(f"LED Screen: Testing solar array {array_name} with {self._current_color}: {command}")
             
@@ -82,6 +93,12 @@ class LED_Screen(MimicBase):
     def test_pattern(self, pattern_name: str):
         """Test a specific LED pattern."""
         try:
+            # Check if button is enabled (Arduino connected)
+            if hasattr(self, 'ids') and 'test_pattern' in self.ids:
+                if self.ids.test_pattern.disabled:
+                    log_info("LED Screen: Pattern button is disabled - no Arduino connected")
+                    return
+            
             command = f"PATTERN_{pattern_name.upper()}"
             log_info(f"LED Screen: Testing pattern {pattern_name}: {command}")
             
@@ -343,4 +360,62 @@ class LED_Screen(MimicBase):
                     log_info("LED Screen: Arduino widget initialized to offline (not connected)")
         except Exception as exc:
             log_error(f"Failed to initialize Arduino widget: {exc}")
-        
+    
+    def _start_arduino_monitoring(self):
+        """Start monitoring Arduino connection status."""
+        try:
+            self._arduino_monitor_event = Clock.schedule_interval(self._update_button_states, 2.0)
+            log_info("LED Screen: Arduino monitoring started")
+        except Exception as exc:
+            log_error(f"Failed to start Arduino monitoring: {exc}")
+    
+    def _stop_arduino_monitoring(self):
+        """Stop monitoring Arduino connection status."""
+        try:
+            if hasattr(self, '_arduino_monitor_event'):
+                self._arduino_monitor_event.cancel()
+            log_info("LED Screen: Arduino monitoring stopped")
+        except Exception as exc:
+            log_error(f"Failed to stop Arduino monitoring: {exc}")
+    
+    def _update_button_states(self, dt=None):
+        """Update button states based on Arduino connection status."""
+        try:
+            if hasattr(self, 'ids') and 'arduino_count' in self.ids:
+                # Check if any Arduinos are connected
+                arduino_count_text = self.ids.arduino_count.text
+                arduino_connected = arduino_count_text and arduino_count_text.strip() != ''
+                
+                # Get all LED control buttons
+                button_ids = [
+                    'test_1a', 'test_1b', 'test_2a', 'test_2b',
+                    'test_3a', 'test_3b', 'test_4a', 'test_4b',
+                    'test_pattern', 'test_animation', 'stop_animations',
+                    'light_everything', 'turn_off_all_leds', 'reset_leds'
+                ]
+                
+                # Enable/disable buttons based on connection status
+                for button_id in button_ids:
+                    if button_id in self.ids:
+                        button = self.ids[button_id]
+                        button.disabled = not arduino_connected
+                        # Update button appearance
+                        if arduino_connected:
+                            button.opacity = 1.0
+                            button.background_color = (0.2, 1, 0.2, 1)  # Green when enabled
+                        else:
+                            button.opacity = 0.5
+                            button.background_color = (0.5, 0.5, 0.5, 1)  # Gray when disabled
+                
+                # Update status message
+                if hasattr(self, 'ids') and 'status_label' in self.ids:
+                    if arduino_connected:
+                        # Don't override user action status messages
+                        if not self._current_test:
+                            self.ids.status_label.text = f'Arduinos connected: {arduino_count_text}'
+                    else:
+                        # Always show disconnection message
+                        self.ids.status_label.text = 'No Arduinos connected - LED controls disabled'
+                        
+        except Exception as exc:
+            log_error(f"Failed to update button states: {exc}")
