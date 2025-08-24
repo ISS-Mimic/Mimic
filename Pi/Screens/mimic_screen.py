@@ -116,9 +116,17 @@ class MimicScreen(MimicBase):
             if rows:
                 # Convert to list of dictionaries for easier access
                 columns = [description[0] for description in cursor.description]
+                log_info(f"Mimic Screen: Database columns: {columns}")
+                
                 self._telemetry_data = []
                 
-                for row in rows:
+                for i, row in enumerate(rows[:3]):  # Show first 3 records for debugging
+                    record = dict(zip(columns, row))
+                    log_info(f"Mimic Screen: Sample record {i}: {record}")
+                    self._telemetry_data.append(record)
+                
+                # Add remaining records
+                for row in rows[3:]:
                     record = dict(zip(columns, row))
                     self._telemetry_data.append(record)
                 
@@ -139,6 +147,9 @@ class MimicScreen(MimicBase):
             
             # Get current telemetry record
             record = self._telemetry_data[self._current_telemetry_index]
+            
+            # Debug: Print the current record
+            log_info(f"Mimic Screen: Record {self._current_telemetry_index}: {record}")
             
             # Build telemetry command (same format as playback screen)
             telemetry_cmd = (
@@ -164,6 +175,9 @@ class MimicScreen(MimicBase):
                 f"SASA_EL={record.get('SASA_EL', 0.0):.1f}"
             )
             
+            # Debug: Print the telemetry command
+            log_info(f"Mimic Screen: Sending telemetry: {telemetry_cmd}")
+            
             # Send telemetry command
             serialWrite(telemetry_cmd)
             
@@ -179,56 +193,46 @@ class MimicScreen(MimicBase):
     def _send_led_commands(self, record):
         """Send LED commands based on telemetry data."""
         try:
-            # Build LED commands (same logic as playback screen)
+            # Debug: Print voltage values
+            log_info(f"Mimic Screen: Voltage values - V1A: {record.get('V1A', 'N/A')}, V1B: {record.get('V1B', 'N/A')}, V2A: {record.get('V2A', 'N/A')}, V2B: {record.get('V2B', 'N/A')}, V3A: {record.get('V3A', 'N/A')}, V3B: {record.get('V3B', 'N/A')}, V4A: {record.get('V4A', 'N/A')}, V4B: {record.get('V4B', 'N/A')}")
+            
+            # Build LED commands (same logic as playback screen - based on voltage)
             led_commands = []
             
-            # Solar array 1A
-            if record.get('B1A', 0) > 0:
-                led_commands.append("LED_1A=Blue")
-            else:
-                led_commands.append("LED_1A=Off")
+            # Get voltage values for LED control
+            v1a = float(record.get('V1A', 0))
+            v1b = float(record.get('V1B', 0))
+            v2a = float(record.get('V2A', 0))
+            v2b = float(record.get('V2B', 0))
+            v3a = float(record.get('V3A', 0))
+            v3b = float(record.get('V3B', 0))
+            v4a = float(record.get('V4A', 0))
+            v4b = float(record.get('V4B', 0))
             
-            # Solar array 1B
-            if record.get('B1B', 0) > 0:
-                led_commands.append("LED_1B=Blue")
-            else:
-                led_commands.append("LED_1B=Off")
+            # Determine LED colors based on voltage (same as playback screen)
+            led_1a = self._get_voltage_color(v1a)
+            led_1b = self._get_voltage_color(v1b)
+            led_2a = self._get_voltage_color(v2a)
+            led_2b = self._get_voltage_color(v2b)
+            led_3a = self._get_voltage_color(v3a)
+            led_3b = self._get_voltage_color(v3b)
+            led_4a = self._get_voltage_color(v4a)
+            led_4b = self._get_voltage_color(v4b)
             
-            # Solar array 2A
-            if record.get('B2A', 0) > 0:
-                led_commands.append("LED_2A=Blue")
-            else:
-                led_commands.append("LED_2A=Off")
+            # Build individual LED commands (same as playback screen)
+            led_commands = [
+                f"LED_1A={led_1a}",
+                f"LED_2A={led_2a}",
+                f"LED_3A={led_3a}",
+                f"LED_4A={led_4a}",
+                f"LED_1B={led_1b}",
+                f"LED_2B={led_2b}",
+                f"LED_3B={led_3b}",
+                f"LED_4B={led_4b}"
+            ]
             
-            # Solar array 2B
-            if record.get('B2B', 0) > 0:
-                led_commands.append("LED_2B=Blue")
-            else:
-                led_commands.append("LED_2B=Off")
-            
-            # Solar array 3A
-            if record.get('B3A', 0) > 0:
-                led_commands.append("LED_3A=Blue")
-            else:
-                led_commands.append("LED_3A=Off")
-            
-            # Solar array 3B
-            if record.get('B3B', 0) > 0:
-                led_commands.append("LED_3B=Blue")
-            else:
-                led_commands.append("LED_3B=Off")
-            
-            # Solar array 4A
-            if record.get('B4A', 0) > 0:
-                led_commands.append("LED_4A=Blue")
-            else:
-                led_commands.append("LED_4A=Off")
-            
-            # Solar array 4B
-            if record.get('B4B', 0) > 0:
-                led_commands.append("LED_4B=Blue")
-            else:
-                led_commands.append("LED_4B=Off")
+            # Debug: Print LED commands
+            log_info(f"Mimic Screen: LED commands: {led_commands}")
             
             # Send LED commands with delays (same as playback screen)
             for i, cmd in enumerate(led_commands):
@@ -238,6 +242,15 @@ class MimicScreen(MimicBase):
             
         except Exception as exc:
             log_error(f"Failed to send LED commands: {exc}")
+    
+    def _get_voltage_color(self, voltage):
+        """Determine LED color based on voltage threshold (same as playback screen)."""
+        if voltage < 151.5:
+            return "Blue"      # Discharging
+        elif voltage < 160.0:
+            return "Yellow"    # Charging
+        else:
+            return "White"     # Fully charged
 
     # ---------------------------------------------------------------- start
     def startproc(self) -> None:
