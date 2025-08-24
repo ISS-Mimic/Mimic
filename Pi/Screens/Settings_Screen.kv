@@ -45,7 +45,7 @@
             text: '29.7604'
             pos_hint: {"center_x": 0.25, "center_y": 0.68}
             size_hint: 0.1, 0.05
-            font_size: min(dp(16), self.parent.width * 0.012)
+            font_size: self.height * 0.8
             multiline: False
             input_filter: 'float'
         
@@ -61,7 +61,7 @@
             text: '-95.3698'
             pos_hint: {"center_x": 0.45, "center_y": 0.68}
             size_hint: 0.1, 0.05
-            font_size: min(dp(16), self.parent.width * 0.012)
+            font_size: self.height * 0.8
             multiline: False
             input_filter: 'float'
         
@@ -71,7 +71,7 @@
             size_hint: 0.3, 0.06
             on_release: root.set_location_from_coordinates(lat_input.text, lon_input.text)
             background_color: 0.2, 1, 0.2, 1
-            font_size: min(dp(32), self.parent.width * 0.024)
+            font_size: self.height * 0.6
         
         # Auto-detect Button
         Button:
@@ -80,7 +80,7 @@
             size_hint: 0.3, 0.06
             on_release: root.detect_location_from_ip()
             background_color: 1, 0.5, 0, 1
-            font_size: min(dp(32), self.parent.width * 0.024)
+            font_size: self.height * 0.6
 
         # Title
         Label:
@@ -95,7 +95,7 @@
             text: "Enable Smartflip (smooth 0 crossing)"
             pos_hint: {"center_x": 0.2, "center_y": 0.3}
             size_hint_y: 0.05
-            font_size: min(dp(32), self.parent.width * 0.024)
+            font_size: self.height * 0.6
             color: 1, 1, 1, 1
 
         CheckBox:
@@ -104,37 +104,53 @@
             size_hint_y: 0.05
             on_active: root.checkbox_clicked(self, self.active)
         
-        # Back Button
-        Button:
-            size_hint: 0.1, 0.11
-            pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
-            on_release: app.root.current = 'main'
+        # ---------- STATUS DISPLAY (Bottom Rectangle) ----------
+        Label:
+            id: status_label
+            text: 'Adjust Location or Smartflip'
+            size_hint: 1, 0.07
+            background_color: 0, 0, 0, 0.8  # Semi-transparent black
+            color: 0, 1, 0, 1  # Green text
+            font_size: self.height * 0.6  # Scale font to label height
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            pos_hint: {"center_x": 0.57, "center_y": 0.07}
         
-        # Status Icons
+        # ---------- BOTTOM TOOLBAR ----------
         Image:
             id: signal
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/signalred.zip"
             size_hint_y: 0.112
             anim_delay: 0.05
             anim_loop: 0
-            pos_hint: {"center_x": 0.05, "center_y": 0.07}
             fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.05, "center_y": 0.07}
         
         Image:
             id: arduino
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
             size_hint_y: 0.15
             anim_delay: 0.2
-            anim_loop: 0
-            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+            anim_loop: -1
             fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
         
         Label:
             id: arduino_count
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
             text: ''
             markup: True
-            color: 1, 1, 1
-            font_size: min(self.height * 0.3, dp(40))
-            size_hint_y: 0.5
+            color: 1, 1, 1, 1
+            font_size: self.height * 1
+            size_hint: 0.06, 0.08
+        
+        # ─────────────────────── Navigation ────────────────────────────────
+
+        Button:
+            size_hint: 0.1, 0.11
+            pos_hint: {"center_x": 0.9375, "center_y": 0.07}
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            border: 0,0,0,0    # avoid 9-slice margins
+            on_release: root.manager.current = 'main'

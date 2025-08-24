@@ -7,6 +7,7 @@ from kivy.uix.screenmanager import Screen
 from kivy.event import EventDispatcher
 from kivy.lang import Builder
 from kivy.properties import StringProperty
+from kivy.clock import Clock
 
 from utils.serial import serialWrite          # <-- already works elsewhere
 from utils.logger import log_info, log_error
@@ -36,6 +37,17 @@ class Settings_Screen(Screen, EventDispatcher):
         """Called when the settings screen is entered."""
         super().on_enter()
         self.update_location_display()
+        self._start_arduino_monitoring()
+        # Initialize Arduino widget
+        self._initialize_arduino_widget()
+        # Reset status label
+        if hasattr(self, 'ids') and 'status_label' in self.ids:
+            self.ids.status_label.text = 'Adjust Location or Smartflip'
+    
+    def on_leave(self):
+        """Called when the settings screen is left."""
+        super().on_leave()
+        self._stop_arduino_monitoring()
 
     def update_location_display(self):
         """Update the current location display label."""
@@ -86,6 +98,11 @@ class Settings_Screen(Screen, EventDispatcher):
                     self.update_location_display()
                     self.update_orbit_screen_location()
                     log_info(f"IP geolocation successful: {self.current_location[0]:.4f}, {self.current_location[1]:.4f}")
+                    
+                    # Update status message
+                    if hasattr(self, 'ids') and 'status_label' in self.ids:
+                        self.ids.status_label.text = f'IP location detected: {self.current_location[0]:.4f}, {self.current_location[1]:.4f}'
+                    
                     return True
         except Exception as e:
             log_error(f"IP geolocation failed: {e}")
@@ -94,6 +111,11 @@ class Settings_Screen(Screen, EventDispatcher):
         self.current_location = (29.7604, -95.3698)
         self.update_location_display()
         log_info("Using fallback Houston location")
+        
+        # Update status message
+        if hasattr(self, 'ids') and 'status_label' in self.ids:
+            self.ids.status_label.text = 'Using fallback Houston location'
+        
         return False
 
     def save_location_settings(self):
@@ -125,11 +147,22 @@ class Settings_Screen(Screen, EventDispatcher):
                 self.update_orbit_screen_location()
                 self.update_location_display()
                 log_info(f"Manual location set: {lat:.4f}, {lon:.4f}")
+                
+                # Update status message
+                if hasattr(self, 'ids') and 'status_label' in self.ids:
+                    self.ids.status_label.text = f'Location set to: {lat:.4f}, {lon:.4f}'
+                
                 return True
             else:
                 log_error(f"Invalid coordinates: {lat}, {lon} (must be lat: -90 to 90, lon: -180 to 180)")
+                # Update status message
+                if hasattr(self, 'ids') and 'status_label' in self.ids:
+                    self.ids.status_label.text = f'Invalid coordinates: {lat}, {lon}'
         except ValueError:
             log_error(f"Invalid coordinate format: {lat}, {lon}")
+            # Update status message
+            if hasattr(self, 'ids') and 'status_label' in self.ids:
+                self.ids.status_label.text = f'Invalid coordinate format: {lat}, {lon}'
         return False
 
     def update_orbit_screen_location(self):
@@ -152,4 +185,72 @@ class Settings_Screen(Screen, EventDispatcher):
         cmd = "SmartRolloverBGA=1 " if active else "SmartRolloverBGA=0 "
         serialWrite(cmd)
         log_info(f"SmartRolloverBGA toggled to {active}")
+        
+        # Update status message
+        if hasattr(self, 'ids') and 'status_label' in self.ids:
+            status_text = "Smartflip enabled" if active else "Smartflip disabled"
+            self.ids.status_label.text = status_text
+    
+    def _start_arduino_monitoring(self):
+        """Start monitoring Arduino connection status."""
+        try:
+            self._arduino_monitor_event = Clock.schedule_interval(self._update_arduino_status, 2.0)
+            log_info("Settings Screen: Arduino monitoring started")
+        except Exception as exc:
+            log_error(f"Failed to start Arduino monitoring: {exc}")
+    
+    def _stop_arduino_monitoring(self):
+        """Stop monitoring Arduino connection status."""
+        try:
+            if hasattr(self, '_arduino_monitor_event'):
+                self._arduino_monitor_event.cancel()
+            log_info("Settings Screen: Arduino monitoring stopped")
+        except Exception as exc:
+            log_error(f"Failed to stop Arduino monitoring: {exc}")
+    
+    def _update_arduino_status(self, dt):
+        """Update Arduino status display."""
+        try:
+            if hasattr(self, 'ids') and 'arduino' in self.ids and 'arduino_count' in self.ids:
+                # Check if any Arduinos are connected
+                arduino_count_text = self.ids.arduino_count.text
+                arduino_connected = arduino_count_text and arduino_count_text.strip() != ''
+                
+                if arduino_connected:
+                    # Arduino connected - show no_transmit status
+                    self.ids.arduino.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
+                    # Update status label
+                    if hasattr(self.ids, 'status_label'):
+                        self.ids.status_label.text = f'Arduinos connected: {arduino_count_text}'
+                else:
+                    # No Arduino connected - show offline status
+                    self.ids.arduino.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
+                    # Update status label
+                    if hasattr(self.ids, 'status_label'):
+                        self.ids.status_label.text = 'No Arduinos connected'
+        except Exception as exc:
+            log_error(f"Error updating Arduino status: {exc}")
+    
+    def _initialize_arduino_widget(self):
+        """Initialize the Arduino widget based on connection status."""
+        try:
+            if hasattr(self, 'ids') and 'arduino' in self.ids:
+                # Check if any Arduinos are connected
+                arduino_count_label = getattr(self.ids, 'arduino_count', None)
+                if arduino_count_label:
+                    arduino_count_text = arduino_count_label.text.strip()
+                    arduino_connected = arduino_count_text and arduino_count_text.isdigit() and int(arduino_count_text) > 0
+                else:
+                    arduino_connected = False
+                
+                if arduino_connected:
+                    # Arduino connected - show no_transmit status
+                    self.ids.arduino.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
+                    log_info("Settings Screen: Arduino widget initialized to no_transmit (connected)")
+                else:
+                    # No Arduino connected - show offline status
+                    self.ids.arduino.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
+                    log_info("Settings Screen: Arduino widget initialized to no_transmit (not connected)")
+        except Exception as exc:
+            log_error(f"Failed to initialize Arduino widget: {exc}")
 
