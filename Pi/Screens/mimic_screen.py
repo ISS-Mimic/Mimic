@@ -38,7 +38,7 @@ class MimicScreen(MimicBase):
         self._db_path = None
 
     # ------------------------------------------------------------------- UI
-    def change_mimic_boolean(self, value: bool) -> None:
+    def mimic_transmit(self, value: bool) -> None:
         """
         Bound in KV.  True ? transmit; False ? idle.
         Now directly controls mimic telemetry instead of just setting a boolean.
@@ -47,8 +47,7 @@ class MimicScreen(MimicBase):
             self.start_mimic_telemetry()
         else:
             self.stop_mimic_telemetry()
-        log_info(f"Change Mimic Boolean: {value}")
-    changeMimicBoolean = change_mimic_boolean      # keep legacy name
+        log_info(f"Start Mimic Telemetry: {value}")
     
     def start_mimic_telemetry(self):
         """Start mimic telemetry transmission."""
