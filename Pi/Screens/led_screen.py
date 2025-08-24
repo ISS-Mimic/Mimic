@@ -17,6 +17,8 @@ class LED_Screen(MimicBase):
     Now uses the new Arduino command format with named colors and patterns.
     """
     
+    mimic_directory = pathlib.Path(__file__).resolve().parents[3]   # …/Mimic
+    
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # Initialize attributes immediately to avoid KV file errors
@@ -48,11 +50,20 @@ class LED_Screen(MimicBase):
         try:
             command = f"LED_{array_name.upper()}={self._current_color}"
             log_info(f"LED Screen: Testing solar array {array_name} with {self._current_color}: {command}")
+            
+            # Show transmit animation
+            self._show_transmit_animation(True)
+            
             serialWrite(command)
             self._current_test = f"Solar Array {array_name.upper()} ({self._current_color})"
             self._start_test_timer()
+            
+            # Hide transmit animation after a short delay
+            Clock.schedule_once(lambda dt: self._show_transmit_animation(False), 0.5)
         except Exception as e:
             log_error(f"LED Screen: Error testing solar array {array_name}: {e}")
+            # Hide transmit animation on error
+            self._show_transmit_animation(False)
     
     def set_color(self, color_name: str):
         """Set the current color for LED testing."""
@@ -71,11 +82,20 @@ class LED_Screen(MimicBase):
         try:
             command = f"PATTERN_{pattern_name.upper()}"
             log_info(f"LED Screen: Testing pattern {pattern_name}: {command}")
+            
+            # Show transmit animation
+            self._show_transmit_animation(True)
+            
             serialWrite(command)
             self._current_test = f"Pattern: {pattern_name.title()}"
             self._start_test_timer()
+            
+            # Hide transmit animation after a short delay
+            Clock.schedule_once(lambda dt: self._show_transmit_animation(False), 0.5)
         except Exception as e:
             log_error(f"LED Screen: Error testing pattern {pattern_name}: {e}")
+            # Hide transmit animation on error
+            self._show_transmit_animation(False)
     
     def test_rainbow_pattern(self):
         """Test rainbow pattern."""
@@ -99,11 +119,20 @@ class LED_Screen(MimicBase):
         try:
             command = f"ANIMATE_{animation_name.upper()}"
             log_info(f"LED Screen: Testing animation {animation_name}: {command}")
+            
+            # Show transmit animation
+            self._show_transmit_animation(True)
+            
             serialWrite(command)
             self._current_test = f"Animation: {animation_name.title()}"
             self._start_test_timer()
+            
+            # Hide transmit animation after a short delay
+            Clock.schedule_once(lambda dt: self._show_transmit_animation(False), 0.5)
         except Exception as e:
             log_error(f"LED Screen: Error testing animation {animation_name}: {e}")
+            # Hide transmit animation on error
+            self._show_transmit_animation(False)
     
     def test_pulse_animation(self):
         """Test pulse animation."""
@@ -126,11 +155,20 @@ class LED_Screen(MimicBase):
         try:
             command = "ANIMATE_STOP"
             log_info(f"LED Screen: Stopping animations: {command}")
+            
+            # Show transmit animation
+            self._show_transmit_animation(True)
+            
             serialWrite(command)
             self._current_test = "Animations Stopped"
             self._start_test_timer()
+            
+            # Hide transmit animation after a short delay
+            Clock.schedule_once(lambda dt: self._show_transmit_animation(False), 0.5)
         except Exception as e:
             log_error(f"LED Screen: Error stopping animations: {e}")
+            # Hide transmit animation on error
+            self._show_transmit_animation(False)
     
     # ===== SPECIAL FUNCTIONS =====
     def light_everything(self):
@@ -138,22 +176,40 @@ class LED_Screen(MimicBase):
         try:
             command = f"LED_ALL={self._current_color}"
             log_info(f"LED Screen: Lighting everything {self._current_color}: {command}")
+            
+            # Show transmit animation
+            self._show_transmit_animation(True)
+            
             serialWrite(command)
             self._current_test = f"All LEDs: {self._current_color}"
             self._start_test_timer()
+            
+            # Hide transmit animation after a short delay
+            Clock.schedule_once(lambda dt: self._show_transmit_animation(False), 0.5)
         except Exception as e:
             log_error(f"LED Screen: Error lighting everything: {e}")
+            # Hide transmit animation on error
+            self._show_transmit_animation(False)
     
     def turn_off_all_leds(self):
         """Turn off all LEDs."""
         try:
             command = "LED_ALL=Off"
             log_info(f"LED Screen: Turning off all LEDs: {command}")
+            
+            # Show transmit animation
+            self._show_transmit_animation(True)
+            
             serialWrite(command)
             self._current_test = "All LEDs Off"
             self._start_test_timer()
+            
+            # Hide transmit animation after a short delay
+            Clock.schedule_once(lambda dt: self._show_transmit_animation(False), 0.5)
         except Exception as e:
             log_error(f"LED Screen: Error turning off all LEDs: {e}")
+            # Hide transmit animation on error
+            self._show_transmit_animation(False)
     
     def turn_off_all(self):
         """Turn off all LEDs (alias for turn_off_all_leds)."""
@@ -164,11 +220,20 @@ class LED_Screen(MimicBase):
         try:
             command = "RESET"
             log_info(f"LED Screen: Resetting LEDs: {command}")
+            
+            # Show transmit animation
+            self._show_transmit_animation(True)
+            
             serialWrite(command)
             self._current_test = "LED Reset"
             self._start_test_timer()
+            
+            # Hide transmit animation after a short delay
+            Clock.schedule_once(lambda dt: self._show_transmit_animation(False), 0.5)
         except Exception as e:
             log_error(f"LED Screen: Error resetting LEDs: {e}")
+            # Hide transmit animation on error
+            self._show_transmit_animation(False)
     
     # ===== UTILITY FUNCTIONS =====
     def _start_test_timer(self):
@@ -228,4 +293,29 @@ class LED_Screen(MimicBase):
     def get_available_animations(self) -> list:
         """Get list of available animations."""
         return ["Pulse", "Chase", "Disco"]
+    
+    def _show_transmit_animation(self, show: bool) -> None:
+        """Show or hide the transmit animation on the Arduino widget."""
+        try:
+            if hasattr(self, 'ids') and 'arduino' in self.ids:
+                if show:
+                    # Show transmit animation
+                    self.ids.arduino.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_transmit.zip"
+                else:
+                    # Check if Arduino is connected to determine what to show
+                    arduino_count_label = getattr(self.ids, 'arduino_count', None)
+                    if arduino_count_label:
+                        arduino_count_text = arduino_count_label.text.strip()
+                        arduino_connected = arduino_count_text and arduino_count_text.isdigit() and int(arduino_count_text) > 0
+                    else:
+                        arduino_connected = False
+                    
+                    if arduino_connected:
+                        # Arduino connected - show no_transmit status
+                        self.ids.arduino.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
+                    else:
+                        # No Arduino connected - show offline status
+                        self.ids.arduino.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
+        except Exception as exc:
+            log_error(f"Failed to update Arduino animation: {exc}")
         
