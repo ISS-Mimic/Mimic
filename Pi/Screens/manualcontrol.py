@@ -271,16 +271,42 @@ class ManualControlScreen(Screen):
                     # Show transmit animation
                     self.ids.arduino.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_transmit.zip"
                 else:
-                    # Show normal (notransmit) state
-                    self.ids.arduino.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
+                    # Check if Arduino is connected to determine what to show
+                    arduino_count_label = getattr(self.ids, 'arduino_count', None)
+                    if arduino_count_label:
+                        arduino_count_text = arduino_count_label.text.strip()
+                        arduino_connected = arduino_count_text and arduino_count_text.isdigit() and int(arduino_count_text) > 0
+                    else:
+                        arduino_connected = False
+                    
+                    if arduino_connected:
+                        # Arduino connected - show no_transmit status
+                        self.ids.arduino.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
+                    else:
+                        # No Arduino connected - show offline status
+                        self.ids.arduino.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
         except Exception as exc:
             log_error(f"Failed to update Arduino animation: {exc}")
     
     def _initialize_arduino_widget(self) -> None:
-        """Initialize the Arduino widget to show notransmit state."""
+        """Initialize the Arduino widget based on connection status."""
         try:
             if hasattr(self, 'ids') and 'arduino' in self.ids:
-                # Start with notransmit state (not offline)
-                self.ids.arduino.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
+                # Check if any Arduinos are connected
+                arduino_count_label = getattr(self.ids, 'arduino_count', None)
+                if arduino_count_label:
+                    arduino_count_text = arduino_count_label.text.strip()
+                    arduino_connected = arduino_count_text and arduino_count_text.isdigit() and int(arduino_count_text) > 0
+                else:
+                    arduino_connected = False
+                
+                if arduino_connected:
+                    # Arduino connected - show no_transmit status
+                    self.ids.arduino.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
+                    log_info("ManualControl: Arduino widget initialized to no_transmit (connected)")
+                else:
+                    # No Arduino connected - show offline status
+                    self.ids.arduino.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
+                    log_info("ManualControl: Arduino widget initialized to offline (not connected)")
         except Exception as exc:
             log_error(f"Failed to initialize Arduino widget: {exc}")

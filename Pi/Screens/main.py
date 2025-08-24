@@ -10,7 +10,6 @@ from kivy.uix.screenmanager import Screen
 from kivy.app import App
 from kivy.lang import Builder
 
-from utils.serial import serialWrite
 from utils.logger import log_info, log_error
 
 kv_path = pathlib.Path(__file__).with_name("MainScreen.kv")
@@ -94,10 +93,15 @@ class MainScreen(Screen):
     def on_pre_enter(self, *_):
         """Start ISS animations when entering the screen."""
         self._start_iss_animations()
+        self._start_arduino_monitoring()
+        # Reset status label to welcome message
+        if hasattr(self, 'ids') and 'status_label' in self.ids:
+            self.ids.status_label.text = 'Welcome to the ISS Mimic!'
     
     def on_pre_leave(self, *_):
         """Stop ISS animations when leaving the screen."""
         self._stop_iss_animations()
+        self._stop_arduino_monitoring()
     
     def _start_iss_animations(self):
         """Start the ISS animation timers."""
@@ -153,6 +157,46 @@ class MainScreen(Screen):
                 self.ids.ISStiny2.pos_hint = {"center_x": self._iss2_x, "center_y": self._iss2_y}
         except Exception as exc:
             log_error(f"Error in ISS2 animation: {exc}")
+    
+    def _start_arduino_monitoring(self):
+        """Start monitoring Arduino connection status."""
+        try:
+            self._arduino_monitor_event = Clock.schedule_interval(self._update_arduino_status, 2.0)
+            log_info("MainScreen: Arduino monitoring started")
+        except Exception as exc:
+            log_error(f"Failed to start Arduino monitoring: {exc}")
+    
+    def _stop_arduino_monitoring(self):
+        """Stop monitoring Arduino connection status."""
+        try:
+            if hasattr(self, '_arduino_monitor_event'):
+                self._arduino_monitor_event.cancel()
+            log_info("MainScreen: Arduino monitoring stopped")
+        except Exception as exc:
+            log_error(f"Failed to stop Arduino monitoring: {exc}")
+    
+    def _update_arduino_status(self, dt):
+        """Update Arduino status display."""
+        try:
+            if hasattr(self, 'ids') and 'arduino' in self.ids and 'arduino_count' in self.ids:
+                # Check if any Arduinos are connected
+                arduino_count_text = self.ids.arduino_count.text
+                arduino_connected = arduino_count_text and arduino_count_text.strip() != ''
+                
+                if arduino_connected:
+                    # Arduino connected - show no_transmit status
+                    self.ids.arduino.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
+                    # Update status label
+                    if hasattr(self.ids, 'status_label'):
+                        self.ids.status_label.text = f'Arduinos connected: {arduino_count_text}'
+                else:
+                    # No Arduino connected - show offline status
+                    self.ids.arduino.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
+                    # Update status label
+                    if hasattr(self.ids, 'status_label'):
+                        self.ids.status_label.text = 'No Arduinos connected'
+        except Exception as exc:
+            log_error(f"Error updating Arduino status: {exc}")
     
     
     # helper stays unchanged
