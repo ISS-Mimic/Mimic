@@ -253,16 +253,14 @@ class ManualControlScreen(Screen):
             log_error(f"Failed to update button states: {exc}")
     
     def _show_transmit_animation(self, show: bool) -> None:
-        """Show or hide the transmit animation."""
+        """Show or hide the transmit animation on the Arduino widget."""
         try:
-            if hasattr(self, 'ids') and 'signal' in self.ids:
+            if hasattr(self, 'ids') and 'arduino' in self.ids:
                 if show:
                     # Show transmit animation
-                    self.ids.signal.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
-                    self.ids.signal.anim_loop = 0  # Loop the animation
+                    self.ids.arduino.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_transmit.zip"
                 else:
-                    # Show offline signal
-                    self.ids.signal.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/signalred.zip"
-                    self.ids.signal.anim_loop = 0  # Stop animation
+                    # Show normal (notransmit) state
+                    self.ids.arduino.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
         except Exception as exc:
-            log_error(f"Failed to update transmit animation: {exc}")
+            log_error(f"Failed to update Arduino animation: {exc}")
