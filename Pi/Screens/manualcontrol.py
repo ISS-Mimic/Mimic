@@ -45,6 +45,7 @@ class ManualControlScreen(Screen):
         self.refresh_buttons()         # text & colour on every visit
         self._update_status("Click a joint to control it")
         self._update_button_states()
+        self._initialize_arduino_widget()
         # Schedule periodic button state updates
         from kivy.clock import Clock
         self._button_update_event = Clock.schedule_interval(self._update_button_states, 2.0)  # Check every 2 seconds
@@ -67,7 +68,6 @@ class ManualControlScreen(Screen):
 
     def increment_active(self, delta: float) -> None:
         if self.active_joint is None:
-            log_info(f"ManualControl: No active joint selected for increment {delta}")
             self._update_status("No joint selected - click a joint first")
             return
         log_info(f"ManualControl: Incrementing {self.active_joint} by {delta}")
@@ -208,7 +208,7 @@ class ManualControlScreen(Screen):
         except Exception as exc:
             log_error(f"Failed to update status label: {exc}")
     
-    def _update_button_states(self) -> None:
+    def _update_button_states(self, dt=None) -> None:
         """Enable/disable buttons based on Arduino connection."""
         try:
             # Get arduino count from the screen's own arduino_count label
@@ -264,3 +264,12 @@ class ManualControlScreen(Screen):
                     self.ids.arduino.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
         except Exception as exc:
             log_error(f"Failed to update Arduino animation: {exc}")
+    
+    def _initialize_arduino_widget(self) -> None:
+        """Initialize the Arduino widget to show notransmit state."""
+        try:
+            if hasattr(self, 'ids') and 'arduino' in self.ids:
+                # Start with notransmit state (not offline)
+                self.ids.arduino.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
+        except Exception as exc:
+            log_error(f"Failed to initialize Arduino widget: {exc}")
