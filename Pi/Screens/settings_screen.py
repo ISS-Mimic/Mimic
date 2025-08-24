@@ -270,7 +270,7 @@ class Settings_Screen(Screen, EventDispatcher):
             if hasattr(self, 'ids') and 'status_label' in self.ids:
                 if hasattr(self, 'current_location') and self.current_location:
                     lat, lon = self.current_location
-                    self.ids.status_label.text = f'Current: {lat:.4f}, {lon:.4f} | Adjust Location or Smartflip'
+                    self.ids.status_label.text = f'Current: {lat:.4f}, {lon:.4f}'
                 else:
                     self.ids.status_label.text = 'Adjust Location or Smartflip'
         except Exception as exc:
