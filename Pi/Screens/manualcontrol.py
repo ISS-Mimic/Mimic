@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pathlib, logging, threading      # threading only if you call it here later
+from typing import Dict
 from kivy.uix.screenmanager import Screen
 from kivy.properties import StringProperty
 from kivy.lang import Builder
