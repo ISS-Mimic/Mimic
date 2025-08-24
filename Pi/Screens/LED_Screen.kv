@@ -32,6 +32,7 @@
             on_release: root.set_color('Red')
             background_color: 1, 0, 0, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
             
         Button:
             text: 'Green'
@@ -39,6 +40,7 @@
             on_release: root.set_color('Green')
             background_color: 0, 1, 0, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
             
         Button:
             text: 'Blue'
@@ -46,6 +48,7 @@
             on_release: root.set_color('Blue')
             background_color: 0, 0, 1, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
             
         Button:
             text: 'White'
@@ -53,6 +56,7 @@
             on_release: root.set_color('White')
             background_color: 1, 1, 1, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
             
         Button:
             text: 'Yellow'
@@ -60,6 +64,7 @@
             on_release: root.set_color('Yellow')
             background_color: 1, 1, 0, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
             
         Button:
             text: 'Magenta'
@@ -67,6 +72,7 @@
             on_release: root.set_color('Magenta')
             background_color: 1, 0, 1, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
             
         Button:
             text: 'Cyan'
@@ -74,6 +80,7 @@
             on_release: root.set_color('Cyan')
             background_color: 0, 1, 1, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
             
         Button:
             text: 'Orange'
@@ -81,6 +88,7 @@
             on_release: root.set_color('Orange')
             background_color: 1, 0.5, 0, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
             
         Button:
             text: 'Purple'
@@ -88,6 +96,7 @@
             on_release: root.set_color('Purple')
             background_color: 0.5, 0, 0.5, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
             
         Button:
             text: 'Pink'
@@ -95,6 +104,7 @@
             on_release: root.set_color('Pink')
             background_color: 1, 0.75, 0.8, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
             
         Button:
             text: 'Gold'
@@ -102,6 +112,7 @@
             on_release: root.set_color('Gold')
             background_color: 1, 0.84, 0, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
             
         Button:
             text: 'Off'
@@ -109,6 +120,7 @@
             on_release: root.set_color('Off')
             background_color: 0.3, 0.3, 0.3, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
     
     # ===== SOLAR ARRAYS SECTION =====
     Label:
@@ -133,6 +145,7 @@
             on_release: root.test_solar_array('1b')
             background_color: 0.2, 0.6, 1, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
             
         Button:
             text: '3A'
@@ -140,6 +153,7 @@
             on_release: root.test_solar_array('3a')
             background_color: 0.2, 0.6, 1, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
             
         Button:
             text: '2A'
@@ -147,6 +161,7 @@
             on_release: root.test_solar_array('2a')
             background_color: 0.2, 0.6, 1, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
             
         Button:
             text: '4B'
@@ -154,6 +169,7 @@
             on_release: root.test_solar_array('2b')
             background_color: 0.2, 0.6, 1, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
             
         Button:
             text: '3B'
@@ -161,6 +177,7 @@
             on_release: root.test_solar_array('3b')
             background_color: 0.2, 0.6, 1, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
             
         Button:
             text: '1A'
@@ -168,6 +185,7 @@
             on_release: root.test_solar_array('1a')
             background_color: 0.2, 0.6, 1, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
             
         Button:
             text: '4A'
@@ -175,6 +193,7 @@
             on_release: root.test_solar_array('4a')
             background_color: 0.2, 0.6, 1, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
             
         Button:
             text: '2B'
@@ -182,6 +201,7 @@
             on_release: root.test_solar_array('2b')
             background_color: 0.2, 0.6, 1, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
     
     
     # ===== ANIMATIONS SECTION =====
@@ -207,6 +227,7 @@
             on_release: root.test_pulse_animation()
             background_color: 0.3, 1, 0.3, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
             
         Button:
             text: 'Chase'
@@ -214,6 +235,7 @@
             on_release: root.test_chase_animation()
             background_color: 1, 0.6, 0.3, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
             
         Button:
             text: 'Disco'
@@ -221,6 +243,7 @@
             on_release: root.test_disco_mode()
             background_color: 1, 0.3, 0.8, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
             
         Button:
             text: 'Stop'
@@ -228,6 +251,7 @@
             on_release: root.stop_animations()
             background_color: 0.8, 0.3, 0.3, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
     
     # ===== SPECIAL FUNCTIONS SECTION =====
     Label:
@@ -252,7 +276,7 @@
             on_release: root.light_everything()
             background_color: 0.3, 1, 0.3, 1
             font_size: self.height * 0.6
-            disabled: root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
             
         Button:
             text: 'All Off'
@@ -260,6 +284,7 @@
             on_release: root.turn_off_all()
             background_color: 0.8, 0.3, 0.3, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
             
         Button:
             text: 'Reset'
@@ -267,6 +292,7 @@
             on_release: root.reset_leds()
             background_color: 1, 0.6, 0.3, 1
             font_size: self.height * 0.6
+            disabled: not (root.ids.arduino_count.text.isdigit() and int(root.ids.arduino_count.text) > 0)
             
     # ---------- STATUS DISPLAY (Bottom Rectangle) ----------
     Label:
