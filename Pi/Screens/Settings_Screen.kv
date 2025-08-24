@@ -1,19 +1,6 @@
 #:kivy 2.0.0
 #:import dp kivy.metrics.dp
 
-<XLCheckBox@CheckBox>:
-    size_hint: None, None
-    size: dp(32), dp(32)   # base size; we’ll scale the drawing
-    canvas.before:
-        PushMatrix
-        Scale:
-            origin: self.center
-            x: max(2, root.height / dp(360))
-            y: max(2, root.height / dp(360))
-    canvas.after:
-        PopMatrix
-
-
 <Settings_Screen>:
     name: 'settings'
     FloatLayout:
@@ -106,15 +93,11 @@
         BoxLayout:
             orientation: "horizontal"
             pos_hint: {"center_x": 0.34, "center_y": 0.3}
-            size_hint: None, None
-            height: dp(64)                 # stable row height
-            width: root.width * 0.48
+            size_hint_y: self.height * 0.6
             spacing: dp(16)
 
-            XLCheckBox:
+            CheckBox:
                 id: smartflip
-                # keep the widget small; the canvas Scale above enlarges the glyph
-                size: dp(32), dp(32)
                 on_active: root.checkbox_clicked(self, self.active)
 
             Label:
