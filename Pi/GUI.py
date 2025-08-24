@@ -285,7 +285,7 @@ if SERIAL_PORTS:
         SERIAL_PORTS = []
         OPEN_SERIAL_PORTS = []
 else:
-    log_info("No serial ports available (this is normal on Windows)")
+    log_info("No serial ports available")
 
 if not USE_CONFIG_JSON and PYUDEV_AVAILABLE and TTY_OBSERVER:
     TTY_OBSERVER.start()

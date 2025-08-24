@@ -44,6 +44,15 @@ class ManualControlScreen(Screen):
     def on_pre_enter(self, *_):
         self.refresh_buttons()         # text & colour on every visit
         self._update_status("Click a joint to control it")
+        self._update_button_states()
+        # Schedule periodic button state updates
+        from kivy.clock import Clock
+        self._button_update_event = Clock.schedule_interval(self._update_button_states, 2.0)  # Check every 2 seconds
+    
+    def on_pre_leave(self, *_):
+        """Clean up scheduled updates when leaving the screen."""
+        if hasattr(self, '_button_update_event'):
+            self._button_update_event.cancel()
 
     # -------------------------------------------------------------------------
     # Public callbacks (bound in KV)
@@ -109,6 +118,9 @@ class ManualControlScreen(Screen):
 
         if emit:
             try:
+                # Show transmit animation
+                self._show_transmit_animation(True)
+                
                 # Map internal labels to Arduino command format
                 label_mapping = {
                     'beta1a': 'B1A',
@@ -129,8 +141,15 @@ class ManualControlScreen(Screen):
                 cmd = f"{arduino_label}={new_val} "
                 log_info(f"ManualControl: Sending command: {cmd!r}")
                 serialWrite(cmd)
+                
+                # Hide transmit animation after a short delay
+                from kivy.clock import Clock
+                Clock.schedule_once(lambda dt: self._show_transmit_animation(False), 0.5)
+                
             except Exception as exc:
                 log_error(f"Serial write failed ({label}): {exc}")
+                # Hide transmit animation on error
+                self._show_transmit_animation(False)
 
         # Note: Database update removed - not essential for manual control functionality
         # The mc_angles are stored in memory and serial commands are sent successfully
@@ -188,3 +207,42 @@ class ManualControlScreen(Screen):
                 log_info(f"ManualControl: Status updated: {message}")
         except Exception as exc:
             log_error(f"Failed to update status label: {exc}")
+    
+    def _update_button_states(self) -> None:
+        """Enable/disable increment buttons based on Arduino connection."""
+        try:
+            app = self._app()
+            arduino_connected = hasattr(app, 'arduino_count') and app.arduino_count > 0
+            
+            # Get all increment buttons
+            increment_buttons = [
+                'set0', 'set90', 'calibrate_zero',
+                'minus5', 'plus5', 'minus20', 'plus20', 'minus90', 'plus90'
+            ]
+            
+            for button_id in increment_buttons:
+                if button_id in self.ids:
+                    self.ids[button_id].disabled = not arduino_connected
+            
+            if not arduino_connected:
+                self._update_status("No Arduinos connected - buttons disabled")
+            else:
+                self._update_status("Arduinos connected - ready for manual control")
+                
+        except Exception as exc:
+            log_error(f"Failed to update button states: {exc}")
+    
+    def _show_transmit_animation(self, show: bool) -> None:
+        """Show or hide the transmit animation."""
+        try:
+            if hasattr(self, 'ids') and 'signal' in self.ids:
+                if show:
+                    # Show transmit animation
+                    self.ids.signal.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
+                    self.ids.signal.anim_loop = 0  # Loop the animation
+                else:
+                    # Show offline signal
+                    self.ids.signal.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/signalred.zip"
+                    self.ids.signal.anim_loop = 0  # Stop animation
+        except Exception as exc:
+            log_error(f"Failed to update transmit animation: {exc}")

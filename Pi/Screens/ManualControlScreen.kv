@@ -181,6 +181,7 @@
 
         # Calibrate zero (zero all joints)
         Button:
+            id: calibrate_zero
             size_hint: 0.20, 0.07
             pos_hint: {"center_x": 0.85, "center_y": 0.62}
             text: "Calibrate Zero"
@@ -189,12 +190,14 @@
 
         # Increment buttons
         Button:
+            id: minus5
             size_hint: 0.10, 0.07
             pos_hint: {"center_x": 0.80, "center_y": 0.49}
             text: "-5"
             font_size: self.height * 0.4 
             on_press: root.increment_active(-5)
         Button:
+            id: plus5
             size_hint: 0.10, 0.07
             pos_hint: {"center_x": 0.90, "center_y": 0.49}
             text: "+5"
@@ -202,12 +205,14 @@
             on_press: root.increment_active(5)
 
         Button:
+            id: minus20
             size_hint: 0.10, 0.07
             pos_hint: {"center_x": 0.80, "center_y": 0.40}
             text: "-20"
             font_size: self.height * 0.4 
             on_press: root.increment_active(-20)
         Button:
+            id: plus20
             size_hint: 0.10, 0.07
             pos_hint: {"center_x": 0.90, "center_y": 0.40}
             text: "+20"
@@ -215,12 +220,14 @@
             on_press: root.increment_active(20)
 
         Button:
+            id: minus90
             size_hint: 0.10, 0.07
             pos_hint: {"center_x": 0.80, "center_y": 0.31}
             text: "-90"
             font_size: self.height * 0.4 
             on_press: root.increment_active(-90)
         Button:
+            id: plus90
             size_hint: 0.10, 0.07
             pos_hint: {"center_x": 0.90, "center_y": 0.31}
             text: "+90"
