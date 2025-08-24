@@ -90,22 +90,24 @@
             halign: 'left'
             valign: 'middle'
         
-        BoxLayout:
+                BoxLayout:
             orientation: "horizontal"
             pos_hint: {"center_x": 0.34, "center_y": 0.3}
-            size_hint_y: self.height * 0.6
+            size_hint: 0.4, 0.1
             spacing: dp(16)
-
+ 
             CheckBox:
                 id: smartflip
+                size_hint: None, None
+                size: dp(48), dp(48)
                 on_active: root.checkbox_clicked(self, self.active)
-
+ 
             Label:
                 text: "Enable Smartflip (smooth 0 crossing)"
                 color: 1, 1, 1, 1
                 font_size: self.height * 0.6
                 size_hint_y: None
-                height: dp(64)             # match row height so text is visible
+                height: dp(48)
                 text_size: self.size
                 halign: "left"
                 valign: "middle"
