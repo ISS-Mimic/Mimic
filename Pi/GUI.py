@@ -46,7 +46,6 @@ os.environ["KIVY_LOG_LEVEL"]    = "error"  # (< INFO is ignored without handler,
 from datetime import datetime, timedelta #used for time conversions and logging timestamps
 from dateutil.relativedelta import relativedelta
 import datetime as dtime #this is different from above for... reasons?
-from subprocess import Popen #, PIPE, STDOUT #used to start/stop telemetry program and TDRS script and orbitmap
 import threading, subprocess #used for background monitoring of USB ports for playback data
 import time #used for time
 import math #used for math
@@ -453,8 +452,6 @@ class MainApp(App):
         else:
             self.signal_client_offline()
 
-    def updateVV(self, dt):
-        proc = Popen(["python", mimic_directory + "/Mimic/Pi/VVcheck.py"])
 
     def updateArduinoCount(self, dt) -> None:
         """

@@ -29,11 +29,6 @@ class MainScreen(Screen):
 
     mimic_directory = pathlib.Path(__file__).resolve().parents[2]   # …/Mimic
     
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        log_info(f"MainScreen: mimic_directory set to: {self.mimic_directory}")
-        log_info(f"MainScreen: Current working directory: {os.getcwd()}")
-    
     # ISS animation variables
     _iss1_x: float = 0.0
     _iss1_y: float = 0.75
