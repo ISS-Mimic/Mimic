@@ -16,8 +16,8 @@
     height: self.texture_size[1] + dp(12)
 
 
-<DescriptionPopup@Popup>:
-    title: 'Recorded ISS Data Descriptions'
+<ManualControlInfoPopup@Popup>:
+    title: 'Manual Control Information'
     size_hint: 0.8, 0.8
     auto_dismiss: True
     
@@ -58,7 +58,7 @@
             background_normal: ''
             background_down: ''
             background_color: 0, 0, 0, 0
-            on_release: Factory.DescriptionPopup().open()
+            on_release: Factory.ManualControlInfoPopup().open()
             Image:
                 source: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/InfoIcon.png'
                 size_hint: None, None
