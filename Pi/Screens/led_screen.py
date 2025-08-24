@@ -204,13 +204,13 @@ class LED_Screen(MimicBase):
     def _update_status(self, dt):
         """Update the test status display."""
         try:
-            if hasattr(self, 'ids') and 'test_status' in self.ids:
-                self.ids.test_status.text = self.get_test_status()
+            if hasattr(self, 'ids') and 'status_label' in self.ids:
+                self.ids.status_label.text = self.get_test_status()
                 # Change color based on status
                 if hasattr(self, '_current_test') and self._current_test:
-                    self.ids.test_status.color = (1, 1, 0, 1)  # Yellow when testing
+                    self.ids.status_label.color = (1, 1, 0, 1)  # Yellow when testing
                 else:
-                    self.ids.test_status.color = (0, 1, 0, 1)  # Green when ready
+                    self.ids.status_label.color = (0, 1, 0, 1)  # Green when ready
         except Exception as e:
             log_error(f"LED Screen: Error updating status: {e}")
     
