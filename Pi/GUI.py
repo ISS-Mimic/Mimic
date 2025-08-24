@@ -90,18 +90,6 @@ args, kivy_args = parser.parse_known_args()
 sys.argv[1:] = kivy_args
 USE_CONFIG_JSON = args.config
 
-# Global variables for animations and arduino count
-new_x = 0.0
-new_y = 0.75
-sizeX = 0.07
-sizeY = 0.07
-startingAnim = True
-new_x2 = 0.0
-new_y2 = 0.75
-mimicbutton = False
-demoboolean = False
-runningDemo = False
-Disco = False
 
 from kivy.app import App
 from kivy.lang import Builder
@@ -116,10 +104,7 @@ from kivy.uix.label import Label
 from functools import partial
 from kivy.network.urlrequest import UrlRequest
 
-#from screens import SCREEN_DEFS # import list of mimic screens
-
 import Screens as screens
-from utils.serial import serialWrite # custom Serial Write function
 from utils.logger import log_info, log_error
 
 mimic_data_directory = Path.home() / '.mimic_data'
@@ -434,7 +419,7 @@ class MainApp(App):
 
             log_info("Scheduling update functions...")
             #Clock.schedule_interval(self.update_labels, 1) #all telemetry wil refresh and get pushed to arduinos every half second!
-            Clock.schedule_interval(self.animate3, 0.1)
+
 
 
             Clock.schedule_interval(self._schedule_internet_probe,
@@ -584,31 +569,6 @@ class MainApp(App):
             self.screens["mimic"].ids.EVA_button.background_color = (1, 1, 1, 1)
         Clock.schedule_once(reset_color, 0.5)
 
-
-    def animate(self, instance):
-        global new_x2, new_y2
-        self.screens["main"].ids.ISStiny2.size_hint = 0.07, 0.07
-        new_x2 = new_x2+0.007
-        new_y2 = (math.sin(new_x2*30)/18)+0.75
-        if new_x2 > 1:
-            new_x2 = new_x2-1.0
-        self.screens["main"].ids.ISStiny2.pos_hint = {"center_x": new_x2, "center_y": new_y2}
-
-    def animate3(self, instance):
-        global new_x, new_y, sizeX, sizeY, startingAnim
-        if new_x<0.886:
-            new_x = new_x+0.007
-            new_y = (math.sin(new_x*30)/18)+0.75
-            self.screens["main"].ids.ISStiny.pos_hint = {"center_x": new_x, "center_y": new_y}
-        else:
-            if sizeX <= 0.15:
-                sizeX = sizeX + 0.01
-                sizeY = sizeY + 0.01
-                self.screens["main"].ids.ISStiny.size_hint = sizeX, sizeY
-            else:
-                if startingAnim:
-                    Clock.schedule_interval(self.animate, 0.1)
-                    startingAnim = False
 
     def changeColors(self, r, g, b, *_) -> None:
         """
