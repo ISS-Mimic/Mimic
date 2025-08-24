@@ -131,7 +131,6 @@ class MimicScreen(MimicBase):
                 'V2B': 'P6000004',        # voltage_2b
                 'V3B': 'S6000001',        # voltage_3b
                 'V4B': 'P6000001',        # voltage_4b
-                'ISS': 'USLAB000086',     # iss_mode
                 'Sgnt_el': 'Z1000014',    # sgant_elevation
                 'Sgnt_xel': 'Z1000015',   # sgant_xel
                 'Sgnt_xmit': 'Z1000013',  # kuband_transmit
@@ -164,6 +163,15 @@ class MimicScreen(MimicBase):
                 
                 log_info(f"Mimic Screen: Loaded telemetry data: {telemetry_dict}")
                 
+                # Debug: Check for missing values
+                missing_values = []
+                for cmd_name in telemetry_mapping.keys():
+                    if cmd_name not in telemetry_dict:
+                        missing_values.append(cmd_name)
+                
+                if missing_values:
+                    log_info(f"Mimic Screen: Missing values: {missing_values}")
+                
                 # Store the telemetry data for use in sending
                 self._telemetry_data = [telemetry_dict]  # Single record for now
                 log_info(f"Loaded {len(self._telemetry_data)} telemetry records")
@@ -188,28 +196,7 @@ class MimicScreen(MimicBase):
             log_info(f"Mimic Screen: Record {self._current_telemetry_index}: {record}")
             
             # Build telemetry command (same format as playback screen)
-            telemetry_cmd = (
-                f"PSARJ={record.get('PSARJ', 0.0):.1f} "
-                f"SSARJ={record.get('SSARJ', 0.0):.1f} "
-                f"PTRRJ={record.get('PTRRJ', 0.0):.1f} "
-                f"STRRJ={record.get('STRRJ', 0.0):.1f} "
-                f"B1B={record.get('B1B', 0.0):.1f} "
-                f"B1A={record.get('B1A', 0.0):.1f} "
-                f"B2B={record.get('B2B', 0.0):.1f} "
-                f"B2A={record.get('B2A', 0.0):.1f} "
-                f"B3B={record.get('B3B', 0.0):.1f} "
-                f"B3A={record.get('B3A', 0.0):.1f} "
-                f"B4B={record.get('B4B', 0.0):.1f} "
-                f"B4A={record.get('B4A', 0.0):.1f} "
-                f"AOS={record.get('AOS', 0)} "
-                f"ISS={record.get('ISS', 0)} "
-                f"Sgnt_el={record.get('Sgnt_el', 0.0):.1f} "
-                f"Sgnt_xel={record.get('Sgnt_xel', 0.0):.1f} "
-                f"Sgnt_xmit={record.get('Sgnt_xmit', 0)} "
-                f"SASA_Xmit={record.get('SASA_Xmit', 0)} "
-                f"SASA_AZ={record.get('SASA_AZ', 0.0):.1f} "
-                f"SASA_EL={record.get('SASA_EL', 0.0):.1f}"
-            )
+            telemetry_cmd = self._build_telemetry_command(record)
             
             # Debug: Print the telemetry command
             log_info(f"Mimic Screen: Sending telemetry: {telemetry_cmd}")
@@ -228,6 +215,59 @@ class MimicScreen(MimicBase):
             
         except Exception as exc:
             log_error(f"Failed to send mimic telemetry: {exc}")
+    
+    def _build_telemetry_command(self, telemetry_values):
+        """Build the telemetry command string (same as playback screen)."""
+        try:
+            # Extract values with defaults (same as playback screen)
+            psarj = "{:.1f}".format(float(telemetry_values.get('PSARJ', 0)))
+            ssarj = "{:.1f}".format(float(telemetry_values.get('SSARJ', 0)))
+            ptrrj = "{:.1f}".format(float(telemetry_values.get('PTRRJ', 0)))
+            strrj = "{:.1f}".format(float(telemetry_values.get('STRRJ', 0)))
+            b1b = "{:.1f}".format(float(telemetry_values.get('B1B', 0)))
+            b1a = "{:.1f}".format(float(telemetry_values.get('B1A', 0)))
+            b2b = "{:.1f}".format(float(telemetry_values.get('B2B', 0)))
+            b2a = "{:.1f}".format(float(telemetry_values.get('B2A', 0)))
+            b3b = "{:.1f}".format(float(telemetry_values.get('B3B', 0)))
+            b3a = "{:.1f}".format(float(telemetry_values.get('B3A', 0)))
+            b4b = "{:.1f}".format(float(telemetry_values.get('B4B', 0)))
+            b4a = "{:.1f}".format(float(telemetry_values.get('B4A', 0)))
+            aos = telemetry_values.get('AOS', 0)
+            sgant_elevation = "{:.1f}".format(float(telemetry_values.get('Sgnt_el', 0)))
+            sgant_xelevation = "{:.1f}".format(float(telemetry_values.get('Sgnt_xel', 0)))
+            sgant_transmit = telemetry_values.get('Sgnt_xmit', 0)
+            sasa_xmit = telemetry_values.get('SASA_Xmit', 0)
+            sasa_az = "{:.1f}".format(float(telemetry_values.get('SASA_AZ', 0)))
+            sasa_el = "{:.1f}".format(float(telemetry_values.get('SASA_EL', 0)))
+            
+            # Build the telemetry command string (same as playback screen)
+            telemetry_cmd = (
+                f"PSARJ={str(psarj)} "
+                f"SSARJ={str(ssarj)} "
+                f"PTRRJ={str(ptrrj)} "
+                f"STRRJ={str(strrj)} "
+                f"B1B={str(b1b)} "
+                f"B1A={str(b1a)} "
+                f"B2B={str(b2b)} "
+                f"B2A={str(b2a)} "
+                f"B3B={str(b3b)} "
+                f"B3A={str(b3a)} "
+                f"B4B={str(b4b)} "
+                f"B4A={str(b4a)} "
+                f"AOS={str(aos)} "
+                f"Sgnt_el={str(sgant_elevation)} "
+                f"Sgnt_xel={str(sgant_xelevation)} "
+                f"Sgnt_xmit={str(sgant_transmit)} "
+                f"SASA_Xmit={str(sasa_xmit)} "
+                f"SASA_AZ={str(sasa_az)} "
+                f"SASA_EL={str(sasa_el)}"
+            )
+            
+            return telemetry_cmd
+            
+        except Exception as e:
+            log_error(f"Error building telemetry command: {e}")
+            return ""
     
     def _send_led_commands(self, record):
         """Send LED commands based on telemetry data."""
