@@ -12,17 +12,17 @@
     # ===== COLOR SELECTOR SECTION =====
     Label:
         text: 'Select Color'
-        font_size: self.height * 0.4
+        font_size: self.height * 0.6
         size_hint: 0.8, 0.05
         pos_hint: {"center_x": 0.5, "center_y": 0.82 }
         color: 1, 1, 0, 1
         
-    # Color Grid (4x4 layout)
+    # Color Grid (4x3 layout)
     GridLayout:
         cols: 4
-        rows: 4
+        rows: 3
         size_hint: 0.8, 0.2
-        pos_hint: {"center_x": 0.5, "center_y": 0.7}
+        pos_hint: {"center_x": 0.5, "center_y": 0.75}
         spacing: '5dp'
         padding: '5dp'
         
@@ -113,7 +113,7 @@
     # ===== SOLAR ARRAYS SECTION =====
     Label:
         text: 'Solar Arrays'
-        font_size: self.height * 0.4
+        font_size: self.height * 0.6
         size_hint: 0.8, 0.05
         pos_hint: {"center_x": 0.5, "center_y": 0.6}
         color: 1, 1, 0, 1
@@ -128,30 +128,9 @@
         padding: '8dp'
         
         Button:
-            text: '1A'
-            size_hint: 1, 1
-            on_release: root.test_solar_array('1a')
-            background_color: 0.2, 0.6, 1, 1
-            font_size: self.height * 0.4
-            
-        Button:
             text: '1B'
             size_hint: 1, 1
             on_release: root.test_solar_array('1b')
-            background_color: 0.2, 0.6, 1, 1
-            font_size: self.height * 0.4
-            
-        Button:
-            text: '2A'
-            size_hint: 1, 1
-            on_release: root.test_solar_array('2a')
-            background_color: 0.2, 0.6, 1, 1
-            font_size: self.height * 0.4
-            
-        Button:
-            text: '2B'
-            size_hint: 1, 1
-            on_release: root.test_solar_array('2b')
             background_color: 0.2, 0.6, 1, 1
             font_size: self.height * 0.4
             
@@ -163,9 +142,30 @@
             font_size: self.height * 0.4
             
         Button:
+            text: '2A'
+            size_hint: 1, 1
+            on_release: root.test_solar_array('2a')
+            background_color: 0.2, 0.6, 1, 1
+            font_size: self.height * 0.4
+            
+        Button:
+            text: '4B'
+            size_hint: 1, 1
+            on_release: root.test_solar_array('2b')
+            background_color: 0.2, 0.6, 1, 1
+            font_size: self.height * 0.4
+            
+        Button:
             text: '3B'
             size_hint: 1, 1
             on_release: root.test_solar_array('3b')
+            background_color: 0.2, 0.6, 1, 1
+            font_size: self.height * 0.4
+            
+        Button:
+            text: '1A'
+            size_hint: 1, 1
+            on_release: root.test_solar_array('1a')
             background_color: 0.2, 0.6, 1, 1
             font_size: self.height * 0.4
             
@@ -177,9 +177,9 @@
             font_size: self.height * 0.4
             
         Button:
-            text: '4B'
+            text: '2B'
             size_hint: 1, 1
-            on_release: root.test_solar_array('4b')
+            on_release: root.test_solar_array('2b')
             background_color: 0.2, 0.6, 1, 1
             font_size: self.height * 0.4
     
@@ -187,7 +187,7 @@
     # ===== ANIMATIONS SECTION =====
     Label:
         text: 'Animations'
-        font_size: self.height * 0.4
+        font_size: self.height * 0.6
         size_hint: 0.8, 0.05
         pos_hint: {"center_x": 0.5, "center_y": 0.42}
         color: 1, 1, 0, 1
@@ -232,7 +232,7 @@
     # ===== SPECIAL FUNCTIONS SECTION =====
     Label:
         text: 'Special Functions'
-        font_size: self.height * 0.4
+        font_size: self.height * 0.6
         size_hint: 0.8, 0.05
         pos_hint: {"center_x": 0.5, "center_y": 0.28}
         color: 1, 1, 0, 1
