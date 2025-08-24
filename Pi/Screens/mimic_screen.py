@@ -108,27 +108,64 @@ class MimicScreen(MimicBase):
             conn = sqlite3.connect(self._db_path)
             cursor = conn.cursor()
             
-            # Get all telemetry records ordered by timestamp
-            cursor.execute("SELECT * FROM telemetry ORDER BY timestamp")
-            rows = cursor.fetchall()
+            # Use the same telemetry mapping as playback screen
+            telemetry_mapping = {
+                'PSARJ': 'S0000004',      # psarj
+                'SSARJ': 'S0000003',      # ssarj
+                'PTRRJ': 'S0000002',      # ptrrj
+                'STRRJ': 'S0000001',      # strrj
+                'B1B': 'S6000008',        # beta1b
+                'B1A': 'S4000007',        # beta1a
+                'B2B': 'P6000008',        # beta2b
+                'B2A': 'P4000007',        # beta2a
+                'B3B': 'S6000007',        # beta3b
+                'B3A': 'S4000008',        # beta3a
+                'B4B': 'P6000007',        # beta4b
+                'B4A': 'P4000008',        # beta4a
+                'AOS': 'AOS',             # aos
+                'V1A': 'S4000001',        # voltage_1a
+                'V2A': 'P4000001',        # voltage_2a
+                'V3A': 'S4000004',        # voltage_3a
+                'V4A': 'P4000004',        # voltage_4a
+                'V1B': 'S6000004',        # voltage_1b
+                'V2B': 'P6000004',        # voltage_2b
+                'V3B': 'S6000001',        # voltage_3b
+                'V4B': 'P6000001',        # voltage_4b
+                'ISS': 'USLAB000086',     # iss_mode
+                'Sgnt_el': 'Z1000014',    # sgant_elevation
+                'Sgnt_xel': 'Z1000015',   # sgant_xel
+                'Sgnt_xmit': 'Z1000013',  # kuband_transmit
+                'SASA_Xmit': 'S1000009',  # sasa1_status
+                'SASA_AZ': 'S1000004',    # sasa1_azimuth
+                'SASA_EL': 'S1000005'     # sasa1_elevation
+            }
             
-            if rows:
-                # Convert to list of dictionaries for easier access
-                columns = [description[0] for description in cursor.description]
-                log_info(f"Mimic Screen: Database columns: {columns}")
+            # Get the actual database IDs we need to query
+            db_ids = list(telemetry_mapping.values())
+            
+            # Build query to get all values at once
+            placeholders = ','.join(['?' for _ in db_ids])
+            query = f"SELECT ID, Value FROM telemetry WHERE ID IN ({placeholders})"
+            
+            log_info(f"Mimic Screen: Querying database with IDs: {db_ids}")
+            
+            cursor.execute(query, db_ids)
+            results = cursor.fetchall()
+            
+            if results:
+                # Convert to dictionary with Arduino command names as keys
+                telemetry_dict = {}
+                for db_id, value in results:
+                    # Find the Arduino command name for this database ID
+                    for cmd_name, actual_db_id in telemetry_mapping.items():
+                        if actual_db_id == db_id:
+                            telemetry_dict[cmd_name] = value
+                            break
                 
-                self._telemetry_data = []
+                log_info(f"Mimic Screen: Loaded telemetry data: {telemetry_dict}")
                 
-                for i, row in enumerate(rows[:3]):  # Show first 3 records for debugging
-                    record = dict(zip(columns, row))
-                    log_info(f"Mimic Screen: Sample record {i}: {record}")
-                    self._telemetry_data.append(record)
-                
-                # Add remaining records
-                for row in rows[3:]:
-                    record = dict(zip(columns, row))
-                    self._telemetry_data.append(record)
-                
+                # Store the telemetry data for use in sending
+                self._telemetry_data = [telemetry_dict]  # Single record for now
                 log_info(f"Loaded {len(self._telemetry_data)} telemetry records")
             else:
                 log_error("No telemetry records found in database")
@@ -179,6 +216,9 @@ class MimicScreen(MimicBase):
             
             # Send telemetry command
             serialWrite(telemetry_cmd)
+            
+            # Small delay to let microcontroller process telemetry command (same as playback screen)
+            time.sleep(0.05)  # 50ms delay
             
             # Send LED commands (same logic as playback screen)
             self._send_led_commands(record)
