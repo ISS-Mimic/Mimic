@@ -31,99 +31,99 @@
             size_hint: 1, 1
             on_release: root.set_color('Red')
             background_color: 1, 0, 0, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
             
         Button:
             text: 'Green'
             size_hint: 1, 1
             on_release: root.set_color('Green')
             background_color: 0, 1, 0, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
             
         Button:
             text: 'Blue'
             size_hint: 1, 1
             on_release: root.set_color('Blue')
             background_color: 0, 0, 1, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
             
         Button:
             text: 'White'
             size_hint: 1, 1
             on_release: root.set_color('White')
             background_color: 1, 1, 1, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
             
         Button:
             text: 'Yellow'
             size_hint: 1, 1
             on_release: root.set_color('Yellow')
             background_color: 1, 1, 0, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
             
         Button:
             text: 'Magenta'
             size_hint: 1, 1
             on_release: root.set_color('Magenta')
             background_color: 1, 0, 1, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
             
         Button:
             text: 'Cyan'
             size_hint: 1, 1
             on_release: root.set_color('Cyan')
             background_color: 0, 1, 1, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
             
         Button:
             text: 'Orange'
             size_hint: 1, 1
             on_release: root.set_color('Orange')
             background_color: 1, 0.5, 0, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
             
         Button:
             text: 'Purple'
             size_hint: 1, 1
             on_release: root.set_color('Purple')
             background_color: 0.5, 0, 0.5, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
             
         Button:
             text: 'Pink'
             size_hint: 1, 1
             on_release: root.set_color('Pink')
             background_color: 1, 0.75, 0.8, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
             
         Button:
             text: 'Gold'
             size_hint: 1, 1
             on_release: root.set_color('Gold')
             background_color: 1, 0.84, 0, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
             
         Button:
             text: 'Off'
             size_hint: 1, 1
             on_release: root.set_color('Off')
             background_color: 0.3, 0.3, 0.3, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
     
     # ===== SOLAR ARRAYS SECTION =====
     Label:
         text: 'Solar Arrays'
         font_size: self.height * 0.6
         size_hint: 0.8, 0.05
-        pos_hint: {"center_x": 0.5, "center_y": 0.6}
+        pos_hint: {"center_x": 0.5, "center_y": 0.63}
         color: 1, 1, 0, 1
         
     # Solar Array Grid (2x4 layout)
     GridLayout:
         cols: 4
         rows: 2
-        size_hint: 0.8, 0.12
-        pos_hint: {"center_x": 0.5, "center_y": 0.52}
+        size_hint: 0.8, 0.2
+        pos_hint: {"center_x": 0.5, "center_y": 0.55}
         spacing: '8dp'
         padding: '8dp'
         
@@ -132,56 +132,56 @@
             size_hint: 1, 1
             on_release: root.test_solar_array('1b')
             background_color: 0.2, 0.6, 1, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
             
         Button:
             text: '3A'
             size_hint: 1, 1
             on_release: root.test_solar_array('3a')
             background_color: 0.2, 0.6, 1, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
             
         Button:
             text: '2A'
             size_hint: 1, 1
             on_release: root.test_solar_array('2a')
             background_color: 0.2, 0.6, 1, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
             
         Button:
             text: '4B'
             size_hint: 1, 1
             on_release: root.test_solar_array('2b')
             background_color: 0.2, 0.6, 1, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
             
         Button:
             text: '3B'
             size_hint: 1, 1
             on_release: root.test_solar_array('3b')
             background_color: 0.2, 0.6, 1, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
             
         Button:
             text: '1A'
             size_hint: 1, 1
             on_release: root.test_solar_array('1a')
             background_color: 0.2, 0.6, 1, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
             
         Button:
             text: '4A'
             size_hint: 1, 1
             on_release: root.test_solar_array('4a')
             background_color: 0.2, 0.6, 1, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
             
         Button:
             text: '2B'
             size_hint: 1, 1
             on_release: root.test_solar_array('2b')
             background_color: 0.2, 0.6, 1, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
     
     
     # ===== ANIMATIONS SECTION =====
@@ -206,28 +206,28 @@
             size_hint: 1, 1
             on_release: root.test_pulse_animation()
             background_color: 0.3, 1, 0.3, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
             
         Button:
             text: 'Chase'
             size_hint: 1, 1
             on_release: root.test_chase_animation()
             background_color: 1, 0.6, 0.3, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
             
         Button:
             text: 'Disco'
             size_hint: 1, 1
             on_release: root.test_disco_mode()
             background_color: 1, 0.3, 0.8, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
             
         Button:
             text: 'Stop'
             size_hint: 1, 1
             on_release: root.stop_animations()
             background_color: 0.8, 0.3, 0.3, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
     
     # ===== SPECIAL FUNCTIONS SECTION =====
     Label:
@@ -251,21 +251,21 @@
             size_hint: 1, 1
             on_release: root.light_everything()
             background_color: 0.3, 1, 0.3, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
             
         Button:
             text: 'All Off'
             size_hint: 1, 1
             on_release: root.turn_off_all()
             background_color: 0.8, 0.3, 0.3, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
             
         Button:
             text: 'Reset'
             size_hint: 1, 1
             on_release: root.reset_leds()
             background_color: 1, 0.6, 0.3, 1
-            font_size: self.height * 0.4
+            font_size: self.height * 0.6
             
     # ---------- STATUS DISPLAY (Bottom Rectangle) ----------
     Label:
