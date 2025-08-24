@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import pathlib, logging, threading      # threading only if you call it here later
+import pathlib, threading      # threading only if you call it here later
 from typing import Dict
 from kivy.uix.screenmanager import Screen
 from kivy.properties import StringProperty
@@ -8,10 +8,7 @@ from kivy.lang import Builder
 from kivy.app import App
 
 from utils.serial import serialWrite
-
-# ------------------------------------------------------------------ logging ---
-log_info  = logging.getLogger("MyLogger").info
-log_error = logging.getLogger("MyLogger").error
+from utils.logger import log_info, log_error
 
 # ------------------------------------------------------------ load kv for THIS screen
 kv_path = pathlib.Path(__file__).with_name("ManualControlScreen.kv")
@@ -55,10 +52,13 @@ class ManualControlScreen(Screen):
         self.active_joint = joint_key
         log_info(f"ManualControl: active → {joint_key}")
         self._highlight_tiles()
+        log_info(f"ManualControl: active_joint is now: {self.active_joint}")
 
     def increment_active(self, delta: float) -> None:
         if self.active_joint is None:
+            log_info(f"ManualControl: No active joint selected for increment {delta}")
             return
+        log_info(f"ManualControl: Incrementing {self.active_joint} by {delta}")
         self._set_angle(self.active_joint, delta=delta)
         self.refresh_buttons()
 
@@ -98,10 +98,13 @@ class ManualControlScreen(Screen):
         app = self._app()
         new_val = absolute if absolute is not None else app.mc_angles[label] + delta
         app.mc_angles[label] = new_val
+        log_info(f"ManualControl: Setting {label} to {new_val}")
 
         if emit:
             try:
-                serialWrite(f"{label.upper()}={new_val} ")
+                cmd = f"{label.upper()}={new_val} "
+                log_info(f"ManualControl: Sending command: {cmd!r}")
+                serialWrite(cmd)
             except Exception as exc:
                 log_error(f"Serial write failed ({label}): {exc}")
 

@@ -4,10 +4,9 @@ Serial helper used by multiple screens.
 The OPEN_SERIAL_PORTS list is still defined in GUI.py; we import it
 dynamically so we *don’t* create a circular import at module-load time.
 """
-import time, serial, os, logging
+import time, serial, os
 
-log_info  = logging.getLogger("MyLogger").info
-log_error = logging.getLogger("MyLogger").error
+from utils.logger import log_info, log_error
 
 def _open_ports():
     """Get serial ports from GUI module."""
