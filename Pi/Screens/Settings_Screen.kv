@@ -15,15 +15,10 @@
             size_hint_y: 0.1
             font_size: min(self.height * 0.6, dp(56))
             color: 1, 1, 1, 1
+            halign: 'left'
+            valign: 'middle'
         
-        # Current Location Display
-        Label:
-            id: current_location_label
-            text: 'Current: 29.7604, -95.3698'
-            pos_hint: {"center_x": 0.2, "center_y": 0.78}
-            size_hint_y: 0.1
-            font_size: min(self.height * 0.4, dp(48))
-            color: 0.5, 0, 0.5, 1
+
         
         # Manual Input Section
         Label:
@@ -90,18 +85,20 @@
             size_hint_y: 0.1
             font_size: min(self.height * 0.6, dp(56))
             color: 1, 1, 1, 1
+            halign: 'Left'
+            valign: 'middle'
         
         Label:
             text: "Enable Smartflip (smooth 0 crossing)"
             pos_hint: {"center_x": 0.2, "center_y": 0.3}
-            size_hint_y: 0.05
+            size_hint_y: 0.1
             font_size: self.height * 0.6
             color: 1, 1, 1, 1
 
         CheckBox:
             id: smartflip
             pos_hint: {"center_x": 0.45, "center_y": 0.3}
-            size_hint_y: 0.05
+            size_hint_y: 0.1
             on_active: root.checkbox_clicked(self, self.active)
         
         # ---------- STATUS DISPLAY (Bottom Rectangle) ----------

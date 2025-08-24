@@ -40,9 +40,8 @@ class Settings_Screen(Screen, EventDispatcher):
         self._start_arduino_monitoring()
         # Initialize Arduino widget
         self._initialize_arduino_widget()
-        # Reset status label
-        if hasattr(self, 'ids') and 'status_label' in self.ids:
-            self.ids.status_label.text = 'Adjust Location or Smartflip'
+        # Show current location in status bar
+        self._update_status_with_current_location()
     
     def on_leave(self):
         """Called when the settings screen is left."""
@@ -50,13 +49,9 @@ class Settings_Screen(Screen, EventDispatcher):
         self._stop_arduino_monitoring()
 
     def update_location_display(self):
-        """Update the current location display label."""
+        """Update the current location display and input fields."""
         try:
             if self.current_location:
-                # Update the display with coordinates
-                if hasattr(self, 'ids') and 'current_location_label' in self.ids:
-                    self.ids.current_location_label.text = f'Current: {self.current_location[0]:.4f}, {self.current_location[1]:.4f}'
-                    
                 # Update the manual input fields
                 if 'lat_input' in self.ids and 'lon_input' in self.ids:
                     self.ids.lat_input.text = f'{self.current_location[0]:.4f}'
@@ -102,6 +97,8 @@ class Settings_Screen(Screen, EventDispatcher):
                     # Update status message
                     if hasattr(self, 'ids') and 'status_label' in self.ids:
                         self.ids.status_label.text = f'IP location detected: {self.current_location[0]:.4f}, {self.current_location[1]:.4f}'
+                        # Reset to default message after 3 seconds
+                        Clock.schedule_once(lambda dt: self._reset_status_to_default(), 3.0)
                     
                     return True
         except Exception as e:
@@ -115,6 +112,8 @@ class Settings_Screen(Screen, EventDispatcher):
         # Update status message
         if hasattr(self, 'ids') and 'status_label' in self.ids:
             self.ids.status_label.text = 'Using fallback Houston location'
+            # Reset to default message after 3 seconds
+            Clock.schedule_once(lambda dt: self._reset_status_to_default(), 3.0)
         
         return False
 
@@ -151,6 +150,8 @@ class Settings_Screen(Screen, EventDispatcher):
                 # Update status message
                 if hasattr(self, 'ids') and 'status_label' in self.ids:
                     self.ids.status_label.text = f'Location set to: {lat:.4f}, {lon:.4f}'
+                    # Reset to default message after 3 seconds
+                    Clock.schedule_once(lambda dt: self._reset_status_to_default(), 3.0)
                 
                 return True
             else:
@@ -190,6 +191,8 @@ class Settings_Screen(Screen, EventDispatcher):
         if hasattr(self, 'ids') and 'status_label' in self.ids:
             status_text = "Smartflip enabled" if active else "Smartflip disabled"
             self.ids.status_label.text = status_text
+            # Reset to default message after 3 seconds
+            Clock.schedule_once(lambda dt: self._reset_status_to_default(), 3.0)
     
     def _start_arduino_monitoring(self):
         """Start monitoring Arduino connection status."""
@@ -219,15 +222,9 @@ class Settings_Screen(Screen, EventDispatcher):
                 if arduino_connected:
                     # Arduino connected - show no_transmit status
                     self.ids.arduino.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
-                    # Update status label
-                    if hasattr(self.ids, 'status_label'):
-                        self.ids.status_label.text = f'Arduinos connected: {arduino_count_text}'
                 else:
                     # No Arduino connected - show offline status
                     self.ids.arduino.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
-                    # Update status label
-                    if hasattr(self.ids, 'status_label'):
-                        self.ids.status_label.text = 'No Arduinos connected'
         except Exception as exc:
             log_error(f"Error updating Arduino status: {exc}")
     
@@ -253,4 +250,29 @@ class Settings_Screen(Screen, EventDispatcher):
                     log_info("Settings Screen: Arduino widget initialized to no_transmit (not connected)")
         except Exception as exc:
             log_error(f"Failed to initialize Arduino widget: {exc}")
+    
+    def _reset_status_to_default(self):
+        """Reset the status label to the default message."""
+        try:
+            if hasattr(self, 'ids') and 'status_label' in self.ids:
+                # Show current location in status bar
+                if hasattr(self, 'current_location') and self.current_location:
+                    lat, lon = self.current_location
+                    self.ids.status_label.text = f'Current: {lat:.4f}, {lon:.4f} | Adjust Location or Smartflip'
+                else:
+                    self.ids.status_label.text = 'Adjust Location or Smartflip'
+        except Exception as exc:
+            log_error(f"Failed to reset status to default: {exc}")
+    
+    def _update_status_with_current_location(self):
+        """Update the status bar to show current location."""
+        try:
+            if hasattr(self, 'ids') and 'status_label' in self.ids:
+                if hasattr(self, 'current_location') and self.current_location:
+                    lat, lon = self.current_location
+                    self.ids.status_label.text = f'Current: {lat:.4f}, {lon:.4f} | Adjust Location or Smartflip'
+                else:
+                    self.ids.status_label.text = 'Adjust Location or Smartflip'
+        except Exception as exc:
+            log_error(f"Failed to update status with current location: {exc}")
 
