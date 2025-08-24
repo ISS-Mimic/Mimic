@@ -89,28 +89,23 @@
             color: 1, 1, 1, 1
             halign: 'left'
             valign: 'middle'
-        
-        BoxLayout:
-            orientation: "horizontal"
-            pos_hint: {"center_x": 0.3, "center_y": 0.3}
-            size_hint: 0.4, 0.2
-            spacing: dp(16)
  
-            CheckBox:
-                id: smartflip
-                size_hint: None, None
-                size: dp(48), dp(48)
-                on_active: root.checkbox_clicked(self, self.active)
- 
-            Label:
-                text: "Enable Smartflip (smooth 0 crossing)"
-                color: 1, 1, 1, 1
-                font_size: min(max(self.height * 0.8, dp(12)), dp(56))
-                size_hint_y: None
-                height: dp(48)
-                text_size: self.size
-                halign: "left"
-                valign: "middle"
+        CheckBox:
+            id: smartflip
+            pos_hint: {"center_x": 0.12, "center_y": 0.3}
+            size_hint: None, None
+            size: dp(48), dp(48)
+            on_active: root.checkbox_clicked(self, self.active)
+
+        Label:
+            text: 'Enable Smartflip (motor behavior)'
+            pos_hint: {"center_x": 0.4, "center_y": 0.3}
+            bold: True
+            size_hint_y: 0.1
+            font_size: min(self.height * 0.4, dp(56))
+            color: 1, 1, 1, 1
+            halign: 'left'
+            valign: 'middle'
         
         # ---------- STATUS DISPLAY (Bottom Rectangle) ----------
         Label:
