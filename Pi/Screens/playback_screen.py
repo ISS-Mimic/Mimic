@@ -281,14 +281,14 @@ class Playback_Screen(MimicBase):
             self.current_file = "Disco"
             
             # Set playback speed to 1x
-            self.playback_speed = 1.0
+            self.playback_speed = 5.0
             
             # Update the speed dropdown to show 1x
             speed_dropdown = getattr(self.ids, 'speed_dropdown', None)
             if speed_dropdown:
-                speed_dropdown.text = '1x'
+                speed_dropdown.text = '5x'
             
-            log_info("Disco mode activated: Disco data at 1x speed")
+            log_info("Disco mode activated: Disco data at 5x speed")
             
             # Update status and check start button
             self._update_status()
@@ -426,7 +426,7 @@ class Playback_Screen(MimicBase):
                 
                 # Send telemetry data to Arduino
                 serialWrite(telemetry_cmd)
-                log_info(f"Sent telemetry command: {telemetry_cmd}")
+                #log_info(f"Sent telemetry command: {telemetry_cmd}")
                 
                 # Small delay to let microcontroller process telemetry command
                 time.sleep(0.05)  # 50ms delay
@@ -438,7 +438,7 @@ class Playback_Screen(MimicBase):
                         serialWrite(led_cmd)
                         # Small delay between LED commands
                         time.sleep(0.02)  # 20ms delay
-                    log_info(f"Sent {len(led_commands)} individual LED commands")
+                    #log_info(f"Sent {len(led_commands)} individual LED commands")
                 
         except Exception as e:
             log_error(f"Error sending telemetry serial: {e}")
@@ -680,9 +680,7 @@ class Playback_Screen(MimicBase):
             
             # Launch the playback engine with isolated environment
             app = App.get_running_app()
-            if hasattr(app, 'playback_proc') and app.playback_proc:
-                log_info("Playback already running")
-                return
+
             
             # Create isolated environment to prevent GUI module reloading
             env = os.environ.copy()
