@@ -25,7 +25,7 @@ class ManualControlScreen(Screen):
     )
 
     # colour constants
-    _default_color = (.3, .3, .3, 1)   # grey when inactive
+    _default_color = (.5, .5, .5, 1)   # grey when inactive
     _active_color  = (.1, .8, .1, 1)   # green when active
 
     # currently selected joint label ('beta4b', 'psarj', …)
@@ -102,19 +102,31 @@ class ManualControlScreen(Screen):
 
         if emit:
             try:
-                cmd = f"{label.upper()}={new_val} "
+                # Map internal labels to Arduino command format
+                label_mapping = {
+                    'beta1a': 'B1A',
+                    'beta1b': 'B1B', 
+                    'beta2a': 'B2A',
+                    'beta2b': 'B2B',
+                    'beta3a': 'B3A',
+                    'beta3b': 'B3B',
+                    'beta4a': 'B4A',
+                    'beta4b': 'B4B',
+                    'psarj': 'PSARJ',
+                    'ssarj': 'SSARJ',
+                    'ptrrj': 'PTRRJ',
+                    'strrj': 'STRRJ'
+                }
+                
+                arduino_label = label_mapping.get(label, label.upper())
+                cmd = f"{arduino_label}={new_val} "
                 log_info(f"ManualControl: Sending command: {cmd!r}")
                 serialWrite(cmd)
             except Exception as exc:
                 log_error(f"Serial write failed ({label}): {exc}")
 
-        try:
-            app.db_cursor.execute(
-                "UPDATE telemetry SET Value = ? WHERE Label = ?",
-                (new_val, label)
-            )
-        except Exception as exc:
-            log_error(f"DB update failed ({label}): {exc}")
+        # Note: Database update removed - not essential for manual control functionality
+        # The mc_angles are stored in memory and serial commands are sent successfully
 
     # -------------------------------------------------------------------------
     # Visual helpers
