@@ -1,6 +1,20 @@
 #:kivy 2.0.0
 #:import Factory kivy.factory.Factory
 #:import dp kivy.metrics.dp
+#:import Window kivy.core.window.Window
+#:import sp kivy.metrics.sp
+
+<PopupText@Label>:
+    size_hint_y: None
+    text_size: self.width - dp(16), None
+    padding: dp(8), 0
+    halign: 'left'
+    valign: 'middle'
+    color: 1, 1, 1, 1
+    # Baseline 16sp at ~1200×800 window; scales with the smaller screen dimension.
+    # Clamp between 14sp and 26sp so it stays readable everywhere.
+    font_size: max(sp(14), min(sp(26), sp(16) * min(Window.width/1200.0, Window.height/800.0)))
+    height: self.texture_size[1] + dp(12)
 
 # Custom dropdown option styling
 <CustomSpinnerOption@SpinnerOption>:
@@ -31,59 +45,23 @@
                 padding: dp(8), dp(8)
                 spacing: dp(8)
                 
-                Label:
+                PopupText:
                     text: 'Select which data set to replay - this is all data recorded during ISS events which can be played back at higher speeds'
-                    size_hint_y: None
-                    height: self.texture_size[1] + dp(12)
-                    text_size: self.width, None
-                    halign: 'left'
-                    valign: 'middle'
-                    color: 1, 1, 1, 1
                 
-                Label:
+                PopupText:
                     text: 'HTV: Recorded during the visit of the Japanese HTV Cargo Spacecraft, shows the arrays in normal operations and then feathering mode to avoid the thruster plume from the HTV'
-                    size_hint_y: None
-                    height: self.texture_size[1] + dp(12)
-                    text_size: self.width, None
-                    halign: 'left'
-                    valign: 'middle'
-                    color: 1, 1, 1, 1
-                
-                Label:
-                    text: 'OFT-2: Recorded during the docking of the Boeing Starliner in 2022'
-                    size_hint_y: None
-                    height: self.texture_size[1] + dp(12)
-                    text_size: self.width, None
-                    halign: 'left'
-                    valign: 'middle'
-                    color: 1, 1, 1, 1
-                
-                Label:
-                    text: 'Standard: ISS in normal operations'
-                    size_hint_y: None
-                    height: self.texture_size[1] + dp(12)
-                    text_size: self.width, None
-                    halign: 'left'
-                    valign: 'middle'
-                    color: 1, 1, 1, 1
 
-                Label:
+                PopupText:
+                    text: 'OFT-2: Recorded during the docking of the Boeing Starliner in 2022'
+
+                PopupText:
+                    text: 'Standard: ISS in normal operations'
+
+                PopupText:
                     text: 'Disco: press disco button for some fun'
-                    size_hint_y: None
-                    height: self.texture_size[1] + dp(12)
-                    text_size: self.width, None
-                    halign: 'left'
-                    valign: 'middle'
-                    color: 1, 1, 1, 1
-                
-                Label:
+
+                PopupText:
                     text: 'USB: Insert a USB drive with telemetry files in a top level folder that starts with "Telemetry" (e.g. Telemetry_19Aug2024), see files in /RecordedData for the format'
-                    size_hint_y: None
-                    height: self.texture_size[1] + dp(12)
-                    text_size: self.width, None
-                    halign: 'left'
-                    valign: 'middle'
-                    color: 1, 1, 1, 1
                 
 
 # If you need an image button later, define it like this and set source per instance:
