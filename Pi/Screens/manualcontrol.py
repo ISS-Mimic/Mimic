@@ -5,7 +5,6 @@ from typing import Dict
 from kivy.uix.screenmanager import Screen
 from kivy.properties import StringProperty
 from kivy.lang import Builder
-from kivy.app import App
 
 from utils.serial import serialWrite
 from utils.logger import log_info, log_error
@@ -30,13 +29,15 @@ class ManualControlScreen(Screen):
 
     # currently selected joint label ('beta4b', 'psarj', …)
     active_joint: str | None = None
+    
+    # Local storage for joint angles
+    _mc_angles: dict[str, float] = {
+        "beta1a": 0.0, "beta1b": 0.0, "beta2a": 0.0, "beta2b": 0.0,
+        "beta3a": 0.0, "beta3b": 0.0, "beta4a": 0.0, "beta4b": 0.0,
+        "psarj": 0.0, "ssarj": 0.0, "ptrrj": 0.0, "strrj": 0.0
+    }
 
-    # -------------------------------------------------------------------------
-    # shorthands
-    # -------------------------------------------------------------------------
-    @staticmethod
-    def _app():
-        return App.get_running_app()
+
 
     # -------------------------------------------------------------------------
     # Kivy life-cycle
@@ -76,21 +77,20 @@ class ManualControlScreen(Screen):
         self._update_status(f"Adjusted {self.active_joint.upper()} by {delta}°")
 
     def set_zero(self) -> None:
-        for key in self._app().mc_angles:
+        for key in self._mc_angles:
             self._set_angle(key, absolute=0)
         self.refresh_buttons()
         self._update_status("All joints set to 0°")
 
     def set_ninety(self) -> None:
-        for key in self._app().mc_angles:
+        for key in self._mc_angles:
             self._set_angle(key, absolute=90)
         self.refresh_buttons()
         self._update_status("All joints set to 90°")
 
     def calibrate_zero(self) -> None:
         """Tell controller current position = 0 for every joint."""
-        app = self._app()
-        for key in app.mc_angles:
+        for key in self._mc_angles:
             try:
                 serialWrite("NULLIFY=1 ")
             except Exception as exc:
@@ -111,9 +111,8 @@ class ManualControlScreen(Screen):
         absolute: float | None = None,
         emit: bool = True
     ) -> None:
-        app = self._app()
-        new_val = absolute if absolute is not None else app.mc_angles[label] + delta
-        app.mc_angles[label] = new_val
+        new_val = absolute if absolute is not None else self._mc_angles[label] + delta
+        self._mc_angles[label] = new_val
         log_info(f"ManualControl: Setting {label} to {new_val}")
 
         if emit:
@@ -159,7 +158,7 @@ class ManualControlScreen(Screen):
     # -------------------------------------------------------------------------
     def refresh_buttons(self) -> None:
         """Update angle text on every tile, then recolour."""
-        a: Dict[str, float] = self._app().mc_angles
+        a: Dict[str, float] = self._mc_angles
         ids = self.ids
 
         ids.Beta4B_Button.text = f"4B\n{int(a['beta4b'])}"

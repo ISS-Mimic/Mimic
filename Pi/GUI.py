@@ -367,22 +367,13 @@ class MainScreenManager(ScreenManager):
 class MainApp(App):
     mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
     INTERNET_POLL_S = 1.0 # check internet connection every 1s
-    manual_control = BooleanProperty(False)
+
     mimicbutton = BooleanProperty(False)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.internet: bool | None = None # None = "unknown"
 
-        # Manual Control variables
-        self.manual_control: bool = False
-        self.mc_angles: dict[str, float] = {         # default 0°
-            k: 0.0 for k in (
-                "beta1a","beta1b","beta2a","beta2b",
-                "beta3a","beta3b","beta4a","beta4b",
-                "psarj","ssarj","ptrrj","strrj"
-            )
-        }
         self.db_cursor = c        # <- assign existing cursor once
         # Process variables
         self.p = None
@@ -634,8 +625,6 @@ class MainApp(App):
         for scr in self.screens.values():
             scr.signalcolor = (r, g, b)
 
-    def changeManualControlBoolean(self, *args):
-        App.get_running_app().manual_control = args[0]
 
     def _broadcast_signal(self,
                           filename: str,
