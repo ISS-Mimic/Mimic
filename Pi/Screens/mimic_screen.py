@@ -15,7 +15,7 @@ from kivy.clock import Clock
 
 from ._base import MimicBase                    # gives mimic_directory + signalcolor
 from utils.logger import log_info, log_error
-from utils.serial import serialWrite            # we’ll keep using this, but ensure newline here
+from utils.serial import serialWrite            # we'll keep using this, but ensure newline here
 
 # -- load KV that sits next to this file -------------------------------------
 kv_path = pathlib.Path(__file__).with_name("MimicScreen.kv")
@@ -99,8 +99,6 @@ class MimicScreen(MimicBase):
         self._db_path = "/dev/shm/iss_telemetry.db"
         self._gate = _ChangeGate(angle_step=self._ANGLE_STEP, heartbeat_s=self._HEARTBEAT_S)
         
-
-
         # static mapping from Arduino tokens -> DB IDs
         self._telemetry_mapping = {
             'PSARJ': 'S0000004',      # psarj
@@ -190,178 +188,105 @@ class MimicScreen(MimicBase):
             f"SSARJ={self._f(vals.get('SSARJ'))}",
             f"PTRRJ={self._f(vals.get('PTRRJ'))}",
             f"STRRJ={self._f(vals.get('STRRJ'))}",
-            f"B1A={self._f(vals.get('B1A'))}",
             f"B1B={self._f(vals.get('B1B'))}",
-            f"B2A={self._f(vals.get('B2A'))}",
+            f"B1A={self._f(vals.get('B1A'))}",
             f"B2B={self._f(vals.get('B2B'))}",
-            f"B3A={self._f(vals.get('B3A'))}",
+            f"B2A={self._f(vals.get('B2A'))}",
             f"B3B={self._f(vals.get('B3B'))}",
-            f"B4A={self._f(vals.get('B4A'))}",
+            f"B3A={self._f(vals.get('B3A'))}",
             f"B4B={self._f(vals.get('B4B'))}",
-            f"AOS={self._i(vals.get('AOS', 0))}",
-            # keep these available for other Arduinos that use them
+            f"B4A={self._f(vals.get('B4A'))}",
+            f"AOS={self._i(vals.get('AOS'))}",
+            f"V1A={self._f(vals.get('V1A'))}",
+            f"V2A={self._f(vals.get('V2A'))}",
+            f"V3A={self._f(vals.get('V3A'))}",
+            f"V4A={self._f(vals.get('V4A'))}",
+            f"V1B={self._f(vals.get('V1B'))}",
+            f"V2B={self._f(vals.get('V2B'))}",
+            f"V3B={self._f(vals.get('V3B'))}",
+            f"V4B={self._f(vals.get('V4B'))}",
             f"Sgnt_el={self._f(vals.get('Sgnt_el'))}",
             f"Sgnt_xel={self._f(vals.get('Sgnt_xel'))}",
-            f"Sgnt_xmit={self._i(vals.get('Sgnt_xmit', 0))}",
-            f"SASA_Xmit={self._i(vals.get('SASA_Xmit', 0))}",
+            f"Sgnt_xmit={self._i(vals.get('Sgnt_xmit'))}",
+            f"SASA_Xmit={self._i(vals.get('SASA_Xmit'))}",
             f"SASA_AZ={self._f(vals.get('SASA_AZ'))}",
-            f"SASA_EL={self._f(vals.get('SASA_EL'))}",
+            f"SASA_EL={self._f(vals.get('SASA_EL'))}"
         ]
+
+        # Add LED tokens if present
         if leds:
-            # include only when present/changed
-            for k in ("LED_1A", "LED_1B", "LED_2A", "LED_2B", "LED_3A", "LED_3B", "LED_4A", "LED_4B"):
-                if k in leds:
-                    tokens.append(f"{k}={leds[k]}")
+            for k, v in leds.items():
+                if v is not None:
+                    tokens.append(f"LED_{k}={v}")
+
         return " ".join(tokens)
 
-    # ------------------------------ UI binding ------------------------------
-
-    def mimic_transmit(self, value: bool) -> None:
-        """
-        Bound in KV.  True → transmit; False → idle.
-        """
-        App.get_running_app().mimicbutton = bool(value)  # keep UI truthful
-        if value:
-            self.start_mimic_telemetry()
-        else:
-            self.stop_mimic_telemetry()
-        log_info(f"Start Mimic Telemetry: {value}")
-
-    def start_mimic_telemetry(self):
-        """Start mimic telemetry transmission (non-blocking, paced)."""
-        try:
-            if self._mimic_active:
-                log_info("Mimic telemetry already active")
-                return
-
-            if not Path(self._db_path).exists():
-                log_error(f"Telemetry database not found: {self._db_path}")
-                return
-
-            self._mimic_active = True
-            # kick off dynamic schedule loop immediately (no fixed-interval Clock)
-            self._schedule_next(0.0)
-            log_info("Mimic telemetry started")
-
-        except Exception as exc:
-            log_error(f"Failed to start mimic telemetry: {exc}")
-
-    def stop_mimic_telemetry(self):
-        """Stop mimic telemetry transmission."""
-        try:
-            if not self._mimic_active:
-                return
-
-            self._mimic_active = False
-
-            if self._mimic_event is not None:
-                self._mimic_event.cancel()
-                self._mimic_event = None
-
-            # single-line RESET; Arduino readStringUntil('\n') expects newline
-            self._write_line("RESET")
-            App.get_running_app().mimicbutton = False
-            log_info("Mimic telemetry stopped")
-
-        except Exception as exc:
-            log_error(f"Failed to stop mimic telemetry: {exc}")
-
-    # ------------------------------ DB read & LED logic ------------------------------
-
-    def _read_vals_from_db(self) -> dict:
-        """
-        Lightweight fresh read each tick (or as often as you like).
-        """
-        vals = {}
-        try:
-            conn = sqlite3.connect(self._db_path)
-            cur = conn.cursor()
-            cur.execute(self._sql_select, self._sql_ids)
-            for db_id, value in cur.fetchall():
-                for token, wanted in self._telemetry_mapping.items():
-                    if db_id == wanted:
-                        vals[token] = value
-                        break
-            conn.close()
-        except Exception as exc:
-            log_error(f"DB read failed: {exc}")
-
-        # defaults to avoid KeyError in packet build
-        for k in ('PSARJ','SSARJ','PTRRJ','STRRJ',
-                  'B1A','B1B','B2A','B2B','B3A','B3B','B4A','B4B',
-                  'AOS','Sgnt_el','Sgnt_xel','Sgnt_xmit','SASA_Xmit','SASA_AZ','SASA_EL'):
-            vals.setdefault(k, 0)
-
-        return vals
-
-    def _get_voltage_color(self, voltage):
-        if float(voltage) < 151.5:
-            return "Blue"      # Discharging
-        elif float(voltage) < 160.0:
-            return "Yellow"    # Charging
-        else:
-            return "White"     # Fully charged
-
-    def _compute_leds(self, vals: dict) -> dict:
-        """
-        Derive LED_* tokens from voltages. Returned as strings (e.g., 'Blue').
-        We only add them to the packet when they changed (via ChangeGate).
-        """
-        leds = {}
-        try:
-            leds["LED_1A"] = self._get_voltage_color(vals.get("V1A", 0))
-            leds["LED_1B"] = self._get_voltage_color(vals.get("V1B", 0))
-            leds["LED_2A"] = self._get_voltage_color(vals.get("V2A", 0))
-            leds["LED_2B"] = self._get_voltage_color(vals.get("V2B", 0))
-            leds["LED_3A"] = self._get_voltage_color(vals.get("V3A", 0))
-            leds["LED_3B"] = self._get_voltage_color(vals.get("V3B", 0))
-            leds["LED_4A"] = self._get_voltage_color(vals.get("V4A", 0))
-            leds["LED_4B"] = self._get_voltage_color(vals.get("V4B", 0))
-        except Exception as exc:
-            log_error(f"LED compute failed: {exc}")
-        return leds
-
-    # ------------------------------ dynamic pacing loop ------------------------------
-
     def _schedule_next(self, delay: float):
-        # cancel old event if any and schedule next one-shot tick
-        if self._mimic_event is not None:
+        """Schedule the next update tick."""
+        if self._mimic_event:
             self._mimic_event.cancel()
-        self._mimic_event = Clock.schedule_once(self._tick, max(0.0, delay))
+        self._mimic_event = Clock.schedule_once(self._update, delay)
 
-    def _tick(self, _dt):
+    def _update(self, dt):
+        """Main update loop: read DB, filter, send if changed."""
         if not self._mimic_active:
             return
 
-        # 1) read current values
-        vals = self._read_vals_from_db()
-        leds = self._compute_leds(vals)
+        try:
+            # Read current values from database
+            app = App.get_running_app()
+            if not hasattr(app, "db_cursor"):
+                log_error("No database cursor available")
+                self._schedule_next(1.0 / self._BASE_HZ)
+                return
 
-        # 2) change gating
-        now = time.monotonic()
-        should_send, q_vals, q_leds = self._gate.filter(now, vals, leds)
+            app.db_cursor.execute(self._sql_select, self._sql_ids)
+            rows = app.db_cursor.fetchall()
 
-        # 3) build & send single line (with newline)
-        if should_send:
-            # Ensure we have valid LED values (not None)
-            if q_leds is None:
-                q_leds = leds  # Use current LED values if gate returned None
-            
-            # Debug: Log what we're sending
-            log_info(f"Mimic Screen: Sending - Vals: {q_vals}, LEDs: {q_leds}")
-            
-            # Show Arduino transmit animation (from base class)
-            self._show_transmit_animation()
-            
-            line = self._build_packet(q_vals, q_leds)
-            # estimate wire time to pace the *next* tick safely at 9600
-            nb = self._line_bytes(line + "\n")
-            min_gap = self._min_gap(nb)
-            self._write_line(line)
-            # schedule the next tick as the larger of: pacing or base UI period
-            self._schedule_next(max(min_gap, 1.0 / self._BASE_HZ))
-        else:
-            # nothing changed; schedule base UI period
+            # Build current values dict
+            vals = {}
+            for row in rows:
+                if len(row) >= 2:
+                    vals[row[0]] = row[1]
+
+            # Map DB IDs back to Arduino tokens
+            reverse_mapping = {v: k for k, v in self._telemetry_mapping.items()}
+            arduino_vals = {}
+            for db_id, value in vals.items():
+                if db_id in reverse_mapping:
+                    arduino_vals[reverse_mapping[db_id]] = value
+
+            # Get LED values (if any)
+            leds = None
+            if hasattr(app, 'led_values'):
+                leds = app.led_values
+
+            # Apply change gate filtering
+            should_send, q_vals, q_leds = self._gate.filter(time.time(), arduino_vals, leds)
+
+            if should_send:
+                if q_leds is None:
+                    q_leds = leds  # Use current LED values if gate returned None
+                
+                # Debug: Log what we're sending
+                log_info(f"Mimic Screen: Sending - Vals: {q_vals}, LEDs: {q_leds}")
+                
+                # Show Arduino transmit animation (handled by GUI.py)
+                # The transmit animation will be shown by GUI.py's updateArduinoCount method
+                
+                line = self._build_packet(q_vals, q_leds)
+                # estimate wire time to pace the *next* tick safely at 9600
+                nb = self._line_bytes(line + "\n")
+                min_gap = self._min_gap(nb)
+                self._write_line(line)
+                # schedule the next tick as the larger of: pacing or base UI period
+                self._schedule_next(max(min_gap, 1.0 / self._BASE_HZ))
+            else:
+                # nothing changed; schedule base UI period
+                self._schedule_next(1.0 / self._BASE_HZ)
+
+        except Exception as exc:
+            log_error(f"Update loop failed: {exc}")
             self._schedule_next(1.0 / self._BASE_HZ)
 
     # ------------------------------ background procs (unchanged) ------------------------------
@@ -449,24 +374,14 @@ class MimicScreen(MimicBase):
                 app.crewproc = None
 
         except Exception as exc:
-            log_error(f"Failed to start telemetry procs: {exc}")
-            app.p = app.TDRSproc = app.VVproc = app.crewproc = None
+            log_error(f"Failed to start subprocesses: {exc}")
 
-    def killproc(self, *_):
+    def killproc(self) -> None:
+        log_info(f"Kill Proc")
         """
-        Stops helper processes and flips mimicbutton → False.
-        Runs when EXIT is pressed or when ScreenManager leaves MimicScreen.
+        Terminates all background processes.
         """
         app = App.get_running_app()
-
-        try:
-            if hasattr(app, "db_cursor"):
-                app.db_cursor.execute(
-                    "INSERT OR IGNORE INTO telemetry "
-                    "VALUES('Lightstreamer', '0', 'Unsubscribed', '0', 0)"
-                )
-        except Exception as exc:
-            log_error(f"DB write failed: {exc}")
 
         for name in ("p", "TDRSproc", "VVproc", "crewproc"):
             proc = getattr(app, name, None)
@@ -491,6 +406,49 @@ class MimicScreen(MimicBase):
     
     def on_leave(self):
         """Called when leaving the screen."""
-        pass
+        # Stop mimic transmission and inform GUI.py
+        if self._mimic_active:
+            self._mimic_active = False
+            if self._mimic_event:
+                self._mimic_event.cancel()
+                self._mimic_event = None
+            
+            # Inform GUI.py about transmission status
+            app = App.get_running_app()
+            if hasattr(app, 'set_mimic_transmission_status'):
+                app.set_mimic_transmission_status(False)
+    
+
+    # ------------------------------ mimic button handlers ------------------------------
+
+    def mimic_transmit(self, start: bool):
+        """
+        Toggle mimic transmission on/off.
+        Called by the mimic button in the KV file.
+        """
+        if start:
+            if not self._mimic_active:
+                log_info("Starting mimic transmission")
+                self._mimic_active = True
+                
+                # Inform GUI.py about transmission status
+                app = App.get_running_app()
+                if hasattr(app, 'set_mimic_transmission_status'):
+                    app.set_mimic_transmission_status(True)
+                
+                self._update(0)  # Start immediately
+        else:
+            if self._mimic_active:
+                log_info("Stopping mimic transmission")
+                self._mimic_active = False
+                
+                # Inform GUI.py about transmission status
+                app = App.get_running_app()
+                if hasattr(app, 'set_mimic_transmission_status'):
+                    app.set_mimic_transmission_status(False)
+                
+                if self._mimic_event:
+                    self._mimic_event.cancel()
+                    self._mimic_event = None
     
 

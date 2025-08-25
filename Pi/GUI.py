@@ -468,6 +468,23 @@ class MainApp(App):
         3. Delete the global fall bals below
         """
         
+    def set_mimic_transmission_status(self, is_transmitting: bool) -> None:
+        """
+        Called by mimic screen to inform GUI.py about transmission status.
+        This allows GUI.py to update Arduino animations across all screens.
+        """
+        try:
+            # Update the mimic button status
+            self.mimicbutton = is_transmitting
+            
+            # Force an immediate Arduino count update to show transmit animation
+            self.updateArduinoCount(0)
+            
+            log_info(f"Mimic transmission status set to: {is_transmitting}")
+            
+        except Exception as exc:
+            log_error(f"Failed to set mimic transmission status: {exc}")
+        
         # ----------------------------------------------------------------
         # Phase-1 (works today): fall back to the old globals
         # ----------------------------------------------------------------
@@ -521,17 +538,6 @@ class MainApp(App):
                 ids.arduino.source = (
                     f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
                 )
-
-        if arduino_count > 0:
-            self.screens["mimic"].ids.mimicstartbutton.disabled = False
-
-            if mimic_is_tx:
-                self.screens["mimic"].ids.mimicstartbutton.disabled = True
-            else:
-                self.screens["mimic"].ids.mimicstartbutton.disabled = False
-        else:
-            self.screens["mimic"].ids.mimicstartbutton.disabled = True
-            self.screens["mimic"].ids.mimicstartbutton.text = "Transmit"
 
     
     def flashROBObutton(self, instance):
