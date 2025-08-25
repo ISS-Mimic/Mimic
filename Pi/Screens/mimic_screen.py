@@ -63,7 +63,7 @@ class _ChangeGate:
         q_leds = {}
         if leds:
             for k, v in leds.items():
-                q_leds[k] = self._qi(v)
+                q_leds[k] = "" if v is None else str(v)
 
         composite = {**q_vals, **q_leds}
         changed = any(self.prev.get(k) != composite[k] for k in composite)
