@@ -484,21 +484,11 @@ class MainApp(App):
             
         except Exception as exc:
             log_error(f"Failed to set mimic transmission status: {exc}")
-        
-        # ----------------------------------------------------------------
-        # Phase-1 (works today): fall back to the old globals
-        # ----------------------------------------------------------------
 
         arduino_count = (
             len(getattr(self, "serial_ports", []))
             if hasattr(self, "serial_ports")
             else len(SERIAL_PORTS)         # ? existing global
-        )
-
-        mimic_is_tx = (
-            getattr(self, "mimicbutton", None)
-            if hasattr(self, "mimicbutton")
-            else mimicbutton               # ? existing global
         )
 
         """
@@ -530,7 +520,7 @@ class MainApp(App):
                 ids.arduino_count.text = str(arduino_count)
                 ids.arduino.source = (
                     f"{self.mimic_directory}/Mimic/Pi/imgs/signal/"
-                    + ("Arduino_Transmit.zip" if mimic_is_tx
+                    + ("Arduino_Transmit.zip" if is_transmitting
                        else "arduino_notransmit.png")
                 )
             else:
