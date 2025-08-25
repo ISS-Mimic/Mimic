@@ -341,6 +341,13 @@ class MimicScreen(MimicBase):
 
         # 3) build & send single line (with newline)
         if should_send:
+            # Ensure we have valid LED values (not None)
+            if q_leds is None:
+                q_leds = leds  # Use current LED values if gate returned None
+            
+            # Debug: Log what we're sending
+            log_info(f"Mimic Screen: Sending - Vals: {q_vals}, LEDs: {q_leds}")
+            
             line = self._build_packet(q_vals, q_leds)
             # estimate wire time to pace the *next* tick safely at 9600
             nb = self._line_bytes(line + "\n")
