@@ -98,6 +98,8 @@ class MimicScreen(MimicBase):
         self._mimic_event = None         # dynamic schedule_once handle
         self._db_path = "/dev/shm/iss_telemetry.db"
         self._gate = _ChangeGate(angle_step=self._ANGLE_STEP, heartbeat_s=self._HEARTBEAT_S)
+        
+
 
         # static mapping from Arduino tokens -> DB IDs
         self._telemetry_mapping = {
@@ -348,6 +350,9 @@ class MimicScreen(MimicBase):
             # Debug: Log what we're sending
             log_info(f"Mimic Screen: Sending - Vals: {q_vals}, LEDs: {q_leds}")
             
+            # Show Arduino transmit animation (from base class)
+            self._show_transmit_animation()
+            
             line = self._build_packet(q_vals, q_leds)
             # estimate wire time to pace the *next* tick safely at 9600
             nb = self._line_bytes(line + "\n")
@@ -480,5 +485,12 @@ class MimicScreen(MimicBase):
     def on_pre_leave(self):
         log_info("Leaving mimic screen")
 
-    def on_leave(self):
+    def on_enter(self):
+        """Called when entering the screen."""
         pass
+    
+    def on_leave(self):
+        """Called when leaving the screen."""
+        pass
+    
+
