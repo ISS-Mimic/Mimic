@@ -131,9 +131,9 @@
 
         Button:
             id: mimicstartbutton
-            size_hint: 0.15,0.1
+            size_hint: 0.15,0.12
             pos_hint: {"center_x": 0.25, "center_y": 0.2}
-            text: 'Transmit'
+            text: 'Transmit \n to Model'
             disabled: False
             font_size: self.height * 0.4
             size_hint_y: 0.1
@@ -144,7 +144,7 @@
 
         Button:
             id: mimicstopbutton
-            size_hint: 0.15,0.1
+            size_hint: 0.15,0.12
             pos_hint: {"center_x": 0.40, "center_y": 0.2}
             text: 'Stop'
             disabled: True
@@ -159,11 +159,12 @@
             id: startTelemetry
             size_hint: 0.15,0.12
             pos_hint: {"center_x": 0.60, "center_y": 0.2}
-            text: 'Connect to \n ISS'
+            text: 'Connect \n to ISS'
             font_size: self.height * 0.4
             size_hint_y: 0.1
             width: 50
             height: 20
+            halign: "center" 
             on_release: stopTelemetry.disabled = False
             on_release: self.disabled = True
             on_release: root.startproc()
@@ -177,6 +178,7 @@
             size_hint_y: 0.1
             width: 50
             height: 20
+            halign: "center" 
             disabled: True
             on_release: startTelemetry.disabled = False
             on_release: self.disabled = True
