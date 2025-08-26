@@ -611,36 +611,45 @@ class MainApp(App):
     def signal_unsubscribed(self):
         if not self.internet:
             self._broadcast_signal("offline.png", (0.5, 0.5, 0.5))
+            log_info("Signal unsubscribed, internet offline")
         else:
             self._broadcast_signal("SignalClientLost.png", (1, 0.5, 0))
+            log_info("Signal unsubscribed, internet online")
 
     def signal_lost(self):
         if not self.internet:
             self._broadcast_signal("offline.png", (0.5, 0.5, 0.5))
+            log_info("Signal lost, internet offline")
         else:
             self._broadcast_signal("signalred.zip", (1, 0, 0), anim_delay=0.4)
+            log_info("Signal lost, internet online")
 
     def signal_acquired(self):
         if not self.internet:
             self._broadcast_signal("offline.png", (0.5, 0.5, 0.5))
+            log_info("Signal acquired, internet offline")
         else:
             self._broadcast_signal("pulse-transparent.zip", (0, 1, 0),
                                    anim_delay=0.05, size_hint_y=0.15)
+            log_info("Signal acquired, internet online")
 
     def signal_stale(self):
         if not self.internet:
             self._broadcast_signal("offline.png", (0.5, 0.5, 0.5))
+            log_info("Signal stale, internet offline")
         else:
             self._broadcast_signal("SignalOrangeGray.png", (1, 0.5, 0),
                                    anim_delay=0.12)
+            log_info("Signal stale, internet online")
 
     def signal_client_offline(self):
         if not self.internet:
             self._broadcast_signal("offline.png", (0.5, 0.5, 0.5))
+            log_info("Signal client offline, internet offline")
         else:
             self._broadcast_signal("SignalClientLost.png", (1, 0.5, 0),
                                    anim_delay=0.12)
-
+            log_info("Signal client offline, internet online")
 
     def update_signal_status(self, dt):
         """
@@ -658,15 +667,6 @@ class MainApp(App):
         aos = "{:.2f}".format(int((values[12])[0]))
         los = "{:.2f}".format(int((values[13])[0]))
         
-        # Get the SASA1 and SASA2 values
-        sasa1_active = int((values[53])[0])
-        sasa2_active = int((values[52])[0])
-        if sasa1_active or sasa2_active:
-            sasa_xmit = True
-        else:
-            sasa_xmit = False
-
-    
 
         ## ISS Potential Problems ##
         #ISS Leak - Check Pressure Levels
@@ -681,13 +681,10 @@ class MainApp(App):
             #client connected and subscibed to ISS telemetry
             if float(aos) == 1.00:
                 self.signal_acquired() #signal status 1 means acquired
-                sasa_xmit = 1
             elif float(aos) == 0.00:
                self.signal_lost() #signal status 0 means loss of signal
-               sasa_xmit = 0
             elif float(aos) == 2.00:
                self.signal_stale() #signal status 2 means data is not being updated from server
-               sasa_xmit = 0
         else:
             self.signal_unsubscribed()
 
