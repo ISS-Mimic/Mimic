@@ -406,17 +406,29 @@ class MimicScreen(MimicBase):
     
     def on_leave(self):
         """Called when leaving the screen."""
-        # Stop mimic transmission and inform GUI.py
-        if self._mimic_active:
-            self._mimic_active = False
-            if self._mimic_event:
-                self._mimic_event.cancel()
-                self._mimic_event = None
-            
-            # Inform GUI.py about transmission status
-            app = App.get_running_app()
-            if hasattr(app, 'set_mimic_transmission_status'):
-                app.set_mimic_transmission_status(False)
+        # Get the screen manager to see where we're going
+        app = App.get_running_app()
+        screen_manager = app.root
+        
+        # Check if we're going to a main screen or a subscreen
+        current_screen = screen_manager.current if screen_manager else None
+        print(f"DEBUG: on_leave called, current_screen: {current_screen}")
+        
+        if current_screen is 'main':
+            print(f"DEBUG: Going to main screen '{current_screen}', stopping transmission")
+            # Stop mimic transmission and inform GUI.py
+            if self._mimic_active:
+                self._mimic_active = False
+                if self._mimic_event:
+                    self._mimic_event.cancel()
+                    self._mimic_event = None
+                
+                # Inform GUI.py about transmission status
+                if hasattr(app, 'set_mimic_transmission_status'):
+                    app.set_mimic_transmission_status(False)
+        else:
+            print(f"DEBUG: Going to subscreen '{current_screen}', keeping transmission running")
+            # Don't stop transmission for subscreens
     
 
     # ------------------------------ mimic button handlers ------------------------------
