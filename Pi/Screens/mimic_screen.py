@@ -301,6 +301,7 @@ class MimicScreen(MimicBase):
         base = Path(self.mimic_directory) / "Mimic" / "Pi"
 
         log_info("Starting telemetry subprocesses")
+        self._update_status("Starting telemetry subprocesses...")
 
         iss_telemetry_path = base / "iss_telemetry.py"
         tdrscheck_path = base / "TDRScheck.py"
@@ -309,15 +310,19 @@ class MimicScreen(MimicBase):
 
         if not iss_telemetry_path.exists():
             log_error(f"iss_telemetry.py not found at {iss_telemetry_path}")
+            self._update_status("Error: iss_telemetry.py not found")
             return
         if not tdrscheck_path.exists():
             log_error(f"TDRScheck.py not found at {tdrscheck_path}")
+            self._update_status("Error: TDRScheck.py not found")
             return
         if not vvcheck_path.exists():
             log_error(f"VVcheck.py not found at {vvcheck_path}")
+            self._update_status("Error: VVcheck.py not found")
             return
         if not checkcrew_path.exists():
             log_error(f"checkCrew.py not found at {checkcrew_path}")
+            self._update_status("Error: checkCrew.py not found")
             return
 
         try:
@@ -356,25 +361,34 @@ class MimicScreen(MimicBase):
             if app.p.poll() is not None:
                 _, stderr = app.p.communicate()
                 log_error(f"iss_telemetry.py failed to start: {stderr}")
+                self._update_status("Error: iss_telemetry.py failed to start")
                 app.p = None
 
             if app.TDRSproc.poll() is not None:
                 _, stderr = app.TDRSproc.communicate()
                 log_error(f"TDRScheck.py failed to start: {stderr}")
+                self._update_status("Error: TDRScheck.py failed to start")
                 app.TDRSproc = None
 
             if app.VVproc.poll() is not None:
                 _, stderr = app.VVproc.communicate()
                 log_error(f"VVcheck.py failed to start: {stderr}")
+                self._update_status("Error: VVcheck.py failed to start")
                 app.VVproc = None
 
             if app.crewproc.poll() is not None:
                 _, stderr = app.crewproc.communicate()
                 log_error(f"checkCrew.py failed to start: {stderr}")
+                self._update_status("Error: checkCrew.py failed to start")
                 app.crewproc = None
+
+            # If all processes started successfully
+            if app.p and app.TDRSproc and app.VVproc and app.crewproc:
+                self._update_status("Telemetry subprocesses started successfully")
 
         except Exception as exc:
             log_error(f"Failed to start subprocesses: {exc}")
+            self._update_status(f"Error starting subprocesses: {exc}")
 
     def killproc(self) -> None:
         log_info(f"Kill Proc")
@@ -382,6 +396,7 @@ class MimicScreen(MimicBase):
         Terminates all background processes.
         """
         app = App.get_running_app()
+        self._update_status("Stopping telemetry subprocesses...")
 
         for name in ("p", "TDRSproc", "VVproc", "crewproc"):
             proc = getattr(app, name, None)
@@ -396,13 +411,14 @@ class MimicScreen(MimicBase):
                 setattr(app, name, None)
 
         app.mimicbutton = False
+        self._update_status("Telemetry subprocesses stopped")
 
     def on_pre_leave(self):
         log_info("Leaving mimic screen")
 
     def on_enter(self):
         """Called when entering the screen."""
-        pass
+        self._update_status("Ready to Mimic")
     
     def on_leave(self):
         """Called when leaving the screen."""
@@ -412,10 +428,8 @@ class MimicScreen(MimicBase):
         
         # Check if we're going to a main screen or a subscreen
         current_screen = screen_manager.current if screen_manager else None
-        print(f"DEBUG: on_leave called, current_screen: {current_screen}")
         
         if current_screen is 'main':
-            print(f"DEBUG: Going to main screen '{current_screen}', stopping transmission")
             # Stop mimic transmission and inform GUI.py
             if self._mimic_active:
                 self._mimic_active = False
@@ -426,9 +440,7 @@ class MimicScreen(MimicBase):
                 # Inform GUI.py about transmission status
                 if hasattr(app, 'set_mimic_transmission_status'):
                     app.set_mimic_transmission_status(False)
-        else:
-            print(f"DEBUG: Going to subscreen '{current_screen}', keeping transmission running")
-            # Don't stop transmission for subscreens
+        # Don't stop transmission for subscreens
     
 
     # ------------------------------ mimic button handlers ------------------------------
@@ -443,6 +455,9 @@ class MimicScreen(MimicBase):
                 log_info("Starting mimic transmission")
                 self._mimic_active = True
                 
+                # Update status
+                self._update_status("Transmitting telemetry...")
+                
                 # Inform GUI.py about transmission status
                 app = App.get_running_app()
                 if hasattr(app, 'set_mimic_transmission_status'):
@@ -454,6 +469,9 @@ class MimicScreen(MimicBase):
                 log_info("Stopping mimic transmission")
                 self._mimic_active = False
                 
+                # Update status
+                self._update_status("Transmission stopped")
+                
                 # Inform GUI.py about transmission status
                 app = App.get_running_app()
                 if hasattr(app, 'set_mimic_transmission_status'):
@@ -462,5 +480,13 @@ class MimicScreen(MimicBase):
                 if self._mimic_event:
                     self._mimic_event.cancel()
                     self._mimic_event = None
+
+    def _update_status(self, message: str):
+        """Update the status label with a message."""
+        try:
+            if hasattr(self, 'ids') and 'status_label' in self.ids:
+                self.ids.status_label.text = message
+        except Exception as exc:
+            log_error(f"Failed to update status label: {exc}")
     
 

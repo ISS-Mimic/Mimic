@@ -460,21 +460,15 @@ class MainApp(App):
         This allows GUI.py to update Arduino animations across all screens.
         """
         try:
-            print(f"DEBUG: set_mimic_transmission_status called with is_transmitting={is_transmitting}")
-            print(f"DEBUG: Current mimicbutton value: {getattr(self, 'mimicbutton', 'NOT_SET')}")
-            
             # Update the mimic button status
             self.mimicbutton = is_transmitting
-            print(f"DEBUG: Set mimicbutton to: {self.mimicbutton}")
             
             # Force an immediate Arduino count update to show transmit animation
-            print("DEBUG: Calling updateArduinoCount(0)")
             self.updateArduinoCount(0)
             
             log_info(f"Mimic transmission status set to: {is_transmitting}")
             
         except Exception as exc:
-            print(f"DEBUG: Exception in set_mimic_transmission_status: {exc}")
             log_error(f"Failed to set mimic transmission status: {exc}")
 
     def updateArduinoCount(self, dt) -> None:
@@ -491,14 +485,11 @@ class MainApp(App):
         2. When the UI mimic button toggles, set self.mimicbutton
         3. Delete the global fall bals below
         """
-        print(f"DEBUG: updateArduinoCount called with dt={dt}")
-        
         arduino_count = (
             len(getattr(self, "serial_ports", []))
             if hasattr(self, "serial_ports")
             else len(SERIAL_PORTS)         # ? existing global
         )
-        print(f"DEBUG: arduino_count = {arduino_count}")
 
         # Get mimic transmission status
         mimic_is_tx = (
@@ -506,7 +497,6 @@ class MainApp(App):
             if hasattr(self, "mimicbutton")
             else False
         )
-        print(f"DEBUG: mimic_is_tx = {mimic_is_tx}")
 
         """
         Refresh the Arduino-status icon & counter on screens that have them.
@@ -515,20 +505,16 @@ class MainApp(App):
         
         # Screens that should have local animation control (don't override)
         local_control_screens = {'manualcontrol', 'led', 'playback', 'main'}
-        print(f"DEBUG: local_control_screens = {local_control_screens}")
         
         for scr in self.screens.values():
             ids = scr.ids
-            print(f"DEBUG: Processing screen: {scr.name}")
 
             # Skip screens without the widgets.
             if "arduino_count" not in ids or "arduino" not in ids:
-                print(f"DEBUG: Skipping {scr.name} - missing arduino widgets")
                 continue
                 
             # Skip screens that have local animation control
             if scr.name in local_control_screens:
-                print(f"DEBUG: {scr.name} is in local_control_screens - only updating count")
                 # Only update the count, not the animation source
                 if arduino_count > 0:
                     ids.arduino_count.text = str(arduino_count)
@@ -537,7 +523,6 @@ class MainApp(App):
                 continue
 
             # For other screens, update both count and animation
-            print(f"DEBUG: {scr.name} is NOT in local_control_screens - updating count and animation")
             if arduino_count > 0:
                 ids.arduino_count.text = str(arduino_count)
                 new_source = (
@@ -545,12 +530,10 @@ class MainApp(App):
                     + ("arduino_transmit.zip" if mimic_is_tx
                        else "arduino_notransmit.png")
                 )
-                print(f"DEBUG: Setting {scr.name}.arduino.source to: {new_source}")
                 ids.arduino.source = new_source
             else:
                 ids.arduino_count.text = ""
                 offline_source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
-                print(f"DEBUG: Setting {scr.name}.arduino.source to: {offline_source}")
                 ids.arduino.source = offline_source
 
     
