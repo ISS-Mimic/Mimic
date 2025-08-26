@@ -417,16 +417,12 @@ class MainApp(App):
             log_info("Set current screen to main")
 
             log_info("Scheduling update functions...")
-            #Clock.schedule_interval(self.update_labels, 1) #all telemetry wil refresh and get pushed to arduinos every half second!
-
-
-
+            Clock.schedule_interval(self.update_signal_status, 1) #all telemetry wil refresh and get pushed to arduinos every half second!
+            Clock.schedule_interval(self.updateArduinoCount, 5) #update arduino count every 5 seconds
             Clock.schedule_interval(self._schedule_internet_probe,
                                     self.INTERNET_POLL_S) # check for active internet connection
 
-            Clock.schedule_interval(self.updateArduinoCount, 5)
             log_info("All functions scheduled")
-
             log_info("Build process completed successfully")
             return root
             
@@ -453,7 +449,6 @@ class MainApp(App):
             self.signal_client_offline()
 
 
-        
     def set_mimic_transmission_status(self, is_transmitting: bool) -> None:
         """
         Called by mimic screen to inform GUI.py about transmission status.
@@ -647,19 +642,23 @@ class MainApp(App):
                                    anim_delay=0.12)
 
 
-    def update_labels(self, dt): #THIS IS THE IMPORTANT FUNCTION
-        global mimicbutton
+    def update_signal_status(self, dt):
+        """
+        Update the signal status on all screens.
+        """
 
-
+        # Get the telemetry values from the database
         c.execute('select Value from telemetry')
         values = c.fetchall()
 
-
+        # Get the lightstreamer subscription status
         sub_status = str((values[255])[0]) #lightstreamer subscript checker
 
+        # Get the AOS and LOS values
         aos = "{:.2f}".format(int((values[12])[0]))
         los = "{:.2f}".format(int((values[13])[0]))
-
+        
+        # Get the SASA1 and SASA2 values
         sasa1_active = int((values[53])[0])
         sasa2_active = int((values[52])[0])
         if sasa1_active or sasa2_active:
@@ -692,7 +691,6 @@ class MainApp(App):
         else:
             self.signal_unsubscribed()
 
-        
 if __name__ == '__main__':
     try:
         # Show logging configuration
