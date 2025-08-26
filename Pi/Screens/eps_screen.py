@@ -80,14 +80,14 @@ class EPS_Screen(MimicBase):
             beta4b = float(values[10][0])
             beta4a = float(values[11][0])
 
-            self._set_text('beta1b_value', f"{beta1b:.2f}")
-            self._set_text('beta1a_value', f"{beta1a:.2f}")
-            self._set_text('beta2b_value', f"{beta2b:.2f}")
-            self._set_text('beta2a_value', f"{beta2a:.2f}")
-            self._set_text('beta3b_value', f"{beta3b:.2f}")
-            self._set_text('beta3a_value', f"{beta3a:.2f}")
-            self._set_text('beta4b_value', f"{beta4b:.2f}")
-            self._set_text('beta4a_value', f"{beta4a:.2f}")
+            self._set_text('beta1b_value', f"{beta1b:.2f}°")
+            self._set_text('beta1a_value', f"{beta1a:.2f}°")
+            self._set_text('beta2b_value', f"{beta2b:.2f}°")
+            self._set_text('beta2a_value', f"{beta2a:.2f}°")
+            self._set_text('beta3b_value', f"{beta3b:.2f}°")
+            self._set_text('beta3a_value', f"{beta3a:.2f}°")
+            self._set_text('beta4b_value', f"{beta4b:.2f}°")
+            self._set_text('beta4a_value', f"{beta4a:.2f}°")
 
             # Per-array V/I
             v = { '1a': float(values[25][0]), '1b': float(values[26][0]), '2a': float(values[27][0]), '2b': float(values[28][0]), '3a': float(values[29][0]), '3b': float(values[30][0]), '4a': float(values[31][0]), '4b': float(values[32][0]) }
@@ -157,8 +157,8 @@ class EPS_Screen(MimicBase):
                 pass
 
             # Show SARJs (deg)
-            self._set_text('psarj_value', f"{psarj:.2f}deg")
-            self._set_text('ssarj_value', f"{ssarj:.2f}deg")
+            self._set_text('psarj_value', f"{psarj:.2f}°")
+            self._set_text('ssarj_value', f"{ssarj:.2f}°")
             
             # SARJ modes
             try:

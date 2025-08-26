@@ -166,6 +166,15 @@ class MimicScreen(MimicBase):
         
         return None
 
+    def _get_voltage_color(self, voltage):
+        """Determine LED color based on voltage threshold (same as playback screen)."""
+        if voltage < 151.5:
+            return "Blue"      # Discharging
+        elif voltage < 160.0:
+            return "Yellow"    # Charging
+        else:
+            return "White"     # Fully charged
+
     # ------------------------------ helpers: writer/pacing/format ------------------------------
 
     def _write_line(self, line: str):
@@ -227,14 +236,6 @@ class MimicScreen(MimicBase):
             f"B4B={self._f(vals.get('B4B'))}",
             f"B4A={self._f(vals.get('B4A'))}",
             f"AOS={self._i(vals.get('AOS'))}",
-            f"V1A={self._f(vals.get('V1A'))}",
-            f"V2A={self._f(vals.get('V2A'))}",
-            f"V3A={self._f(vals.get('V3A'))}",
-            f"V4A={self._f(vals.get('V4A'))}",
-            f"V1B={self._f(vals.get('V1B'))}",
-            f"V2B={self._f(vals.get('V2B'))}",
-            f"V3B={self._f(vals.get('V3B'))}",
-            f"V4B={self._f(vals.get('V4B'))}",
             f"Sgnt_el={self._f(vals.get('Sgnt_el'))}",
             f"Sgnt_xel={self._f(vals.get('Sgnt_xel'))}",
             f"Sgnt_xmit={self._i(vals.get('Sgnt_xmit'))}",
@@ -243,11 +244,24 @@ class MimicScreen(MimicBase):
             f"SASA_EL={self._f(vals.get('SASA_EL'))}"
         ]
 
-        # Add LED tokens if present
-        if leds:
-            for k, v in leds.items():
-                if v is not None:
-                    tokens.append(f"LED_{k}={v}")
+        # Convert voltage values to LED commands (like playback screen)
+        voltage_to_led_mapping = {
+            'V1A': '1A', 'V1B': '1B',
+            'V2A': '2A', 'V2B': '2B', 
+            'V3A': '3A', 'V3B': '3B',
+            'V4A': '4A', 'V4B': '4B'
+        }
+        
+        # Add LED commands based on voltage values
+        for voltage_key, led_suffix in voltage_to_led_mapping.items():
+            if voltage_key in vals:
+                try:
+                    voltage = float(vals[voltage_key])
+                    color = self._get_voltage_color(voltage)
+                    tokens.append(f"LED_{led_suffix}={color}")
+                except (ValueError, TypeError):
+                    # If voltage conversion fails, default to Blue
+                    tokens.append(f"LED_{led_suffix}=Blue")
 
         return " ".join(tokens)
 
