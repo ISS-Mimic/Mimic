@@ -542,7 +542,7 @@ class MainApp(App):
                 ids.arduino_count.text = str(arduino_count)
                 new_source = (
                     f"{self.mimic_directory}/Mimic/Pi/imgs/signal/"
-                    + ("Arduino_Transmit.zip" if mimic_is_tx
+                    + ("arduino_transmit.zip" if mimic_is_tx
                        else "arduino_notransmit.png")
                 )
                 print(f"DEBUG: Setting {scr.name}.arduino.source to: {new_source}")
