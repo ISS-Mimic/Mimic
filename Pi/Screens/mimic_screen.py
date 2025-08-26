@@ -90,13 +90,12 @@ class MimicScreen(MimicBase):
     _SAFETY = 0.15         # extra headroom on pacing
     _BASE_HZ = 5           # UI tick target; actual wire pacing enforces 9600
     _ANGLE_STEP = 0.1      # deg
-    _HEARTBEAT_S = 1.0     # resend latest state once per second (recovery)
+    _HEARTBEAT_S = 0.5     # resend latest state once per second (recovery)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._mimic_active = False
         self._mimic_event = None         # dynamic schedule_once handle
-        self._db_path = "/dev/shm/iss_telemetry.db"
         self._gate = _ChangeGate(angle_step=self._ANGLE_STEP, heartbeat_s=self._HEARTBEAT_S)
         
         # static mapping from Arduino tokens -> DB IDs
@@ -135,6 +134,37 @@ class MimicScreen(MimicBase):
         placeholders = ",".join("?" for _ in ids)
         self._sql_select = f"SELECT ID, Value FROM telemetry WHERE ID IN ({placeholders})"
         self._sql_ids = ids
+
+    def _get_db_path(self):
+        """Get the database path, trying shared memory first, then fallback locations."""
+        import os
+        
+        # Try shared memory first (Linux/Raspberry Pi)
+        shm_path = "/dev/shm/iss_telemetry.db"
+        if os.path.exists(shm_path):
+            return shm_path
+        
+        # Try current directory
+        current_path = os.path.join(os.getcwd(), "iss_telemetry.db")
+        if os.path.exists(current_path):
+            return current_path
+        
+        # Try home directory
+        home = os.path.expanduser("~")
+        home_path = os.path.join(home, ".mimic_data", "iss_telemetry.db")
+        if os.path.exists(home_path):
+            return home_path
+        
+        # Try mimic directory
+        try:
+            mimic_dir = self.mimic_directory
+            mimic_path = os.path.join(mimic_dir, "iss_telemetry.db")
+            if os.path.exists(mimic_path):
+                return mimic_path
+        except:
+            pass
+        
+        return None
 
     # ------------------------------ helpers: writer/pacing/format ------------------------------
 
@@ -235,13 +265,23 @@ class MimicScreen(MimicBase):
         try:
             # Read current values from database
             app = App.get_running_app()
-            if not hasattr(app, "db_cursor"):
-                log_error("No database cursor available")
+            
+            # Create our own database connection like the playback screen does
+            db_path = self._get_db_path()
+            if not db_path:
+                log_error("No database found")
                 self._schedule_next(1.0 / self._BASE_HZ)
                 return
-
-            app.db_cursor.execute(self._sql_select, self._sql_ids)
-            rows = app.db_cursor.fetchall()
+                
+            try:
+                with sqlite3.connect(db_path) as conn:
+                    cursor = conn.cursor()
+                    cursor.execute(self._sql_select, self._sql_ids)
+                    rows = cursor.fetchall()
+            except Exception as db_exc:
+                log_error(f"Database connection failed: {db_exc}")
+                self._schedule_next(1.0 / self._BASE_HZ)
+                return
 
             # Build current values dict
             vals = {}
