@@ -217,11 +217,8 @@ class MimicScreen(MimicBase):
         except Exception:
             return "0"
 
-    def _build_packet(self, vals: dict, leds: dict | None) -> str:
-        """
-        Single space-separated KEY=VALUE line; Arduino reads with readStringUntil('\n').
-        Include LED_* tokens only if present (other sketches may use them).
-        """
+    def _build_telemetry_command(self, vals: dict) -> str:
+        """Build telemetry command string (without LED commands)."""
         tokens = [
             f"PSARJ={self._f(vals.get('PSARJ'))}",
             f"SSARJ={self._f(vals.get('SSARJ'))}",
@@ -243,8 +240,11 @@ class MimicScreen(MimicBase):
             f"SASA_AZ={self._f(vals.get('SASA_AZ'))}",
             f"SASA_EL={self._f(vals.get('SASA_EL'))}"
         ]
+        return " ".join(tokens)
 
-        # Convert voltage values to LED commands (like playback screen)
+    def _build_led_commands(self, vals: dict) -> list:
+        """Build individual LED commands (like playback screen)."""
+        led_commands = []
         voltage_to_led_mapping = {
             'V1A': '1A', 'V1B': '1B',
             'V2A': '2A', 'V2B': '2B', 
@@ -252,18 +252,18 @@ class MimicScreen(MimicBase):
             'V4A': '4A', 'V4B': '4B'
         }
         
-        # Add LED commands based on voltage values
+        # Build LED commands based on voltage values
         for voltage_key, led_suffix in voltage_to_led_mapping.items():
             if voltage_key in vals:
                 try:
                     voltage = float(vals[voltage_key])
                     color = self._get_voltage_color(voltage)
-                    tokens.append(f"LED_{led_suffix}={color}")
+                    led_commands.append(f"LED_{led_suffix}={color}")
                 except (ValueError, TypeError):
                     # If voltage conversion fails, default to Blue
-                    tokens.append(f"LED_{led_suffix}=Blue")
-
-        return " ".join(tokens)
+                    led_commands.append(f"LED_{led_suffix}=Blue")
+        
+        return led_commands
 
     def _schedule_next(self, delay: float):
         """Schedule the next update tick."""
@@ -328,12 +328,30 @@ class MimicScreen(MimicBase):
                 # Show Arduino transmit animation (handled by GUI.py)
                 # The transmit animation will be shown by GUI.py's updateArduinoCount method
                 
-                line = self._build_packet(q_vals, q_leds)
+                # Send telemetry command first (like playback screen)
+                telemetry_cmd = self._build_telemetry_command(q_vals)
+                self._write_line(telemetry_cmd)
+                
+                # Small delay to let microcontroller process telemetry command
+                time.sleep(0.05)  # 50ms delay
+                
+                # Send LED commands individually (like playback screen)
+                led_commands = self._build_led_commands(q_vals)
+                if led_commands:
+                    for led_cmd in led_commands:
+                        self._write_line(led_cmd)
+                        # Small delay between LED commands
+                        time.sleep(0.02)  # 20ms delay
+                
                 # estimate wire time to pace the *next* tick safely at 9600
-                nb = self._line_bytes(line + "\n")
+                # Use telemetry command length for pacing calculation
+                nb = self._line_bytes(telemetry_cmd + "\n")
                 min_gap = self._min_gap(nb)
-                self._write_line(line)
-                # schedule the next tick as the larger of: pacing or base UI period
+                
+                # Add delay time to the minimum gap calculation
+                total_delay = 0.05 + (len(led_commands) * 0.02)  # 50ms + 20ms per LED command
+                min_gap = max(min_gap, total_delay)
+                
                 self._schedule_next(max(min_gap, 1.0 / self._BASE_HZ))
             else:
                 # nothing changed; schedule base UI period
