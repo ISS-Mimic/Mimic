@@ -654,44 +654,44 @@ class MainApp(App):
     def update_signal_status(self, dt):
         """
         Update the signal status on all screens.
+        - Reads only the needed telemetry rows by label.
+        - Avoids relying on implicit SQLite row ordering.
+        - Compares AOS numerically.
         """
-
-        # Get the telemetry values from the database
         try:
-            c.execute('select Value from telemetry')
-            values = c.fetchall()
-    
+            # Fetch Lightstreamer and AOS directly by label
+            c.execute("SELECT Value FROM telemetry WHERE Label = 'Lightstreamer'")
+            row = c.fetchone()
+            if not row:
+                log_error("Lightstreamer status not found in telemetry table")
+                return
+            sub_status = str(row[0])
 
-            # Get the lightstreamer subscription status
-            sub_status = str((values[255])[0]) #lightstreamer subscript checker
-            print(f"sub_status: {sub_status}")
+            c.execute("SELECT Value, Timestamp FROM telemetry WHERE Label = 'aos'")
+            row = c.fetchone()
+            if not row:
+                log_error("AOS not found in telemetry table")
+                return
 
-            # Get the AOS value
-            aos = "{:.2f}".format(int((values[12])[0]))
-        
+            # iss_telemetry writes 0/1/2 here
+            aos_val = int(float(row[0]))  # robust if stored as '0', '0.0', etc.
+
         except Exception as e:
             log_error(f"Error getting telemetry values: {e}")
             return
 
-        ## ISS Potential Problems ##
-        #ISS Leak - Check Pressure Levels
-        #Number of CMGs online could reveal CMG failure
-        #CMG speed less than 6600rpm
-        #Solar arrays offline
-        #Loss of attitude control, loss of cmg control
-        #ISS altitude too low
-        #Russion hook status - make sure all modules remain docked
-
+        # Only react when we’re actually subscribed
         if sub_status == "Subscribed":
-            #client connected and subscibed to ISS telemetry
-            if float(aos) == 1.00:
-                self.signal_acquired() #signal status 1 means acquired
-            elif float(aos) == 0.00:
-               self.signal_lost() #signal status 0 means loss of signal
-            elif float(aos) == 2.00:
-               self.signal_stale() #signal status 2 means data is not being updated from server
+            # Map AOS state to the right visual
+            if aos_val == 1:
+                self.signal_acquired()
+            elif aos_val == 0:
+                self.signal_lost()
+            elif aos_val == 2:
+                self.signal_stale()
         else:
             self.signal_unsubscribed()
+
 
 if __name__ == '__main__':
     try:
