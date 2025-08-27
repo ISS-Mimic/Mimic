@@ -664,7 +664,7 @@ class MainApp(App):
 
             # Get the lightstreamer subscription status
             sub_status = str((values[255])[0]) #lightstreamer subscript checker
-            #print(f"sub_status: {sub_status}")
+            print(f"sub_status: {sub_status}")
 
             # Get the AOS value
             aos = "{:.2f}".format(int((values[12])[0]))
