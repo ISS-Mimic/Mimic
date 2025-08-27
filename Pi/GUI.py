@@ -627,29 +627,29 @@ class MainApp(App):
     def signal_acquired(self):
         if not self.internet:
             self._broadcast_signal("offline.png", (0.5, 0.5, 0.5))
-            log_info("Signal acquired, internet offline")
+            #log_info("Signal acquired, internet offline")
         else:
             self._broadcast_signal("pulse-transparent.zip", (0, 1, 0),
                                    anim_delay=0.05, size_hint_y=0.15)
-            log_info("Signal acquired, internet online")
+            #log_info("Signal acquired, internet online")
 
     def signal_stale(self):
         if not self.internet:
             self._broadcast_signal("offline.png", (0.5, 0.5, 0.5))
-            log_info("Signal stale, internet offline")
+            #log_info("Signal stale, internet offline")
         else:
             self._broadcast_signal("SignalOrangeGray.png", (1, 0.5, 0),
                                    anim_delay=0.12)
-            log_info("Signal stale, internet online")
+            #log_info("Signal stale, internet online")
 
     def signal_client_offline(self):
         if not self.internet:
             self._broadcast_signal("offline.png", (0.5, 0.5, 0.5))
-            log_info("Signal client offline, internet offline")
+            #log_info("Signal client offline, internet offline")
         else:
             self._broadcast_signal("SignalClientLost.png", (1, 0.5, 0),
                                    anim_delay=0.12)
-            log_info("Signal client offline, internet online")
+            #log_info("Signal client offline, internet online")
 
     def update_signal_status(self, dt):
         """
@@ -657,17 +657,21 @@ class MainApp(App):
         """
 
         # Get the telemetry values from the database
-        c.execute('select Value from telemetry')
-        values = c.fetchall()
+        try:
+            c.execute('select Value from telemetry')
+            values = c.fetchall()
+    
 
-        # Get the lightstreamer subscription status
-        sub_status = str((values[255])[0]) #lightstreamer subscript checker
-        print(f"sub_status: {sub_status}")
+            # Get the lightstreamer subscription status
+            sub_status = str((values[255])[0]) #lightstreamer subscript checker
+            #print(f"sub_status: {sub_status}")
 
-        # Get the AOS and LOS values
-        aos = "{:.2f}".format(int((values[12])[0]))
-        los = "{:.2f}".format(int((values[13])[0]))
+            # Get the AOS value
+            aos = "{:.2f}".format(int((values[12])[0]))
         
+        except Exception as e:
+            log_error(f"Error getting telemetry values: {e}")
+            return
 
         ## ISS Potential Problems ##
         #ISS Leak - Check Pressure Levels
