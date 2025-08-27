@@ -166,6 +166,48 @@ class MimicScreen(MimicBase):
         
         return None
 
+    def _update_lightstreamer_status(self, status: str):
+        """Update the Lightstreamer status in the database to control signal display."""
+        try:
+            db_path = self._get_db_path()
+            if not db_path:
+                return
+                
+            with sqlite3.connect(db_path) as conn:
+                cursor = conn.cursor()
+                
+                # Update the Lightstreamer field (Label = 'Lightstreamer')
+                cursor.execute("""
+                    UPDATE telemetry SET Value = ? WHERE Label = ?
+                """, (status, "Lightstreamer"))
+                
+                conn.commit()
+                log_info(f"Updated Lightstreamer status to: {status}")
+                
+        except Exception as exc:
+            log_error(f"Failed to update Lightstreamer status: {exc}")
+
+    def _update_aos_status(self, aos_value: int):
+        """Update the AOS (Acquisition of Signal) status in the database."""
+        try:
+            db_path = self._get_db_path()
+            if not db_path:
+                return
+                
+            with sqlite3.connect(db_path) as conn:
+                cursor = conn.cursor()
+                
+                # Update the AOS field (Label = 'aos')
+                cursor.execute("""
+                    UPDATE telemetry SET Value = ? WHERE Label = ?
+                """, (aos_value, "aos"))
+                
+                conn.commit()
+                log_info(f"Updated AOS status to: {aos_value}")
+                
+        except Exception as exc:
+            log_error(f"Failed to update AOS status: {exc}")
+
     def _get_voltage_color(self, voltage):
         """Determine LED color based on voltage threshold (same as playback screen)."""
         if voltage < 151.5:
@@ -457,6 +499,12 @@ class MimicScreen(MimicBase):
             # If all processes started successfully
             if app.p and app.TDRSproc and app.VVproc and app.crewproc:
                 self._update_status("Telemetry subprocesses started successfully")
+                
+                # Update the Lightstreamer status to "Subscribed" so GUI shows correct signal
+                self._update_lightstreamer_status("Subscribed")
+                
+                # Also update AOS status to indicate we have signal (AOS = 1 means signal acquired)
+                self._update_aos_status(1)
 
         except Exception as exc:
             log_error(f"Failed to start subprocesses: {exc}")
@@ -484,6 +532,12 @@ class MimicScreen(MimicBase):
 
         app.mimicbutton = False
         self._update_status("Telemetry subprocesses stopped")
+        
+        # Update the Lightstreamer status to "Unsubscribed" so GUI shows correct signal
+        self._update_lightstreamer_status("Unsubscribed")
+        
+        # Also update AOS status to indicate we lost signal (AOS = 0 means signal lost)
+        self._update_aos_status(0)
 
     def on_pre_leave(self):
         log_info("Leaving mimic screen")
