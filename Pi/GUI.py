@@ -275,7 +275,6 @@ if not USE_CONFIG_JSON and PYUDEV_AVAILABLE and TTY_OBSERVER:
     TTY_OBSERVER.start()
     log_str = "Started monitoring serial ports."
     log_info(log_str)
-    log_info(log_str)
 
 #-----------------------------Checking Databases-----------------------------------------
 # Cross-platform database path handling
@@ -285,19 +284,59 @@ def get_db_path(db_name):
         return str(shm_dir / db_name)
     return str(pathlib.Path.home() / '.mimic_data' / db_name)
 
-TDRSconn = sqlite3.connect(get_db_path('tdrs.db'))
-TDRSconn.isolation_level = None
-TDRScursor = TDRSconn.cursor()
-VVconn = sqlite3.connect(get_db_path('vv.db'))
-VVconn.isolation_level = None
-VVcursor = VVconn.cursor()
-conn = sqlite3.connect(get_db_path('iss_telemetry.db'))
-conn.isolation_level = None
-c = conn.cursor()
+# Initialize database connections as None - will connect when needed
+TDRSconn = None
+VVconn = None
+conn = None
+c = None
+
+def get_telemetry_connection():
+    """Get a fresh connection to the telemetry database."""
+    global conn, c
+    try:
+        if conn is None or not conn:
+            conn = sqlite3.connect(get_db_path('iss_telemetry.db'))
+            conn.isolation_level = None
+            c = conn.cursor()
+        return conn, c
+    except Exception as e:
+        log_error(f"Failed to connect to telemetry database: {e}")
+        return None, None
+
+def get_tdrs_connection():
+    """Get a fresh connection to the TDRS database."""
+    global TDRSconn, TDRScursor
+    try:
+        if TDRSconn is None or not TDRSconn:
+            TDRSconn = sqlite3.connect(get_db_path('tdrs.db'))
+            TDRSconn.isolation_level = None
+            TDRScursor = TDRSconn.cursor()
+        return TDRSconn, TDRScursor
+    except Exception as e:
+        log_error(f"Failed to connect to TDRS database: {e}")
+        return None, None
+
+def get_vv_connection():
+    """Get a fresh connection to the VV database."""
+    global VVconn, VVcursor
+    try:
+        if VVconn is None or not VVconn:
+            VVconn = sqlite3.connect(get_db_path('vv.db'))
+            VVconn.isolation_level = None
+            VVcursor = VVconn.cursor()
+        return VVconn, VVcursor
+    except Exception as e:
+        log_error(f"Failed to connect to VV database: {e}")
+        return None, None
 
 def staleTelemetry():
     log_info("Stale telemetry")
-    c.execute("UPDATE telemetry SET Value = 'Unsubscribed' where Label = 'Lightstreamer'")
+    conn, c = get_telemetry_connection()
+    if conn and c:
+        try:
+            c.execute("UPDATE telemetry SET Value = 'Unsubscribed' where Label = 'Lightstreamer'")
+        except Exception as e:
+            log_error(f"Failed to update stale telemetry: {e}")
 #----------------------------------Variables---------------------------------------------
 
 SCREEN_DEFS = {
@@ -358,7 +397,8 @@ class MainApp(App):
         super().__init__(**kwargs)
         self.internet: bool | None = None # None = "unknown"
 
-        self.db_cursor = c        # <- assign existing cursor once
+        # Don't assign db_cursor here - will get it when needed
+        self.db_cursor = None
         # Process variables
         self.p = None
         self.p2 = None
@@ -373,6 +413,11 @@ class MainApp(App):
         """Update global mimicbutton variable when app property changes."""
         global mimicbutton
         mimicbutton = value
+        
+    def get_db_cursor(self):
+        """Get a fresh database cursor when needed."""
+        conn, c = get_telemetry_connection()
+        return c
 
     def build(self):
         try:
@@ -659,6 +704,12 @@ class MainApp(App):
         - Compares AOS numerically.
         """
         try:
+            # Get a fresh connection to the telemetry database
+            conn, c = get_telemetry_connection()
+            if not conn or not c:
+                log_error("Failed to get telemetry database connection")
+                return
+                
             # Fetch Lightstreamer and AOS directly by label
             c.execute("SELECT Value FROM telemetry WHERE Label = 'Lightstreamer'")
             row = c.fetchone()
