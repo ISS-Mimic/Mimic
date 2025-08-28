@@ -296,6 +296,7 @@ conn.isolation_level = None
 c = conn.cursor()
 
 def staleTelemetry():
+    log_info("Stale telemetry")
     c.execute("UPDATE telemetry SET Value = 'Unsubscribed' where Label = 'Lightstreamer'")
 #----------------------------------Variables---------------------------------------------
 
