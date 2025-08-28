@@ -280,10 +280,9 @@ if not USE_CONFIG_JSON and PYUDEV_AVAILABLE and TTY_OBSERVER:
 #-----------------------------Checking Databases-----------------------------------------
 # Cross-platform database path handling
 def get_db_path(db_name):
-    """Get database path with cross-platform handling."""
-    shm = pathlib.Path(f'/dev/shm/{db_name}')
-    if shm.exists():
-        return str(shm)
+    shm_dir = pathlib.Path('/dev/shm')
+    if shm_dir.exists() and shm_dir.is_dir():
+        return str(shm_dir / db_name)
     return str(pathlib.Path.home() / '.mimic_data' / db_name)
 
 TDRSconn = sqlite3.connect(get_db_path('tdrs.db'))
