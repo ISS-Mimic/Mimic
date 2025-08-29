@@ -50,7 +50,8 @@ class _ChangeGate:
 
     def filter(self, now: float, vals: dict, leds: dict | None = None):
         """
-        Returns (should_send: bool, q_vals: dict, q_leds: dict|None)
+        Returns (should_send: bool, q_vals: dict, q_leds: dict|None, reason: str)
+        reason ∈ {"change", "heartbeat", ""}.
         """
         q_vals = {}
         for k, v in vals.items():
@@ -72,8 +73,9 @@ class _ChangeGate:
         if changed or heartbeat_due:
             self.prev = composite
             self._last_sent = now
-            return True, q_vals, (q_leds if leds else None)
-        return False, q_vals, (q_leds if leds else None)
+            reason = "change" if changed else "heartbeat"
+            return True, q_vals, (q_leds if leds else None), reason
+        return False, q_vals, (q_leds if leds else None), ""
 
 
 class MimicScreen(MimicBase):
@@ -90,7 +92,7 @@ class MimicScreen(MimicBase):
     _SAFETY = 0.15         # extra headroom on pacing
     _BASE_HZ = 5           # UI tick target; actual wire pacing enforces 9600
     _ANGLE_STEP = 0.1      # deg
-    _HEARTBEAT_S = 4     # resend latest state once per 4 seconds (recovery)
+    _HEARTBEAT_S = 4       # resend latest state once per 4 seconds (recovery)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -310,46 +312,40 @@ class MimicScreen(MimicBase):
                 if db_id in reverse_mapping:
                     arduino_vals[reverse_mapping[db_id]] = value
 
-            # Get LED values (if any)
+            # Get LED values (if any) from app (optional)
             leds = None
             if hasattr(app, 'led_values'):
                 leds = app.led_values
 
-            # Apply change gate filtering
-            should_send, q_vals, q_leds = self._gate.filter(time.time(), arduino_vals, leds)
+            # Apply change gate filtering (use monotonic clock)
+            should_send, q_vals, q_leds, reason = self._gate.filter(time.monotonic(), arduino_vals, leds)
 
             if should_send:
                 if q_leds is None:
                     q_leds = leds  # Use current LED values if gate returned None
                 
-                # Debug: Log what we're sending
-                log_info(f"Mimic Screen: Sending - Vals: {q_vals}, LEDs: {q_leds}")
-                
-                # Show Arduino transmit animation (handled by GUI.py)
-                # The transmit animation will be shown by GUI.py's updateArduinoCount method
-                
-                # Send telemetry command first (like playback screen)
+                # Build and send telemetry line
                 telemetry_cmd = self._build_telemetry_command(q_vals)
+                log_info(f"Mimic: sending telemetry ({reason}) → {telemetry_cmd}")
                 self._write_line(telemetry_cmd)
                 
                 # Small delay to let microcontroller process telemetry command
-                time.sleep(0.05)  # 50ms delay
+                time.sleep(0.05)  # 50ms delay (kept to match your current behavior)
                 
-                # Send LED commands individually (like playback screen)
+                # Send LED commands individually (current behavior)
                 led_commands = self._build_led_commands(q_vals)
                 if led_commands:
                     for led_cmd in led_commands:
                         self._write_line(led_cmd)
-                        # Small delay between LED commands
-                        time.sleep(0.02)  # 20ms delay
-                
+                        time.sleep(0.02)  # 20ms delay between LED commands
+                    log_info(f"Mimic: sent {len(led_commands)} LED commands")
+
                 # estimate wire time to pace the *next* tick safely at 9600
-                # Use telemetry command length for pacing calculation
                 nb = self._line_bytes(telemetry_cmd + "\n")
                 min_gap = self._min_gap(nb)
-                
+
                 # Add delay time to the minimum gap calculation
-                total_delay = 0.05 + (len(led_commands) * 0.02)  # 50ms + 20ms per LED command
+                total_delay = 0.05 + (len(led_commands) * 0.02)
                 min_gap = max(min_gap, total_delay)
                 
                 self._schedule_next(max(min_gap, 1.0 / self._BASE_HZ))
@@ -560,5 +556,3 @@ class MimicScreen(MimicBase):
                 self.ids.status_label.text = message
         except Exception as exc:
             log_error(f"Failed to update status label: {exc}")
-    
-
