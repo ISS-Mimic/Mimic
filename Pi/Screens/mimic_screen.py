@@ -90,7 +90,7 @@ class MimicScreen(MimicBase):
     _SAFETY = 0.15         # extra headroom on pacing
     _BASE_HZ = 5           # UI tick target; actual wire pacing enforces 9600
     _ANGLE_STEP = 0.1      # deg
-    _HEARTBEAT_S = 0.5     # resend latest state once per second (recovery)
+    _HEARTBEAT_S = 4     # resend latest state once per 4 seconds (recovery)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
