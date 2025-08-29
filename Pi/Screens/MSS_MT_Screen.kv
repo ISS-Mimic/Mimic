@@ -1,3 +1,37 @@
+#:import dp kivy.metrics.dp
+
+<MTSpeedometer@Widget>:
+    # Dynamic gauge for MT speed (cm/s)
+    speed_cms: 0.0
+    min_speed: 0.0
+    max_speed: 5.5  # ~2.17 in/s, headroom above 2 in/s (5.08 cm/s)
+    # Horizontal semicircle: 0=left (180°) → max=right (360°)
+    start_angle: 0.0
+    end_angle: 180.0
+    canvas:
+        Color:
+            rgba: 1, 1, 1, 0.4
+        # Arc background
+        Line:
+            ellipse: (root.center_x - root.width * 0.45, root.center_y - root.height * 0.45, root.width * 0.9, root.height * 0.9, -90, 90)
+            width: dp(2)
+        # Needle
+        Color:
+            rgba: 1, 0.2, 0.4, 1
+        PushMatrix
+        Rotate:
+            angle: root.start_angle + (((min(max(root.speed_cms, root.min_speed), root.max_speed) - root.min_speed) / (root.max_speed - root.min_speed) if (root.max_speed - root.min_speed) != 0 else 0) * (root.end_angle - root.start_angle))
+            origin: root.center_x, root.center_y
+        Line:
+            points: [root.center_x, root.center_y, root.center_x + root.width * 0.4, root.center_y]
+            width: dp(2)
+        PopMatrix
+        # Center cap
+        Color:
+            rgba: 1, 1, 1, 1
+        Line:
+            circle: (root.center_x, root.center_y, dp(3))
+
 <MSS_MT_Screen>:
     name: 'mt'
     FloatLayout:
@@ -6,36 +40,13 @@
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/robo/MBSbackground.png'
             fit_mode: "fill"
         Label:
-            ##pos_hint: {"center_x": 0.5, "center_y": 0.8}
-            ##text: 'Mobile Transporter'
-            ##markup: True
-            ##color: 1,0,1
-            ##size_hint_y: 0.4
-            ##font_size: self.height * 0.10
-        Label:
-            ##id: mt_ws_label
-            ##pos_hint: {"center_x": 0.25, "center_y": 0.6}
-            ##text: 'MT is at WS: '
-            ##markup: True
-            ##color: 1,1,1
-            ##size_hint_y: 0.4
-            ##font_size: self.height * 0.10
-        Label:
             id: mt_ws_value
             pos_hint: {"center_x": 0.275, "center_y": 0.73}
             text: '0'
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.10
-        Label:
-            ##id: mt_positon_label
-            ##pos_hint: {"center_x": 0.2, "center_y": 0.45}
-            ##text: 'MT Position: '
-            ##markup: True
-            ##color: 1,1,1
-            ##size_hint_y: 0.4
-            ##font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         Label:
             id: mt_position_value
             pos_hint: {"center_x": 0.275, "center_y": 0.65}
@@ -43,15 +54,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.10
-        Label:
-            ##id: mt_speed_label
-            ##pos_hint: {"center_x": 0.22, "center_y": 0.3}
-            ##text: 'MT Speed: '
-            ##markup: True
-            ##color: 1,1,1
-            ##size_hint_y: 0.4
-            ##font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         Label:
             id: mt_speed_value
             pos_hint: {"center_x": 0.275, "center_y": 0.69}
@@ -59,7 +62,23 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
+        Label:
+            id: MBS_Base_Location
+            pos_hint: {"center_x": 0.275, "center_y": 0.48}
+            text: '0'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: min(self.height * 0.10, dp(28))
+        Label:
+            id: MBS_Operating_Base
+            pos_hint: {"center_x": 0.275, "center_y": 0.44}
+            text: '0'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: min(self.height * 0.10, dp(28))
         Label:
             id: MCASpayload
             pos_hint: {"center_x": 0.275, "center_y": 0.32}
@@ -67,7 +86,7 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
         Label:
             id: POApayload
             pos_hint: {"center_x": 0.275, "center_y": 0.28}
@@ -75,39 +94,91 @@
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(28))
+        Label:
+            id: POA_Stop_Condition
+            pos_hint: {"center_x": 0.275, "center_y": 0.24}
+            text: '0'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: min(self.height * 0.10, dp(28))
+        Label:
+            id: POA_Run_Speed
+            pos_hint: {"center_x": 0.275, "center_y": 0.20}
+            text: '0'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: min(self.height * 0.10, dp(28))
+        Label:
+            id: POA_Hot
+            pos_hint: {"center_x": 0.275, "center_y": 0.16}
+            text: '0'
+            markup: True
+            color: root.signalcolor
+            size_hint_y: 0.4
+            font_size: min(self.height * 0.10, dp(28))
         Image:
             id: FloatingMT
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/robo/MovingMT.png'
             size_hint_y: 0.09
             pos_hint: {"center_x": 0.62, "center_y": 0.375}
             fit_mode: "scale-down"
-        Button:
-            size_hint: 0.1,0.11
-            pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
-            on_release: app.root.current = 'robo'
+        
+        # MT Speedometer gauge
+        MTSpeedometer:
+            id: mt_speedometer
+            size_hint: 0.25, 0.25
+            pos_hint: {"right": 0.7, "top": 0.8}
+
+       # ---------- STATUS DISPLAY (Bottom Rectangle) ----------
+        Label:
+            id: status_label
+            text: ''
+            size_hint: 1, 0.07
+            background_color: 0, 0, 0, 0.8  # Semi-transparent black
+            color: 0, 1, 0, 1  # Green text
+            font_size: self.height * 0.6  # Scale font to label height
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            pos_hint: {"center_x": 0.57, "center_y": 0.07}
+        
+        # ---------- BOTTOM TOOLBAR ----------
         Image:
             id: signal
-            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
-            size_hint_y: 0.15
-            anim_delay: 0.12
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/signalred.zip"
+            size_hint_y: 0.112
+            anim_delay: 0.05
             anim_loop: 0
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.05, "center_y": 0.07}
+        
         Image:
             id: arduino
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
             size_hint_y: 0.15
             anim_delay: 0.2
-            anim_loop: 0
-            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+            anim_loop: -1
             fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+        
         Label:
             id: arduino_count
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
             text: ''
             markup: True
-            color: 1,1,1
-            font_size: self.height * 0.3
-            size_hint_y: 0.5
+            color: 1, 1, 1, 1
+            font_size: self.height * 1
+            size_hint: 0.06, 0.08
+        
+        # ─────────────────────── Navigation ────────────────────────────────
+
+        Button:
+            size_hint: 0.1, 0.11
+            pos_hint: {"center_x": 0.9375, "center_y": 0.07}
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            border: 0,0,0,0    # avoid 9-slice margins
+            on_release: app.root.current = 'robo'

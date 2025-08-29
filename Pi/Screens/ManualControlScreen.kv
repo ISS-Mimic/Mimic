@@ -1,192 +1,285 @@
+#:import dp kivy.metrics.dp
+#:import Window kivy.core.window.Window
+#:import sp kivy.metrics.sp
+#:import Factory kivy.factory.Factory
+
+<PopupText@Label>:
+    size_hint_y: None
+    text_size: self.width - dp(16), None
+    padding: dp(8), 0
+    halign: 'left'
+    valign: 'middle'
+    color: 1, 1, 1, 1
+    # Baseline 16sp at ~1200×800 window; scales with the smaller screen dimension.
+    # Clamp between 14sp and 26sp so it stays readable everywhere.
+    font_size: max(sp(14), min(sp(26), sp(16) * min(Window.width/1200.0, Window.height/800.0)))
+    height: self.texture_size[1] + dp(12)
+
+
+<ManualControlInfoPopup@Popup>:
+    title: 'Manual Control Information'
+    size_hint: 0.8, 0.8
+    auto_dismiss: True
+    
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(12)
+        spacing: dp(8)
+        
+        ScrollView:
+            do_scroll_x: False
+            do_scroll_y: True
+            
+            GridLayout:
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height
+                padding: dp(8), dp(8)
+                spacing: dp(8)
+                
+                PopupText:
+                    text: 'Manually control all of the ISS joints - click a specific joint to increment using the +/- buttons \n or set90 / set0 to make ALL motors turn to those angles \n \n If using the standard DC motors, you need to use the "Calibrate Zero" button \n to inform the microcontroller that the current motor position should be considered the "0 degree" point \n (Refer to the ISS Mimic Github wiki to see the ISS angles zero position)'
+                
+
 <ManualControlScreen>:
-    name: 'manualcontrol'
-    on_pre_enter: root.callback()
+    name: "manualcontrol"
+    on_pre_enter: root.refresh_buttons()
+
     FloatLayout:
-        size_hint: 1,1
         Image:
-            id: Control_background
-            source: f'{root.mimic_directory}/Mimic/Pi/imgs/control/ControlBackground.png'
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/control/ControlBackground.png"
             fit_mode: "fill"
-        Widget:
-        #---------------------------------------------------------------------------------------------------------------
+
         Button:
-            id: Beta4B_Button
-            size_hint: 0.08,0.3
-            pos_hint: {"center_x": 0.6, "center_y": 0.7}
-            text: "4B"
-            font_size: dp(30)
-            on_press: root.setActive("Beta4B")
-            halign: "center"
-        Button:
-            id: Beta2B_Button
-            size_hint: 0.08,0.3
-            pos_hint: {"center_x": 0.6, "center_y": 0.3}
-            text: "2B"
-            font_size: dp(30)
-            on_press: root.setActive("Beta2B")
-            halign: "center"
-        Button:
-            id: PSARJ_Button
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.55, "center_y": 0.5}
-            text: "Port Truss"
-            font_size: dp(30)
-            on_press: root.setActive("PSARJ")
-            halign: "center"
-        Button:
-            id: Beta2A_Button
-            size_hint: 0.08,0.3
-            pos_hint: {"center_x": 0.5, "center_y": 0.7}
-            text: "2A"
-            font_size: dp(30)
-            on_press: root.setActive("Beta2A")
-            halign: "center"
-        Button:
-            id: Beta4A_Button
-            size_hint: 0.08,0.3
-            pos_hint: {"center_x": 0.5, "center_y": 0.3}
-            text: "4A"
-            font_size: dp(30)
-            on_press: root.setActive("Beta4A")
-            halign: "center"
-        Button:
-            id: PTRRJ_Button
-            size_hint: 0.1,0.3
-            pos_hint: {"center_x": 0.4, "center_y": 0.5}
-            text: "Port\nHRS"
-            font_size: dp(25)
-            on_press: root.setActive("PTRRJ")
-            halign: "center"
-        Button:
-            id: STRRJ_Button
-            size_hint: 0.1,0.3
-            pos_hint: {"center_x": 0.3, "center_y": 0.5}
-            text: "Stbd\nHRS"
-            font_size: dp(25)
-            on_press: root.setActive("STRRJ")
-            halign: "center"
-        Button:
-            id: Beta3A_Button
-            size_hint: 0.08,0.3
-            pos_hint: {"center_x": 0.2, "center_y": 0.7}
-            text: "3A"
-            font_size: dp(30)
-            on_press: root.setActive("Beta3A")
-            halign: "center"
-        Button:
-            id: Beta1A_Button
-            size_hint: 0.08,0.3
-            pos_hint: {"center_x": 0.2, "center_y": 0.3}
-            text: "1A"
-            font_size: dp(30)
-            on_press: root.setActive("Beta1A")
-            halign: "center"
-        Button:
-            id: SSARJ_Button
-            size_hint: 0.2,0.1
-            pos_hint: {"center_x": 0.15, "center_y": 0.5}
-            text: "Stbd Truss"
-            font_size: dp(30)
-            on_press: root.setActive("SSARJ")
-            halign: "center"
-        Button:
-            id: Beta3B_Button
-            size_hint: 0.08,0.3
-            pos_hint: {"center_x": 0.1, "center_y": 0.3}
-            text: "3B"
-            font_size: dp(30)
-            on_press: root.setActive("Beta3B")
-            halign: "center"
+            id: popup
+            text: ''
+            size_hint: 0.08, 0.08
+            pos_hint: {"center_x": 0.6, "center_y": 0.95}
+            background_normal: ''
+            background_down: ''
+            background_color: 0, 0, 0, 0
+            on_release: Factory.ManualControlInfoPopup().open()
+            Image:
+                source: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/InfoIcon.png'
+                size_hint: None, None
+                size: self.parent.size
+                pos: self.parent.pos
+                fit_mode: "contain"
+
+        # ---- STBD TRUSS -----------------------------------------------------
         Button:
             id: Beta1B_Button
-            size_hint: 0.08,0.3
-            pos_hint: {"center_x": 0.1, "center_y": 0.7}
+            size_hint: 0.08, 0.30
+            pos_hint: {"center_x": 0.10, "center_y": 0.70}
             text: "1B"
-            font_size: dp(30)
-            on_press: root.setActive("Beta1B")
-            halign: "center"
+            font_size: self.width * 0.4 
+            on_press: root.set_active("beta1b")
+        Button:
+            id: Beta3B_Button
+            size_hint: 0.08, 0.30
+            pos_hint: {"center_x": 0.10, "center_y": 0.30}
+            text: "3B"
+            font_size: self.width * 0.4 
+            on_press: root.set_active("beta3b")
+
+        Button:
+            id: SSARJ_Button
+            size_hint: 0.20, 0.10
+            pos_hint: {"center_x": 0.15, "center_y": 0.50}
+            text: "Stbd Truss"
+            font_size: self.height * 0.4 
+            on_press: root.set_active("ssarj")
+
+        Button:
+            id: Beta3A_Button
+            size_hint: 0.08, 0.30
+            pos_hint: {"center_x": 0.20, "center_y": 0.70}
+            text: "3A"
+            font_size: self.width * 0.4
+            on_press: root.set_active("beta3a")
+        Button:
+            id: Beta1A_Button
+            size_hint: 0.08, 0.30
+            pos_hint: {"center_x": 0.20, "center_y": 0.30}
+            text: "1A"
+            font_size: self.width * 0.4
+            on_press: root.set_active("beta1a")
+
+        # ---- HRS / TRRJ -----------------------------------------------------
+        Button:
+            id: STRRJ_Button
+            size_hint: 0.10, 0.30
+            pos_hint: {"center_x": 0.30, "center_y": 0.50}
+            text: "Stbd\nHRS"
+            font_size: self.width * 0.3 
+            on_press: root.set_active("strrj")
+
+        Button:
+            id: PTRRJ_Button
+            size_hint: 0.10, 0.30
+            pos_hint: {"center_x": 0.40, "center_y": 0.50}
+            text: "Port\nHRS"
+            font_size: self.width * 0.3 
+            on_press: root.set_active("ptrrj")
+
+        # ---- CENTER / PSARJ -------------------------------------------------
+        Button:
+            id: PSARJ_Button
+            size_hint: 0.20, 0.10
+            pos_hint: {"center_x": 0.55, "center_y": 0.50}
+            text: "Port Truss"
+            font_size: self.height * 0.4 
+            on_press: root.set_active("psarj")
+
+        # ---- RIGHT TRUSS ----------------------------------------------------
+        Button:
+            id: Beta2A_Button
+            size_hint: 0.08, 0.30
+            pos_hint: {"center_x": 0.50, "center_y": 0.70}
+            text: "2A"
+            font_size: self.width * 0.4 
+            on_press: root.set_active("beta2a")
+        Button:
+            id: Beta4A_Button
+            size_hint: 0.08, 0.30
+            pos_hint: {"center_x": 0.50, "center_y": 0.30}
+            text: "4A"
+            font_size: self.width * 0.4 
+            on_press: root.set_active("beta4a")
+
+        Button:
+            id: Beta2B_Button
+            size_hint: 0.08, 0.30
+            pos_hint: {"center_x": 0.60, "center_y": 0.30}
+            text: "2B"
+            font_size: self.width * 0.4 
+            on_press: root.set_active("beta2b")
+        Button:
+            id: Beta4B_Button
+            size_hint: 0.08, 0.30
+            pos_hint: {"center_x": 0.60, "center_y": 0.70}
+            text: "4B"
+            font_size: self.width * 0.4 
+            on_press: root.set_active("beta4b")
+
+        # ---- CONTROL BUTTON STACK ------------------------------------------
+        # Set 0 / Set 90
         Button:
             id: set0
-            size_hint: 0.1,0.07
-            pos_hint: {"center_x": 0.8, "center_y": 0.75}
-            text: 'Set 0'
-            font_size: dp(20)
-            on_release: root.send0()
+            size_hint: 0.10, 0.07
+            pos_hint: {"center_x": 0.80, "center_y": 0.75}
+            text: "Set 0"
+            font_size: self.height * 0.4 
+            on_release: root.set_zero()
         Button:
             id: set90
-            size_hint: 0.1,0.07
-            pos_hint: {"center_x": 0.9, "center_y": 0.75}
-            text: 'Set 90'
-            font_size: dp(20)
-            on_release: root.send90()
+            size_hint: 0.10, 0.07
+            pos_hint: {"center_x": 0.90, "center_y": 0.75}
+            text: "Set 90"
+            font_size: self.height * 0.4 
+            on_release: root.set_ninety()
+
+        # Calibrate zero (zero all joints)
         Button:
-            size_hint: 0.2,0.07
+            id: calibrate_zero
+            size_hint: 0.20, 0.07
             pos_hint: {"center_x": 0.85, "center_y": 0.62}
-            text: 'Calibrate Zero'
-            font_size: dp(20)
-            on_press: root.zeroJoints()
+            text: "Calibrate Zero"
+            font_size: self.height * 0.4 
+            on_press: root.calibrate_zero()
+
+        # Increment buttons
         Button:
-            size_hint: 0.1,0.07
-            pos_hint: {"center_x": 0.9, "center_y": 0.49}
-            text: '+5'
-            font_size: dp(20)
-            on_press: root.incrementActive(5)
+            id: minus5
+            size_hint: 0.10, 0.07
+            pos_hint: {"center_x": 0.80, "center_y": 0.49}
+            text: "-5"
+            font_size: self.height * 0.4 
+            on_press: root.increment_active(-5)
         Button:
-            size_hint: 0.1,0.07
-            pos_hint: {"center_x": 0.8, "center_y": 0.49}
-            text: '-5'
-            font_size: dp(20)
-            on_press: root.incrementActive(-5)
+            id: plus5
+            size_hint: 0.10, 0.07
+            pos_hint: {"center_x": 0.90, "center_y": 0.49}
+            text: "+5"
+            font_size: self.height * 0.4 
+            on_press: root.increment_active(5)
+
         Button:
-            size_hint: 0.1,0.07
-            pos_hint: {"center_x": 0.9, "center_y": 0.40}
-            text: '+20'
-            font_size: dp(20)
-            on_press: root.incrementActive(20)
+            id: minus20
+            size_hint: 0.10, 0.07
+            pos_hint: {"center_x": 0.80, "center_y": 0.40}
+            text: "-20"
+            font_size: self.height * 0.4 
+            on_press: root.increment_active(-20)
         Button:
-            size_hint: 0.1,0.07
-            pos_hint: {"center_x": 0.8, "center_y": 0.40}
-            text: '-20'
-            font_size: dp(20)
-            on_press: root.incrementActive(-20)
+            id: plus20
+            size_hint: 0.10, 0.07
+            pos_hint: {"center_x": 0.90, "center_y": 0.40}
+            text: "+20"
+            font_size: self.height * 0.4 
+            on_press: root.increment_active(20)
+
         Button:
-            size_hint: 0.1,0.07
-            pos_hint: {"center_x": 0.9, "center_y": 0.31}
-            text: '+90'
-            font_size: dp(20)
-            on_press: root.incrementActive(90)
+            id: minus90
+            size_hint: 0.10, 0.07
+            pos_hint: {"center_x": 0.80, "center_y": 0.31}
+            text: "-90"
+            font_size: self.height * 0.4 
+            on_press: root.increment_active(-90)
         Button:
-            size_hint: 0.1,0.07
-            pos_hint: {"center_x": 0.8, "center_y": 0.31}
-            text: '-90'
-            font_size: dp(20)
-            on_press: root.incrementActive(-90)
+            id: plus90
+            size_hint: 0.10, 0.07
+            pos_hint: {"center_x": 0.90, "center_y": 0.31}
+            text: "+90"
+            font_size: self.height * 0.4 
+            on_press: root.increment_active(90)
+
+        # ---------- BOTTOM TOOLBAR ----------
         Image:
             id: signal
-            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
-            size_hint_y: 0.15
-            anim_delay: 0.12
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/signalred.zip"
+            size_hint_y: 0.112
+            anim_delay: 0.05
             anim_loop: 0
-            pos_hint: {"center_x": 0.05, "center_y": 0.07}
             fit_mode: "scale-down"
-        Button:
-            size_hint: 0.1,0.11
-            pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
-            on_release: app.root.current = 'main'
+            pos_hint: {"center_x": 0.05, "center_y": 0.07}
+        
         Image:
             id: arduino
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
             size_hint_y: 0.15
             anim_delay: 0.2
-            anim_loop: 0
-            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+            anim_loop: -1
             fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+        
         Label:
             id: arduino_count
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
             text: ''
             markup: True
-            color: 1,1,1
-            font_size: self.height * 0.3
-            size_hint_y: 0.5
+            color: 1, 1, 1, 1
+            font_size: self.height * 1
+            size_hint: 0.06, 0.08
+
+        # ---------- STATUS DISPLAY (Bottom Rectangle) ----------
+        Label:
+            id: status_label
+            text: 'Select Motor to Control'
+            size_hint: 1, 0.07
+            background_color: 0, 0, 0, 0.8  # Semi-transparent black
+            color: 0, 1, 0, 1  # Green text
+            font_size: self.height * 0.6  # Scale font to label height
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            pos_hint: {"center_x": 0.57, "center_y": 0.07}
+        
+        # ---------- BOTTOM TOOLBAR ----------
+        Button:
+            size_hint: 0.1, 0.11
+            pos_hint: {"center_x": 0.9375, "center_y": 0.07}
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            border: 0,0,0,0    # avoid 9-slice margins
+            on_release: root.manager.current = 'main'

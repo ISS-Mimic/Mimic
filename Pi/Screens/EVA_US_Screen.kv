@@ -1,227 +1,279 @@
 <EVA_US_Screen>:
     name: 'us_eva'
     FloatLayout:
+        # Background image - scales with screen size
         Image:
             id: US_EVA_background
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/USpageEVAbaseNew.png'
             fit_mode: "fill"
+            size_hint: 1, 1
+            pos_hint: {"x": 0, "y": 0}
+        
+        # Crewlock Status Image - positioned relative to screen
         Image:
             id: Crewlock_Status_image
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BlankLights.png'
-            size_hint_y: 0.14
+            size_hint: 0.15, 0.14
             pos_hint: {"center_x": 0.835, "center_y": 0.87}
             fit_mode: "scale-down"
+        
+        # EVA PSI Bar - positioned relative to screen
         Image:
             id: EVA_psi_bar
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/GuageBar.png'
-            size_hint_y: 0.15
-            pos_hint: {"center_x": 0.945, "center_y": 0.0}
+            size_hint: 0.05, 0.15
+            pos_hint: {"center_x": 0.945, "center_y": 0.61}
             fit_mode: "scale-down"
+        
+        # Pressure Value Label - scales with screen
         Label:
             id: crewlockpressure_value
-            pos_hint: {"center_x": 0.9, "center_y": 0.61}
+            pos_hint: {"center_x": 0.9, "center_y": 0.605}
             text: '0.00'
             markup: True
+            bold: True
             color: root.signalcolor 
-            size_hint_y: 0.4
-            font_size: self.height * 0.10
-        Image:
-            id: Hold_bar
-            source: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/GuageBar.png'
-            size_hint_y: 0.15
-            pos_hint: {"center_x": 0.83, "center_y": 0.54}
-            fit_mode: "scale-down"
+            size_hint: 0.1, 0.04
+            font_size: min(self.width * 0.8, self.height * 0.8)
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+        
+        # Leak Timer Label - scales with screen
         Label:
             id: leak_timer
-            pos_hint: {"center_x": 0.83, "center_y": 0.54}
+            pos_hint: {"center_x": 0.83, "center_y": 0.47}
             text: '~260s Leak Check'
             markup: True
             color: 0,0,0
-            size_hint_y: 0.4
-            font_size: self.height * 0.10
+            size_hint: 0.15, 0.04
+            font_size: min(self.width * 0.6, self.height * 0.6)
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+        
+        # PSI Label - scales with screen
         Label:
             pos_hint: {"center_x": 0.835, "center_y": 0.61}
             text: '(psi)'
             markup: True
             color: 0,0,0
-            size_hint_y: 0.4
-            font_size: self.height * 0.09
+            size_hint: 0.08, 0.04
+            font_size: min(self.width * 0.7, self.height * 0.7)
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+        
+        # Pump Switch Status - scales with screen
         Label:
             id: pumpswitch
-            pos_hint: {"center_x": 0.55, "center_y": 0.60}
-            size_hint: 0.3,0.15
+            pos_hint: {"center_x": 0.55, "center_y": 0.65}
+            size_hint: 0.3, 0.15
             text: 'Airlock Pump Switch Off'
             text_size: self.width, None
             markup: True
             color: root.signalcolor 
-            size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.8, dp(20))
+            halign: 'left'
+            valign: 'middle'
+        
+        # Pump Voltage Status - scales with screen
         Label:
             id: pumpvoltage
             pos_hint: {"center_x": 0.55, "center_y": 0.55}
-            size_hint: 0.3,0.15
+            size_hint: 0.3, 0.15
             text: 'Airlock Pump Power Off'
             text_size: self.width, None
             markup: True
             color: root.signalcolor 
-            size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.8, dp(20))
+            halign: 'left'
+            valign: 'middle'
+        
+        # EV1 Astronaut Picture - scales with screen
         AsyncImage:
             id: EV1_Pic
             source: ""
             opacity: 0.0
-            size_hint_y: 0.17
+            size_hint: 0.12, 0.17
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.764, "center_y": 0.291}
+        
+        # EV1 Name Label - scales with screen
         Label:
             id: EV1_name
             pos_hint: {"center_x": 0.763, "center_y": 0.17}
             text: 'EV1'
             markup: True
             color: 0,0,0
-            size_hint_y: 0.4
-            font_size: self.height * 0.10
+            size_hint: 0.12, 0.04
+            font_size: min(self.width * 0.8, self.height * 0.8)
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+        
+        # EV2 Astronaut Picture - scales with screen
         AsyncImage:
             id: EV2_Pic
             source: ""
             opacity: 0.0
-            size_hint_y: 0.17
+            size_hint: 0.12, 0.17
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.895, "center_y": 0.291}
+        
+        # EV2 Name Label - scales with screen
         Label:
             id: EV2_name
             pos_hint: {"center_x": 0.894, "center_y": 0.17}
             text: 'EV2'
             markup: True
             color: 0,0,0
-            size_hint_y: 0.4
-            font_size: self.height * 0.10
+            size_hint: 0.12, 0.04
+            font_size: min(self.width * 0.8, self.height * 0.8)
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+        
+        # EVA Image - scales with screen
         AsyncImage:
             id: EVAimage
-            source: ""
-            opacity: 0.0
-            ##source: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/GuageBar.png'
+            source: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/US_Airlock.jpg'
+            opacity: 1.0
             size_hint: 0.42, 0.38
-            size_hint_max: 270, 220
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.187, "center_y": 0.655}
+        
+        # EVA Image Button - scales with screen
         Button:
             id: EVAimage_button
-            size_hint_y: 0.38
+            size_hint: 0.42, 0.38
             pos_hint: {"center_x": 0.185, "center_y": 0.655}
             opacity: 0.0
             on_release: app.root.current = 'eva_pictures'
+        
+        # EVA Status Label - scales with screen
         Label:
             id: EVAstatus  
             pos_hint: {"center_x": 0.19, "center_y": 0.34}
-            size_hint: 0.365,0.36
+            size_hint: 0.365, 0.36
             text: ''
             text_size: self.width, None
-            ##padding_y: (self.height - self.line_height)/2
             markup: True
             color: 1,1,1
-            size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.9, dp(24))
+            halign: 'left'
+            valign: 'middle'
+        
+        # EVA Clock - scales with screen
         Label:
             id: EVA_clock
             pos_hint: {"center_x": 0.51, "center_y": 0.84}
             text: '0:00:00'
-            size_hint_y: 0.5
-            text_size: None, self.height
+            size_hint: 0.2, 0.1
+            text_size: self.size
             markup: True
             color: 0,0,0
-            size_hint_y: 0.4
-            font_size: self.height * 0.3
+            font_size: min(self.height * 0.9, dp(48))
+            halign: 'center'
+            valign: 'middle'
+        
+        # EV1 Crewmember Label - scales with screen
         Label:
             id: EV1
             pos_hint: {"center_x": 0.55, "center_y": 0.47}
-            size_hint: 0.3,0.15
+            size_hint: 0.3, 0.15
             text: 'EV1 Crewmember:'
             text_size: self.width, None
             markup: True
             color: 0,0,0
-            size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.8, dp(20))
+            halign: 'left'
+            valign: 'middle'
+        
+        # EV1 EVA Number - scales with screen
         Label:
             id: EV1_EVAnum
             pos_hint: {"center_x": 0.55, "center_y": 0.42}
-            size_hint: 0.3,0.15
+            size_hint: 0.3, 0.15
             text: 'Number of EVAs = 0'
             text_size: self.width, None
             markup: True
             color: 0,0,0
-            size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.8, dp(20))
+            halign: 'left'
+            valign: 'middle'
+        
+        # EV1 EVA Time - scales with screen
         Label:
             id: EV1_EVAtime
             pos_hint: {"center_x": 0.55, "center_y": 0.37}
-            size_hint: 0.3,0.15
+            size_hint: 0.3, 0.15
             text: 'Total EVA Time = 0:00'
             text_size: self.width, None
             markup: True
             color: 0,0,0
-            size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.8, dp(20))
+            halign: 'left'
+            valign: 'middle'
+        
+        # EV2 Crewmember Label - scales with screen
         Label:
             id: EV2
             pos_hint: {"center_x": 0.55, "center_y": 0.30}
-            size_hint: 0.3,0.15
+            size_hint: 0.3, 0.15
             text: 'EV2 Crewmember:'
             text_size: self.width, None
             markup: True
             color: 0,0,0
-            size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.8, dp(20))
+            halign: 'left'
+            valign: 'middle'
+        
+        # EV2 EVA Number - scales with screen
         Label:
             id: EV2_EVAnum
             pos_hint: {"center_x": 0.55, "center_y": 0.25}
-            size_hint: 0.3,0.15
+            size_hint: 0.3, 0.15
             text: 'Number of EVAs = 0'
             text_size: self.width, None
             markup: True
             color: 0,0,0
-            size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.8, dp(20))
+            halign: 'left'
+            valign: 'middle'
+        
+        # EV2 EVA Time - scales with screen
         Label:
             id: EV2_EVAtime
             pos_hint: {"center_x": 0.55, "center_y": 0.20}
-            size_hint: 0.3,0.15
+            size_hint: 0.3, 0.15
             text: 'Total EVA Time = 0:00'
             text_size: self.width, None
             markup: True
             color: 0,0,0
-            size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.8, dp(20))
+            halign: 'left'
+            valign: 'middle'
+        
+        # EVA Occurring Status - scales with screen
         Label:
             id: EVA_occuring
-            pos_hint: {"center_x": 0.57, "center_y": 0.81}
-            size_hint: 0.35,0.35
+            pos_hint: {"center_x": 0.55, "center_y": 0.75}
+            size_hint: 0.35, 0.35
             text: 'EVA Status'
             text_size: self.width, None
             markup: True
             color: 1,1,1
-            size_hint_y: 0.4
-            font_size: self.height * 0.10
-        Image:
-            id: signal
-            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
-            size_hint_y: 0.15
-            anim_delay: 0.05
-            anim_loop: 0
-            pos_hint: {"center_x": 0.05, "center_y": 0.07}
-            fit_mode: "scale-down"
-        Button:
-            size_hint: 0.1,0.11
-            pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
-            on_release: app.root.current = 'eva_main'
+            font_size: min(self.height * 0.8, dp(20))
+            halign: 'center'
+            valign: 'middle'
+ 
+        # EVA Needle - positioned relative to screen
         Image:
             id: EVA_needle
-            source: './imgs/eva/GuageNeedle.png'
-            pos_hint: {"center_x": 0.83, "center_y": 0.633}
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/GuageNeedle.png'
             pos_hint: {"center_x": 0.83, "center_y": 0.633}
-            size_hint_x: 0.24 
+            size_hint: 0.24, 0.24
             fit_mode: "scale-down"
             angle: 180
             canvas.before:
@@ -232,19 +284,54 @@
                     origin: self.center
             canvas.after:
                 PopMatrix
+        
+       # ---------- STATUS DISPLAY (Bottom Rectangle) ----------
+        Label:
+            id: status_label
+            text: ''
+            size_hint: 1, 0.07
+            background_color: 0, 0, 0, 0.8  # Semi-transparent black
+            color: 0, 1, 0, 1  # Green text
+            font_size: self.height * 0.6  # Scale font to label height
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            pos_hint: {"center_x": 0.57, "center_y": 0.07}
+        
+        # ---------- BOTTOM TOOLBAR ----------
+        Image:
+            id: signal
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/signalred.zip"
+            size_hint_y: 0.112
+            anim_delay: 0.05
+            anim_loop: 0
+            fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.05, "center_y": 0.07}
+        
         Image:
             id: arduino
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
             size_hint_y: 0.15
             anim_delay: 0.2
-            anim_loop: 0
-            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+            anim_loop: -1
             fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+        
         Label:
             id: arduino_count
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
             text: ''
             markup: True
-            color: 1,1,1
-            font_size: self.height * 0.3
-            size_hint_y: 0.5
+            color: 1, 1, 1, 1
+            font_size: self.height * 1
+            size_hint: 0.06, 0.08
+        
+        # ─────────────────────── Navigation ────────────────────────────────
+
+        Button:
+            size_hint: 0.1, 0.11
+            pos_hint: {"center_x": 0.9375, "center_y": 0.07}
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            border: 0,0,0,0    # avoid 9-slice margins
+            on_release: app.root.current = 'eva_main'

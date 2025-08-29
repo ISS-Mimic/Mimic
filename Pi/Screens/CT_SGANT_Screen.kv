@@ -1,3 +1,5 @@
+#:import dp kivy.metrics.dp
+
 <CT_SGANT_Screen>:
     name: 'ct_sgant'
     FloatLayout:
@@ -19,24 +21,24 @@
             text: 'Ku-Band SGANT Elevation'
             markup: True
             color: 1,1,1
-            size_hint_y: 0.4
-            font_size: self.height * 0.14
+            size_hint: 0.3, 0.4
+            font_size: min(self.height * 0.14, dp(20))
         Label:
             id: sgant_elevation
             pos_hint: {"center_x": 0.65, "center_y": 0.2}
             text: ''
             markup: True
             color: root.signalcolor
-            size_hint_y: 0.4
-            font_size: self.height * 0.10
+            size_hint: 0.15, 0.4
+            font_size: min(self.height * 0.10, dp(16))
         Label:
             id: sgant_transmit
             pos_hint: {"center_x": 0.75, "center_y": 0.2}
             text: ''
             markup: True
             color: root.signalcolor
-            size_hint_y: 0.4
-            font_size: self.height * 0.10
+            size_hint: 0.15, 0.4
+            font_size: min(self.height * 0.10, dp(16))
         Image:
             id: sgant_dish
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/ct/SGANTantenna.png"
@@ -197,33 +199,86 @@
                     origin: self.center
             canvas.after:
                 PopMatrix
+        Image:
+            id: tdrs_z8
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
+            color: 1,1,1,0.2
+            size_hint: 0.15,0.15
+            anim_delay: 0.12
+            anim_loop: 0
+            fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.5, "center_y": 0.8}
+            angle: 0
+            angle2: 180
+            canvas.before:
+                PushMatrix
+                Rotate:
+                    angle: self.angle
+                    axis: 0,0,-1
+                    ##origin: sgant_dish.center
+                    origin: 400,0
+                Rotate:
+                    angle: self.angle2
+                    axis: 0,0,1
+                    origin: self.center
+            canvas.after:
+                PopMatrix
         Label:
             id: tdrs_label
-            ##pos: tdrs.pos
-            pos_hint: {"center_x": 0.5, "center_y": 0.85}
+            pos_hint: {"center_x": 0.5, "center_y": 0.89}
             text: '---'
             markup: True
             color: root.signalcolor
-            size_hint_y: 0.4
-            font_size: self.height * 0.12
-        Button:
-            size_hint: 0.1,0.11
-            pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
-            on_release: app.root.current = 'ct'
+            size_hint: 0.4, 0.4
+            font_size: min(self.height * 0.12, dp(18))
+
+       # ---------- STATUS DISPLAY (Bottom Rectangle) ----------
+        Label:
+            id: status_label
+            text: ''
+            size_hint: 1, 0.07
+            background_color: 0, 0, 0, 0.8  # Semi-transparent black
+            color: 0, 1, 0, 1  # Green text
+            font_size: self.height * 0.6  # Scale font to label height
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            pos_hint: {"center_x": 0.57, "center_y": 0.07}
+        
+        # ---------- BOTTOM TOOLBAR ----------
+        Image:
+            id: signal
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/signalred.zip"
+            size_hint_y: 0.112
+            anim_delay: 0.05
+            anim_loop: 0
+            fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.05, "center_y": 0.07}
+        
         Image:
             id: arduino
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
             size_hint_y: 0.15
             anim_delay: 0.2
-            anim_loop: 0
-            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+            anim_loop: -1
             fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+        
         Label:
             id: arduino_count
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
             text: ''
             markup: True
-            color: 1,1,1
-            font_size: self.height * 0.3
-            size_hint_y: 0.5
+            color: 1, 1, 1, 1
+            font_size: self.height * 1
+            size_hint: 0.06, 0.08
+        
+        # ─────────────────────── Navigation ────────────────────────────────
+
+        Button:
+            size_hint: 0.1, 0.11
+            pos_hint: {"center_x": 0.9375, "center_y": 0.07}
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            border: 0,0,0,0    # avoid 9-slice margins
+            on_release: app.root.current = 'ct'

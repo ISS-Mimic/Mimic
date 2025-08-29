@@ -1,0 +1,25 @@
+[
+  {
+    "type": "stepseq",
+    "seq": [
+      90,
+      180
+    ],
+    "duration": 15
+  },
+  {
+    "type": "sine",
+    "amp": 90,
+    "offset": 0,
+    "period": 6,
+    "duration": 30,
+    "quant": 5
+  },
+  {
+    "type": "random",
+    "low": -235,
+    "high": 235,
+    "duration": 15,
+    "seed": 123
+  }
+]

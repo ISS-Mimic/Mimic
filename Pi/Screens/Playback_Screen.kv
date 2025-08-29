@@ -1,253 +1,218 @@
+#:kivy 2.0.0
 #:import Factory kivy.factory.Factory
+#:import dp kivy.metrics.dp
+#:import Window kivy.core.window.Window
+#:import sp kivy.metrics.sp
+
+<PopupText@Label>:
+    size_hint_y: None
+    text_size: self.width - dp(16), None
+    padding: dp(8), 0
+    halign: 'left'
+    valign: 'middle'
+    color: 1, 1, 1, 1
+    # Baseline 16sp at ~1200×800 window; scales with the smaller screen dimension.
+    # Clamp between 14sp and 26sp so it stays readable everywhere.
+    font_size: max(sp(14), min(sp(26), sp(16) * min(Window.width/1200.0, Window.height/800.0)))
+    height: self.texture_size[1] + dp(12)
+
+# Custom dropdown option styling
+<CustomSpinnerOption@SpinnerOption>:
+    background_color: 0.3, 0.3, 0.3, 1
+    color: 1, 1, 1, 1
+    font_size: self.height * 0.6  # Scale font to option height
+    size_hint_y: None
+    height: self.width * 0.25  # Fixed height for consistent scaling
+
 <DescriptionPopup@Popup>:
     title: 'Recorded ISS Data Descriptions'
-    size_hint: 0.6, 0.4
+    size_hint: 0.8, 0.8
     auto_dismiss: True
-
+    
     BoxLayout:
         orientation: 'vertical'
+        padding: dp(12)
+        spacing: dp(8)
+        
         ScrollView:
-            do_scroll_x: False  # Disabling horizontal scrolling
-            do_scroll_y: True   # Enabling vertical scrolling
-
-            # You can add your content inside this GridLayout
+            do_scroll_x: False
+            do_scroll_y: True
+            
             GridLayout:
                 cols: 1
                 size_hint_y: None
-                height: self.minimum_height  # Important for scrolling
-                # Add your widgets here
+                height: self.minimum_height
+                padding: dp(8), dp(8)
+                spacing: dp(8)
+                
+                PopupText:
+                    text: 'Select which data set to replay - this is all data recorded during ISS events which can be played back at higher speeds'
+                
+                PopupText:
+                    text: 'HTV: Recorded during the visit of the Japanese HTV Cargo Spacecraft, shows the arrays in normal operations and then feathering mode to avoid the thruster plume from the HTV'
 
-                #Label:
-                #    text: 'This will playback recorded data from when the Japanese HTV spacecraft berthed to the ISS. During berthing, the SARJs and nadir BGAs lock but the zenith BGAs autotrack'
-                #    padding: 10, 10
-                #    halign: 'center'
-                #    text_size: self.width - 20, None
+                PopupText:
+                    text: 'OFT-2: Recorded during the docking of the Boeing Starliner in 2022'
 
-                # Example of a text box with ISS information
-                Label:
-                    text: 'This will playback recorded data from when the Japanese HTV spacecraft berthed to the ISS. During berthing, the SARJs and nadir BGAs lock but the zenith BGAs autotrack'
-                    size_hint_y: None
-                    height: self.texture_size[1] + 20  
-                    text_size: self.width, None  
-                    halign: 'left'
-                    valign: 'middle'
+                PopupText:
+                    text: 'Standard: ISS in normal operations'
 
-                Label:
-                    text: 'ISS Info 2: [More ISS info here]'
-                    size_hint_y: None
-                    height: self.texture_size[1] + 20
-                    text_size: self.width, None
-                    halign: 'left'
-                    valign: 'middle'
+                PopupText:
+                    text: 'Disco: press disco button for some fun'
 
-                Label:
-                    text: 'ISS Info 2: [More ISS info here]'
-                    size_hint_y: None
-                    height: self.texture_size[1] + 20
-                    text_size: self.width, None
-                    halign: 'left'
-                    valign: 'middle'
-
-                Label:
-                    text: 'ISS Info 2: [More ISS info here]'
-                    size_hint_y: None
-                    height: self.texture_size[1] + 20
-                    text_size: self.width, None
-                    halign: 'left'
-                    valign: 'middle'
-
-                Label:
-                    text: 'ISS Info 2: [More ISS info here]'
-                    size_hint_y: None
-                    height: self.texture_size[1] + 20
-                    text_size: self.width, None
-                    halign: 'left'
-                    valign: 'middle'
-
-                Label:
-                    text: 'DEmo orbit 2'
-                    padding: 10, 10
-                    halign: 'center'
-                    text_size: self.width - 20, None
-
-<ImageButton>:
-    background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/InfoIcon.png'
-    fit_mode: "scale-down"
+                PopupText:
+                    text: 'USB: Insert a USB drive with telemetry files in a top level folder that starts with "Telemetry" (e.g. Telemetry_19Aug2024), see files in /RecordedData for the format'
+                
 
 <Playback_Screen>:
     name: 'playback'
+    
     FloatLayout:
-        orientation: 'vertical'
         Image:
+            id: Playback_Background
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/SimulatedOrbitBackground.png'
             fit_mode: "fill"
-        Spinner:
-            id: playback_dropdown
-            size_hint: 0.2, 0.1
-            pos_hint: {"center_x": 0.5, "center_y": 0.5}
-            text: 'Select Playback Data'
-            values: ['HTV','OFT-2']
-            on_text: root.on_dropdown_select(self.text)
-        Label:
-            id: playbackstatus
-            text: ''
-            size_hint_y: 0.4
-            font_size: self.height * 0.2
-            pos_hint: {"center_x": 0.5, "center_y": 0.1}
-            markup: True
-            color: 1,1,1
+        
         Button:
             id: popup
             text: ''
-            size_hint: 0.1,0.1
-            pos_hint: {"center_x": 0.5, "center_y": 0.8}
-            background_color: 0,0,0,0
+            size_hint: None, None
+            size: [max(dp(36), min(min(self.parent.width, self.parent.height) * 0.08, dp(120)))] * 2
+            pos_hint: {"center_x": 0.25, "center_y": 0.8}
+            background_normal: ''
+            background_down: ''
+            background_color: 0, 0, 0, 0
             on_release: Factory.DescriptionPopup().open()
+
             Image:
                 source: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/InfoIcon.png'
-                center_x: self.parent.center_x
-                center_y: self.parent.center_y
+                size_hint: None, None
+                size: self.parent.size
+                pos: self.parent.pos      # <-- bind to the button's position
+                fit_mode: "contain"       # Kivy 2.2+
+
+        
+        Spinner:
+            id: file_dropdown
+            text: 'Select DATA'
+            size_hint: 0.18, 0.07
+            values: ['HTV', 'OFT2', 'Standard']
+            on_text: root.on_dropdown_select_data(self.text)
+            background_color: 0.3, 0.3, 0.3, 1  # Dark metallic look
+            pos_hint: {"center_x": 0.154, "center_y": 0.5475}
+            font_size: self.height * 0.5  # Scale font to button height
+            # Custom dropdown popup styling
+            option_cls: Factory.CustomSpinnerOption
+        
+        
+        # ---------- MIDDLE PANEL: PLAYBACK SPEED ----------
+        Spinner:
+            id: speed_dropdown
+            text: 'Select SPEED'
+            size_hint: 0.18, 0.07
+            values: ['10x', '20x', '60x', '90x']
+            on_text: root.on_dropdown_select_speed(self.text)
+            background_color: 0.3, 0.3, 0.3, 1  # Dark metallic look
+            pos_hint: {"center_x": 0.485, "center_y": 0.5475}
+            font_size: self.height * 0.5  # Scale font to button height
+            # Custom dropdown popup styling
+            option_cls: Factory.CustomSpinnerOption
+
+        
+        # ---------- RIGHT PANEL: DISCO MODE ----------
         Button:
-            id: Disco
-            size_hint: 0.14,0.115
-            text: "Disco!"
-            font_size: dp(30)
-            pos_hint: {"center_x": 0.85, "center_y": 0.47}
-            on_release: playbackstatus.text = 'Transmitting Disco Orbit'
-            on_release: root.changeDemoBoolean(True)
-            on_release: root.startDisco()
+            id: disco_button
+            size_hint: 0.2, 0.31
+            background_color: 0, 0, 0, 0  # Transparent background
+            on_press: root.start_disco_mode()
+            pos_hint: {"center_x": 0.807, "center_y": 0.55}
+            
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 0.5
+                Ellipse:
+                    pos: self.pos
+                    size: self.size
+        
+        
+        # ---------- MAIN PLAYBACK CONTROLS ----------
+        # Green Start Button (Bottom Left)
         Button:
-            id: DemoStart
-            size_hint: 0.14,0.115
-            pos_hint: {"center_x": 0.15, "center_y": 0.54}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StartUnlit.png'
-            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StartDown.png'
-            on_release: DemoStop.disabled = False
-            on_release: playbackstatus.text = 'Transmitting Demo Orbit'
-            on_release: root.changeDemoBoolean(True)
-            on_release: self.disabled = True
-            on_release: root.startDemo()
+            id: start_button
+            text: 'START'
+            size_hint: 0.15, 0.1
+            background_color: 0, 0.8, 0, 1  # Green
+            disabled: True  # Start disabled by default
+            on_press: root.start_playback()
+            pos_hint: {"center_x": 0.35, "center_y": 0.235}
+            font_size: self.height * 0.4  # Scale font to button height
+        
+        # Red Stop Button (Bottom Right)
         Button:
-            id: DemoStop
-            size_hint: 0.14,0.115
-            pos_hint: {"center_x": 0.15, "center_y": 0.40}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StopUnlit.png'
-            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StopDown.png'
-            disabled: True
-            on_release: DemoStart.disabled = False
-            on_release: playbackstatus.text = 'Stopped'
-            on_release: root.changeDemoBoolean(False)
-            on_release: self.disabled = True
-            on_release: root.stopDemo()
+            text: 'STOP'
+            size_hint: 0.15, 0.1
+            background_color: 0.8, 0, 0, 1  # Red
+            disabled: not root.is_playing
+            on_press: root.stop_playback()
+            pos_hint: {"center_x": 0.65, "center_y": 0.235}
+            font_size: self.height * 0.4  # Scale font to button height
+        
+        # Loop Button (Center Bottom)
         Button:
-            id: HTVDemoStart
-            size_hint: 0.14,0.115
-            pos_hint: {"center_x": 0.38, "center_y": 0.54}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StartUnlit.png'
-            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StartDown.png'
-            on_release: HTVDemoStop.disabled = False
-            on_release: playbackstatus.text = 'Transmitting HTV Demo Orbit'
-            on_release: root.changeDemoBoolean(True)
-            on_release: self.disabled = True
-            on_release: root.startHTVDemo()
-        Button:
-            id: HTVDemoStop
-            size_hint: 0.14,0.115
-            pos_hint: {"center_x": 0.38, "center_y": 0.40}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StopUnlit.png'
-            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StopDown.png'
-            disabled: True
-            on_release: HTVDemoStart.disabled = False
-            on_release: playbackstatus.text = 'Stopped'
-            on_release: root.changeDemoBoolean(False)
-            on_release: self.disabled = True
-        Button:
-            id: OFT2DemoStart
-            size_hint: 0.14,0.115
-            pos_hint: {"center_x": 0.15, "center_y": 0.54}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StartUnlit.png'
-            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StartDown.png'
-            on_release: OFT2DemoStop.disabled = False
-            on_release: playbackstatus.text = 'Transmitting OFT2 Demo'
-            on_release: root.changeDemoBoolean(True)
-            on_release: self.disabled = True
-            on_release: root.startOFT2Demo()
-        Button:
-            id: OFT2DemoStop
-            size_hint: 0.14,0.115
-            pos_hint: {"center_x": 0.15, "center_y": 0.40}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StopUnlit.png'
-            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StopDown.png'
-            disabled: True
-            on_release: OFT2DemoStart.disabled = False
-            on_release: playbackstatus.text = 'Stopped'
-            on_release: root.changeDemoBoolean(False)
-            on_release: self.disabled = True
-        Button:
-            id: LoadDemoStart
-            disabled: True
-            size_hint: 0.14,0.115
-            pos_hint: {"center_x": 0.615, "center_y": 0.54}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StartUnlit.png'
-            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StartDown.png'
-            on_release: LoadDemoStop.disabled = False
-            on_release: playbackstatus.text = 'Sending Demo'
-            on_release: root.changeDemoBoolean(True)
-            on_release: self.disabled = True
-            on_release: root.startLoadDemo()
-        Button:
-            id: LoadDemoStop
-            size_hint: 0.14,0.115
-            pos_hint: {"center_x": 0.615, "center_y": 0.40}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StopUnlit.png'
-            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StopDown.png'
-            disabled: True
-            on_release: LoadDemoStart.disabled = False
-            on_release: playbackstatus.text = 'Stopped'
-            on_release: root.changeDemoBoolean(False)
-            on_release: self.disabled = True
-        Button:
-            id: OFT2loop
-            text: 'OFT2 Loop'
-            size_hint: 0.1,0.1
-            font_size: dp(20)
-            pos_hint: {"center_x": 0.15, "center_y": 0.23}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StopUnlit.png'
-            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/playback/StopDown.png'
-            disabled: True
-            on_release: playbackstatus.text = 'Looping'
-            on_release: root.changeDemoBoolean(False)
-            on_release: self.disabled = True
-        Button:
-            size_hint: 0.1,0.11
-            pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
-            on_release: DemoStart.disabled = False
-            on_release: DemoStop.disabled = True
-            on_release: root.changeDemoBoolean(False)
-            on_release: root.stopDemo()
-            on_release: root.manager.current = 'main'
+            text: 'LOOP'
+            size_hint: 0.15, 0.1
+            background_color: (0.2, 0.8, 0.2, 1) if root.loop_enabled else (0.6, 0.6, 0.6, 1)
+            on_press: root.toggle_loop()
+            pos_hint: {"center_x": 0.49, "center_y": 0.43}
+            font_size: self.height * 0.4  # Scale font to button height
+        
+        # ---------- STATUS DISPLAY (Bottom Rectangle) ----------
+        Label:
+            id: status_label
+            text: 'Select Data to Playback'
+            size_hint: 1, 0.07
+            background_color: 0, 0, 0, 0.8  # Semi-transparent black
+            color: 0, 1, 0, 1  # Green text
+            font_size: self.height * 0.6  # Scale font to label height
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            pos_hint: {"center_x": 0.57, "center_y": 0.07}
+        
+        # ---------- BOTTOM TOOLBAR ----------
         Image:
             id: signal
-            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
-            size_hint_y: 0.15
-            anim_delay: 0.12
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/signalred.zip"
+            size_hint_y: 0.112
+            anim_delay: 0.05
             anim_loop: 0
-            pos_hint: {"center_x": 0.05, "center_y": 0.07}
             fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.05, "center_y": 0.07}
+        
         Image:
             id: arduino
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
             size_hint_y: 0.15
             anim_delay: 0.2
-            anim_loop: 0
-            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+            anim_loop: -1
             fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+        
         Label:
             id: arduino_count
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
             text: ''
             markup: True
-            color: 1,1,1
-            font_size: self.height * 0.3
-            size_hint_y: 0.5
+            color: 1, 1, 1, 1
+            font_size: self.height * 1
+            size_hint: 0.06, 0.08
+        
+        # ─────────────────────── Navigation ────────────────────────────────
+
+        Button:
+            size_hint: 0.1, 0.11
+            pos_hint: {"center_x": 0.9375, "center_y": 0.07}
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            border: 0,0,0,0    # avoid 9-slice margins
+            on_release: root.manager.current = 'main'

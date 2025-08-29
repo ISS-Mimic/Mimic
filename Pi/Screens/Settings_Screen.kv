@@ -1,3 +1,6 @@
+#:kivy 2.0.0
+#:import dp kivy.metrics.dp
+
 <Settings_Screen>:
     name: 'settings'
     FloatLayout:
@@ -5,64 +8,150 @@
         Image:
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/SettingsBackground.png'
             fit_mode: "fill"
+        
+        # Title
         Label:
-            text: ''
-            pos_hint: {"center_x": 0.5,"center_y":0.8}
+            text: 'Location Settings'
+            pos_hint: {"center_x": 0.15, "center_y": 0.85}
             bold: True
-            size_hint_y: 0.2
-            font_size: self.height * 0.5
-            markup: True
-            color: 1,0,1
+            size_hint_y: 0.1
+            font_size: min(self.height * 0.6, dp(56))
+            color: 1, 1, 1, 1
+            halign: 'left'
+            valign: 'middle'
+        
+
+        
+        # Manual Input Section
+        Label:
+            text: 'Enter Coordinates:'
+            pos_hint: {"center_x": 0.15, "center_y": 0.78}
+            size_hint_y: 0.1
+            font_size: min(self.height * 0.4, dp(48))
+            color: 1, 0, 1, 1
+        
+        Label:
+            text: 'Latitude:'
+            pos_hint: {"center_x": 0.15, "center_y": 0.72}
+            size_hint_y: 0.05
+            font_size: min(self.height * 0.6, dp(56))
+            color: 1, 1, 1, 1
+        
+        TextInput:
+            id: lat_input
+            text: '29.7604'
+            pos_hint: {"center_x": 0.25, "center_y": 0.72}
+            size_hint: 0.1, 0.05
+            font_size: self.height * 0.4
+            multiline: False
+            input_filter: 'float'
+        
+        Label:
+            text: 'Longitude:'
+            pos_hint: {"center_x": 0.15, "center_y": 0.65}
+            size_hint_y: 0.05
+            font_size: min(self.height * 0.6, dp(56))
+            color: 1, 1, 1, 1
+        
+        TextInput:
+            id: lon_input
+            text: '-95.3698'
+            pos_hint: {"center_x": 0.25, "center_y": 0.65}
+            size_hint: 0.1, 0.05
+            font_size: self.height * 0.4
+            multiline: False
+            input_filter: 'float'
+        
+        Button:
+            text: 'Set Manual Location'
+            pos_hint: {"center_x": 0.2, "center_y": 0.58}
+            size_hint: 0.3, 0.06
+            on_release: root.set_location_from_coordinates(lat_input.text, lon_input.text)
+            background_color: 0.2, 1, 0.2, 1
+            font_size: self.height * 0.6
+        
+        # Auto-detect Button
+        Button:
+            text: 'Auto-detect from IP'
+            pos_hint: {"center_x": 0.2, "center_y": 0.51}
+            size_hint: 0.3, 0.06
+            on_release: root.detect_location_from_ip()
+            background_color: 1, 0.5, 0, 1
+            font_size: self.height * 0.6
+
+        # Title
+        Label:
+            text: 'Motor Settings'
+            pos_hint: {"center_x": 0.12, "center_y": 0.4}
+            bold: True
+            size_hint_y: 0.1
+            font_size: min(self.height * 0.6, dp(56))
+            color: 1, 1, 1, 1
+            halign: 'left'
+            valign: 'middle'
+ 
         CheckBox:
             id: smartflip
-            pos_hint: {"center_x": 0.1,"center_y": 0.5}
-            size_hint_y: 0.2
-            on_active: root.checkbox_clicked(self,self.active)
+            pos_hint: {"center_x": 0.05, "center_y": 0.3}
+            size_hint: 0.1,0.1
+            on_active: root.checkbox_clicked(self, self.active)
+
         Label:
-            text: "Smartflip (check to enable smooth 0 crossing)"
-            pos_hint: {"center_x": 0.35,"center_y":0.5}
-            size_hint_y: 0.4   
-            font_size: self.height * 0.13
-        TextInput:
-            id: lat_input1
-            pos_hint: {'center_x': 0.2, 'y': 0.4}
-            size_hint: (0.1, 0.06)
-            cursor_blink: True
-            font_size: 15
-            multiline: False
-        TextInput:
-            id: lat_input2
-            pos_hint: {'center_x': 0.4, 'y': 0.4}
-            size_hint: (0.1, 0.06)
-            cursor_blink: True
-            font_size: 15
-            multiline: False
-        Button:
-            size_hint: 0.1,0.11
-            pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
-            on_release: app.root.current = 'main'
+            text: 'Enable Smartflip (motor behavior)'
+            pos_hint: {"center_x": 0.25, "center_y": 0.3}
+            size_hint_y: 0.1
+            font_size: min(self.height * 0.4, dp(56))
+            color: 0.6, 0.6, 0.6, 1
+            halign: 'left'
+            valign: 'middle'
+        
+        # ---------- STATUS DISPLAY (Bottom Rectangle) ----------
+        Label:
+            id: status_label
+            text: 'Adjust Location or Smartflip'
+            size_hint: 1, 0.07
+            background_color: 0, 0, 0, 0.8  # Semi-transparent black
+            color: 0, 1, 0, 1  # Green text
+            font_size: self.height * 0.6  # Scale font to label height
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            pos_hint: {"center_x": 0.57, "center_y": 0.07}
+        
+        # ---------- BOTTOM TOOLBAR ----------
         Image:
             id: signal
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/signalred.zip"
             size_hint_y: 0.112
             anim_delay: 0.05
             anim_loop: 0
-            pos_hint: {"center_x": 0.05, "center_y": 0.07}
             fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.05, "center_y": 0.07}
+        
         Image:
             id: arduino
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
             size_hint_y: 0.15
             anim_delay: 0.2
-            anim_loop: 0
-            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+            anim_loop: -1
             fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+        
         Label:
             id: arduino_count
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
             text: ''
             markup: True
-            color: 1,1,1
-            font_size: self.height * 0.3
-            size_hint_y: 0.5
+            color: 1, 1, 1, 1
+            font_size: self.height * 1
+            size_hint: 0.06, 0.08
+        
+        # ─────────────────────── Navigation ────────────────────────────────
+
+        Button:
+            size_hint: 0.1, 0.11
+            pos_hint: {"center_x": 0.9375, "center_y": 0.07}
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            border: 0,0,0,0    # avoid 9-slice margins
+            on_release: root.manager.current = 'main'

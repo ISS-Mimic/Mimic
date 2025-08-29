@@ -1,102 +1,205 @@
 <Crew_Screen>:
     name: 'crew'
+    
     FloatLayout:
-        Image:
-            id: Crew_background
-            source: f'{root.mimic_directory}/Mimic/Pi/imgs/crew/Crewbackground.png'
-            fit_mode: "fill"
+        # Background
+        #Image:
+        #    id: Crew_background
+        #    source: f'{root.mimic_directory}/Mimic/Pi/imgs/crew/CrewBackground.png'
+        #    fit_mode: "fill"
+        
+        # Top Left - Expedition Title
         Label:
-            id: ISS_crewed_time
-            pos_hint: {"center_x": 0.85, "center_y": 0.86}
-            text: '0:0:0:0:0:0'
+            id: expedition_title
+            pos_hint: {"center_x": 0.2, "center_y": 0.88}
+            text: root.expedition_number
             markup: True
-            color: 1,1,1
-            font_size: self.height * 0.09
-            size_hint_y: 0.4  
+            color: 0, 1, 0, 1  # Bright green
+            font_size: dp(40)
+            bold: True
+        
+        # Top Center - Expedition Duration Timer
+        Label:
+            id: expedition_duration_label
+            pos_hint: {"center_x": 0.5, "center_y": 0.92}
+            text: 'MISSION DURATION:'
+            markup: True
+            color: 1, 1, 1, 1
+            font_size: dp(16)
+            bold: True
+        
+        Label:
+            id: expedition_duration_timer
+            pos_hint: {"center_x": 0.5, "center_y": 0.86}
+            text: root.expedition_duration
+            markup: True
+            color: 0, 1, 1, 1  # Cyan for timer
+            font_size: dp(24)
+            bold: True
+            halign: 'center'
+        
+        # Top Right - ISS Continuously Crewed Time
+        Label:
+            id: iss_crewed_time_label
+            pos_hint: {"center_x": 0.83, "center_y": 0.92}
+            text: 'ISS CONTINUOUSLY CREWED FOR:'
+            markup: True
+            color: 1, 1, 1, 1
+            font_size: dp(16)
+            bold: True
+        
         Label:
             id: ISS_crewed_years
-            pos_hint: {"center_x": 0.715, "center_y": 0.91}
-            text: '23'
+            pos_hint: {"center_x": 0.73, "center_y": 0.86}
+            text: root.iss_crewed_years
             markup: True
-            color: 1,1,1
-            font_size: self.height * 0.09
-            size_hint_y: 0.4
+            color: 1, 1, 1, 1
+            font_size: dp(24)
+            bold: True
+        
         Label:
             id: ISS_crewed_months
-            pos_hint: {"center_x": 0.80, "center_y": 0.91}
-            text: '0'
+            pos_hint: {"center_x": 0.83, "center_y": 0.86}
+            text: root.iss_crewed_months
             markup: True
-            color: 1,1,1
-            font_size: self.height * 0.09
-            size_hint_y: 0.4
+            color: 1, 1, 1, 1
+            font_size: dp(24)
+            bold: True
+        
         Label:
             id: ISS_crewed_days
-            pos_hint: {"center_x": 0.915, "center_y": 0.91}
-            text: '3'
+            pos_hint: {"center_x": 0.93, "center_y": 0.86}
+            text: root.iss_crewed_days
             markup: True
-            color: 1,1,1
-            font_size: self.height * 0.09
-            size_hint_y: 0.4
+            color: 1, 1, 1, 1
+            font_size: dp(24)
+            bold: True
         
-        #---Start of Individual Crewmember Calculated Days
+        # Time format labels
         Label:
-            id: soyuz73_1
-            pos_hint: {"center_x": 0.135, "center_y": 0.58}
-            text: '23'
+            pos_hint: {"center_x": 0.73, "center_y": 0.82}
+            text: 'Years'
             markup: True
-            color: 1,1,1
-            font_size: self.height * 0.09
-            size_hint_y: 0.3
+            color: 1, 1, 1, 1
+            font_size: dp(12)
+        
         Label:
-            id: soyuz73_2
-            pos_hint: {"center_x": 0.135, "center_y": 0.42}
-            text: '23'
+            pos_hint: {"center_x": 0.83, "center_y": 0.82}
+            text: 'Months'
             markup: True
-            color: 1,1,1
-            font_size: self.height * 0.09
-            size_hint_y: 0.3
+            color: 1, 1, 1, 1
+            font_size: dp(12)
+        
         Label:
-            id: soyuz73_3
-            pos_hint: {"center_x": 0.135, "center_y": 0.265}
-            text: '23'
+            pos_hint: {"center_x": 0.93, "center_y": 0.82}
+            text: 'Days'
             markup: True
-            color: 1,1,1
-            font_size: self.height * 0.09
-            size_hint_y: 0.3
+            color: 1, 1, 1, 1
+            font_size: dp(12)
+        
+        # Total People on the ISS
         Label:
-            id: dragon11_1
-            pos_hint: {"center_x": 0.285, "center_y": 0.58}
-            text: '23'
+            id: total_crew_count_label
+            pos_hint: {"center_x": 0.82, "center_y": 0.78}
+            text: 'Number of People on ISS: '
             markup: True
-            color: 1,1,1
-            font_size: self.height * 0.09
-            size_hint_y: 0.3    
+            color: 1, 1, 1, 1
+            font_size: dp(14)
+            bold: True
+        
         Label:
-            id: dragon11_2
-            pos_hint: {"center_x": 0.44, "center_y": 0.58}
-            text: '23'
+            id: total_crew_count
+            pos_hint: {"center_x": 0.93, "center_y": 0.78}
+            text: '0'
             markup: True
-            color: 1,1,1
-            font_size: self.height * 0.09
-            size_hint_y: 0.3 
+            color: 0, 1, 0, 1
+            font_size: dp(14)
+            bold: True
+        
         Label:
-            id: dragon11_3
-            pos_hint: {"center_x": 0.44, "center_y": 0.42}
-            text: '23'
+            id: loading
+            pos_hint: {"center_x": 0.35, "center_y": 0.5}
+            text: 'Loading...'
             markup: True
-            color: 1,1,1
-            font_size: self.height * 0.09
-            size_hint_y: 0.3 
-        Label:
-            id: dragon11_4
-            pos_hint: {"center_x": 0.44, "center_y": 0.265}
-            text: '23'
-            markup: True
-            color: 1,1,1
-            font_size: self.height * 0.09
-            size_hint_y: 0.3 
-        #---End of Individual Crewmember Calculated Days
+            color: 1, 1, 1, 1
+            font_size: dp(14)
+            bold: True
 
+        # Main Crew Display Area (Left Side)
+        ScrollView:
+            pos_hint: {"center_x": 0.35, "center_y": 0.5}
+            size_hint: 0.65, 0.6
+            
+            GridLayout:
+                id: crew_container
+                cols: 3
+                spacing: dp(20)
+                padding: dp(20)
+                size_hint_y: None
+                height: self.minimum_height
+                # Crew widgets will be added here dynamically
+        
+        # Right Side - Expedition Mission Patch
+        Image:
+            id: expedition_patch
+            pos_hint: {"center_x": 0.83, "center_y": 0.62}
+            size_hint: 0.25, 0.25
+            source: f'{root.mimic_directory}/Mimic/Pi/imgs/crew/Expedition_Patch.png'
+            fit_mode: "scale-down"
+        
+        # Crewed Vehicles List
+        ScrollView:
+            pos_hint: {"center_x": 0.83, "center_y": 0.35}
+            size_hint: 0.25, 0.3
+            
+            GridLayout:
+                id: crewed_vehicles_container
+                cols: 1
+                spacing: dp(2)
+                padding: dp(0)
+                size_hint_y: None
+                height: self.minimum_height
+                # Crewed vehicle widgets will be added here dynamically
+        
+        # Legend
+        BoxLayout:
+            pos_hint: {"center_x": 0.35, "center_y": 0.18}
+            size_hint: 0.65, 0.1
+            orientation: 'horizontal'
+            spacing: dp(10)
+            
+            Label:
+                text: 'CMDR = Commander'
+                color: 1, 1, 1, 1
+                font_size: dp(12)
+                bold: True
+            
+            Label:
+                text: 'FE = Flight Engineer'
+                color: 1, 1, 1, 1
+                font_size: dp(12)
+                bold: True
+            
+            Label:
+                text: 'Credit: spacefacts.de'
+                color: 1, 1, 1, 1
+                font_size: dp(12)
+                bold: True
+        
+       # ---------- STATUS DISPLAY (Bottom Rectangle) ----------
+        Label:
+            id: status_label
+            text: ''
+            size_hint: 1, 0.07
+            background_color: 0, 0, 0, 0.8  # Semi-transparent black
+            color: 0, 1, 0, 1  # Green text
+            font_size: self.height * 0.6  # Scale font to label height
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            pos_hint: {"center_x": 0.57, "center_y": 0.07}
+        
+        # ---------- BOTTOM TOOLBAR ----------
         Image:
             id: signal
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/signalred.zip"
@@ -105,24 +208,99 @@
             anim_loop: 0
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.05, "center_y": 0.07}
+        
         Image:
             id: arduino
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
             size_hint_y: 0.15
             anim_delay: 0.2
-            anim_loop: 0
+            anim_loop: -1
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
+        
         Label:
             id: arduino_count
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
             text: ''
             markup: True
-            color: 1,1,1
-            font_size: self.height * 0.3
-            size_hint_y: 0.5
+            color: 1, 1, 1, 1
+            font_size: self.height * 1
+            size_hint: 0.06, 0.08
+        
+        # ─────────────────────── Navigation ────────────────────────────────
+
         Button:
-            size_hint: 0.1,0.11
-            pos_hint: {"center_x": 0.9375, "center_y": 0.082}
+            size_hint: 0.1, 0.11
+            pos_hint: {"center_x": 0.9375, "center_y": 0.07}
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            border: 0,0,0,0    # avoid 9-slice margins
             on_release: app.root.current = 'mimic'
+
+# Crew Member Widget Template
+<CrewMemberWidget>:
+    canvas.before:
+        Color:
+            rgba: 0.2, 0.2, 0.2, 0.8
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    
+    orientation: 'vertical'
+    size_hint_y: None
+    height: dp(200)
+    padding: dp(10)
+    spacing: dp(2)
+    
+    # Crew Member Photo
+    AsyncImage:
+        id: crew_photo
+        source: root.image_url if root.image_url else f'{root.mimic_directory}/Mimic/Pi/imgs/crew/CrewBase.png'
+        size_hint: 0.4, 0.6
+        pos_hint: {"center_x": 0.5, "center_y": 0.8}
+        fit_mode: "contain"
+        allow_stretch: False
+        keep_ratio: True
+        nocache: True  # Force reload when source changes
+    
+    # Crew Member Name
+    Label:
+        text: root.name
+        color: 1, 1, 1, 1
+        font_size: dp(16)
+        bold: True
+        size_hint_y: 0.2
+    
+    # Country
+    Label:
+        text: root.country
+        color: 0.8, 0.8, 0.8, 1
+        font_size: dp(12)
+        size_hint_y: 0.15
+    
+    # Role (Commander/Flight Engineer)
+    Label:
+        text: root.role
+        color: 0, 1, 0, 1  # Green for role
+        font_size: dp(14)
+        bold: True
+        size_hint_y: 0.15
+    
+    # Mission Days / Total Days in Space
+    Label:
+        text: f"Mission: {root.mission_days} days\nTotal: {root.total_days} days"
+        color: 1, 1, 1, 1
+        font_size: dp(12)
+        size_hint_y: 0.2
+    
+    # Spacecraft Info
+    Label:
+        text: root.spacecraft
+        color: 0.7, 0.7, 1, 1  # Light blue for spacecraft
+        font_size: dp(10)
+        size_hint_y: 0.15
+        text_size: self.width, None     # measure against available width
+        shorten: True                   # show "…" instead of wrapping
+        shorten_from: "right"           # trim from the right
+        halign: "center"                # (optional) keep it centered
+        max_lines: 1                    # only if your Kivy version supports it

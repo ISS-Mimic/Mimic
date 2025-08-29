@@ -1,21 +1,33 @@
+#:import dp kivy.metrics.dp
+
 <ISS_Screen>:
     name: 'iss'
     FloatLayout:
+        # Title Label - Responsive positioning and font size
         Label:
-            pos_hint: {"center_x": 0.15, "center_y": 0.8}
+            pos_hint: {"center_x": 0.15, "center_y": 0.85}
             text: 'ISS Info'
             markup: True
             color: 1,0,1
             size_hint_y: 0.4
-            font_size: self.height * 0.2
+            font_size: min(self.height * 0.2, dp(24))
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            
+        # ISS Background Image - Responsive sizing
         Image:
             id: ISS_background
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/iss/ISSbackground.png"
             fit_mode: "fill"
+            size_hint: 1, 1
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            
+        # Module Stack Image - Responsive with rotation support
         Image:
             id: modulestack
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2.png"
-            size_hint: 1,1
+            size_hint: 0.8, 0.8
             pos_hint: {"center_x": 0.5, "center_y": 0.6}
             fit_mode: "scale-down"
             angle: 0
@@ -27,300 +39,408 @@
                     origin: self.center
             canvas.after:
                 PopMatrix
+                
+        # Service Module (SM) Button and Label
         ToggleButton:
             id: SM_button
-            size_hint: 0.25,0.2
-            pos_hint: {"center_x": 0.1, "center_y": 0.55}
+            size_hint: 0.22, 0.2
+            pos_hint: {"center_x": 0.2, "center_y": 0.51}
             group: "modules"
             opacity: 0.0
-            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_SM.png"
-            on_release: root.selectModule("SM")
+            on_press: root.select_module("SM")
         Label:
-            pos_hint: {"center_x": 0.1, "center_y": 0.5}
+            pos_hint: {"center_x": 0.22, "center_y": 0.52}
             text: 'SM'
             markup: True
             color: 0,0,0
             size_hint_y: 0.4
-            font_size: self.height * 0.08
+            font_size: min(self.height * 0.08, dp(16))
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            
+        # Functional Cargo Block (FGB) Button and Label
         ToggleButton:
             id: FGB_button
-            size_hint: 0.25,0.2
-            pos_hint: {"center_x": 0.35, "center_y": 0.55}
+            size_hint: 0.22, 0.2
+            pos_hint: {"center_x": 0.4, "center_y": 0.51}
             group: "modules"
             opacity: 0.0
-            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_FGB.png"
-            on_release: root.selectModule("FGB")
+            on_press: root.select_module("FGB")
         Label:
-            pos_hint: {"center_x": 0.35, "center_y": 0.5}
+            pos_hint: {"center_x": 0.35, "center_y": 0.52}
             text: 'FGB'
             markup: True
             color: 0,0,0
             size_hint_y: 0.4
-            font_size: self.height * 0.08
+            font_size: min(self.height * 0.08, dp(16))
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            
+        # Node 1 Button and Label
         ToggleButton:
             id: Node1_button
-            size_hint: 0.13,0.18
-            pos_hint: {"center_x": 0.57, "center_y": 0.55}
+            size_hint: 0.13, 0.13
+            pos_hint: {"center_x": 0.57, "center_y": 0.51}
             group: "modules"
             opacity: 0.0
-            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_Node1.png"
-            on_release: root.selectModule("Node1")
+            on_press: root.select_module("Node1")
         Label:
-            pos_hint: {"center_x": 0.60, "center_y": 0.55}
+            pos_hint: {"center_x": 0.58, "center_y": 0.52}
             text: 'Node 1'
             markup: True
             color: 0,0,0
             size_hint_y: 0.4
-            font_size: self.height * 0.08
+            font_size: min(self.height * 0.08, dp(16))
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            
+        # Airlock Button and Label
         ToggleButton:
             id: Airlock_button
-            size_hint: 0.1,0.2
-            pos_hint: {"center_x": 0.6, "center_y": 0.37}
+            size_hint: 0.1, 0.15
+            pos_hint: {"center_x": 0.58, "center_y": 0.385}
             group: "modules"
             opacity: 0.0
-            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_AL.png"
-            on_release: root.selectModule("AL")
+            on_press: root.select_module("AL")
         Label:
-            pos_hint: {"center_x": 0.6, "center_y": 0.4}
+            pos_hint: {"center_x": 0.585, "center_y": 0.42}
             text: 'Airlock'
             markup: True
             color: 0,0,0
             size_hint_y: 0.4
-            font_size: self.height * 0.08
+            font_size: min(self.height * 0.08, dp(16))
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            
+        # Node 3 Button and Label
         ToggleButton:
             id: Node3_button
-            size_hint: 0.1,0.25
-            pos_hint: {"center_x": 0.6, "center_y": 0.75}
+            size_hint: 0.08, 0.16
+            pos_hint: {"center_x": 0.585, "center_y": 0.67}
             group: "modules"
             opacity: 0.0
-            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_Node3.png"
-            on_release: root.selectModule("Node3")
+            on_press: root.select_module("Node3")
         Label:
-            pos_hint: {"center_x": 0.605, "center_y": 0.75}
+            pos_hint: {"center_x": 0.585, "center_y": 0.65}
             text: 'Node 3'
             markup: True
             color: 0,0,0
             size_hint_y: 0.4
-            font_size: self.height * 0.08
+            font_size: min(self.height * 0.08, dp(16))
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            
+        # PMM Button and Label
         ToggleButton:
             id: PMM_button
-            size_hint: 0.13,0.18
-            pos_hint: {"center_x": 0.7, "center_y": 0.75}
+            size_hint: 0.1, 0.13
+            pos_hint: {"center_x": 0.67, "center_y": 0.69}
             group: "modules"
             opacity: 0.0
-            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_PMM.png"
-            on_release: root.selectModule("PMM")
+            on_press: root.select_module("PMM")
         Label:
-            pos_hint: {"center_x": 0.7, "center_y": 0.75}
+            pos_hint: {"center_x": 0.68, "center_y": 0.69}
             text: 'PMM'
             markup: True
             color: 0,0,0
             size_hint_y: 0.4
-            font_size: self.height * 0.08
+            font_size: min(self.height * 0.08, dp(16))
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            
+        # BEAM Button and Label
         ToggleButton:
             id: BEAM_button
-            size_hint: 0.05,0.05
-            pos_hint: {"center_x": 0.55, "center_y": 0.72}
+            size_hint: 0.05, 0.1
+            pos_hint: {"center_x": 0.52, "center_y": 0.69}
             group: "modules"
             opacity: 0.0
-            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_BEAM.png"
-            on_release: root.selectModule("BEAM")
+            on_press: root.select_module("BEAM")
         Label:
-            pos_hint: {"center_x": 0.53, "center_y": 0.72}
+            pos_hint: {"center_x": 0.53, "center_y": 0.69}
             text: 'BEAM'
             markup: True
             color: 0,0,0
             size_hint_y: 0.4
-            font_size: self.height * 0.08
+            font_size: min(self.height * 0.08, dp(16))
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            
+        # US Lab Button and Label
         ToggleButton:
             id: USLab_button
-            size_hint: 0.17,0.18
-            pos_hint: {"center_x": 0.73, "center_y": 0.55}
+            size_hint: 0.15, 0.16
+            pos_hint: {"center_x": 0.69, "center_y": 0.51}
             group: "modules"
             opacity: 0.0
-            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_USL.png"
-            on_release: root.selectModule("USL")
+            on_press: root.select_module("USL")
         Label:
-            pos_hint: {"center_x": 0.73, "center_y": 0.55}
+            pos_hint: {"center_x": 0.7, "center_y": 0.52}
             text: 'US Lab'
             markup: True
             color: 0,0,0
             size_hint_y: 0.4
-            font_size: self.height * 0.08
+            font_size: min(self.height * 0.08, dp(16))
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            
+        # Node 2 Button and Label
         ToggleButton:
             id: Node2_button
-            size_hint: 0.14,0.18
-            pos_hint: {"center_x": 0.87, "center_y": 0.55}
+            size_hint: 0.13, 0.17
+            pos_hint: {"center_x": 0.825, "center_y": 0.51}
             group: "modules"
             opacity: 0.0
-            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_Node2.png"
-            on_release: root.selectModule("Node2")
+            on_press: root.select_module("Node2")
         Label:
-            pos_hint: {"center_x": 0.9, "center_y": 0.55}
+            pos_hint: {"center_x": 0.83, "center_y": 0.52}
             text: 'Node 2'
             markup: True
             color: 0,0,0
             size_hint_y: 0.4
-            font_size: self.height * 0.08
+            font_size: min(self.height * 0.08, dp(16))
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            
+        # Columbus Button and Label
         ToggleButton:
             id: Columbus_button
-            size_hint: 0.1,0.18
-            pos_hint: {"center_x": 0.87, "center_y": 0.36}
+            size_hint: 0.1, 0.17
+            pos_hint: {"center_x": 0.825, "center_y": 0.36}
             group: "modules"
             opacity: 0.0
-            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_Col.png"
-            on_release: root.selectModule("Col")
+            on_press: root.select_module("Col")
         Label:
-            pos_hint: {"center_x": 0.905, "center_y": 0.36}
-            text: 'Columbus'
+            pos_hint: {"center_x": 0.83, "center_y": 0.36}
+            text: 'Col'
             markup: True
             color: 0,0,0
             size_hint_y: 0.4
-            font_size: self.height * 0.08
+            font_size: min(self.height * 0.08, dp(16))
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            
+        # JLP Button and Label
         ToggleButton:
             id: JLP_button
-            size_hint: 0.14,0.14
-            pos_hint: {"center_x": 0.87, "center_y": 0.775}
+            size_hint: 0.08, 0.1
+            pos_hint: {"center_x": 0.83, "center_y": 0.74}
             group: "modules"
             opacity: 0.0
-            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_JLP.png"
-            on_release: root.selectModule("JLP")
+            on_press: root.select_module("JLP")
         Label:
-            pos_hint: {"center_x": 0.90, "center_y": 0.775}
+            pos_hint: {"center_x": 0.825, "center_y": 0.74}
             text: 'JLP'
             markup: True
             color: 0,0,0
             size_hint_y: 0.4
-            font_size: self.height * 0.08
+            font_size: min(self.height * 0.08, dp(16))
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            
+        # JEM Button and Label
         ToggleButton:
             id: JEM_button
-            size_hint: 0.1,0.2
-            pos_hint: {"center_x": 0.87, "center_y": 0.65}
+            size_hint: 0.08, 0.1
+            pos_hint: {"center_x": 0.825, "center_y": 0.655}
             group: "modules"
             opacity: 0.0
-            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_JEM.png"
-            on_release: root.selectModule("JEM")
+            on_press: root.select_module("JEM")
         Label:
-            pos_hint: {"center_x": 0.90, "center_y": 0.65}
+            pos_hint: {"center_x": 0.83, "center_y": 0.645}
             text: 'JEM'
             markup: True
             color: 0,0,0
             size_hint_y: 0.4
-            font_size: self.height * 0.08
+            font_size: min(self.height * 0.08, dp(16))
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            
+        # NRAL Button and Label
         ToggleButton:
             id: NRAL_button
-            size_hint: 0.1,0.1
-            pos_hint: {"center_x": 0.605, "center_y": 0.8}
+            size_hint: 0.05, 0.05
+            pos_hint: {"center_x": 0.58, "center_y": 0.76}
             group: "modules"
             opacity: 0.0
-            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2_NRAL.png"
-            on_release: root.selectModule("NRAL")
+            on_press: root.select_module("NRAL")
         Label:
-            pos_hint: {"center_x": 0.61, "center_y": 0.8}
+            pos_hint: {"center_x": 0.58, "center_y": 0.76}
             text: 'NRAL'
             markup: True
             color: 0,0,0
             size_hint_y: 0.4
-            font_size: self.height * 0.08
+            font_size: min(self.height * 0.08, dp(16))
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            
+        # Clear Module Button - Responsive sizing
         ToggleButton:
             id: clear_module_button
-            size_hint: 0.15,0.18
+            size_hint: 0.15, 0.18
             pos_hint: {"center_x": 0.07, "center_y": 0.25}
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/iss/ModuleReset.png/'
             background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/iss/ModuleResetDown.png/'
             group: "modules"
-            on_press: modulestack.source = f"{root.mimic_directory}/Mimic/Pi/imgs/iss/LEDstack2.png"
-            on_release: root.selectModule("reset")
+            on_press: root.select_module("reset")
+            
+        # Telemetry Display Section - Responsive layout
+        # Velocity Label and Value
         Label:
             id: velocity_label
-            pos_hint: {"center_x": 0.25, "center_y": 0.2}
+            pos_hint: {"center_x": 0.25, "center_y": 0.21}
             text: 'Speed'
             markup: True
             color: 1,1,1
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(18))
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
         Label:
             id: velocity_value
-            pos_hint: {"center_x": 0.25, "center_y": 0.15}
+            pos_hint: {"center_x": 0.25, "center_y": 0.16}
             text: '0.00'
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(18))
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            
+        # Altitude Label and Value
         Label:
             id: altitude_label
-            pos_hint: {"center_x": 0.45, "center_y": 0.2}
+            pos_hint: {"center_x": 0.45, "center_y": 0.21}
             text: 'Altitude'
             markup: True
             color: 1,1,1
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(18))
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
         Label:
             id: altitude_value
-            pos_hint: {"center_x": 0.45, "center_y": 0.15}
+            pos_hint: {"center_x": 0.45, "center_y": 0.16}
             text: '0.00'
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(18))
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            
+        # Station Mass Label and Value
         Label:
             id: stationmass_label
-            pos_hint: {"center_x": 0.65, "center_y": 0.2}
+            pos_hint: {"center_x": 0.65, "center_y": 0.21}
             text: 'Total Mass'
             markup: True
             color: 1,1,1
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(18))
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
         Label:
             id: stationmass_value
-            pos_hint: {"center_x": 0.65, "center_y": 0.15}
+            pos_hint: {"center_x": 0.65, "center_y": 0.16}
             text: '0.00 kg'
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(18))
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            
+        # Station Mode Label and Value
         Label:
             id: stationmode_label
-            pos_hint: {"center_x": 0.85, "center_y": 0.2}
+            pos_hint: {"center_x": 0.85, "center_y": 0.21}
             text: 'Station Mode'
             markup: True
             color: 1,1,1
             size_hint_y: 0.4
-            font_size: self.height * 0.10
+            font_size: min(self.height * 0.10, dp(18))
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
         Label:
             id: stationmode_value
-            pos_hint: {"center_x": 0.85, "center_y": 0.15}
+            pos_hint: {"center_x": 0.85, "center_y": 0.16}
             text: ''
             markup: True
             color: root.signalcolor
             size_hint_y: 0.4
-            font_size: self.height * 0.10
-        Button:
-            size_hint: 0.1,0.11
-            pos_hint: {"center_x": 0.9375, "center_y": 0.082}
-            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
-            on_release: app.root.current = 'mimic'
+            font_size: min(self.height * 0.10, dp(18))
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            
+       # ---------- STATUS DISPLAY (Bottom Rectangle) ----------
+        Label:
+            id: status_label
+            text: ''
+            size_hint: 1, 0.07
+            background_color: 0, 0, 0, 0.8  # Semi-transparent black
+            color: 0, 1, 0, 1  # Green text
+            font_size: self.height * 0.6  # Scale font to label height
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            pos_hint: {"center_x": 0.57, "center_y": 0.07}
+        
+        # ---------- BOTTOM TOOLBAR ----------
         Image:
             id: signal
-            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/pulse-transparent.zip"
-            size_hint_y: 0.15
-            anim_delay: 0.12
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/signalred.zip"
+            size_hint_y: 0.112
+            anim_delay: 0.05
             anim_loop: 0
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.05, "center_y": 0.07}
+        
         Image:
             id: arduino
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
             size_hint_y: 0.15
             anim_delay: 0.2
-            anim_loop: 0
-            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+            anim_loop: -1
             fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+        
         Label:
             id: arduino_count
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
             text: ''
             markup: True
-            color: 1,1,1
-            font_size: self.height * 0.3
-            size_hint_y: 0.5
+            color: 1, 1, 1, 1
+            font_size: self.height * 1
+            size_hint: 0.06, 0.08
+        
+        # ─────────────────────── Navigation ────────────────────────────────
+
+        Button:
+            size_hint: 0.1, 0.11
+            pos_hint: {"center_x": 0.9375, "center_y": 0.07}
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            border: 0,0,0,0    # avoid 9-slice margins
+            on_release: app.root.current = 'mimic'

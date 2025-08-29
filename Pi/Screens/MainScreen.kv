@@ -25,74 +25,78 @@
         Button:
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainSimulateButton.png'
             background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainSimulateButtonDown.png'
-            size_hint: 0.15,0.4
+            size_hint: 0.15, 0.4
             pos_hint: {"center_x": 0.68, "center_y": 0.37}
-            width: 50
-            height: 20
             on_release: root.manager.current = 'playback'
         Button:
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainSettingsButton.png'
             background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainSettingsButtonDown.png'
-            size_hint: 0.15,0.18
+            size_hint: 0.15, 0.18
             pos_hint: {"center_x": 0.85, "center_y": 0.47}
-            width: 50
-            height:20
             on_release: root.manager.current = 'settings'
         Button:
-            size_hint: 0.15,0.4
+            size_hint: 0.15, 0.4
             pos_hint: {"center_x": 0.15, "center_y": 0.37}
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainControlButton.png'
             background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainControlButtonDown.png'
-            width: 50
-            height: 20
-            on_press: root.changeManualControlBoolean(True)
             on_release: root.manager.current = 'manualcontrol'
         Button:
-            size_hint: 0.15,0.4
+            size_hint: 0.15, 0.4
             pos_hint: {"center_x": 0.325, "center_y": 0.37}
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainLightItUpButton.png'
             background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainLightItUpButtonDown.png'
-            width: 50
-            height: 20
             on_release: root.manager.current = 'led'
         Button:
-            size_hint: 0.15,0.4
+            size_hint: 0.15, 0.4
             pos_hint: {"center_x": 0.505, "center_y": 0.37}
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainMimicButton.png'
             background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainMimicButtonDown.png'
-            width: 50
-            height: 20
             on_release: app.root.current = 'mimic'
         Button:
-            size_hint: 0.15,0.18
+            size_hint: 0.15, 0.18
             pos_hint: {"center_x": 0.85, "center_y": 0.27}
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainExitButton.png'
             background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/main/MainExitButtonDown.png'
-            width: 50
-            height: 20
             on_press: root.killproc()
             on_release: app.stop(*args)
+
+        # ---------- STATUS DISPLAY (Bottom Rectangle) ----------
+        Label:
+            id: status_label
+            text: 'Welcome to ISS Mimic!'
+            size_hint: 1, 0.07
+            background_color: 0, 0, 0, 0.8  # Semi-transparent black
+            color: 0, 1, 0, 1  # Green text
+            font_size: self.height * 0.6  # Scale font to label height
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            pos_hint: {"center_x": 0.57, "center_y": 0.07}
+        
+        # ---------- BOTTOM TOOLBAR ----------
         Image:
             id: signal
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/signalred.zip"
             size_hint_y: 0.112
             anim_delay: 0.05
             anim_loop: 0
-            pos_hint: {"center_x": 0.05, "center_y": 0.07}
             fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.05, "center_y": 0.07}
+        
         Image:
             id: arduino
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
             size_hint_y: 0.15
             anim_delay: 0.2
-            anim_loop: 0
-            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+            anim_loop: -1
             fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+        
         Label:
             id: arduino_count
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
             text: ''
             markup: True
-            color: 1,1,1
-            font_size: self.height * 0.3
-            size_hint_y: 0.5
+            color: 1, 1, 1, 1
+            font_size: self.height * 1
+            size_hint: 0.06, 0.08
