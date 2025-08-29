@@ -403,31 +403,53 @@ class Playback_Screen(MimicBase):
             should_send, q_vals, q_leds, reason = self._gate.filter(now, vals, leds)
 
             if should_send:
-                line = self._build_packet(q_vals, q_leds)
+                # Build telemetry command (without LED commands)
+                telemetry_cmd = self._build_telemetry_command(q_vals)
+                
+                # Build LED commands separately
+                led_commands = self._build_led_commands(q_vals)
 
                 # If Disco demo, also send a separate DISCO line as requested
                 disco_line = "DISCO" if self.current_file == "Disco" else None
 
                 # estimate wire time (include both lines if we’ll send both)
-                nb = len((line + "\n").encode("ascii", "ignore"))
+                nb = len((telemetry_cmd + "\n").encode("ascii", "ignore"))
                 if disco_line:
                     nb += len((disco_line + "\n").encode("ascii", "ignore"))
+                
+                # Add LED command bytes to wire time calculation
+                for led_cmd in led_commands:
+                    nb += len((led_cmd + "\n").encode("ascii", "ignore"))
+                
                 min_gap = self._min_gap(nb)
 
-                # write(s)
-                self._write_line(line)
+                # Send telemetry command first
+                self._write_line(telemetry_cmd)
+                log_info(f"Playback: sent telemetry ({reason}) → {telemetry_cmd}")
+                
+                # Small delay to let microcontroller process telemetry command
+                time.sleep(0.05)  # 50ms delay
+                
+                # Send LED commands individually with delays (like mimic screen)
+                if led_commands:
+                    for led_cmd in led_commands:
+                        self._write_line(led_cmd)
+                        # Small delay between LED commands
+                        time.sleep(0.02)  # 20ms delay
+                    log_info(f"Playback: sent {len(led_commands)} LED commands")
+                
+                # Send DISCO command if needed
                 if disco_line:
                     self._write_line(disco_line)
-
-                # Reasoned log (change vs heartbeat)
-                if disco_line:
-                    log_info(f"Playback: sent telemetry ({reason}) + DISCO → {line}")
-                else:
-                    log_info(f"Playback: sent telemetry ({reason}) → {line}")
+                    log_info(f"Playback: sent DISCO command")
 
                 self._is_writing_serial = True
                 self._update_arduino_animation()
 
+                # Calculate total delay time and add to minimum gap
+                total_delay = 0.05 + (len(led_commands) * 0.02)  # 50ms + 20ms per LED command
+                min_gap = max(min_gap, total_delay)
+                
                 self._reschedule_serial_writer(max(min_gap, 1.0 / self._BASE_HZ))
             else:
                 self._is_writing_serial = False
@@ -505,8 +527,8 @@ class Playback_Screen(MimicBase):
             log_error(f"LED compute failed: {e}")
         return leds
 
-    def _build_packet(self, vals: dict, leds: dict | None) -> str:
-        """One space-separated line (Arduino-friendly)."""
+    def _build_telemetry_command(self, vals: dict) -> str:
+        """Build telemetry command string (without LED commands)."""
         tokens = [
             f"PSARJ={self._f(vals.get('PSARJ'))}",
             f"SSARJ={self._f(vals.get('SSARJ'))}",
@@ -529,11 +551,39 @@ class Playback_Screen(MimicBase):
             f"SASA_AZ={self._f(vals.get('SASA_AZ'))}",
             f"SASA_EL={self._f(vals.get('SASA_EL'))}",
         ]
-        if leds:
-            for k in ("LED_1A","LED_1B","LED_2A","LED_2B","LED_3A","LED_3B","LED_4A","LED_4B"):
-                if k in leds:
-                    tokens.append(f"{k}={leds[k]}")
         return " ".join(tokens)
+
+    def _build_led_commands(self, vals: dict) -> list:
+        """Build individual LED commands (like mimic screen)."""
+        led_commands = []
+        voltage_to_led_mapping = {
+            'V1A': '1A', 'V1B': '1B',
+            'V2A': '2A', 'V2B': '2B', 
+            'V3A': '3A', 'V3B': '3B',
+            'V4A': '4A', 'V4B': '4B'
+        }
+        
+        # Build LED commands based on voltage values
+        for voltage_key, led_suffix in voltage_to_led_mapping.items():
+            if voltage_key in vals:
+                try:
+                    voltage = float(vals[voltage_key])
+                    color = self._get_voltage_color(voltage)
+                    led_commands.append(f"LED_{led_suffix}={color}")
+                except (ValueError, TypeError):
+                    # If voltage conversion fails, default to Blue
+                    led_commands.append(f"LED_{led_suffix}=Blue")
+        
+        return led_commands
+
+    def _get_voltage_color(self, voltage):
+        """Determine LED color based on voltage threshold (same as mimic screen)."""
+        if voltage < 151.5:
+            return "Blue"      # Discharging
+        elif voltage < 160.0:
+            return "Yellow"    # Charging
+        else:
+            return "White"     # Fully charged
 
     # ------------------------------ DB I/O ------------------------------
     def _read_current_telemetry(self):
