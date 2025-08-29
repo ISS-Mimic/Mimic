@@ -1,7 +1,7 @@
 Keeping track of everyone who has helped move this project forward and whose services we use
 
-People in Space http://howmanypeopleareinspacerightnow.com/
-http://www.spacefacts.de/eva/e_eva_az.htm
+All of the original JSC ISSlive team who got this data out to the public in the first place
+http://www.spacefacts.de
 Ezra Brooks and the Space Network Now team from Goddard (TDRS info)
 All the JSC folks who restored ISSlive
 All of the Space Center Houston folks
