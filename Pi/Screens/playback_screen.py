@@ -53,7 +53,7 @@ class _ChangeGate:
 
     def filter(self, now: float, vals: dict, leds: dict | None = None):
         """
-        Returns (should_send: bool, q_vals: dict, q_leds: str|None, reason: str)
+        Returns (should_send: bool, q_vals: dict, q_leds: tuple[str, str]|None, reason: str)
         reason ∈ {"change", "heartbeat", "led_change", ""}.
         """
         q_vals = {}
@@ -64,14 +64,26 @@ class _ChangeGate:
             else:
                 q_vals[k] = v
 
-        # Build LED command string
+        # Build LED command strings (port and starboard)
         q_leds = None
         if leds:
-            led_tokens = []
-            for k, v in leds.items():
-                if v is not None:
-                    led_tokens.append(f"{k}={v}")
-            q_leds = " ".join(led_tokens) if led_tokens else ""
+            # Port side: 2A, 4A, 2B, 4B
+            port_tokens = []
+            port_keys = ['LED_2A', 'LED_4A', 'LED_2B', 'LED_4B']
+            for k in port_keys:
+                if k in leds and leds[k] is not None:
+                    port_tokens.append(f"{k}={leds[k]}")
+            port_cmd = " ".join(port_tokens) if port_tokens else ""
+            
+            # Starboard side: 1A, 3A, 1B, 3B
+            starboard_tokens = []
+            starboard_keys = ['LED_1A', 'LED_3A', 'LED_1B', 'LED_3B']
+            for k in starboard_keys:
+                if k in leds and leds[k] is not None:
+                    starboard_tokens.append(f"{k}={leds[k]}")
+            starboard_cmd = " ".join(starboard_tokens) if starboard_tokens else ""
+            
+            q_leds = (port_cmd, starboard_cmd)
 
         # Check if telemetry values changed
         telemetry_changed = any(self.prev.get(k) != q_vals[k] for k in q_vals)
@@ -79,8 +91,10 @@ class _ChangeGate:
         # Check if LED values changed (only if we have LEDs)
         led_changed = False
         if q_leds is not None:
-            prev_leds = self.prev.get('_leds', "")
-            led_changed = prev_leds != q_leds
+            prev_port = self.prev.get('_port_leds', "")
+            prev_starboard = self.prev.get('_starboard_leds', "")
+            port_cmd, starboard_cmd = q_leds
+            led_changed = (prev_port != port_cmd) or (prev_starboard != starboard_cmd)
         
         # Determine if we should send
         changed = telemetry_changed or led_changed
@@ -90,7 +104,9 @@ class _ChangeGate:
             # Update previous values
             self.prev.update(q_vals)
             if q_leds is not None:
-                self.prev['_leds'] = q_leds
+                port_cmd, starboard_cmd = q_leds
+                self.prev['_port_leds'] = port_cmd
+                self.prev['_starboard_leds'] = starboard_cmd
             self._last_sent = now
             
             # Determine reason
@@ -442,7 +458,11 @@ class Playback_Screen(MimicBase):
                 
                 # Add LED command bytes to wire time calculation (if any)
                 if led_commands:
-                    nb += len((led_commands + "\n").encode("ascii", "ignore"))
+                    port_cmd, starboard_cmd = led_commands
+                    if port_cmd:
+                        nb += len((port_cmd + "\n").encode("ascii", "ignore"))
+                    if starboard_cmd:
+                        nb += len((starboard_cmd + "\n").encode("ascii", "ignore"))
                 
                 min_gap = self._min_gap(nb)
 
@@ -453,10 +473,20 @@ class Playback_Screen(MimicBase):
                 # Small delay to let microcontroller process telemetry command
                 time.sleep(0.05)  # 50ms delay
                 
-                # Send combined LED commands (if any)
+                # Send LED commands in two groups for reliability
                 if led_commands:
-                    self._write_line(led_commands)
-                    log_info(f"Playback: sent LED commands → {led_commands}")
+                    port_cmd, starboard_cmd = led_commands
+                    
+                    # Send port LEDs first (2A, 4A, 2B, 4B)
+                    if port_cmd:
+                        self._write_line(port_cmd)
+                        log_info(f"Playback: sent port LEDs → {port_cmd}")
+                        time.sleep(0.02)  # Small delay between groups
+                    
+                    # Send starboard LEDs (1A, 3A, 1B, 3B)
+                    if starboard_cmd:
+                        self._write_line(starboard_cmd)
+                        log_info(f"Playback: sent starboard LEDs → {starboard_cmd}")
                 
                 # Send DISCO command if needed
                 if disco_line:
@@ -466,8 +496,8 @@ class Playback_Screen(MimicBase):
                 self._is_writing_serial = True
                 self._update_arduino_animation()
 
-                # Calculate total delay time (just 50ms + any additional delays)
-                total_delay = 0.05  # Only 50ms delay between telemetry and LEDs
+                # Calculate total delay time (50ms + 20ms between LED groups)
+                total_delay = 0.05 + 0.02  # 50ms + 20ms between LED groups
                 min_gap = max(min_gap, total_delay)
                 
                 self._reschedule_serial_writer(max(min_gap, 1.0 / self._BASE_HZ))
@@ -573,28 +603,40 @@ class Playback_Screen(MimicBase):
         ]
         return " ".join(tokens)
 
-    def _build_led_commands(self, vals: dict) -> str:
-        """Build combined LED command string (all LEDs in one packet)."""
-        led_tokens = []
-        voltage_to_led_mapping = {
-            'V1A': '1A', 'V1B': '1B',
-            'V2A': '2A', 'V2B': '2B', 
-            'V3A': '3A', 'V3B': '3B',
-            'V4A': '4A', 'V4B': '4B'
-        }
+    def _build_led_commands(self, vals: dict) -> tuple[str, str]:
+        """Build LED commands split into port and starboard groups for reliability."""
+        # Port side: 2A, 4A, 2B, 4B
+        port_tokens = []
+        port_mapping = {'V2A': '2A', 'V4A': '4A', 'V2B': '2B', 'V4B': '4B'}
         
-        # Build LED commands based on voltage values
-        for voltage_key, led_suffix in voltage_to_led_mapping.items():
+        # Starboard side: 1A, 3A, 1B, 3B  
+        starboard_tokens = []
+        starboard_mapping = {'V1A': '1A', 'V3A': '3A', 'V1B': '1B', 'V3B': '3B'}
+        
+        # Build port LED commands
+        for voltage_key, led_suffix in port_mapping.items():
             if voltage_key in vals:
                 try:
                     voltage = float(vals[voltage_key])
                     color = self._get_voltage_color(voltage)
-                    led_tokens.append(f"LED_{led_suffix}={color}")
+                    port_tokens.append(f"LED_{led_suffix}={color}")
                 except (ValueError, TypeError):
-                    # If voltage conversion fails, default to Blue
-                    led_tokens.append(f"LED_{led_suffix}=Blue")
+                    port_tokens.append(f"LED_{led_suffix}=Blue")
         
-        return " ".join(led_tokens) if led_tokens else ""
+        # Build starboard LED commands
+        for voltage_key, led_suffix in starboard_mapping.items():
+            if voltage_key in vals:
+                try:
+                    voltage = float(vals[voltage_key])
+                    color = self._get_voltage_color(voltage)
+                    starboard_tokens.append(f"LED_{led_suffix}={color}")
+                except (ValueError, TypeError):
+                    starboard_tokens.append(f"LED_{led_suffix}=Blue")
+        
+        port_cmd = " ".join(port_tokens) if port_tokens else ""
+        starboard_cmd = " ".join(starboard_tokens) if starboard_tokens else ""
+        
+        return port_cmd, starboard_cmd
 
     def _get_voltage_color(self, voltage):
         """Determine LED color based on voltage threshold (same as mimic screen)."""
