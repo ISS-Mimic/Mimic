@@ -743,7 +743,6 @@ class MainApp(App):
         else:
             self.signal_unsubscribed()
 
-
 if __name__ == '__main__':
     try:
         # Show logging configuration
