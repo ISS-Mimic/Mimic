@@ -197,7 +197,7 @@ class Playback_Screen(MimicBase):
                             display_name = telemetry_dir.replace("Telemetry_", "")
                             telemetry_folders.append(f"USB: {display_name}")
 
-                builtin_demos = ["HTV", "OFT2", "Standard", "Disco"]
+                builtin_demos = ["HTV", "OFT2", "Standard"]
                 dropdown.values = builtin_demos + telemetry_folders
         except Exception as e:
             log_error(f"Error updating dropdown: {e}")
