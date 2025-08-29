@@ -7,6 +7,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, Any
+from math import isfinite
 
 from kivy.clock import Clock
 from kivy.lang import Builder
@@ -29,7 +30,57 @@ from utils.serial import serialWrite
 kv_path = pathlib.Path(__file__).with_name("Playback_Screen.kv")
 Builder.load_file(str(kv_path))
 
-# ───────────────────────────────────────────────────────────────────────────
+
+class _ChangeGate:
+    """
+    Quantizes angles and only allows a send when something changed
+    (or on heartbeat). Greatly reduces bandwidth at 9600 bps.
+    """
+    def __init__(self, angle_step: float = 0.1, heartbeat_s: float = 1.0):
+        self.prev: dict[str, object] = {}
+        self.angle_step = angle_step
+        self.heartbeat_s = heartbeat_s
+        self._last_sent = 0.0
+
+    def _q(self, v):
+        try:
+            fv = float(v)
+            if not isfinite(fv):
+                return 0.0
+            return round(fv / self.angle_step) * self.angle_step
+        except Exception:
+            return 0.0
+
+    def filter(self, now: float, vals: dict, leds: dict | None = None):
+        """
+        Returns (should_send: bool, q_vals: dict, q_leds: dict|None, reason: str)
+        reason ∈ {"change", "heartbeat", ""}.
+        """
+        q_vals = {}
+        for k, v in vals.items():
+            # Angle-like signals get quantized; flags/ints passed through
+            if k.endswith("ARJ") or k.endswith("RRJ") or (k and k[0] == "B"):
+                q_vals[k] = self._q(v)
+            else:
+                q_vals[k] = v
+
+        # Keep LED color strings exactly as computed
+        q_leds = {}
+        if leds:
+            for k, v in leds.items():
+                q_leds[k] = "" if v is None else str(v)
+
+        composite = {**q_vals, **q_leds}
+        changed = any(self.prev.get(k) != composite[k] for k in composite)
+        heartbeat_due = (now - self._last_sent) >= self.heartbeat_s
+
+        if changed or heartbeat_due:
+            self.prev = composite
+            self._last_sent = now
+            reason = "change" if changed else "heartbeat"
+            return True, q_vals, (q_leds if leds else None), reason
+        return False, q_vals, (q_leds if leds else None), ""
+
 class Playback_Screen(MimicBase):
     """
     Clean, simple playback screen for recorded ISS telemetry data.
@@ -38,63 +89,54 @@ class Playback_Screen(MimicBase):
     # Playback state
     is_playing = BooleanProperty(False)
     current_file = StringProperty("")
-    playback_speed = NumericProperty(0)  # Changed from 10.0 to 0 (no default)
-    
+    playback_speed = NumericProperty(0)  # set via dropdown (e.g., 5, 10, 20)
+
     # Arduino connection status
     arduino_connected = BooleanProperty(False)
-    loop_enabled = BooleanProperty(False)  # Enable loop by default to prevent premature exit
-    
+    loop_enabled = BooleanProperty(False)
+
     # Playback data
     _playback_data = []
     _current_index = 0
     _playback_timer = None
-    
+
+    # ======= wire/throughput parameters (NO Arduino changes required) =======
+    _BAUD = 9600
+    _SAFETY = 0.15         # extra headroom on pacing
+    _BASE_HZ = 5           # UI tick target; actual wire pacing enforces 9600
+    _ANGLE_STEP = 0.1      # deg
+    _HEARTBEAT_S = 5.0     # resend latest state once per 5 seconds (recovery)
+
     # Serial writing
     _serial_timer = None
-    _serial_update_interval = 0.5  # Update every 500ms (2Hz)
-    _is_writing_serial = False  # Track if we're actively writing serial data
-    
+    _is_writing_serial = False  # for the Arduino animation
+    _gate = None  # initialized in __init__
+
     # LED control
     _disco_colors = ["Red", "Green", "Blue", "Yellow", "Purple", "Cyan", "White", "Orange"]
 
     def __init__(self, **kw):
         super().__init__(**kw)
-        
-        # Start monitoring Arduino connection
+        self._gate = _ChangeGate(angle_step=self._ANGLE_STEP, heartbeat_s=self._HEARTBEAT_S)
         Clock.schedule_interval(self._check_arduino_connection, 5.0)
-        
-        # Start monitoring USB drives
         self._start_usb_monitor()
-        
-        # Update Arduino animation initially
         self._update_arduino_animation()
 
     # ---------------------------------------------------------------- Arduino Check
     def _check_arduino_connection(self, dt):
         """Check if Arduino is connected by checking the arduino count text."""
         try:
-            # Get arduino count from the screen's own arduino_count label
-            # This gets updated by the main app's updateArduinoCount method
             arduino_count_label = getattr(self.ids, 'arduino_count', None)
             if arduino_count_label:
-                arduino_count_text = arduino_count_label.text.strip()
-                if arduino_count_text and arduino_count_text.isdigit():
-                    arduino_count = int(arduino_count_text)
-                    self.arduino_connected = arduino_count > 0
-                else:
-                    self.arduino_connected = False
+                txt = arduino_count_label.text.strip()
+                self.arduino_connected = txt.isdigit() and int(txt) > 0
             else:
                 self.arduino_connected = False
-                
         except Exception as e:
             log_error(f"Error checking Arduino connection: {e}")
             self.arduino_connected = False
-        
-        # Check start button state whenever Arduino connection changes
+
         self._check_start_button_state()
-        
-        # Only update Arduino animation if NOT currently playing
-        # During playback, the animation should be controlled by the serial writer
         if not self.is_playing:
             self._update_arduino_animation()
 
@@ -105,17 +147,13 @@ class Playback_Screen(MimicBase):
             arduino_image = getattr(self.ids, 'arduino', None)
             if not arduino_image:
                 return
-                
+
             if not self.arduino_connected:
-                # No Arduino connected - show offline
                 arduino_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
             elif self._is_writing_serial:
-                # Writing serial data - show transmit animation
                 arduino_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_transmit.zip"
             else:
-                # Connected but not writing serial - show normal
                 arduino_image.source = f"{self.mimic_directory}/Mimic/Pi/imgs/signal/arduino_notransmit.png"
-                
         except Exception as e:
             log_error(f"Error updating Arduino animation: {e}")
 
@@ -126,11 +164,10 @@ class Playback_Screen(MimicBase):
             while True:
                 try:
                     self._scan_usb_drives()
-                    time.sleep(5)  # Check every 5 seconds
+                    time.sleep(5)
                 except Exception as e:
                     log_error(f"USB monitoring error: {e}")
-                    time.sleep(10)  # Longer delay on error
-        
+                    time.sleep(10)
         thread = threading.Thread(target=monitor_loop, daemon=True)
         thread.start()
 
@@ -140,12 +177,8 @@ class Playback_Screen(MimicBase):
             media_dir = Path("/media/pi")
             if not media_dir.exists():
                 return
-                
             drives = [d.name for d in media_dir.iterdir() if d.is_dir()]
-            
-            # Update dropdown on main thread
             Clock.schedule_once(lambda dt: self._update_dropdown(drives))
-            
         except Exception as e:
             log_error(f"USB scan failed: {e}")
 
@@ -154,24 +187,18 @@ class Playback_Screen(MimicBase):
         try:
             dropdown = self.ids.file_dropdown
             if dropdown:
-                # Find Telemetry_ folders on USB drives
                 telemetry_folders = []
                 for drive in drives:
                     drive_path = Path(f"/media/pi/{drive}")
                     if drive_path.exists():
-                        # Look for folders starting with "Telemetry_"
-                        telemetry_dirs = [d.name for d in drive_path.iterdir() 
-                                        if d.is_dir() and d.name.startswith("Telemetry_")]
+                        telemetry_dirs = [d.name for d in drive_path.iterdir()
+                                          if d.is_dir() and d.name.startswith("Telemetry_")]
                         for telemetry_dir in telemetry_dirs:
-                            # Remove "Telemetry_" prefix for display, but keep full name for operations
                             display_name = telemetry_dir.replace("Telemetry_", "")
                             telemetry_folders.append(f"USB: {display_name}")
-                
-                # Add built-in demos
-                builtin_demos = ["HTV", "OFT2", "Standard"]
-                
+
+                builtin_demos = ["HTV", "OFT2", "Standard", "Disco"]
                 dropdown.values = builtin_demos + telemetry_folders
-                
         except Exception as e:
             log_error(f"Error updating dropdown: {e}")
 
@@ -180,67 +207,51 @@ class Playback_Screen(MimicBase):
         """Called when user selects a file from dropdown and close it."""
         if not filename:
             return
-            
+
         log_info(f"File selected: {filename}")
-        
-        # Parse the selection
         if filename.startswith("USB: "):
-            # USB telemetry folder - reconstruct full name
             display_name = filename.replace("USB: ", "")
             telemetry_folder = f"Telemetry_{display_name}"
             self._load_usb_telemetry_folder(telemetry_folder)
         else:
-            # Built-in demo
             self._load_builtin_demo(filename)
-        
-        # Update status and check if start button should be enabled
+
         self._update_status()
         self._check_start_button_state()
 
     def _load_usb_telemetry_folder(self, telemetry_folder: str):
         """Load playback data from USB telemetry folder."""
         try:
-            # Find which USB drive contains this telemetry folder
             media_dir = Path("/media/pi")
             if not media_dir.exists():
                 self._show_error("No USB drives found")
                 return
-                
-            # Search through all USB drives for the telemetry folder
+
             for drive_dir in media_dir.iterdir():
                 if drive_dir.is_dir():
                     telemetry_path = drive_dir / telemetry_folder
                     if telemetry_path.exists() and telemetry_path.is_dir():
-                        # Found the telemetry folder on this USB drive
                         self.current_file = f"USB: {telemetry_folder}"
                         log_info(f"Loaded USB telemetry folder: {telemetry_path}")
                         return
-                        
-            # If we get here, the folder wasn't found
+
             self._show_error(f"Telemetry folder '{telemetry_folder}' not found on any USB drive")
-            
         except Exception as e:
             log_error(f"Error loading USB telemetry folder: {e}")
             self._show_error(f"Error loading USB telemetry folder: {e}")
 
-    def _find_usb_telemetry_path(self, telemetry_folder: str) -> str:
+    def _find_usb_telemetry_path(self, telemetry_folder: str) -> Optional[str]:
         """Find the full path to a USB telemetry folder."""
         try:
             media_dir = Path("/media/pi")
             if not media_dir.exists():
                 return None
-                
-            # Search through all USB drives for the telemetry folder
             for drive_dir in media_dir.iterdir():
                 if drive_dir.is_dir():
                     telemetry_path = drive_dir / telemetry_folder
                     if telemetry_path.exists() and telemetry_path.is_dir():
-                        # Found the telemetry folder on this USB drive
                         return str(telemetry_path)
-                        
-            # If we get here, the folder wasn't found
             return None
-            
         except Exception as e:
             log_error(f"Error finding USB telemetry path: {e}")
             return None
@@ -249,7 +260,6 @@ class Playback_Screen(MimicBase):
         """Load built-in demo data."""
         try:
             demo_path = Path(self.mimic_directory) / "Mimic/Pi/RecordedData"
-            
             if demo_name == "HTV":
                 data_folder = demo_path / "HTV"
             elif demo_name == "OFT2":
@@ -261,14 +271,13 @@ class Playback_Screen(MimicBase):
             else:
                 self._show_error(f"Unknown demo: {demo_name}")
                 return
-                
+
             if not data_folder.exists():
                 self._show_error(f"Demo folder not found: {data_folder}")
                 return
-                
+
             self.current_file = demo_name
             log_info(f"Loaded demo folder: {data_folder}")
-            
         except Exception as e:
             log_error(f"Error loading demo: {e}")
             self._show_error(f"Error loading demo: {e}")
@@ -277,26 +286,15 @@ class Playback_Screen(MimicBase):
     def start_disco_mode(self):
         """All-in-one disco mode: set data source, speed, and auto-start."""
         try:
-            # Set data source to Disco
             self.current_file = "Disco"
-            
-            # Set playback speed to 1x
             self.playback_speed = 5.0
-            
-            # Update the speed dropdown to show 1x
             speed_dropdown = getattr(self.ids, 'speed_dropdown', None)
             if speed_dropdown:
                 speed_dropdown.text = '5x'
-            
             log_info("Disco mode activated: Disco data at 5x speed")
-            
-            # Update status and check start button
             self._update_status()
             self._check_start_button_state()
-            
-            # Auto-start the playback
             self.start_playback()
-            
         except Exception as e:
             log_error(f"Error starting disco mode: {e}")
             self._show_error(f"Error starting disco mode: {e}")
@@ -305,24 +303,13 @@ class Playback_Screen(MimicBase):
     def on_dropdown_select_speed(self, speed_str):
         """Set the playback speed multiplier from dropdown text and close it."""
         try:
-            # Extract numeric value from "10x", "20x", etc.
             speed_value = float(speed_str.replace('x', ''))
-            
             if speed_value <= 0:
                 return
-                
             self.playback_speed = speed_value
-            
-            # If currently playing, the speed change will take effect on next telemetry update
-            # No need to restart timers - the serial writer will continue with new speed
-                
             log_info(f"Playback speed set to {speed_value}x")
-            
-            
-            # Update status and check if start button should be enabled
             self._update_status()
             self._check_start_button_state()
-            
         except ValueError:
             log_error(f"Invalid speed format: {speed_str}")
 
@@ -333,23 +320,20 @@ class Playback_Screen(MimicBase):
             status_label = getattr(self.ids, 'status_label', None)
             if not status_label:
                 return
-                
+
             if self.is_playing:
-                # Show playback status
                 status_label.text = f"Playing back {self.current_file} data at {self.playback_speed}x"
                 return
-                
+
             if not self.current_file:
                 status_label.text = "Select Data to Playback"
                 return
-                
+
             if self.playback_speed == 0:
                 status_label.text = f"{self.current_file} selected, choose playback speed"
                 return
-                
-            # Both data and speed are selected
+
             status_label.text = f"{self.current_file} at {self.playback_speed}x - Ready to Start!"
-            
         except Exception as e:
             log_error(f"Error updating status: {e}")
 
@@ -360,16 +344,13 @@ class Playback_Screen(MimicBase):
             start_button = getattr(self.ids, 'start_button', None)
             stop_button = getattr(self.ids, 'stop_button', None)
             disco_button = getattr(self.ids, 'disco_button', None)
-            
+
             if start_button:
                 start_button.disabled = self.is_playing
-                
             if stop_button:
                 stop_button.disabled = not self.is_playing
-                
             if disco_button:
                 disco_button.disabled = self.is_playing
-                
         except Exception as e:
             log_error(f"Error updating playback buttons: {e}")
 
@@ -379,29 +360,24 @@ class Playback_Screen(MimicBase):
             start_button = getattr(self.ids, 'start_button', None)
             if not start_button:
                 return
-                
-            # Only enable start button if not currently playing AND all conditions are met
             should_enable = (
                 not self.is_playing and
-                self.current_file and 
-                self.playback_speed > 0 and 
+                self.current_file and
+                self.playback_speed > 0 and
                 self.arduino_connected
             )
-            
             start_button.disabled = not should_enable
-            
         except Exception as e:
             log_error(f"Error checking start button state: {e}")
 
-    # ---------------------------------------------------------------- Serial Writing
+    # ---------------------------------------------------------------- Serial Writing (Mimic-style)
     def _start_serial_writer(self):
         """Start the serial writer timer to continuously send telemetry data."""
         if self._serial_timer:
             Clock.unschedule(self._serial_timer)
-        
-        self._serial_timer = Clock.schedule_interval(self._send_telemetry_serial, self._serial_update_interval)
+        self._serial_timer = Clock.schedule_once(self._send_telemetry_serial, 0)
         self._is_writing_serial = True
-        log_info("Serial writer started")
+        log_info("Serial writer started with ChangeGate optimization")
 
     def _stop_serial_writer(self):
         """Stop the serial writer timer."""
@@ -412,206 +388,218 @@ class Playback_Screen(MimicBase):
         log_info("Serial writer stopped")
 
     def _send_telemetry_serial(self, dt):
-        """Read telemetry values from database and send to Arduino."""
+        """Send one combined packet, change-gated and paced for 9600."""
         if not self.is_playing or not self.arduino_connected:
             return
-            
+
         try:
-            # Read current telemetry values from database
-            telemetry_values = self._read_current_telemetry()
-            
-            if telemetry_values:
-                # Build the telemetry command string (without LED commands)
-                telemetry_cmd = self._build_telemetry_command(telemetry_values)
-                
-                # Send telemetry data to Arduino
-                serialWrite(telemetry_cmd)
-                #log_info(f"Sent telemetry command: {telemetry_cmd}")
-                
-                # Small delay to let microcontroller process telemetry command
-                time.sleep(0.05)  # 50ms delay
-                
-                # Build and send LED commands individually (like LED control screen)
-                led_commands = self._build_individual_led_commands(telemetry_values)
-                if led_commands:
-                    for led_cmd in led_commands:
-                        serialWrite(led_cmd)
-                        # Small delay between LED commands
-                        time.sleep(0.02)  # 20ms delay
-                    #log_info(f"Sent {len(led_commands)} individual LED commands")
-                
+            vals = self._read_current_telemetry()
+            if not vals:
+                self._reschedule_serial_writer(1.0 / self._BASE_HZ)
+                return
+
+            leds = self._compute_leds(vals)
+            now = time.monotonic()
+            should_send, q_vals, q_leds, reason = self._gate.filter(now, vals, leds)
+
+            if should_send:
+                line = self._build_packet(q_vals, q_leds)
+
+                # If Disco demo, also send a separate DISCO line as requested
+                disco_line = "DISCO" if self.current_file == "Disco" else None
+
+                # estimate wire time (include both lines if we’ll send both)
+                nb = len((line + "\n").encode("ascii", "ignore"))
+                if disco_line:
+                    nb += len((disco_line + "\n").encode("ascii", "ignore"))
+                min_gap = self._min_gap(nb)
+
+                # write(s)
+                self._write_line(line)
+                if disco_line:
+                    self._write_line(disco_line)
+
+                # Reasoned log (change vs heartbeat)
+                if disco_line:
+                    log_info(f"Playback: sent telemetry ({reason}) + DISCO → {line}")
+                else:
+                    log_info(f"Playback: sent telemetry ({reason}) → {line}")
+
+                self._is_writing_serial = True
+                self._update_arduino_animation()
+
+                self._reschedule_serial_writer(max(min_gap, 1.0 / self._BASE_HZ))
+            else:
+                self._is_writing_serial = False
+                self._update_arduino_animation()
+                self._reschedule_serial_writer(1.0 / self._BASE_HZ)
+
         except Exception as e:
             log_error(f"Error sending telemetry serial: {e}")
+            self._reschedule_serial_writer(1.0 / self._BASE_HZ)
 
+    def _reschedule_serial_writer(self, interval: float):
+        """Reschedule the serial writer with the specified interval."""
+        if self._serial_timer:
+            Clock.unschedule(self._serial_timer)
+        self._serial_timer = Clock.schedule_once(self._send_telemetry_serial, interval)
+
+    # ------------------------------ helpers: writer/pacing/format ------------------------------
+    def _write_line(self, line: str):
+        """
+        Ensure newline termination and call serialWrite once per update.
+        """
+        if not line.endswith("\n"):
+            line = line + "\n"
+        try:
+            serialWrite(line)
+        except Exception as e:
+            log_error(f"serialWrite failed: {e}")
+
+    def _line_bytes(self, line: str) -> int:
+        return len(line.encode("ascii", "ignore"))
+
+    def _min_gap(self, n_bytes: int) -> float:
+        """
+        Compute the minimum on-the-wire time for this payload at 9600,
+        assuming 10 bits/byte (start + 8 data + stop) plus safety margin.
+        """
+        bits = n_bytes * 10
+        seconds = bits / self._BAUD
+        return seconds * (1.0 + self._SAFETY)
+
+    @staticmethod
+    def _f(v, places: int = 1) -> str:
+        try:
+            return f"{float(v):.{places}f}"
+        except Exception:
+            return f"{0.0:.{places}f}"
+
+    @staticmethod
+    def _i(v) -> str:
+        try:
+            return str(int(round(float(v))))
+        except Exception:
+            return "0"
+
+    def _compute_leds(self, telemetry_values: dict) -> dict:
+        """Voltage → color strings ('Blue'|'Yellow'|'White') for LED_* keys."""
+        def color(v):
+            v = float(v)
+            if v < 151.5:
+                return "Blue"
+            if v < 160.0:
+                return "Yellow"
+            return "White"
+        leds = {}
+        try:
+            leds["LED_1A"] = color(telemetry_values.get('V1A', 0))
+            leds["LED_1B"] = color(telemetry_values.get('V1B', 0))
+            leds["LED_2A"] = color(telemetry_values.get('V2A', 0))
+            leds["LED_2B"] = color(telemetry_values.get('V2B', 0))
+            leds["LED_3A"] = color(telemetry_values.get('V3A', 0))
+            leds["LED_3B"] = color(telemetry_values.get('V3B', 0))
+            leds["LED_4A"] = color(telemetry_values.get('V4A', 0))
+            leds["LED_4B"] = color(telemetry_values.get('V4B', 0))
+        except Exception as e:
+            log_error(f"LED compute failed: {e}")
+        return leds
+
+    def _build_packet(self, vals: dict, leds: dict | None) -> str:
+        """One space-separated line (Arduino-friendly)."""
+        tokens = [
+            f"PSARJ={self._f(vals.get('PSARJ'))}",
+            f"SSARJ={self._f(vals.get('SSARJ'))}",
+            f"PTRRJ={self._f(vals.get('PTRRJ'))}",
+            f"STRRJ={self._f(vals.get('STRRJ'))}",
+            f"B1B={self._f(vals.get('B1B'))}",
+            f"B1A={self._f(vals.get('B1A'))}",
+            f"B2B={self._f(vals.get('B2B'))}",
+            f"B2A={self._f(vals.get('B2A'))}",
+            f"B3B={self._f(vals.get('B3B'))}",
+            f"B3A={self._f(vals.get('B3A'))}",
+            f"B4B={self._f(vals.get('B4B'))}",
+            f"B4A={self._f(vals.get('B4A'))}",
+            f"AOS={self._i(vals.get('AOS'))}",
+            f"ISS={self._i(vals.get('ISS'))}",
+            f"Sgnt_el={self._f(vals.get('Sgnt_el'))}",
+            f"Sgnt_xel={self._f(vals.get('Sgnt_xel'))}",
+            f"Sgnt_xmit={self._i(vals.get('Sgnt_xmit'))}",
+            f"SASA_Xmit={self._i(vals.get('SASA_Xmit'))}",
+            f"SASA_AZ={self._f(vals.get('SASA_AZ'))}",
+            f"SASA_EL={self._f(vals.get('SASA_EL'))}",
+        ]
+        if leds:
+            for k in ("LED_1A","LED_1B","LED_2A","LED_2B","LED_3A","LED_3B","LED_4A","LED_4B"):
+                if k in leds:
+                    tokens.append(f"{k}={leds[k]}")
+        return " ".join(tokens)
+
+    # ------------------------------ DB I/O ------------------------------
     def _read_current_telemetry(self):
         """Read current telemetry values from the database."""
         try:
             import sqlite3
-            
             db_path = self._get_db_path()
             if not db_path:
                 return None
-                
+
             with sqlite3.connect(db_path) as conn:
                 cursor = conn.cursor()
-                
-                # Map the Arduino command names to actual database IDs
                 telemetry_mapping = {
-                    'PSARJ': 'S0000004',      # psarj
-                    'SSARJ': 'S0000003',      # ssarj
-                    'PTRRJ': 'S0000002',      # ptrrj
-                    'STRRJ': 'S0000001',      # strrj
-                    'B1B': 'S6000008',        # beta1b
-                    'B1A': 'S4000007',        # beta1a
-                    'B2B': 'P6000008',        # beta2b
-                    'B2A': 'P4000007',        # beta2a
-                    'B3B': 'S6000007',        # beta3b
-                    'B3A': 'S4000008',        # beta3a
-                    'B4B': 'P6000007',        # beta4b
-                    'B4A': 'P4000008',        # beta4a
-                    'AOS': 'AOS',             # aos
-                    'V1A': 'S4000001',        # voltage_1a
-                    'V2A': 'P4000001',        # voltage_2a
-                    'V3A': 'S4000004',        # voltage_3a
-                    'V4A': 'P4000004',        # voltage_4a
-                    'V1B': 'S6000004',        # voltage_1b
-                    'V2B': 'P6000004',        # voltage_2b
-                    'V3B': 'S6000001',        # voltage_3b
-                    'V4B': 'P6000001',        # voltage_4b
-                    'ISS': 'USLAB000086',     # iss_mode
-                    'Sgnt_el': 'Z1000014',    # sgant_elevation
-                    'Sgnt_xel': 'Z1000015',   # sgant_xel
-                    'Sgnt_xmit': 'Z1000013',  # kuband_transmit
-                    'SASA_Xmit': 'S1000009',  # sasa1_status
-                    'SASA_AZ': 'S1000004',    # sasa1_azimuth
-                    'SASA_EL': 'S1000005'     # sasa1_elevation
+                    'PSARJ': 'S0000004',
+                    'SSARJ': 'S0000003',
+                    'PTRRJ': 'S0000002',
+                    'STRRJ': 'S0000001',
+                    'B1B': 'S6000008',
+                    'B1A': 'S4000007',
+                    'B2B': 'P6000008',
+                    'B2A': 'P4000007',
+                    'B3B': 'S6000007',
+                    'B3A': 'S4000008',
+                    'B4B': 'P6000007',
+                    'B4A': 'P4000008',
+                    'AOS': 'AOS',
+                    'V1A': 'S4000001',
+                    'V2A': 'P4000001',
+                    'V3A': 'S4000004',
+                    'V4A': 'P4000004',
+                    'V1B': 'S6000004',
+                    'V2B': 'P6000004',
+                    'V3B': 'S6000001',
+                    'V4B': 'P6000001',
+                    'ISS': 'USLAB000086',
+                    'Sgnt_el': 'Z1000014',
+                    'Sgnt_xel': 'Z1000015',
+                    'Sgnt_xmit': 'Z1000013',
+                    'SASA_Xmit': 'S1000009',
+                    'SASA_AZ': 'S1000004',
+                    'SASA_EL': 'S1000005'
                 }
-                
-                # Get the actual database IDs we need to query
                 db_ids = list(telemetry_mapping.values())
-                
-                # Build query to get all values at once
                 placeholders = ','.join(['?' for _ in db_ids])
                 query = f"SELECT ID, Value FROM telemetry WHERE ID IN ({placeholders})"
-                
                 cursor.execute(query, db_ids)
                 results = cursor.fetchall()
-                
-                # Convert to dictionary with Arduino command names as keys
+
                 telemetry_dict = {}
                 for db_id, value in results:
-                    # Find the Arduino command name for this database ID
                     for cmd_name, actual_db_id in telemetry_mapping.items():
                         if actual_db_id == db_id:
                             telemetry_dict[cmd_name] = value
                             break
-                
+
+                # Ensure defaults for missing keys to avoid KeyError
+                for k in ('PSARJ','SSARJ','PTRRJ','STRRJ',
+                          'B1A','B1B','B2A','B2B','B3A','B3B','B4A','B4B',
+                          'AOS','ISS','Sgnt_el','Sgnt_xel','Sgnt_xmit','SASA_Xmit','SASA_AZ','SASA_EL',
+                          'V1A','V1B','V2A','V2B','V3A','V3B','V4A','V4B'):
+                    telemetry_dict.setdefault(k, 0)
+
                 return telemetry_dict
-                
         except Exception as e:
             log_error(f"Error reading telemetry from database: {e}")
             return None
-
-    def _build_telemetry_command(self, telemetry_values):
-        """Build the telemetry command string (without LED commands)."""
-        try:
-            # Extract values with defaults
-            psarj = "{:.1f}".format(float(telemetry_values.get('PSARJ', 0)))
-            ssarj = "{:.1f}".format(float(telemetry_values.get('SSARJ', 0)))
-            ptrrj = "{:.1f}".format(float(telemetry_values.get('PTRRJ', 0)))
-            strrj = "{:.1f}".format(float(telemetry_values.get('STRRJ', 0)))
-            b1b = "{:.1f}".format(float(telemetry_values.get('B1B', 0)))
-            b1a = "{:.1f}".format(float(telemetry_values.get('B1A', 0)))
-            b2b = "{:.1f}".format(float(telemetry_values.get('B2B', 0)))
-            b2a = "{:.1f}".format(float(telemetry_values.get('B2A', 0)))
-            b3b = "{:.1f}".format(float(telemetry_values.get('B3B', 0)))
-            b3a = "{:.1f}".format(float(telemetry_values.get('B3A', 0)))
-            b4b = "{:.1f}".format(float(telemetry_values.get('B4B', 0)))
-            b4a = "{:.1f}".format(float(telemetry_values.get('B4A', 0)))
-            aos = telemetry_values.get('AOS', 0)
-            module = telemetry_values.get('ISS', 0)
-            sgant_elevation = "{:.1f}".format(float(telemetry_values.get('Sgnt_el', 0)))
-            sgant_xelevation = "{:.1f}".format(float(telemetry_values.get('Sgnt_xel', 0)))
-            sgant_transmit = telemetry_values.get('Sgnt_xmit', 0)
-            sasa_xmit = telemetry_values.get('SASA_Xmit', 0)
-            sasa_az = "{:.1f}".format(float(telemetry_values.get('SASA_AZ', 0)))
-            sasa_el = "{:.1f}".format(float(telemetry_values.get('SASA_EL', 0)))
-            
-            # Build the telemetry command string (without LED commands)
-            telemetry_cmd = (
-                f"PSARJ={str(psarj)} "
-                f"SSARJ={str(ssarj)} "
-                f"PTRRJ={str(ptrrj)} "
-                f"STRRJ={str(strrj)} "
-                f"B1B={str(b1b)} "
-                f"B1A={str(b1a)} "
-                f"B2B={str(b2b)} "
-                f"B2A={str(b2a)} "
-                f"B3B={str(b3b)} "
-                f"B3A={str(b3a)} "
-                f"B4B={str(b4b)} "
-                f"B4A={str(b4a)} "
-                f"AOS={str(aos)} "
-                f"ISS={str(module)} "
-                f"Sgnt_el={str(sgant_elevation)} "
-                f"Sgnt_xel={str(sgant_xelevation)} "
-                f"Sgnt_xmit={str(sgant_transmit)} "
-                f"SASA_Xmit={str(sasa_xmit)} "
-                f"SASA_AZ={str(sasa_az)} "
-                f"SASA_EL={str(sasa_el)}"
-            )
-            
-            return telemetry_cmd
-            
-        except Exception as e:
-            log_error(f"Error building telemetry command: {e}")
-            return ""
-
-    def _build_individual_led_commands(self, telemetry_values):
-        """Build individual LED commands (like LED control screen)."""
-        try:
-            # For disco mode, just return the DISCO command
-            if self.current_file == "Disco":
-                return ["DISCO"]
-            
-            # Normal mode: voltage-based colors
-            # Get voltage values for LED control
-            v1a = float(telemetry_values.get('V1A', 0))
-            v1b = float(telemetry_values.get('V1B', 0))
-            v2a = float(telemetry_values.get('V2A', 0))
-            v2b = float(telemetry_values.get('V2B', 0))
-            v3a = float(telemetry_values.get('V3A', 0))
-            v3b = float(telemetry_values.get('V3B', 0))
-            v4a = float(telemetry_values.get('V4A', 0))
-            v4b = float(telemetry_values.get('V4B', 0))
-            
-            # Determine LED colors based on voltage
-            led_1a = self._get_voltage_color(v1a)
-            led_1b = self._get_voltage_color(v1b)
-            led_2a = self._get_voltage_color(v2a)
-            led_2b = self._get_voltage_color(v2b)
-            led_3a = self._get_voltage_color(v3a)
-            led_3b = self._get_voltage_color(v3b)
-            led_4a = self._get_voltage_color(v4a)
-            led_4b = self._get_voltage_color(v4b)
-            
-            # Build individual LED commands (like LED control screen)
-            led_commands = [
-                f"LED_1A={led_1a}",
-                f"LED_2A={led_2a}",
-                f"LED_3A={led_3a}",
-                f"LED_4A={led_4a}",
-                f"LED_1B={led_1b}",
-                f"LED_2B={led_2b}",
-                f"LED_3B={led_3b}",
-                f"LED_4B={led_4b}"
-            ]
-            
-            return led_commands
-            
-        except Exception as e:
-            log_error(f"Error building individual LED commands: {e}")
-            return []
 
     def _get_db_path(self):
         """Get the database path based on platform."""
@@ -620,22 +608,11 @@ class Playback_Screen(MimicBase):
             if platform.system() == "Linux":
                 return "/dev/shm/iss_telemetry.db"
             else:
-                # Windows path
-                import os
                 home = os.path.expanduser("~")
                 return os.path.join(home, ".mimic_data", "iss_telemetry.db")
         except Exception as e:
             log_error(f"Error getting database path: {e}")
             return None
-
-    def _get_voltage_color(self, voltage):
-        """Determine LED color based on voltage threshold."""
-        if voltage < 151.5:
-            return "Blue"      # Discharging
-        elif voltage < 160.0:
-            return "Yellow"    # Charging
-        else:
-            return "White"     # Fully charged
 
     # ---------------------------------------------------------------- Playback Control
     def start_playback(self):
@@ -643,70 +620,50 @@ class Playback_Screen(MimicBase):
         if not self.current_file:
             self._show_error("No file selected")
             return
-            
         if not self.arduino_connected:
             self._show_error("No Arduino connected")
             return
-            
         if self.is_playing:
             self._show_error("Already playing")
             return
-            
+
         try:
-            # Determine the data folder path
             if self.current_file.startswith("USB: "):
-                # USB telemetry folder - find the actual path
                 telemetry_folder = self.current_file.replace("USB: ", "")
                 data_folder = self._find_usb_telemetry_path(telemetry_folder)
                 if not data_folder:
                     self._show_error(f"Could not find USB telemetry folder: {telemetry_folder}")
                     return
             else:
-                # Built-in demo
                 demo_name = self.current_file
                 data_folder = str(Path(self.mimic_directory) / "Mimic/Pi/RecordedData" / demo_name)
-            
-            # Build command with loop option
+
             cmd = [
                 "python3",
                 str(Path(self.mimic_directory) / "Mimic/Pi/RecordedData/playback_engine.py"),
                 data_folder,
                 str(self.playback_speed)
             ]
-            
-            # Add loop flag if enabled
             if self.loop_enabled:
                 cmd.append("--loop")
-            
-            # Launch the playback engine with isolated environment
-            app = App.get_running_app()
 
-            
-            # Create isolated environment to prevent GUI module reloading
+            app = App.get_running_app()
             env = os.environ.copy()
-            # Remove any Python path variables that might cause module conflicts
             env.pop('PYTHONPATH', None)
             env.pop('PYTHONHOME', None)
-            
+
             proc = Popen(cmd, env=env)
             app.playback_proc = proc
-            
+
             self.is_playing = True
             loop_status = "with looping" if self.loop_enabled else ""
             log_info(f"Started playback of {self.current_file} at {self.playback_speed}x speed {loop_status}")
-            
-            # Start serial writer
+
             self._start_serial_writer()
-            
-            # Update status to show playback is active
             self._update_status()
-            
-            # Update all button states
             self._update_playback_buttons()
-            
-            # Update Arduino animation to show transmit
             self._update_arduino_animation()
-            
+
         except Exception as e:
             log_error(f"Error starting playback: {e}")
             import traceback
@@ -717,72 +674,55 @@ class Playback_Screen(MimicBase):
         """Stop the current playback."""
         if not self.is_playing:
             return
-            
         try:
             log_info("Stopping playback...")
-            
-            # Stop serial writer first
+
             self._stop_serial_writer()
-            
-            # Stop the playback engine
+
             app = App.get_running_app()
             if hasattr(app, 'playback_proc') and app.playback_proc:
                 log_info(f"Terminating process {app.playback_proc.pid}")
-                
-                # Try graceful termination first
-                # Only send RESET if we're actually playing and have a process
-                if self.is_playing:
-                    serialWrite("RESET")
+
+                # Only send RESET if we’re actually playing and have a process
+                serialWrite("RESET")
+
                 app.playback_proc.terminate()
-                
-                # Wait a bit for graceful shutdown
                 try:
                     app.playback_proc.wait(timeout=3)
                     log_info("Process terminated gracefully")
                 except TimeoutExpired:
-                    # Force kill if it doesn't respond
                     log_info("Force killing playback process")
                     app.playback_proc.kill()
                     app.playback_proc.wait()
                     log_info("Process force killed")
-                
                 app.playback_proc = None
             else:
                 log_info("No playback process found to stop")
-            
+
             self.is_playing = False
             log_info("Playback stopped")
-            
-            # Update status and re-enable all buttons
+
             self._update_status()
             self._update_playback_buttons()
-            
-            # Update Arduino animation to show normal
             self._update_arduino_animation()
-            
+
         except Exception as e:
             log_error(f"Error stopping playback: {e}")
-            # Even if there's an error, mark as not playing
             self.is_playing = False
             self._stop_serial_writer()
             self._update_status()
             self._update_playback_buttons()
             self._update_arduino_animation()
-    
+
     def toggle_loop(self):
         """Toggle loop mode on/off."""
         self.loop_enabled = not self.loop_enabled
         status = "enabled" if self.loop_enabled else "disabled"
         log_info(f"Loop mode {status}")
-        
-        # Update button appearance
         loop_button = getattr(self.ids, 'loop_button', None)
         if loop_button:
-            if self.loop_enabled:
-                loop_button.background_color = (0.2, 0.8, 0.2, 1)  # Green
-            else:
-                loop_button.background_color = (0.6, 0.6, 0.6, 1)  # Gray
-            
+            loop_button.background_color = (0.2, 0.8, 0.2, 1) if self.loop_enabled else (0.6, 0.6, 0.6, 1)
+
     # ---------------------------------------------------------------- Error Handling
     def _show_error(self, message: str):
         """Show an error popup."""
@@ -793,10 +733,7 @@ class Playback_Screen(MimicBase):
                 size_hint=(0.6, 0.3)
             )
             popup.open()
-            
-            # Auto-close after 3 seconds
             Clock.schedule_once(lambda dt: popup.dismiss(), 3.0)
-            
         except Exception as e:
             log_error(f"Error showing error popup: {e}")
 
@@ -804,6 +741,5 @@ class Playback_Screen(MimicBase):
     def on_pre_leave(self):
         """Called when leaving the screen."""
         self.stop_playback()
-        # Ensure Arduino animation is reset when leaving
         self._update_arduino_animation()
         super().on_pre_leave()
