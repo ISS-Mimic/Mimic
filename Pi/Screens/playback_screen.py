@@ -53,8 +53,8 @@ class _ChangeGate:
 
     def filter(self, now: float, vals: dict, leds: dict | None = None):
         """
-        Returns (should_send: bool, q_vals: dict, q_leds: dict|None, reason: str)
-        reason ∈ {"change", "heartbeat", ""}.
+        Returns (should_send: bool, q_vals: dict, q_leds: str|None, reason: str)
+        reason ∈ {"change", "heartbeat", "led_change", ""}.
         """
         q_vals = {}
         for k, v in vals.items():
@@ -64,22 +64,45 @@ class _ChangeGate:
             else:
                 q_vals[k] = v
 
-        # Keep LED color strings exactly as computed
-        q_leds = {}
+        # Build LED command string
+        q_leds = None
         if leds:
+            led_tokens = []
             for k, v in leds.items():
-                q_leds[k] = "" if v is None else str(v)
+                if v is not None:
+                    led_tokens.append(f"{k}={v}")
+            q_leds = " ".join(led_tokens) if led_tokens else ""
 
-        composite = {**q_vals, **q_leds}
-        changed = any(self.prev.get(k) != composite[k] for k in composite)
+        # Check if telemetry values changed
+        telemetry_changed = any(self.prev.get(k) != q_vals[k] for k in q_vals)
+        
+        # Check if LED values changed (only if we have LEDs)
+        led_changed = False
+        if q_leds is not None:
+            prev_leds = self.prev.get('_leds', "")
+            led_changed = prev_leds != q_leds
+        
+        # Determine if we should send
+        changed = telemetry_changed or led_changed
         heartbeat_due = (now - self._last_sent) >= self.heartbeat_s
 
         if changed or heartbeat_due:
-            self.prev = composite
+            # Update previous values
+            self.prev.update(q_vals)
+            if q_leds is not None:
+                self.prev['_leds'] = q_leds
             self._last_sent = now
-            reason = "change" if changed else "heartbeat"
-            return True, q_vals, (q_leds if leds else None), reason
-        return False, q_vals, (q_leds if leds else None), ""
+            
+            # Determine reason
+            if led_changed and not telemetry_changed:
+                reason = "led_change"
+            elif telemetry_changed:
+                reason = "change"
+            else:
+                reason = "heartbeat"
+                
+            return True, q_vals, q_leds, reason
+        return False, q_vals, q_leds, ""
 
 class Playback_Screen(MimicBase):
     """
@@ -417,9 +440,9 @@ class Playback_Screen(MimicBase):
                 if disco_line:
                     nb += len((disco_line + "\n").encode("ascii", "ignore"))
                 
-                # Add LED command bytes to wire time calculation
-                for led_cmd in led_commands:
-                    nb += len((led_cmd + "\n").encode("ascii", "ignore"))
+                # Add LED command bytes to wire time calculation (if any)
+                if led_commands:
+                    nb += len((led_commands + "\n").encode("ascii", "ignore"))
                 
                 min_gap = self._min_gap(nb)
 
@@ -430,13 +453,10 @@ class Playback_Screen(MimicBase):
                 # Small delay to let microcontroller process telemetry command
                 time.sleep(0.05)  # 50ms delay
                 
-                # Send LED commands individually with delays (like mimic screen)
+                # Send combined LED commands (if any)
                 if led_commands:
-                    for led_cmd in led_commands:
-                        self._write_line(led_cmd)
-                        # Small delay between LED commands
-                        time.sleep(0.02)  # 20ms delay
-                    log_info(f"Playback: sent {len(led_commands)} LED commands")
+                    self._write_line(led_commands)
+                    log_info(f"Playback: sent LED commands → {led_commands}")
                 
                 # Send DISCO command if needed
                 if disco_line:
@@ -446,8 +466,8 @@ class Playback_Screen(MimicBase):
                 self._is_writing_serial = True
                 self._update_arduino_animation()
 
-                # Calculate total delay time and add to minimum gap
-                total_delay = 0.05 + (len(led_commands) * 0.02)  # 50ms + 20ms per LED command
+                # Calculate total delay time (just 50ms + any additional delays)
+                total_delay = 0.05  # Only 50ms delay between telemetry and LEDs
                 min_gap = max(min_gap, total_delay)
                 
                 self._reschedule_serial_writer(max(min_gap, 1.0 / self._BASE_HZ))
@@ -553,9 +573,9 @@ class Playback_Screen(MimicBase):
         ]
         return " ".join(tokens)
 
-    def _build_led_commands(self, vals: dict) -> list:
-        """Build individual LED commands (like mimic screen)."""
-        led_commands = []
+    def _build_led_commands(self, vals: dict) -> str:
+        """Build combined LED command string (all LEDs in one packet)."""
+        led_tokens = []
         voltage_to_led_mapping = {
             'V1A': '1A', 'V1B': '1B',
             'V2A': '2A', 'V2B': '2B', 
@@ -569,12 +589,12 @@ class Playback_Screen(MimicBase):
                 try:
                     voltage = float(vals[voltage_key])
                     color = self._get_voltage_color(voltage)
-                    led_commands.append(f"LED_{led_suffix}={color}")
+                    led_tokens.append(f"LED_{led_suffix}={color}")
                 except (ValueError, TypeError):
                     # If voltage conversion fails, default to Blue
-                    led_commands.append(f"LED_{led_suffix}=Blue")
+                    led_tokens.append(f"LED_{led_suffix}=Blue")
         
-        return led_commands
+        return " ".join(led_tokens) if led_tokens else ""
 
     def _get_voltage_color(self, voltage):
         """Determine LED color based on voltage threshold (same as mimic screen)."""
