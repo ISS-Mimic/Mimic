@@ -4,16 +4,274 @@
         Image:
             id: Orbit_Pass_background
             source: f'{root.mimic_directory}/Mimic/Pi/imgs/orbit/ISSpassBackground.png'
-            fit_mode: "fill" 
-        #Label:
-            #id: passtime
-            #pos_hint: {"center_x": 0.5, "center_y": 0.5}
-            #text: "Pass"
-
-       # ---------- STATUS DISPLAY (Bottom Rectangle) ----------
+            fit_mode: "fill"
+        
+        # ---------- MAIN CONTENT AREA ----------
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint: 0.9, 0.8
+            pos_hint: {"center_x": 0.5, "center_y": 0.55}
+            spacing: 10
+            padding: 10
+            
+            # ---------- PASS INFORMATION HEADER ----------
+            BoxLayout:
+                size_hint: 1, 0.15
+                orientation: 'horizontal'
+                spacing: 10
+                
+                # Pass Details Grid
+                GridLayout:
+                    cols: 2
+                    size_hint: 0.7, 1
+                    spacing: 5
+                    
+                    Label:
+                        text: 'Next ISS Pass'
+                        size_hint: 1, 0.5
+                        color: 1, 1, 1, 1
+                        font_size: self.height * 0.4
+                        bold: True
+                        text_size: self.size
+                        halign: 'center'
+                        valign: 'middle'
+                    
+                    Label:
+                        text: ''
+                        size_hint: 1, 0.5
+                    
+                    Label:
+                        text: 'Start Time:'
+                        size_hint: 1, 1
+                        color: 0.8, 0.8, 0.8, 1
+                        font_size: self.height * 0.3
+                        text_size: self.size
+                        halign: 'left'
+                        valign: 'middle'
+                    
+                    Label:
+                        text: root.pass_start_time
+                        size_hint: 1, 1
+                        color: 1, 1, 1, 1
+                        font_size: self.height * 0.3
+                        text_size: self.size
+                        halign: 'right'
+                        valign: 'middle'
+                    
+                    Label:
+                        text: 'End Time:'
+                        size_hint: 1, 1
+                        color: 0.8, 0.8, 0.8, 1
+                        font_size: self.height * 0.3
+                        text_size: self.size
+                        halign: 'left'
+                        valign: 'middle'
+                    
+                    Label:
+                        text: root.pass_end_time
+                        size_hint: 1, 1
+                        color: 1, 1, 1, 1
+                        font_size: self.height * 0.3
+                        text_size: self.size
+                        halign: 'right'
+                        valign: 'middle'
+                    
+                    Label:
+                        text: 'Duration:'
+                        size_hint: 1, 1
+                        color: 0.8, 0.8, 0.8, 1
+                        font_size: self.height * 0.3
+                        text_size: self.size
+                        halign: 'left'
+                        valign: 'middle'
+                    
+                    Label:
+                        text: root.pass_duration
+                        size_hint: 1, 1
+                        color: 1, 1, 1, 1
+                        font_size: self.height * 0.3
+                        text_size: self.size
+                        halign: 'right'
+                        valign: 'middle'
+                
+                # Pass Quality and Magnitude
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint: 0.3, 1
+                    spacing: 5
+                    
+                    Label:
+                        text: 'Quality:'
+                        size_hint: 1, 0.3
+                        color: 0.8, 0.8, 0.8, 1
+                        font_size: self.height * 0.25
+                        text_size: self.size
+                        halign: 'center'
+                        valign: 'middle'
+                    
+                    Label:
+                        text: root.pass_quality
+                        size_hint: 1, 0.4
+                        color: 1, 1, 0, 1
+                        font_size: self.height * 0.35
+                        bold: True
+                        text_size: self.size
+                        halign: 'center'
+                        valign: 'middle'
+                    
+                    Label:
+                        text: 'Magnitude:'
+                        size_hint: 1, 0.3
+                        color: 0.8, 0.8, 0.8, 1
+                        font_size: self.height * 0.25
+                        text_size: self.size
+                        halign: 'center'
+                        valign: 'middle'
+                    
+                    Label:
+                        text: root.magnitude
+                        size_hint: 1, 0.4
+                        color: 1, 1, 1, 1
+                        font_size: self.height * 0.35
+                        text_size: self.size
+                        halign: 'center'
+                        valign: 'middle'
+            
+            # ---------- SKY CHART AREA ----------
+            BoxLayout:
+                size_hint: 1, 0.6
+                orientation: 'horizontal'
+                spacing: 10
+                
+                # Sky Chart Container
+                BoxLayout:
+                    id: sky_chart_container
+                    size_hint: 0.7, 1
+                    canvas.before:
+                        Color:
+                            rgba: 0.1, 0.1, 0.1, 0.8
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+                
+                # Pass Details Sidebar
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint: 0.3, 1
+                    spacing: 5
+                    
+                    Label:
+                        text: 'Pass Details'
+                        size_hint: 1, 0.15
+                        color: 1, 1, 1, 1
+                        font_size: self.height * 0.4
+                        bold: True
+                        text_size: self.size
+                        halign: 'center'
+                        valign: 'middle'
+                    
+                    # Max Elevation
+                    BoxLayout:
+                        orientation: 'vertical'
+                        size_hint: 1, 0.2
+                        
+                        Label:
+                            text: 'Max Elevation'
+                            size_hint: 1, 0.5
+                            color: 0.8, 0.8, 0.8, 1
+                            font_size: self.height * 0.25
+                            text_size: self.size
+                            halign: 'center'
+                            valign: 'middle'
+                        
+                        Label:
+                            text: root.max_elevation
+                            size_hint: 1, 0.5
+                            color: 0, 1, 0, 1
+                            font_size: self.height * 0.4
+                            bold: True
+                            text_size: self.size
+                            halign: 'center'
+                            valign: 'middle'
+                    
+                    # Start Azimuth
+                    BoxLayout:
+                        orientation: 'vertical'
+                        size_hint: 1, 0.2
+                        
+                        Label:
+                            text: 'Start Direction'
+                            size_hint: 1, 0.5
+                            color: 0.8, 0.8, 0.8, 1
+                            font_size: self.height * 0.25
+                            text_size: self.size
+                            halign: 'center'
+                            valign: 'middle'
+                        
+                        Label:
+                            text: root.start_azimuth
+                            size_hint: 1, 0.5
+                            color: 1, 1, 1, 1
+                            font_size: self.height * 0.4
+                            text_size: self.size
+                            halign: 'center'
+                            valign: 'middle'
+                    
+                    # End Azimuth
+                    BoxLayout:
+                        orientation: 'vertical'
+                        size_hint: 1, 0.2
+                        
+                        Label:
+                            text: 'End Direction'
+                            size_hint: 1, 0.5
+                            color: 0.8, 0.8, 0.8, 1
+                            font_size: self.height * 0.25
+                            text_size: self.size
+                            halign: 'center'
+                            valign: 'middle'
+                        
+                        Label:
+                            text: root.end_azimuth
+                            size_hint: 1, 0.5
+                            color: 1, 1, 1, 1
+                            font_size: self.height * 0.4
+                            text_size: self.size
+                            halign: 'center'
+                            valign: 'middle'
+                    
+                    # Spacer
+                    Widget:
+                        size_hint: 1, 0.25
+            
+            # ---------- CONTROL BUTTONS ----------
+            BoxLayout:
+                size_hint: 1, 0.1
+                spacing: 20
+                
+                Button:
+                    text: 'Refresh Pass Data'
+                    size_hint: 0.3, 1
+                    background_color: 0.2, 0.6, 1, 1
+                    color: 1, 1, 1, 1
+                    font_size: self.height * 0.4
+                    on_release: root.refresh_pass_data()
+                
+                Button:
+                    text: 'Update Location'
+                    size_hint: 0.3, 1
+                    background_color: 0.2, 0.8, 0.2, 1
+                    color: 1, 1, 1, 1
+                    font_size: self.height * 0.4
+                    on_release: app.root.current = 'settings'
+                
+                Widget:
+                    size_hint: 0.4, 1
+        
+        # ---------- STATUS DISPLAY (Bottom Rectangle) ----------
         Label:
             id: status_label
-            text: ''
+            text: 'Loading ISS pass data...'
             size_hint: 1, 0.07
             background_color: 0, 0, 0, 0.8  # Semi-transparent black
             color: 0, 1, 0, 1  # Green text
@@ -52,7 +310,6 @@
             size_hint: 0.06, 0.08
         
         # ─────────────────────── Navigation ────────────────────────────────
-
         Button:
             size_hint: 0.1, 0.11
             pos_hint: {"center_x": 0.9375, "center_y": 0.07}
