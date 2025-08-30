@@ -1,4 +1,8 @@
+#:import sp kivy.metrics.sp
+
 <Orbit_Pass>:
+    on_size: root.on_size()
+
     name: 'orbit_pass'
     FloatLayout:
         #Image:
@@ -169,39 +173,21 @@
                     size_hint: 0.3, 1
                     spacing: 5
                     
-                    Label:
+                    LblBig:
                         text: 'Pass Details'
-                        size_hint: 1, 0.15
-                        color: 1, 1, 1, 1
-                        font_size: self.height * 0.5
-                        bold: True
-                        text_size: self.size
-                        halign: 'center'
-                        valign: 'middle'
+
                     
                     # Max Elevation
                     BoxLayout:
                         orientation: 'vertical'
                         size_hint: 1, 0.2
                         
-                        Label:
+                        LblMed:
                             text: 'Max Elevation'
-                            size_hint: 1, 0.5
-                            color: 0.8, 0.8, 0.8, 1
-                            font_size: self.height * 0.4
-                            text_size: self.size
-                            halign: 'center'
-                            valign: 'middle'
                         
-                        Label:
+                        LblMed:
                             text: root.max_elevation
-                            size_hint: 1, 0.5
-                            color: 0, 1, 0, 1
-                            font_size: self.height * 0.5
-                            bold: True
-                            text_size: self.size
-                            halign: 'center'
-                            valign: 'middle'
+
                     
                     # Start Azimuth
                     BoxLayout:
@@ -326,3 +312,15 @@
             background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             border: 0,0,0,0    # avoid 9-slice margins
             on_release: app.root.current = 'orbit'
+
+<LblBig@Label>:
+    font_size: sp(22) * root.ui_scale
+    text_size: self.size
+    halign: 'center'
+    valign: 'middle'
+
+<LblMed@Label>:
+    font_size: sp(18) * root.ui_scale
+    text_size: self.size
+    halign: 'center'
+    valign: 'middle'

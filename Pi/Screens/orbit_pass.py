@@ -12,6 +12,13 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
 from kivy.uix.scrollview import ScrollView
 from kivy.core.image import Image as CoreImage
+
+from typing import Tuple, List
+from kivy.clock import Clock
+from kivy.core.image import Image as CoreImage
+from kivy.graphics import Color, Rectangle
+
+import io, math
 import ephem
 import math
 import time
@@ -68,143 +75,114 @@ def _safe_import_matplotlib():
 
 
 class SkyChartWidget(Widget):
-    """Custom widget for displaying the sky chart with ISS pass arc."""
-    
+    """Draw a simple polar sky chart of the ISS pass."""
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.pass_data = None
-        self.user_location = None
-        self.bind(size=self._update_sky_chart, pos=self._update_sky_chart)
-    
+        self.pass_data: dict | None = None
+        self.user_location: Tuple[float, float] | None = None
+
+        # coalesce noisy size/pos changes into a single redraw
+        self._redraw_trigger = Clock.create_trigger(self._draw_chart, 0.12)
+        self.bind(size=self._on_geom_change, pos=self._on_geom_change)
+
+    def _on_geom_change(self, *_):
+        if self.pass_data:
+            self._redraw_trigger()
+
     def set_pass_data(self, pass_data: dict, user_location: Tuple[float, float]):
-        """Set the pass data and user location for the sky chart."""
         self.pass_data = pass_data
         self.user_location = user_location
-        self._update_sky_chart()
-    
-    def _update_sky_chart(self, *args):
-        """Update the sky chart display."""
+        self._redraw_trigger()
+
+    def _draw_chart(self, *_):
+        self.canvas.clear()
         if not self.pass_data or not self.user_location:
             return
-        
-        self.canvas.clear()
-        
-        # Check if matplotlib is available
-        if not _safe_import_matplotlib():
-            log_error("Orbit Pass: Matplotlib not available, showing fallback")
-            # Show a simple colored rectangle as fallback
+        if not _safe_import_matplotlib():  # your helper already in file
+            # fallback: plain grey box
             with self.canvas:
                 Color(0.2, 0.2, 0.2, 1)
                 Rectangle(pos=self.pos, size=self.size)
             return
-        
-        try:
-            # Import matplotlib modules locally
-            import matplotlib.pyplot as plt
-            from matplotlib.backends.backend_agg import FigureCanvasAgg
-            
-            # Create matplotlib figure for the sky chart
-            fig, ax = plt.subplots(figsize=(8, 8), subplot_kw={'projection': 'polar'})
-            
-            # Set up the polar plot (azimuth vs elevation)
-            ax.set_theta_direction(-1)  # Clockwise from North
-            ax.set_theta_zero_location('N')
-            ax.set_rlim(0, 90)  # 0° to 90° elevation
-            ax.set_rticks([0, 15, 30, 45, 60, 75, 90])
-            ax.set_yticklabels(['0°', '15°', '30°', '45°', '60°', '75°', '90°'])
-            
-            # Add cardinal directions
-            ax.text(0, 95, 'N', ha='center', va='center', fontsize=12, weight='bold')
-            ax.text(math.pi/2, 95, 'E', ha='center', va='center', fontsize=12, weight='bold')
-            ax.text(math.pi, 95, 'S', ha='center', va='center', fontsize=12, weight='bold')
-            ax.text(3*math.pi/2, 95, 'W', ha='center', va='center', fontsize=12, weight='bold')
-            
-            # Plot the ISS pass arc
-            if 'azimuths' in self.pass_data and 'elevations' in self.pass_data:
-                # Handle numpy availability
-                if NUMPY_AVAILABLE:
-                    az = np.radians(self.pass_data['azimuths'])
-                    el = self.pass_data['elevations']
-                    
-                    # Convert to radians for polar plot
-                    az_rad = np.radians(self.pass_data['azimuths'])
-                    
-                    # Plot the pass arc
-                    ax.plot(az_rad, el, 'r-', linewidth=3, label='ISS Pass')
-                    
-                    # Mark key points
-                    if 'max_elevation_time' in self.pass_data:
-                        max_el_idx = np.argmax(el)
-                        ax.plot(az_rad[max_el_idx], el[max_el_idx], 'ro', markersize=8, label='Max Elevation')
-                    
-                    # Mark start and end points
-                    if len(az) > 0:
-                        ax.plot(az_rad[0], el[0], 'go', markersize=6, label='Pass Start')
-                        ax.plot(az_rad[-1], el[-1], 'mo', markersize=6, label='Pass End')
-                else:
-                    # Fallback without numpy
-                    az_rad = [math.radians(az) for az in self.pass_data['azimuths']]
-                    el = self.pass_data['elevations']
-                    
-                    # Plot the pass arc
-                    ax.plot(az_rad, el, 'r-', linewidth=3, label='ISS Pass')
-                    
-                    # Mark key points
-                    if len(el) > 0:
-                        max_el_idx = el.index(max(el))
-                        ax.plot(az_rad[max_el_idx], el[max_el_idx], 'ro', markersize=8, label='Max Elevation')
-                        
-                        # Mark start and end points
-                        ax.plot(az_rad[0], el[0], 'go', markersize=6, label='Pass Start')
-                        ax.plot(az_rad[-1], el[-1], 'mo', markersize=6, label='Pass End')
-            
-            # Add grid and legend
-            ax.grid(True, alpha=0.3)
-            ax.legend(loc='upper right')
-            ax.set_title('ISS Pass Sky Chart', pad=20, fontsize=14, weight='bold')
-            
-            # Convert matplotlib figure to image
-            canvas = FigureCanvasAgg(fig)
-            canvas.draw()
-            
-            # Get the image data
-            buf = io.BytesIO()
-            fig.savefig(buf, format='png', dpi=100, bbox_inches='tight', 
-                       facecolor='white', edgecolor='none')
-            buf.seek(0)
-            ci = CoreImage(buf, ext='png')   # Kivy decodes the PNG for you
-            texture = ci.texture             # This has the correct size/format
 
-            with self.canvas:
-                Color(1, 1, 1, 1)
-                Rectangle(texture=texture, pos=self.pos, size=self.size)
-            
-            # Create Kivy image from the buffer
-            from kivy.core.image import Image as CoreImage
-            from kivy.graphics.texture import Texture
-            
-            
-            # Draw the texture
-            with self.canvas:
-                Color(1, 1, 1, 1)
-                Rectangle(texture=texture, pos=self.pos, size=self.size)
-            
+        # --- build a polar chart with matplotlib ---
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        from matplotlib.backends.backend_agg import FigureCanvasAgg
+
+        # size the figure roughly to the widget pixels (crisper text, fewer resizes)
+        w, h = max(400, int(self.width)), max(400, int(self.height))
+        dpi = 110
+        fig = plt.figure(figsize=(w / dpi, h / dpi), dpi=dpi)
+        ax = fig.add_subplot(111, projection="polar")
+        fig.patch.set_facecolor("white")
+        ax.set_facecolor("white")
+
+        # polar config: 0° = North at top, clockwise azimuth, horizon at rim
+        ax.set_theta_zero_location("N")
+        ax.set_theta_direction(-1)
+        ax.set_rlim(90, 0)                # r = 0 at zenith, 90 at horizon
+        ax.set_rticks([0, 30, 60, 90])
+        ax.set_rlabel_position(225)       # keep r labels out of the way
+        ax.grid(True, linewidth=0.6)
+
+        # cardinal labels
+        for deg, lab in [(0, "N"), (90, "E"), (180, "S"), (270, "W")]:
+            ax.text(math.radians(deg), 92, lab, ha="center", va="center", fontsize=12, weight="bold")
+
+        # pass geometry (expect degrees)
+        az_deg: List[float] = self.pass_data.get("azimuths", [])
+        el_deg: List[float] = self.pass_data.get("elevations", [])
+        if not az_deg or not el_deg or len(az_deg) != len(el_deg):
             plt.close(fig)
-            log_info("Orbit Pass: Sky chart created successfully")
-            
-        except Exception as e:
-            log_error(f"Orbit Pass: Failed to create sky chart: {e}")
-            import traceback
-            traceback.print_exc()
-            # Show a simple colored rectangle as fallback
             with self.canvas:
                 Color(0.2, 0.2, 0.2, 1)
                 Rectangle(pos=self.pos, size=self.size)
+            return
+
+        # convert: theta = az, radius = 90 - elev  (so low elev is near rim)
+        thetas = [math.radians(a) for a in az_deg]
+        radii  = [90.0 - e for e in el_deg]
+
+        ax.plot(thetas, radii, linewidth=2.6, label="ISS Pass")
+
+        # mark start / max / end
+        ax.plot(thetas[0], radii[0], "o", markersize=5)
+        ax.plot(thetas[-1], radii[-1], "o", markersize=5)
+        try:
+            import numpy as np  # optional
+            k = int(np.argmax(el_deg))
+        except Exception:
+            k = max(range(len(el_deg)), key=lambda i: el_deg[i])
+        ax.plot(thetas[k], radii[k], "o", markersize=6)
+
+        # title
+        ax.set_title("ISS Pass", pad=10, fontsize=14, weight="bold")
+
+        # render to PNG in-memory
+        canvas = FigureCanvasAgg(fig)
+        canvas.draw()
+        buf = io.BytesIO()
+        fig.savefig(buf, format="png", dpi=dpi, facecolor=fig.get_facecolor(), bbox_inches="tight")
+        plt.close(fig)
+        buf.seek(0)
+
+        # Kivy texture from PNG (correct way)
+        ci = CoreImage(buf, ext="png")
+        tex = ci.texture
+
+        # draw on canvas
+        with self.canvas:
+            Color(1, 1, 1, 1)
+            Rectangle(texture=tex, pos=self.pos, size=self.size)
 
 
 class Orbit_Pass(MimicBase):
     """Screen for displaying ISS pass predictions and sky charts."""
     
+    ui_scale = NumericProperty(1.0)
+
     # Properties for pass information
     pass_start_time = StringProperty("--:--:--")
     pass_end_time = StringProperty("--:--:--")
@@ -215,6 +193,10 @@ class Orbit_Pass(MimicBase):
     magnitude = StringProperty("--.-")
     pass_quality = StringProperty("--")
     
+    def on_size(self, *_):
+        # 1280 is an arbitrary "baseline"; clamp so phones don't get silly
+        self.ui_scale = max(0.8, min(2.0, self.width / 1280.0))
+
     def __init__(self, **kwargs):
         try:
             super().__init__(**kwargs)
