@@ -17,13 +17,13 @@
     valign: 'middle'
 
 <LblMed@Label>:
-    font_size: sp(16) * root.ui_scale
+    font_size: sp(16)
     text_size: self.size
     halign: 'left'
     valign: 'middle'
 
 <LblValue@Label>:
-    font_size: sp(18) * root.ui_scale
+    font_size: sp(18)
     text_size: self.size
     halign: 'right'
     valign: 'middle'
@@ -31,7 +31,7 @@
 <ActionBtn@Button>:
     size_hint_y: None
     height: dp(56)
-    font_size: sp(18) * root.ui_scale
+    font_size: sp(18)
     padding: dp(12), dp(12)
 
 # ----------------- Screen Layout -----------------
@@ -57,7 +57,7 @@
                     cols: 2
                     size_hint_y: None
                     height: self.minimum_height
-                    row_default_height: dp(28) * root.ui_scale
+                    row_default_height: dp(28)
                     row_force_default: True
                     padding: 0, 0, dp(12), 0
                     spacing: dp(8)
@@ -101,11 +101,11 @@
                 LblTitle:
                     text: "Pass Details"
                     size_hint_y: None
-                    height: dp(34) * root.ui_scale
+                    height: dp(34)
 
                 GridLayout:
                     cols: 2
-                    row_default_height: dp(28) * root.ui_scale
+                    row_default_height: dp(28)
                     row_force_default: True
                     size_hint_y: None
                     height: self.minimum_height
@@ -141,7 +141,7 @@
         # Bottom row: actions + status
         BoxLayout:
             size_hint_y: None
-            height: dp(64) * root.ui_scale
+            height: dp(64)
             spacing: dp(12)
 
             ActionBtn:
@@ -155,7 +155,7 @@
             Label:
                 id: status_label
                 text: root.status_text
-                font_size: sp(16) * root.ui_scale
+                font_size: sp(16)
                 color: 0.2, 1, 0.2, 1
                 halign: 'center'
                 valign: 'middle'
