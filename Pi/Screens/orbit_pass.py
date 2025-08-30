@@ -17,18 +17,53 @@ import time
 import json
 from datetime import datetime, timedelta
 from typing import Optional, Tuple, List
-import matplotlib
-matplotlib.use('Agg')  # Use non-interactive backend
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-from matplotlib.backends.backend_agg import FigureCanvasAgg
+# Don't import matplotlib at module level - import it only when needed
+MATPLOTLIB_AVAILABLE = None  # Will be set to True/False when first needed
 import io
-import numpy as np
+# Safe numpy import
+try:
+    import numpy as np
+    NUMPY_AVAILABLE = True
+except ImportError:
+    NUMPY_AVAILABLE = False
+    log_error("Orbit Pass: Numpy not available, some features may be limited")
+
 from ._base import MimicBase
 from utils.logger import log_info, log_error
 
 kv_path = pathlib.Path(__file__).with_name("Orbit_Pass.kv")
 Builder.load_file(str(kv_path))
+
+
+def _safe_import_matplotlib():
+    """Safely import matplotlib and set availability flag."""
+    global MATPLOTLIB_AVAILABLE
+    
+    if MATPLOTLIB_AVAILABLE is not None:
+        return MATPLOTLIB_AVAILABLE
+    
+    try:
+        log_info("Orbit Pass: Attempting to import matplotlib...")
+        import matplotlib
+        matplotlib.use('Agg')  # Use non-interactive backend
+        import matplotlib.pyplot as plt
+        import matplotlib.patches as patches
+        from matplotlib.backends.backend_agg import FigureCanvasAgg
+        
+        # Test if it actually works
+        fig, ax = plt.subplots(figsize=(1, 1))
+        plt.close(fig)
+        
+        MATPLOTLIB_AVAILABLE = True
+        log_info("Orbit Pass: Matplotlib imported successfully and tested")
+        return True
+        
+    except Exception as e:
+        log_error(f"Orbit Pass: Failed to import matplotlib: {e}")
+        import traceback
+        traceback.print_exc()
+        MATPLOTLIB_AVAILABLE = False
+        return False
 
 
 class SkyChartWidget(Widget):
@@ -53,76 +88,118 @@ class SkyChartWidget(Widget):
         
         self.canvas.clear()
         
-        # Create matplotlib figure for the sky chart
-        fig, ax = plt.subplots(figsize=(8, 8), subplot_kw={'projection': 'polar'})
+        # Check if matplotlib is available
+        if not _safe_import_matplotlib():
+            log_error("Orbit Pass: Matplotlib not available, showing fallback")
+            # Show a simple colored rectangle as fallback
+            with self.canvas:
+                Color(0.2, 0.2, 0.2, 1)
+                Rectangle(pos=self.pos, size=self.size)
+            return
         
-        # Set up the polar plot (azimuth vs elevation)
-        ax.set_theta_direction(-1)  # Clockwise from North
-        ax.set_theta_zero_location('N')
-        ax.set_rlim(0, 90)  # 0° to 90° elevation
-        ax.set_rticks([0, 15, 30, 45, 60, 75, 90])
-        ax.set_yticklabels(['0°', '15°', '30°', '45°', '60°', '75°', '90°'])
-        
-        # Add cardinal directions
-        ax.text(0, 95, 'N', ha='center', va='center', fontsize=12, weight='bold')
-        ax.text(math.pi/2, 95, 'E', ha='center', va='center', fontsize=12, weight='bold')
-        ax.text(math.pi, 95, 'S', ha='center', va='center', fontsize=12, weight='bold')
-        ax.text(3*math.pi/2, 95, 'W', ha='center', va='center', fontsize=12, weight='bold')
-        
-        # Plot the ISS pass arc
-        if 'azimuths' in self.pass_data and 'elevations' in self.pass_data:
-            az = np.radians(self.pass_data['azimuths'])
-            el = self.pass_data['elevations']
+        try:
+            # Import matplotlib modules locally
+            import matplotlib.pyplot as plt
+            from matplotlib.backends.backend_agg import FigureCanvasAgg
             
-            # Convert to radians for polar plot
-            az_rad = np.radians(self.pass_data['azimuths'])
+            # Create matplotlib figure for the sky chart
+            fig, ax = plt.subplots(figsize=(8, 8), subplot_kw={'projection': 'polar'})
             
-            # Plot the pass arc
-            ax.plot(az_rad, el, 'r-', linewidth=3, label='ISS Pass')
+            # Set up the polar plot (azimuth vs elevation)
+            ax.set_theta_direction(-1)  # Clockwise from North
+            ax.set_theta_zero_location('N')
+            ax.set_rlim(0, 90)  # 0° to 90° elevation
+            ax.set_rticks([0, 15, 30, 45, 60, 75, 90])
+            ax.set_yticklabels(['0°', '15°', '30°', '45°', '60°', '75°', '90°'])
             
-            # Mark key points
-            if 'max_elevation_time' in self.pass_data:
-                max_el_idx = np.argmax(el)
-                ax.plot(az_rad[max_el_idx], el[max_el_idx], 'ro', markersize=8, label='Max Elevation')
+            # Add cardinal directions
+            ax.text(0, 95, 'N', ha='center', va='center', fontsize=12, weight='bold')
+            ax.text(math.pi/2, 95, 'E', ha='center', va='center', fontsize=12, weight='bold')
+            ax.text(math.pi, 95, 'S', ha='center', va='center', fontsize=12, weight='bold')
+            ax.text(3*math.pi/2, 95, 'W', ha='center', va='center', fontsize=12, weight='bold')
             
-            # Mark start and end points
-            if len(az) > 0:
-                ax.plot(az_rad[0], el[0], 'go', markersize=6, label='Pass Start')
-                ax.plot(az_rad[-1], el[-1], 'mo', markersize=6, label='Pass End')
-        
-        # Add grid and legend
-        ax.grid(True, alpha=0.3)
-        ax.legend(loc='upper right')
-        ax.set_title('ISS Pass Sky Chart', pad=20, fontsize=14, weight='bold')
-        
-        # Convert matplotlib figure to image
-        canvas = FigureCanvasAgg(fig)
-        canvas.draw()
-        
-        # Get the image data
-        buf = io.BytesIO()
-        fig.savefig(buf, format='png', dpi=100, bbox_inches='tight', 
-                   facecolor='white', edgecolor='none')
-        buf.seek(0)
-        
-        # Create Kivy image from the buffer
-        from kivy.core.image import Image as CoreImage
-        from kivy.graphics.texture import Texture
-        
-        # Load the image data
-        image_data = buf.getvalue()
-        buf.close()
-        
-        # Create texture
-        texture = Texture.create(size=(800, 800), colorfmt='rgba')
-        texture.blit_buffer(image_data, colorfmt='rgba', bufferfmt='ubyte')
-        
-        # Draw the texture
-        with self.canvas:
-            Color(1, 1, 1, 1)
-            Rectangle(texture=texture, pos=self.pos, size=self.size)
-        
-        plt.close(fig)
+            # Plot the ISS pass arc
+            if 'azimuths' in self.pass_data and 'elevations' in self.pass_data:
+                # Handle numpy availability
+                if NUMPY_AVAILABLE:
+                    az = np.radians(self.pass_data['azimuths'])
+                    el = self.pass_data['elevations']
+                    
+                    # Convert to radians for polar plot
+                    az_rad = np.radians(self.pass_data['azimuths'])
+                    
+                    # Plot the pass arc
+                    ax.plot(az_rad, el, 'r-', linewidth=3, label='ISS Pass')
+                    
+                    # Mark key points
+                    if 'max_elevation_time' in self.pass_data:
+                        max_el_idx = np.argmax(el)
+                        ax.plot(az_rad[max_el_idx], el[max_el_idx], 'ro', markersize=8, label='Max Elevation')
+                    
+                    # Mark start and end points
+                    if len(az) > 0:
+                        ax.plot(az_rad[0], el[0], 'go', markersize=6, label='Pass Start')
+                        ax.plot(az_rad[-1], el[-1], 'mo', markersize=6, label='Pass End')
+                else:
+                    # Fallback without numpy
+                    az_rad = [math.radians(az) for az in self.pass_data['azimuths']]
+                    el = self.pass_data['elevations']
+                    
+                    # Plot the pass arc
+                    ax.plot(az_rad, el, 'r-', linewidth=3, label='ISS Pass')
+                    
+                    # Mark key points
+                    if len(el) > 0:
+                        max_el_idx = el.index(max(el))
+                        ax.plot(az_rad[max_el_idx], el[max_el_idx], 'ro', markersize=8, label='Max Elevation')
+                        
+                        # Mark start and end points
+                        ax.plot(az_rad[0], el[0], 'go', markersize=6, label='Pass Start')
+                        ax.plot(az_rad[-1], el[-1], 'mo', markersize=6, label='Pass End')
+            
+            # Add grid and legend
+            ax.grid(True, alpha=0.3)
+            ax.legend(loc='upper right')
+            ax.set_title('ISS Pass Sky Chart', pad=20, fontsize=14, weight='bold')
+            
+            # Convert matplotlib figure to image
+            canvas = FigureCanvasAgg(fig)
+            canvas.draw()
+            
+            # Get the image data
+            buf = io.BytesIO()
+            fig.savefig(buf, format='png', dpi=100, bbox_inches='tight', 
+                       facecolor='white', edgecolor='none')
+            buf.seek(0)
+            
+            # Create Kivy image from the buffer
+            from kivy.core.image import Image as CoreImage
+            from kivy.graphics.texture import Texture
+            
+            # Load the image data
+            image_data = buf.getvalue()
+            buf.close()
+            
+            # Create texture
+            texture = Texture.create(size=(800, 800), colorfmt='rgba')
+            texture.blit_buffer(image_data, colorfmt='rgba', bufferfmt='ubyte')
+            
+            # Draw the texture
+            with self.canvas:
+                Color(1, 1, 1, 1)
+                Rectangle(texture=texture, pos=self.pos, size=self.size)
+            
+            plt.close(fig)
+            log_info("Orbit Pass: Sky chart created successfully")
+            
+        except Exception as e:
+            log_error(f"Orbit Pass: Failed to create sky chart: {e}")
+            import traceback
+            traceback.print_exc()
+            # Show a simple colored rectangle as fallback
+            with self.canvas:
+                Color(0.2, 0.2, 0.2, 1)
+                Rectangle(pos=self.pos, size=self.size)
 
 
 class Orbit_Pass(MimicBase):
@@ -139,15 +216,36 @@ class Orbit_Pass(MimicBase):
     pass_quality = StringProperty("--")
     
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.user_location = None
-        self.iss_tle = None
-        self.next_pass_data = None
-        self.sky_chart_widget = None
-        self._pass_update_event = None
-        
-        # Schedule initial pass calculation
-        Clock.schedule_once(self._initialize_pass_calculation, 1.0)
+        try:
+            super().__init__(**kwargs)
+            self.user_location = None
+            self.iss_tle = None
+            self.next_pass_data = None
+            self.sky_chart_widget = None
+            self._pass_update_event = None
+            
+            log_info("Orbit Pass: Screen initialized successfully")
+            
+            # Schedule initial pass calculation
+            Clock.schedule_once(self._initialize_pass_calculation, 1.0)
+            
+        except Exception as e:
+            log_error(f"Orbit Pass: Failed to initialize screen: {e}")
+            import traceback
+            traceback.print_exc()
+            # Try to continue with basic initialization
+            try:
+                super().__init__(**kwargs)
+                self.user_location = (29.7604, -95.3698)  # Default Houston
+                self.iss_tle = None
+                self.next_pass_data = None
+                self.sky_chart_widget = None
+                self._pass_update_event = None
+                log_info("Orbit Pass: Basic initialization completed after error")
+            except Exception as e2:
+                log_error(f"Orbit Pass: Complete initialization failure: {e2}")
+                import traceback
+                traceback.print_exc()
     
     def on_enter(self):
         """Called when entering the screen."""
@@ -591,35 +689,94 @@ class Orbit_Pass(MimicBase):
     
     def _update_sky_chart(self):
         """Update the sky chart with the current pass data."""
+        log_info("Orbit Pass: Starting sky chart update...")
+        
         if not self.next_pass_data or not self.next_pass_data.get('detailed_data'):
+            log_error("Orbit Pass: No pass data available for sky chart")
             return
         
         # Find the sky chart widget
         if hasattr(self, 'ids') and 'sky_chart_container' in self.ids:
             container = self.ids.sky_chart_container
+            log_info("Orbit Pass: Found sky chart container")
             
             # Clear existing chart
             container.clear_widgets()
+            log_info("Orbit Pass: Cleared existing chart widgets")
             
             try:
                 # Create new sky chart
+                log_info("Orbit Pass: Creating new SkyChartWidget...")
                 chart = SkyChartWidget()
                 chart.size_hint = (1, 1)
                 
                 # Set the pass data
+                log_info("Orbit Pass: Setting pass data on chart...")
                 chart.set_pass_data(
                     self.next_pass_data['detailed_data'],
                     self.user_location
                 )
                 
+                log_info("Orbit Pass: Adding chart to container...")
                 container.add_widget(chart)
                 self.sky_chart_widget = chart
-                log_info("Sky chart updated successfully")
+                log_info("Orbit Pass: Sky chart updated successfully")
                 
             except Exception as e:
-                log_error(f"Failed to create sky chart: {e}")
-                # Add a fallback label
-                from kivy.uix.label import Label
+                log_error(f"Orbit Pass: Failed to create sky chart: {e}")
+                import traceback
+                traceback.print_exc()
+                # Add a fallback label with more detailed information
+                log_info("Orbit Pass: Adding detailed fallback label...")
+                self._create_fallback_chart(container)
+        else:
+            log_error("Orbit Pass: Sky chart container not found in ids")
+    
+    def _create_fallback_chart(self, container):
+        """Create a simple text-based fallback chart when matplotlib fails."""
+        try:
+            from kivy.uix.label import Label
+            from kivy.uix.boxlayout import BoxLayout
+            
+            # Create a simple text representation of the pass
+            if self.next_pass_data and 'detailed_data' in self.next_pass_data:
+                data = self.next_pass_data['detailed_data']
+                
+                # Create a simple ASCII-style chart
+                chart_text = "ISS Pass Chart (Text Mode)\n"
+                chart_text += "=" * 30 + "\n"
+                chart_text += f"Start: {self.pass_start_time}\n"
+                chart_text += f"End: {self.pass_end_time}\n"
+                chart_text += f"Max Elevation: {self.max_elevation}\n"
+                chart_text += f"Duration: {self.pass_duration}\n"
+                chart_text += f"Quality: {self.pass_quality}\n"
+                chart_text += f"Magnitude: {self.magnitude}\n"
+                chart_text += "\nPass Arc:\n"
+                
+                if 'azimuths' in data and 'elevations' in data:
+                    # Show a few key points
+                    num_points = len(data['azimuths'])
+                    if num_points > 0:
+                        chart_text += f"Start: {data['azimuths'][0]:.1f}° → {data['elevations'][0]:.1f}°\n"
+                        mid_idx = num_points // 2
+                        chart_text += f"Mid: {data['azimuths'][mid_idx]:.1f}° → {data['elevations'][mid_idx]:.1f}°\n"
+                        chart_text += f"End: {data['azimuths'][-1]:.1f}° → {data['elevations'][-1]:.1f}°\n"
+                
+                chart_text += "\n(Matplotlib chart generation failed)"
+                
+                fallback_label = Label(
+                    text=chart_text,
+                    color=(1, 1, 1, 1),
+                    font_size=min(20, self.height * 0.3),
+                    halign='center',
+                    valign='middle',
+                    text_size=(self.width * 0.9, None)
+                )
+                fallback_label.bind(size=lambda s, size: setattr(s, 'text_size', (size[0] * 0.9, None)))
+                container.add_widget(fallback_label)
+                log_info("Orbit Pass: Added detailed fallback chart")
+            else:
+                # Simple fallback if no data
                 fallback_label = Label(
                     text="Sky Chart\n(Chart generation failed)\n\nPass data loaded successfully!",
                     color=(1, 1, 1, 1),
@@ -629,7 +786,24 @@ class Orbit_Pass(MimicBase):
                 )
                 fallback_label.bind(size=lambda s, size: setattr(s, 'text_size', size))
                 container.add_widget(fallback_label)
-                log_info("Added fallback label for sky chart")
+                log_info("Orbit Pass: Added simple fallback label")
+                
+        except Exception as e:
+            log_error(f"Orbit Pass: Failed to create fallback chart: {e}")
+            import traceback
+            traceback.print_exc()
+            # Last resort - just show an error message
+            try:
+                from kivy.uix.label import Label
+                error_label = Label(
+                    text="Chart Error\nCheck logs",
+                    color=(1, 0, 0, 1),
+                    font_size=20
+                )
+                container.add_widget(error_label)
+                log_info("Orbit Pass: Added error label as last resort")
+            except:
+                log_error("Orbit Pass: Complete failure in fallback chart creation")
     
     def _start_pass_monitoring(self):
         """Start monitoring for pass updates."""
