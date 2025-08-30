@@ -30,7 +30,7 @@
                         text: 'Next ISS Pass'
                         size_hint: 1, 0.5
                         color: 1, 1, 1, 1
-                        font_size: self.height * 0.4
+                        font_size: self.height * 0.6
                         bold: True
                         text_size: self.size
                         halign: 'center'
@@ -44,7 +44,7 @@
                         text: 'Start Time:'
                         size_hint: 1, 1
                         color: 0.8, 0.8, 0.8, 1
-                        font_size: self.height * 0.3
+                        font_size: self.height * 0.5
                         text_size: self.size
                         halign: 'left'
                         valign: 'middle'
@@ -53,7 +53,7 @@
                         text: root.pass_start_time
                         size_hint: 1, 1
                         color: 1, 1, 1, 1
-                        font_size: self.height * 0.3
+                        font_size: self.height * 0.5
                         text_size: self.size
                         halign: 'right'
                         valign: 'middle'
@@ -62,7 +62,7 @@
                         text: 'End Time:'
                         size_hint: 1, 1
                         color: 0.8, 0.8, 0.8, 1
-                        font_size: self.height * 0.3
+                        font_size: self.height * 0.5
                         text_size: self.size
                         halign: 'left'
                         valign: 'middle'
@@ -71,7 +71,7 @@
                         text: root.pass_end_time
                         size_hint: 1, 1
                         color: 1, 1, 1, 1
-                        font_size: self.height * 0.3
+                        font_size: self.height * 0.5
                         text_size: self.size
                         halign: 'right'
                         valign: 'middle'
@@ -80,7 +80,7 @@
                         text: 'Duration:'
                         size_hint: 1, 1
                         color: 0.8, 0.8, 0.8, 1
-                        font_size: self.height * 0.3
+                        font_size: self.height * 0.5
                         text_size: self.size
                         halign: 'left'
                         valign: 'middle'
@@ -89,7 +89,7 @@
                         text: root.pass_duration
                         size_hint: 1, 1
                         color: 1, 1, 1, 1
-                        font_size: self.height * 0.3
+                        font_size: self.height * 0.5
                         text_size: self.size
                         halign: 'right'
                         valign: 'middle'
@@ -104,7 +104,7 @@
                         text: 'Quality:'
                         size_hint: 1, 0.3
                         color: 0.8, 0.8, 0.8, 1
-                        font_size: self.height * 0.25
+                        font_size: self.height * 0.4
                         text_size: self.size
                         halign: 'center'
                         valign: 'middle'
@@ -113,7 +113,7 @@
                         text: root.pass_quality
                         size_hint: 1, 0.4
                         color: 1, 1, 0, 1
-                        font_size: self.height * 0.35
+                        font_size: self.height * 0.5
                         bold: True
                         text_size: self.size
                         halign: 'center'
@@ -123,7 +123,7 @@
                         text: 'Magnitude:'
                         size_hint: 1, 0.3
                         color: 0.8, 0.8, 0.8, 1
-                        font_size: self.height * 0.25
+                        font_size: self.height * 0.4
                         text_size: self.size
                         halign: 'center'
                         valign: 'middle'
@@ -132,7 +132,7 @@
                         text: root.magnitude
                         size_hint: 1, 0.4
                         color: 1, 1, 1, 1
-                        font_size: self.height * 0.35
+                        font_size: self.height * 0.5
                         text_size: self.size
                         halign: 'center'
                         valign: 'middle'
@@ -153,6 +153,15 @@
                         Rectangle:
                             pos: self.pos
                             size: self.size
+                    
+                    # Default loading message
+                    Label:
+                        text: 'Loading Sky Chart...\n\nCalculating ISS pass data...'
+                        color: 1, 1, 1, 1
+                        font_size: self.height * 0.1
+                        halign: 'center'
+                        valign: 'middle'
+                        text_size: self.size
                 
                 # Pass Details Sidebar
                 BoxLayout:
@@ -164,7 +173,7 @@
                         text: 'Pass Details'
                         size_hint: 1, 0.15
                         color: 1, 1, 1, 1
-                        font_size: self.height * 0.4
+                        font_size: self.height * 0.5
                         bold: True
                         text_size: self.size
                         halign: 'center'
@@ -179,7 +188,7 @@
                             text: 'Max Elevation'
                             size_hint: 1, 0.5
                             color: 0.8, 0.8, 0.8, 1
-                            font_size: self.height * 0.25
+                            font_size: self.height * 0.4
                             text_size: self.size
                             halign: 'center'
                             valign: 'middle'
@@ -188,7 +197,7 @@
                             text: root.max_elevation
                             size_hint: 1, 0.5
                             color: 0, 1, 0, 1
-                            font_size: self.height * 0.4
+                            font_size: self.height * 0.5
                             bold: True
                             text_size: self.size
                             halign: 'center'
@@ -202,8 +211,8 @@
                         Label:
                             text: 'Start Direction'
                             size_hint: 1, 0.5
-                            color: 0.8, 0.8, 0.8, 1
-                            font_size: self.height * 0.25
+                            color: 1, 1, 1, 1
+                            font_size: self.height * 0.4
                             text_size: self.size
                             halign: 'center'
                             valign: 'middle'
@@ -212,7 +221,7 @@
                             text: root.start_azimuth
                             size_hint: 1, 0.5
                             color: 1, 1, 1, 1
-                            font_size: self.height * 0.4
+                            font_size: self.height * 0.5
                             text_size: self.size
                             halign: 'center'
                             valign: 'middle'
@@ -225,8 +234,8 @@
                         Label:
                             text: 'End Direction'
                             size_hint: 1, 0.5
-                            color: 0.8, 0.8, 0.8, 1
-                            font_size: self.height * 0.25
+                            color: 1, 1, 1, 1
+                            font_size: self.height * 0.4
                             text_size: self.size
                             halign: 'center'
                             valign: 'middle'
@@ -235,7 +244,7 @@
                             text: root.end_azimuth
                             size_hint: 1, 0.5
                             color: 1, 1, 1, 1
-                            font_size: self.height * 0.4
+                            font_size: self.height * 0.5
                             text_size: self.size
                             halign: 'center'
                             valign: 'middle'
@@ -254,7 +263,7 @@
                     size_hint: 0.3, 1
                     background_color: 0.2, 0.6, 1, 1
                     color: 1, 1, 1, 1
-                    font_size: self.height * 0.4
+                    font_size: self.height * 0.6
                     on_release: root.refresh_pass_data()
                 
                 Button:
@@ -262,7 +271,7 @@
                     size_hint: 0.3, 1
                     background_color: 0.2, 0.8, 0.2, 1
                     color: 1, 1, 1, 1
-                    font_size: self.height * 0.4
+                    font_size: self.height * 0.6
                     on_release: app.root.current = 'settings'
                 
                 Widget:
