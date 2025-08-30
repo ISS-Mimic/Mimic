@@ -11,6 +11,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
 from kivy.uix.scrollview import ScrollView
+from kivy.core.image import Image as CoreImage
 import ephem
 import math
 import time
@@ -171,18 +172,17 @@ class SkyChartWidget(Widget):
             fig.savefig(buf, format='png', dpi=100, bbox_inches='tight', 
                        facecolor='white', edgecolor='none')
             buf.seek(0)
+            ci = CoreImage(buf, ext='png')   # Kivy decodes the PNG for you
+            texture = ci.texture             # This has the correct size/format
+
+            with self.canvas:
+                Color(1, 1, 1, 1)
+                Rectangle(texture=texture, pos=self.pos, size=self.size)
             
             # Create Kivy image from the buffer
             from kivy.core.image import Image as CoreImage
             from kivy.graphics.texture import Texture
             
-            # Load the image data
-            image_data = buf.getvalue()
-            buf.close()
-            
-            # Create texture
-            texture = Texture.create(size=(800, 800), colorfmt='rgba')
-            texture.blit_buffer(image_data, colorfmt='rgba', bufferfmt='ubyte')
             
             # Draw the texture
             with self.canvas:
