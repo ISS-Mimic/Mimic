@@ -1,161 +1,62 @@
-#:kivy 2.2.0
-#:import dp kivy.metrics.dp
-#:import sp kivy.metrics.sp
-
-# ----------------- Reusable scaled text styles -----------------
-<LblTitle@Label>:
-    font_size: sp(24) * root.ui_scale
-    text_size: self.size
-    halign: 'center'
-    valign: 'middle'
-    bold: True
-
-<LblBig@Label>:
-    font_size: sp(20) * root.ui_scale
-    text_size: self.size
-    halign: 'left'
-    valign: 'middle'
-
-<LblMed@Label>:
-    font_size: sp(16)
-    text_size: self.size
-    halign: 'left'
-    valign: 'middle'
-
-<LblValue@Label>:
-    font_size: sp(18)
-    text_size: self.size
-    halign: 'right'
-    valign: 'middle'
-
-<ActionBtn@Button>:
-    size_hint_y: None
-    height: dp(56)
-    font_size: sp(18)
-    padding: dp(12), dp(12)
-
-# ----------------- Screen Layout -----------------
 <Orbit_Pass>:
-    on_size: root.on_size()
+    name: 'orbit_pass'
+    FloatLayout:
+        Image:
+            id: Orbit_Pass_background
+            source: f'{root.mimic_directory}/Mimic/Pi/imgs/orbit/ISSpassBackground.png'
+            fit_mode: "fill" 
+        #Label:
+            #id: passtime
+            #pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            #text: "Pass"
 
-    BoxLayout:
-        orientation: 'vertical'
-        padding: dp(16)
-        spacing: dp(12)
+       # ---------- STATUS DISPLAY (Bottom Rectangle) ----------
+        Label:
+            id: status_label
+            text: ''
+            size_hint: 1, 0.07
+            background_color: 0, 0, 0, 0.8  # Semi-transparent black
+            color: 0, 1, 0, 1  # Green text
+            font_size: self.height * 0.6  # Scale font to label height
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            pos_hint: {"center_x": 0.57, "center_y": 0.07}
+        
+        # ---------- BOTTOM TOOLBAR ----------
+        Image:
+            id: signal
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/signalred.zip"
+            size_hint_y: 0.112
+            anim_delay: 0.05
+            anim_loop: 0
+            fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.05, "center_y": 0.07}
+        
+        Image:
+            id: arduino
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
+            size_hint_y: 0.15
+            anim_delay: 0.2
+            anim_loop: -1
+            fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+        
+        Label:
+            id: arduino_count
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+            text: ''
+            markup: True
+            color: 1, 1, 1, 1
+            font_size: self.height * 1
+            size_hint: 0.06, 0.08
+        
+        # ─────────────────────── Navigation ────────────────────────────────
 
-        # Top row: content
-        BoxLayout:
-            spacing: dp(16)
-
-            # ---- LEFT: labels + sky chart ----
-            BoxLayout:
-                orientation: 'vertical'
-                spacing: dp(10)
-                size_hint_x: 0.66
-
-                GridLayout:
-                    cols: 2
-                    size_hint_y: None
-                    height: self.minimum_height
-                    row_default_height: dp(28)
-                    row_force_default: True
-                    padding: 0, 0, dp(12), 0
-                    spacing: dp(8)
-
-                    LblMed:
-                        text: "Start Time:"
-                    LblValue:
-                        id: start_time_value
-                        text: "--:--"
-
-                    LblMed:
-                        text: "End Time:"
-                    LblValue:
-                        id: end_time_value
-                        text: "--:--"
-
-                    LblMed:
-                        text: "Duration:"
-                    LblValue:
-                        id: duration_value
-                        text: "--m"
-
-                # Sky chart container
-                Widget:
-                    id: sky_chart_container
-                    size_hint_y: 1
-                    canvas.before:
-                        Color:
-                            rgba: 0.12, 0.12, 0.12, 1
-                        Rectangle:
-                            pos: self.pos
-                            size: self.size
-
-            # ---- RIGHT: Pass Details ----
-            BoxLayout:
-                orientation: 'vertical'
-                size_hint_x: 0.34
-                spacing: dp(8)
-                padding: dp(8)
-
-                LblTitle:
-                    text: "Pass Details"
-                    size_hint_y: None
-                    height: dp(34)
-
-                GridLayout:
-                    cols: 2
-                    row_default_height: dp(28)
-                    row_force_default: True
-                    size_hint_y: None
-                    height: self.minimum_height
-                    spacing: dp(6)
-
-                    LblMed:
-                        text: "Max Elevation"
-                    LblValue:
-                        id: max_elev_value
-                        text: "--°"
-
-                    LblMed:
-                        text: "Start Direction"
-                    LblValue:
-                        id: start_dir_value
-                        text: "--°"
-
-                    LblMed:
-                        text: "End Direction"
-                    LblValue:
-                        id: end_dir_value
-                        text: "--°"
-
-                    LblMed:
-                        text: "Magnitude"
-                    LblValue:
-                        id: mag_value
-                        text: "--"
-
-                Widget:  # spacer
-                    size_hint_y: 1
-
-        # Bottom row: actions + status
-        BoxLayout:
-            size_hint_y: None
-            height: dp(64)
-            spacing: dp(12)
-
-            ActionBtn:
-                text: "Refresh Pass Data"
-                on_release: root.refresh_pass_data()
-
-            ActionBtn:
-                text: "Update Location"
-                on_release: root.update_location()
-
-            Label:
-                id: status_label
-                text: root.status_text
-                font_size: sp(16)
-                color: 0.2, 1, 0.2, 1
-                halign: 'center'
-                valign: 'middle'
+        Button:
+            size_hint: 0.1, 0.11
+            pos_hint: {"center_x": 0.9375, "center_y": 0.07}
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            border: 0,0,0,0    # avoid 9-slice margins
+            on_release: app.root.current = 'orbit'
