@@ -220,14 +220,15 @@ class Orbit_Pass(MimicBase):
     pass_quality = StringProperty("--")
     
     def __init__(self, **kwargs):
+        # Initialize basic attributes first
+        self.user_location = None
+        self.iss_tle = None
+        self.next_pass_data = None
+        self.sky_chart_widget = None
+        self._pass_update_event = None
+        
         try:
             super().__init__(**kwargs)
-            self.user_location = None
-            self.iss_tle = None
-            self.next_pass_data = None
-            self.sky_chart_widget = None
-            self._pass_update_event = None
-            
             log_info("Orbit Pass: Screen initialized successfully")
             
             # Schedule initial pass calculation
@@ -237,19 +238,9 @@ class Orbit_Pass(MimicBase):
             log_error(f"Orbit Pass: Failed to initialize screen: {e}")
             import traceback
             traceback.print_exc()
-            # Try to continue with basic initialization
-            try:
-                super().__init__(**kwargs)
-                self.user_location = (29.7604, -95.3698)  # Default Houston
-                self.iss_tle = None
-                self.next_pass_data = None
-                self.sky_chart_widget = None
-                self._pass_update_event = None
-                log_info("Orbit Pass: Basic initialization completed after error")
-            except Exception as e2:
-                log_error(f"Orbit Pass: Complete initialization failure: {e2}")
-                import traceback
-                traceback.print_exc()
+            # Set default location if initialization failed
+            self.user_location = (29.7604, -95.3698)  # Default Houston
+            log_info("Orbit Pass: Basic initialization completed after error")
     
     def on_enter(self):
         """Called when entering the screen."""
