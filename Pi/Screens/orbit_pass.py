@@ -151,109 +151,172 @@ class Orbit_Pass(MimicBase):
     
     def on_enter(self):
         """Called when entering the screen."""
-        super().on_enter()
-        self._start_pass_monitoring()
+        log_info("Orbit Pass: Screen entered")
+        try:
+            super().on_enter()
+            self._start_pass_monitoring()
+            log_info("Orbit Pass: Screen entry completed successfully")
+        except Exception as e:
+            log_error(f"Orbit Pass: Screen entry failed: {e}")
+            import traceback
+            traceback.print_exc()
     
     def on_leave(self):
         """Called when leaving the screen."""
-        super().on_leave()
-        self._stop_pass_monitoring()
+        log_info("Orbit Pass: Screen leaving")
+        try:
+            super().on_leave()
+            self._stop_pass_monitoring()
+            log_info("Orbit Pass: Screen leave completed successfully")
+        except Exception as e:
+            log_error(f"Orbit Pass: Screen leave failed: {e}")
+            import traceback
+            traceback.print_exc()
     
     def _initialize_pass_calculation(self, dt):
         """Initialize pass calculation after screen setup."""
-        self.load_user_location()
-        self._calculate_next_pass()
+        log_info("Orbit Pass: Starting initialization...")
+        try:
+            self.load_user_location()
+            log_info("Orbit Pass: Location loaded, calculating next pass...")
+            self._calculate_next_pass()
+            log_info("Orbit Pass: Initialization complete")
+        except Exception as e:
+            log_error(f"Orbit Pass: Initialization failed: {e}")
+            import traceback
+            traceback.print_exc()
     
     def load_user_location(self):
         """Load user location from settings."""
+        log_info("Orbit Pass: Loading user location...")
         try:
             config_path = pathlib.Path.home() / ".mimic_data" / "location_config.json"
+            log_info(f"Orbit Pass: Looking for config at: {config_path}")
+            
             if config_path.exists():
+                log_info("Orbit Pass: Config file found, reading...")
                 with open(config_path, 'r') as f:
                     data = json.load(f)
                     self.user_location = (data['lat'], data['lon'])
-                    log_info(f"Loaded user location: {self.user_location[0]:.4f}, {self.user_location[1]:.4f}")
+                    log_info(f"Orbit Pass: Loaded user location: {self.user_location[0]:.4f}, {self.user_location[1]:.4f}")
             else:
                 # Default to Houston if no location set
+                log_info("Orbit Pass: No config file found, using default Houston location")
                 self.user_location = (29.7604, -95.3698)
-                log_info("Using default Houston location")
+                log_info("Orbit Pass: Default location set: 29.7604, -95.3698")
         except Exception as e:
-            log_error(f"Failed to load user location: {e}")
+            log_error(f"Orbit Pass: Failed to load user location: {e}")
+            import traceback
+            traceback.print_exc()
             self.user_location = (29.7604, -95.3698)
+            log_info("Orbit Pass: Fallback to default location due to error")
     
     def set_user_location(self, lat: float, lon: float):
         """Set user location and recalculate passes."""
+        log_info(f"Orbit Pass: Setting user location to: {lat:.4f}, {lon:.4f}")
         self.user_location = (lat, lon)
+        log_info("Orbit Pass: Location set, recalculating passes...")
         self._calculate_next_pass()
-        log_info(f"Updated user location: {lat:.4f}, {lon:.4f}")
+        log_info(f"Orbit Pass: User location updated and passes recalculated")
     
     def _calculate_next_pass(self):
         """Calculate the next ISS pass for the user's location."""
+        log_info("Orbit Pass: Starting pass calculation...")
+        
         if not self.user_location:
-            log_error("No user location available for pass calculation")
+            log_error("Orbit Pass: No user location available for pass calculation")
             self._update_status("Error: No location set")
             return
         
+        log_info(f"Orbit Pass: Using location: {self.user_location[0]:.4f}, {self.user_location[1]:.4f}")
+        
         try:
             self._update_status("Loading ISS orbital data...")
+            log_info("Orbit Pass: Loading ISS TLE data...")
             
             # Load ISS TLE data
             self._load_iss_tle()
             
             if not self.iss_tle:
-                log_error("Failed to load ISS TLE data")
+                log_error("Orbit Pass: Failed to load ISS TLE data")
                 self._update_status("Error: Failed to load orbital data")
                 return
             
+            log_info("Orbit Pass: TLE data loaded successfully")
             self._update_status("Calculating next pass...")
+            log_info("Orbit Pass: Computing next pass...")
             
             # Calculate next pass
             self.next_pass_data = self._compute_next_pass()
             
             if self.next_pass_data:
+                log_info("Orbit Pass: Pass data computed successfully")
+                log_info(f"Orbit Pass: Pass details - Start: {self.next_pass_data['rise_time']}, End: {self.next_pass_data['set_time']}")
+                
                 self._update_pass_display()
+                log_info("Orbit Pass: Pass display updated")
+                
                 self._update_sky_chart()
-                log_info("Successfully calculated next ISS pass")
+                log_info("Orbit Pass: Sky chart updated")
+                
+                log_info("Orbit Pass: Successfully calculated next ISS pass")
                 self._update_status(f"Pass calculated: {self.next_pass_data['rise_time'].strftime('%H:%M')} - {self.next_pass_data['set_time'].strftime('%H:%M')}")
             else:
-                log_info("No upcoming ISS passes found")
+                log_info("Orbit Pass: No upcoming ISS passes found")
                 self._update_status("No upcoming passes found - try refreshing")
                 
         except Exception as e:
-            log_error(f"Failed to calculate ISS pass: {e}")
+            log_error(f"Orbit Pass: Failed to calculate ISS pass: {e}")
             self._update_status(f"Error: {str(e)[:50]}...")
             import traceback
             traceback.print_exc()
     
     def _load_iss_tle(self):
         """Load ISS TLE data from the database or online source."""
+        log_info("Orbit Pass: Starting TLE loading process...")
+        
         try:
             # Try to load from database first
             db_path = pathlib.Path.home() / ".mimic_data" / "iss_telemetry.db"
+            log_info(f"Orbit Pass: Looking for database at: {db_path}")
+            
             if db_path.exists():
-                import sqlite3
-                conn = sqlite3.connect(str(db_path))
-                cursor = conn.cursor()
-                
-                # Get the most recent TLE data
-                cursor.execute("""
-                    SELECT TLE_Line1, TLE_Line2 FROM tle_data 
-                    WHERE satellite_name = 'ISS (ZARYA)' 
-                    ORDER BY timestamp DESC LIMIT 1
-                """)
-                
-                result = cursor.fetchone()
-                if result:
-                    line1, line2 = result
-                    self.iss_tle = ephem.readtle("ISS (ZARYA)", line1, line2)
-                    log_info("Loaded ISS TLE from database")
+                log_info("Orbit Pass: Database found, attempting to read TLE data...")
+                try:
+                    import sqlite3
+                    conn = sqlite3.connect(str(db_path))
+                    cursor = conn.cursor()
+                    
+                    # Get the most recent TLE data
+                    log_info("Orbit Pass: Executing SQL query for TLE data...")
+                    cursor.execute("""
+                        SELECT TLE_Line1, TLE_Line2 FROM tle_data 
+                        WHERE satellite_name = 'ISS (ZARYA)' 
+                        ORDER BY timestamp DESC LIMIT 1
+                    """)
+                    
+                    result = cursor.fetchone()
+                    if result:
+                        line1, line2 = result
+                        log_info("Orbit Pass: TLE data found in database, parsing...")
+                        self.iss_tle = ephem.readtle("ISS (ZARYA)", line1, line2)
+                        log_info("Orbit Pass: Successfully loaded ISS TLE from database")
+                        conn.close()
+                        return
+                    else:
+                        log_info("Orbit Pass: No TLE data found in database")
+                    
                     conn.close()
-                    return
-                
-                conn.close()
+                except Exception as db_error:
+                    log_error(f"Orbit Pass: Database read failed: {db_error}")
+                    import traceback
+                    traceback.print_exc()
+            else:
+                log_info("Orbit Pass: Database not found, using fallback TLE")
             
             # Fallback: use a working TLE (you might want to implement online TLE fetching)
             # For now, using a working TLE - in production, fetch from celestrak.com
+            log_info("Orbit Pass: Using fallback TLE data...")
             sample_tle = [
                 "ISS (ZARYA)",
                 "1 25544U 98067A   24365.50000000  .00012237  00000+0  22906-3 0  9994",
@@ -261,25 +324,35 @@ class Orbit_Pass(MimicBase):
             ]
             
             try:
+                log_info("Orbit Pass: Attempting to parse sample TLE...")
                 self.iss_tle = ephem.readtle(*sample_tle)
-                log_info("Using sample ISS TLE data")
+                log_info("Orbit Pass: Successfully parsed sample ISS TLE data")
             except Exception as e:
-                log_error(f"Failed to parse sample TLE: {e}")
+                log_error(f"Orbit Pass: Failed to parse sample TLE: {e}")
+                import traceback
+                traceback.print_exc()
+                
                 # Try a simpler approach - create a basic satellite
+                log_info("Orbit Pass: Creating basic EarthSatellite object as fallback...")
                 self.iss_tle = ephem.EarthSatellite()
                 self.iss_tle.name = "ISS (ZARYA)"
-                log_info("Using basic EarthSatellite object")
+                log_info("Orbit Pass: Basic EarthSatellite object created successfully")
             
         except Exception as e:
-            log_error(f"Failed to load ISS TLE: {e}")
+            log_error(f"Orbit Pass: Failed to load ISS TLE: {e}")
             self.iss_tle = None
             import traceback
             traceback.print_exc()
     
     def _compute_next_pass(self) -> Optional[dict]:
         """Compute the next ISS pass for the user's location."""
+        log_info("Orbit Pass: Starting pass computation...")
+        
         if not self.user_location:
+            log_error("Orbit Pass: No user location available for pass calculation")
             return None
+        
+        log_info(f"Orbit Pass: Using location: {self.user_location[0]:.4f}, {self.user_location[1]:.4f}")
         
         try:
             # For now, create a sample pass for testing
@@ -287,11 +360,23 @@ class Orbit_Pass(MimicBase):
             from datetime import datetime, timedelta
             
             now = datetime.utcnow()
+            log_info(f"Orbit Pass: Current time (UTC): {now}")
             
             # Create a sample pass starting in about 2 hours
             rise_time = now + timedelta(hours=2)
             max_time = rise_time + timedelta(minutes=2, seconds=30)
             set_time = rise_time + timedelta(minutes=5)
+            
+            log_info(f"Orbit Pass: Sample pass times - Rise: {rise_time}, Max: {max_time}, Set: {set_time}")
+            
+            # Generate detailed pass data for sky chart
+            log_info("Orbit Pass: Generating detailed pass data...")
+            detailed_data = self._generate_sample_pass_data()
+            
+            if detailed_data:
+                log_info(f"Orbit Pass: Generated {len(detailed_data['azimuths'])} points for sky chart")
+            else:
+                log_error("Orbit Pass: Failed to generate detailed pass data")
             
             # Sample pass data
             sample_pass = {
@@ -304,25 +389,29 @@ class Orbit_Pass(MimicBase):
                 'duration': set_time - rise_time,
                 'magnitude': '-1.5',
                 'quality': 'Very Good',
-                'detailed_data': self._generate_sample_pass_data()
+                'detailed_data': detailed_data
             }
             
-            log_info("Generated sample pass data for testing")
+            log_info("Orbit Pass: Sample pass data created successfully")
+            log_info(f"Orbit Pass: Pass details - Start: {rise_time.strftime('%H:%M')}, End: {set_time.strftime('%H:%M')}, Duration: {set_time - rise_time}")
             return sample_pass
             
         except Exception as e:
-            log_error(f"Failed to compute pass: {e}")
+            log_error(f"Orbit Pass: Failed to compute pass: {e}")
             import traceback
             traceback.print_exc()
             return None
     
     def _generate_sample_pass_data(self):
         """Generate sample pass data for sky chart visualization."""
+        log_info("Orbit Pass: Starting sample pass data generation...")
         try:
             # Create sample points for a realistic pass arc
             num_points = 50
             azimuths = []
             elevations = []
+            
+            log_info(f"Orbit Pass: Generating {num_points} points for pass arc...")
             
             # Generate a realistic pass arc
             for i in range(num_points):
@@ -345,14 +434,23 @@ class Orbit_Pass(MimicBase):
                 azimuths.append(az)
                 elevations.append(el)
             
-            return {
+            log_info(f"Orbit Pass: Generated {len(azimuths)} azimuth points and {len(elevations)} elevation points")
+            log_info(f"Orbit Pass: Azimuth range: {min(azimuths):.1f}° to {max(azimuths):.1f}°")
+            log_info(f"Orbit Pass: Elevation range: {min(elevations):.1f}° to {max(elevations):.1f}°")
+            
+            result = {
                 'times': [],  # Not needed for sample
                 'azimuths': azimuths,
                 'elevations': elevations
             }
             
+            log_info("Orbit Pass: Sample pass data generation completed successfully")
+            return result
+            
         except Exception as e:
-            log_error(f"Failed to generate sample pass data: {e}")
+            log_error(f"Orbit Pass: Failed to generate sample pass data: {e}")
+            import traceback
+            traceback.print_exc()
             return None
     
     def _generate_detailed_pass_data(self, rise_time, set_time, rise_az, set_az, max_alt, max_time):
@@ -448,29 +546,48 @@ class Orbit_Pass(MimicBase):
     
     def _update_pass_display(self):
         """Update the pass information display."""
+        log_info("Orbit Pass: Starting pass display update...")
+        
         if not self.next_pass_data:
+            log_error("Orbit Pass: No pass data available for display update")
             return
         
         data = self.next_pass_data
+        log_info(f"Orbit Pass: Updating display with pass data: {data['rise_time']} to {data['set_time']}")
         
-        # Format times
-        self.pass_start_time = data['rise_time'].strftime("%H:%M:%S")
-        self.pass_end_time = data['set_time'].strftime("%H:%M:%S")
-        
-        # Format duration
-        duration_min = int(data['duration'].total_seconds() / 60)
-        duration_sec = int(data['duration'].total_seconds()) % 60
-        self.pass_duration = f"{duration_min}m {duration_sec}s"
-        
-        # Format other values
-        self.max_elevation = f"{data['max_elevation']:.1f}°"
-        self.start_azimuth = f"{data['rise_azimuth']:.1f}°"
-        self.end_azimuth = f"{data['set_azimuth']:.1f}°"
-        self.magnitude = data['magnitude']
-        self.pass_quality = data['quality']
-        
-        # Update status
-        self._update_status(f"Next pass: {data['rise_time'].strftime('%H:%M')} - {data['set_time'].strftime('%H:%M')} (Max: {data['max_elevation']:.1f}°)")
+        try:
+            # Format times
+            self.pass_start_time = data['rise_time'].strftime("%H:%M:%S")
+            self.pass_end_time = data['set_time'].strftime("%H:%M:%S")
+            log_info(f"Orbit Pass: Formatted times - Start: {self.pass_start_time}, End: {self.pass_end_time}")
+            
+            # Format duration
+            duration_min = int(data['duration'].total_seconds() / 60)
+            duration_sec = int(data['duration'].total_seconds()) % 60
+            self.pass_duration = f"{duration_min}m {duration_sec}s"
+            log_info(f"Orbit Pass: Formatted duration: {self.pass_duration}")
+            
+            # Format other values
+            self.max_elevation = f"{data['max_elevation']:.1f}°"
+            self.start_azimuth = f"{data['rise_azimuth']:.1f}°"
+            self.end_azimuth = f"{data['set_azimuth']:.1f}°"
+            self.magnitude = data['magnitude']
+            self.pass_quality = data['quality']
+            
+            log_info(f"Orbit Pass: Formatted values - Max Elev: {self.max_elevation}, Start Az: {self.start_azimuth}, End Az: {self.end_azimuth}")
+            log_info(f"Orbit Pass: Formatted values - Magnitude: {self.magnitude}, Quality: {self.pass_quality}")
+            
+            # Update status
+            status_msg = f"Next pass: {data['rise_time'].strftime('%H:%M')} - {data['set_time'].strftime('%H:%M')} (Max: {data['max_elevation']:.1f}°)"
+            self._update_status(status_msg)
+            log_info(f"Orbit Pass: Status updated: {status_msg}")
+            
+            log_info("Orbit Pass: Pass display update completed successfully")
+            
+        except Exception as e:
+            log_error(f"Orbit Pass: Failed to update pass display: {e}")
+            import traceback
+            traceback.print_exc()
     
     def _update_sky_chart(self):
         """Update the sky chart with the current pass data."""
@@ -541,10 +658,26 @@ class Orbit_Pass(MimicBase):
     
     def _update_status(self, message: str):
         """Update the status label."""
-        if hasattr(self, 'ids') and 'status_label' in self.ids:
-            self.ids.status_label.text = message
+        log_info(f"Orbit Pass: Updating status: {message}")
+        try:
+            if hasattr(self, 'ids') and 'status_label' in self.ids:
+                self.ids.status_label.text = message
+                log_info(f"Orbit Pass: Status label updated successfully")
+            else:
+                log_error("Orbit Pass: Status label not found in ids")
+        except Exception as e:
+            log_error(f"Orbit Pass: Failed to update status: {e}")
+            import traceback
+            traceback.print_exc()
     
     def refresh_pass_data(self):
         """Manually refresh pass data."""
-        self._calculate_next_pass()
-        self._update_status("Refreshing pass data...")
+        log_info("Orbit Pass: Manual refresh requested")
+        try:
+            self._update_status("Refreshing pass data...")
+            self._calculate_next_pass()
+            log_info("Orbit Pass: Manual refresh completed")
+        except Exception as e:
+            log_error(f"Orbit Pass: Manual refresh failed: {e}")
+            import traceback
+            traceback.print_exc()
