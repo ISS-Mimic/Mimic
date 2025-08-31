@@ -54,23 +54,93 @@ def _fmt_date_local(utc_dt: datetime) -> str:
     return utc_dt.replace(tzinfo=timezone.utc).astimezone().strftime("%Y-%m-%d")
 
 
-def _est_visual_mag(max_el_deg: float) -> float:
+def _est_visual_mag(iss_alt_deg: float, iss_range_m: float, phase_angle_rad: float) -> float:
     """
-    Very rough visual magnitude estimate vs. maximum elevation.
-    This is deliberately labeled 'est.' in the UI.
+    Crude ISS visual magnitude estimate using elevation proxy (for phase) and range.
+    - Baseline: ISS can reach about -5.5 at ~500 km and small phase angle.
+    - We use a Lambertian-ish term with phase_angle and inverse-square with range.
     """
-    el = max(0.0, min(90.0, float(max_el_deg)))
-    if el >= 60:
-        return -3.0
-    if el >= 45:
-        return -2.5
-    if el >= 30:
-        return -2.0
-    if el >= 20:
-        return -1.5
-    if el >= 10:
-        return -1.0
-    return -0.5
+    # Clamp and convert
+    rng_km = max(300.0, iss_range_m / 1000.0)  # avoid blow-ups at very small values
+    # Baseline magnitude at 500 km near full phase
+    M0 = -5.2
+    # Range term (inverse square -> +5 log10(r))
+    m_range = 5.0 * math.log10(rng_km / 500.0)
+    # Phase term: 0 (brightest) .. pi (faintest); scale ~ 1.5–2.5 mag across full range
+    m_phase = 2.0 * (phase_angle_rad / math.pi)
+    return M0 + m_range + m_phase
+
+
+def _phase_angle_rad(observer: ephem.Observer, iss: ephem.EarthSatellite, sun: ephem.Sun) -> float:
+    """
+    Phase angle at the ISS between (to Sun) and (to observer).
+    """
+    # Vector directions from ISS to Sun and to Observer (approximate using topocentric RA/Dec)
+    # In PyEphem, we can compute at the observer, then use angular separation on the sky
+    # as a cheap proxy for phase angle (not exact but good enough here).
+    # angle between Sun and Observer directions as seen from ISS ~ angle between Sun and ISS as seen from Observer
+    return abs(float(ephem.separation((sun.a_ra, sun.a_dec), (iss.a_ra, iss.a_dec))))
+
+
+def _check_pass_visibility(observer: ephem.Observer,
+                           iss: ephem.EarthSatellite,
+                           when_utc: datetime,
+                           min_el_deg: float = 10.0,
+                           darkness_thresh_deg: float = -4.0,
+                           moon_bright_penalty: bool = True) -> tuple[bool, dict]:
+    """
+    Returns (visible?, details) where details has fields useful for UI.
+    Conditions:
+      - ISS above min elevation
+      - ISS sunlit (not eclipsed)
+      - Sun below darkness threshold (tighten threshold if Moon is bright & high)
+    """
+    # Set time
+    observer.date = ephem.Date(when_utc)
+    # Compute bodies
+    sun = ephem.Sun(observer)
+    moon = ephem.Moon(observer)
+    iss.compute(observer)
+
+    sun_alt_deg = math.degrees(float(sun.alt))
+    iss_el_deg  = math.degrees(float(iss.alt))
+    iss_range_m = float(iss.range) if hasattr(iss, "range") else float('inf')
+
+    # Adaptive darkness threshold if Moon is bright & high
+    moon_alt_deg = math.degrees(float(moon.alt))
+    moon_phase_pct = float(moon.phase)  # 0=new, 100=full
+    adaptive_dark_thresh = darkness_thresh_deg
+    if moon_bright_penalty and moon_phase_pct > 85.0 and moon_alt_deg > 10.0:
+        # Make it a bit darker to count as "visible"
+        adaptive_dark_thresh = min(-6.0, darkness_thresh_deg)
+
+    # Basic visibility gates
+    above_horizon = iss_el_deg >= min_el_deg
+    sky_dark_enough = sun_alt_deg <= adaptive_dark_thresh
+
+    # Sunlit test (preferred)
+    sunlit = not bool(getattr(iss, "eclipsed", False))
+
+    visible = above_horizon and sky_dark_enough and sunlit
+
+    # Optional magnitude estimate
+    try:
+        phase_rad = _phase_angle_rad(observer, iss, sun)
+        est_mag = _est_visual_mag(iss_el_deg, iss_range_m, phase_rad)
+    except Exception:
+        est_mag = None
+
+    details = {
+        "sun_alt_deg": sun_alt_deg,
+        "moon_alt_deg": moon_alt_deg,
+        "moon_phase_pct": moon_phase_pct,
+        "iss_el_deg": iss_el_deg,
+        "iss_range_km": None if math.isinf(iss_range_m) else iss_range_m / 1000.0,
+        "iss_sunlit": sunlit,
+        "darkness_threshold_deg": adaptive_dark_thresh,
+        "est_mag": est_mag,
+    }
+    return visible, details
 
 
 # ------------------------------ Sky chart widget ------------------------------
@@ -257,8 +327,11 @@ class Orbit_Pass(MimicBase):
             dur_min = duration_s // 60
             dur_sec = duration_s % 60
 
-            # Magnitude (est.)
-            est_mag = _est_visual_mag(max_el_deg)
+            # Check if pass will be visible with detailed analysis
+            pass_visible, visibility_details = _check_pass_visibility(self._observer, self._iss, m_dt)
+            
+            # Get magnitude from visibility details
+            est_mag = visibility_details.get('est_mag')
 
             # Update info labels
             self.pass_date_local = _fmt_date_local(r_dt)
@@ -287,7 +360,24 @@ class Orbit_Pass(MimicBase):
             if hasattr(ids, 'duration'):
                 ids.duration.text = f"{dur_min}m {dur_sec:02d}s"
             if hasattr(ids, 'magnitude'):
-                ids.magnitude.text = f"~{est_mag:0.1f} (est.)"
+                if not pass_visible:
+                    # Use visibility details to determine why not visible
+                    sun_alt = visibility_details.get('sun_alt_deg', 0)
+                    iss_sunlit = visibility_details.get('iss_sunlit', True)
+                    iss_el = visibility_details.get('iss_el_deg', 0)
+                    
+                    if not iss_sunlit:
+                        ids.magnitude.text = "Not visible (eclipsed)"
+                    elif iss_el < 10.0:
+                        ids.magnitude.text = "Not visible (too low)"
+                    elif sun_alt > visibility_details.get('darkness_threshold_deg', -4.0):
+                        ids.magnitude.text = "Not visible (too bright)"
+                    else:
+                        ids.magnitude.text = "Not visible (conditions)"
+                elif est_mag is not None:
+                    ids.magnitude.text = f"~{est_mag:0.1f} (est.)"
+                else:
+                    ids.magnitude.text = "Magnitude unknown"
 
             # Build sky path points
             pts, s_xy, m_xy, e_xy = self._build_sky_path(r_dt, s_dt, m_dt)
