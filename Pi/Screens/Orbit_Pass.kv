@@ -8,12 +8,12 @@
         # ─────────────────────── Title ──────────────────────────────────
         Label:
             text: "Orbit Pass"
-            color: root.signalcolor
+            color: 0,1,0,1
             bold: True
-            font_size: dp(32)
+            font_size: dp(64)
             size_hint: None, None
             size: self.texture_size
-            pos_hint: {"center_x": 0.5, "center_y": 0.95}
+            pos_hint: {"center_x": 0.25, "center_y": 0.95}
 
         # ─────────────────────── Content Area ───────────────────────────
         # LEFT: pass details
@@ -22,7 +22,7 @@
             padding: dp(20)
             spacing: dp(10)
             size_hint: 0.4, 0.8
-            pos_hint: {"x": 0.05, "center_y": 0.5}
+            pos_hint: {"x": 0.05, "center_y": 0.6}
 
             Label:
                 text: "Next ISS Overflight"
@@ -61,7 +61,7 @@
                     valign: "middle"
                     text_size: self.size
                     font_size: self.height * 0.6
-                    color: root.signalcolor
+                    color: 1,0,1,1
 
                 Label:
                     text: "Start Az:"
@@ -77,7 +77,7 @@
                     valign: "middle"
                     text_size: self.size
                     font_size: self.height * 0.6
-                    color: root.signalcolor
+                    color: 1,0,1,1
 
                 Label:
                     text: "Max Time:"
@@ -93,7 +93,7 @@
                     valign: "middle"
                     text_size: self.size
                     font_size: self.height * 0.6
-                    color: root.signalcolor
+                    color: 1,0,1,1
 
                 Label:
                     text: "Max Elev:"
@@ -109,7 +109,7 @@
                     valign: "middle"
                     text_size: self.size
                     font_size: self.height * 0.6
-                    color: root.signalcolor
+                    color: 1,0,1,1
 
                 Label:
                     text: "End:"
@@ -125,7 +125,7 @@
                     valign: "middle"
                     text_size: self.size
                     font_size: self.height * 0.6
-                    color: root.signalcolor
+                    color: 1,0,1,1
 
                 Label:
                     text: "End Az:"
@@ -141,7 +141,7 @@
                     valign: "middle"
                     text_size: self.size
                     font_size: self.height * 0.6
-                    color: root.signalcolor
+                    color: 1,0,1,1
 
                 Label:
                     text: "Duration:"
@@ -157,7 +157,7 @@
                     valign: "middle"
                     text_size: self.size
                     font_size: self.height * 0.6
-                    color: root.signalcolor
+                    color: 1,0,1,1
 
                 Label:
                     text: "Visual Mag:"
@@ -173,7 +173,7 @@
                     valign: "middle"
                     text_size: self.size
                     font_size: self.height * 0.6
-                    color: root.signalcolor
+                    color: 1,0,1,1
 
         # RIGHT: sky chart
         RelativeLayout:
