@@ -222,9 +222,16 @@ class Orbit_Pass(MimicBase):
         try:
             obs = self._observer
             obs.date = ephem.now()
+            
+            log_info(f"Orbit Pass: Computing pass for observer at {obs.lat}, {obs.lon}")
+            log_info(f"Orbit Pass: Current time (UTC): {obs.date}")
 
             # PyEphem next_pass: rise_time, rise_az, max_time, max_alt, set_time, set_az
-            r_time, r_az, m_time, m_alt, s_time, s_az = self._iss.next_pass(obs)
+            # The next_pass method is on the Observer, not the satellite
+            r_time, r_az, m_time, m_alt, s_time, s_az = obs.next_pass(self._iss)
+            
+            log_info(f"Orbit Pass: Pass computed - Rise: {r_time}, Max: {m_time}, Set: {s_time}")
+            
             # Convert ephem.Date to UTC datetime for display
             r_dt = r_time.datetime()
             m_dt = m_time.datetime()
@@ -245,10 +252,14 @@ class Orbit_Pass(MimicBase):
             # Update info labels
             self.pass_date_local = _fmt_date_local(r_dt)
             ids = self.ids
+            log_info(f"Orbit Pass: Updating UI labels, ids available: {list(ids.keys()) if hasattr(ids, 'keys') else 'No keys'}")
+            
             if hasattr(ids, 'start_time'):
                 ids.start_time.text = _fmt_time_local(r_dt)
+                log_info(f"Orbit Pass: Updated start_time to {_fmt_time_local(r_dt)}")
             if hasattr(ids, 'start_az'):
                 ids.start_az.text = f"{rise_az_deg:0.0f}° ({_deg_to_card(rise_az_deg)})"
+                log_info(f"Orbit Pass: Updated start_az to {rise_az_deg:0.0f}° ({_deg_to_card(rise_az_deg)})")
 
             if hasattr(ids, 'max_time'):
                 ids.max_time.text = _fmt_time_local(m_dt)
