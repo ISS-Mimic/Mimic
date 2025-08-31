@@ -93,29 +93,117 @@
                     height: self.minimum_height
                     spacing: dp(4)
 
-                    Label: text: "Start:";  halign: "right"; valign: "middle"; text_size: self.size; font_size: self.height * 0.6
-                    Label: id: start_time; text: "--:--:--"; halign: "left"; valign: "middle"; text_size: self.size; font_size: self.height * 0.6
+                    Label:
+                        text: "Start:"
+                        halign: "right"
+                        valign: "middle"
+                        text_size: self.size
+                        font_size: self.height * 0.6
+                    Label:
+                        id: start_time
+                        text: "--:--:--"
+                        halign: "left"
+                        valign: "middle"
+                        text_size: self.size
+                        font_size: self.height * 0.6
 
-                    Label: text: "Start Az:"; halign: "right"; valign: "middle"; text_size: self.size; font_size: self.height * 0.6
-                    Label: id: start_az;   text: "--";       halign: "left";  valign: "middle"; text_size: self.size; font_size: self.height * 0.6
+                    Label:
+                        text: "Start Az:"
+                        halign: "right"
+                        valign: "middle"
+                        text_size: self.size
+                        font_size: self.height * 0.6
+                    Label:
+                        id: start_az
+                        text: "--"
+                        halign: "left"
+                        valign: "middle"
+                        text_size: self.size
+                        font_size: self.height * 0.6
 
-                    Label: text: "Max Time:"; halign: "right"; valign: "middle"; text_size: self.size; font_size: self.height * 0.6
-                    Label: id: max_time;    text: "--:--:--";  halign: "left";  valign: "middle"; text_size: self.size; font_size: self.height * 0.6
+                    Label:
+                        text: "Max Time:"
+                        halign: "right"
+                        valign: "middle"
+                        text_size: self.size
+                        font_size: self.height * 0.6
+                    Label:
+                        id: max_time
+                        text: "--:--:--"
+                        halign: "left"
+                        valign: "middle"
+                        text_size: self.size
+                        font_size: self.height * 0.6
 
-                    Label: text: "Max Elev:"; halign: "right"; valign: "middle"; text_size: self.size; font_size: self.height * 0.6
-                    Label: id: max_el;      text: "--";        halign: "left";  valign: "middle"; text_size: self.size; font_size: self.height * 0.6
+                    Label:
+                        text: "Max Elev:"
+                        halign: "right"
+                        valign: "middle"
+                        text_size: self.size
+                        font_size: self.height * 0.6
+                    Label:
+                        id: max_el
+                        text: "--"
+                        halign: "left"
+                        valign: "middle"
+                        text_size: self.size
+                        font_size: self.height * 0.6
 
-                    Label: text: "End:";      halign: "right"; valign: "middle"; text_size: self.size; font_size: self.height * 0.6
-                    Label: id: end_time;      text: "--:--:--"; halign: "left";  valign: "middle"; text_size: self.size; font_size: self.height * 0.6
+                    Label:
+                        text: "End:"
+                        halign: "right"
+                        valign: "middle"
+                        text_size: self.size
+                        font_size: self.height * 0.6
+                    Label:
+                        id: end_time
+                        text: "--:--:--"
+                        halign: "left"
+                        valign: "middle"
+                        text_size: self.size
+                        font_size: self.height * 0.6
 
-                    Label: text: "End Az:";   halign: "right"; valign: "middle"; text_size: self.size; font_size: self.height * 0.6
-                    Label: id: end_az;        text: "--";       halign: "left";  valign: "middle"; text_size: self.size; font_size: self.height * 0.6
+                    Label:
+                        text: "End Az:"
+                        halign: "right"
+                        valign: "middle"
+                        text_size: self.size
+                        font_size: self.height * 0.6
+                    Label:
+                        id: end_az
+                        text: "--"
+                        halign: "left"
+                        valign: "middle"
+                        text_size: self.size
+                        font_size: self.height * 0.6
 
-                    Label: text: "Duration:"; halign: "right"; valign: "middle"; text_size: self.size; font_size: self.height * 0.6
-                    Label: id: duration;      text: "--";       halign: "left";  valign: "middle"; text_size: self.size; font_size: self.height * 0.6
+                    Label:
+                        text: "Duration:"
+                        halign: "right"
+                        valign: "middle"
+                        text_size: self.size
+                        font_size: self.height * 0.6
+                    Label:
+                        id: duration
+                        text: "--"
+                        halign: "left"
+                        valign: "middle"
+                        text_size: self.size
+                        font_size: self.height * 0.6
 
-                    Label: text: "Visual Mag:"; halign: "right"; valign: "middle"; text_size: self.size; font_size: self.height * 0.6
-                    Label: id: magnitude;      text: "--";        halign: "left";  valign: "middle"; text_size: self.size; font_size: self.height * 0.6
+                    Label:
+                        text: "Visual Mag:"
+                        halign: "right"
+                        valign: "middle"
+                        text_size: self.size
+                        font_size: self.height * 0.6
+                    Label:
+                        id: magnitude
+                        text: "--"
+                        halign: "left"
+                        valign: "middle"
+                        text_size: self.size
+                        font_size: self.height * 0.6
 
                 Widget:  # spacer
                     size_hint_y: 1
@@ -205,6 +293,3 @@
         Ellipse:
             size: dp(8), dp(8)
             pos: self.end_xy[0] - dp(4), self.end_xy[1] - dp(4)
-
-        
-        
