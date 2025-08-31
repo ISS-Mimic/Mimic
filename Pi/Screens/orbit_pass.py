@@ -115,9 +115,7 @@ class Orbit_Pass(MimicBase):
     Logging follows the same pattern as other orbit screens.
     """
 
-    # Required properties for MimicBase compatibility
-    mimic_directory = StringProperty("")
-    signalcolor = StringProperty("1,1,1,1")
+    # UI scaling property for responsive design
     ui_scale = NumericProperty(1.0)
 
     # For a friendly header
