@@ -3,251 +3,260 @@
 
 <Orbit_Pass>:
     name: "orbit_pass"
-    BoxLayout:
-        orientation: "vertical"
-        spacing: dp(6)
-        padding: dp(6)
+    
+    FloatLayout:
+        # ─────────────────────── Title ──────────────────────────────────
+        Label:
+            text: "Orbit Pass"
+            color: root.signalcolor
+            bold: True
+            font_size: dp(32)
+            size_hint: None, None
+            size: self.texture_size
+            pos_hint: {"center_x": 0.5, "center_y": 0.95}
 
-        # --- top status bar (required by GUI.py signal + Arduino updater) ---
+        # ─────────────────────── Content Area ───────────────────────────
+        # LEFT: pass details
         BoxLayout:
-            size_hint_y: None
-            height: dp(36)
-            spacing: dp(8)
-
-            # signal icon (GUI.py will update this)
-            Image:
-                id: signal
-                source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/offline.png"
-                allow_stretch: True
-                keep_ratio: True
-                anim_delay: -1
+            orientation: "vertical"
+            padding: dp(20)
+            spacing: dp(10)
+            size_hint: 0.4, 0.8
+            pos_hint: {"x": 0.05, "center_y": 0.5}
 
             Label:
-                text: "Orbit Pass"
-                color: root.signalcolor
+                text: "Next ISS Overflight"
                 bold: True
-                font_size: self.height * 0.7
-
-            Widget:
-                size_hint_x: 1  # spacer
-
-            # ─────────────────────── Navigation ────────────────────────────────
-
-            Button:
-                size_hint: 0.1, 0.11
-                pos_hint: {"center_x": 0.9375, "center_y": 0.07}
-                background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
-                background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
-                border: 0,0,0,0    # avoid 9-slice margins
-                on_release: app.root.current = 'orbit'
-
-            # Arduino status icon + count (GUI.py will update these)
-            Image:
-                id: arduino
-                size_hint_x: None
-                width: dp(36)
-                source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
-                allow_stretch: True
-                keep_ratio: True
-            Label:
-                id: arduino_count
-                text: ""
-                size_hint_x: None
-                width: dp(30)
-                halign: "left"
-                valign: "middle"
-                text_size: self.size
-                font_size: self.height * 0.7
+                font_size: dp(24)
+                size_hint_y: None
+                height: dp(28)
                 color: 1,1,1,1
 
-        # --- content: info (left) + sky chart (right) ---
-        BoxLayout:
-            spacing: dp(10)
+            Label:
+                text: root.pass_date_local
+                size_hint_y: None
+                height: dp(24)
+                font_size: dp(20)
+                color: 0.8,0.8,0.8,1
 
-            # LEFT: pass details
-            BoxLayout:
-                orientation: "vertical"
-                padding: dp(6)
-                spacing: dp(6)
+            GridLayout:
+                cols: 2
+                rows: 7
+                row_default_height: dp(28)
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(4)
 
                 Label:
-                    text: "Next ISS Overflight"
-                    bold: True
-                    font_size: self.height * 0.3
-                    size_hint_y: None
-                    height: dp(28)
+                    text: "Start:"
+                    halign: "right"
+                    valign: "middle"
+                    text_size: self.size
+                    font_size: self.height * 0.6
                     color: 1,1,1,1
+                Label:
+                    id: start_time
+                    text: "--:--:--"
+                    halign: "left"
+                    valign: "middle"
+                    text_size: self.size
+                    font_size: self.height * 0.6
+                    color: root.signalcolor
 
                 Label:
-                    text: root.pass_date_local
-                    size_hint_y: None
-                    height: dp(24)
-                    font_size: self.height * 0.8
-                    color: 0.8,0.8,0.8,1
-
-                GridLayout:
-                    cols: 2
-                    rows: 7
-                    row_default_height: dp(28)
-                    size_hint_y: None
-                    height: self.minimum_height
-                    spacing: dp(4)
-
-                    Label:
-                        text: "Start:"
-                        halign: "right"
-                        valign: "middle"
-                        text_size: self.size
-                        font_size: self.height * 0.6
-                    Label:
-                        id: start_time
-                        text: "--:--:--"
-                        halign: "left"
-                        valign: "middle"
-                        text_size: self.size
-                        font_size: self.height * 0.6
-
-                    Label:
-                        text: "Start Az:"
-                        halign: "right"
-                        valign: "middle"
-                        text_size: self.size
-                        font_size: self.height * 0.6
-                    Label:
-                        id: start_az
-                        text: "--"
-                        halign: "left"
-                        valign: "middle"
-                        text_size: self.size
-                        font_size: self.height * 0.6
-
-                    Label:
-                        text: "Max Time:"
-                        halign: "right"
-                        valign: "middle"
-                        text_size: self.size
-                        font_size: self.height * 0.6
-                    Label:
-                        id: max_time
-                        text: "--:--:--"
-                        halign: "left"
-                        valign: "middle"
-                        text_size: self.size
-                        font_size: self.height * 0.6
-
-                    Label:
-                        text: "Max Elev:"
-                        halign: "right"
-                        valign: "middle"
-                        text_size: self.size
-                        font_size: self.height * 0.6
-                    Label:
-                        id: max_el
-                        text: "--"
-                        halign: "left"
-                        valign: "middle"
-                        text_size: self.size
-                        font_size: self.height * 0.6
-
-                    Label:
-                        text: "End:"
-                        halign: "right"
-                        valign: "middle"
-                        text_size: self.size
-                        font_size: self.height * 0.6
-                    Label:
-                        id: end_time
-                        text: "--:--:--"
-                        halign: "left"
-                        valign: "middle"
-                        text_size: self.size
-                        font_size: self.height * 0.6
-
-                    Label:
-                        text: "End Az:"
-                        halign: "right"
-                        valign: "middle"
-                        text_size: self.size
-                        font_size: self.height * 0.6
-                    Label:
-                        id: end_az
-                        text: "--"
-                        halign: "left"
-                        valign: "middle"
-                        text_size: self.size
-                        font_size: self.height * 0.6
-
-                    Label:
-                        text: "Duration:"
-                        halign: "right"
-                        valign: "middle"
-                        text_size: self.size
-                        font_size: self.height * 0.6
-                    Label:
-                        id: duration
-                        text: "--"
-                        halign: "left"
-                        valign: "middle"
-                        text_size: self.size
-                        font_size: self.height * 0.6
-
-                    Label:
-                        text: "Visual Mag:"
-                        halign: "right"
-                        valign: "middle"
-                        text_size: self.size
-                        font_size: self.height * 0.6
-                    Label:
-                        id: magnitude
-                        text: "--"
-                        halign: "left"
-                        valign: "middle"
-                        text_size: self.size
-                        font_size: self.height * 0.6
-
-                Widget:  # spacer
-                    size_hint_y: 1
-
-            # RIGHT: sky chart
-            RelativeLayout:
-                SkyChart:
-                    id: skychart
-
-                # Direction labels on top of chart (N/E/S/W)
+                    text: "Start Az:"
+                    halign: "right"
+                    valign: "middle"
+                    text_size: self.size
+                    font_size: self.height * 0.6
+                    color: 1,1,1,1
                 Label:
-                    text: "N"
-                    size_hint: None, None
-                    size: dp(18), dp(18)
-                    center_x: skychart.center_x
-                    y: skychart.top - dp(16)
-                    color: 0.8,0.8,0.8,1
-                    font_size: self.height * 0.8
-                Label:
-                    text: "S"
-                    size_hint: None, None
-                    size: dp(18), dp(18)
-                    center_x: skychart.center_x
-                    y: skychart.y + dp(2)
-                    color: 0.8,0.8,0.8,1
-                    font_size: self.height * 0.8
-                Label:
-                    text: "E"
-                    size_hint: None, None
-                    size: dp(18), dp(18)
-                    x: skychart.right - dp(18)
-                    center_y: skychart.center_y
-                    color: 0.8,0.8,0.8,1
-                    font_size: self.height * 0.8
-                Label:
-                    text: "W"
-                    size_hint: None, None
-                    size: dp(18), dp(18)
-                    x: skychart.x + dp(2)
-                    center_y: skychart.center_y
-                    color: 0.8,0.8,0.8,1
-                    font_size: self.height * 0.8
+                    id: start_az
+                    text: "--"
+                    halign: "left"
+                    valign: "middle"
+                    text_size: self.size
+                    font_size: self.height * 0.6
+                    color: root.signalcolor
 
+                Label:
+                    text: "Max Time:"
+                    halign: "right"
+                    valign: "middle"
+                    text_size: self.size
+                    font_size: self.height * 0.6
+                    color: 1,1,1,1
+                Label:
+                    id: max_time
+                    text: "--:--:--"
+                    halign: "left"
+                    valign: "middle"
+                    text_size: self.size
+                    font_size: self.height * 0.6
+                    color: root.signalcolor
 
+                Label:
+                    text: "Max Elev:"
+                    halign: "right"
+                    valign: "middle"
+                    text_size: self.size
+                    font_size: self.height * 0.6
+                    color: 1,1,1,1
+                Label:
+                    id: max_el
+                    text: "--"
+                    halign: "left"
+                    valign: "middle"
+                    text_size: self.size
+                    font_size: self.height * 0.6
+                    color: root.signalcolor
+
+                Label:
+                    text: "End:"
+                    halign: "right"
+                    valign: "middle"
+                    text_size: self.size
+                    font_size: self.height * 0.6
+                    color: 1,1,1,1
+                Label:
+                    id: end_time
+                    text: "--:--:--"
+                    halign: "left"
+                    valign: "middle"
+                    text_size: self.size
+                    font_size: self.height * 0.6
+                    color: root.signalcolor
+
+                Label:
+                    text: "End Az:"
+                    halign: "right"
+                    valign: "middle"
+                    text_size: self.size
+                    font_size: self.height * 0.6
+                    color: 1,1,1,1
+                Label:
+                    id: end_az
+                    text: "--"
+                    halign: "left"
+                    valign: "middle"
+                    text_size: self.size
+                    font_size: self.height * 0.6
+                    color: root.signalcolor
+
+                Label:
+                    text: "Duration:"
+                    halign: "right"
+                    valign: "middle"
+                    text_size: self.size
+                    font_size: self.height * 0.6
+                    color: 1,1,1,1
+                Label:
+                    id: duration
+                    text: "--"
+                    halign: "left"
+                    valign: "middle"
+                    text_size: self.size
+                    font_size: self.height * 0.6
+                    color: root.signalcolor
+
+                Label:
+                    text: "Visual Mag:"
+                    halign: "right"
+                    valign: "middle"
+                    text_size: self.size
+                    font_size: self.height * 0.6
+                    color: 1,1,1,1
+                Label:
+                    id: magnitude
+                    text: "--"
+                    halign: "left"
+                    valign: "middle"
+                    text_size: self.size
+                    font_size: self.height * 0.6
+                    color: root.signalcolor
+
+        # RIGHT: sky chart
+        RelativeLayout:
+            size_hint: 0.5, 0.8
+            pos_hint: {"right": 0.95, "center_y": 0.5}
+
+            SkyChart:
+                id: skychart
+
+            # Direction labels on top of chart (N/E/S/W)
+            Label:
+                text: "N"
+                size_hint: None, None
+                size: dp(18), dp(18)
+                center_x: skychart.center_x
+                y: skychart.top - dp(16)
+                color: 0.8,0.8,0.8,1
+                font_size: self.height * 0.8
+            Label:
+                text: "S"
+                size_hint: None, None
+                size: dp(18), dp(18)
+                center_x: skychart.center_x
+                y: skychart.y + dp(2)
+                color: 0.8,0.8,0.8,1
+                font_size: self.height * 0.8
+            Label:
+                text: "E"
+                size_hint: None, None
+                size: dp(18), dp(18)
+                x: skychart.right - dp(18)
+                center_y: skychart.center_y
+                color: 0.8,0.8,0.8,1
+                font_size: self.height * 0.8
+            Label:
+                text: "W"
+                size_hint: None, None
+                size: dp(18), dp(18)
+                x: skychart.x + dp(2)
+                center_y: skychart.center_y
+                color: 0.8,0.8,0.8,1
+                font_size: self.height * 0.8
+
+        # ─────────────────────── BOTTOM TOOLBAR ──────────────────────────
+        # Signal icon
+        Image:
+            id: signal
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/offline.png"
+            size_hint_y: 0.112
+            anim_delay: 0.05
+            anim_loop: 0
+            fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.05, "center_y": 0.07}
+
+        # Arduino status icon + count
+        Image:
+            id: arduino
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
+            size_hint_y: 0.15
+            anim_delay: 0.2
+            anim_loop: -1
+            fit_mode: "scale-down"
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+
+        Label:
+            id: arduino_count
+            pos_hint: {"center_x": 0.14, "center_y": 0.08}
+            text: ''
+            markup: True
+            color: 1, 1, 1, 1
+            font_size: self.height * 1
+            size_hint: 0.06, 0.08
+
+        # ─────────────────────── Navigation ──────────────────────────────
+        Button:
+            size_hint: 0.1, 0.11
+            pos_hint: {"center_x": 0.9375, "center_y": 0.07}
+            background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
+            border: 0,0,0,0    # avoid 9-slice margins
+            on_release: app.root.current = 'orbit'
+
+# ─────────────────────── Sky Chart Widget ──────────────────────────────
 <SkyChart>:
     canvas:
         # horizon rings
