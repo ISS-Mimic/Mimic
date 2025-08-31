@@ -331,7 +331,9 @@ class Orbit_Pass(MimicBase):
         obs.pressure = 0
 
         def azel_at(tdt: datetime) -> Tuple[float, float]:
-            self._iss.compute(tdt)
+            # Convert Python datetime to ephem.Date
+            ephem_date = ephem.Date(tdt)
+            self._iss.compute(ephem_date)
             # az, alt in radians -> degrees
             return float(self._iss.az) * 180.0 / math.pi, float(self._iss.alt) * 180.0 / math.pi
 
