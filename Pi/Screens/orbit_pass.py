@@ -17,8 +17,15 @@ from kivy.graphics import Color, Line, Ellipse
 from ._base import MimicBase
 from utils.logger import log_info, log_error
 
-# KV file path - will be loaded when needed
-KV_FILE = Path(__file__).with_name("Orbit_Pass.kv")
+# Load KV file at module level
+try:
+    kv_path = Path(__file__).with_name("Orbit_Pass.kv")
+    Builder.load_file(str(kv_path))
+    print("Orbit Pass: KV file loaded successfully")
+except Exception as e:
+    print(f"Orbit Pass: Failed to load KV file: {e}")
+    import traceback
+    traceback.print_exc()
 
 
 # ------------------------------ small helpers ------------------------------
@@ -130,20 +137,26 @@ class Orbit_Pass(MimicBase):
     def on_enter(self):
         try:
             log_info("Orbit Pass: on_enter()")
-            # Load KV file if not already loaded
-            if not hasattr(self, '_kv_loaded'):
-                Builder.load_file(str(KV_FILE))
-                self._kv_loaded = True
-                log_info("Orbit Pass: KV file loaded")
             
             self._load_user_location()
             self._load_iss_tle()
             self._build_observer()
+            
+            # Wait a frame for the UI to be ready, then compute pass
+            Clock.schedule_once(self._delayed_pass_computation, 0.1)
+            
+        except Exception as exc:
+            log_error(f"Orbit Pass init failed: {exc}")
+
+    def _delayed_pass_computation(self, dt):
+        """Compute pass after UI is ready."""
+        try:
+            log_info("Orbit Pass: Starting delayed pass computation")
             # compute now, then keep fresh
             self._update_next_pass(0)
             self._evt_nextpass = Clock.schedule_interval(self._update_next_pass, 30)
         except Exception as exc:
-            log_error(f"Orbit Pass init failed: {exc}")
+            log_error(f"Orbit Pass: Delayed pass computation failed: {exc}")
 
     def on_leave(self):
         log_info("Orbit Pass: on_leave() – unschedule timers")
