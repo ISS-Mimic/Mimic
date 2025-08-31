@@ -12,13 +12,13 @@ from kivy.lang import Builder
 from kivy.properties import ListProperty, StringProperty, NumericProperty
 from kivy.uix.widget import Widget
 from kivy.uix.screenmanager import Screen
+from kivy.graphics import Color, Line, Ellipse
 
 from ._base import MimicBase
 from utils.logger import log_info, log_error
 
-# Load KV located next to this file
-kv_path = Path(__file__).with_name("Orbit_Pass.kv")
-Builder.load_file(str(kv_path))
+# KV file path - will be loaded when needed
+KV_FILE = Path(__file__).with_name("Orbit_Pass.kv")
 
 
 # ------------------------------ small helpers ------------------------------
@@ -130,6 +130,12 @@ class Orbit_Pass(MimicBase):
     def on_enter(self):
         try:
             log_info("Orbit Pass: on_enter()")
+            # Load KV file if not already loaded
+            if not hasattr(self, '_kv_loaded'):
+                Builder.load_file(str(KV_FILE))
+                self._kv_loaded = True
+                log_info("Orbit Pass: KV file loaded")
+            
             self._load_user_location()
             self._load_iss_tle()
             self._build_observer()
@@ -146,6 +152,14 @@ class Orbit_Pass(MimicBase):
                 Clock.unschedule(self._evt_nextpass)
         except Exception as exc:
             log_error(f"Orbit Pass unschedule failed: {exc}")
+
+    def on_size(self, *args):
+        """Handle screen size changes for UI scaling."""
+        try:
+            # Scale typography across devices; 1280px baseline
+            self.ui_scale = max(0.8, min(2.0, self.width / 1280.0))
+        except Exception:
+            self.ui_scale = 1.0
 
     # ------------------------------ loaders ------------------------------
 
