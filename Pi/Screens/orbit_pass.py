@@ -9,8 +9,9 @@ from typing import Optional, Tuple, List
 import ephem
 from kivy.clock import Clock
 from kivy.lang import Builder
-from kivy.properties import ListProperty, StringProperty
+from kivy.properties import ListProperty, StringProperty, NumericProperty
 from kivy.uix.widget import Widget
+from kivy.uix.screenmanager import Screen
 
 from ._base import MimicBase
 from utils.logger import log_info, log_error
@@ -106,6 +107,11 @@ class Orbit_Pass(MimicBase):
     Displays the next ISS pass over user's location with a zenith sky plot.
     Logging follows the same pattern as other orbit screens.
     """
+
+    # Required properties for MimicBase compatibility
+    mimic_directory = StringProperty("")
+    signalcolor = StringProperty("1,1,1,1")
+    ui_scale = NumericProperty(1.0)
 
     # For a friendly header
     pass_date_local = StringProperty("--")
@@ -225,26 +231,36 @@ class Orbit_Pass(MimicBase):
             # Update info labels
             self.pass_date_local = _fmt_date_local(r_dt)
             ids = self.ids
-            ids.start_time.text = _fmt_time_local(r_dt)
-            ids.start_az.text = f"{rise_az_deg:0.0f}° ({_deg_to_card(rise_az_deg)})"
+            if hasattr(ids, 'start_time'):
+                ids.start_time.text = _fmt_time_local(r_dt)
+            if hasattr(ids, 'start_az'):
+                ids.start_az.text = f"{rise_az_deg:0.0f}° ({_deg_to_card(rise_az_deg)})"
 
-            ids.max_time.text = _fmt_time_local(m_dt)
-            ids.max_el.text = f"{max_el_deg:0.0f}°"
-            ids.max_az.text = ""  # optional: could show az at max if desired
+            if hasattr(ids, 'max_time'):
+                ids.max_time.text = _fmt_time_local(m_dt)
+            if hasattr(ids, 'max_el'):
+                ids.max_el.text = f"{max_el_deg:0.0f}°"
+            if hasattr(ids, 'max_az'):
+                ids.max_az.text = ""  # optional: could show az at max if desired
 
-            ids.end_time.text = _fmt_time_local(s_dt)
-            ids.end_az.text = f"{set_az_deg:0.0f}° ({_deg_to_card(set_az_deg)})"
+            if hasattr(ids, 'end_time'):
+                ids.end_time.text = _fmt_time_local(s_dt)
+            if hasattr(ids, 'end_az'):
+                ids.end_az.text = f"{set_az_deg:0.0f}° ({_deg_to_card(set_az_deg)})"
 
-            ids.duration.text = f"{dur_min}m {dur_sec:02d}s"
-            ids.magnitude.text = f"~{est_mag:0.1f} (est.)"
+            if hasattr(ids, 'duration'):
+                ids.duration.text = f"{dur_min}m {dur_sec:02d}s"
+            if hasattr(ids, 'magnitude'):
+                ids.magnitude.text = f"~{est_mag:0.1f} (est.)"
 
             # Build sky path points
             pts, s_xy, m_xy, e_xy = self._build_sky_path(r_dt, s_dt, m_dt)
-            schart: SkyChart = ids.skychart
-            schart.track_points = pts
-            schart.start_xy = list(s_xy)
-            schart.max_xy = list(m_xy)
-            schart.end_xy = list(e_xy)
+            if hasattr(ids, 'skychart'):
+                schart: SkyChart = ids.skychart
+                schart.track_points = pts
+                schart.start_xy = list(s_xy)
+                schart.max_xy = list(m_xy)
+                schart.end_xy = list(e_xy)
 
             log_info(
                 f"Orbit Pass: next pass {ids.start_time.text}–{ids.end_time.text}, "
@@ -260,6 +276,9 @@ class Orbit_Pass(MimicBase):
         Sample az/el along the pass; convert to XY for the sky chart.
         """
         ids = self.ids
+        if not hasattr(ids, 'skychart'):
+            log_error("Orbit Pass: skychart widget not found")
+            return [], (0, 0), (0, 0), (0, 0)
         schart: SkyChart = ids.skychart
 
         # sample every 5s, clamp to sensible maximum
