@@ -1180,6 +1180,8 @@ class Orbit_Screen(MimicBase):
         loc = self.location
         loc.lat, loc.lon = str(self.user_lat), str(self.user_lon)
         loc.elevation = 10
+        loc.pressure = 0
+        loc.horizon = "5"
         loc.date = ephem.now()  # ← **reset each tick**
 
         # ----------------------------------------------------------------------
@@ -1229,13 +1231,16 @@ class Orbit_Screen(MimicBase):
                 
                 if not iss_sunlit:
                     self.ids.ISSvisible.text = "Not Visible"
+                    log_info(f"Not Visible: {iss_sunlit}")
                 elif iss_el < 10.0:
                     self.ids.ISSvisible.text = "Not Visible"
+                    log_info(f"Not Visible: {iss_el}")
                 elif sun_alt > visibility_details.get('darkness_threshold_deg', -4.0):
                     self.ids.ISSvisible.text = "Not Visible"
+                    log_info(f"Not Visible: {sun_alt}")
                 else:
                     self.ids.ISSvisible.text = "Not Visible"
-                
+                        
                 # Clear next visible pass time if not visible
                 self._next_visible_pass_time = None
         except Exception as e:
