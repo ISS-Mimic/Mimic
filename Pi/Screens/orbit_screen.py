@@ -1215,7 +1215,7 @@ class Orbit_Screen(MimicBase):
         # Use sophisticated visibility analysis like orbit_pass screen
         try:
             # Check visibility at max elevation time
-            pass_visible, visibility_details = self._check_pass_visibility(
+            pass_visible, visibility_details = _check_pass_visibility(
                 loc, self.iss_tle, next_pass[2].datetime()
             )
             
