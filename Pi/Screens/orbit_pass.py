@@ -421,9 +421,10 @@ class Orbit_Pass(MimicBase):
         obs.pressure = 0
 
         def azel_at(tdt: datetime) -> Tuple[float, float]:
-            # Convert Python datetime to ephem.Date
+            # Convert Python datetime to ephem.Date and compute topocentric at observer
             ephem_date = ephem.Date(tdt)
-            self._iss.compute(ephem_date)
+            obs.date = ephem_date
+            self._iss.compute(obs)
             # az, alt in radians -> degrees
             return float(self._iss.az) * 180.0 / math.pi, float(self._iss.alt) * 180.0 / math.pi
 
@@ -450,5 +451,7 @@ class Orbit_Pass(MimicBase):
         # Ensure we at least have endpoints
         if not points:
             points.extend([*s_xy, *e_xy])
+
+        log_info(f"Orbit Pass: sky path points={len(points)//2}, start={s_xy}, max={m_xy}, end={e_xy}")
 
         return points, s_xy, m_xy, e_xy
