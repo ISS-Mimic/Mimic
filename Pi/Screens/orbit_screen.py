@@ -86,6 +86,95 @@ def _elevation_deg_at_alt(lat_deg: float, lon_deg: float, h_km: float, sat_lon_d
     return math.degrees(math.asin(sin_el))
 
 
+def _est_visual_mag(iss_alt_deg: float, iss_range_m: float, phase_angle_rad: float) -> float:
+    """
+    Crude ISS visual magnitude estimate using elevation proxy (for phase) and range.
+    - Baseline: ISS can reach about -5.5 at ~500 km and small phase angle.
+    - We use a Lambertian-ish term with phase_angle and inverse-square with range.
+    """
+    # Clamp and convert
+    rng_km = max(300.0, iss_range_m / 1000.0)  # avoid blow-ups at very small values
+    # Baseline magnitude at 500 km near full phase
+    M0 = -5.2
+    # Range term (inverse square -> +5 log10(r))
+    m_range = 5.0 * math.log10(rng_km / 500.0)
+    # Phase term: 0 (brightest) .. pi (faintest); scale ~ 1.5–2.5 mag across full range
+    m_phase = 2.0 * (phase_angle_rad / math.pi)
+    return M0 + m_range + m_phase
+
+
+def _phase_angle_rad(observer: ephem.Observer, iss: ephem.EarthSatellite, sun: ephem.Sun) -> float:
+    """
+    Phase angle at the ISS between (to Sun) and (to observer).
+    """
+    # Vector directions from ISS to Sun and to Observer (approximate using topocentric RA/Dec)
+    # In PyEphem, we can compute at the observer, then use angular separation on the sky
+    # as a cheap proxy for phase angle (not exact but good enough here).
+    # angle between Sun and Observer directions as seen from ISS ~ angle between Sun and ISS as seen from Observer
+    return abs(float(ephem.separation((sun.a_ra, sun.a_dec), (iss.a_ra, iss.a_dec))))
+
+
+def _check_pass_visibility(observer: ephem.Observer,
+                           iss: ephem.EarthSatellite,
+                           when_utc: datetime,
+                           min_el_deg: float = 10.0,
+                           darkness_thresh_deg: float = -4.0,
+                           moon_bright_penalty: bool = True) -> tuple[bool, dict]:
+    """
+    Returns (visible?, details) where details has fields useful for UI.
+    Conditions:
+      - ISS above min elevation
+      - ISS sunlit (not eclipsed)
+      - Sun below darkness threshold (tighten threshold if Moon is bright & high)
+    """
+    # Set time
+    observer.date = ephem.Date(when_utc)
+    # Compute bodies
+    sun = ephem.Sun(observer)
+    moon = ephem.Moon(observer)
+    iss.compute(observer)
+
+    sun_alt_deg = math.degrees(float(sun.alt))
+    iss_el_deg  = math.degrees(float(iss.alt))
+    iss_range_m = float(iss.range) if hasattr(iss, "range") else float('inf')
+
+    # Adaptive darkness threshold if Moon is bright & high
+    moon_alt_deg = math.degrees(float(moon.alt))
+    moon_phase_pct = float(moon.phase)  # 0=new, 100=full
+    adaptive_dark_thresh = darkness_thresh_deg
+    if moon_bright_penalty and moon_phase_pct > 85.0 and moon_alt_deg > 10.0:
+        # Make it a bit darker to count as "visible"
+        adaptive_dark_thresh = min(-6.0, darkness_thresh_deg)
+
+    # Basic visibility gates
+    above_horizon = iss_el_deg >= min_el_deg
+    sky_dark_enough = sun_alt_deg <= adaptive_dark_thresh
+
+    # Sunlit test (preferred)
+    sunlit = not bool(getattr(iss, "eclipsed", False))
+
+    visible = above_horizon and sky_dark_enough and sunlit
+
+    # Optional magnitude estimate
+    try:
+        phase_rad = _phase_angle_rad(observer, iss, sun)
+        est_mag = _est_visual_mag(iss_el_deg, iss_range_m, phase_rad)
+    except Exception:
+        est_mag = None
+
+    details = {
+        "sun_alt_deg": sun_alt_deg,
+        "moon_alt_deg": moon_alt_deg,
+        "moon_phase_pct": moon_phase_pct,
+        "iss_el_deg": iss_el_deg,
+        "iss_range_km": None if math.isinf(iss_range_m) else iss_range_m / 1000.0,
+        "iss_sunlit": sunlit,
+        "darkness_threshold_deg": adaptive_dark_thresh,
+        "est_mag": est_mag,
+    }
+    return visible, details
+
+
 # ────────────────────────────────────────────────────────────────────────────
 class Orbit_Screen(MimicBase):
     """Everything related to ground tracks, TDRS icons, next-pass timers.
@@ -120,6 +209,10 @@ class Orbit_Screen(MimicBase):
     _zoe_recompute_interval_s: float = 15.0
     _zoe_last_in_state: Optional[bool] = None
 
+    # ISS pass button flashing
+    _pass_button_flash_state: bool = False
+    _next_visible_pass_time: Optional[datetime] = None
+
     # ---- ZOE / coverage params (no drawing) ----
     _FALLBACK_TDRS_LONS = {
         "TDRS 6": -45.0,
@@ -152,6 +245,7 @@ class Orbit_Screen(MimicBase):
         Clock.schedule_interval(self.update_tdrs, 607)
         Clock.schedule_interval(self.update_sun, 489)
         Clock.schedule_interval(self.update_active_tdrs, 1)
+        Clock.schedule_interval(self.update_pass_button_flash, 2)
 
         # one-shots that existed in MainApp.build()
         Clock.schedule_once(self.update_active_tdrs, 1)
@@ -203,6 +297,7 @@ class Orbit_Screen(MimicBase):
         Clock.unschedule(self.update_tdrs)
         Clock.unschedule(self.update_sun)
         Clock.unschedule(self.update_active_tdrs)
+        Clock.unschedule(self.update_pass_button_flash)
 
     # ─────────────────────── user location ─────────────────────────────────────
     def update_user_location(self, _dt=0) -> None:
@@ -694,6 +789,40 @@ class Orbit_Screen(MimicBase):
             # Z-belt not active, show ZOE label
             zoe_label.opacity = 1
 
+    def update_pass_button_flash(self, _dt=0) -> None:
+        """Flash the ISS pass button if a visible pass is coming up within the next hour."""
+        try:
+            if "iss_pass_button" not in self.ids:
+                return
+
+            button = self.ids.iss_pass_button
+            
+            # Check if we have a visible pass coming up within the next hour
+            should_flash = False
+            if self._next_visible_pass_time:
+                now = datetime.utcnow()
+                time_until_pass = (self._next_visible_pass_time - now).total_seconds()
+                # Flash if pass is within the next hour (3600 seconds)
+                should_flash = 0 <= time_until_pass <= 3600
+
+            if should_flash:
+                # Toggle flash state every 2 seconds
+                self._pass_button_flash_state = not self._pass_button_flash_state
+                
+                if self._pass_button_flash_state:
+                    # Lit state
+                    button.background_normal = f"{self.mimic_directory}/Mimic/Pi/imgs/orbit/ISSpassLit.png"
+                else:
+                    # Unlit state
+                    button.background_normal = f"{self.mimic_directory}/Mimic/Pi/imgs/orbit/ISSpassUnlit.png"
+            else:
+                # Not flashing - ensure button is in unlit state
+                button.background_normal = f"{self.mimic_directory}/Mimic/Pi/imgs/orbit/ISSpassUnlit.png"
+                self._pass_button_flash_state = False
+
+        except Exception as exc:
+            log_error(f"Update pass button flash failed: {exc}")
+
     # ─────────────────────── crew sleep timer, telemetry, etc. ────────────────
     def update_crew_sleep_timer(self) -> None:
         """Update the crew sleep timer based on standard sleep schedule (21:30-06:00 GMT)."""
@@ -1081,14 +1210,38 @@ class Orbit_Screen(MimicBase):
         self.ids.countdown.text = f"{int(hrs):02d}:{int(mins):02d}:{int(secs):02d}"
 
         # — visible / not visible flag ----------------------------------------
-        sun = ephem.Sun()
-        loc.date = next_pass[2]  # max-elevation time
-        sun.compute(loc)
-        self.iss_tle.compute(loc)
-        sun_alt = float(str(sun.alt).split(":")[0])
-        self.ids.ISSvisible.text = (
-            "Visible Pass!" if (not self.iss_tle.eclipsed and -18 < sun_alt < -6) else "Not Visible"
-        )
+        # Use sophisticated visibility analysis like orbit_pass screen
+        try:
+            # Check visibility at max elevation time
+            pass_visible, visibility_details = self._check_pass_visibility(
+                loc, self.iss_tle, next_pass[2].datetime()
+            )
+            
+            if pass_visible:
+                self.ids.ISSvisible.text = "Visible Pass!"
+                # Store next visible pass time for button flashing
+                self._next_visible_pass_time = next_pass[0].datetime()
+            else:
+                # Determine specific reason for non-visibility
+                sun_alt = visibility_details.get('sun_alt_deg', 0)
+                iss_sunlit = visibility_details.get('iss_sunlit', True)
+                iss_el = visibility_details.get('iss_el_deg', 0)
+                
+                if not iss_sunlit:
+                    self.ids.ISSvisible.text = "Not Visible"
+                elif iss_el < 10.0:
+                    self.ids.ISSvisible.text = "Not Visible"
+                elif sun_alt > visibility_details.get('darkness_threshold_deg', -4.0):
+                    self.ids.ISSvisible.text = "Not Visible"
+                else:
+                    self.ids.ISSvisible.text = "Not Visible"
+                
+                # Clear next visible pass time if not visible
+                self._next_visible_pass_time = None
+        except Exception as e:
+            log_error(f"Visibility check failed: {e}")
+            self.ids.ISSvisible.text = "Not Visible"
+            self._next_visible_pass_time = None
 
         # — update orbit counters --------------------------------------------
         if "dailyorbit" in self.ids and "totalorbits" in self.ids:
