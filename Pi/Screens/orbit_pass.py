@@ -201,6 +201,10 @@ class Orbit_Pass(MimicBase):
     # cached user location
     _user_lat: float = 29.7604  # default Houston; overwritten by settings
     _user_lon: float = -95.3698
+    
+    # current pass times (for checking if we're still in pass)
+    _current_pass_start: Optional[datetime] = None
+    _current_pass_end: Optional[datetime] = None
 
     def on_enter(self):
         try:
@@ -296,11 +300,20 @@ class Orbit_Pass(MimicBase):
             self._observer = None
             log_error(f"Orbit Pass: failed to build observer: {exc}")
 
+    def _is_currently_in_pass(self) -> bool:
+        """Check if we're currently in the middle of a pass."""
+        if not self._current_pass_start or not self._current_pass_end:
+            return False
+            
+        now = datetime.utcnow()
+        return self._current_pass_start <= now <= self._current_pass_end
+
     # ------------------------------ compute & draw ------------------------------
 
     def _update_next_pass(self, _dt):
         """
         Compute the next pass and update labels + sky chart.
+        Only updates if current pass is finished.
         """
         if not self._iss or not self._observer:
             log_error("Orbit Pass: missing ISS TLE or observer; cannot compute pass")
@@ -309,6 +322,11 @@ class Orbit_Pass(MimicBase):
         try:
             obs = self._observer
             obs.date = ephem.now()
+            
+            # Check if we're currently in a pass
+            if self._is_currently_in_pass():
+                log_info("Orbit Pass: Currently in pass, skipping update")
+                return
             
             log_info(f"Orbit Pass: Computing pass for observer at {obs.lat}, {obs.lon}")
             log_info(f"Orbit Pass: Current time (UTC): {obs.date}")
@@ -323,6 +341,10 @@ class Orbit_Pass(MimicBase):
             r_dt = r_time.datetime()
             m_dt = m_time.datetime()
             s_dt = s_time.datetime()
+            
+            # Store current pass times for checking if we're still in pass
+            self._current_pass_start = r_dt
+            self._current_pass_end = s_dt
 
             # Human fields
             rise_az_deg = float(r_az) * 180.0 / math.pi
@@ -432,8 +454,11 @@ class Orbit_Pass(MimicBase):
             now = datetime.utcnow()
             time_diff = r_dt - now
             
-            if time_diff.total_seconds() < 0:
-                # Pass already started or finished
+            if self._is_currently_in_pass():
+                # Currently in the middle of a pass
+                countdown_text = "In progress"
+            elif time_diff.total_seconds() < 0:
+                # Pass already finished, get next one
                 countdown_text = "In progress"
             else:
                 # Format as MM:SS
