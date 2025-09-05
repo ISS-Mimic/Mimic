@@ -196,6 +196,7 @@ class Orbit_Pass(MimicBase):
     # schedule handles
     _evt_nextpass = None
     _evt_countdown = None
+    _evt_iss_position = None
 
     # cached user location
     _user_lat: float = 29.7604  # default Houston; overwritten by settings
@@ -223,6 +224,7 @@ class Orbit_Pass(MimicBase):
             self._update_next_pass(0)
             self._evt_nextpass = Clock.schedule_interval(self._update_next_pass, 30)
             self._evt_countdown = Clock.schedule_interval(self._update_countdown, 1)
+            self._evt_iss_position = Clock.schedule_interval(self._update_iss_position, 2)
         except Exception as exc:
             log_error(f"Orbit Pass: Delayed pass computation failed: {exc}")
 
@@ -233,6 +235,8 @@ class Orbit_Pass(MimicBase):
                 Clock.unschedule(self._evt_nextpass)
             if self._evt_countdown:
                 Clock.unschedule(self._evt_countdown)
+            if self._evt_iss_position:
+                Clock.unschedule(self._evt_iss_position)
         except Exception as exc:
             log_error(f"Orbit Pass unschedule failed: {exc}")
 
@@ -447,6 +451,39 @@ class Orbit_Pass(MimicBase):
         except Exception as exc:
             log_error(f"Orbit Pass: countdown update failed: {exc}")
             self.pass_countdown = "--"
+
+    def _update_iss_position(self, _dt):
+        """Update real-time ISS position on the sky chart."""
+        try:
+            if not self._iss or not self._observer:
+                return
+                
+            ids = self.ids
+            if not hasattr(ids, 'skychart'):
+                return
+                
+            schart: SkyChart = ids.skychart
+            
+            # Get current ISS position
+            obs = self._observer
+            obs.date = ephem.now()
+            self._iss.compute(obs)
+            
+            # Convert to degrees
+            az_deg = float(self._iss.az) * 180.0 / math.pi
+            el_deg = float(self._iss.alt) * 180.0 / math.pi
+            
+            # Only show if above horizon
+            if el_deg >= 0:
+                # Convert to chart coordinates
+                x, y = schart.polar_xy(az_deg, el_deg)
+                schart.current_iss_xy = [x, y]
+                schart.show_current_iss = True
+            else:
+                schart.show_current_iss = False
+                
+        except Exception as exc:
+            log_error(f"Orbit Pass: ISS position update failed: {exc}")
 
     def _build_sky_path(
         self, start_dt: datetime, end_dt: datetime, max_dt: datetime

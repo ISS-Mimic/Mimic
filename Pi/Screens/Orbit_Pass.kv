@@ -259,6 +259,10 @@
 
 # ─────────────────────── Sky Chart Widget ──────────────────────────────
 <SkyChart>:
+    # Properties for current ISS position
+    current_iss_xy: [0, 0]
+    show_current_iss: False
+    
     canvas:
         # horizon rings
         Color:
@@ -303,3 +307,15 @@
         Ellipse:
             size: dp(8), dp(8)
             pos: self.end_xy[0] - dp(4), self.end_xy[1] - dp(4)
+
+        # Current ISS position (white dot with cyan border) - only when visible
+        Color:
+            rgba: 0,1,1,1 if self.show_current_iss else 0,0,0,0
+        Ellipse:
+            size: dp(12), dp(12)
+            pos: self.current_iss_xy[0] - dp(6), self.current_iss_xy[1] - dp(6)
+        Color:
+            rgba: 1,1,1,1 if self.show_current_iss else 0,0,0,0
+        Ellipse:
+            size: dp(8), dp(8)
+            pos: self.current_iss_xy[0] - dp(4), self.current_iss_xy[1] - dp(4)
