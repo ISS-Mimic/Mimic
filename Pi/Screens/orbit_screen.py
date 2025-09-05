@@ -245,7 +245,7 @@ class Orbit_Screen(MimicBase):
         Clock.schedule_interval(self.update_tdrs, 607)
         Clock.schedule_interval(self.update_sun, 489)
         Clock.schedule_interval(self.update_active_tdrs, 1)
-        Clock.schedule_interval(self.update_pass_button_flash, 2)
+        Clock.schedule_interval(self.update_pass_button_flash, 1)
 
         # one-shots that existed in MainApp.build()
         Clock.schedule_once(self.update_active_tdrs, 1)
