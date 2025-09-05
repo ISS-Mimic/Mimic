@@ -184,6 +184,9 @@ class Orbit_Pass(MimicBase):
 
     # For a friendly header
     pass_date_local = StringProperty("--")
+    
+    # Countdown to next pass
+    pass_countdown = StringProperty("--")
 
     # ephem observers / satellites
     _observer: Optional[ephem.Observer] = None
@@ -191,6 +194,7 @@ class Orbit_Pass(MimicBase):
 
     # schedule handles
     _evt_nextpass = None
+    _evt_countdown = None
 
     # cached user location
     _user_lat: float = 29.7604  # default Houston; overwritten by settings
@@ -217,6 +221,7 @@ class Orbit_Pass(MimicBase):
             # compute now, then keep fresh
             self._update_next_pass(0)
             self._evt_nextpass = Clock.schedule_interval(self._update_next_pass, 30)
+            self._evt_countdown = Clock.schedule_interval(self._update_countdown, 1)
         except Exception as exc:
             log_error(f"Orbit Pass: Delayed pass computation failed: {exc}")
 
@@ -225,6 +230,8 @@ class Orbit_Pass(MimicBase):
         try:
             if self._evt_nextpass:
                 Clock.unschedule(self._evt_nextpass)
+            if self._evt_countdown:
+                Clock.unschedule(self._evt_countdown)
         except Exception as exc:
             log_error(f"Orbit Pass unschedule failed: {exc}")
 
@@ -362,16 +369,29 @@ class Orbit_Pass(MimicBase):
                     
                     if not iss_sunlit:
                         ids.magnitude.text = "Not visible (eclipsed)"
+                        ids.magnitude.color = 1,0,0,1
+                        ids.pass_title.text = f"Non visible pass in: {self.pass_countdown}"
                     elif iss_el < 10.0:
                         ids.magnitude.text = "Not visible (too low)"
+                        ids.magnitude.color = 1,0,0,1
+                        ids.pass_title.text = f"Non visible pass in: {self.pass_countdown}"
                     elif sun_alt > visibility_details.get('darkness_threshold_deg', -4.0):
                         ids.magnitude.text = "Not visible (too bright)"
+                        ids.magnitude.color = 1,0,0,1
+                        ids.pass_title.text = f"Non visible pass in: {self.pass_countdown}"
                     else:
                         ids.magnitude.text = "Not visible (conditions)"
+                        ids.magnitude.color = 1,0,0,1
+                        ids.pass_title.text = f"Non visible pass in: {self.pass_countdown}"
                 elif est_mag is not None:
                     ids.magnitude.text = f"~{est_mag:0.1f} (est.)"
+                    ids.magnitude.color = 0,1,0,1
+                    ids.pass_title.text = f"Visible Pass in: {self.pass_countdown}"
+
                 else:
                     ids.magnitude.text = "Magnitude unknown"
+                    ids.magnitude.color = 1,0,0,1
+                    ids.pass_title.text = f"Visible Pass in: {self.pass_countdown}"
 
             # Build sky path points
             pts, s_xy, m_xy, e_xy = self._build_sky_path(r_dt, s_dt, m_dt)
@@ -388,6 +408,38 @@ class Orbit_Pass(MimicBase):
             )
         except Exception as exc:
             log_error(f"Orbit Pass: pass compute failed: {exc}")
+
+    def _update_countdown(self, _dt):
+        """Update countdown to next pass start."""
+        try:
+            if not self._iss or not self._observer:
+                self.pass_countdown = "--"
+                return
+                
+            obs = self._observer
+            obs.date = ephem.now()
+            
+            # Get next pass times
+            r_time, r_az, m_time, m_alt, s_time, s_az = obs.next_pass(self._iss)
+            r_dt = r_time.datetime()
+            
+            # Calculate time until pass starts
+            now = datetime.utcnow()
+            time_diff = r_dt - now
+            
+            if time_diff.total_seconds() < 0:
+                # Pass already started or finished
+                self.pass_countdown = "In progress"
+            else:
+                # Format as MM:SS
+                total_seconds = int(time_diff.total_seconds())
+                minutes = total_seconds // 60
+                seconds = total_seconds % 60
+                self.pass_countdown = f"{minutes:02d}:{seconds:02d}"
+                
+        except Exception as exc:
+            log_error(f"Orbit Pass: countdown update failed: {exc}")
+            self.pass_countdown = "--"
 
     def _build_sky_path(
         self, start_dt: datetime, end_dt: datetime, max_dt: datetime
