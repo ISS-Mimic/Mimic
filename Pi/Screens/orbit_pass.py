@@ -187,6 +187,7 @@ class Orbit_Pass(MimicBase):
     
     # Countdown to next pass
     pass_countdown = StringProperty("--")
+    pass_title_prefix = StringProperty("--")
 
     # ephem observers / satellites
     _observer: Optional[ephem.Observer] = None
@@ -370,28 +371,28 @@ class Orbit_Pass(MimicBase):
                     if not iss_sunlit:
                         ids.magnitude.text = "Not visible (eclipsed)"
                         ids.magnitude.color = 1,0,0,1
-                        ids.pass_title.text = f"Non visible pass in: {self.pass_countdown}"
+                        self.pass_title_prefix = "Non visible pass in: "
                     elif iss_el < 10.0:
                         ids.magnitude.text = "Not visible (too low)"
                         ids.magnitude.color = 1,0,0,1
-                        ids.pass_title.text = f"Non visible pass in: {self.pass_countdown}"
+                        self.pass_title_prefix = "Non visible pass in: "
                     elif sun_alt > visibility_details.get('darkness_threshold_deg', -4.0):
                         ids.magnitude.text = "Not visible (too bright)"
                         ids.magnitude.color = 1,0,0,1
-                        ids.pass_title.text = f"Non visible pass in: {self.pass_countdown}"
+                        self.pass_title_prefix = "Non visible pass in: "
                     else:
                         ids.magnitude.text = "Not visible (conditions)"
                         ids.magnitude.color = 1,0,0,1
-                        ids.pass_title.text = f"Non visible pass in: {self.pass_countdown}"
+                        self.pass_title_prefix = "Non visible pass in: "
                 elif est_mag is not None:
                     ids.magnitude.text = f"~{est_mag:0.1f} (est.)"
                     ids.magnitude.color = 0,1,0,1
-                    ids.pass_title.text = f"Visible Pass in: {self.pass_countdown}"
+                    self.pass_title_prefix = "Visible Pass in: "
 
                 else:
                     ids.magnitude.text = "Magnitude unknown"
                     ids.magnitude.color = 1,0,0,1
-                    ids.pass_title.text = f"Visible Pass in: {self.pass_countdown}"
+                    self.pass_title_prefix = "Visible Pass in: "
 
             # Build sky path points
             pts, s_xy, m_xy, e_xy = self._build_sky_path(r_dt, s_dt, m_dt)
@@ -429,13 +430,19 @@ class Orbit_Pass(MimicBase):
             
             if time_diff.total_seconds() < 0:
                 # Pass already started or finished
-                self.pass_countdown = "In progress"
+                countdown_text = "In progress"
             else:
                 # Format as MM:SS
                 total_seconds = int(time_diff.total_seconds())
                 minutes = total_seconds // 60
                 seconds = total_seconds % 60
-                self.pass_countdown = f"{minutes:02d}:{seconds:02d}"
+                countdown_text = f"{minutes:02d}:{seconds:02d}"
+            
+            # Combine prefix with countdown
+            if hasattr(self, 'pass_title_prefix') and self.pass_title_prefix != "--":
+                self.pass_countdown = f"{self.pass_title_prefix} {countdown_text}"
+            else:
+                self.pass_countdown = countdown_text
                 
         except Exception as exc:
             log_error(f"Orbit Pass: countdown update failed: {exc}")
