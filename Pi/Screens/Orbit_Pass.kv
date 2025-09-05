@@ -10,7 +10,7 @@
             text: "Orbit Pass"
             color: 0,1,0,1
             bold: True
-            font_size: dp(64)
+            font_size: min(self.height * 0.3, dp(64))
             size_hint: None, None
             size: self.texture_size
             pos_hint: {"center_x": 0.25, "center_y": 0.93}
@@ -27,7 +27,7 @@
             Label:
                 text: "Next ISS Overflight"
                 bold: True
-                font_size: dp(24)
+                font_size: min(self.height * 0.25, dp(24))
                 size_hint_y: None
                 height: dp(28)
                 color: 1,1,1,1
@@ -36,7 +36,7 @@
                 text: root.pass_date_local
                 size_hint_y: None
                 height: dp(24)
-                font_size: dp(20)
+                font_size: min(self.height * 0.8, dp(20))
                 color: 0.8,0.8,0.8,1
 
             GridLayout:
@@ -52,7 +52,7 @@
                     halign: "right"
                     valign: "middle"
                     text_size: self.size
-                    font_size: self.height * 0.6
+                    font_size: min(self.height * 0.6, dp(16))
                     color: 1,1,1,1
                 Label:
                     id: start_time
@@ -60,7 +60,7 @@
                     halign: "left"
                     valign: "middle"
                     text_size: self.size
-                    font_size: self.height * 0.6
+                    font_size: min(self.height * 0.6, dp(16))
                     color: 1,0,1,1
 
                 Label:
@@ -68,7 +68,7 @@
                     halign: "right"
                     valign: "middle"
                     text_size: self.size
-                    font_size: self.height * 0.6
+                    font_size: min(self.height * 0.6, dp(16))
                     color: 1,1,1,1
                 Label:
                     id: start_az
@@ -76,7 +76,7 @@
                     halign: "left"
                     valign: "middle"
                     text_size: self.size
-                    font_size: self.height * 0.6
+                    font_size: min(self.height * 0.6, dp(16))
                     color: 1,0,1,1
 
                 Label:
@@ -84,7 +84,7 @@
                     halign: "right"
                     valign: "middle"
                     text_size: self.size
-                    font_size: self.height * 0.6
+                    font_size: min(self.height * 0.6, dp(16))
                     color: 1,1,1,1
                 Label:
                     id: max_time
@@ -92,7 +92,7 @@
                     halign: "left"
                     valign: "middle"
                     text_size: self.size
-                    font_size: self.height * 0.6
+                    font_size: min(self.height * 0.6, dp(16))
                     color: 1,0,1,1
 
                 Label:
@@ -100,7 +100,7 @@
                     halign: "right"
                     valign: "middle"
                     text_size: self.size
-                    font_size: self.height * 0.6
+                    font_size: min(self.height * 0.6, dp(16))
                     color: 1,1,1,1
                 Label:
                     id: max_el
@@ -108,7 +108,7 @@
                     halign: "left"
                     valign: "middle"
                     text_size: self.size
-                    font_size: self.height * 0.6
+                    font_size: min(self.height * 0.6, dp(16))
                     color: 1,0,1,1
 
                 Label:
@@ -116,7 +116,7 @@
                     halign: "right"
                     valign: "middle"
                     text_size: self.size
-                    font_size: self.height * 0.6
+                    font_size: min(self.height * 0.6, dp(16))
                     color: 1,1,1,1
                 Label:
                     id: end_time
@@ -124,7 +124,7 @@
                     halign: "left"
                     valign: "middle"
                     text_size: self.size
-                    font_size: self.height * 0.6
+                    font_size: min(self.height * 0.6, dp(16))
                     color: 1,0,1,1
 
                 Label:
@@ -132,7 +132,7 @@
                     halign: "right"
                     valign: "middle"
                     text_size: self.size
-                    font_size: self.height * 0.6
+                    font_size: min(self.height * 0.6, dp(16))
                     color: 1,1,1,1
                 Label:
                     id: end_az
@@ -140,7 +140,7 @@
                     halign: "left"
                     valign: "middle"
                     text_size: self.size
-                    font_size: self.height * 0.6
+                    font_size: min(self.height * 0.6, dp(16))
                     color: 1,0,1,1
 
                 Label:
@@ -148,7 +148,7 @@
                     halign: "right"
                     valign: "middle"
                     text_size: self.size
-                    font_size: self.height * 0.6
+                    font_size: min(self.height * 0.6, dp(16))
                     color: 1,1,1,1
                 Label:
                     id: duration
@@ -156,7 +156,7 @@
                     halign: "left"
                     valign: "middle"
                     text_size: self.size
-                    font_size: self.height * 0.6
+                    font_size: min(self.height * 0.6, dp(16))
                     color: 1,0,1,1
 
                 Label:
@@ -164,7 +164,7 @@
                     halign: "right"
                     valign: "middle"
                     text_size: self.size
-                    font_size: self.height * 0.6
+                    font_size: min(self.height * 0.6, dp(16))
                     color: 1,1,1,1
                 Label:
                     id: magnitude
@@ -172,7 +172,7 @@
                     halign: "left"
                     valign: "middle"
                     text_size: self.size
-                    font_size: self.height * 0.6
+                    font_size: min(self.height * 0.6, dp(16))
                     color: 1,0,1,1
 
         # RIGHT: sky chart
@@ -191,7 +191,7 @@
                 center_x: skychart.center_x
                 y: skychart.top - dp(16)
                 color: 0.8,0.8,0.8,1
-                font_size: self.height * 0.8
+                font_size: min(self.height * 0.8, dp(14))
             Label:
                 text: "S"
                 size_hint: None, None
@@ -199,7 +199,7 @@
                 center_x: skychart.center_x
                 y: skychart.y + dp(2)
                 color: 0.8,0.8,0.8,1
-                font_size: self.height * 0.8
+                font_size: min(self.height * 0.8, dp(14))
             Label:
                 text: "E"
                 size_hint: None, None
@@ -207,7 +207,7 @@
                 x: skychart.right - dp(18)
                 center_y: skychart.center_y
                 color: 0.8,0.8,0.8,1
-                font_size: self.height * 0.8
+                font_size: min(self.height * 0.8, dp(14))
             Label:
                 text: "W"
                 size_hint: None, None
@@ -215,7 +215,20 @@
                 x: skychart.x + dp(2)
                 center_y: skychart.center_y
                 color: 0.8,0.8,0.8,1
-                font_size: self.height * 0.8
+                font_size: min(self.height * 0.8, dp(14))
+        
+        # ---------- STATUS DISPLAY (Bottom Rectangle) ----------
+        Label:
+            id: status_label
+            text: ''
+            size_hint: 1, 0.07
+            background_color: 0, 0, 0, 0.8  # Semi-transparent black
+            color: 0, 1, 0, 1  # Green text
+            font_size: self.height * 0.6  # Scale font to label height
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            pos_hint: {"center_x": 0.57, "center_y": 0.07}
 
         # ─────────────────────── BOTTOM TOOLBAR ──────────────────────────
         # Signal icon
@@ -244,7 +257,7 @@
             text: ''
             markup: True
             color: 1, 1, 1, 1
-            font_size: self.height * 1
+            font_size: min(self.height * 1, dp(16))
             size_hint: 0.06, 0.08
 
         # ─────────────────────── Navigation ──────────────────────────────

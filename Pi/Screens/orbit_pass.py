@@ -18,15 +18,9 @@ from ._base import MimicBase
 from utils.logger import log_info, log_error
 
 # Load KV file at module level
-try:
-    kv_path = Path(__file__).with_name("Orbit_Pass.kv")
-    Builder.load_file(str(kv_path))
-    print("Orbit Pass: KV file loaded successfully")
-except Exception as e:
-    print(f"Orbit Pass: Failed to load KV file: {e}")
-    import traceback
-    traceback.print_exc()
 
+kv_path = Path(__file__).with_name("Orbit_Pass.kv")
+Builder.load_file(str(kv_path))
 
 # ------------------------------ small helpers ------------------------------
 
