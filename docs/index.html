@@ -3041,15 +3041,12 @@ timeSub.addListener({
 
 		var timestampnow = dayOfYear*24 + hours + minutes/60 + seconds/3600;
 		//console.log("timestamp now: " + timestampnow);
-  
-  
-  
 		var status = update.getValue('Status.Class');
 		var AOStimestamp = parseFloat(update.getValue('TimeStamp'));
 		//console.log("Timestamp: " + update.getValue('TimeStamp'));
 		var difference = timestampnow - AOStimestamp;
 		var diff_seconds = difference*3600;
-		console.log(diff_seconds);
+		//console.log(diff_seconds);
 		if (status === '24') 
 		{
 			document.getElementById("AOS").innerHTML = "Signal Acquired!";
