@@ -59,6 +59,19 @@ Join the discussion, help out, ask for help, chat about the ISS here: [Mimic Dis
 ```
 Full software guide: [Wiki » Software Setup Instructions](https://github.com/ISS-Mimic/Mimic/wiki/Build-Instruction%3A-Mimic-Software-Setup-Instructions).
 
+### Telemetry
+Telemetry is data remotely collected from the ISS and transmitted to the ISS Mission Control Centers for monitoring the operational status of ISS systems. 
+
+In 2011 some incredible JSC employees released a subset of the 100,000+ ISS telemetry items to the public under the ISSlive! project and an associated website.
+Sadly, that website is no longer running, but they opened the door for dozens of projects to follow in their footsteps. 
+
+NASA contracted the wonderful folks at [Lightstreamer](https://lightstreamer.com/) to provide this subset of ISS telemetry out to the public and that is the source of all the public telemetry projects today. 
+
+We have made three telemetry pages to show off all of the public data (as well as our Pi application screens).
+
+A filterable table here: https://iss-mimic.github.io/Mimic/ (and in Russian: https://iss-mimic.github.io/Mimic/index_ru.html)
+and a great dashboard here: https://iss-mimic.github.io/Mimic/dashboard.html
+
 ### Project Architecture
 ```text
 ┌──────────┐              ┌──────────────┐                ┌──────────────┐                 ┌──────────┐
