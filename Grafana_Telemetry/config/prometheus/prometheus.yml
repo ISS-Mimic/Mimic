@@ -1,0 +1,24 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+rule_files:
+  - alerts/*.yml
+  - rules/*.yml
+
+scrape_configs:
+# prometheus itself
+  - job_name: prometheus
+    static_configs:
+      - targets: ['prometheus:9090']
+
+# grafana
+  - job_name: grafana
+    static_configs:
+      - targets: ['grafana:3000']
+
+# iss-telemetry-exporter
+  - job_name: iss-telemetry-exporter
+    static_configs:
+      - targets: ['iss-telemetry-exporter:9155']
+
