@@ -274,7 +274,7 @@ class Orbit_Screen(MimicBase):
         """Update the visibility of active TDRS circles."""
         try:
             # TDRS IDs that can be active
-            tdrs_ids = [6, 7, 8, 10, 11, 12]
+            tdrs_ids = [6, 7, 8, 11, 12]
 
             for tdrs_id in tdrs_ids:
                 circle_id = f"TDRS{tdrs_id}_active_circle"
