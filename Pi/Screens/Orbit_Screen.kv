@@ -267,41 +267,7 @@
         size: self.texture_size
         pos: 0, 0  # Will be positioned dynamically in Python
 
-    # WEST — TDRS 10 & 11 (Blue)
-    Widget:
-        id: TDRS10
-        size_hint: None, None
-        size: min(dp(32), self.parent.width * 0.012), min(dp(32), self.parent.height * 0.012)  # Responsive size
-        pos: 0, 0
-        canvas:
-            Color:
-                rgba: 0, 0, 1, 1  # Blue
-            Line:
-                width: 2  # Thick line to create filled circle
-                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
-
-    # Active TDRS circle for TDRS10
-    Widget:
-        id: TDRS10_active_circle
-        size_hint: None, None
-        size: min(dp(96), self.parent.width * 0.036), min(dp(96), self.parent.height * 0.036)  # Larger responsive size
-        pos: 0, 0
-        canvas:
-            Color:
-                rgba: 1, 1, 1, 1  # White circle for active TDRS
-            Line:
-                width: 1
-                circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
-
-    Widget:
-        id: TDRS10_track
-        canvas:
-            Color:
-                rgba: 0, 0, 1, 0.5  # Blue, semi-transparent
-            Line:
-                points: []
-                width: max(1, dp(0.5))  # Responsive line width
-
+    # WEST — TDRS 11 (Blue)
     Widget:
         id: TDRS11
         size_hint: None, None

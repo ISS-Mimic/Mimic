@@ -89,13 +89,13 @@ def _elevation_deg_at_alt(lat_deg: float, lon_deg: float, h_km: float, sat_lon_d
 # ────────────────────────────────────────────────────────────────────────────
 class Orbit_Screen(MimicBase):
     """Everything related to ground tracks, TDRS icons, next-pass timers.
-    Only six satellites are shown:
+    Only five satellites are shown:
         • East  : TDRS 6, 12
         • Z-belt: TDRS 7, 8
-        • West  : TDRS 10, 11
+        • West  : TDRS 11
     """
 
-    _TDRS_IDS = {"TDRS 6", "TDRS 12", "TDRS 7", "TDRS 8", "TDRS 10", "TDRS 11"}
+    _TDRS_IDS = {"TDRS 6", "TDRS 12", "TDRS 7", "TDRS 8", "TDRS 11"}
 
     # ---------------------------------------------------------------- state
     iss_tle: Optional[ephem.EarthSatellite] = None
@@ -123,7 +123,6 @@ class Orbit_Screen(MimicBase):
     # ---- ZOE / coverage params (no drawing) ----
     _FALLBACK_TDRS_LONS = {
         "TDRS 6": -45.0,
-        "TDRS 10": -151.0,
         "TDRS 11": -174.0,
         "TDRS 12": -40.0,
     }
@@ -301,8 +300,8 @@ class Orbit_Screen(MimicBase):
     def _update_tdrs_labels(self) -> None:
         """Position TDRS group labels dynamically based on satellite positions."""
         try:
-            # TDRS groups: East (6,12), Z-Belt (7,8), West (10,11)
-            tdrs_groups = {"east": [6, 12], "zbelt": [7, 8], "west": [10, 11]}
+            # TDRS groups: East (6,12), Z-Belt (7,8), West (11)
+            tdrs_groups = {"east": [6, 12], "zbelt": [7, 8], "west": [11]}
 
             for group_name, tdrs_ids in tdrs_groups.items():
                 # Find the first visible TDRS in this group to position the label
@@ -514,7 +513,7 @@ class Orbit_Screen(MimicBase):
     def _tdrs_sublongitudes_at(self, t_dt: datetime) -> dict[str, float]:
         """Return current GEO longitudes for non-Z-belt TDRS, with fallbacks."""
         lons: dict[str, float] = {}
-        for name in ("TDRS 6", "TDRS 10", "TDRS 11", "TDRS 12"):
+        for name in ("TDRS 6", "TDRS 11", "TDRS 12"):
             lon = None
             sat = self.tdrs_tles.get(name)
             if sat is not None:

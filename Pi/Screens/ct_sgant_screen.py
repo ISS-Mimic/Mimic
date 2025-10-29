@@ -47,7 +47,7 @@ class CT_SGANT_Screen(MimicBase):
             if cfg.exists():
                 db = json.loads(cfg.read_text())
                 # Load only the TDRS satellites we need
-                tdrs_ids = {"TDRS 6", "TDRS 12", "TDRS 7", "TDRS 8", "TDRS 10", "TDRS 11"}
+                tdrs_ids = {"TDRS 6", "TDRS 12", "TDRS 7", "TDRS 8", "TDRS 11"}
                 self.tdrs_tles = {
                     name: ephem.readtle(name, *lines)
                     for name, lines in db["TDRS_TLEs"].items()
@@ -135,8 +135,6 @@ class CT_SGANT_Screen(MimicBase):
                 
                 # Update TDRS sources - only animate the specific active satellites
                 # All TDRS start with static PNG, then we animate only the active ones
-                if 'tdrs_west10' in self.ids:
-                    self.ids.tdrs_west10.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
                 if 'tdrs_west11' in self.ids:
                     self.ids.tdrs_west11.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
                 if 'tdrs_east12' in self.ids:
@@ -163,9 +161,6 @@ class CT_SGANT_Screen(MimicBase):
                     elif tdrs_number == 8 and 'tdrs_z8' in self.ids:
                         self.ids.tdrs_z8.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip"
                         animated_tdrs.append("TDRS 8")
-                    elif tdrs_number == 10 and 'tdrs_west10' in self.ids:
-                        self.ids.tdrs_west10.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip"
-                        animated_tdrs.append("TDRS 10")
                     elif tdrs_number == 11 and 'tdrs_west11' in self.ids:
                         self.ids.tdrs_west11.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.zip"
                         animated_tdrs.append("TDRS 11")
@@ -181,8 +176,6 @@ class CT_SGANT_Screen(MimicBase):
                     self.ids.tdrs_east6.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
                 if 'tdrs_west11' in self.ids:
                     self.ids.tdrs_west11.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
-                if 'tdrs_west10' in self.ids:
-                    self.ids.tdrs_west10.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
                 if 'tdrs_z7' in self.ids:
                     self.ids.tdrs_z7.source = f"{self.mimic_directory}/Mimic/Pi/imgs/ct/TDRS.png"
                 if 'tdrs_z8' in self.ids:
@@ -252,7 +245,6 @@ class CT_SGANT_Screen(MimicBase):
             "TDRS 12": "tdrs_east12", 
             "TDRS 7": "tdrs_z7",
             "TDRS 8": "tdrs_z8",
-            "TDRS 10": "tdrs_west10",
             "TDRS 11": "tdrs_west11"
         }
         return mapping.get(tdrs_name)
