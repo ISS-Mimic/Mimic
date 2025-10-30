@@ -2,7 +2,10 @@ import datetime as dt
 import math
 from pathlib import Path
 
+import matplotlib
+matplotlib.use("Agg")  # no GUI; just savefig
 import matplotlib.pyplot as plt
+
 import cartopy.crs as ccrs
 from cartopy.feature.nightshade import Nightshade
 from shapely.geometry import Polygon
@@ -173,7 +176,7 @@ def render_maps(
       - map_zoe.jpg    (nightshade + ZOE overlay if present)
     Returns dict with paths and a boolean 'zoe_exists'.
     """
-    when_utc = when_utc or dt.datetime.utcnow()
+    when_utc = when_utc or dt.datetime.now(dt.UTC)
     out_dir = Path(out_dir);
     out_dir.mkdir(parents=True, exist_ok=True)
     path_nozoe = out_dir / "map_nozoe.jpg"
