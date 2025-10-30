@@ -1,5 +1,9 @@
 import numpy as np
 import os
+
+import matplotlib
+matplotlib.use("Agg")  # non-interactive backend; prevents Qt/GTK init
+
 import matplotlib.pyplot as plt
 import ephem
 import json
