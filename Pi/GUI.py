@@ -438,6 +438,8 @@ class MainApp(App):
         try:
             width_scale = width / base_width
             height_scale = height / base_height
+            width_scale = width_scale * 0.5 #scale down the UI by 50%
+            height_scale = height_scale * 0.5 #scale down the UI by 50%
             print(f"width_scale: {width_scale}, height_scale: {height_scale}")
         except ZeroDivisionError:
             self.ui_scale = 1.0
