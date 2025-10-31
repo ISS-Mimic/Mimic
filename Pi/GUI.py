@@ -433,9 +433,12 @@ class MainApp(App):
         base_width = 800.0
         base_height = 480.0
 
+        print(f"width: {width}, height: {height}")
+        print(f"base_width: {base_width}, base_height: {base_height}")
         try:
             width_scale = width / base_width
             height_scale = height / base_height
+            print(f"width_scale: {width_scale}, height_scale: {height_scale}")
         except ZeroDivisionError:
             self.ui_scale = 1.0
             return
