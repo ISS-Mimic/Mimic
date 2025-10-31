@@ -96,7 +96,7 @@ from kivy.network.urlrequest import UrlRequest #using this to request webpages
 from kivy.clock import Clock
 from kivy.event import EventDispatcher
 from kivy.core.window import Window
-from kivy.properties import ObjectProperty, BooleanProperty, StringProperty
+from kivy.properties import ObjectProperty, BooleanProperty, StringProperty, NumericProperty
 from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition, NoTransition
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
@@ -392,6 +392,7 @@ class MainApp(App):
     INTERNET_POLL_S = 1.0 # check internet connection every 1s
 
     mimicbutton = BooleanProperty(False)
+    ui_scale = NumericProperty(1.0)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -405,6 +406,9 @@ class MainApp(App):
         self.tty_observer = None
 
         self.mimic_directory = mimic_directory
+
+        Window.bind(on_resize=self._on_window_resize)
+        self._update_ui_scale(Window.width, Window.height)
         
         # Bind mimicbutton property to update global variable
         self.bind(mimicbutton=self._on_mimicbutton_change)
@@ -413,6 +417,25 @@ class MainApp(App):
         """Update global mimicbutton variable when app property changes."""
         global mimicbutton
         mimicbutton = value
+
+    def _on_window_resize(self, _window, width, height):
+        """Recompute the UI scale factor when the window size changes."""
+        self._update_ui_scale(width, height)
+
+    def _update_ui_scale(self, width: float, height: float) -> None:
+        """Adjust UI scale so layouts designed for 800x480 look correct elsewhere."""
+        base_width = 800.0
+        base_height = 480.0
+
+        try:
+            width_scale = width / base_width
+            height_scale = height / base_height
+        except ZeroDivisionError:
+            self.ui_scale = 1.0
+            return
+
+        # Don't shrink below the baseline design, but allow larger displays to scale up.
+        self.ui_scale = max(1.0, min(width_scale, height_scale))
         
     def get_db_cursor(self):
         """Get a fresh database cursor when needed."""

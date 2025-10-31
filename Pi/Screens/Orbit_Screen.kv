@@ -5,13 +5,13 @@
 # --------------------------------------------------------------------------
 <TelemetryLabel@Label>:
     color: 1, 1, 1, 1
-    font_size: min(self.height * 0.2, dp(30))  # Responsive with max size
+    font_size: min(self.height * 0.2, dp(30)) * app.ui_scale  # Responsive with max size
     size_hint_y: 0.2
 
 <PassLabel@Label>:
     color: 1, 1, 1, 1
     halign: "center"
-    font_size: min(self.height * 0.17, dp(18))  # Responsive with max size
+    font_size: min(self.height * 0.17, dp(18)) * app.ui_scale  # Responsive with max size
     size_hint_y: 0.2
 
 <NavButton@Button>:
@@ -51,7 +51,7 @@
         text: "00:00:00"
         color: (1, 1, 1, 1)  # White text
         size_hint_y: 0.4
-        font_size: min(self.height * 0.10, dp(32))  # Responsive with max size
+        font_size: min(self.height * 0.10, dp(32)) * app.ui_scale  # Responsive with max size
         markup: True
 
     # ───────────────────────── Crew Sleep Timer ───────────────────────────
@@ -61,7 +61,7 @@
         text: "00:00:00"
         color: (1, 1, 1, 1)  # White text
         size_hint_y: 0.4
-        font_size: min(self.height * 0.10, dp(32))  # Responsive with max size
+        font_size: min(self.height * 0.10, dp(32)) * app.ui_scale  # Responsive with max size
         markup: True
 
     # ───────────────────────── Sun, ISS icon & ground tracks ───────────────
@@ -69,7 +69,10 @@
         id: sun_icon
         source: f"{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitSun.png"
         size_hint: None, None
-        size: min(dp(80), self.parent.width * 0.06), min(dp(80), self.parent.height * 0.06)  # Responsive size
+        size: (
+            min(dp(80), self.parent.width * 0.06) * app.ui_scale,
+            min(dp(80), self.parent.height * 0.06) * app.ui_scale
+        )  # Responsive size
         pos: 0, 0  # set in python
     
     # ISS icon & track
@@ -77,13 +80,16 @@
         id: iss_icon
         source: f"{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitYellowISSicon.png"
         size_hint: None, None
-        size: min(dp(75), self.parent.width * 0.075), min(dp(75), self.parent.height * 0.075)  # Responsive size
+        size: (
+            min(dp(75), self.parent.width * 0.075) * app.ui_scale,
+            min(dp(75), self.parent.height * 0.075) * app.ui_scale
+        )  # Responsive size
         pos: 0, 0                        
         canvas.after:
             Color:
                 rgba: 1, 1, 1, 1         
             Line:
-                width: max(1, dp(0.5))  # Responsive line width
+                width: max(1, dp(0.5)) * app.ui_scale  # Responsive line width
                 circle:
                     (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360, 20)
 
@@ -95,7 +101,7 @@
                 rgba: 1, 1, 0, 1           
             Line:
                 points: []                 
-                width: max(1, dp(0.5))  # Responsive line width
+                width: max(1, dp(0.5)) * app.ui_scale  # Responsive line width
 
     Widget:
         id: iss_track_line_b
@@ -104,33 +110,39 @@
                 rgba: 1, 1, 0, 1
             Line:
                 points: []
-                width: max(1, dp(0.5))  # Responsive line width
+                width: max(1, dp(0.5)) * app.ui_scale  # Responsive line width
 
     # ──────────────────────────── TDRS Satellites ─────────────────────────
     # EAST — TDRS 6 & 12 (Red)
     Widget:
         id: TDRS6
         size_hint: None, None
-        size: min(dp(32), self.parent.width * 0.012), min(dp(32), self.parent.height * 0.012)  # Responsive size
+        size: (
+            min(dp(32), self.parent.width * 0.012) * app.ui_scale,
+            min(dp(32), self.parent.height * 0.012) * app.ui_scale
+        )  # Responsive size
         pos: 0, 0
         canvas:
             Color:
                 rgba: 1, 0, 0, 1  # Red
             Line:
-                width: 2  # Thick line to create filled circle
+                width: max(1, 2 * app.ui_scale)  # Thick line to create filled circle
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # Active TDRS circle for TDRS6
     Widget:
         id: TDRS6_active_circle
         size_hint: None, None
-        size: min(dp(96), self.parent.width * 0.036), min(dp(96), self.parent.height * 0.036)  # Larger responsive size
+        size: (
+            min(dp(96), self.parent.width * 0.036) * app.ui_scale,
+            min(dp(96), self.parent.height * 0.036) * app.ui_scale
+        )  # Larger responsive size
         pos: 0, 0
         canvas:
             Color:
                 rgba: 1, 1, 1, 1  # White circle for active TDRS
             Line:
-                width: 1
+                width: max(1, app.ui_scale)
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     Widget:
@@ -140,31 +152,37 @@
                 rgba: 1, 0, 0, 0.5  # Red, semi-transparent
             Line:
                 points: []
-                width: max(1, dp(0.5))  # Responsive line width
+                width: max(1, dp(0.5)) * app.ui_scale  # Responsive line width
 
     Widget:
         id: TDRS12
         size_hint: None, None
-        size: min(dp(32), self.parent.width * 0.012), min(dp(32), self.parent.height * 0.012)  # Responsive size
+        size: (
+            min(dp(32), self.parent.width * 0.012) * app.ui_scale,
+            min(dp(32), self.parent.height * 0.012) * app.ui_scale
+        )  # Responsive size
         pos: 0, 0
         canvas:
             Color:
                 rgba: 1, 0, 0, 1  # Red
             Line:
-                width: 2  # Thick line to create filled circle
+                width: max(1, 2 * app.ui_scale)  # Thick line to create filled circle
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # Active TDRS circle for TDRS12
     Widget:
         id: TDRS12_active_circle
         size_hint: None, None
-        size: min(dp(96), self.parent.width * 0.036), min(dp(96), self.parent.height * 0.036)  # Larger responsive size
+        size: (
+            min(dp(96), self.parent.width * 0.036) * app.ui_scale,
+            min(dp(96), self.parent.height * 0.036) * app.ui_scale
+        )  # Larger responsive size
         pos: 0, 0
         canvas:
             Color:
                 rgba: 1, 1, 1, 1  # White circle for active TDRS
             Line:
-                width: 1
+                width: max(1, app.ui_scale)
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     Widget:
@@ -174,14 +192,14 @@
                 rgba: 1, 0, 0, 0.5  # Red, semi-transparent
             Line:
                 points: []
-                width: max(1, dp(0.5))  # Responsive line width
+                width: max(1, dp(0.5)) * app.ui_scale  # Responsive line width
 
     # TDRS East Label
     Label:
         id: tdrs_east_label
         text: "TDRS East"
         color: 1, 1, 1, 1  # White text
-        font_size: min(dp(36), self.parent.width * 0.024)  # Much larger text
+        font_size: min(dp(36), self.parent.width * 0.024) * app.ui_scale  # Much larger text
         bold: True  # Make text thicker
         size_hint: None, None
         size: self.texture_size
@@ -191,26 +209,32 @@
     Widget:
         id: TDRS7
         size_hint: None, None
-        size: min(dp(32), self.parent.width * 0.012), min(dp(32), self.parent.height * 0.012)  # Responsive size
+        size: (
+            min(dp(32), self.parent.width * 0.012) * app.ui_scale,
+            min(dp(32), self.parent.height * 0.012) * app.ui_scale
+        )  # Responsive size
         pos: 0, 0
         canvas:
             Color:
                 rgba: 0, 1, 0, 1  # Green
             Line:
-                width: 2  # Thick line to create filled circle
+                width: max(1, 2 * app.ui_scale)  # Thick line to create filled circle
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # Active TDRS circle for TDRS7
     Widget:
         id: TDRS7_active_circle
         size_hint: None, None
-        size: min(dp(96), self.parent.width * 0.036), min(dp(96), self.parent.height * 0.036)  # Larger responsive size
+        size: (
+            min(dp(96), self.parent.width * 0.036) * app.ui_scale,
+            min(dp(96), self.parent.height * 0.036) * app.ui_scale
+        )  # Larger responsive size
         pos: 0, 0
         canvas:
             Color:
                 rgba: 1, 1, 1, 1  # White circle for active TDRS
             Line:
-                width: 1
+                width: max(1, app.ui_scale)
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     Widget:
@@ -220,31 +244,37 @@
                 rgba: 0, 1, 0, 0.5  # Green, semi-transparent
             Line:
                 points: []
-                width: max(1, dp(0.5))  # Responsive line width
+                width: max(1, dp(0.5)) * app.ui_scale  # Responsive line width
 
     Widget:
         id: TDRS8
         size_hint: None, None
-        size: min(dp(32), self.parent.width * 0.012), min(dp(32), self.parent.height * 0.012)  # Responsive size
+        size: (
+            min(dp(32), self.parent.width * 0.012) * app.ui_scale,
+            min(dp(32), self.parent.height * 0.012) * app.ui_scale
+        )  # Responsive size
         pos: 0, 0
         canvas:
             Color:
                 rgba: 0, 1, 0, 1  # Green
             Line:
-                width: 2  # Thick line to create filled circle
+                width: max(1, 2 * app.ui_scale)  # Thick line to create filled circle
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # Active TDRS circle for TDRS8
     Widget:
         id: TDRS8_active_circle
         size_hint: None, None
-        size: min(dp(96), self.parent.width * 0.036), min(dp(96), self.parent.height * 0.036)  # Larger responsive size
+        size: (
+            min(dp(96), self.parent.width * 0.036) * app.ui_scale,
+            min(dp(96), self.parent.height * 0.036) * app.ui_scale
+        )  # Larger responsive size
         pos: 0, 0
         canvas:
             Color:
                 rgba: 1, 1, 1, 1  # White circle for active TDRS
             Line:
-                width: 1
+                width: max(1, app.ui_scale)
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     Widget:
@@ -254,14 +284,14 @@
                 rgba: 0, 1, 0, 0.5  # Green, semi-transparent
             Line:
                 points: []
-                width: max(1, dp(0.5))  # Responsive line width
+                width: max(1, dp(0.5)) * app.ui_scale  # Responsive line width
 
     # TDRS Z Label
     Label:
         id: tdrs_zbelt_label
         text: "TDRS Z"
         color: 1, 1, 1, 1  # White text
-        font_size: min(dp(36), self.parent.width * 0.024)  # Much larger text
+        font_size: min(dp(36), self.parent.width * 0.024) * app.ui_scale  # Much larger text
         bold: True  # Make text thicker
         size_hint: None, None
         size: self.texture_size
@@ -271,26 +301,32 @@
     Widget:
         id: TDRS10
         size_hint: None, None
-        size: min(dp(32), self.parent.width * 0.012), min(dp(32), self.parent.height * 0.012)  # Responsive size
+        size: (
+            min(dp(32), self.parent.width * 0.012) * app.ui_scale,
+            min(dp(32), self.parent.height * 0.012) * app.ui_scale
+        )  # Responsive size
         pos: 0, 0
         canvas:
             Color:
                 rgba: 0, 0, 1, 1  # Blue
             Line:
-                width: 2  # Thick line to create filled circle
+                width: max(1, 2 * app.ui_scale)  # Thick line to create filled circle
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # Active TDRS circle for TDRS10
     Widget:
         id: TDRS10_active_circle
         size_hint: None, None
-        size: min(dp(96), self.parent.width * 0.036), min(dp(96), self.parent.height * 0.036)  # Larger responsive size
+        size: (
+            min(dp(96), self.parent.width * 0.036) * app.ui_scale,
+            min(dp(96), self.parent.height * 0.036) * app.ui_scale
+        )  # Larger responsive size
         pos: 0, 0
         canvas:
             Color:
                 rgba: 1, 1, 1, 1  # White circle for active TDRS
             Line:
-                width: 1
+                width: max(1, app.ui_scale)
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     Widget:
@@ -300,31 +336,37 @@
                 rgba: 0, 0, 1, 0.5  # Blue, semi-transparent
             Line:
                 points: []
-                width: max(1, dp(0.5))  # Responsive line width
+                width: max(1, dp(0.5)) * app.ui_scale  # Responsive line width
 
     Widget:
         id: TDRS11
         size_hint: None, None
-        size: min(dp(32), self.parent.width * 0.012), min(dp(32), self.parent.height * 0.012)  # Responsive size
+        size: (
+            min(dp(32), self.parent.width * 0.012) * app.ui_scale,
+            min(dp(32), self.parent.height * 0.012) * app.ui_scale
+        )  # Responsive size
         pos: 0, 0
         canvas:
             Color:
                 rgba: 0, 0, 1, 1  # Blue
             Line:
-                width: 2  # Thick line to create filled circle
+                width: max(1, 2 * app.ui_scale)  # Thick line to create filled circle
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     # Active TDRS circle for TDRS11
     Widget:
         id: TDRS11_active_circle
         size_hint: None, None
-        size: min(dp(96), self.parent.width * 0.036), min(dp(96), self.parent.height * 0.036)  # Larger responsive size
+        size: (
+            min(dp(96), self.parent.width * 0.036) * app.ui_scale,
+            min(dp(96), self.parent.height * 0.036) * app.ui_scale
+        )  # Larger responsive size
         pos: 0, 0
         canvas:
             Color:
                 rgba: 1, 1, 1, 1  # White circle for active TDRS
             Line:
-                width: 1
+                width: max(1, app.ui_scale)
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     Widget:
@@ -334,14 +376,14 @@
                 rgba: 0, 0, 1, 0.5  # Blue, semi-transparent
             Line:
                 points: []
-                width: max(1, dp(0.5))  # Responsive line width
+                width: max(1, dp(0.5)) * app.ui_scale  # Responsive line width
 
     # TDRS West Label
     Label:
         id: tdrs_west_label
         text: "TDRS West"
         color: 1, 1, 1, 1  # White text
-        font_size: min(dp(36), self.parent.width * 0.024)  # Much larger text
+        font_size: min(dp(36), self.parent.width * 0.024) * app.ui_scale  # Much larger text
         bold: True  # Make text thicker
         size_hint: None, None
         size: self.texture_size
@@ -352,73 +394,91 @@
     Widget:
         id: mcc_houston
         size_hint: None, None
-        size: min(dp(8), self.parent.width * 0.0075), min(dp(8), self.parent.height * 0.0075)
+        size: (
+            min(dp(8), self.parent.width * 0.0075) * app.ui_scale,
+            min(dp(8), self.parent.height * 0.0075) * app.ui_scale
+        )
         pos: 0, 0
         canvas:
             Color:
                 rgba: 1, 1, 1, 1
             Line:
-                width: 2
+                width: max(1, 2 * app.ui_scale)
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
  
     Widget:
         id: mcc_quebec
         size_hint: None, None
-        size: min(dp(8), self.parent.width * 0.0075), min(dp(8), self.parent.height * 0.0075)
+        size: (
+            min(dp(8), self.parent.width * 0.0075) * app.ui_scale,
+            min(dp(8), self.parent.height * 0.0075) * app.ui_scale
+        )
         pos: 0, 0
         canvas:
             Color:
                 rgba: 1, 1, 1, 1
             Line:
-                width: 2
+                width: max(1, 2 * app.ui_scale)
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
  
     Widget:
         id: mcc_oberpf
         size_hint: None, None
-        size: min(dp(8), self.parent.width * 0.0075), min(dp(8), self.parent.height * 0.0075)
+        size: (
+            min(dp(8), self.parent.width * 0.0075) * app.ui_scale,
+            min(dp(8), self.parent.height * 0.0075) * app.ui_scale
+        )
         pos: 0, 0
         canvas:
             Color:
                 rgba: 1, 1, 1, 1
             Line:
-                width: 2
+                width: max(1, 2 * app.ui_scale)
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
  
     Widget:
         id: mcc_huntsville
         size_hint: None, None
-        size: min(dp(8), self.parent.width * 0.0075), min(dp(8), self.parent.height * 0.0075)
+        size: (
+            min(dp(8), self.parent.width * 0.0075) * app.ui_scale,
+            min(dp(8), self.parent.height * 0.0075) * app.ui_scale
+        )
         pos: 0, 0
         canvas:
             Color:
                 rgba: 1, 1, 1, 1
             Line:
-                width: 2
+                width: max(1, 2 * app.ui_scale)
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
  
     Widget:
         id: mcc_tsukuba
         size_hint: None, None
-        size: min(dp(8), self.parent.width * 0.0075), min(dp(8), self.parent.height * 0.0075)
+        size: (
+            min(dp(8), self.parent.width * 0.0075) * app.ui_scale,
+            min(dp(8), self.parent.height * 0.0075) * app.ui_scale
+        )
         pos: 0, 0
         canvas:
             Color:
                 rgba: 1, 1, 1, 1
             Line:
-                width: 2
+                width: max(1, 2 * app.ui_scale)
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     Widget:
         id: mcc_moscow
         size_hint: None, None
-        size: min(dp(8), self.parent.width * 0.0075), min(dp(8), self.parent.height * 0.0075)
+        size: (
+            min(dp(8), self.parent.width * 0.0075) * app.ui_scale,
+            min(dp(8), self.parent.height * 0.0075) * app.ui_scale
+        )
         pos: 0, 0
         canvas:
             Color:
                 rgba: 1, 1, 1, 1
             Line:
-                width: 2
+                width: max(1, 2 * app.ui_scale)
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
  
     # Labels
@@ -426,7 +486,7 @@
         id: mcc_houston_label
         text: "NASA"
         color: 1, 1, 1, 1
-        font_size: min(dp(16), self.parent.width * 0.012)
+        font_size: min(dp(16), self.parent.width * 0.012) * app.ui_scale
         size_hint: None, None
         size: self.texture_size
         pos: 0, 0
@@ -435,7 +495,7 @@
         id: mcc_quebec_label
         text: "CSA"
         color: 1, 1, 1, 1
-        font_size: min(dp(16), self.parent.width * 0.012)
+        font_size: min(dp(16), self.parent.width * 0.012) * app.ui_scale
         size_hint: None, None
         size: self.texture_size
         pos: 0, 0
@@ -444,7 +504,7 @@
         id: mcc_oberpf_label
         text: "ESA"
         color: 1, 1, 1, 1
-        font_size: min(dp(16), self.parent.width * 0.012)
+        font_size: min(dp(16), self.parent.width * 0.012) * app.ui_scale
         size_hint: None, None
         size: self.texture_size
         pos: 0, 0
@@ -453,7 +513,7 @@
         id: mcc_huntsville_label
         text: "NASA"
         color: 1, 1, 1, 1
-        font_size: min(dp(16), self.parent.width * 0.012)
+        font_size: min(dp(16), self.parent.width * 0.012) * app.ui_scale
         size_hint: None, None
         size: self.texture_size
         pos: 0, 0
@@ -462,7 +522,7 @@
         id: mcc_tsukuba_label
         text: "JAXA"
         color: 1, 1, 1, 1
-        font_size: min(dp(16), self.parent.width * 0.012)
+        font_size: min(dp(16), self.parent.width * 0.012) * app.ui_scale
         size_hint: None, None
         size: self.texture_size
         pos: 0, 0
@@ -471,7 +531,7 @@
         id: mcc_moscow_label
         text: "ROSCOSMOS"
         color: 1, 1, 1, 1
-        font_size: min(dp(16), self.parent.width * 0.012)
+        font_size: min(dp(16), self.parent.width * 0.012) * app.ui_scale
         size_hint: None, None
         size: self.texture_size
         pos: 0, 0
@@ -480,20 +540,23 @@
     Widget:
         id: user_location
         size_hint: None, None
-        size: min(dp(8), self.parent.width * 0.0075), min(dp(8), self.parent.height * 0.0075)
+        size: (
+            min(dp(8), self.parent.width * 0.0075) * app.ui_scale,
+            min(dp(8), self.parent.height * 0.0075) * app.ui_scale
+        )
         pos: 0, 0
         canvas:
             Color:
                 rgba: 0.5, 0, 0.5, 1
             Line:
-                width: 2
+                width: max(1, 2 * app.ui_scale)
                 circle: (self.center_x, self.center_y, min(self.width, self.height) / 2, 0, 360)
 
     Label:
         id: user_location_label
         text: "user"
         color: 0.5, 0, 0.5, 1
-        font_size: min(dp(16), self.parent.width * 0.012)
+        font_size: min(dp(16), self.parent.width * 0.012) * app.ui_scale
         size_hint: None, None
         size: self.texture_size
         pos: 0, 0
@@ -502,7 +565,7 @@
         id: ZOElabel
         text: "ZOE"
         color: 1, 0, 1, 1 
-        font_size: min(dp(20), self.parent.width * 0.024)  # Much larger text
+        font_size: min(dp(20), self.parent.width * 0.024) * app.ui_scale  # Much larger text
         bold: True
         size_hint: None, None
         size: self.texture_size
@@ -527,42 +590,42 @@
         color: root.signalcolor
         pos_hint: {"center_x": .12, "center_y": .22}  # Moved higher
         text: "0.00"
-        font_size: min(dp(20), self.parent.width * 0.014)  # Larger text
+        font_size: min(dp(20), self.parent.width * 0.014) * app.ui_scale  # Larger text
         
     TelemetryLabel:
         id: altitude
         color: root.signalcolor
         pos_hint: {"center_x": .35, "center_y": .22}  # Moved higher
         text: "0.00"
-        font_size: min(dp(20), self.parent.width * 0.014)  # Larger text
+        font_size: min(dp(20), self.parent.width * 0.014) * app.ui_scale  # Larger text
         
     TelemetryLabel:
         id: solarbeta
         color: root.signalcolor
         pos_hint: {"center_x": .575, "center_y": .22}  # Moved higher
         text: "0.00"
-        font_size: min(dp(20), self.parent.width * 0.014)  # Larger text
+        font_size: min(dp(20), self.parent.width * 0.014) * app.ui_scale  # Larger text
 
     TelemetryLabel:
         id: longitude
         color: root.signalcolor
         pos_hint: {"center_x": .13, "center_y": .18}  # Moved higher
         text: "0.00"
-        font_size: min(dp(20), self.parent.width * 0.014)  # Larger text
+        font_size: min(dp(20), self.parent.width * 0.014) * app.ui_scale  # Larger text
         
     TelemetryLabel:
         id: inc
         color: root.signalcolor
         pos_hint: {"center_x": .35, "center_y": .18}  # Moved higher
         text: "0.00"
-        font_size: min(dp(20), self.parent.width * 0.014)  # Larger text
+        font_size: min(dp(20), self.parent.width * 0.014) * app.ui_scale  # Larger text
         
     TelemetryLabel:
         id: period
         color: root.signalcolor
         pos_hint: {"center_x": .575, "center_y": .18}  # Moved higher
         text: "0.00"
-        font_size: min(dp(20), self.parent.width * 0.014)  # Larger text
+        font_size: min(dp(20), self.parent.width * 0.014) * app.ui_scale  # Larger text
 
     # ─────── next-pass block (upper-right) ───────
     PassLabel:
@@ -601,14 +664,14 @@
         id: zoe_loss_timer
         text: "--:--"
         color: (1, 0, 0, 1)  # Red text
-        font_size: min(dp(20), self.parent.width * 0.014)
+        font_size: min(dp(20), self.parent.width * 0.014) * app.ui_scale
         pos_hint: {"center_x": .95, "center_y": .22}
 
     TelemetryLabel:
         id: zoe_acquisition_timer
         text: "--:--"
         color: (0, 1, 0, 1)  # Green text
-        font_size: min(dp(20), self.parent.width * 0.014)
+        font_size: min(dp(20), self.parent.width * 0.014) * app.ui_scale
         pos_hint: {"center_x": .95, "center_y": .18}
 
     # ---------- STATUS DISPLAY (Bottom Rectangle) ----------
