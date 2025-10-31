@@ -69,10 +69,7 @@
         id: sun_icon
         source: f"{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitSun.png"
         size_hint: None, None
-        size: (
-            min(dp(80), self.parent.width * 0.06) * (app.ui_scale if app else 1),
-            min(dp(80), self.parent.height * 0.06) * (app.ui_scale if app else 1)
-        )  # Responsive size
+        size: min(dp(80), self.parent.width * 0.06) * (app.ui_scale if app else 1), min(dp(80), self.parent.height * 0.06) * (app.ui_scale if app else 1)
         pos: 0, 0  # set in python
     
     # ISS icon & track
@@ -80,10 +77,7 @@
         id: iss_icon
         source: f"{root.mimic_directory}/Mimic/Pi/imgs/orbit/OrbitYellowISSicon.png"
         size_hint: None, None
-        size: (
-            min(dp(75), self.parent.width * 0.075) * (app.ui_scale if app else 1),
-            min(dp(75), self.parent.height * 0.075) * (app.ui_scale if app else 1)
-        )  # Responsive size
+        size: min(dp(75), self.parent.width * 0.075) * (app.ui_scale if app else 1), min(dp(75), self.parent.height * 0.075) * (app.ui_scale if app else 1)
         pos: 0, 0                        
         canvas.after:
             Color:
@@ -117,10 +111,7 @@
     Widget:
         id: TDRS6
         size_hint: None, None
-        size: (
-            min(dp(32), self.parent.width * 0.012) * (app.ui_scale if app else 1),
-            min(dp(32), self.parent.height * 0.012) * (app.ui_scale if app else 1)
-        )  # Responsive size
+        size: min(dp(32), self.parent.width * 0.012) * (app.ui_scale if app else 1), min(dp(32), self.parent.height * 0.012) * (app.ui_scale if app else 1)
         pos: 0, 0
         canvas:
             Color:
@@ -133,10 +124,7 @@
     Widget:
         id: TDRS6_active_circle
         size_hint: None, None
-        size: (
-            min(dp(96), self.parent.width * 0.036) * (app.ui_scale if app else 1),
-            min(dp(96), self.parent.height * 0.036) * (app.ui_scale if app else 1)
-        )  # Larger responsive size
+        size: min(dp(96), self.parent.width * 0.036) * (app.ui_scale if app else 1), min(dp(96), self.parent.height * 0.036) * (app.ui_scale if app else 1)
         pos: 0, 0
         canvas:
             Color:
@@ -157,10 +145,7 @@
     Widget:
         id: TDRS12
         size_hint: None, None
-        size: (
-            min(dp(32), self.parent.width * 0.012) * (app.ui_scale if app else 1),
-            min(dp(32), self.parent.height * 0.012) * (app.ui_scale if app else 1)
-        )  # Responsive size
+        size: min(dp(32), self.parent.width * 0.012) * (app.ui_scale if app else 1), min(dp(32), self.parent.height * 0.012) * (app.ui_scale if app else 1)
         pos: 0, 0
         canvas:
             Color:
@@ -173,10 +158,7 @@
     Widget:
         id: TDRS12_active_circle
         size_hint: None, None
-        size: (
-            min(dp(96), self.parent.width * 0.036) * (app.ui_scale if app else 1),
-            min(dp(96), self.parent.height * 0.036) * (app.ui_scale if app else 1)
-        )  # Larger responsive size
+        size: min(dp(96), self.parent.width * 0.036) * (app.ui_scale if app else 1), min(dp(96), self.parent.height * 0.036) * (app.ui_scale if app else 1)
         pos: 0, 0
         canvas:
             Color:
@@ -209,10 +191,7 @@
     Widget:
         id: TDRS7
         size_hint: None, None
-        size: (
-            min(dp(32), self.parent.width * 0.012) * (app.ui_scale if app else 1),
-            min(dp(32), self.parent.height * 0.012) * (app.ui_scale if app else 1)
-        )  # Responsive size
+        size: min(dp(32), self.parent.width * 0.012) * (app.ui_scale if app else 1), min(dp(32), self.parent.height * 0.012) * (app.ui_scale if app else 1)
         pos: 0, 0
         canvas:
             Color:
@@ -225,10 +204,7 @@
     Widget:
         id: TDRS7_active_circle
         size_hint: None, None
-        size: (
-            min(dp(96), self.parent.width * 0.036) * (app.ui_scale if app else 1),
-            min(dp(96), self.parent.height * 0.036) * (app.ui_scale if app else 1)
-        )  # Larger responsive size
+        size: min(dp(96), self.parent.width * 0.036) * (app.ui_scale if app else 1), min(dp(96), self.parent.height * 0.036) * (app.ui_scale if app else 1)
         pos: 0, 0
         canvas:
             Color:
@@ -249,10 +225,7 @@
     Widget:
         id: TDRS8
         size_hint: None, None
-        size: (
-            min(dp(32), self.parent.width * 0.012) * (app.ui_scale if app else 1),
-            min(dp(32), self.parent.height * 0.012) * (app.ui_scale if app else 1)
-        )  # Responsive size
+        size: min(dp(32), self.parent.width * 0.012) * (app.ui_scale if app else 1), min(dp(32), self.parent.height * 0.012) * (app.ui_scale if app else 1)
         pos: 0, 0
         canvas:
             Color:
@@ -265,10 +238,7 @@
     Widget:
         id: TDRS8_active_circle
         size_hint: None, None
-        size: (
-            min(dp(96), self.parent.width * 0.036) * (app.ui_scale if app else 1),
-            min(dp(96), self.parent.height * 0.036) * (app.ui_scale if app else 1)
-        )  # Larger responsive size
+        size: min(dp(96), self.parent.width * 0.036) * (app.ui_scale if app else 1), min(dp(96), self.parent.height * 0.036) * (app.ui_scale if app else 1)
         pos: 0, 0
         canvas:
             Color:
@@ -301,10 +271,7 @@
     Widget:
         id: TDRS10
         size_hint: None, None
-        size: (
-            min(dp(32), self.parent.width * 0.012) * (app.ui_scale if app else 1),
-            min(dp(32), self.parent.height * 0.012) * (app.ui_scale if app else 1)
-        )  # Responsive size
+        size: min(dp(32), self.parent.width * 0.012) * (app.ui_scale if app else 1), min(dp(32), self.parent.height * 0.012) * (app.ui_scale if app else 1)
         pos: 0, 0
         canvas:
             Color:
@@ -317,10 +284,7 @@
     Widget:
         id: TDRS10_active_circle
         size_hint: None, None
-        size: (
-            min(dp(96), self.parent.width * 0.036) * (app.ui_scale if app else 1),
-            min(dp(96), self.parent.height * 0.036) * (app.ui_scale if app else 1)
-        )  # Larger responsive size
+        size: min(dp(96), self.parent.width * 0.036) * (app.ui_scale if app else 1), min(dp(96), self.parent.height * 0.036) * (app.ui_scale if app else 1)
         pos: 0, 0
         canvas:
             Color:
@@ -341,10 +305,7 @@
     Widget:
         id: TDRS11
         size_hint: None, None
-        size: (
-            min(dp(32), self.parent.width * 0.012) * (app.ui_scale if app else 1),
-            min(dp(32), self.parent.height * 0.012) * (app.ui_scale if app else 1)
-        )  # Responsive size
+        size: min(dp(32), self.parent.width * 0.012) * (app.ui_scale if app else 1), min(dp(32), self.parent.height * 0.012) * (app.ui_scale if app else 1)
         pos: 0, 0
         canvas:
             Color:
@@ -357,10 +318,7 @@
     Widget:
         id: TDRS11_active_circle
         size_hint: None, None
-        size: (
-            min(dp(96), self.parent.width * 0.036) * (app.ui_scale if app else 1),
-            min(dp(96), self.parent.height * 0.036) * (app.ui_scale if app else 1)
-        )  # Larger responsive size
+        size: min(dp(96), self.parent.width * 0.036) * (app.ui_scale if app else 1), min(dp(96), self.parent.height * 0.036) * (app.ui_scale if app else 1)
         pos: 0, 0
         canvas:
             Color:
@@ -394,11 +352,7 @@
     Widget:
         id: mcc_houston
         size_hint: None, None
-        size: (
-            min(dp(8), self.parent.width * 0.0075) * (app.ui_scale if app else 1),
-            min(dp(8), self.parent.height * 0.0075) * (app.ui_scale if app else 1)
-        )
-        pos: 0, 0
+        size: min(dp(8), self.parent.width * 0.0075) * (app.ui_scale if app else 1), min(dp(8), self.parent.height * 0.0075) * (app.ui_scale if app else 1)  # pos: 0, 0
         canvas:
             Color:
                 rgba: 1, 1, 1, 1
@@ -409,11 +363,7 @@
     Widget:
         id: mcc_quebec
         size_hint: None, None
-        size: (
-            min(dp(8), self.parent.width * 0.0075) * (app.ui_scale if app else 1),
-            min(dp(8), self.parent.height * 0.0075) * (app.ui_scale if app else 1)
-        )
-        pos: 0, 0
+        size: min(dp(8), self.parent.width * 0.0075) * (app.ui_scale if app else 1), min(dp(8), self.parent.height * 0.0075) * (app.ui_scale if app else 1)  # pos: 0, 0
         canvas:
             Color:
                 rgba: 1, 1, 1, 1
@@ -424,11 +374,7 @@
     Widget:
         id: mcc_oberpf
         size_hint: None, None
-        size: (
-            min(dp(8), self.parent.width * 0.0075) * (app.ui_scale if app else 1),
-            min(dp(8), self.parent.height * 0.0075) * (app.ui_scale if app else 1)
-        )
-        pos: 0, 0
+        size: min(dp(8), self.parent.width * 0.0075) * (app.ui_scale if app else 1), min(dp(8), self.parent.height * 0.0075) * (app.ui_scale if app else 1)  # pos: 0, 0
         canvas:
             Color:
                 rgba: 1, 1, 1, 1
@@ -439,11 +385,7 @@
     Widget:
         id: mcc_huntsville
         size_hint: None, None
-        size: (
-            min(dp(8), self.parent.width * 0.0075) * (app.ui_scale if app else 1),
-            min(dp(8), self.parent.height * 0.0075) * (app.ui_scale if app else 1)
-        )
-        pos: 0, 0
+        size: min(dp(8), self.parent.width * 0.0075) * (app.ui_scale if app else 1), min(dp(8), self.parent.height * 0.0075) * (app.ui_scale if app else 1)  # pos: 0, 0
         canvas:
             Color:
                 rgba: 1, 1, 1, 1
@@ -454,11 +396,7 @@
     Widget:
         id: mcc_tsukuba
         size_hint: None, None
-        size: (
-            min(dp(8), self.parent.width * 0.0075) * (app.ui_scale if app else 1),
-            min(dp(8), self.parent.height * 0.0075) * (app.ui_scale if app else 1)
-        )
-        pos: 0, 0
+        size: min(dp(8), self.parent.width * 0.0075) * (app.ui_scale if app else 1), min(dp(8), self.parent.height * 0.0075) * (app.ui_scale if app else 1)  # pos: 0, 0
         canvas:
             Color:
                 rgba: 1, 1, 1, 1
@@ -469,11 +407,7 @@
     Widget:
         id: mcc_moscow
         size_hint: None, None
-        size: (
-            min(dp(8), self.parent.width * 0.0075) * (app.ui_scale if app else 1),
-            min(dp(8), self.parent.height * 0.0075) * (app.ui_scale if app else 1)
-        )
-        pos: 0, 0
+        size: min(dp(8), self.parent.width * 0.0075) * (app.ui_scale if app else 1), min(dp(8), self.parent.height * 0.0075) * (app.ui_scale if app else 1)  # pos: 0, 0
         canvas:
             Color:
                 rgba: 1, 1, 1, 1
@@ -540,11 +474,7 @@
     Widget:
         id: user_location
         size_hint: None, None
-        size: (
-            min(dp(8), self.parent.width * 0.0075) * (app.ui_scale if app else 1),
-            min(dp(8), self.parent.height * 0.0075) * (app.ui_scale if app else 1)
-        )
-        pos: 0, 0
+        size: min(dp(8), self.parent.width * 0.0075) * (app.ui_scale if app else 1), min(dp(8), self.parent.height * 0.0075) * (app.ui_scale if app else 1)  # pos: 0, 0
         canvas:
             Color:
                 rgba: 0.5, 0, 0.5, 1
