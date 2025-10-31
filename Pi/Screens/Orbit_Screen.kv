@@ -15,7 +15,7 @@
     halign: "center"
     # Scale gently with window size so it reads well on both Pi (800×480) and large monitors.
     # Clamp between 1.0x (Pi) and ~1.35x (large displays).
-    font_size: sp(18) * min(1.35, max(1.0, min(Window.width / 1366.0, Window.height / 768.0)))
+    font_size: sp(18) * min(1.5, max(1.0, min(Window.width / 1366.0, Window.height / 768.0)))
     size_hint_y: 0.2
 
 <NavButton@Button>:
