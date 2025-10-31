@@ -8,16 +8,19 @@ import traceback
 # Parse command line arguments first, before any other imports
 def parse_arguments():
     parser = argparse.ArgumentParser(description='ISS Mimic GUI Application')
-    parser.add_argument('--debug', action='store_true', 
-                       help='Enable debug logging (INFO level)')
+    parser.add_argument('--debug', action='store_true',
+                        help='Enable debug logging (INFO level)')
     parser.add_argument('--verbose', action='store_true',
-                       help='Enable verbose logging (INFO level) - same as --debug')
+                        help='Enable verbose logging (INFO level) - same as --debug')
     parser.add_argument('--quiet', action='store_true',
-                       help='Suppress all logging output')
+                        help='Suppress all logging output')
     parser.add_argument('--console-logging', action='store_true',
-                       help='Enable console logging in addition to file logging')
-    
-    return parser.parse_args()
+                        help='Enable console logging in addition to file logging')
+
+    args, remaining = parser.parse_known_args()
+    # Leave only the remaining arguments for downstream parsers (e.g. Kivy)
+    sys.argv = [sys.argv[0]] + remaining
+    return args
 
 # Parse arguments and set environment variables for logger configuration
 args = parse_arguments()
