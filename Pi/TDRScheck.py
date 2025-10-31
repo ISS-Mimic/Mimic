@@ -82,13 +82,9 @@ class Component(ApplicationSession):
 
 if __name__ == '__main__':
     try:
-        import six
-        #log_info("Starting TDRS check application")
-
+        log_info("Starting TDRS check application")
         # Updated URL with port 8443
-        url = environ.get("AUTOBAHN_DEMO_ROUTER", u"wss://scan-now.gsfc.nasa.gov:8443/messages")
-        if six.PY2 and isinstance(url, six.binary_type):
-            url = url.decode('utf8')
+        url = environ.get("AUTOBAHN_DEMO_ROUTER", "wss://scan-now.gsfc.nasa.gov:8443/messages")
         realm = u"sn_now"
         
         log_info(f"Connecting to WAMP router: {url}")
