@@ -11,7 +11,7 @@
 <PassLabel@Label>:
     color: 1, 1, 1, 1
     halign: "center"
-    font_size: min(self.height * 0.17, dp(18)) * (app.ui_scale if app else 1)  # Responsive with max size
+    font_size: min(self.height * 0.24, dp(30)) * (app.ui_scale if app else 1)  # Responsive with max size
     size_hint_y: 0.2
 
 <NavButton@Button>:
@@ -495,7 +495,7 @@
         id: ZOElabel
         text: "ZOE"
         color: 1, 0, 1, 1 
-        font_size: min(dp(20), self.parent.width * 0.024) * (app.ui_scale if app else 1)  # Much larger text
+        font_size: min(dp(30), self.parent.width * 0.024) * (app.ui_scale if app else 1)  # Much larger text
         bold: True
         size_hint: None, None
         size: self.texture_size
@@ -506,11 +506,13 @@
         id: dailyorbit
         pos_hint: {"center_x": .08, "center_y": .70}
         text: "0"
+        font_size: min(dp(36), self.parent.width * 0.024) * (app.ui_scale if app else 1)
         
     TelemetryLabel:
         id: totalorbits
         pos_hint: {"center_x": .08, "center_y": .50}
         text: "0"
+        font_size: min(dp(36), self.parent.width * 0.024) * (app.ui_scale if app else 1)
 
     # ─────── orbital parameters (lower band) ───────
     # Positioned to align with background graphics, higher up and larger text
