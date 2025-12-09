@@ -12,14 +12,21 @@
   			gtag('config', 'UA-148243619-1');
 		</script>
 <style>
-			tr:nth-child(even) {background: lightgrey;}
-			tr:hover {background: lightblue;}
+			tr:nth-child(even) { background-color: lightgrey; }
+			tr:nth-child(odd)  { background-color: white; }
+
+			tr:hover { background-color: lightblue; }
+
 			@keyframes hifade {
-				from { background: yellow; }
-				to { background: transparent; }
+				from { background-color: yellow; }
+				to   { background-color: inherit; }
 			}
-			td.highlight { animation: hifade 0.5s; }
+
+			td.highlight {
+				animation: hifade 0.5s;
+			}
 		</style>
+</head>
 </head>
 <body onload="onPageLoad()"><div id="current-time-display" style="position: absolute; top: 0; right: 0; padding: 10px;">Time: </div>
 <table align="center" border="1px" class="status">
