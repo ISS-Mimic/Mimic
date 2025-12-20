@@ -14,7 +14,7 @@
 </p>
 
 > **ISS Mimic** is an open-source mash-up of hardware + software that **mirrors the International Space Station’s solar-array and radiator motion** in real time.  
-> 🍓 Runs on Raspberry Pi • 🛠 12 motors drive a 3-D-printed ISS • 📈 Live telemetry visualizer
+> Runs on Raspberry Pi • 12 motors drive a 3-D printed ISS • Live telemetry visualizer
 
 ---
 
@@ -85,7 +85,7 @@ and a great dashboard here: https://iss-mimic.github.io/Mimic/dashboard.html
 | Fidelity | STL pack | Status |
 |----------|----------|--------|
 | Low      | [`/3D_Printing`](3D_Printing) | ✔ Complete |
-| High     | `/3D_Printing/high_fidelity` | 🚧 In progress – contributors welcome! |
+| High     | `/3D_Printing/high_fidelity` | In progress – contributors welcome! |
 
 Mechanical details, BOM, and wiring live in the **[Hardware Wiki section](https://github.com/ISS-Mimic/Mimic/wiki/Hardware)**.
 
@@ -105,7 +105,7 @@ Mechanical details, BOM, and wiring live in the **[Hardware Wiki section](https:
 </p>
 
 ### Contributing
-We 💙 pull requests! Start by opening an issue or chatting on **[Discord](https://discord.gg/zPKyE6hBSe)**.  
+Start by opening an issue to suggest am improvement or bug or by chatting on **[Discord](https://discord.gg/zPKyE6hBSe)**.  
 Coding guidelines:
 1. Follow **PEP 8** and keep GUI layout in **`.kv` files** (Kivy best practice).  
 2. Fix all our mistakes. 
