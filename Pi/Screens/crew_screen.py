@@ -396,9 +396,6 @@ class Crew_Screen(MimicBase):
                 })
 
             total_crew = len(self.crew_data)
-            log_info(total_crew)
-            log_info(vehicles)
-
             total_lbl = getattr(self.ids, "total_crew_count", None)
             if total_lbl:
                 total_lbl.text = str(total_crew)
