@@ -7,6 +7,7 @@ import sqlite3
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
+from collections import defaultdict
 
 from kivy.clock import Clock
 from kivy.lang import Builder
@@ -60,11 +61,11 @@ class CrewMemberWidget(BoxLayout):
         # Use DB-provided fields when present
         self.mission_days = str(crew_data.get("current_mission_duration", 0))
         self.total_days = str(crew_data.get("total_time_in_space", 0))
-        
+
         # Set image URL and log it
         image_url = crew_data.get("image_url", "") or ""
         self.image_url = image_url
-        
+
         if self.image_url:
             #log_info(f"Crew member {self.name} image URL: {self.image_url}")
             # Force a property update to trigger the KV binding
@@ -182,21 +183,21 @@ class Crew_Screen(MimicBase):
             with sqlite3.connect(db_path) as conn:
                 conn.row_factory = sqlite3.Row
                 cur = conn.cursor()
-                
+
                 # First check if data has changed by comparing checksums
                 cur.execute("SELECT checksum FROM snapshots ORDER BY id DESC LIMIT 1")
                 checksum_row = cur.fetchone()
                 current_checksum = checksum_row[0] if checksum_row else None
-                
+
                 # If checksum hasn't changed, skip the update
                 if current_checksum == self._last_checksum and self.crew_data or current_checksum == None:
                     log_info("Crew data unchanged, skipping update")
                     return
-                
-                
+
+
                 log_info(f"Database checksum changed from {self._last_checksum} to {current_checksum}")
                 self._last_checksum = current_checksum
-                
+
                 # Load the actual crew data
                 cur.execute(
                     """
@@ -286,43 +287,43 @@ class Crew_Screen(MimicBase):
         end = end or datetime.now()
         delta = end - start
         total_seconds = int(delta.total_seconds())
-        
+
         if total_seconds < 0:
             return "00:00:00:00"
-        
+
         days = total_seconds // 86400
         remaining_seconds = total_seconds % 86400
         hours = remaining_seconds // 3600
         minutes = (remaining_seconds % 3600) // 60
         seconds = remaining_seconds % 60
-        
+
         return f"{days:02d}:{hours:02d}:{minutes:02d}:{seconds:02d}"
 
     def _format_expedition_duration(self, start: datetime, end: Optional[datetime] = None) -> str:
         """Format expedition duration as months, days, hours."""
         end = end or datetime.now()
         delta = end - start
-        
+
         if delta.total_seconds() < 0:
             return "0m 0d 0h"
-        
+
         total_seconds = int(delta.total_seconds())
-        
+
         # Calculate months (approximate - using 30 days per month)
         months = total_seconds // (30 * 24 * 3600)
         remaining_seconds = total_seconds % (30 * 24 * 3600)
-        
+
         # Calculate days
         days = remaining_seconds // (24 * 3600)
         remaining_seconds = remaining_seconds % (24 * 3600)
-        
+
         # Calculate hours
         hours = remaining_seconds // 3600
         remaining_seconds = remaining_seconds % 3600
-        
+
         # Remaining seconds
         seconds = remaining_seconds
-        
+
         # Build the formatted string
         parts = []
         if months > 0:
@@ -331,7 +332,7 @@ class Crew_Screen(MimicBase):
             parts.append(f"{days}d")
         if hours > 0:
             parts.append(f"{hours}h")
-        
+
         return " ".join(parts)
 
     # Expedition duration (oldest launch to now) - formatted as months, days, hours, seconds
@@ -357,7 +358,7 @@ class Crew_Screen(MimicBase):
             # First ISS crew arrived on November 2nd, 2000 at 09:23 UTC
             first_crew_date = datetime(2000, 11, 2, 9, 23, 0)
             now = datetime.utcnow()
-            
+
             y, m, d = self._duration_parts(first_crew_date, now)
             self.iss_crewed_years, self.iss_crewed_months, self.iss_crewed_days = map(str, (y, m, d))
             log_info(f"ISS crewed time: {y}y {m}m {d}d")
@@ -381,8 +382,22 @@ class Crew_Screen(MimicBase):
     # ─────────────── Crewed vehicles (VV DB) ───────────────
     def update_crewed_vehicles_display(self):
         try:
-            vehicles = self.get_crewed_vehicles_from_vv_db()
-            total_crew = sum(v.get("crew_count", 0) for v in vehicles)
+            # Build vehicle list from crew_data
+            grouped = defaultdict(list)
+            for member in self.crew_data:
+                if member.get("spaceship") and member.get("launch_date"):
+                    grouped[member["spaceship"]].append(member)
+
+            vehicles = []
+            for spacecraft, members in grouped.items():
+                vehicles.append({
+                    "spacecraft": " ".join(spacecraft.replace("\n", " ").split()),
+                    "arrival": min(m["launch_date"] for m in members).replace("\n", " ").strip(),
+                })
+
+            total_crew = len(self.crew_data)
+            log_info(total_crew)
+            log_info(vehicles)
 
             total_lbl = getattr(self.ids, "total_crew_count", None)
             if total_lbl:
@@ -393,64 +408,7 @@ class Crew_Screen(MimicBase):
         except Exception as e:
             log_error(f"Error updating crewed vehicles display: {e}")
 
-    def get_crewed_vehicles_from_vv_db(self) -> List[Dict]:
-        try:
-            vv_db_path = self.get_db_path()
-        except Exception as e:
-            log_error(f"Could not resolve VV DB path: {e}")
-            return []
 
-        p = Path(vv_db_path)
-        if not p.exists():
-            log_error(f"VV database not found at {vv_db_path}")
-            return []
-
-        try:
-            with sqlite3.connect(vv_db_path) as conn:
-                conn.row_factory = sqlite3.Row
-                cur = conn.cursor()
-
-                # Verify table
-                cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='vehicles'")
-                if not cur.fetchone():
-                    log_error("Vehicles table not found in VV database")
-                    return []
-
-                cur.execute(
-                    """
-                    SELECT Mission, Spacecraft, Arrival, Location
-                    FROM vehicles
-                    WHERE Type = 'Crewed'
-                    ORDER BY Arrival DESC
-                    """
-                )
-                rows = cur.fetchall()
-
-            def estimate_crew(spacecraft: str) -> int:
-                s = (spacecraft or "").upper()
-                if "CREW-" in s or "CREW " in s or "DRAGON" in s:
-                    return 4
-                if "SOYUZ" in s:
-                    return 3
-                # Default conservative
-                return 3
-
-            vehicles = []
-            for r in rows:
-                miss = str(r["Mission"]) if r["Mission"] is not None else "Unknown"
-                sc = str(r["Spacecraft"]) if r["Spacecraft"] is not None else "Unknown"
-                arr = str(r["Arrival"]) if r["Arrival"] is not None else "Unknown"
-                loc = str(r["Location"]) if r["Location"] is not None else "Unknown"
-                vehicles.append(
-                    {
-                        "mission": miss,
-                        "spacecraft": sc,
-                        "arrival": arr,
-                        "location": loc,
-                        "crew_count": estimate_crew(sc),
-                    }
-                )
-            return vehicles
         except Exception as e:
             log_error(f"Error reading VV DB: {e}")
             return []
@@ -469,34 +427,20 @@ class Crew_Screen(MimicBase):
 
     def _make_vehicle_widget(self, vehicle: Dict) -> BoxLayout:
         widget = BoxLayout(orientation="vertical", size_hint_y=None, height=dp(60))
-        
-        # Format arrival date to show only the date part
-        arrival_date = vehicle.get('arrival', 'Unknown')
-        if arrival_date and arrival_date != 'Unknown':
-            try:
-                # Parse the full datetime string and extract just the date
-                if ' ' in arrival_date:
-                    date_part = arrival_date.split(' ')[0]  # Get "2025-04-08" from "2025-04-08 00:00:00"
-                    arrival_date = date_part
-            except Exception:
-                # If parsing fails, keep the original value
-                pass
-        
-        mission_label = Label(
-            text=vehicle.get("mission", "Unknown"),
-            color=(1, 1, 1, 1),
-            font_size=dp(12),
-            bold=True,
-            size_hint_y=0.5,
+
+        vehicle_info = (
+            f"{vehicle.get('spacecraft', '')}\n({vehicle.get('arrival', '')})"
         )
+
         info_label = Label(
-            text=f"{vehicle.get('spacecraft','Unknown')}\nArrived: {arrival_date}",
+            text=vehicle_info,
             color=(0.8, 0.8, 0.8, 1),
-            font_size=dp(10),
+            font_size=dp(15),
             size_hint_y=0.5,
         )
-        widget.add_widget(mission_label)
+
         widget.add_widget(info_label)
+        log_info(f"Vehicle widget width: {widget.width}")
         return widget
 
     # ─────────────── Expedition patch image ────────────────
@@ -585,7 +529,7 @@ class Crew_Screen(MimicBase):
         """Poll frequently until first data appears, then switch cadence."""
         prev_checksum = self._last_checksum
         self.load_crew_data()  # This now checks checksum internally
-        
+
         # Check if we got new data (checksum changed)
         if self._last_checksum != prev_checksum and self.crew_data:
             self._cancel_timer("poll_timer")

@@ -82,8 +82,8 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
             # Look for the crew table with the specific structure
             for table in tables:
                 table_text = str(table)
-                if ('No.' in table_text and 'Nation' in table_text and 'Surname' in table_text and 
-                    'Given names' in table_text and 'Position' in table_text):
+                headers = ['No.', 'Nation', 'Surname', 'Given names', 'Position']
+                if all(any(h in cell.get_text() for cell in table.find_all(['td', 'th'])) for h in headers):
                     crew_table = table
                     break
             
@@ -99,7 +99,7 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
             for row_index, row in enumerate(rows):
                 cells = row.find_all(['td', 'th'])
                 # Skip rows that don't have enough data or are header rows
-                if len(cells) < 13:  # Need at least 13 columns for complete crew data
+                if len(cells) < 12:  # Need at least 12 columns for complete crew data
                     continue
                 
                 # Check if this row contains crew data (should have a number in first cell)
@@ -107,6 +107,7 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
                 # Look for crew number pattern (1, 2, 3, etc.)
                 if not first_cell.isdigit():
                     continue
+
                 
                 try:
                     # Extract country from flag image
@@ -203,7 +204,6 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
                                 
                                 # Also fetch mission data for total time in space calculation
                                 mission_data = get_astronaut_mission_data(astronaut_page_url)
-                                #print(mission_data)
                             else:
                                 image_url = None
                                 mission_data = {'total_time_in_space': 0, 'current_mission_duration': 0}
@@ -219,7 +219,8 @@ def fetch_spacefacts_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict
                         'landing_date': cells[9].get_text(strip=True),  # Landing date
                         'landing_time': cells[10].get_text(strip=True),  # Landing time
                         'mission_duration': '',  # Will be calculated by crew screen based on launch time
-                        'orbits': cells[12].get_text(strip=True),  # Orbits
+                        #'orbits': cells[12].get_text(strip=True),  # Orbits - removed from webpage
+                        'orbits': None,
                         'expedition': f"Expedition {expedition_number}",  # Use expedition number found at start
                         'image_url': image_url,  # URL to astronaut's personal page with image
                         'total_time_in_space': mission_data['total_time_in_space'],  # Total lifetime days in space
