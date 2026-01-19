@@ -102,7 +102,7 @@ class VV_Screen(MimicBase):
             # Default off for all icons each pass
             for icon_id in (
                 'n2f_dragon','n2f_starliner','n2z_dragon','n2z_starliner',
-                'n1n_cygnus','sma_soyuz','sma_progress',
+                'n1n_cygnus','n2n_htv_x','sma_soyuz','sma_progress',
                 'mrm2_soyuz','mrm2_progress','mrm1_soyuz','mrm1_progress',
                 'rsn_soyuz','rsn_progress',
             ):
@@ -139,6 +139,9 @@ class VV_Screen(MimicBase):
                 elif "NG" in mis_text:
                     sc_name = "Cygnus"
                     sc_name2 = sc_text
+                elif "HTV" in mis_text:
+                    sc_name = "HTV-X"
+                    sc_name2 = sc_text
                 else:
                     sc_name = "n/a"
                     sc_name2 = "n/a"
@@ -160,6 +163,8 @@ class VV_Screen(MimicBase):
                         self.ids.n2z_starliner.opacity = 1.0
                 elif port == "Node 2 Nadir":
                     self.ids.n2n_label.text = label_text
+                    if "HTV" in sc_name:
+                        self.ids.n2n_htv_x.opacity = 1.0
                     # Future: dreamchaser/htvx icons here
                 elif port == "Node 1 Nadir":
                     self.ids.n1n_label.text = label_text

@@ -17,6 +17,11 @@ class VV_Image(MimicBase):
 
     _update_event = None
 
+    def on_pre_enter(self, *args):
+        path = os.path.join(self.mimic_data_directory, "vv.jpg")
+        self.vv_source = path
+        super().on_pre_enter(*args)
+
     def on_enter(self):
         """Start periodic refresh when screen is shown."""
         try:

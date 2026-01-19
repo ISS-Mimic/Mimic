@@ -8,7 +8,7 @@
             id: USOS_Background
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/usos/USOSbackground.png"
             fit_mode: "fill"
-        
+
         # ───────────────────────── Port Icons ─────────────────────────────
         Image:
             id: n1n_cygnus
@@ -16,7 +16,11 @@
             opacity: 0.0
         Image:
             id: n2n_cygnus
-            source: f"{root.mimic_directory}/Mimic/Pi/imgs/usos/N1NcygnusUSOS.png"
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/usos/N2NcygnusUSOS.png"
+            opacity: 0.0
+        Image:
+            id: n2n_htv_x
+            source: f"{root.mimic_directory}/Mimic/Pi/imgs/usos/N2NcygnusUSOS.png"
             opacity: 0.0
         Image:
             id: n2f_dragon
@@ -34,7 +38,7 @@
             id: n2z_starliner
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/usos/N2ZcstUSOS.png"
             opacity: 0.0
-        
+
         # ───────────────────────── Labels (N2Z) ───────────────────────────
         Label:
             id: n2z_label
@@ -91,7 +95,7 @@
             bold: True
             markup: True
             color: 1, 1, 1, 1
-        
+
         # ───────────────────────── Labels (N2F) ───────────────────────────
         Label:
             id: n2f_label
@@ -148,7 +152,7 @@
             bold: True
             markup: True
             color: 1, 1, 1, 1
-        
+
         # ───────────────────────── Labels (N1N) ───────────────────────────
         Label:
             id: n1n_label
@@ -205,7 +209,7 @@
             bold: True
             markup: True
             color: 1, 1, 1, 1
-        
+
         # ───────────────────────── Labels (N2N) ───────────────────────────
         Label:
             id: n2n_label
@@ -275,7 +279,7 @@
             halign: 'center'
             valign: 'middle'
             pos_hint: {"center_x": 0.57, "center_y": 0.07}
-        
+
         # ---------- BOTTOM TOOLBAR ----------
         Image:
             id: signal
@@ -285,7 +289,7 @@
             anim_loop: 0
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.05, "center_y": 0.07}
-        
+
         Image:
             id: arduino
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
@@ -294,7 +298,7 @@
             anim_loop: -1
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
-        
+
         Label:
             id: arduino_count
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
@@ -303,7 +307,7 @@
             color: 1, 1, 1, 1
             font_size: self.height * 1
             size_hint: 0.06, 0.08
-        
+
         # ─────────────────────── Navigation ────────────────────────────────
 
         Button:

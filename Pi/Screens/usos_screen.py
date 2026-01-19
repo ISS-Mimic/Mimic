@@ -89,7 +89,7 @@ class USOS_Screen(MimicBase):
                 if lab in self.ids:
                     self.ids[lab].text = "-"
 
-            for icon in ('n2f_dragon','n2f_starliner','n2z_dragon','n2z_starliner','n1n_cygnus','n2n_cygnus'):
+            for icon in ('n2f_dragon','n2f_starliner','n2z_dragon','n2z_starliner','n1n_cygnus','n2n_cygnus','n2n_htv_x'):
                 if icon in self.ids:
                     self.ids[icon].opacity = 0.0
 
@@ -124,6 +124,9 @@ class USOS_Screen(MimicBase):
                     sc_name2 = sc_text.replace(sc_name + " ", "").strip()
                 elif "NG" in mis_text:
                     sc_name = "Cygnus"
+                    sc_name2 = sc_text
+                elif "HTV" in mis_text:
+                    sc_name = "HTV-X"
                     sc_name2 = sc_text
                 else:
                     sc_name = "n/a"
@@ -162,6 +165,8 @@ class USOS_Screen(MimicBase):
                     self.ids.n2n_departure.text = dep_text
                     self.ids.n2n_label.text = f"{sc_name}\n{mis_text}"
                     # Icons for n2n not currently defined
+                    if "HTV" in sc_name:
+                        self.ids.n2n_htv_x.opacity = 1.0
                 elif port == "Node 1 Nadir":
                     self.ids.n1n_mission.text = mis_text + type_text
                     self.ids.n1n_vehicle.text = sc_name
@@ -184,6 +189,7 @@ class USOS_Screen(MimicBase):
                     self.ids.n2z_starliner.opacity = 0.0
                 elif port == "Node 2 Nadir":
                     self.ids.n2n_label.text = ""
+                    self.ids.n2n_htv_x.opacity = 0.0
                 elif port == "Node 1 Nadir":
                     self.ids.n1n_label.text = ""
                     self.ids.n1n_cygnus.opacity = 0.0
@@ -206,6 +212,6 @@ class USOS_Screen(MimicBase):
         ):
             if lab in self.ids:
                 self.ids[lab].text = "-"
-        for icon in ('n2f_dragon','n2f_starliner','n2z_dragon','n2z_starliner','n1n_cygnus','n2n_cygnus'):
+        for icon in ('n2f_dragon','n2f_starliner','n2z_dragon','n2z_starliner','n1n_cygnus','n2n_cygnus','n2n_htv_x'):
             if icon in self.ids:
                 self.ids[icon].opacity = 0.0
