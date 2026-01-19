@@ -46,7 +46,7 @@ class VV_Image(MimicBase):
         """Reload the VV image from the data directory."""
         try:
             if 'VVimage' in self.ids:
-                self.ids.VVimage.source = f"{self.mimic_data_directory}/vv.png"
+                self.ids.VVimage.source = f"{self.mimic_data_directory}/vv.jpg"
                 self.ids.VVimage.reload()
         except Exception as exc:
             log_error(f"VV_Image update failed: {exc}")
