@@ -6,10 +6,10 @@
         # ───────────────────────── VV Image ───────────────────────────────
         Image:
             id: VVimage
-            source: f'{root.mimic_data_directory}/vv.png'
+            source: f'{root.mimic_data_directory}/vv.jpg'
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
             fit_mode: "contain"
-        
+
        # ---------- STATUS DISPLAY (Bottom Rectangle) ----------
         Label:
             id: status_label
@@ -22,7 +22,7 @@
             halign: 'center'
             valign: 'middle'
             pos_hint: {"center_x": 0.57, "center_y": 0.07}
-        
+
         # ---------- BOTTOM TOOLBAR ----------
         Image:
             id: signal
@@ -32,7 +32,7 @@
             anim_loop: 0
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.05, "center_y": 0.07}
-        
+
         Image:
             id: arduino
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/signal/arduino_offline.png"
@@ -41,7 +41,7 @@
             anim_loop: -1
             fit_mode: "scale-down"
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
-        
+
         Label:
             id: arduino_count
             pos_hint: {"center_x": 0.14, "center_y": 0.08}
@@ -50,7 +50,7 @@
             color: 1, 1, 1, 1
             font_size: self.height * 1
             size_hint: 0.06, 0.08
-        
+
         # ─────────────────────── Navigation ────────────────────────────────
 
         Button:
@@ -59,4 +59,4 @@
             background_normal: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             border: 0,0,0,0    # avoid 9-slice margins
-            on_release: app.root.current = 'mimic'
+            on_release: app.root.current = 'vv'
