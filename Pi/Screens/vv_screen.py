@@ -208,6 +208,7 @@ class VV_Screen(MimicBase):
                     self.ids.n2z_starliner.opacity = 0.0
                 elif port == "Node 2 Nadir":
                     self.ids.n2n_label.text = ""
+                    self.ids.n2n_htv_x.opacity = 0.0
                 elif port == "Node 1 Nadir":
                     self.ids.n1n_label.text = ""
                     self.ids.n1n_cygnus.opacity = 0.0
