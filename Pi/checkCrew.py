@@ -390,42 +390,71 @@ def fetch_iss_crew(max_attempts: int = 3, timeout: int = 10) -> List[Dict[str, s
 
 def get_latest_expedition_number() -> int:
     """
-    Discover the latest ISS expedition number by checking Spacefacts.de.
-    Returns the expedition number as an integer.
+    Return the highest expedition number whose page indicates the expedition
+    has actually begun as of now.
     """
     base_url = "https://spacefacts.de/iss/english/"
     headers = {
         "User-Agent": "ISS-Mimic/1.0 (+https://github.com/ISS-Mimic; iss.mimic@gmail.com)"
     }
-    
-    # Start from a known good number and work up/down more efficiently
-    # We know Expedition 73 exists, so start there
-    for exp_num in range(73, 85):  # Try expeditions 73 up to 84
-        test_url = f"{base_url}exp_{exp_num}.htm"
-        try:
-            r = requests.get(test_url, headers=headers, timeout=5)
-            if r.status_code == 200:
-                # Quick check - just look for expedition number in text
-                if f"expedition {exp_num}" in r.text.lower():
-                    return exp_num
-        except Exception:
-            continue
-    
-    # If we can't find any working expeditions above 73, try a few below
-    for exp_num in range(72, 69, -1):  # Try expeditions 72 down to 69
-        test_url = f"{base_url}exp_{exp_num}.htm"
-        try:
-            r = requests.get(test_url, headers=headers, timeout=5)
-            if r.status_code == 200:
-                if f"expedition {exp_num}" in r.text.lower():
-                    return exp_num
-        except Exception:
-            continue
-    
-    # If all else fails, return a reasonable default
-    log_info("Could not determine expedition number, using default: 73")
-    return 73
 
+    now = datetime.now()
+    started_expeditions = []
+
+    for exp_num in range(73, 85):
+        test_url = f"{base_url}exp_{exp_num}.htm"
+        try:
+            r = requests.get(test_url, headers=headers, timeout=5)
+            if r.status_code != 200:
+                continue
+
+            text = r.text
+
+            # Look for a sentence like:
+            # "Expedition 74 began with undocking of Soyuz MS-27 on Dezember 09, 2025 at 01:41:30 UTC."
+            start_match = re.search(
+                rf"Expedition\s+{exp_num}\s+began.*?\bon\s+([A-Za-z]+)\s+(\d{{1,2}}),\s+(\d{{4}})",
+                text,
+                re.IGNORECASE | re.DOTALL,
+            )
+
+            if not start_match:
+                # No explicit "began" line => likely future/prebuilt page
+                continue
+
+            month_name = start_match.group(1)
+            day = int(start_match.group(2))
+            year = int(start_match.group(3))
+
+            # Spacefacts sometimes uses German month names like "Dezember"
+            month_map = {
+                "january": 1, "february": 2, "march": 3, "april": 4, "may": 5, "june": 6,
+                "july": 7, "august": 8, "september": 9, "october": 10, "november": 11, "december": 12,
+                "januar": 1, "februar": 2, "maerz": 3, "april": 4, "mai": 5, "juni": 6,
+                "juli": 7, "august": 8, "september": 9, "oktober": 10, "november": 11, "dezember": 12,
+            }
+
+            month_num = month_map.get(month_name.lower())
+            if not month_num:
+                continue
+
+            start_date = datetime(year, month_num, day)
+
+            if start_date <= now:
+                started_expeditions.append(exp_num)
+
+        except Exception as e:
+            log_error(f"Error checking expedition {exp_num}: {e}")
+            continue
+
+    if started_expeditions:
+        latest = max(started_expeditions)
+        log_info(f"Latest started expedition found: {latest}")
+        return latest
+
+    log_info("Could not determine started expedition, using default: 74")
+    return 74
+    
 def get_spacefacts_url(expedition_num: int = None) -> str:
     """
     Get the Spacefacts.de URL for the specified expedition.
