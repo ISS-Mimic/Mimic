@@ -42,7 +42,8 @@ def fetch_tle_from_celestrak(url):
 def getTLE_ISS():
     """Get ISS TLE data, either from cache or by fetching from Celestrak."""
     config_filename = mimic_data_path / 'iss_tle_config.json'
-    iss_tle_url = 'https://celestrak.com/NORAD/elements/stations.txt'
+    #iss_tle_url = 'https://celestrak.com/NORAD/elements/stations.txt' # old, not working anymore
+    iss_tle_url = "https://celestrak.org/NORAD/elements/gp.php?GROUP=stations&FORMAT=tle" # updated URL
     
     log_info("Starting ISS TLE retrieval process")
     log_info(f"Config file path: {config_filename}")
