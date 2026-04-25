@@ -48,7 +48,8 @@ def fetch_tdrs_tles_from_celestrak(url):
 def getTLE_TDRS():
     """Get TDRS TLE data, either from cache or by fetching from Celestrak."""
     config_filename = mimic_data_path / 'tdrs_tle_config.json'
-    tdrs_tle_url = 'https://celestrak.com/NORAD/elements/tdrss.txt'
+    #tdrs_tle_url = 'https://celestrak.com/NORAD/elements/tdrss.txt' # old, not working anymore
+    tdrs_tle_url = "https://celestrak.org/NORAD/elements/gp.php?GROUP=tdrss&FORMAT=tle" # new URL
     
     log_info("Starting TDRS TLE retrieval process")
     log_info(f"Config file path: {config_filename}")
