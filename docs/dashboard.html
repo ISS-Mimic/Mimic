@@ -1975,7 +1975,10 @@ var Decoder =
 				$("#"+"USLAB000ROL").text(roll.toFixed(2));
             };
 
-			selector.addClass('highlight');
+			if (item !== "TIME_000001")
+			{
+				selector.addClass('highlight');
+			}
 //			selector.one('animationend', function() { selector.removeClass('highlight');});
 			switch (update.getItemName()){
 			  case "Z1000014":
