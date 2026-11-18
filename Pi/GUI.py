@@ -43,34 +43,21 @@ if args.console_logging:
     #print("Console logging enabled")
 
 # Now import the rest of the modules
-import os.path as op
-
-import os # used to remove database on program exit; also used for importing config.json
 os.environ["KIVY_NO_CONSOLELOG"] = "1"   # Kivy: no automatic console handler
 os.environ["KIVY_LOG_LEVEL"]    = "error"  # (< INFO is ignored without handler,
 
-from datetime import datetime, timedelta #used for time conversions and logging timestamps
-from dateutil.relativedelta import relativedelta
-import datetime as dtime #this is different from above for... reasons?
-import threading, subprocess #used for background monitoring of USB ports for playback data
-import time #used for time
-import math #used for math
-import glob #used to parse serial port names
-import sqlite3 #used to access ISS telemetry database
-import pytz #used for timezone conversion in orbit pass predictions
-from bs4 import BeautifulSoup #used to parse webpages for data (EVA stats, ISS TLE)
-import ephem #used for TLE orbit information on orbit screen
-import serial #used to send data over serial to arduino
-import json # used for serial port config and storing TLEs and crew info
-import argparse
-import sys
 import os.path as op #use for getting mimic directory
+import json # used for serial port config
+import pathlib
 from pathlib import Path
-import pathlib, sys, signal
-import math
-import time
-from datetime import datetime
+import sqlite3 #used to access ISS telemetry database
+import serial #used to send data over serial to arduino
+# Not used directly here, but imported at startup so a missing dependency
+# fails immediately with a clear ImportError instead of inside a screen.
 from dateutil.relativedelta import relativedelta
+import pytz
+from bs4 import BeautifulSoup
+import ephem
 
 # Conditional import for pyudev (Linux only)
 try:
@@ -99,7 +86,6 @@ from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition, NoTran
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from functools import partial
-from kivy.network.urlrequest import UrlRequest
 
 # GUI.py runs as __main__; register it as "GUI" too so `import GUI`
 # (utils/serial.py) reuses this module instead of re-executing it, which
@@ -142,20 +128,16 @@ def probe_internet(callback, timeout=1.0) -> None:
 def remove_tty_device(name_to_remove):
     """ Removes tty device from list of serial ports. """
     global SERIAL_PORTS, OPEN_SERIAL_PORTS
-    try:
+    if name_to_remove in SERIAL_PORTS:
         SERIAL_PORTS.remove(name_to_remove)
-        idx_to_remove = -1
-        for x in range(len(OPEN_SERIAL_PORTS)):
-            if name_to_remove in str(OPEN_SERIAL_PORTS[x]):
-                idx_to_remove = x
-        if idx_to_remove != -1:
-            del OPEN_SERIAL_PORTS[idx_to_remove]
-            log_str = "Removed %s." % name_to_remove
-            log_info(log_str)
-            log_info(log_str)
-    except ValueError:
-        # Not printing anything because it sometimes tries too many times and is irrelevant
-        pass
+    # Match on the exact port name and close the handle so the fd isn't leaked
+    for port in [p for p in OPEN_SERIAL_PORTS if p.port == name_to_remove]:
+        OPEN_SERIAL_PORTS.remove(port)
+        try:
+            port.close()
+        except Exception:
+            pass  # device is already gone; nothing more to do
+        log_info("Removed %s." % name_to_remove)
 
 def add_tty_device(name_to_add):
     """ Adds tty device to list of serial ports after it successfully opens. """
@@ -406,7 +388,7 @@ class MainApp(App):
         # Process variables
         self.p = None
         self.p2 = None
-        self.tty_observer = None
+        self.tty_observer = TTY_OBSERVER  # stopped by MainScreen's EXIT cleanup
 
         self.mimic_directory = mimic_directory
         
@@ -493,7 +475,8 @@ class MainApp(App):
         self.internet = is_up
 
         if is_up:
-            self.signal_acquired()
+            # Show the real ISS signal state rather than assuming "acquired"
+            self.update_signal_status(0)
         else:
             self.signal_client_offline()
 
@@ -778,5 +761,8 @@ if __name__ == '__main__':
         log_error(f"Fatal error during startup: {e}")
         traceback.print_exc()
         
-        # Keep the console open so the user can see the error
-        input("Press Enter to exit...")
+        # Keep the console open so the user can see the error -- but only when
+        # there is a console; under autostart this would hang forever.
+        if sys.stdin is not None and sys.stdin.isatty():
+            input("Press Enter to exit...")
+        sys.exit(1)

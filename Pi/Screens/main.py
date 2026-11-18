@@ -92,7 +92,11 @@ class MainScreen(Screen):
             self._terminate_attr(app, attr)
     
         # 3) wipe temporary sqlite caches
-        for db in pathlib.Path("/dev/shm").glob("*.db*"):
+        # Only Mimic's own databases (plus -journal/-wal/-shm side files);
+        # /dev/shm is shared with every other program on the system.
+        mimic_dbs = ("iss_telemetry.db", "tdrs.db", "vv.db", "iss_crew.db")
+        shm = pathlib.Path("/dev/shm")
+        for db in (p for name in mimic_dbs for p in shm.glob(name + "*")):
             try:
                 db.unlink()
             except OSError as exc:
