@@ -302,7 +302,16 @@ class MainScreen(Screen):
                         if response.status_code == 200:
                             latest_commit = response.json()['sha']
                             
-                            if latest_commit != local_commit:
+                            # Up to date if GitHub's commit is already in our history
+                            # (equal to HEAD, or we have local commits on top of it).
+                            # Exit code 0 = ancestor; nonzero (incl. "unknown commit"
+                            # because it hasn't been fetched) = an update exists.
+                            is_ancestor = subprocess.run(
+                                ['git', 'merge-base', '--is-ancestor', latest_commit, 'HEAD'],
+                                cwd=repo_path, capture_output=True, timeout=10,
+                            ).returncode == 0
+
+                            if not is_ancestor:
                                 log_info(f"MainScreen: GitHub update available. Local: {local_commit[:8]}, Remote: {latest_commit[:8]}")
                                 return {
                                     'local': local_commit[:8],
@@ -330,25 +339,45 @@ class MainScreen(Screen):
             log_error(f"Error checking GitHub updates: {exc}")
             return None
     
+    # Result of the once-per-session update check: None = not finished yet
+    _github_update_info = None
+    _github_check_started = False
+
     def _check_and_update_github_status(self):
-        """Check for GitHub updates and update status if needed."""
+        """
+        Show the update notice if one is known; otherwise start the check.
+
+        The check (git subprocesses + a GitHub API call) runs once per session
+        in a background thread. It used to run on the UI thread every time the
+        main screen was entered, freezing the UI for up to ~40s when offline
+        and using up GitHub's 60 requests/hour unauthenticated limit.
+        """
+        cls = type(self)
+        if cls._github_update_info is not None:
+            self._show_github_status()
+            return
+        if cls._github_check_started:
+            return
+        cls._github_check_started = True
+
+        def worker():
+            info = self._check_github_updates()
+            cls._github_update_info = info or {}
+            Clock.schedule_once(lambda _dt: self._show_github_status())
+
+        threading.Thread(target=worker, name="github-update-check", daemon=True).start()
+
+    def _show_github_status(self):
+        """Apply the cached update-check result to the status label (UI thread)."""
         try:
-            # Only check if we have a status label
-            if not hasattr(self.ids, 'status_label'):
+            if 'status_label' not in self.ids:
                 return
-            
-            # Check for GitHub updates
-            update_info = self._check_github_updates()
-            
-            if update_info:
-                # There's an update available
-                status_text = f"GitHub update available! Run 'git pull' to update."
+            if type(self)._github_update_info and self.manager and self.manager.current == self.name:
+                status_text = "GitHub update available! Run 'git pull' to update."
                 self.ids.status_label.text = status_text
                 log_info(f"MainScreen: Status updated with GitHub update info: {status_text}")
             else:
-                # No update available - just log it
                 log_info("MainScreen: No GitHub updates available")
-                    
         except Exception as exc:
             log_error(f"Error updating GitHub status: {exc}")
     
