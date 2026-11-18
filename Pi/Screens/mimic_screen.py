@@ -487,7 +487,7 @@ class MimicScreen(MimicBase):
         # Check if we're going to a main screen or a subscreen
         current_screen = screen_manager.current if screen_manager else None
         
-        if current_screen is 'main':
+        if current_screen == 'main':
             # Stop mimic transmission and inform GUI.py
             if self._mimic_active:
                 self._mimic_active = False

@@ -1,11 +1,25 @@
 from os import environ
+from pathlib import Path
 from twisted.internet.defer import inlineCallbacks
 from autobahn.twisted.wamp import ApplicationSession, ApplicationRunner
 import sqlite3
 from utils.logger import log_info, log_error
 
+# Every TDRS that can relay for the ISS. Only the first two found connected are
+# stored (TDRS1/TDRS2 columns); screens without art for one still show its label.
+TDRS_IDS = [12, 11, 10, 13, 6, 7, 8]
+
+def _db_path(db_name: str) -> str:
+    """Same location rules as GUI.py / database_initialize.py."""
+    shm_dir = Path('/dev/shm')
+    if shm_dir.is_dir():
+        return str(shm_dir / db_name)
+    data_dir = Path.home() / '.mimic_data'
+    data_dir.mkdir(parents=True, exist_ok=True)
+    return str(data_dir / db_name)
+
 # Database connection
-conn = sqlite3.connect('/dev/shm/tdrs.db', isolation_level=None)
+conn = sqlite3.connect(_db_path('tdrs.db'), isolation_level=None)
 c = conn.cursor()
 
 
@@ -62,7 +76,7 @@ class Component(ApplicationSession):
                 active_tdrs = [0, 0]
                 timestamp = 0
 
-                for tdrs_id in [12, 11, 10, 6, 7]:
+                for tdrs_id in TDRS_IDS:
                     ts = update_active_tdrs(msg, tdrs_id, active_tdrs)
                     if ts:
                         timestamp = ts
@@ -71,9 +85,7 @@ class Component(ApplicationSession):
                 update_database(active_tdrs, timestamp)
 
             except Exception as e:
-                log_error(f"Error processing TDRS status message: {e}")
-                import traceback
-                traceback.print_exc()
+                log_error(f"Error processing TDRS status message: {e}", exc_info=True)
 
         #log_info("Subscribing to TDRS activity channel")
         yield self.subscribe(onevent, u'gov.nasa.gsfc.scan_now.sn.activity')
