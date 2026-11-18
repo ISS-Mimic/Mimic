@@ -86,7 +86,7 @@ class MainScreen(Screen):
     
         # 2) terminate helper subprocesses
         for attr in (
-            "p", "TDRSproc",
+            "p", "TDRSproc", "VVproc", "crewproc",
             "demo_proc", "disco_proc",
             "htv_proc", "oft2_proc",
         ):

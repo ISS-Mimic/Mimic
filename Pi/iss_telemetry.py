@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 from datetime import datetime, timedelta, timezone
+import signal
 import sqlite3
+import threading
 import os.path as op #use for getting mimic directory
 from utils.logger import log_info, log_error
 
@@ -86,15 +88,19 @@ class TimeListener(LSSubscriptionListener):
         super().__init__()
         self.db = db
         self.AOSnum = 0
+
+    @staticmethod
+    def _current_iss_hours() -> float:
+        """Current UTC time in ISS timestamp units (fractional hours since Dec 31 of the prior year)."""
         now = datetime.now(timezone.utc)
         new_years_eve = datetime(now.year - 1, 12, 31, tzinfo=now.tzinfo)
-        diff = now - new_years_eve
-        self.start_time = diff / timedelta(hours=1)  # convert to fractional hours
+        return (now - new_years_eve) / timedelta(hours=1)
 
     def onItemUpdate(self, update):
         status = update.getValue("Status.Class")
         AOStimestamp = float(update.getValue("TimeStamp"))
-        difference = self.start_time - AOStimestamp
+        # Compare against the time *now*, not script start, so a frozen feed is detected as stale
+        difference = self._current_iss_hours() - AOStimestamp
 
         if status == "24":
             if difference > FIVE_SECONDS_AS_HOURS:
@@ -116,8 +122,24 @@ class TimeListener(LSSubscriptionListener):
                         (self.AOSnum, AOStimestamp, "aos"))
 
 
-def wait_for_input():
-    input("{0:-^80}\n".format("Press enter to disconnect & quit."))
+_shutdown = threading.Event()
+
+def _request_shutdown(signum, _frame):
+    log_info(f"Received signal {signum}, shutting down telemetry")
+    _shutdown.set()
+
+def wait_for_shutdown():
+    """Block until SIGTERM/SIGINT (e.g. GUI calling proc.terminate()).
+
+    Previously this used input(), which returned immediately (EOFError) when
+    the GUI was launched without a terminal, and disconnected the feed
+    whenever Enter was pressed in the shared terminal.
+    """
+    signal.signal(signal.SIGTERM, _request_shutdown)
+    signal.signal(signal.SIGINT, _request_shutdown)
+    # Wait in short slices so signals are handled promptly on all platforms
+    while not _shutdown.wait(1.0):
+        pass
 
 def main():
     print('ISS Telemetry script active')
@@ -153,7 +175,7 @@ def main():
         ls_client.connect()
         print(ls_client.getStatus())
         log_info(ls_client.getStatus())
-        wait_for_input()
+        wait_for_shutdown()
     finally:
         ls_client.unsubscribe(main_sub)
         ls_client.unsubscribe(time_sub)

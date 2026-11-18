@@ -16,11 +16,17 @@ def parse_arguments():
                        help='Suppress all logging output')
     parser.add_argument('--console-logging', action='store_true',
                        help='Enable console logging in addition to file logging')
-    
-    return parser.parse_args()
+    parser.add_argument('--config', action='store_true', default=False,
+                       help='use config.json to manually specify serial ports to use')
 
-# Parse arguments and set environment variables for logger configuration
-args = parse_arguments()
+    # parse_known_args so Kivy-specific args are left for Kivy to handle
+    return parser.parse_known_args()
+
+# Parse arguments and set environment variables for logger configuration.
+# Strip our own flags from sys.argv so Kivy (which parses sys.argv on import)
+# only sees arguments it understands.
+args, kivy_args = parse_arguments()
+sys.argv[1:] = kivy_args
 
 if args.debug or args.verbose:
     os.environ['MIMIC_LOG_LEVEL'] = 'INFO'
@@ -78,15 +84,7 @@ except ImportError:
     class Monitor: pass
     class MonitorObserver: pass
 
-# This is here because Kivy gets upset if you pass in your own non-Kivy args
 CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), "config.json")
-parser = argparse.ArgumentParser(description='ISS Mimic GUI. Arguments listed below are non-Kivy arguments.')
-parser.add_argument(
-        '--config', action='store_true',
-        help='use config.json to manually specify serial ports to use',
-        default=False)
-args, kivy_args = parser.parse_known_args()
-sys.argv[1:] = kivy_args
 USE_CONFIG_JSON = args.config
 
 
@@ -102,6 +100,12 @@ from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from functools import partial
 from kivy.network.urlrequest import UrlRequest
+
+# GUI.py runs as __main__; register it as "GUI" too so `import GUI`
+# (utils/serial.py) reuses this module instead of re-executing it, which
+# would re-open every serial port and start a second device monitor.
+if __name__ == '__main__':
+    sys.modules.setdefault('GUI', sys.modules['__main__'])
 
 import Screens as screens
 from utils.logger import log_info, log_error
