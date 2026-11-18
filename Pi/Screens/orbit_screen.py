@@ -913,16 +913,16 @@ class Orbit_Screen(MimicBase):
 
     # ---------------------------------------------------------------- spawn helpers
     def update_globe(self, _dt=0):
-        Popen(["python", f"{self.mimic_directory}/Mimic/Pi/orbitGlobe.py"])
+        Popen([sys.executable, f"{self.mimic_directory}/Mimic/Pi/orbitGlobe.py"])
 
     def update_nightshade(self, _dt=0):
-        Popen(["python", f"{self.mimic_directory}/Mimic/Pi/NightShade.py"])
+        Popen([sys.executable, f"{self.mimic_directory}/Mimic/Pi/NightShade.py"])
 
     def update_iss_tle(self, _dt=0):
-        Popen(["python", f"{self.mimic_directory}/Mimic/Pi/getTLE_ISS.py"])
+        Popen([sys.executable, f"{self.mimic_directory}/Mimic/Pi/getTLE_ISS.py"])
 
     def update_tdrs_tle(self, _dt=0):
-        Popen(["python", f"{self.mimic_directory}/Mimic/Pi/getTLE_TDRS.py"])
+        Popen([sys.executable, f"{self.mimic_directory}/Mimic/Pi/getTLE_TDRS.py"])
 
     # ---------------------------------------------------------------- TDRS ground-track
     def update_tdrs(self, _dt=0):

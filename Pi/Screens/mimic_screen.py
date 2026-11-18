@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 import pathlib
 import subprocess
+import sys
 from subprocess import Popen
 from kivy.uix.screenmanager import Screen
 from kivy.properties import ObjectProperty
@@ -393,70 +394,54 @@ class MimicScreen(MimicBase):
             self._update_status("Error: checkCrew.py not found")
             return
 
+        helpers = (
+            ("p", iss_telemetry_path),
+            ("TDRSproc", tdrscheck_path),
+            ("VVproc", vvcheck_path),
+            ("crewproc", checkcrew_path),
+        )
         try:
-            app.p = Popen(
-                ["python", str(iss_telemetry_path)],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
-            )
-            log_info(f"Started iss_telemetry.py (PID: {app.p.pid})")
-
-            app.TDRSproc = Popen(
-                ["python", str(tdrscheck_path)],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
-            )
-            log_info(f"Started TDRScheck.py (PID: {app.TDRSproc.pid})")
-
-            app.VVproc = Popen(
-                ["python", str(vvcheck_path)],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
-            )
-            log_info(f"Started VVcheck.py (PID: {app.VVproc.pid})")
-
-            app.crewproc = Popen(
-                ["python", str(checkcrew_path)],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
-            )
-            log_info(f"Started checkCrew.py (PID: {app.crewproc.pid})")
-
-            if app.p.poll() is not None:
-                _, stderr = app.p.communicate()
-                log_error(f"iss_telemetry.py failed to start: {stderr}")
-                self._update_status("Error: iss_telemetry.py failed to start")
-                app.p = None
-
-            if app.TDRSproc.poll() is not None:
-                _, stderr = app.TDRSproc.communicate()
-                log_error(f"TDRScheck.py failed to start: {stderr}")
-                self._update_status("Error: TDRScheck.py failed to start")
-                app.TDRSproc = None
-
-            if app.VVproc.poll() is not None:
-                _, stderr = app.VVproc.communicate()
-                log_error(f"VVcheck.py failed to start: {stderr}")
-                self._update_status("Error: VVcheck.py failed to start")
-                app.VVproc = None
-
-            if app.crewproc.poll() is not None:
-                _, stderr = app.crewproc.communicate()
-                log_error(f"checkCrew.py failed to start: {stderr}")
-                self._update_status("Error: checkCrew.py failed to start")
-                app.crewproc = None
-
-            # If all processes started successfully
-            if app.p and app.TDRSproc and app.VVproc and app.crewproc:
-                self._update_status("Telemetry subprocesses started successfully")
-
+            for attr, script in helpers:
+                setattr(app, attr, self._spawn_helper(script))
+            self._update_status("Telemetry subprocesses started successfully")
+            # Check shortly after launch so a script that crashes on startup is reported
+            Clock.schedule_once(lambda _dt: self._check_helpers(helpers), 3)
         except Exception as exc:
             log_error(f"Failed to start subprocesses: {exc}")
             self._update_status(f"Error starting subprocesses: {exc}")
+
+    @staticmethod
+    def _spawn_helper(script: Path) -> Popen:
+        """
+        Start a helper script with the same interpreter as the GUI.
+
+        Output goes to Logs/<script>.out rather than an unread PIPE: a PIPE
+        nobody reads fills up (~64KB) and then blocks the child forever.
+        """
+        log_dir = Path(__file__).resolve().parents[1] / "Logs"
+        log_dir.mkdir(parents=True, exist_ok=True)
+        with open(log_dir / f"{script.stem}.out", "w") as out:
+            proc = Popen(
+                [sys.executable, str(script)],
+                stdin=subprocess.DEVNULL,
+                stdout=out,
+                stderr=subprocess.STDOUT,
+            )
+        log_info(f"Started {script.name} (PID: {proc.pid})")
+        return proc
+
+    def _check_helpers(self, helpers) -> None:
+        app = App.get_running_app()
+        failed = []
+        for attr, script in helpers:
+            proc = getattr(app, attr, None)
+            if proc is not None and proc.poll() is not None:
+                log_error(f"{script.name} exited early (code {proc.returncode}); "
+                          f"see Logs/{script.stem}.out")
+                setattr(app, attr, None)
+                failed.append(script.name)
+        if failed:
+            self._update_status(f"Error: {', '.join(failed)} stopped - see Logs")
 
     def killproc(self) -> None:
         log_info(f"Kill Proc")
@@ -471,7 +456,12 @@ class MimicScreen(MimicBase):
             if not proc:
                 continue
             try:
-                proc.terminate(); proc.wait(timeout=3)
+                proc.terminate()
+                try:
+                    proc.wait(timeout=3)
+                except subprocess.TimeoutExpired:
+                    proc.kill()
+                    proc.wait()
                 log_info(f"{name} terminated.")
             except Exception as exc:
                 log_error(f"Failed to kill {name}: {exc}")

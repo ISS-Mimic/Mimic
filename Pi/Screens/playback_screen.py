@@ -4,6 +4,7 @@ import pathlib
 import time
 import threading
 import os
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, Any
@@ -751,7 +752,7 @@ class Playback_Screen(MimicBase):
                 data_folder = str(Path(self.mimic_directory) / "Mimic/Pi/RecordedData" / demo_name)
 
             cmd = [
-                "python3",
+                sys.executable,
                 str(Path(self.mimic_directory) / "Mimic/Pi/RecordedData/playback_engine.py"),
                 data_folder,
                 str(self.playback_speed)
