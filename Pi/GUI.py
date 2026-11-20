@@ -101,6 +101,9 @@ mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 
 # Constants
 SERIAL_SPEED = 9600
+# Short finite write timeout: 0 makes pyserial 3.5 spin forever when an
+# Arduino stops reading (see utils/serial.py), freezing the UI thread.
+from utils.serial import WRITE_TIMEOUT as SERIAL_WRITE_TIMEOUT
 
 os.environ['KIVY_GL_BACKEND'] = 'gl' #need this to fix a kivy segfault that occurs with python3 for some reason
 
@@ -145,7 +148,7 @@ def add_tty_device(name_to_add):
     if name_to_add not in SERIAL_PORTS:
         try:
             SERIAL_PORTS.append(name_to_add)
-            OPEN_SERIAL_PORTS.append(serial.Serial(SERIAL_PORTS[-1], SERIAL_SPEED, write_timeout=0.5, timeout=0))
+            OPEN_SERIAL_PORTS.append(serial.Serial(SERIAL_PORTS[-1], SERIAL_SPEED, write_timeout=SERIAL_WRITE_TIMEOUT, timeout=0))
             log_str = "Added and opened %s." % name_to_add
             log_info(log_str)
         except IOError as e:
@@ -226,7 +229,7 @@ def open_serial_ports(serial_ports):
     global OPEN_SERIAL_PORTS
     try:
         for s in serial_ports:
-            OPEN_SERIAL_PORTS.append(serial.Serial(s, SERIAL_SPEED, write_timeout=0, timeout=0))
+            OPEN_SERIAL_PORTS.append(serial.Serial(s, SERIAL_SPEED, write_timeout=SERIAL_WRITE_TIMEOUT, timeout=0))
     except (OSError, serial.SerialException) as e:
         if USE_CONFIG_JSON:
             log_info("\nNot all serial ports were detected. Check config.json for accuracy.\n\n%s" % e)
