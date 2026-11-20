@@ -342,7 +342,11 @@ class MimicScreen(MimicBase):
                     log_info(f"Mimic: sent {len(led_commands)} LED commands")
 
                 # estimate wire time to pace the *next* tick safely at 9600
-                nb = self._line_bytes(telemetry_cmd + "\n")
+                # Count the LED lines too: they're ~1/3 of each tick's bytes, and
+                # leaving them out let ticks outrun the 9600 bps link (~960 B/s),
+                # filling the port buffer until writes stalled.
+                nb = self._line_bytes(telemetry_cmd + "\n") + sum(
+                    self._line_bytes(cmd + "\n") for cmd in led_commands)
                 min_gap = self._min_gap(nb)
 
                 # Add delay time to the minimum gap calculation
