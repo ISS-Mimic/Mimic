@@ -10,8 +10,9 @@ Usage in any module / screen:
 from __future__ import annotations
 
 import logging
+import sys
 import time
-from logging.handlers import RotatingFileHandler
+from logging.handlers import RotatingFileHandler, WatchedFileHandler
 from pathlib import Path
 from os import environ
 
@@ -44,8 +45,16 @@ def _configure_root() -> logging.Logger:
     
     root.setLevel(log_level)
 
-    # rotating file handler --------------------------------------------------
-    fh = RotatingFileHandler(_LOG_FILE, maxBytes=1_048_576, backupCount=5)
+    # file handler -------------------------------------------------------------
+    # GUI.py and every helper it launches log to the same file. If each
+    # process rotated it, the others would keep writing into the renamed
+    # mimic.log.1 (scattering lines across files). So only the GUI process
+    # rotates; helpers use WatchedFileHandler, which reopens mimic.log when
+    # it notices the file was rotated underneath it.
+    if Path(sys.argv[0]).name == "GUI.py":
+        fh = RotatingFileHandler(_LOG_FILE, maxBytes=1_048_576, backupCount=5)
+    else:
+        fh = WatchedFileHandler(_LOG_FILE)
     fmt = logging.Formatter(
         "%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s",
         "%Y-%m-%d %H:%M:%S",
