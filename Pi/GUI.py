@@ -103,7 +103,7 @@ mimic_directory = op.abspath(op.join(__file__, op.pardir, op.pardir, op.pardir))
 SERIAL_SPEED = 9600
 # Short finite write timeout: 0 makes pyserial 3.5 spin forever when an
 # Arduino stops reading (see utils/serial.py), freezing the UI thread.
-from utils.serial import WRITE_TIMEOUT as SERIAL_WRITE_TIMEOUT
+from utils.serial import WRITE_TIMEOUT as SERIAL_WRITE_TIMEOUT, drain_input
 
 os.environ['KIVY_GL_BACKEND'] = 'gl' #need this to fix a kivy segfault that occurs with python3 for some reason
 
@@ -453,6 +453,9 @@ class MainApp(App):
             log_info("Scheduling update functions...")
             Clock.schedule_interval(self.update_signal_status, 1) #all telemetry wil refresh and get pushed to arduinos every half second!
             Clock.schedule_interval(self.updateArduinoCount, 5) #update arduino count every 5 seconds
+            # Discard Arduino output we never read, so it can't back up and
+            # stall our writes (see utils/serial.drain_input)
+            Clock.schedule_interval(lambda _dt: drain_input(OPEN_SERIAL_PORTS), 1)
             Clock.schedule_interval(self._schedule_internet_probe,
                                     self.INTERNET_POLL_S) # check for active internet connection
 

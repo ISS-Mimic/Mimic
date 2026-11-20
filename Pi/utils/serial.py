@@ -16,7 +16,10 @@ from utils.logger import log_info, log_error
 # Arduino stops reading (reset, brown-out, firmware hang). So every port gets
 # a short finite write timeout (GUI.py: SERIAL_WRITE_TIMEOUT), and we skip a
 # port entirely while its output queue is backed up.
-WRITE_TIMEOUT = 0.1          # seconds; worst-case block per port per write
+# Must exceed the wire time of the longest line we send: the Uno's USB-serial
+# path only buffers ~64 bytes, so a ~200-byte telemetry line takes ~210 ms
+# at 9600 bps and a shorter timeout cuts it off mid-line.
+WRITE_TIMEOUT = 0.5          # seconds; worst-case block per port per write
 MAX_OUT_WAITING = 512        # bytes queued before we consider the port stalled
 
 RETRY_AFTER = 2.0            # seconds to skip a port after it stops accepting data
@@ -58,6 +61,32 @@ def _port_is_stalled(s) -> bool:
         return True
     return False
 
+def drain_input(ports=None) -> None:
+    """
+    Discard whatever the Arduinos have sent us.
+
+    Nothing in Mimic reads serial input, but the sketches print continuously
+    (~170 B/s). Once the Pi's ~4 KB receive buffer is full, the Uno's
+    USB-serial chip stops accepting data from us too: writes stall, and at
+    exit the kernel waits 30 s trying to send what's queued.
+    """
+    for s in list(ports if ports is not None else _open_ports()):
+        try:
+            if s.is_open:
+                s.reset_input_buffer()
+        except Exception:
+            pass             # unplugged mid-call; the hot-plug handler cleans up
+
+def close_ports(ports=None) -> None:
+    """Discard pending I/O and close every port (fast exit, no 30 s drain)."""
+    for s in list(ports if ports is not None else _open_ports()):
+        try:
+            s.reset_input_buffer()
+            s.reset_output_buffer()
+            s.close()
+        except Exception:
+            pass
+
 def _mark_ok(s) -> None:
     if _stalled_until.pop(s.port, None) is not None:
         log_info(f"Serial port {s.port} is accepting data again")
@@ -74,6 +103,10 @@ def serialWrite(*args):
             continue
         if _port_is_stalled(s):
             continue
+        try:
+            s.reset_input_buffer()   # keep the receive side from backing up (see drain_input)
+        except Exception:
+            pass
         # Guard against ports opened with write_timeout=0 (see note above)
         if not s.write_timeout:
             s.write_timeout = WRITE_TIMEOUT
