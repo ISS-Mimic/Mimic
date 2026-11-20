@@ -61,11 +61,16 @@ class MainScreen(Screen):
         app.stop()                      # ⇢ window disappears instantly
     
         # ------------------------------------------------------------
-        # launch daemon thread to finish cleanup in background
+        # finish cleanup in a background thread. It must NOT be a daemon:
+        # once app.run() returns the interpreter only waits for non-daemon
+        # threads, and cleanup stops the (non-daemon) TTY observer first --
+        # a daemon thread would then be killed before it terminates the
+        # helpers, deletes the DBs and reaches os._exit().
         # ------------------------------------------------------------
         threading.Thread(
             target=self._background_cleanup_and_exit,
-            daemon=True
+            name="exit-cleanup",
+            daemon=False
         ).start()
     
     
