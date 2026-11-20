@@ -1,6 +1,7 @@
 from __future__ import annotations
 import threading
 import subprocess
+import time
 import pathlib
 import os
 import math
@@ -57,8 +58,14 @@ class MainScreen(Screen):
             return                      # double-click guard
         self._exiting = True
     
+        t0 = time.monotonic()
+        log_info("EXIT pressed")
+        # Grab the app *before* stopping it: app.stop() clears
+        # App._running_app, so get_running_app() in the cleanup thread
+        # returned None and the observer/helpers were silently skipped.
         app = App.get_running_app()
         app.stop()                      # ⇢ window disappears instantly
+        log_info(f"EXIT: app.stop() returned after {time.monotonic() - t0:.2f}s")
     
         # ------------------------------------------------------------
         # finish cleanup in a background thread. It must NOT be a daemon:
@@ -69,33 +76,60 @@ class MainScreen(Screen):
         # ------------------------------------------------------------
         threading.Thread(
             target=self._background_cleanup_and_exit,
+            args=(app, t0),
             name="exit-cleanup",
             daemon=False
         ).start()
     
     
     # ──────────────────────────────────────────────────────────────
-    # runs in a daemon thread; UI already closed
+    # runs in a background thread; UI already closed
     # ──────────────────────────────────────────────────────────────
-    def _background_cleanup_and_exit(self):
-        app = App.get_running_app()
-    
+    def _background_cleanup_and_exit(self, app, t0):
+        def step(msg):
+            log_info(f"EXIT cleanup: {msg} (+{time.monotonic() - t0:.2f}s)")
+
         # 1) stop observer
         observer = getattr(app, "tty_observer", None)
         if observer:
             try:
                 observer.stop()
-                log_info("TTY observer stopped.")
+                step("TTY observer stopped")
             except Exception as exc:
                 log_error(f"Error stopping observer: {exc}")
     
-        # 2) terminate helper subprocesses
-        for attr in (
-            "p", "TDRSproc", "VVproc", "crewproc",
-            "playback_proc",
-        ):
-            self._terminate_attr(app, attr)
+        # 2) terminate helper subprocesses: signal them all first, then wait
+        #    with one shared deadline (not up to 3s each in turn)
+        procs = {}
+        for attr in ("p", "TDRSproc", "VVproc", "crewproc", "playback_proc"):
+            proc = getattr(app, attr, None)
+            setattr(app, attr, None)
+            if proc is None or proc.poll() is not None:
+                continue
+            try:
+                proc.terminate()
+                procs[attr] = proc
+            except Exception as exc:
+                log_error(f"Failed to terminate {attr}: {exc}")
+        deadline = time.monotonic() + 3
+        for attr, proc in procs.items():
+            try:
+                proc.wait(timeout=max(0.0, deadline - time.monotonic()))
+            except subprocess.TimeoutExpired:
+                log_error(f"{attr} ignored SIGTERM; killing it")
+                proc.kill()
+                proc.wait()
+        step(f"helpers stopped ({', '.join(procs) or 'none running'})")
     
+        # 3) close serial ports with pending I/O discarded; otherwise the
+        #    kernel waits up to 30 s at process exit trying to send it
+        try:
+            from utils.serial import close_ports
+            close_ports()
+            step("serial ports closed")
+        except Exception as exc:
+            log_error(f"Error closing serial ports: {exc}")
+
         # 3) wipe temporary sqlite caches
         # Only Mimic's own databases (plus -journal/-wal/-shm side files);
         # /dev/shm is shared with every other program on the system.
@@ -106,6 +140,7 @@ class MainScreen(Screen):
                 db.unlink()
             except OSError as exc:
                 log_error(f"Could not remove {db}: {exc}")
+        step("temp DBs removed; exiting")
     
         # 4) done – force interpreter exit (bypasses lingering threads)
         os._exit(0)                     # ← never returns
@@ -389,22 +424,3 @@ class MainScreen(Screen):
                 log_info("MainScreen: No GitHub updates available")
         except Exception as exc:
             log_error(f"Error updating GitHub status: {exc}")
-    
-    
-    # helper stays unchanged
-    @staticmethod
-    def _terminate_attr(app: App, attr_name: str) -> None:
-        proc = getattr(app, attr_name, None)
-        if not proc:
-            return
-        try:
-            proc.terminate()
-            proc.wait(timeout=3)
-        except subprocess.TimeoutExpired:
-            proc.kill()
-            proc.wait()
-        except Exception as exc:
-            log_error(f"Failed to terminate {attr_name}: {exc}")
-        finally:
-            setattr(app, attr_name, None)
-            log_info(f"{attr_name} terminated.")
