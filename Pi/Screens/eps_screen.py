@@ -64,7 +64,7 @@ class EPS_Screen(MimicBase):
                 return
             conn = sqlite3.connect(str(db_path))
             cur = conn.cursor()
-            cur.execute('select Value from telemetry')
+            cur.execute('select Value, Timestamp from telemetry')
             values = cur.fetchall()
             conn.close()
 
@@ -92,9 +92,14 @@ class EPS_Screen(MimicBase):
             # Per-array V/I
             v = { '1a': float(values[25][0]), '1b': float(values[26][0]), '2a': float(values[27][0]), '2b': float(values[28][0]), '3a': float(values[29][0]), '3b': float(values[30][0]), '4a': float(values[31][0]), '4b': float(values[32][0]) }
             c = { '1a': float(values[33][0]), '1b': float(values[34][0]), '2a': float(values[35][0]), '2b': float(values[36][0]), '3a': float(values[37][0]), '3b': float(values[38][0]), '4a': float(values[39][0]), '4b': float(values[40][0]) }
+            # Array currents are no longer in NASA's public feed (#705): their
+            # rows keep Timestamp 0. Hide those labels until data shows up again.
+            c_live = {k: float(values[i][1] or 0) > 0 for k, i in zip(c, range(33, 41))}
             for key in ('1a','1b','2a','2b','3a','3b','4a','4b'):
                 self._set_text(f"v{key}_value", f"{v[key]:.2f}V")
                 self._set_text(f"c{key}_value", f"{c[key]:.2f}A")
+                if f"c{key}_value" in self.ids:
+                    self.ids[f"c{key}_value"].opacity = 1 if c_live[key] else 0
 
             # Smooth the array state with 10-sample averaging and update imagery
             if self._v_buffers is not None:
