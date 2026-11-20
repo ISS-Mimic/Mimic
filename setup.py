@@ -377,7 +377,13 @@ def main():
     # Replace Kivy config (safe)
     def replace_kivy_config():
         username = os.environ.get("SUDO_USER") or getuser()
-        kivy_cfg = Path(f"/home/{username}/.kivy/config.ini")
+        # Real home dir of the invoking user (not always /home/<user>, #657)
+        try:
+            import pwd
+            user_home = Path(pwd.getpwnam(username).pw_dir)
+        except (ImportError, KeyError):
+            user_home = Path.home()
+        kivy_cfg = user_home / ".kivy" / "config.ini"
         mimic_cfg = REPO_ROOT / "Pi" / "config.ini"
         _print("\nUpdating the Kivy config.ini file.")
         try:
