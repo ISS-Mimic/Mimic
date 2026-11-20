@@ -898,9 +898,18 @@ class Orbit_Screen(MimicBase):
             else:
                 src = str(self.map_zoe_jpg)
 
-            if self.ids.OrbitMap.source != src:
+            # NightShade.py rewrites these same files every couple of minutes,
+            # so also reload when the file changes -- comparing the path alone
+            # left the first-loaded (cached) map on screen forever (#696).
+            try:
+                mtime = Path(src).stat().st_mtime
+            except OSError:
+                mtime = None
+            last_src, last_mtime = getattr(self, "_orbit_map_state", (None, None))
+            if src != last_src or mtime != last_mtime:
                 self.ids.OrbitMap.source = src
                 self.ids.OrbitMap.reload()
+                self._orbit_map_state = (src, mtime)
         except Exception as exc:
             log_error(f"update_orbit_map failed: {exc}")
 

@@ -1,3 +1,4 @@
+import os
 import datetime as dt
 import math
 from pathlib import Path
@@ -162,6 +163,13 @@ def _draw_zoe(ax, poly, facecolor=(0.70, 0.49, 1.0), alpha=0.25, edgecolor='none
                           facecolor=facecolor, edgecolor=edgecolor, alpha=alpha, zorder=zorder)
 
 
+def _save_atomic(fig, path: Path, dpi) -> None:
+    """Write to a temp file then rename, so the GUI never loads a half-written map."""
+    tmp = path.with_name(path.stem + ".tmp" + path.suffix)
+    fig.savefig(tmp, bbox_inches="tight", pad_inches=0, dpi=dpi)
+    os.replace(tmp, path)
+
+
 def render_maps(
         out_dir=OUT_DIR,
         when_utc: dt.datetime | None = None,
@@ -190,14 +198,14 @@ def render_maps(
     # --- map_nozoe ---
     fig1, ax1 = _new_ax()
     _draw_night(ax1, when_utc)
-    fig1.savefig(path_nozoe, bbox_inches="tight", pad_inches=0, dpi=dpi)
+    _save_atomic(fig1, path_nozoe, dpi)
     plt.close(fig1)
 
     # --- map_zoe ---
     fig2, ax2 = _new_ax()
     _draw_night(ax2, when_utc)
     _draw_zoe(ax2, poly)
-    fig2.savefig(path_zoe, bbox_inches="tight", pad_inches=0, dpi=dpi)
+    _save_atomic(fig2, path_zoe, dpi)
     plt.close(fig2)
 
 
