@@ -1,6 +1,8 @@
 from os import environ
 from pathlib import Path
+import time
 from twisted.internet.defer import inlineCallbacks
+from twisted.internet.task import LoopingCall
 from autobahn.twisted.wamp import ApplicationSession, ApplicationRunner
 import sqlite3
 from utils.logger import log_info, log_error
@@ -8,6 +10,10 @@ from utils.logger import log_info, log_error
 # Every TDRS that can relay for the ISS. Only the first two found connected are
 # stored (TDRS1/TDRS2 columns); screens without art for one still show its label.
 TDRS_IDS = [12, 11, 10, 13, 6, 7, 8]
+
+# SCAN Now publishes every ~3 s. If nothing arrives for this long the feed is
+# down, so clear the active TDRS instead of showing the last one forever (#695).
+STALE_AFTER_S = 30
 
 def _db_path(db_name: str) -> str:
     """Same location rules as GUI.py / database_initialize.py."""
@@ -63,11 +69,40 @@ def update_database(active_tdrs, timestamp):
         raise
 
 
+def clear_active_tdrs(reason: str) -> None:
+    """Mark no TDRS as active (feed stale, disconnected or shutting down)."""
+    try:
+        update_database([0, 0], 0)
+        log_info(f"Cleared active TDRS: {reason}")
+    except Exception:
+        pass  # update_database already logged it
+
+
 class Component(ApplicationSession):
+    _last_msg = None
+    _cleared = False
+    _watchdog = None
+
+    def _check_stale(self):
+        if self._cleared:
+            return
+        if self._last_msg is None or time.monotonic() - self._last_msg > STALE_AFTER_S:
+            clear_active_tdrs(f"no SCAN Now data for {STALE_AFTER_S}s")
+            self._cleared = True
+
+    def onLeave(self, details):
+        clear_active_tdrs(f"left WAMP session ({details.reason})")
+        if self._watchdog and self._watchdog.running:
+            self._watchdog.stop()
+        super().onLeave(details)
+
     @inlineCallbacks
     def onJoin(self, details):
         """Handles joining the WAMP session."""
         log_info(f"Successfully joined WAMP session")
+        self._last_msg = time.monotonic()
+        self._watchdog = LoopingCall(self._check_stale)
+        self._watchdog.start(5, now=False)
 
         def onevent(msg):
             """Processes incoming messages and updates the database."""
@@ -83,6 +118,8 @@ class Component(ApplicationSession):
 
                 #log_info(f"Active TDRS: {active_tdrs}, Timestamp: {timestamp}")
                 update_database(active_tdrs, timestamp)
+                self._last_msg = time.monotonic()
+                self._cleared = False
 
             except Exception as e:
                 log_error(f"Error processing TDRS status message: {e}", exc_info=True)
@@ -104,7 +141,11 @@ if __name__ == '__main__':
 
         runner = ApplicationRunner(url, realm)
         log_info("Starting WAMP application runner")
-        runner.run(Component)
+        try:
+            runner.run(Component)
+        finally:
+            # Connection lost or SIGTERM from the GUI: don't leave a stale TDRS behind
+            clear_active_tdrs("TDRScheck exiting")
         
     except Exception as e:
         log_error(f"Fatal error in TDRS check application: {e}")
