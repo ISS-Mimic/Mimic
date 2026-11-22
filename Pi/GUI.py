@@ -701,6 +701,7 @@ class MainApp(App):
             conn, c = get_telemetry_connection()
             if not conn or not c:
                 log_error("Failed to get telemetry database connection")
+                self._broadcast_status("Telemetry database unavailable")
                 return
                 
             # Fetch Lightstreamer and AOS directly by label
@@ -735,6 +736,51 @@ class MainApp(App):
                 self.signal_stale()
         else:
             self.signal_unsubscribed()
+
+        self._broadcast_status(self._compose_status(sub_status, aos_val))
+
+    # ---- shared status bar (#688) -----------------------------------------
+    # These screens write their own status_label text; all others get the
+    # shared telemetry/Arduino status below.
+    OWN_STATUS_SCREENS = {'main', 'manualcontrol', 'led', 'playback',
+                          'settings', 'mimic'}
+
+    @staticmethod
+    def _proc_running(proc) -> bool:
+        return proc is not None and proc.poll() is None
+
+    def _compose_status(self, sub_status: str, aos_val: int) -> str:
+        """One-line summary of where the data on screen is coming from."""
+        if self._proc_running(getattr(self, "playback_proc", None)):
+            text = "Playback - showing recorded data, not live"
+        elif self.internet is False:
+            text = "No internet - live telemetry unavailable"
+        elif not self._proc_running(getattr(self, "p", None)):
+            text = "Telemetry not running - start it from the Mimic screen"
+        elif sub_status != "Subscribed":
+            text = "Connecting to ISS live telemetry..."
+        elif aos_val == 1:
+            text = "Live ISS telemetry (AOS)"
+        elif aos_val == 0:
+            text = "Loss of signal (LOS) - showing last received data"
+        else:
+            text = "Telemetry stale - showing last received data"
+
+        if self.mimicbutton:
+            n = len(SERIAL_PORTS)
+            text += f"  |  Transmitting to {n} Arduino{'s' if n != 1 else ''}"
+        return text
+
+    def _broadcast_status(self, text: str) -> None:
+        if text == getattr(self, "_last_status", None):
+            return
+        self._last_status = text
+        for name, scr in self.screens.items():
+            if name in self.OWN_STATUS_SCREENS:
+                continue
+            label = scr.ids.get("status_label")
+            if label is not None:
+                label.text = text
 
 if __name__ == '__main__':
     try:
