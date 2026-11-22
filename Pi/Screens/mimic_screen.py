@@ -16,7 +16,7 @@ from kivy.clock import Clock
 
 from ._base import MimicBase                    # gives mimic_directory + signalcolor
 from utils.logger import log_info, log_error
-from utils.serial import serialWrite            # we'll keep using this, but ensure newline here
+from utils.serial import serialWrite, serial_backlog            # we'll keep using this, but ensure newline here
 
 # -- load KV that sits next to this file -------------------------------------
 kv_path = pathlib.Path(__file__).with_name("MimicScreen.kv")
@@ -180,15 +180,15 @@ class MimicScreen(MimicBase):
 
     # ------------------------------ helpers: writer/pacing/format ------------------------------
 
-    def _write_line(self, line: str):
+    def _write_line(self, line: str, pause_after: float = 0.0):
         """
-        Ensure newline termination and call serialWrite once per update.
-        serialWrite ultimately writes to all open ports (as in your code).
+        Ensure newline termination and queue the line for every open port.
+        serialWrite returns at once; a background thread does the writing.
         """
         if not line.endswith("\n"):
             line = line + "\n"
         try:
-            serialWrite(line)
+            serialWrite(line, pause_after=pause_after)
         except Exception as e:
             log_error(f"serialWrite failed: {e}")
 
@@ -318,6 +318,12 @@ class MimicScreen(MimicBase):
             if hasattr(app, 'led_values'):
                 leds = app.led_values
 
+            # Previous tick still going out at 9600 bps: skip this one rather
+            # than queue stale data (the gate sends the latest values next time)
+            if serial_backlog():
+                self._schedule_next(1.0 / self._BASE_HZ)
+                return
+
             # Apply change gate filtering (use monotonic clock)
             should_send, q_vals, q_leds, reason = self._gate.filter(time.monotonic(), arduino_vals, leds)
 
@@ -328,17 +334,15 @@ class MimicScreen(MimicBase):
                 # Build and send telemetry line
                 telemetry_cmd = self._build_telemetry_command(q_vals)
                 log_info(f"Mimic: sending telemetry ({reason}) → {telemetry_cmd}")
-                self._write_line(telemetry_cmd)
+                # 50ms pause so the microcontroller can process the telemetry
+                # line; the serial writer thread waits, not the UI
+                self._write_line(telemetry_cmd, pause_after=0.05)
                 
-                # Small delay to let microcontroller process telemetry command
-                time.sleep(0.05)  # 50ms delay (kept to match your current behavior)
-                
-                # Send LED commands individually (current behavior)
+                # Send LED commands individually, 20ms apart
                 led_commands = self._build_led_commands(q_vals)
                 if led_commands:
                     for led_cmd in led_commands:
-                        self._write_line(led_cmd)
-                        time.sleep(0.02)  # 20ms delay between LED commands
+                        self._write_line(led_cmd, pause_after=0.02)
                     log_info(f"Mimic: sent {len(led_commands)} LED commands")
 
                 # estimate wire time to pace the *next* tick safely at 9600

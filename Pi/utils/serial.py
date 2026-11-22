@@ -4,7 +4,7 @@ Serial helper used by multiple screens.
 The OPEN_SERIAL_PORTS list is still defined in GUI.py; we import it
 dynamically so we *don’t* create a circular import at module-load time.
 """
-import time, serial, os
+import os, queue, serial, threading, time
 
 from utils.logger import log_info, log_error
 
@@ -79,6 +79,7 @@ def drain_input(ports=None) -> None:
 
 def close_ports(ports=None) -> None:
     """Discard pending I/O and close every port (fast exit, no 30 s drain)."""
+    discard_pending()
     for s in list(ports if ports is not None else _open_ports()):
         try:
             s.reset_input_buffer()
@@ -91,12 +92,8 @@ def _mark_ok(s) -> None:
     if _stalled_until.pop(s.port, None) is not None:
         log_info(f"Serial port {s.port} is accepting data again")
 
-def serialWrite(*args):
-    """Writes the given bytes to every port in OPEN_SERIAL_PORTS."""
-    msg = str(*args)
-    log_info(f"serialWrite → {msg!r}")
-    data = msg.encode()
-
+def _write_all(data: bytes) -> None:
+    """Write one message to every open port (runs on the writer thread)."""
     for s in list(_open_ports()):     # copy: hot-plug thread may modify the list
         if not s.is_open:
             log_error(f"Serial port {s.port} is not open.")
@@ -117,3 +114,58 @@ def serialWrite(*args):
             _mark_stalled(s, "write timed out")
         except (OSError, serial.SerialException) as e:
             log_error(f"Error writing to {s.port}: {e}")
+
+# ---- background writer ---------------------------------------------------
+# At 9600 bps a ~200-byte telemetry line takes ~200 ms to leave, and the
+# Uno only buffers ~64 bytes, so s.write() blocks for most of that time.
+# Done on the Kivy thread, every mimic tick froze animations for ~0.5 s.
+# serialWrite() therefore only queues; one thread does the writing, in order.
+_queue: "queue.Queue[tuple[bytes, float]]" = queue.Queue()
+_writer = None
+_writer_lock = threading.Lock()
+
+def _writer_loop() -> None:
+    while True:
+        data, pause_after = _queue.get()
+        try:
+            _write_all(data)
+            if pause_after:
+                time.sleep(pause_after)   # give the sketch time to parse
+        except Exception as e:
+            log_error(f"Serial writer error: {e}")
+        finally:
+            _queue.task_done()
+
+def _ensure_writer() -> None:
+    global _writer
+    with _writer_lock:
+        if _writer is None or not _writer.is_alive():
+            _writer = threading.Thread(target=_writer_loop, name="serial-writer",
+                                       daemon=True)
+            _writer.start()
+
+def serial_backlog() -> int:
+    """Messages queued or being written. Periodic senders should skip a tick
+    while this is non-zero, so stale telemetry never piles up."""
+    return _queue.unfinished_tasks
+
+def discard_pending() -> None:
+    """Drop queued (not yet started) messages, e.g. at exit."""
+    try:
+        while True:
+            _queue.get_nowait()
+            _queue.task_done()
+    except queue.Empty:
+        pass
+
+def serialWrite(*args, pause_after: float = 0.0):
+    """
+    Queue a message for every port in OPEN_SERIAL_PORTS and return at once.
+
+    pause_after: seconds the writer waits after this message before sending
+    the next one (replaces time.sleep() calls that used to block the UI).
+    """
+    msg = str(*args)
+    log_info(f"serialWrite → {msg!r}")
+    _ensure_writer()
+    _queue.put((msg.encode(), pause_after))

@@ -25,7 +25,7 @@ from subprocess import Popen, TimeoutExpired
 
 from ._base import MimicBase
 from utils.logger import log_info, log_error
-from utils.serial import serialWrite
+from utils.serial import serialWrite, serial_backlog
 
 # ── load KV next to this file ──────────────────────────────────────────────
 kv_path = pathlib.Path(__file__).with_name("Playback_Screen.kv")
@@ -438,6 +438,12 @@ class Playback_Screen(MimicBase):
                 self._reschedule_serial_writer(1.0 / self._BASE_HZ)
                 return
 
+            # Previous packet still going out at 9600 bps: skip this tick
+            # rather than queue stale data
+            if serial_backlog():
+                self._reschedule_serial_writer(1.0 / self._BASE_HZ)
+                return
+
             leds = self._compute_leds(vals)
             now = time.monotonic()
             should_send, q_vals, q_leds, reason = self._gate.filter(now, vals, leds)
@@ -468,11 +474,10 @@ class Playback_Screen(MimicBase):
                 min_gap = self._min_gap(nb)
 
                 # Send telemetry command first
-                self._write_line(telemetry_cmd)
+                # 50ms pause (on the serial writer thread, not the UI) so the
+                # microcontroller can process the telemetry line
+                self._write_line(telemetry_cmd, pause_after=0.05)
                 log_info(f"Playback: sent telemetry ({reason}) → {telemetry_cmd}")
-                
-                # Small delay to let microcontroller process telemetry command
-                time.sleep(0.05)  # 50ms delay
                 
                 # Send LED commands in two groups for reliability
                 if led_commands:
@@ -480,9 +485,8 @@ class Playback_Screen(MimicBase):
                     
                     # Send port LEDs first (2A, 4A, 2B, 4B)
                     if port_cmd:
-                        self._write_line(port_cmd)
+                        self._write_line(port_cmd, pause_after=0.02)  # gap between groups
                         log_info(f"Playback: sent port LEDs → {port_cmd}")
-                        time.sleep(0.02)  # Small delay between groups
                     
                     # Send starboard LEDs (1A, 3A, 1B, 3B)
                     if starboard_cmd:
@@ -518,14 +522,14 @@ class Playback_Screen(MimicBase):
         self._serial_timer = Clock.schedule_once(self._send_telemetry_serial, interval)
 
     # ------------------------------ helpers: writer/pacing/format ------------------------------
-    def _write_line(self, line: str):
+    def _write_line(self, line: str, pause_after: float = 0.0):
         """
-        Ensure newline termination and call serialWrite once per update.
+        Ensure newline termination and queue the line for every open port.
         """
         if not line.endswith("\n"):
             line = line + "\n"
         try:
-            serialWrite(line)
+            serialWrite(line, pause_after=pause_after)
         except Exception as e:
             log_error(f"serialWrite failed: {e}")
 
