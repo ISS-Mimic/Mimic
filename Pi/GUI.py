@@ -900,7 +900,20 @@ if __name__ == '__main__':
         log_info("MainApp created successfully")
         app.run()
         log_info("Application finished normally")
-        
+
+        # The EXIT button runs MainScreen's cleanup in a thread that ends in
+        # os._exit(). Any other way out (window closed, SIGTERM, Ctrl-C)
+        # used to hang here forever: the serial hot-plug observer is a
+        # non-daemon thread, so Python waited for it, and helper processes
+        # were left running. Run the same cleanup for those exits too.
+        main_screen = getattr(app, "screens", {}).get("main")
+        if main_screen is not None and not getattr(main_screen, "_exiting", False):
+            import time
+            main_screen._exiting = True
+            main_screen._background_cleanup_and_exit(app, time.monotonic())
+        elif main_screen is None and TTY_OBSERVER is not None:
+            TTY_OBSERVER.stop()
+
     except Exception as e:
         log_error(f"Fatal error during startup: {e}")
         traceback.print_exc()

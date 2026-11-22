@@ -170,7 +170,17 @@ class Settings_Screen(Screen, EventDispatcher):
         """Update the orbit screen with new location."""
         try:
             # Find the orbit screen and update its location
-            orbit_screen = self.manager.get_screen('orbit')
+            # At startup the IP lookup can finish before this screen has been
+            # added to the ScreenManager (self.manager is None); the app's
+            # screen dict is available either way.
+            if self.manager is not None:
+                orbit_screen = self.manager.get_screen('orbit')
+            else:
+                from kivy.app import App
+                orbit_screen = getattr(App.get_running_app(), 'screens', {}).get('orbit')
+                if orbit_screen is None:
+                    return
+
             if hasattr(orbit_screen, 'set_user_location'):
                 orbit_screen.set_user_location(self.current_location[0], self.current_location[1])
                 log_info(f"Updated orbit screen location: {self.current_location[0]:.4f}, {self.current_location[1]:.4f}")
