@@ -145,6 +145,10 @@ class EPS_Screen(MimicBase):
             # USOS Power sum
             usos_power = sum(v[k] * c[k] for k in v.keys())
             self._set_text('usos_power', f"{usos_power*-1.0:.0f} W")
+            # Power is V*I summed over all arrays, so it's meaningless without
+            # every current; hide it like the current labels (#705)
+            if 'usos_power' in self.ids:
+                self.ids.usos_power.opacity = 1 if all(c_live.values()) else 0
 
             # Sun icon visibility: any channel voltage >= 151.5
             try:
