@@ -18,6 +18,14 @@ def parse_arguments():
                        help='Enable console logging in addition to file logging')
     parser.add_argument('--config', action='store_true', default=False,
                        help='use config.json to manually specify serial ports to use')
+    parser.add_argument('--tour', metavar='DIR', default=None,
+                       help='layout check: show each screen, save a screenshot '
+                            'of it to DIR/<screen>.png, then exit')
+    parser.add_argument('--screens', metavar='A,B,...', default=None,
+                       help='with --tour: only these screen names (default: all)')
+    parser.add_argument('--show-hidden', action='store_true',
+                       help='with --tour: make hidden (opacity 0) images visible '
+                            'before each screenshot, to check overlay placement')
 
     # parse_known_args so Kivy-specific args are left for Kivy to handle
     return parser.parse_known_args()
@@ -74,6 +82,15 @@ except ImportError:
 CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), "config.json")
 USE_CONFIG_JSON = args.config
 
+
+# Fullscreen "1" opens an 800x480 window that the Wayland compositor only
+# stretches to the panel's resolution ~1 s later, after build() has created
+# every screen at the wrong scale. "auto" opens it at the desktop resolution
+# straight away (800x480 on the 7" panel, 1920x1080 on larger ones), so
+# MainApp._apply_ui_scale sees the real size. Windowed (0) is left alone.
+from kivy.config import Config
+if Config.get('graphics', 'fullscreen').strip().lower() in ('1', 'true', 'yes'):
+    Config.set('graphics', 'fullscreen', 'auto')
 
 from kivy.app import App
 from kivy.lang import Builder
@@ -408,9 +425,40 @@ class MainApp(App):
         conn, c = get_telemetry_connection()
         return c
 
+    # Resolution the layouts were designed on (the official 7" touchscreen).
+    DESIGN_SIZE = (800, 480)
+
+    def _apply_ui_scale(self) -> None:
+        """
+        Make dp()/sp() grow with the display.
+
+        Positions and most sizes in the kv files are fractions of the screen,
+        so they already scale. Fonts, however, are mostly written as
+        min(self.height * k, dp(N)): the dp(N) cap is a fixed pixel size, so
+        on a 1920x1080 panel text stopped growing and looked tiny. Scaling
+        the dp unit by (screen / design size) keeps every cap, padding and
+        spacing proportional, and leaves the 7" display exactly as before
+        (scale 1.0). Override with MIMIC_UI_SCALE=<factor> if needed.
+        """
+        from kivy.metrics import Metrics
+        w, h = Window.size
+        dw, dh = self.DESIGN_SIZE
+        scale = min(w / dw, h / dh)
+        override = os.environ.get("MIMIC_UI_SCALE")
+        if override:
+            try:
+                scale = float(override)
+            except ValueError:
+                log_error(f"Ignoring invalid MIMIC_UI_SCALE={override!r}")
+        scale = max(0.5, scale)
+        Metrics.density = scale
+        log_info(f"UI scale {scale:.3f} for window {w}x{h}")
+
     def build(self):
         try:
             log_info("Starting build process...")
+            # Must run before any screen is created: kv rules read dp() then
+            self._apply_ui_scale()
             # 1. instantiate once, store in a dict
             log_info("Creating screens...")
             self.screens = {}
@@ -460,6 +508,8 @@ class MainApp(App):
                                     self.INTERNET_POLL_S) # check for active internet connection
 
             log_info("All functions scheduled")
+            if args.tour:
+                Clock.schedule_once(lambda _dt: self._run_tour(), 3)
             log_info("Build process completed successfully")
             return root
             
@@ -470,6 +520,48 @@ class MainApp(App):
             from kivy.uix.label import Label
             error_label = Label(text=f'Error loading application:\n{str(e)}')
             return error_label
+
+    def _run_tour(self) -> None:
+        """--tour: screenshot every screen (for checking layouts on each
+        display size), then exit."""
+        out = Path(args.tour).expanduser().resolve()
+        out.mkdir(parents=True, exist_ok=True)
+        names = list(self.screens)
+        if args.screens:
+            wanted = [n.strip() for n in args.screens.split(",") if n.strip()]
+            names = [n for n in wanted if n in self.screens]
+        log_info(f"Tour: {len(names)} screens -> {out}, window {Window.size}")
+
+        def shoot(i):
+            if i >= len(names):
+                from utils.serial import close_ports
+                if TTY_OBSERVER is not None:
+                    TTY_OBSERVER.stop()
+                close_ports()
+                os._exit(0)
+            name = names[i]
+            self.root.current = name
+
+            def reveal(_dt):
+                # Overlays (docked vehicles, etc.) stay at opacity 0 until
+                # live data arrives; show them so their placement can be checked
+                from kivy.uix.image import Image as KvImage
+                for w in self.screens[name].walk():
+                    if isinstance(w, KvImage) and w.opacity == 0:
+                        w.opacity = 1
+            if args.show_hidden:
+                Clock.schedule_once(reveal, 1.5)
+
+            def capture(_dt):
+                target = out / f"{name}.png"
+                target.unlink(missing_ok=True)
+                # Window.screenshot appends a counter: <name>0001.png
+                saved = Window.screenshot(name=str(target))
+                if saved:
+                    Path(saved).replace(target)
+                Clock.schedule_once(lambda _dt: shoot(i + 1), 0)
+            Clock.schedule_once(capture, 2.5)   # let on_enter/images settle
+        shoot(0)
 
     def _schedule_internet_probe(self, _dt) -> None:
         # Callbacks run async; keep lambda tiny.

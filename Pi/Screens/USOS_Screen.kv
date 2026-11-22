@@ -14,38 +14,45 @@
             id: n1n_cygnus
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/usos/N1NcygnusUSOS.png"
             opacity: 0.0
+            fit_mode: "fill"   # full-frame overlay: must match the background
         Image:
             id: n2n_cygnus
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/usos/N2NcygnusUSOS.png"
             opacity: 0.0
+            fit_mode: "fill"   # full-frame overlay: must match the background
         Image:
             id: n2n_htv_x
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/usos/N2NcygnusUSOS.png"
             opacity: 0.0
+            fit_mode: "fill"   # full-frame overlay: must match the background
         Image:
             id: n2f_dragon
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/usos/N2FdragonUSOS.png"
             opacity: 0.0
+            fit_mode: "fill"   # full-frame overlay: must match the background
         Image:
             id: n2z_dragon
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/usos/N2ZdragonUSOS.png"
             opacity: 0.0
+            fit_mode: "fill"   # full-frame overlay: must match the background
         Image:
             id: n2f_starliner
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/usos/N2FcstUSOS.png"
             opacity: 0.0
+            fit_mode: "fill"   # full-frame overlay: must match the background
         Image:
             id: n2z_starliner
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/usos/N2ZcstUSOS.png"
             opacity: 0.0
 
+            fit_mode: "fill"   # full-frame overlay: must match the background
         # ───────────────────────── Labels (N2Z) ───────────────────────────
         Label:
             id: n2z_label
             pos_hint: {"center_x": 0.45, "center_y": 0.58}
             text: ''
             font_size: min(self.height * 0.2, dp(14))
-            text_size: 200, None
+            text_size: dp(200), None
             halign: 'left'
             bold: True
             markup: True
@@ -54,7 +61,7 @@
             id: n2z_mission
             pos_hint: {"center_x": 0.65, "center_y": 0.35}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -63,7 +70,7 @@
             id: n2z_vehicle
             pos_hint: {"center_x": 0.65, "center_y": 0.31}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -72,7 +79,7 @@
             id: n2z_spacecraft
             pos_hint: {"center_x": 0.65, "center_y": 0.27}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -81,7 +88,7 @@
             id: n2z_arrival
             pos_hint: {"center_x": 0.65, "center_y": 0.23}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -90,7 +97,7 @@
             id: n2z_departure
             pos_hint: {"center_x": 0.65, "center_y": 0.19}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -102,7 +109,7 @@
             pos_hint: {"center_x": 0.45, "center_y": 0.47}
             text: ''
             font_size: min(self.height * 0.2, dp(14))
-            text_size: 200, None
+            text_size: dp(200), None
             halign: 'left'
             bold: True
             markup: True
@@ -111,7 +118,7 @@
             id: n2f_mission
             pos_hint: {"center_x": 0.65, "center_y": 0.71}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -120,7 +127,7 @@
             id: n2f_vehicle
             pos_hint: {"center_x": 0.65, "center_y": 0.67}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -129,7 +136,7 @@
             id: n2f_spacecraft
             pos_hint: {"center_x": 0.65, "center_y": 0.63}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -138,7 +145,7 @@
             id: n2f_arrival
             pos_hint: {"center_x": 0.65, "center_y": 0.59}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -147,7 +154,7 @@
             id: n2f_departure
             pos_hint: {"center_x": 0.65, "center_y": 0.55}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -159,7 +166,7 @@
             pos_hint: {"center_x": 0.24, "center_y": 0.2}
             text: ''
             font_size: min(self.height * 0.2, dp(14))
-            text_size: 200, None
+            text_size: dp(200), None
             halign: 'left'
             bold: True
             markup: True
@@ -168,7 +175,7 @@
             id: n1n_mission
             pos_hint: {"center_x": 0.92, "center_y": 0.35}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -177,7 +184,7 @@
             id: n1n_vehicle
             pos_hint: {"center_x": 0.92, "center_y": 0.31}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -186,7 +193,7 @@
             id: n1n_spacecraft
             pos_hint: {"center_x": 0.92, "center_y": 0.27}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -195,7 +202,7 @@
             id: n1n_arrival
             pos_hint: {"center_x": 0.92, "center_y": 0.23}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -204,7 +211,7 @@
             id: n1n_departure
             pos_hint: {"center_x": 0.92, "center_y": 0.19}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -216,7 +223,7 @@
             pos_hint: {"center_x": 0.46, "center_y": 0.2}
             text: ''
             font_size: min(self.height * 0.2, dp(14))
-            text_size: 200, None
+            text_size: dp(200), None
             halign: 'left'
             bold: True
             markup: True
@@ -225,7 +232,7 @@
             id: n2n_mission
             pos_hint: {"center_x": 0.92, "center_y": 0.71}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -234,7 +241,7 @@
             id: n2n_vehicle
             pos_hint: {"center_x": 0.92, "center_y": 0.67}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -243,7 +250,7 @@
             id: n2n_spacecraft
             pos_hint: {"center_x": 0.92, "center_y": 0.63}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -252,7 +259,7 @@
             id: n2n_arrival
             pos_hint: {"center_x": 0.92, "center_y": 0.59}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -261,7 +268,7 @@
             id: n2n_departure
             pos_hint: {"center_x": 0.92, "center_y": 0.55}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True

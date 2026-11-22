@@ -13,42 +13,50 @@
             id: sma_soyuz
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/russian/SMAsoyuzROS.png"
             opacity: 0.0
+            fit_mode: "fill"   # full-frame overlay: must match the background
         Image:
             id: sma_progress
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/russian/SMAprogressROS.png"
             opacity: 0.0
+            fit_mode: "fill"   # full-frame overlay: must match the background
         Image:
             id: mrm2_soyuz
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/russian/MRM2soyuzROS.png"
             opacity: 0.0
+            fit_mode: "fill"   # full-frame overlay: must match the background
         Image:
             id: mrm2_progress
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/russian/MRM2progressROS.png"
             opacity: 0.0
+            fit_mode: "fill"   # full-frame overlay: must match the background
         Image:
             id: mrm1_soyuz
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/russian/MRM1soyuzROS.png"
             opacity: 0.0
+            fit_mode: "fill"   # full-frame overlay: must match the background
         Image:
             id: mrm1_progress
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/russian/MRM1progressROS.png"
             opacity: 0.0
+            fit_mode: "fill"   # full-frame overlay: must match the background
         Image:
             id: rsn_soyuz
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/russian/RSNsoyuzROS.png"
             opacity: 0.0
+            fit_mode: "fill"   # full-frame overlay: must match the background
         Image:
             id: rsn_progress
             source: f"{root.mimic_directory}/Mimic/Pi/imgs/russian/RSNprogressROS.png"
             opacity: 0.0
         
+            fit_mode: "fill"   # full-frame overlay: must match the background
         # ───────────────────────── Labels (RS Node Nadir) ─────────────────
         Label:
             id: rsn_label
             pos_hint: {"center_x": 0.37, "center_y": 0.2}
             text: ''
             font_size: min(self.height * 0.25, dp(18))
-            text_size: 200, None
+            text_size: dp(200), None
             halign: 'left'
             bold: True
             markup: True
@@ -57,7 +65,7 @@
             id: rsn_mission
             pos_hint: {"center_x": 0.65, "center_y": 0.39}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -66,7 +74,7 @@
             id: rsn_vehicle
             pos_hint: {"center_x": 0.65, "center_y": 0.35}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -75,7 +83,7 @@
             id: rsn_spacecraft
             pos_hint: {"center_x": 0.65, "center_y": 0.31}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -84,7 +92,7 @@
             id: rsn_arrival
             pos_hint: {"center_x": 0.65, "center_y": 0.27}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -93,7 +101,7 @@
             id: rsn_departure
             pos_hint: {"center_x": 0.65, "center_y": 0.23}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -105,7 +113,7 @@
             pos_hint: {"center_x": 0.15, "center_y": 0.71}
             text: ''
             font_size: min(self.height * 0.25, dp(18))
-            text_size: 200, None
+            text_size: dp(200), None
             halign: 'left'
             bold: True
             markup: True
@@ -114,7 +122,7 @@
             id: sma_mission
             pos_hint: {"center_x": 0.65, "center_y": 0.75}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -123,7 +131,7 @@
             id: sma_vehicle
             pos_hint: {"center_x": 0.65, "center_y": 0.71}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -132,7 +140,7 @@
             id: sma_spacecraft
             pos_hint: {"center_x": 0.65, "center_y": 0.67}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -141,7 +149,7 @@
             id: sma_arrival
             pos_hint: {"center_x": 0.65, "center_y": 0.63}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -150,7 +158,7 @@
             id: sma_departure
             pos_hint: {"center_x": 0.65, "center_y": 0.59}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -162,7 +170,7 @@
             pos_hint: {"center_x": 0.435, "center_y": 0.3}
             text: ''
             font_size: min(self.height * 0.25, dp(18))
-            text_size: 200, None
+            text_size: dp(200), None
             halign: 'left'
             bold: True
             markup: True
@@ -171,7 +179,7 @@
             id: mrm1_mission
             pos_hint: {"center_x": 0.92, "center_y": 0.39}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -180,7 +188,7 @@
             id: mrm1_vehicle
             pos_hint: {"center_x": 0.92, "center_y": 0.35}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -189,7 +197,7 @@
             id: mrm1_spacecraft
             pos_hint: {"center_x": 0.92, "center_y": 0.31}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -198,7 +206,7 @@
             id: mrm1_arrival
             pos_hint: {"center_x": 0.92, "center_y": 0.27}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -207,7 +215,7 @@
             id: mrm1_departure
             pos_hint: {"center_x": 0.92, "center_y": 0.23}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -219,7 +227,7 @@
             pos_hint: {"center_x": 0.37, "center_y": 0.82}
             text: ''
             font_size: min(self.height * 0.25, dp(18))
-            text_size: 200, None
+            text_size: dp(200), None
             halign: 'left'
             bold: True
             markup: True
@@ -228,7 +236,7 @@
             id: mrm2_mission
             pos_hint: {"center_x": 0.92, "center_y": 0.75}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -237,7 +245,7 @@
             id: mrm2_vehicle
             pos_hint: {"center_x": 0.92, "center_y": 0.71}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -246,7 +254,7 @@
             id: mrm2_spacecraft
             pos_hint: {"center_x": 0.92, "center_y": 0.67}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -255,7 +263,7 @@
             id: mrm2_arrival
             pos_hint: {"center_x": 0.92, "center_y": 0.63}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True
@@ -264,7 +272,7 @@
             id: mrm2_departure
             pos_hint: {"center_x": 0.92, "center_y": 0.59}
             text: '-'
-            text_size: 300,None
+            text_size: dp(300), None
             halign: 'left'
             bold: True
             markup: True

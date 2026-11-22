@@ -10,3 +10,8 @@ imgs/orbit/map.jpg
 Pi/imgs/orbit/map.jpg
 *.pyc
 __pycache__/
+
+# Local dev/test tooling (layout screenshots on the 7" and large-screen Pis)
+Pi/CLAUDE.md
+Pi/mimic-test.sh
+screenshots/
