@@ -355,7 +355,7 @@ try:
     ##log_info(f"Retrieved Wikipedia data with {len(wikipedia_df)} rows")
 
     ##log_info("Cleaning citations from Wikipedia data")
-    wikipedia_df = wikipedia_df.applymap(clean_citations)
+    wikipedia_df = wikipedia_df.map(clean_citations)
 
     ##log_info("Cleaning and standardizing Wikipedia data")
     wikipedia_df = clean_wikipedia_data(wikipedia_df)
