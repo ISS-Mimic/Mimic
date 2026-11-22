@@ -43,6 +43,9 @@ class ManualControlScreen(Screen):
     # Kivy life-cycle
     # -------------------------------------------------------------------------
     def on_pre_enter(self, *_):
+        # Flag to track if we've shown the initial connection status; must be
+        # set before _update_button_states() below reads it
+        self._connection_status_shown = False
         self.refresh_buttons()         # text & colour on every visit
         self._update_status("Click a joint to control it")
         self._update_button_states()
@@ -50,8 +53,6 @@ class ManualControlScreen(Screen):
         # Schedule periodic button state updates
         from kivy.clock import Clock
         self._button_update_event = Clock.schedule_interval(self._update_button_states, 2.0)  # Check every 2 seconds
-        # Flag to track if we've shown the initial connection status
-        self._connection_status_shown = False
     
     def on_pre_leave(self, *_):
         """Clean up scheduled updates when leaving the screen."""
