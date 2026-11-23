@@ -5,7 +5,7 @@ ISS Mimic setup: Bullseye, Bookworm, Trixie
 - Safe path handling (no renames), robust sudo/root behavior
 - Noninteractive apt, lock/repair handling, lean deps (no *-dev)
 - Locale setup without forcing LC_ALL systemwide
-- Kivy runtime libs + optional pip Kivy
+- Kivy runtime libs + Kivy (pip by default), with a minimum version check
 - Headless priming of data products
 """
 
@@ -17,6 +17,7 @@ import argparse
 import shutil
 import subprocess
 import stat
+import re
 from pathlib import Path
 from getpass import getuser
 
@@ -190,6 +191,54 @@ def pip_install(packages: str):
         run_command(f"{shlex.quote(sys.executable)} -m pip install {extras} --break-system-packages {packages}")
     except subprocess.CalledProcessError:
         run_command(f"{shlex.quote(sys.executable)} -m pip install {extras} {packages}")
+
+# The UI relies on Kivy features added in 2.2.0 (Image.fit_mode for the
+# spacecraft overlays, used by the display scaling). Older Kivy runs but draws
+# those images wrong on non-7" screens (#493): e.g. apt Kivy on Bookworm (2.1)
+# or a stale pip install.
+MIN_KIVY = (2, 2, 0)
+MIN_KIVY_STR = ".".join(map(str, MIN_KIVY))
+
+def installed_kivy_version():
+    """Return (version tuple, version string) of the Kivy that `python3`
+    imports, or (None, None) if it can't be imported. Checked in a fresh
+    interpreter so it sees what pip/apt just installed."""
+    env = os.environ.copy()
+    env.update({"KIVY_NO_ARGS": "1", "KIVY_NO_CONSOLELOG": "1", "KIVY_NO_FILELOG": "1"})
+    try:
+        out = subprocess.run(
+            [sys.executable, "-c", "import kivy; print(kivy.__version__)"],
+            capture_output=True, text=True, env=env, timeout=120,
+        )
+    except Exception:
+        return None, None
+    if out.returncode != 0:
+        return None, None
+    version = out.stdout.strip().splitlines()[-1] if out.stdout.strip() else ""
+    m = re.match(r"(\d+)\.(\d+)(?:\.(\d+))?", version)
+    if not m:
+        return None, version or None
+    return tuple(int(g or 0) for g in m.groups()), version
+
+def install_kivy(method: str):
+    """Install Kivy and make sure the one Python imports is new enough."""
+    _print("\nInstalling Kivy …")
+    if method == "apt":
+        run_install("python3-kivy", "apt")
+    else:
+        # The version spec also upgrades an older pip-installed Kivy
+        pip_install(shlex.quote(f"kivy>={MIN_KIVY_STR}"))
+
+    version, version_str = installed_kivy_version()
+    if version is not None and version >= MIN_KIVY:
+        _print(f"{GREEN}Kivy {version_str} OK (need >= {MIN_KIVY_STR}){RESET}")
+        return
+
+    found = f"Kivy {version_str}" if version_str else "no importable Kivy"
+    _print(f"{RED}ISS Mimic needs Kivy >= {MIN_KIVY_STR}, but Python finds {found}.{RESET}")
+    _print(f"{RED}Fix it with:  {sys.executable} -m pip install --break-system-packages "
+           f"--upgrade 'kivy>={MIN_KIVY_STR}'  then re-run setup.py{RESET}")
+    sys.exit(1)
 
 def run_install(packages: str, method: str):
     if method == "apt":
@@ -365,14 +414,8 @@ def main():
     # Lightstreamer client (pip)
     pip_install("lightstreamer-client-lib")
 
-    # Kivy itself
-    _print("\nInstalling Kivy …")
-    if args.kivy_from == "apt":
-        run_install("python3-kivy", "apt")
-    else:
-        pip_install("kivy")
-    # Sanity check
-    run_command(f"{shlex.quote(sys.executable)} -c 'import kivy, sys; print(\"Kivy\", kivy.__version__); sys.exit(0)'", check=False)
+    # Kivy itself (exits with instructions if the result is older than MIN_KIVY)
+    install_kivy(args.kivy_from)
 
     # Replace Kivy config (safe)
     def replace_kivy_config():
