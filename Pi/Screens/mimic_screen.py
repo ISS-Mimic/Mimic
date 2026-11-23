@@ -6,7 +6,7 @@ import subprocess
 import sys
 from subprocess import Popen
 from kivy.uix.screenmanager import Screen
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.lang import Builder
 from kivy.app import App
 import sqlite3
@@ -80,6 +80,10 @@ class _ChangeGate:
 
 
 class MimicScreen(MimicBase):
+    # True while the telemetry helper scripts are running (drives the
+    # Connect / Disconnect toggle button)
+    telemetry_running = BooleanProperty(False)
+
     log_info("MimicScreen loaded")
     """
     Live ISS telemetry hub.
@@ -411,6 +415,7 @@ class MimicScreen(MimicBase):
         try:
             for attr, script in helpers:
                 setattr(app, attr, self._spawn_helper(script))
+            self.telemetry_running = True
             self._update_status("Telemetry subprocesses started successfully")
             # Check shortly after launch so a script that crashes on startup is reported
             Clock.schedule_once(lambda _dt: self._check_helpers(helpers), 3)
@@ -457,6 +462,9 @@ class MimicScreen(MimicBase):
         Terminates all background processes.
         """
         app = App.get_running_app()
+        # The demo needs telemetry; stopping the connection ends it too
+        if getattr(app, "demo_running", False):
+            app.stop_demo()
         self._update_status("Stopping telemetry subprocesses...")
 
         for name in ("p", "TDRSproc", "VVproc", "crewproc"):
@@ -476,6 +484,10 @@ class MimicScreen(MimicBase):
             finally:
                 setattr(app, name, None)
 
+        self.telemetry_running = False
+        # Nothing live to send any more: stop transmitting properly (this used
+        # to clear only the flag, leaving the transmit loop running)
+        self.mimic_transmit(False)
         app.mimicbutton = False
         self._update_status("Telemetry subprocesses stopped")
 

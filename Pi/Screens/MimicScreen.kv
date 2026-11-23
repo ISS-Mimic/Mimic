@@ -129,61 +129,36 @@
             on_release: root.manager.current = 'science'
 
 
+        # ---------- control row: three toggle buttons, evenly spaced ----------
+        # Each label follows the real state, so it can't get out of sync.
         Button:
-            id: mimicstartbutton
-            size_hint: 0.15,0.12
-            pos_hint: {"center_x": 0.25, "center_y": 0.2}
-            text: 'Transmit \n to Model'
-            halign: "center" 
-            disabled: False
+            id: transmitButton
+            size_hint: 0.2, 0.1
+            pos_hint: {"center_x": 0.2, "center_y": 0.2}
+            text: 'Stop \n Transmit' if app.mimicbutton else 'Transmit \n to Model'
+            halign: "center"
             font_size: self.height * 0.4
-            size_hint_y: 0.1
-            on_release: mimicstartbutton.text = 'Sending...'
-            on_release: root.mimic_transmit(True)
-            on_release: mimicstopbutton.disabled = False
-            on_release: mimicstartbutton.disabled = True
+            on_release: root.mimic_transmit(not app.mimicbutton)
 
         Button:
-            id: mimicstopbutton
-            size_hint: 0.15,0.12
-            pos_hint: {"center_x": 0.40, "center_y": 0.2}
-            text: 'Stop'
-            disabled: True
+            id: telemetryButton
+            size_hint: 0.2, 0.1
+            pos_hint: {"center_x": 0.5, "center_y": 0.2}
+            text: 'Disconnect \n from ISS' if root.telemetry_running else 'Connect \n to ISS'
+            halign: "center"
             font_size: self.height * 0.4
-            size_hint_y: 0.1
-            on_release: mimicstartbutton.text = 'Transmit'
-            on_release: root.mimic_transmit(False)
-            on_release: mimicstopbutton.disabled = True
-            on_release: mimicstartbutton.disabled = False
+            on_release: root.killproc() if root.telemetry_running else root.startproc()
 
+        # Demo (#503): cycles through the telemetry screens above. Calibrate
+        # and start Transmit first if the model should move during the demo.
         Button:
-            id: startTelemetry
-            size_hint: 0.15,0.12
-            pos_hint: {"center_x": 0.60, "center_y": 0.2}
-            text: 'Connect \n to ISS'
+            id: demoButton
+            size_hint: 0.2, 0.1
+            pos_hint: {"center_x": 0.8, "center_y": 0.2}
+            text: 'Stop \n Demo' if app.demo_running else 'Start \n Demo'
+            halign: "center"
             font_size: self.height * 0.4
-            size_hint_y: 0.1
-            width: 50
-            height: 20
-            halign: "center" 
-            on_release: stopTelemetry.disabled = False
-            on_release: self.disabled = True
-            on_release: root.startproc()
-
-        Button:
-            id: stopTelemetry
-            size_hint: 0.15,0.12
-            pos_hint: {"center_x": 0.75, "center_y": 0.2}
-            text: 'Stop \n Connection'
-            font_size: self.height * 0.4
-            size_hint_y: 0.1
-            width: 50
-            height: 20
-            halign: "center" 
-            disabled: True
-            on_release: startTelemetry.disabled = False
-            on_release: self.disabled = True
-            on_release: root.killproc()
+            on_release: app.toggle_demo()
 
 
         # ---------- STATUS DISPLAY (Bottom Rectangle) ----------
@@ -236,10 +211,5 @@
             background_down: f'{root.mimic_directory}/Mimic/Pi/imgs/eva/BackButton.png'
             border: 0,0,0,0    # avoid 9-slice margins
             on_release: root.mimic_transmit(False)
-            on_release: mimicstartbutton.text = 'Transmit'
-            on_release: mimicstopbutton.disabled = True
-            on_release: mimicstartbutton.disabled = False
-            on_release: startTelemetry.disabled = False
-            on_release: stopTelemetry.disabled = True
             on_release: root.killproc()
             on_release: app.root.current = 'main'

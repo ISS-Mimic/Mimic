@@ -501,6 +501,7 @@ class MainApp(App):
             log_info("Scheduling update functions...")
             Clock.schedule_interval(self.update_signal_status, 1) #all telemetry wil refresh and get pushed to arduinos every half second!
             Clock.schedule_interval(self.updateArduinoCount, 5) #update arduino count every 5 seconds
+            self._start_flash_events()
             # Discard Arduino output we never read, so it can't back up and
             # stall our writes (see utils/serial.drain_input)
             Clock.schedule_interval(lambda _dt: drain_input(OPEN_SERIAL_PORTS), 1)
@@ -510,6 +511,7 @@ class MainApp(App):
             log_info("All functions scheduled")
             if args.tour:
                 Clock.schedule_once(lambda _dt: self._run_tour(), 3)
+
             log_info("Build process completed successfully")
             return root
             
@@ -562,6 +564,82 @@ class MainApp(App):
                 Clock.schedule_once(lambda _dt: shoot(i + 1), 0)
             Clock.schedule_once(capture, 2.5)   # let on_enter/images settle
         shoot(0)
+
+    # ---- demo mode (#503) ---------------------------------------------------
+    # Started from the Mimic screen's Demo button, after the user has (if they
+    # want) calibrated the motors and started transmitting. Cycles through the
+    # telemetry screens reachable from the Mimic screen, in button order.
+    DEMO_SCREENS = ("iss", "eps", "crew", "ct", "eva_main", "tcs", "eclss",
+                    "rs", "gnc", "orbit", "robo", "cdh", "vv", "usos", "science")
+    DEMO_DWELL_S = 20.0          # time on each screen
+    DEMO_IDLE_RESUME_S = 60.0    # after a touch, resume once left alone this long
+
+    demo_running = BooleanProperty(False)
+
+    def toggle_demo(self) -> None:
+        if self.demo_running:
+            self.stop_demo()
+        else:
+            self.start_demo()
+
+    def start_demo(self) -> None:
+        if self.demo_running:
+            return
+        self._demo_names = [n for n in self.DEMO_SCREENS if n in self.screens]
+        if not self._demo_names:
+            return
+        self._demo_index = -1
+        self._demo_event = None
+        self._demo_resume = None
+
+        # The screens only show data with the telemetry scripts running
+        mimic = self.screens.get("mimic")
+        if mimic is not None and not self._proc_running(getattr(self, "p", None)):
+            try:
+                mimic.startproc()
+            except Exception as exc:
+                log_error(f"Demo: could not start telemetry: {exc}")
+
+        self.demo_running = True
+        log_info(f"Demo started: {len(self._demo_names)} screens, "
+                 f"{self.DEMO_DWELL_S:.0f} s each")
+        # Bound after the button's own touch has been handled
+        Window.bind(on_touch_down=self._demo_touched)
+        self._demo_next()
+
+    def stop_demo(self) -> None:
+        if not self.demo_running:
+            return
+        self.demo_running = False
+        Window.unbind(on_touch_down=self._demo_touched)
+        for ev in (self._demo_event, self._demo_resume):
+            if ev is not None:
+                ev.cancel()
+        self._demo_event = self._demo_resume = None
+        log_info("Demo stopped")
+
+    def _demo_next(self, _dt=0) -> None:
+        if not self.demo_running:
+            return
+        self._demo_resume = None
+        self._demo_index = (self._demo_index + 1) % len(self._demo_names)
+        self.root.current = self._demo_names[self._demo_index]
+        self._demo_event = Clock.schedule_once(self._demo_next, self.DEMO_DWELL_S)
+
+    def _demo_touched(self, *_args) -> None:
+        """Someone is using the screen: pause cycling until it has been left
+        alone for DEMO_IDLE_RESUME_S, then carry on from the next screen.
+        (Stop Demo on the Mimic screen ends it.)"""
+        if not self.demo_running:
+            return
+        if self._demo_event is not None:
+            self._demo_event.cancel()
+            self._demo_event = None
+        if self._demo_resume is not None:
+            self._demo_resume.cancel()
+        self._demo_resume = Clock.schedule_once(self._demo_next,
+                                                self.DEMO_IDLE_RESUME_S)
+        # don't consume the touch: buttons must still work
 
     def _schedule_internet_probe(self, _dt) -> None:
         # Callbacks run async; keep lambda tiny.
@@ -662,38 +740,61 @@ class MainApp(App):
                 ids.arduino.source = offline_source
 
     
-    def flashROBObutton(self, instance):
-        #log_info("Function call - flashRobo")
+    # ---- button flashing for live events (#17 / #687) ---------------------
+    # Each rule: (name, predicate(app) -> bool, [(screen, button id), ...]).
+    # While a rule's predicate is true its buttons blink, pointing visitors
+    # to the screen where the event is happening. Add new events here.
+    FLASH_COLOR = (0, 0, 1, 1)        # blue tint, as the old flash used
+    FLASH_PERIOD_S = 0.5
+    EVA_CREWLOCK_MMHG = 740.0         # normal cabin is ~755-760 mmHg
 
-        self.screens["mimic"].ids.Robo_button.background_color = (0, 0, 1, 1)
-        def reset_color(*args):
-            self.screens["mimic"].ids.Robo_button.background_color = (1, 1, 1, 1)
-        Clock.schedule_once(reset_color, 0.5)
-    
-    def flashUS_EVAbutton(self, instance):
-        #log_info("Function call - flashUS_EVA")
+    @staticmethod
+    def _eva_crewlock_depressed(app) -> bool:
+        """US EVA: the crewlock is being (or has been) depressurised."""
+        p = getattr(app, "crewlock_pres", None)
+        # 0 / None is "no data yet", not vacuum
+        return p is not None and 0 < p < app.EVA_CREWLOCK_MMHG
 
-        self.screens["eva_main"].ids.US_EVA_Button.background_color = (0, 0, 1, 1)
-        def reset_color(*args):
-            self.screens["eva_main"].ids.US_EVA_Button.background_color = (1, 1, 1, 1)
-        Clock.schedule_once(reset_color, 0.5)
+    FLASH_RULES = (
+        ("US EVA", _eva_crewlock_depressed.__func__,
+         (("mimic", "EVA_button"), ("eva_main", "US_EVA_Button"))),
+    )
 
-    def flashRS_EVAbutton(self, instance):
-        #log_info("Function call - flashRS_EVA")
+    def _start_flash_events(self) -> None:
+        self._flash_targets: set = set()
+        self._flash_active: set = set()
+        self._flash_on = False
+        Clock.schedule_interval(self._check_flash_events, 2)
+        Clock.schedule_interval(self._flash_tick, self.FLASH_PERIOD_S)
 
-        self.screens["eva_main"].ids.RS_EVA_Button.background_color = (0, 0, 1, 1)
-        def reset_color(*args):
-            self.screens["eva_main"].ids.RS_EVA_Button.background_color = (1, 1, 1, 1)
-        Clock.schedule_once(reset_color, 0.5)
+    def _set_button_tint(self, screen: str, button: str, color) -> None:
+        scr = self.screens.get(screen)
+        if scr is not None and button in scr.ids:
+            scr.ids[button].background_color = color
 
-    def flashEVAbutton(self, instance):
-        #log_info("Function call - flashEVA")
+    def _check_flash_events(self, _dt=0) -> None:
+        targets, active = set(), set()
+        for name, predicate, buttons in self.FLASH_RULES:
+            try:
+                if predicate(self):
+                    active.add(name)
+                    targets.update(buttons)
+            except Exception as exc:
+                log_error(f"Flash rule {name} failed: {exc}")
+        if active != self._flash_active:
+            log_info(f"Flashing buttons for: {', '.join(sorted(active)) or 'nothing'}")
+            self._flash_active = active
+        for screen, button in self._flash_targets - targets:
+            self._set_button_tint(screen, button, (1, 1, 1, 1))
+        self._flash_targets = targets
 
-        self.screens["mimic"].ids.EVA_button.background_color = (0, 0, 1, 1)
-        def reset_color(*args):
-            self.screens["mimic"].ids.EVA_button.background_color = (1, 1, 1, 1)
-        Clock.schedule_once(reset_color, 0.5)
-
+    def _flash_tick(self, _dt=0) -> None:
+        if not self._flash_targets:
+            return
+        self._flash_on = not self._flash_on
+        color = self.FLASH_COLOR if self._flash_on else (1, 1, 1, 1)
+        for screen, button in self._flash_targets:
+            self._set_button_tint(screen, button, color)
 
     def changeColors(self, r, g, b, *_) -> None:
         """
@@ -788,6 +889,8 @@ class MainApp(App):
         - Avoids relying on implicit SQLite row ordering.
         - Compares AOS numerically.
         """
+        self.telemetry_aos = None  # set below once AOS is known
+        self.crewlock_pres = None
         try:
             # Get a fresh connection to the telemetry database
             conn, c = get_telemetry_connection()
@@ -813,9 +916,19 @@ class MainApp(App):
             # iss_telemetry writes 0/1/2 here
             aos_val = int(float(row[0]))  # robust if stored as '0', '0.0', etc.
 
+            # For event flashing (US EVA). Only meaningful with live data.
+            c.execute("SELECT Value FROM telemetry WHERE Label = 'crewlock_pres'")
+            row = c.fetchone()
+            crewlock = float(row[0]) if row and row[0] not in (None, "") else None
+
         except Exception as e:
             log_error(f"Error getting telemetry values: {e}")
             return
+
+        # Shared with screens (e.g. Orbit's AOS timer): None unless live
+        # telemetry is subscribed, else 0/1/2 as written by iss_telemetry.
+        self.telemetry_aos = aos_val if sub_status == "Subscribed" else None
+        self.crewlock_pres = crewlock if sub_status == "Subscribed" else None
 
         # Only react when we’re actually subscribed
         if sub_status == "Subscribed":
@@ -874,6 +987,74 @@ class MainApp(App):
             if label is not None:
                 label.text = text
 
+HELPER_SCRIPTS = ("iss_telemetry.py", "TDRScheck.py", "VVcheck.py", "checkCrew.py")
+
+def stop_leftover_helpers() -> None:
+    """Stop telemetry helper scripts left running by an earlier GUI that
+    crashed or was killed. They keep the /dev/shm databases open, and
+    database_initialize then fails to recreate them ("disk I/O error"), so
+    the app wouldn't start. Linux only (/proc); our own user's processes only.
+    Helpers whose parent is a still-running GUI.py are left alone."""
+    import signal, time
+    proc = Path("/proc")
+    if not proc.is_dir():
+        return
+    me, uid = os.getpid(), os.getuid()
+
+    def cmdline(pid: str) -> list[str]:
+        try:
+            return (proc / pid / "cmdline").read_bytes().decode(errors="replace").split("\0")
+        except OSError:
+            return []
+
+    def parent(pid: str) -> str:
+        try:
+            # field 4 of /proc/<pid>/stat; comm (field 2) may contain spaces
+            return (proc / pid / "stat").read_text().rsplit(")", 1)[1].split()[1]
+        except (OSError, IndexError):
+            return ""
+
+    leftovers = []
+    for d in proc.iterdir():
+        pid = d.name
+        if not pid.isdigit() or int(pid) == me:
+            continue
+        try:
+            if d.stat().st_uid != uid:
+                continue
+        except OSError:
+            continue
+        args = cmdline(pid)
+        if not args or "python" not in Path(args[0]).name:
+            continue
+        script = next((Path(a).name for a in args[1:2]), "")
+        if script not in HELPER_SCRIPTS:
+            continue
+        ppid = parent(pid)
+        if ppid and ppid != "1" and any(Path(a).name == "GUI.py" for a in cmdline(ppid)):
+            continue  # belongs to a GUI that is still running
+        leftovers.append((int(pid), script))
+
+    if not leftovers:
+        return
+    log_info(f"Stopping helpers left over from a previous run: {leftovers}")
+    print(f"Stopping helpers left over from a previous run: {[s for _, s in leftovers]}")
+    for pid, _ in leftovers:
+        try:
+            os.kill(pid, signal.SIGTERM)
+        except OSError:
+            pass
+    deadline = time.monotonic() + 5
+    while time.monotonic() < deadline and any((proc / str(pid)).exists() for pid, _ in leftovers):
+        time.sleep(0.1)
+    for pid, script in leftovers:
+        if (proc / str(pid)).exists():
+            log_error(f"{script} (PID {pid}) ignored SIGTERM; killing it")
+            try:
+                os.kill(pid, signal.SIGKILL)
+            except OSError:
+                pass
+
 if __name__ == '__main__':
     try:
         # Show logging configuration
@@ -890,6 +1071,7 @@ if __name__ == '__main__':
         print("run: \"python GUI.py --debug\" to enable debug logging")
         print(f"=====================")
         
+        stop_leftover_helpers()  # before the databases are recreated
         import database_initialize # create and populate database script
         log_info("Starting ISS Mimic Program")
         log_info("Mimic Program Directory: " + mimic_directory + "/Mimic/Pi")
@@ -898,21 +1080,26 @@ if __name__ == '__main__':
         # Create the app and run it
         app = MainApp()
         log_info("MainApp created successfully")
-        app.run()
-        log_info("Application finished normally")
-
-        # The EXIT button runs MainScreen's cleanup in a thread that ends in
-        # os._exit(). Any other way out (window closed, SIGTERM, Ctrl-C)
-        # used to hang here forever: the serial hot-plug observer is a
-        # non-daemon thread, so Python waited for it, and helper processes
-        # were left running. Run the same cleanup for those exits too.
-        main_screen = getattr(app, "screens", {}).get("main")
-        if main_screen is not None and not getattr(main_screen, "_exiting", False):
-            import time
-            main_screen._exiting = True
-            main_screen._background_cleanup_and_exit(app, time.monotonic())
-        elif main_screen is None and TTY_OBSERVER is not None:
-            TTY_OBSERVER.stop()
+        try:
+            app.run()
+            log_info("Application finished normally")
+        except KeyboardInterrupt:
+            log_info("Interrupted (Ctrl-C / SIGINT), shutting down")
+        finally:
+            # The EXIT button runs MainScreen's cleanup in a thread that ends
+            # in os._exit(). Any other way out (window closed, SIGTERM,
+            # Ctrl-C) used to hang forever: the serial hot-plug observer is a
+            # non-daemon thread, so Python waited for it, and helper
+            # processes were left running. Run the same cleanup for those
+            # exits too (in `finally`, so an exception out of run() can't
+            # skip it).
+            main_screen = getattr(app, "screens", {}).get("main")
+            if main_screen is not None and not getattr(main_screen, "_exiting", False):
+                import time
+                main_screen._exiting = True
+                main_screen._background_cleanup_and_exit(app, time.monotonic())
+            elif main_screen is None and TTY_OBSERVER is not None:
+                TTY_OBSERVER.stop()
 
     except Exception as e:
         log_error(f"Fatal error during startup: {e}")

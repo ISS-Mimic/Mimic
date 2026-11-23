@@ -13,6 +13,7 @@ from pathlib import Path
 from subprocess import Popen
 from typing import Optional
 from kivy.base import ExceptionManager, ExceptionHandler
+from kivy.app import App
 from kivy.clock import Clock
 from kivy.lang import Builder
 
@@ -27,6 +28,9 @@ from utils.logger import log_info, log_error
 # Exception handler to forward traceback to logs
 class _Reraise(ExceptionHandler):
     def handle_exception(self, inst):
+        # Ctrl-C / SIGINT must still stop the app, not be logged and ignored
+        if isinstance(inst, (KeyboardInterrupt, SystemExit)):
+            return ExceptionManager.RAISE
         traceback.print_exception(type(inst), inst, inst.__traceback__, file=sys.stderr)
         logging.getLogger("Mimic").exception("Unhandled Kivy error")
         return ExceptionManager.PASS
@@ -119,6 +123,11 @@ class Orbit_Screen(MimicBase):
     _zoe_last_compute_time: float = 0.0
     _zoe_recompute_interval_s: float = 15.0
     _zoe_last_in_state: Optional[bool] = None
+
+    # Day/night (sunrise/sunset) countdown cache
+    _sun_eclipsed: Optional[bool] = None
+    _sun_transition_time: Optional[ephem.Date] = None
+    _sun_last_compute_time: float = 0.0
 
     # ---- ZOE / coverage params (no drawing) ----
     _FALLBACK_TDRS_LONS = {
@@ -652,6 +661,16 @@ class Orbit_Screen(MimicBase):
             entry_time = self._zoe_entry_time
             exit_time = self._zoe_exit_time
 
+            # With a signal already (an active TDRS, or live telemetry
+            # reporting AOS) there is nothing to count down to: AOS is now.
+            if self._has_signal():
+                self.ids.zoe_acquisition_timer.text = "00:00"
+                if not (entry_time and entry_time > now):
+                    self.ids.zoe_loss_timer.text = "--:--"
+                else:
+                    self.ids.zoe_loss_timer.text = self._fmt_mmss(entry_time - now)
+                return
+
             # LOS countdown (to entry)
             if entry_time and entry_time > now:
                 dtm = entry_time - now
@@ -673,6 +692,78 @@ class Orbit_Screen(MimicBase):
                 self.ids.zoe_acquisition_timer.text = "--:--"
         except Exception as exc:
             log_error(f"_update_zoe_timers failed: {exc}")
+
+    @staticmethod
+    def _fmt_mmss(days: float) -> str:
+        """Format an ephem time difference (days) as MM:SS (minutes may exceed 59)."""
+        total = max(0, int(round(days * 86400)))
+        return f"{total // 60:02d}:{total % 60:02d}"
+
+    def _has_signal(self) -> bool:
+        """True if the ISS currently has a TDRS link: the SCAN Now feed shows an
+        active TDRS, or live telemetry is subscribed and reporting AOS."""
+        if any(t for t in self.active_tdrs):
+            return True
+        app = App.get_running_app()
+        return getattr(app, "telemetry_aos", None) == 1
+
+    def _calculate_sun_transition(self) -> tuple[Optional[bool], Optional[ephem.Date]]:
+        """Return (eclipsed_now, time of next sunrise/sunset) for the ISS.
+        Coarse 30 s search over the next 2 h, refined to ~1 s. The time is
+        None when there is no transition in that window (high beta angle:
+        the ISS stays in sunlight for days)."""
+        tle_lines = getattr(self, "_iss_tle_lines", None)
+        if tle_lines is None:
+            return None, None
+        # Our own satellite object, built from the TLE text. Never use
+        # EarthSatellite.copy(): the copy points into the original's memory,
+        # which is freed when update_orbit reloads the TLE -> segfault.
+        sat = ephem.readtle("ISS (ZARYA)", *tle_lines)
+
+        def eclipsed(t) -> bool:
+            sat.compute(t)
+            return bool(sat.eclipsed)
+
+        now = ephem.Date(ephem.now())
+        state = eclipsed(now)
+        step = 30 * ephem.second
+        lo = now
+        for _ in range(240):  # 2 hours
+            hi = ephem.Date(lo + step)
+            if eclipsed(hi) != state:
+                for _ in range(15):  # 30 s / 2**15 -> well under 1 s
+                    mid = ephem.Date(lo + (hi - lo) / 2.0)
+                    if eclipsed(mid) == state:
+                        lo = mid
+                    else:
+                        hi = mid
+                return state, hi
+            lo = hi
+        return state, None
+
+    def _update_day_night_timer(self) -> None:
+        """Show the countdown to the ISS's next orbital sunrise or sunset."""
+        if "day_night_title" not in self.ids or "day_night_timer" not in self.ids:
+            return
+        try:
+            now = ephem.Date(ephem.now())
+            stale = (time.time() - self._sun_last_compute_time) > 60
+            passed = self._sun_transition_time is not None and now >= self._sun_transition_time
+            if self._sun_eclipsed is None or stale or passed:
+                self._sun_eclipsed, self._sun_transition_time = self._calculate_sun_transition()
+                self._sun_last_compute_time = time.time()
+
+            if self._sun_eclipsed is None:
+                self.ids.day_night_title.text = "SUNSET"
+                self.ids.day_night_timer.text = "--:--"
+                return
+            self.ids.day_night_title.text = "SUNRISE" if self._sun_eclipsed else "SUNSET"
+            if self._sun_transition_time is None:
+                self.ids.day_night_timer.text = "--:--"
+            else:
+                self.ids.day_night_timer.text = self._fmt_mmss(self._sun_transition_time - now)
+        except Exception as exc:
+            log_error(f"_update_day_night_timer failed: {exc}")
 
     def _update_zoe_label_position(self) -> None:
         """Position the ZOE label at 0° latitude, 77° longitude on the map (once) and control visibility based on TDRS status."""
@@ -1051,6 +1142,7 @@ class Orbit_Screen(MimicBase):
         try:
             lines = json.loads(cfg.read_text())
             self.iss_tle = ephem.readtle("ISS (ZARYA)", lines["ISS_TLE_Line1"], lines["ISS_TLE_Line2"])
+            self._iss_tle_lines = (lines["ISS_TLE_Line1"], lines["ISS_TLE_Line2"])
         except Exception as exc:
             log_error(f"ISS TLE load failed: {exc}")
             return
@@ -1121,6 +1213,9 @@ class Orbit_Screen(MimicBase):
         # — recompute ZOE timers (no drawing) -------------------------------
         self._refresh_zoe_times_if_needed()
         self._update_zoe_timers()
+
+        # — sunrise / sunset countdown (#686) ------------------------------
+        self._update_day_night_timer()
 
 
 
