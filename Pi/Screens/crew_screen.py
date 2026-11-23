@@ -28,6 +28,31 @@ POLL_INTERVAL_S = 2.0         # fast polling until DB shows data
 UPDATE_INTERVAL_S = 300.0     # periodic DB refresh
 EXPEDITION_TICK_S = 60.0      # 1 minute
 
+# The crew DB lives in /dev/shm and is recreated empty at every start, so
+# remember the last expedition checkCrew reported (from spacefacts.de) and
+# show it until fresh data arrives.
+LAST_EXPEDITION_FILE = Path.home() / ".mimic_data" / "last_expedition.txt"
+NO_EXPEDITION = "Expedition --"
+
+
+def _load_last_expedition() -> str:
+    try:
+        text = LAST_EXPEDITION_FILE.read_text().strip()
+        if re.fullmatch(r"Expedition \d+", text):
+            return text
+    except OSError:
+        pass
+    return NO_EXPEDITION
+
+
+def _save_last_expedition(label: str) -> None:
+    try:
+        if label != _load_last_expedition():
+            LAST_EXPEDITION_FILE.parent.mkdir(parents=True, exist_ok=True)
+            LAST_EXPEDITION_FILE.write_text(label + "\n")
+    except OSError as exc:
+        log_error(f"Could not save last expedition: {exc}")
+
 # ──────────────────────── Widgets ──────────────────────────
 class CrewMemberWidget(BoxLayout):
     """Individual crew member widget with photo, info, and stats."""
@@ -105,8 +130,8 @@ class Crew_Screen(MimicBase):
     """Dynamic crew screen that automatically displays current ISS crew."""
 
     crew_data = ListProperty([])
-    expedition_number = StringProperty("Expedition 70")
-    expedition_duration = StringProperty("0 days")
+    expedition_number = StringProperty(NO_EXPEDITION)
+    expedition_duration = StringProperty("--")
     iss_crewed_years = StringProperty("24")
     iss_crewed_months = StringProperty("9")
     iss_crewed_days = StringProperty("10")
@@ -118,6 +143,8 @@ class Crew_Screen(MimicBase):
         self.poll_timer = None
         self.expedition_timer = None
         self._last_checksum = None  # Track database changes
+        # Last known expedition until checkCrew's data arrives
+        self.expedition_number = _load_last_expedition()
 
     # ─────────────── Lifecycle & scheduling ────────────────
     def on_pre_enter(self):
@@ -127,6 +154,8 @@ class Crew_Screen(MimicBase):
         self._cancel_timer("expedition_timer")
 
         self.load_crew_data()
+        if not self.crew_data:
+            self._show_cached_patch()
         self._update_iss_crewed_time()
         self._update_expedition_duration()
 
@@ -216,8 +245,15 @@ class Crew_Screen(MimicBase):
 
             # Update expedition label (prefer explicit 'Expedition ##' value)
             self.expedition_number = self._extract_expedition_number()
+            if re.fullmatch(r"Expedition \d+", self.expedition_number):
+                _save_last_expedition(self.expedition_number)
 
             self.update_crew_display()
+            # Crew count and the spacecraft list under the patch come from the
+            # same data. This used to run only from the 5-minute timer (which
+            # is cancelled on leaving the screen) or when data first arrived
+            # while the screen was open, so normally they showed 0 / nothing.
+            self.update_crewed_vehicles_display()
             self.update_expedition_patch()
             self._update_expedition_duration()
 
@@ -347,10 +383,10 @@ class Crew_Screen(MimicBase):
             if oldest:
                 self.expedition_duration = self._format_expedition_duration(oldest)
             else:
-                self.expedition_duration = "0m 0d 0h"
+                self.expedition_duration = "--"   # no crew data yet
         except Exception as e:
             log_error(f"Error updating expedition duration: {e}")
-            self.expedition_duration = "0m 0d 0h"
+            self.expedition_duration = "--"
 
     # "ISS crewed time" (since first crew on Nov 2, 2000)
     def _update_iss_crewed_time(self):
@@ -398,7 +434,7 @@ class Crew_Screen(MimicBase):
             total_crew = len(self.crew_data)
             total_lbl = getattr(self.ids, "total_crew_count", None)
             if total_lbl:
-                total_lbl.text = str(total_crew)
+                total_lbl.text = str(total_crew) if total_crew else "--"
 
             self.update_crewed_vehicles_list(vehicles)
             log_info(f"Crewed vehicles: {len(vehicles)}; total crew: {total_crew}")
@@ -441,6 +477,17 @@ class Crew_Screen(MimicBase):
         return widget
 
     # ─────────────── Expedition patch image ────────────────
+    def _show_cached_patch(self) -> None:
+        """Before crew data arrives, show the already-downloaded patch for
+        the last known expedition (never fetches: this runs on the UI thread)."""
+        m = re.search(r"Expedition\s+(\d+)", self.expedition_number or "")
+        patch_img = getattr(self.ids, "expedition_patch", None)
+        if not m or not patch_img:
+            return
+        cached = Path.home() / ".mimic_data" / "patches" / f"expedition_{m.group(1)}_patch.png"
+        if cached.exists():
+            patch_img.source = str(cached)
+
     def update_expedition_patch(self):
         try:
             patch_img = getattr(self.ids, "expedition_patch", None)
@@ -520,7 +567,8 @@ class Crew_Screen(MimicBase):
             exp = (c.get("expedition") or "").strip()
             if "Expedition" in exp:
                 return exp
-        return "Expedition 70"
+        # Keep what we're showing (last known), rather than a made-up number
+        return self.expedition_number or NO_EXPEDITION
 
     def _poll_for_crew(self, _dt):
         """Poll frequently until first data appears, then switch cadence."""
