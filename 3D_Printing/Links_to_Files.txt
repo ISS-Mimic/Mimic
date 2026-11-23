@@ -109,7 +109,7 @@ https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_S0/README.md
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_S1/LoFi_ITS-1_AmmoniaTank.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_S1/LoFi_ITS-1_Mounts (1).stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_S1/LoFi_ITS-1_TRRJ-Beam.stl
-https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_S1/LoFi_ITS-S1_.stl
+https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_S1/LoFi_ITS-S1.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_S1/README.md
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_S3/LoFi_ITS-3_SARJ_Gear_Ring.stl
 https://github.com/ISS-Mimic/Mimic/blob/main/3D_Printing/Truss_S3/LoFi_ITS-S3-complex.stl
